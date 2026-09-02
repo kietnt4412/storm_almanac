@@ -51,8 +51,8 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 | `GameAgnosticismTest` | **Passing** | Source scan over planner/gacha/stats |
 | Health endpoint | Unit-tested, never served | `GET /api/health` — no process has been started |
 | Docker Compose | **Unverified** | Docker daemon has never been running on this machine |
-| CI workflow | Never run; deploy step stubbed | `.github/workflows/ci.yml` |
-| Frontend | **Unverified** | `npm install` has never run; no typecheck, no build |
+| CI workflow | Red x3, fixes pending push | Runs #1/#2 predate the wrapper; #3 hit the two issues below |
+| Frontend | **Green locally** | 415 deps resolved clean, typecheck + `vite build` pass, PWA SW generated |
 | Track B | Package docs only | Deliberately empty — see the gate |
 
 ### What is still unverified
@@ -92,11 +92,21 @@ Ordered. Do them in this order.
       start, the first time a datasource opens and the first time Flyway runs
       `V1__baseline.sql`. Expect problems the unit tests structurally cannot
       catch. Then `curl localhost:8080/api/health`.
-- [ ] **B3 — Verify the frontend.** `cd frontend && npm install && npm run
-      typecheck && npm run build`. Never once executed; the dependency versions
-      in `package.json` were written from memory and are unproven.
-- [ ] **B4 — Push, and watch CI actually run.** A green pipeline is Phase 0's
-      exit criterion, and a workflow that has never executed is not evidence.
+- [x] ~~**B3 — Verify the frontend.**~~ Done. 415 packages resolved with no peer
+      conflicts, `npm run typecheck` and `npm run build` both clean, PWA service
+      worker generated. Tailwind warns "no utility classes detected" — expected,
+      the Phase 0 shell uses inline styles; it resolves itself at Phase 4.
+- [ ] **B4 — Get CI green.** Two independent failures found in run #3, both
+      fixed locally and awaiting a push:
+      1. `backend/gradlew` was committed mode `100644`. Git on Windows does not
+         track the exec bit, so `./gradlew` was "Permission denied" on Ubuntu.
+         Fixed with `git update-index --chmod=+x backend/gradlew`. **Watch for
+         this on every future shell script added from Windows.**
+      2. No `frontend/package-lock.json`, which broke the job twice over —
+         `npm ci` requires a lockfile, and `setup-node`'s `cache-dependency-path`
+         could not resolve. Generated; commit it.
+      A green pipeline is Phase 0's exit criterion, and a workflow that has never
+      passed is not evidence.
 - [ ] **B5 — Wire the real deploy** in `ci.yml` and make the smoke step actually
       `curl --fail` the deployed `/api/health`. Blocked on **Q1** (hosting).
 - [ ] **B6 — Read the prior art.** Kornblume and Penguin Statistics source, as
@@ -288,6 +298,26 @@ Carry these forward until answered; strike through with the answer when resolved
 ## Session log
 
 Append one entry per session. Newest first.
+
+### 2026-09-02 — first CI runs, both jobs fixed locally
+
+- Pushed; all three workflow runs went red. #1 and #2 predate the wrapper and
+  could never have passed. #3 is the informative one, and it failed in both jobs
+  for unrelated reasons.
+- **Backend:** `gradlew` committed as mode `100644`. Git on Windows does not
+  track the executable bit, so Ubuntu refused to run it. `git update-index
+  --chmod=+x` sets the mode in the index without needing a Unix filesystem.
+  This will recur for every shell script added from this machine.
+- **Frontend:** no `package-lock.json`. That broke the job twice — `npm ci`
+  requires a lockfile, and `setup-node`'s cache path could not resolve.
+- Generating the lockfile doubled as B3: 415 packages resolved with no peer
+  conflicts, so the `package.json` versions written from memory hold. Typecheck
+  and `vite build` both pass; PWA service worker generates.
+- Added `gradle/actions/wrapper-validation@v4` to CI, since `gradle-wrapper.jar`
+  is now a committed binary that every build executes.
+- Lesson worth keeping: the two failures were both *environment* mismatches
+  between Windows and the Linux runner, not code defects. A green local build
+  says nothing about either.
 
 ### 2026-09-02 — first green build
 
