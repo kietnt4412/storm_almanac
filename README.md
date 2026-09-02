@@ -93,6 +93,19 @@ than good intentions:
 - **Modest monetization.** Publishers tolerate fan tools; they do not tolerate
   commercialising their IP.
 
+## License
+
+Code is [MIT](LICENSE).
+
+That covers the code only. Ingested game data — item names, stage costs, upgrade
+requirements, stat curves, skill values — is the property of its publishers and
+is redistributed here under fan-tool norms, attributed, with links out. It is
+not licensed by this project and is not MIT. Anyone reusing this repository
+inherits the code, not the right to redistribute that data.
+
+Storm Almanac is an unofficial fan tool with no affiliation with Bluepoch or
+Kuro Games.
+
 ## Prior art, credited
 
 [Kornblume](https://github.com/kachiyo/Kornblume) — Reverse: 1999 planner, a
