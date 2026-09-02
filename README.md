@@ -49,9 +49,8 @@ Frontend only (proxies `/api` to `localhost:8080`):
 cd frontend && npm install && npm run dev
 ```
 
-> **Bootstrap note:** the Gradle wrapper is not committed yet. With a JDK 21 and
-> Gradle 8.10+ on the path, run `cd backend && gradle wrapper` once to generate
-> it, then use `./gradlew` from then on.
+The Gradle wrapper is committed and pins Gradle 9.6.0, so a JDK 21 is the only
+prerequisite.
 
 ## Layout
 
@@ -108,10 +107,15 @@ Kuro Games.
 
 ## Prior art, credited
 
-[Kornblume](https://github.com/kachiyo/Kornblume) — Reverse: 1999 planner, a
-static site with no server. [Penguin Statistics](https://penguin-stats.io) —
-crowdsourced Arknights drop rates with a real backend, plus ArkPlanner's LP
-farming solver. Both are worth reading closely, and both are one game by design.
+[Kornblume](https://github.com/windbow27/kornblume) — Reverse: 1999 planner, a
+static site with no server, whose farming routes are precomputed per patch.
+[Penguin Statistics](https://penguin-stats.io) — crowdsourced Arknights drop
+rates with a real backend, plus [ArkPlanner](https://github.com/penguin-statistics/ArkPlanner)'s
+LP farming solver. Both are worth reading closely, and both are one game by
+design.
+
 Storm Almanac's bet is server-side integer optimization over crowdsourced
 estimates with a domain model that is game-agnostic by construction — all three
-at once.
+at once. Read [docs/prior-art.md](docs/prior-art.md) for what each of them
+actually does, where this differs deliberately, and the one place their real
+data proved our first model wrong.

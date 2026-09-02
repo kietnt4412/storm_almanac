@@ -105,12 +105,23 @@ Ordered. Do them in this order.
       2. No `frontend/package-lock.json`, which broke the job twice over —
          `npm ci` requires a lockfile, and `setup-node`'s `cache-dependency-path`
          could not resolve. Generated; commit it.
+      3. Run #4: **invalid YAML in `ci.yml` line 67** — no jobs ran at all. An
+         unquoted `run:` scalar contained `: ` (colon-space) inside
+         `echo "TODO(phase-0): wire..."`, which YAML reads as a nested mapping.
+         Fixed with block scalars. The `deploy` job is now `if: false` until Q1
+         is answered, because a job that echoes a TODO and exits 0 would paint
+         the pipeline green while nothing deploys.
+      **Validate YAML locally before pushing** — `js-yaml` in the scratchpad
+      parses all five files in seconds and is cheaper than a CI round trip.
       A green pipeline is Phase 0's exit criterion, and a workflow that has never
       passed is not evidence.
-- [ ] **B5 — Wire the real deploy** in `ci.yml` and make the smoke step actually
-      `curl --fail` the deployed `/api/health`. Blocked on **Q1** (hosting).
-- [ ] **B6 — Read the prior art.** Kornblume and Penguin Statistics source, as
-      the plan instructs. Write notes into `docs/`. Also answers **Q2**.
+- [ ] **B5 — Wire the real deploy.** **Deferred to Phase 4** — see deviation
+      **D1**. No hosting will be provisioned before then. The `deploy` job stays
+      `if: false` until there is a real URL to smoke.
+- [x] ~~**B6 — Read the prior art.**~~ Done — see
+      [docs/prior-art.md](docs/prior-art.md). Found a real defect in our `Drop`
+      record (fixed) and narrowed Q2/Q3. Four follow-ups F1–F4 recorded there;
+      **F4 blocks Phase 1 ingestion.**
 - [ ] **B7 — Write the positioning paragraph.** One paragraph. If it is not
       sharp, the project is not either. Put it at the top of the README.
 
@@ -128,6 +139,8 @@ previous one's criterion is met.
       before any real code. Read Kornblume and Penguin Statistics. Write the
       positioning paragraph.
       **Exit:** a green pipeline deploying a health endpoint to a real URL.
+      **⚠ Cannot be met as written — see deviation D1.** Closing this phase on
+      "green pipeline, deploy deferred" is an exception, not the criterion.
       **Landed:** repo, git, ADRs 1–6, compose file, CI skeleton, health
       endpoint, domain model, and a green local backend build.
       **Missing:** a booted app, a verified frontend, a CI run that has actually
@@ -180,7 +193,10 @@ previous one's criterion is met.
 > built against imagined requirements is a toy; infrastructure built against six
 > weeks of your own production traffic is engineering.
 
-**Gate status: CLOSED.** Nothing is deployed. Do not open `almanac-store`.
+**Gate status: CLOSED, and now structurally so — see deviation D1.** Nothing is
+deployed and nothing is scheduled to be before Phase 4. Do not open
+`almanac-store`. When Phase 7 comes round, re-read D1 and decide deliberately
+whether Track B on synthetic workloads is still worth building.
 
 ### Track B — substrate
 
@@ -276,18 +292,71 @@ proves nothing.
 
 ---
 
+## Deviations from the plan
+
+Record every departure here with its cost, so nobody has to reconstruct the
+reasoning later — including you, in month six.
+
+### D1 · Deployment deferred (2026-09-02)
+
+**Decision:** no money will be spent on this project, so no hosting is
+provisioned. The `deploy` job in `ci.yml` is `if: false`.
+
+**What this costs, stated plainly:**
+
+- **Phase 0 cannot meet its exit criterion.** "A green pipeline deploying a
+  health endpoint to a real URL" is not achievable without a URL. Phase 0 is
+  therefore closed *with this exception noted*, not met. Do not tick it.
+- **The Track B gate loses its meaning.** The gate exists so that
+  `almanac-store` and `almanac-raft` are shaped by real write volume, real read
+  patterns and real failure modes. With nothing deployed there is no traffic to
+  observe, and the plan is explicit that infrastructure built against imagined
+  requirements is a toy.
+- **The headline CV claim weakens.** "I run a live tool for two games with real
+  users" is the sentence this project is arranged to earn.
+- **Deploy problems get discovered late.** Phase 0 puts the deploy first
+  precisely because that is when it is cheapest to fix.
+
+**Mitigation, agreed:** revisit hosting at **Phase 4**, not at the end. Phase 4's
+public launch is on the plan's own "never cut" list, and it still puts real
+traffic ahead of Track B. Phases 1-3 need no server, so nothing is blocked
+between now and then.
+
+**Reversal trigger:** the moment any free-tier host is acceptable, or the moment
+Phase 4 is reached — whichever is sooner. Before starting Phase 7, re-read this
+entry and decide consciously whether Track B is still worth doing on synthetic
+workloads. It may be; that is a decision to make with open eyes, not by default.
+
+---
+
 ## Open questions
 
 Carry these forward until answered; strike through with the answer when resolved.
 
-- **Q1 — Hosting target.** Fly.io or a small VPS? Blocks B3 and Phase 0's exit.
-  Fly.io is faster to a green deploy; a VPS is cheaper and gives real disks,
-  which Track B will want by phase 7.
-- **Q2 — Upstream data source for R1999.** Which community repository is
-  canonical for items, stages, upgrade costs *and* the combat axis? Blocks
-  Phase 1. Kornblume's data directory is the obvious first read.
-- **Q3 — Seed data provenance.** Where do day-one drop estimates come from, and
-  is their licence compatible with redistribution? Blocks Phase 6's cold start.
+- ~~**Q1 — Hosting target.**~~ **Answered 2026-09-02: VPS, but deferred.** The
+  constraint is no spend on this project. Consequence recorded under
+  *Deviations from the plan* below — this is not a neutral scheduling change.
+  If the constraint softens, Oracle Cloud Always Free is the option to try
+  first: ARM instance with real block storage, free indefinitely rather than a
+  trial, card required for identity only. Real disks matter for phase 7 anyway.
+- **Q2 — Upstream data source for R1999.** *Narrowed, not closed
+  (2026-09-02).* **Kornblume is not canonical** — it is a presentation layer
+  over Huiji Wiki (characters), 必要的记录 (drop data) and ArkPlanner
+  (algorithm). Its `public/data/*.json` is still the best consolidated *shape*
+  found and maps cleanly onto our model, so treat it as a reference schema and
+  cross-check. Remaining work is **F1** in `docs/prior-art.md`: evaluate
+  必要的记录 as the real drop-data upstream.
+- **Q3 — Seed data provenance.** *Answered provisionally: assume not
+  redistributable.* The Kornblume repository has **no `LICENSE` file**, so it is
+  all rights reserved by default — absence of a licence is not permission. We
+  may read it to validate schema and numbers; we may not vendor it as seed data.
+  **F2** is to ask the maintainer directly.
+- **Q6 — How is equipment modelled?** New, from the prior-art read. Kornblume
+  ships `psychubes.json`: equippable, upgradeable gear that is neither our
+  `Entity` (characters) nor our `Item` (materials). Leaning toward treating
+  equipment as an `Entity`, since PGR's Memories are equipment-like too and one
+  concept covering both games would be the abstraction working. **Blocks Phase 1
+  ingestion** — see F4.
 - **Q4 — Rate verification.** The pity numbers in `PityRuleTest` come from the
   secondary sources the plan cites. They must be checked against in-game
   disclosure before the simulator ships (Phase 5).
@@ -298,6 +367,44 @@ Carry these forward until answered; strike through with the answer when resolved
 ## Session log
 
 Append one entry per session. Newest first.
+
+### 2026-09-02 — prior-art read; first real model defect found
+
+- Read Kornblume, Penguin Statistics `backend-next` and ArkPlanner. Written up
+  in [docs/prior-art.md](docs/prior-art.md).
+- **Found a genuine defect in the domain model.** `Drop` stored
+  `declaredProbability` validated to `[0,1]` plus a separate `quantityPerHit`.
+  Real upstream drop values are **expected yield per run and exceed 1.0** (up to
+  2.187 observed) — our validation would have rejected most of the dataset on
+  ingest. Replaced with a single unbounded `expectedYield`, which is also the
+  quantity the MIP constraint actually needs. This is exactly what the reading
+  was for, and it was found before any ingestion code existed rather than after.
+- Confirmed by inspection rather than assumption: **Kornblume does no
+  server-side solving** — its farming routes are precomputed greedy results
+  baked per patch. The wedge is real.
+- ArkPlanner already returns integer stage counts and exposes item `values`,
+  which is a farming LP's dual in all but name. Integrality and shadow-price
+  explanation are validated prior art, not our inventions.
+- Corrected the README's Kornblume URL — it cited a fork, not upstream — and
+  removed the now-stale wrapper bootstrap note.
+- New open question **Q6** (equipment modelling) and follow-ups F1–F4.
+- Backend still green after the model change: 15 tests passing.
+
+### 2026-09-02 — hosting deferred; Phase 0 closed with an exception
+
+- Q1 answered: VPS in principle, but **no money will be spent**, so nothing is
+  provisioned. Logged as deviation **D1** with its full cost rather than as a
+  scheduling note — it removes the Track B gate, which is the plan's central
+  structural bet.
+- Agreed mitigation: revisit hosting at **Phase 4** (on the plan's "never cut"
+  list) rather than at the end. Phases 1-3 need no server.
+- Fixed run #4: `ci.yml` was invalid YAML at line 67 — an unquoted `run:` scalar
+  containing `: `. No jobs ran at all. Also caught, on re-reading, that the
+  `deploy` job would have echoed a TODO and exited 0, painting the pipeline
+  green while nothing deployed. Now `if: false` — skipped is honest, fake-green
+  is not.
+- Validated all five repo YAML files locally with `js-yaml` under node. Cheaper
+  than a CI round trip; do this before every workflow push.
 
 ### 2026-09-02 — first CI runs, both jobs fixed locally
 

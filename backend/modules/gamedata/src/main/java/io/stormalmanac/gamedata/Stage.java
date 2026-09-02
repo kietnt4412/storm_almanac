@@ -25,8 +25,19 @@ public record Stage(
         return stageId.value();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Unlike the deterministic sources, a stage's output is a distribution.
+     * The quantity here is a rounded-up expected yield, floored at 1 — enough
+     * for reachability pruning, which only asks <em>which</em> items a stage can
+     * produce. It is not a guarantee and must never be used as a supply figure;
+     * the solver reads measured {@code DropEstimate}s for that.
+     */
     @Override
     public List<ItemStack> potentialOutput() {
-        return drops.stream().map(d -> new ItemStack(d.item(), d.quantityPerHit())).toList();
+        return drops.stream()
+                .map(d -> new ItemStack(d.item(), Math.max(1, (int) Math.ceil(d.expectedYield()))))
+                .toList();
     }
 }

@@ -57,13 +57,23 @@ jobs:
   # Phase 0's exit criterion: a green pipeline deploying a health endpoint to a
   # real URL. Wire the deploy target in before writing any product code — the
   # deploy path is cheapest to fix while there is nothing to lose.
+  #
+  # Disabled (`if: false`) until a host is chosen — see Q1 in TRACKER.md. A
+  # deploy job that echoes a TODO and exits 0 would paint the pipeline green
+  # while nothing deploys, which is precisely the self-deception the phase exit
+  # criterion exists to prevent. Skipped is honest; fake-green is not.
   deploy:
     needs: [backend, frontend]
-    if: github.ref == 'refs/heads/main'
+    if: false
     runs-on: ubuntu-latest
+    env:
+      DEPLOY_URL: https://example.invalid
     steps:
       - uses: actions/checkout@v4
       - name: Deploy
-        run: echo "TODO(phase-0): wire Fly.io or the VPS deploy here"
+        run: |
+          echo "TODO(phase-0) wire Fly.io or the VPS deploy here"
+          exit 1
       - name: Smoke the deployed health endpoint
-        run: echo "TODO(phase-0): curl --fail https://<host>/api/health"
+        run: |
+          curl --fail --silent --show-error "$DEPLOY_URL/api/health"
