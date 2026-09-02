@@ -26,6 +26,12 @@ class ModuleBoundaryTest {
     void layering() {
         Architectures.layeredArchitecture()
                 .consideringOnlyDependenciesInLayers()
+                // The Track B layers are empty until phases 7-10 and that is the
+                // point: the gate says no substrate code before the product is
+                // deployed. The rules are declared now so they bite the moment
+                // the first class lands there, rather than being written from
+                // scratch at the exact moment the temptation to skip them peaks.
+                .withOptionalLayers(true)
 
                 .layer("common").definedBy("io.stormalmanac.common..")
                 .layer("gamedata").definedBy("io.stormalmanac.gamedata..")

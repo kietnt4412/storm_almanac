@@ -21,6 +21,11 @@ jobs:
         with:
           java-version: '21'
           distribution: temurin
+      # gradle-wrapper.jar is a committed binary that every build executes.
+      # Verify it against the checksums of published Gradle releases before
+      # running it, so a tampered wrapper fails the build rather than the build
+      # machine.
+      - uses: gradle/actions/wrapper-validation@v4
       - uses: gradle/actions/setup-gradle@v4
       - name: Build and test
         run: ./gradlew --no-daemon build
