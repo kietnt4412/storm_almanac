@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: storm-almanac
+  threads:
+    # Virtual threads carry the Monte Carlo fan-out and the solver queue.
+    virtual:
+      enabled: true
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/storm_almanac}
+    username: ${DATABASE_USER:almanac}
+    password: ${DATABASE_PASSWORD:almanac}
+  jpa:
+    open-in-view: false
+    hibernate:
+      # Flyway owns the schema. Hibernate never touches it.
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+storm-almanac:
+  version: ${APP_VERSION:dev}
+  # Which implementation backs each Track B seam. Both stay in the codebase.
+  # See docs/adr/0003-the-honesty-rule.md
+  substrate:
+    drop-report-store: postgres    # postgres | almanac-store
+    solve-coordinator: single-node # single-node | almanac-raft
+    solve-cache: redis             # redis | almanac-raft-kv
+
+server:
+  port: ${PORT:8080}
+
+logging:
+  level:
+    io.stormalmanac: INFO

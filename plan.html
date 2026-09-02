@@ -1,0 +1,708 @@
+<title>Storm Almanac</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --ground:#EFF2F1;
+    --surface:#FBFCFC;
+    --surface-sunk:#E6EBEA;
+    --ink:#15211F;
+    --ink-soft:#41524F;
+    --ink-mute:#6C7D7A;
+    --rule:#D2DAD8;
+    --rule-soft:#E1E7E6;
+    --accent:#0D6F68;
+    --accent-soft:#D8E9E7;
+    --signal:#9C6414;
+    --signal-soft:#F3E7D2;
+    --infra:#3F5C93;
+    --infra-soft:#DEE5F2;
+    --shadow:0 1px 2px rgba(21,33,31,.05);
+    --display:"Newsreader",Georgia,"Times New Roman",serif;
+    --body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0E1A19;
+      --surface:#152322;
+      --surface-sunk:#101D1C;
+      --ink:#E3EDEB;
+      --ink-soft:#B0C2BF;
+      --ink-mute:#7E918E;
+      --rule:#263835;
+      --rule-soft:#1E2E2C;
+      --accent:#3FB3A7;
+      --accent-soft:#16302D;
+      --signal:#DFA657;
+      --signal-soft:#2B2313;
+      --infra:#8AA6DC;
+      --infra-soft:#1B2436;
+      --shadow:0 1px 2px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E1A19;
+    --surface:#152322;
+    --surface-sunk:#101D1C;
+    --ink:#E3EDEB;
+    --ink-soft:#B0C2BF;
+    --ink-mute:#7E918E;
+    --rule:#263835;
+    --rule-soft:#1E2E2C;
+    --accent:#3FB3A7;
+    --accent-soft:#16302D;
+    --signal:#DFA657;
+    --signal-soft:#2B2313;
+    --infra:#8AA6DC;
+    --infra-soft:#1B2436;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+
+  body{background:var(--ground);color:var(--ink);font-family:var(--body);
+       font-size:16px;line-height:1.62;-webkit-font-smoothing:antialiased;}
+  *{box-sizing:border-box;}
+
+  .shell{max-width:1220px;margin:0 auto;padding:0 28px 96px;}
+  @media (min-width:1100px){
+    .shell{display:grid;grid-template-columns:210px minmax(0,1fr);gap:56px;align-items:start;}
+    .masthead{grid-column:1/-1;}
+  }
+
+  .masthead{padding:64px 0 34px;border-bottom:1px solid var(--rule);}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+           color:var(--accent);margin:0 0 18px;}
+  h1{font-family:var(--display);font-weight:600;font-size:clamp(38px,6vw,60px);line-height:1.03;
+     letter-spacing:-.02em;margin:0 0 18px;text-wrap:balance;max-width:16ch;}
+  .thesis{font-family:var(--display);font-size:clamp(18px,2.4vw,21px);line-height:1.5;
+          color:var(--ink-soft);margin:0;max-width:58ch;font-style:italic;}
+  .facts{display:flex;flex-wrap:wrap;gap:0;margin-top:38px;border-top:1px solid var(--rule-soft);}
+  .fact{flex:1 1 145px;padding:16px 20px 4px 0;border-right:1px solid var(--rule-soft);}
+  .fact:last-child{border-right:0;}
+  .fact dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+           color:var(--ink-mute);margin:0 0 6px;}
+  .fact dd{margin:0;font-size:14.5px;font-weight:500;color:var(--ink);}
+
+  .rail{display:none;}
+  @media (min-width:1100px){
+    .rail{display:block;position:sticky;top:28px;padding-top:52px;max-height:calc(100vh - 56px);overflow-y:auto;}
+    .rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
+    .rail a{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;
+            color:var(--ink-mute);text-decoration:none;padding:3px 0 3px 12px;
+            border-left:2px solid var(--rule);transition:color .15s,border-color .15s;}
+    .rail a:hover,.rail a:focus-visible{color:var(--accent);border-left-color:var(--accent);}
+    .rail .b a{border-left-color:var(--infra);}
+    .rail .b a:hover,.rail .b a:focus-visible{color:var(--infra);border-left-color:var(--infra);}
+  }
+
+  main{padding-top:52px;min-width:0;}
+  section{margin-bottom:60px;scroll-margin-top:24px;}
+  .num{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--ink-mute);
+       display:block;margin-bottom:9px;}
+  h2{font-family:var(--display);font-weight:600;font-size:clamp(25px,3.4vw,31px);line-height:1.16;
+     letter-spacing:-.015em;margin:0 0 16px;text-wrap:balance;}
+  h3{font-family:var(--body);font-weight:600;font-size:16px;letter-spacing:-.005em;
+     margin:30px 0 9px;color:var(--ink);}
+  p{margin:0 0 15px;max-width:68ch;color:var(--ink-soft);}
+  p strong,li strong{color:var(--ink);font-weight:600;}
+  a{color:var(--accent);text-underline-offset:2px;}
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px;}
+  ul{margin:0 0 15px;padding-left:19px;max-width:68ch;color:var(--ink-soft);}
+  li{margin-bottom:7px;}
+  li::marker{color:var(--ink-mute);}
+  .lede{font-size:17px;color:var(--ink);}
+  code{font-family:var(--mono);font-size:.88em;color:var(--accent);}
+
+  .spec{background:var(--surface-sunk);border:1px solid var(--rule-soft);border-left:2px solid var(--accent);
+        font-family:var(--mono);font-size:12.5px;line-height:1.72;color:var(--ink-soft);
+        padding:18px 20px;margin:20px 0;overflow-x:auto;white-space:pre;}
+  .spec b{color:var(--ink);font-weight:500;}
+  .spec .c{color:var(--ink-mute);}
+  .spec.infra{border-left-color:var(--infra);}
+
+  .callout{border:1px solid var(--rule);background:var(--surface);border-radius:3px;
+           padding:18px 22px;margin:22px 0;box-shadow:var(--shadow);}
+  .callout.warn{border-left:3px solid var(--signal);background:var(--signal-soft);}
+  .callout.warn .tag{color:var(--signal);}
+  .callout.blue{border-left:3px solid var(--infra);background:var(--infra-soft);}
+  .callout.blue .tag{color:var(--infra);}
+  .callout .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+                color:var(--accent);display:block;margin-bottom:8px;}
+  .callout p:last-child,.callout ul:last-child{margin-bottom:0;}
+
+  .modules{margin:22px 0;border-top:1px solid var(--rule);}
+  .mod{display:grid;grid-template-columns:158px minmax(0,1fr);gap:20px;padding:13px 0;
+       border-bottom:1px solid var(--rule-soft);align-items:baseline;}
+  @media (max-width:620px){.mod{grid-template-columns:1fr;gap:3px;}}
+  .mod code{font-size:12.5px;font-weight:500;}
+  .mod.b code{color:var(--infra);}
+  .mod span{font-size:14.5px;color:var(--ink-soft);}
+
+  .compare{display:grid;gap:14px;margin:22px 0;}
+  @media (min-width:700px){.compare{grid-template-columns:repeat(3,1fr);}}
+  .compare.two{grid-template-columns:1fr;}
+  @media (min-width:700px){.compare.two{grid-template-columns:repeat(2,1fr);}}
+  .card{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:17px 18px;
+        box-shadow:var(--shadow);display:flex;flex-direction:column;gap:7px;}
+  .card h4{margin:0;font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;
+           color:var(--ink-mute);font-weight:500;}
+  .card p{margin:0;font-size:14px;}
+  .card .verdict{font-size:13.5px;color:var(--ink);font-weight:500;margin-top:auto;padding-top:7px;
+                 border-top:1px solid var(--rule-soft);}
+  .card.b h4{color:var(--infra);}
+
+  .phases{list-style:none;margin:26px 0 0;padding:0;}
+  .phase{display:grid;grid-template-columns:92px minmax(0,1fr);gap:24px;
+         padding:22px 0;border-top:1px solid var(--rule);}
+  @media (max-width:620px){.phase{grid-template-columns:1fr;gap:8px;}}
+  .phase .when{padding-top:3px;}
+  .phase .when b{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;
+                 color:var(--accent);text-transform:uppercase;font-weight:500;}
+  .phase.b .when b{color:var(--infra);}
+  .phase .when em{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-mute);
+                  font-style:normal;margin-top:3px;}
+  .phase h3{margin:0 0 7px;font-size:17px;}
+  .phase p{margin:0 0 10px;font-size:14.8px;}
+  .phase ul{font-size:14.5px;margin-bottom:10px;}
+  .exit{font-family:var(--mono);font-size:12px;color:var(--ink);background:var(--accent-soft);
+        border-radius:2px;padding:8px 12px;display:block;line-height:1.55;}
+  .exit b{color:var(--accent);font-weight:500;}
+  .phase.b .exit{background:var(--infra-soft);}
+  .phase.b .exit b{color:var(--infra);}
+
+  .gate{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+        background:var(--surface-sunk);padding:20px 22px;margin:0;}
+  .gate .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+             color:var(--signal);display:block;margin-bottom:8px;}
+  .gate p{margin:0;font-size:14.8px;}
+
+  footer{margin-top:16px;padding-top:26px;border-top:1px solid var(--rule);
+         font-size:13.5px;color:var(--ink-mute);max-width:68ch;}
+  footer a{color:var(--ink-mute);}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <p class="eyebrow">Final build plan · v2 · two tracks</p>
+    <h1>Storm Almanac</h1>
+    <p class="thesis">A progression optimizer for live-service games, running on a storage engine and a consensus layer you wrote yourself — one product to be used, one substrate to be understood.</p>
+    <dl class="facts">
+      <div class="fact"><dt>Launch title</dt><dd>Reverse: 1999</dd></div>
+      <div class="fact"><dt>Second title</dt><dd>Punishing: Gray Raven</dd></div>
+      <div class="fact"><dt>Stack</dt><dd>Java 21 · Spring Boot 3 · React</dd></div>
+      <div class="fact"><dt>Phases</dt><dd>13, ~23 weeks</dd></div>
+      <div class="fact"><dt>Public launch</dt><dd>End of Phase 4</dd></div>
+    </dl>
+  </header>
+
+  <nav class="rail" aria-label="Sections">
+    <ol>
+      <li><a href="#tracks">00 · Two tracks</a></li>
+      <li><a href="#wedge">01 · The wedge</a></li>
+      <li><a href="#model">02 · Domain model</a></li>
+      <li><a href="#catalog">03 · Catalog</a></li>
+      <li><a href="#optimizer">04 · Optimizer</a></li>
+      <li><a href="#gacha">05 · Gacha engine</a></li>
+      <li><a href="#stats">06 · Drop statistics</a></li>
+      <li><a href="#arch">07 · Architecture</a></li>
+      <li class="b"><a href="#store">08 · Storage engine</a></li>
+      <li class="b"><a href="#raft">09 · Consensus</a></li>
+      <li class="b"><a href="#chaos">10 · Verification</a></li>
+      <li><a href="#pgr">11 · Second game</a></li>
+      <li><a href="#ingest">12 · Ingestion</a></li>
+      <li><a href="#guardrails">13 · Guardrails</a></li>
+      <li><a href="#phases">14 · The phases</a></li>
+      <li><a href="#weapon">15 · The CV story</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section id="tracks">
+      <span class="num">00</span>
+      <h2>Two tracks, one system</h2>
+      <p class="lede">The product is built on boring, proven infrastructure. Then the infrastructure is rewritten from scratch, behind the same interfaces, and benchmarked against what it replaced.</p>
+      <div class="compare two">
+        <div class="card">
+          <h4>Track A · Product</h4>
+          <p>The optimizer, the gacha engine, the drop-statistics platform, two games, a public deployment with real users. Postgres and Redis underneath, chosen because they work.</p>
+          <p class="verdict">Proves you can ship something people use.</p>
+        </div>
+        <div class="card b">
+          <h4>Track B · Substrate</h4>
+          <p>An LSM-tree storage engine for the drop-report log, a Raft implementation coordinating the solver fleet, and a fault-injection harness that tries to break both.</p>
+          <p class="verdict">Proves you understand what you're shipping on.</p>
+        </div>
+      </div>
+      <div class="callout blue">
+        <span class="tag">The honesty rule</span>
+        <p>Every hand-built component sits <strong>behind an interface that already has a boring implementation</strong> — <code>DropReportStore</code> has a Postgres version before it has yours; <code>SolveCoordinator</code> has a single-node version before it has a replicated one. Both implementations stay in the codebase, selectable by config, and you publish the benchmark.</p>
+        <p>You are allowed to conclude that Postgres won. Writing "my LSM tree is 40% slower on this workload and here is exactly why" is a <em>stronger</em> signal than pretending otherwise — it says you can measure, and that you build infrastructure to understand it rather than to decorate a CV.</p>
+      </div>
+      <p>Order matters. Track A ships first and completely, because infrastructure written for a system with no users is infrastructure written against imaginary requirements. By the time you start Track B you will know your real write volume, your real read patterns, and your real failure modes — and the engine you build will be shaped by them.</p>
+    </section>
+
+    <section id="wedge">
+      <span class="num">01</span>
+      <h2>The wedge</h2>
+      <p>Companion tools for these games exist. None combine the three things below, and that combination is the product thesis.</p>
+      <div class="compare">
+        <div class="card">
+          <h4>Kornblume</h4>
+          <p>Reverse: 1999 planner. Vue + TypeScript, static site on GitHub Pages, no server. Resource planner, summon tracker, databases.</p>
+          <p class="verdict">Gap: no server-side solving, no crowdsourced data, one game.</p>
+        </div>
+        <div class="card">
+          <h4>Penguin Statistics</h4>
+          <p>Crowdsourced Arknights drop rates with a real backend, plus ArkPlanner's LP farming solver. Open source, worth reading closely.</p>
+          <p class="verdict">Gap: one game, by design.</p>
+        </div>
+        <div class="card">
+          <h4>Storm Almanac</h4>
+          <p>Server-side integer optimizer over crowdsourced drop estimates, with a domain model that is game-agnostic by construction.</p>
+          <p class="verdict">All three at once. That's the bet.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="model">
+      <span class="num">02</span>
+      <h2>The domain model is the product</h2>
+      <p>Every live-service progression game has the same skeleton: things you want, things that produce them, things that consume them, and an energy budget that gates the producers. Model the skeleton once and games become <em>data</em>.</p>
+      <div class="spec"><b>Game</b>            id, version, energyUnit    <span class="c">// "Activity" (R1999), "Serum" (PGR)</span>
+<b>Item</b>            id, tier, category
+<b>Source</b>          <span class="c">how an item enters the account</span>
+  ├ Stage         energyCost, drops[]: (item, probability)
+  ├ Craft         consumes[] → produces[]
+  ├ Shop          currency, price, periodLimit
+  └ Reward        daily / weekly / event, expiresAt
+<b>Sink</b>            <span class="c">how an item leaves</span>
+  ├ Upgrade       character, fromState → toState, costs[]
+  └ Fodder        consumes items of a class to advance another item
+<b>Banner</b>          rateTable, pityRule, featuredRule, scope, window
+<b>PlayerProfile</b>   one per account/region  <span class="c">(people run several)</span>
+  ├ Inventory     item → quantity
+  ├ Roster        owned entities → current upgrade state
+  └ Goals         entity → target state
+<b>Plan</b>            computed: stages[], runs[], totalEnergy, etaDays
+<b>DropReport</b>      profile, stage, observedDrops[], gameVersion
+<b>DropEstimate</b>    (stage, item, version) → p̂, n, confidenceInterval</div>
+      <div class="callout">
+        <span class="tag">The rule that makes or breaks it</span>
+        <p>No game-specific branching in <code>planner</code>, <code>gacha</code> or <code>stats</code>. Not one <code>if (game == REVERSE_1999)</code>. A new game is <strong>a GameDefinition bundle plus a parser adapter</strong>, nothing more. Phase 11 exists to prove you held the line.</p>
+      </div>
+      <p><strong>Why <code>Fodder</code> is in the model already:</strong> Punishing: Gray Raven upgrades Memories by consuming <em>other Memories</em>, and Resonance requires duplicate copies for a random effect. So an item is simultaneously a resource and a sink, and one goal is only probabilistically satisfiable. Reverse: 1999 alone would never have forced that shape — which is exactly why the second game was chosen to be structurally different rather than merely another gacha.</p>
+    </section>
+
+    <section id="catalog">
+      <span class="num">03</span>
+      <h2>The catalog surface</h2>
+      <p class="lede">A browsable reference for characters, skills and stats — not because the world needs another wiki, but because it is the only realistic way a stranger will ever find this thing.</p>
+      <p>Nobody searches for "gacha progression optimizer". They search for <em>"reverse 1999 [character] materials"</em>. Catalog pages are the top of the funnel and the planner is what makes someone stay, which makes this section the answer to the hardest problem in the project — a problem that was never the code.</p>
+      <h3>What it adds to the model</h3>
+      <p>The domain model above covers <em>progression</em> data. Combat data is a separate axis, and the community data repositories already carry it, so ingestion mostly comes along for free:</p>
+      <div class="spec"><b>Entity</b>          <span class="c">// character / construct</span>
+  identity      id, rarity, tags[], element/class
+  statCurves    stat → f(level, ascensionTier)
+  skills[]      id, ranks[]: { values[], cost, description }
+  talents[]     unlockCondition, effect
+  <span class="c">// versioned exactly like the rest of GameDefinition —</span>
+  <span class="c">// balance patches change multipliers silently</span>
+
+<b>CatalogProjection</b>  denormalized read model, cached, CDN-friendly
+<b>Search</b>              Postgres full-text to start; nothing exotic</div>
+      <h3>The one thing a wiki cannot do</h3>
+      <div class="callout">
+        <span class="tag">Personalized reference</span>
+        <p>A static wiki lists what Insight 2 costs. Yours knows who is reading: <strong>"you own her, you are 4 Sonorous Twins short, that is 6 runs of 3-4, about two days."</strong> Every catalog page carries a live overlay from the reader's own inventory, computed by the same optimizer that powers the planner. No other reference site is structurally capable of this, and it converts a lookup into a plan without the reader asking.</p>
+      </div>
+      <h3>Scope discipline</h3>
+      <ul>
+        <li><strong>Do not fight a content war.</strong> Prydwen, Fandom and GamePress have staff and years of tier lists. You lose on breadth and you do not need to win there — the catalog exists to serve the optimizer, not to replace them.</li>
+        <li><strong>No hosted assets, per the guardrails.</strong> Text and numbers, attributed, with links out. It will look plainer than Prydwen; that is the price of staying clearly inside fan-tool territory.</li>
+        <li><strong>Combat data goes stale differently.</strong> Balance patches change multipliers quietly, without touching material costs. Same versioning discipline, or you become the site with wrong numbers — which is worse than having no numbers.</li>
+      </ul>
+    </section>
+
+    <section id="optimizer">
+      <span class="num">04</span>
+      <h2>The optimizer</h2>
+      <p>Given what a player owns and what they want, find the cheapest way to close the gap. A genuine mixed-integer program, and the centrepiece of Track A.</p>
+      <div class="spec"><b>minimize</b>    Σ x_s · energy_s                      <span class="c">// total energy spent</span>
+
+<b>subject to</b>   for every item i:
+              Σ x_s · drop[s,i]                     <span class="c">// farmed</span>
+            + Σ y_c · (produce[c,i] − consume[c,i])  <span class="c">// crafted / fed</span>
+            + inventory_i  ≥  demand_i
+
+              x_s ∈ ℤ≥0   <span class="c">// stage runs are whole numbers</span>
+              y_c ∈ ℤ≥0   <span class="c">// so are conversions</span></div>
+      <ul>
+        <li><strong>Integer runs.</strong> "Run 3-4 exactly 17.3 times" is useless to a player. MIP, not LP.</li>
+        <li><strong>Availability windows.</strong> Stages rotate by weekday; event stages expire. That makes the model time-indexed, which is where it gets interesting.</li>
+        <li><strong>Two objectives.</strong> Least energy and fewest days are different plans. Offer both and show the trade.</li>
+        <li><strong>Explain the answer.</strong> Surface shadow prices — <em>"4-6 is your binding constraint; 3-4 is 12% less efficient for this goal set."</em> Nobody trusts a black box that says grind for three weeks.</li>
+      </ul>
+      <p><strong>Solver:</strong> ojAlgo — pure Java, <code>ExpressionsBasedModel</code> covers LP/QP/MIP, no native binaries to fight in a container. OR-Tools is the documented fallback. Solves are deterministic given (game version, demand, estimates, constraints): hash that tuple and cache. Budget 2s synchronous; past that, queue it and push the result over WebSocket — which is precisely the queue Phase 9 later replicates.</p>
+      <div class="callout warn">
+        <span class="tag">Validate before moving on</span>
+        <p>Run the solver against goal sets the community has already settled. If it disagrees with the accepted best stage, <strong>find out why before writing another feature.</strong> A confidently wrong optimizer is worse than none, and a small community gives you one first impression.</p>
+      </div>
+    </section>
+
+    <section id="gacha">
+      <span class="num">05</span>
+      <h2>Gacha engine</h2>
+      <p>Two games, two structurally different pity systems. Put them side by side and the case for a general model writes itself.</p>
+      <div class="spec"><b>Reverse: 1999</b>  <span class="c">— soft pity, curve-shaped</span>
+  base 6★         1.5%
+  soft pity       after 60 pulls → 4%, then +2.5% per pull
+  hard pity       70
+  floor           4★ minimum per 10-pull
+  beginner        6★ within 30, 4★ within 10
+
+<b>Punishing: Gray Raven</b>  <span class="c">— hard pity, split-shaped</span>
+  base S-rank     0.5%
+  hard pity       60   <span class="c">(beginner 40, weapons 30)</span>
+  featured        70% at pity on rotational banners
+                  100% on debut banners
+  variant         "floating guarantee": 1.5% base, pity 80–100
+  scope           pity carries over within a banner TYPE only</div>
+      <p>R1999 needs a rising-rate curve. PGR needs a featured/off-featured split, a variable hard pity, and pity state <em>scoped by banner type</em> rather than globally. A model that expresses both is general by evidence, not by assertion — and that is the argument you make in the README.</p>
+      <div class="spec"><b>BannerModel</b>
+  baseRates       Map&lt;Rarity, Double&gt;
+  pityRule        { hardAt, softFrom?, softJumpTo?, softStep? }
+  floors          [{ everyN, minimumRarity }]
+  featuredRule    { chanceAtHit, guaranteeAfterLoss }
+  pityScope       GLOBAL | BANNER_TYPE | BANNER
+  window          startsAt, endsAt</div>
+      <h3>Two engines, cross-checked</h3>
+      <ul>
+        <li><strong>Monte Carlo</strong> — 100k trials, expresses any rule. Parallelised across virtual threads; Java 21 makes this nearly free.</li>
+        <li><strong>Exact Markov chain</strong> — pity as a state machine, closed-form probability. Instant and exact for the common case.</li>
+      </ul>
+      <p>Build both. Two independent methods agreeing to three decimals is a correctness argument worth publishing, and the first disagreement will find a real bug in your pity model. The published rates above are the acceptance fixtures: reproduce them or the model is wrong.</p>
+      <h3>The feature nobody ships well</h3>
+      <p>Pair the simulator with an <strong>income model</strong> — daily, weekly, monthly and event currency for the account — and answer what players actually ask: <em>"I have this much, she arrives in 40 days, what's my probability of guaranteeing her?"</em> For PGR that answer has to account for the 70% featured split and the 120-pull worst case, which is exactly the kind of nuance existing calculators get wrong.</p>
+    </section>
+
+    <section id="stats">
+      <span class="num">06</span>
+      <h2>Drop statistics</h2>
+      <p>What turns a calculator into a data platform, and the hardest part to copy. Users report what stages dropped; you aggregate into estimates the optimizer consumes.</p>
+      <ul>
+        <li><strong>Validate on ingest</strong> against the game definition — an item that cannot drop on that stage is a rejected report, not a data point.</li>
+        <li><strong>Wilson score intervals</strong>, not naive proportions. At n=7, a naive 43% is noise, and the interval says so.</li>
+        <li><strong>Abuse resistance:</strong> per-profile rate limits, reputation weighting, outlier down-weighting rather than bans.</li>
+        <li><strong>Provenance labels.</strong> Every estimate is <code>SEEDED</code> or <code>COMMUNITY</code>, shown with sample size. Visible honesty about data quality is a feature.</li>
+      </ul>
+      <div class="callout">
+        <span class="tag">Cold start</span>
+        <p>Day one has zero reports and a solver that needs rates. Seed from published community data, label it, and let real reports displace it. The flywheel — <strong>more users → better estimates → better plans → more users</strong> — only starts once the tool is useful without it.</p>
+      </div>
+      <p>This report stream is also the workload that justifies Track B: append-heavy, immutable, time-ordered, read almost exclusively as range scans over <code>(stage, item, version)</code>. That is an LSM tree's native shape, and by Phase 7 you will have months of real traffic to size it against.</p>
+    </section>
+
+    <section id="arch">
+      <span class="num">07</span>
+      <h2>Architecture</h2>
+      <p>A <strong>modular monolith</strong>: one deployable, hard module boundaries, separate schemas, no cross-module database reads. Modules communicate through internal events, so extraction later is a deployment change rather than a rewrite.</p>
+      <div class="modules">
+        <div class="mod"><code>identity</code><span>Accounts, Google/Discord OAuth, sessions, multiple game profiles per user.</span></div>
+        <div class="mod"><code>gamedata</code><span>Canonical catalog, versioned publishing, ingestion and diffing.</span></div>
+        <div class="mod"><code>player</code><span>Inventory, roster, goals, cross-device sync.</span></div>
+        <div class="mod"><code>planner</code><span>The MIP optimizer, plan persistence, explanation output.</span></div>
+        <div class="mod"><code>gacha</code><span>Banner models, Markov + Monte Carlo engines, income model.</span></div>
+        <div class="mod"><code>stats</code><span>Drop reports, aggregation, estimate publication.</span></div>
+        <div class="mod"><code>api</code><span>REST + WebSocket edge, DTOs, auth, rate limiting.</span></div>
+        <div class="mod b"><code>almanac-store</code><span>Track B. LSM storage engine behind <code>DropReportStore</code>.</span></div>
+        <div class="mod b"><code>almanac-raft</code><span>Track B. Consensus behind <code>SolveCoordinator</code> and the replicated KV.</span></div>
+        <div class="mod b"><code>almanac-chaos</code><span>Track B. Fault injection and linearizability checking.</span></div>
+      </div>
+      <h3>Choices</h3>
+      <ul>
+        <li><strong>Java 21+ / Spring Boot 3.x</strong> — virtual threads carry the Monte Carlo and the solver fan-out.</li>
+        <li><strong>Postgres</strong> — JSONB for game-definition documents, relational for player and report data. Flyway migrations.</li>
+        <li><strong>Redis</strong> — solve cache, rate limits, sessions. Later mirrored by your own replicated KV, both kept.</li>
+        <li><strong>React 19 + TypeScript + Vite</strong>, TanStack Query, Zustand for planner-local state, Tailwind. PWA with offline inventory editing — these users are on a phone, next to the game.</li>
+        <li><strong>Ops</strong> — Docker Compose locally, Fly.io or a small VPS, GitHub Actions, OpenTelemetry into Grafana Cloud's free tier, Sentry.</li>
+      </ul>
+    </section>
+
+    <section id="store">
+      <span class="num">08 · Track B</span>
+      <h2>almanac-store — the storage engine</h2>
+      <p>An embedded log-structured merge tree, written from nothing, serving the drop-report event log. Not a <code>HashMap</code> with a save button — the real components, in the real order.</p>
+      <div class="spec infra"><b>write path</b>
+  append to WAL (fsync policy configurable)
+    → insert into memtable (skip list, sorted)
+      → memtable full → freeze, flush to SSTable
+
+<b>SSTable</b>
+  sorted blocks + sparse index + bloom filter + footer checksums
+
+<b>read path</b>
+  memtable → frozen memtables → SSTables newest-first
+  bloom filter short-circuits the misses
+
+<b>compaction</b>
+  levelled, background threads, tombstone reclamation,
+  read amplification vs write amplification as a tuning knob
+
+<b>recovery</b>
+  replay WAL from the last durable flush; torn writes detected</div>
+      <h3>What proves it works</h3>
+      <ul>
+        <li><strong>Crash-consistency fuzzing.</strong> Kill the process at random points during writes and compactions; on restart, every acknowledged write must be present and no unacknowledged one may appear. This is the test that matters.</li>
+        <li><strong>Property tests</strong> against an in-memory reference model — same operations, same answers, thousands of random sequences.</li>
+        <li><strong>A published benchmark</strong> against the Postgres implementation on your actual report workload: write throughput, p99 read latency, space amplification, recovery time.</li>
+      </ul>
+      <p>Bounded scope, deliberately: single-node, embedded, one key ordering, no transactions across keys. A finished small engine beats an unfinished ambitious one, and the constraint is itself a design decision worth writing down.</p>
+    </section>
+
+    <section id="raft">
+      <span class="num">09 · Track B</span>
+      <h2>almanac-raft — consensus, with a reason to exist</h2>
+      <p>The solver fleet needs work assigned exactly once. A node dies mid-solve and the job must be reassigned, not lost and not run twice. That is a replicated log with a leader — which is to say, Raft, applied to a problem you actually have rather than a problem you invented to justify it.</p>
+      <div class="spec infra"><b>consensus</b>      leader election, log replication, commit index,
+                term safety, log matching
+
+<b>durability</b>     snapshotting, log compaction, restart recovery
+
+<b>membership</b>     joint-consensus config change; add/remove a node live
+
+<b>applied to</b>     SolveCoordinator
+                  ├ replicated job log (submit → assign → complete)
+                  ├ leader assigns work, followers execute
+                  ├ lease-based liveness; reassign on expiry
+                  └ exactly-once completion via idempotency keys
+
+<b>also applied to</b> replicated KV — the solve cache, mirroring Redis</div>
+      <h3>What proves it works</h3>
+      <ul>
+        <li>A five-node cluster that <strong>survives repeated leader kills</strong> under continuous load with zero lost or duplicated solves.</li>
+        <li>Network partitions: minority partitions must refuse writes, and the cluster must converge on heal with no divergent log entries.</li>
+        <li>The replicated KV must be <strong>linearizable</strong> under concurrent clients — verified, not assumed. See Phase 10.</li>
+      </ul>
+      <div class="callout blue">
+        <span class="tag">Scope discipline</span>
+        <p>Implement the core paper plus snapshots and membership changes. Skip pre-vote, leader leases for reads, and multi-raft groups — but <strong>write down that you skipped them and what they'd buy you.</strong> "I know exactly what my implementation doesn't do" is the mark of someone who read the paper properly rather than a blog post about it.</p>
+      </div>
+    </section>
+
+    <section id="chaos">
+      <span class="num">10 · Track B</span>
+      <h2>almanac-chaos — the verification harness</h2>
+      <p>Both Track B components are only as credible as the evidence that they're correct. This is the phase most people skip, and it is the one that makes the rest count.</p>
+      <ul>
+        <li><strong>Fault injection:</strong> partition the network, delay and reorder messages, pause a process (simulating GC or a hypervisor stall), kill and restart nodes, corrupt a segment on disk.</li>
+        <li><strong>Linearizability checking:</strong> record concurrent client histories against the replicated register and verify a valid sequential ordering exists. Jepsen's approach, at your scale.</li>
+        <li><strong>Nightly in CI</strong> with randomized seeds. A failing seed is saved and replayed as a permanent regression test.</li>
+        <li><strong>Write up the first real bug it finds.</strong> It will find one. That writeup is worth more than the implementation.</li>
+      </ul>
+    </section>
+
+    <section id="pgr">
+      <span class="num">11</span>
+      <h2>Second game: Punishing: Gray Raven</h2>
+      <p>Chosen because it is structurally different, not merely different. Each item below stresses a distinct part of the abstraction:</p>
+      <ul>
+        <li><strong>Pity shape.</strong> Hard pity with a featured/off-featured split, variable thresholds per banner variant, and pity scoped to banner type — versus R1999's rising soft-pity curve.</li>
+        <li><strong>Fodder economics.</strong> Memories are enhanced by consuming other Memories. Items are both resource and sink, so the optimizer must treat a class of items as convertible into progress on another item of the same class.</li>
+        <li><strong>Probabilistic goals.</strong> Resonance consumes duplicates for a random outcome. "Complete this goal" stops being a deterministic cost and becomes a distribution — which either fits your model or exposes it.</li>
+        <li><strong>Different currencies and cadences.</strong> A separate energy unit, different weekly caps, different event structure.</li>
+      </ul>
+      <div class="callout">
+        <span class="tag">The acceptance test for the whole project</span>
+        <p>PGR goes live with <strong>zero new lines in <code>planner</code>, <code>gacha</code> or <code>stats</code></strong> — only a GameDefinition bundle, a parser adapter, and whatever the fodder and probabilistic-goal work forced you to generalise <em>in the model itself</em>. Put that diff in the README. If the diff is clean, the thesis is proven; if it isn't, the week you spend fixing it is the most valuable week in the project.</p>
+      </div>
+    </section>
+
+    <section id="ingest">
+      <span class="num">12</span>
+      <h2>Data ingestion, or: how these projects die</h2>
+      <p>Every patch changes the numbers. Tools that depend on hand-edited spreadsheets are dead within three patches.</p>
+      <ul>
+        <li>Scheduled fetch from community data repositories → parse into your canonical schema.</li>
+        <li><strong>Diff against the current published version</strong> and produce a human-readable change report.</li>
+        <li>Publishing stays a manual approval step. Automated ingest, deliberate release.</li>
+        <li>Plans record the game-data version they were computed against, so an old plan never silently becomes wrong.</li>
+        <li>A <code>gamedata-cli</code>, so onboarding a title never requires touching backend code.</li>
+      </ul>
+    </section>
+
+    <section id="guardrails">
+      <span class="num">13</span>
+      <h2>Guardrails</h2>
+      <ul>
+        <li><strong>No game assets.</strong> No character art, no audio, no ripped sprites. Numbers and text data only, attributed.</li>
+        <li><strong>Never touch the client.</strong> No automation, no credentials, no packet capture. Screenshot OCR runs on the user's own uploads, client-side where possible.</li>
+        <li><strong>Visible disclaimer</strong>, no claimed affiliation with Bluepoch or Kuro Games.</li>
+        <li><strong>Modest monetization</strong> — donations and unobtrusive ads. Publishers tolerate fan tools; they don't tolerate commercialising their IP.</li>
+      </ul>
+    </section>
+
+    <section id="phases">
+      <span class="num">14</span>
+      <h2>The phases</h2>
+      <p>Thirteen phases, roughly 23 weeks at a steady full-time-ish pace. At 15–20 hours a week, assume closer to eight months — and plan around that honestly rather than discovering it in month three. Each phase has an exit criterion; you do not start the next one until it's met.</p>
+
+      <ol class="phases">
+        <li class="phase">
+          <div class="when"><b>Phase 0</b><em>1 week</em></div>
+          <div>
+            <h3>Ground</h3>
+            <p>Repo, CI, Docker Compose, ADR folder, and a hello-world deployed to production <em>before</em> any real code. Read the Kornblume and Penguin Statistics source. Write the positioning paragraph — one paragraph, and if it isn't sharp, the project isn't either.</p>
+            <span class="exit"><b>Exit</b> · a green pipeline deploying a health endpoint to a real URL</span>
+          </div>
+        </li>
+
+        <li class="phase">
+          <div class="when"><b>Phase 1</b><em>2.5 weeks</em></div>
+          <div>
+            <h3>Game data foundation</h3>
+            <p>Canonical schema, R1999 ingestion (items, stages, characters, upgrade costs), versioned publishing with diffs, <code>gamedata-cli</code>. Tests over real patch data, including a patch that changes something. <strong>Includes the catalog axis</strong> — stat curves, skills and talents — modelled and ingested now, because retrofitting a second data axis into a published schema later is miserable.</p>
+            <span class="exit"><b>Exit</b> · your API answers "what does Insight 2 cost?" <em>and</em> "what does her S2 do at rank 3?"; a patch diff report renders for both axes</span>
+          </div>
+        </li>
+
+        <li class="phase">
+          <div class="when"><b>Phase 2</b><em>2 weeks</em></div>
+          <div>
+            <h3>Optimizer core</h3>
+            <p>ojAlgo MIP model, crafting recursion, integer runs, solve caching, explanation output, both objectives.</p>
+            <span class="exit"><b>Exit</b> · agrees with community-accepted answers on 5 benchmark goal sets; p95 solve under 2s</span>
+          </div>
+        </li>
+
+        <li class="phase">
+          <div class="when"><b>Phase 3</b><em>1 week</em></div>
+          <div>
+            <h3>Identity and player state</h3>
+            <p>OAuth, inventory, roster, goals, multiple profiles, sync. Unglamorous and load-bearing — everything after assumes it works.</p>
+            <span class="exit"><b>Exit</b> · a plan computed end-to-end from stored state on your own account</span>
+          </div>
+        </li>
+
+        <li class="phase">
+          <div class="when"><b>Phase 4</b><em>2.5 weeks</em></div>
+          <div>
+            <h3>Frontend v1 — and launch</h3>
+            <p>Inventory editor built for <em>fast bulk entry</em> (this is where companion tools live or die), goal picker, plan view with per-stage breakdown, offline PWA. Plus the <strong>catalog browse and search surface</strong>, with the personalized overlay on every character page — that overlay is the whole argument for having a catalog at all, so it ships with it, not after. Launch publicly at the end of this phase even if it's ugly.</p>
+            <span class="exit"><b>Exit</b> · five strangers complete a plan without asking you how, and a logged-in character page shows what that reader is short of</span>
+          </div>
+        </li>
+
+        <li class="phase">
+          <div class="when"><b>Phase 5</b><em>1.5 weeks</em></div>
+          <div>
+            <h3>Gacha engine</h3>
+            <p>Generic <code>BannerModel</code>, Markov and Monte Carlo engines, income model, the "can I guarantee her" answer.</p>
+            <span class="exit"><b>Exit</b> · both engines agree within 0.3% and reproduce published R1999 and PGR rates</span>
+          </div>
+        </li>
+
+        <li class="phase">
+          <div class="when"><b>Phase 6</b><em>1.5 weeks</em></div>
+          <div>
+            <h3>Drop statistics on Postgres</h3>
+            <p>Report submission, Wilson intervals, provenance, abuse controls, estimates feeding the optimizer. Deliberately built on the boring implementation first — this is the interface Track B will later swap.</p>
+            <span class="exit"><b>Exit</b> · a community-derived estimate supersedes a seeded one in a live plan</span>
+          </div>
+        </li>
+      </ol>
+
+      <div class="gate">
+        <span class="tag">Gate · do not cross early</span>
+        <p>Track B starts only when the product is <strong>publicly deployed with real users and real traffic</strong>. If Phase 4 hasn't landed, go back and land it. Infrastructure built against imagined requirements is a toy; infrastructure built against six weeks of your own production traffic is engineering — and the difference is visible in every design decision you'll make below.</p>
+      </div>
+
+      <ol class="phases">
+        <li class="phase b">
+          <div class="when"><b>Phase 7</b><em>3 weeks</em></div>
+          <div>
+            <h3>almanac-store — LSM storage engine</h3>
+            <p>WAL, skip-list memtable, SSTable format with sparse index and bloom filters, levelled compaction, range iterators, crash recovery. Wired behind <code>DropReportStore</code> alongside the Postgres implementation.</p>
+            <span class="exit"><b>Exit</b> · crash-consistency fuzzing passes 10k randomized kills; benchmark vs Postgres published</span>
+          </div>
+        </li>
+
+        <li class="phase b">
+          <div class="when"><b>Phase 8</b><em>3 weeks</em></div>
+          <div>
+            <h3>almanac-raft — consensus</h3>
+            <p>Leader election, log replication, snapshotting, joint-consensus membership changes. Exposed first as a replicated KV so it can be tested in isolation before anything depends on it.</p>
+            <span class="exit"><b>Exit</b> · 5-node cluster survives repeated leader kills and partitions with no divergent log</span>
+          </div>
+        </li>
+
+        <li class="phase b">
+          <div class="when"><b>Phase 9</b><em>2 weeks</em></div>
+          <div>
+            <h3>Solver cluster</h3>
+            <p>Replicated job log, leader-assigned work, lease-based liveness, idempotent completion, backpressure, results pushed over WebSocket. The Phase 2 queue, now distributed.</p>
+            <span class="exit"><b>Exit</b> · kill any node mid-solve — no lost solves, no duplicated solves, throughput recorded</span>
+          </div>
+        </li>
+
+        <li class="phase b">
+          <div class="when"><b>Phase 10</b><em>1.5 weeks</em></div>
+          <div>
+            <h3>Chaos and verification harness</h3>
+            <p>Partitions, delays, process pauses, kills, disk corruption. Linearizability checking on the replicated register. Nightly randomized runs in CI, failing seeds saved as regression tests.</p>
+            <span class="exit"><b>Exit</b> · nightly suite green for 7 consecutive nights, and one real bug found and written up</span>
+          </div>
+        </li>
+
+        <li class="phase">
+          <div class="when"><b>Phase 11</b><em>2 weeks</em></div>
+          <div>
+            <h3>Punishing: Gray Raven</h3>
+            <p>Data adapter, banner model configuration, fodder economics, probabilistic goals. Whatever the model has to generalise, generalise <em>in the model</em>.</p>
+            <span class="exit"><b>Exit</b> · PGR live with zero game-specific code in planner, gacha or stats — and the diff to prove it</span>
+          </div>
+        </li>
+
+        <li class="phase">
+          <div class="when"><b>Phase 12</b><em>1 week</em></div>
+          <div>
+            <h3>Hardening and the writeups</h3>
+            <p>Tracing, alerting, a backup you have actually restored from, load test with published numbers. <strong>Pre-rendered catalog pages, stable URLs, sitemap and structured data</strong> — the funnel only works if it is indexable. Then the three writeups: the storage benchmark, the consensus verification, and the multi-game diff.</p>
+            <span class="exit"><b>Exit</b> · restore drill completed from a real backup; catalog pages indexed; three writeups published in the repo</span>
+          </div>
+        </li>
+      </ol>
+
+      <div class="callout warn">
+        <span class="tag">Cut list, in order</span>
+        <ul>
+          <li><strong>Cut first:</strong> Phase 10 as a separate phase — fold minimal fault injection into 8 and 9. You lose the strongest evidence, so cut this only under real pressure.</li>
+          <li><strong>Cut second:</strong> Phase 9. Keep <code>almanac-raft</code> as a verified standalone replicated KV and leave the solver single-node.</li>
+          <li><strong>Cut third:</strong> Phase 11's real second game — but still prove the abstraction against a synthetic test game. That proof <em>is</em> the product thesis.</li>
+          <li><strong>Never cut:</strong> the Phase 4 public launch, the Phase 2 optimizer, and <em>completing</em> at least one of Phase 7 or 8 properly. Half an LSM tree and half a Raft is worth nothing; one finished engine is worth a great deal.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="weapon">
+      <span class="num">15</span>
+      <h2>What this becomes on a CV</h2>
+      <p>Two sentences that very few candidates can both say:</p>
+      <ul>
+        <li><em>"I run a live tool for two games with real users, built on a mixed-integer optimizer over crowdsourced drop data."</em></li>
+        <li><em>"Its report log runs on a storage engine I wrote, and its solver fleet is coordinated by a Raft implementation I wrote, both verified under fault injection — here are the benchmarks against the off-the-shelf components they replaced."</em></li>
+      </ul>
+      <p>Supporting evidence in the repo: an <code>/adr</code> folder where every decision names the trigger that would reverse it; the Markov-versus-Monte-Carlo cross-validation; the crash-consistency and linearizability results; <code>docker compose up</code> working from a clean clone; and a "what I'd do differently" section, which interviewers read first and which is the fastest seniority signal you can send.</p>
+      <p>Distribution still decides whether anyone uses it: long-tail search on catalog pages is the passive channel, posting in the game subreddits and Discords <strong>when it works</strong> is the active one. Credit and talk to the Kornblume and Penguin Statistics maintainers early, and be a participant in those communities before you are a vendor to them.</p>
+    </section>
+
+    <footer>
+      <p>Figures used above: Reverse: 1999 rates and pity per <a href="https://attackofthefanboy.com/guides/reverse-1999-gacha-system-explained-soft-pity-hard-pity-and-banner-types/">Attack of the Fanboy</a>; Punishing: Gray Raven rates, pity and featured split per <a href="https://topuplist.com/blogs/detail/pgr-pity-system-explained-s-rank-pulls-40-60-guarantee">TopUpList</a> and the <a href="https://punishing-gray-raven.fandom.com/wiki/Gacha">PGR Wiki</a>; Memory enhancement and Resonance per <a href="https://www.appgamer.com/punishing-gray-raven/memory-training-guide">AppGamer</a>; prior art per <a href="https://github.com/windbow27/kornblume">Kornblume</a> and <a href="https://github.com/penguin-statistics">Penguin Statistics</a>; solver per <a href="https://www.ojalgo.org/mathematical-optimisation/">ojAlgo</a>. Verify current-patch rates against in-game disclosure before shipping the simulator.</p>
+    </footer>
+
+  </main>
+</div>

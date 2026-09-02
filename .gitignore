@@ -1,0 +1,32 @@
+# Build output
+build/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+out/
+bin/
+dist/
+node_modules/
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Local config and secrets — never commit these
+.env
+.env.*
+!.env.example
+*.pem
+
+# Track B working data
+substrate-data/
+*.sst
+*.wal
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,64 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build and test
+        run: ./gradlew --no-daemon build
+      # The module boundaries and the game-agnosticism rule are enforced by
+      # tests in :app, so a violation fails this job rather than a review.
+      - name: Publish test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend/**/build/reports/tests/
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
+  # Phase 0's exit criterion: a green pipeline deploying a health endpoint to a
+  # real URL. Wire the deploy target in before writing any product code — the
+  # deploy path is cheapest to fix while there is nothing to lose.
+  deploy:
+    needs: [backend, frontend]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy
+        run: echo "TODO(phase-0): wire Fly.io or the VPS deploy here"
+      - name: Smoke the deployed health endpoint
+        run: echo "TODO(phase-0): curl --fail https://<host>/api/health"

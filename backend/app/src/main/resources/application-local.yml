@@ -1,0 +1,7 @@
+# Used by docker compose and by `gradle bootRun` against it.
+spring:
+  jpa:
+    ddl-auto: validate
+logging:
+  level:
+    io.stormalmanac: DEBUG

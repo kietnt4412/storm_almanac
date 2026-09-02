@@ -1,0 +1,46 @@
+# `docker compose up` must work from a clean clone. That is a stated deliverable,
+# not a convenience — it is the first thing anyone reading the repo will try.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: storm_almanac
+      POSTGRES_USER: almanac
+      POSTGRES_PASSWORD: almanac
+    ports: ["5432:5432"]
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U almanac -d storm_almanac"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]
+    volumes: ["redis-data:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      DATABASE_URL: jdbc:postgresql://postgres:5432/storm_almanac
+      DATABASE_USER: almanac
+      DATABASE_PASSWORD: almanac
+      REDIS_URL: redis://redis:6379
+    ports: ["8080:8080"]
+
+volumes:
+  postgres-data:
+  redis-data:

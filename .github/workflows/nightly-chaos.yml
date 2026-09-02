@@ -1,0 +1,35 @@
+# Phase 10. Dormant until almanac-chaos exists; committed now so that the
+# nightly cadence is a habit rather than a thing bolted on at the end.
+name: nightly-chaos
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: 'Replay a specific seed'
+        required: false
+
+jobs:
+  chaos:
+    runs-on: ubuntu-latest
+    if: false # flip to true when :substrate:almanac-chaos has a suite to run
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+      - uses: gradle/actions/setup-gradle@v4
+      # A failing seed is saved and committed as a permanent regression test.
+      - run: ./gradlew --no-daemon :substrate:almanac-chaos:test -Dchaos.seed=${{ inputs.seed || github.run_id }}
+      - name: Preserve the failing seed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chaos-seed-${{ github.run_id }}
+          path: backend/substrate/almanac-chaos/build/seeds/
