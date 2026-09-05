@@ -1,8 +1,20 @@
 # Storm Almanac
 
-A progression optimizer for live-service games, running on a storage engine and
-a consensus layer written from scratch — one product to be used, one substrate
-to be understood.
+**Storm Almanac tells you what to farm next, and why.** You enter what you own
+and who you want to raise; it solves an integer program against your actual
+inventory and hands back the stages, the run counts, and the constraint that put
+each one on the list. The tools that exist today have pieces of this and not the
+whole. Reverse: 1999's community planner ships one greedy route per patch,
+precomputed for nobody in particular, because a static site has nothing to solve
+against. Arknights' ArkPlanner has a real solver, but it keeps its reasoning to
+itself and covers one game. Storm Almanac solves per player, against
+crowdsourced drop rates that carry their own confidence intervals, shows its
+working, and does all of it behind a model with no game-specific code in it —
+Punishing: Gray Raven runs on the same optimizer as Reverse: 1999, which is the
+only real proof that the first game was modelled rather than hardcoded.
+
+It runs on a storage engine and a consensus layer written from scratch — one
+product to be used, one substrate to be understood.
 
 - **Launch title:** Reverse: 1999 · **Second title:** Punishing: Gray Raven
 - **Stack:** Java 21 · Spring Boot 3 · React 19 · Postgres · Redis
