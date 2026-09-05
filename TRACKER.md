@@ -6,9 +6,8 @@ the next session starts from a lie.
 
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks)
 - Last updated: **2026-09-05**
-- Current phase: **Phase 0 — Ground — closed**, except the deploy, which is
-  deferred by decision D1 rather than missed. CI green on `a82da1e`.
-  **Phase 1 opens on N3.**
+- Current phase: **Phase 1 — Game data foundation**, opened 2026-09-05 with the
+  canonical schema. Phase 0 is closed by exception (deploy deferred by D1).
 - Track B status: **not started, and gated** — see [the gate](#the-gate)
 
 ---
@@ -46,9 +45,10 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 
 | Area | State | Notes |
 |------|-------|-------|
-| Backend build | **Green** | `./gradlew build` — 17 tests, `storm-almanac.jar` |
+| Backend build | **Green** | `./gradlew build` — 26 tests, `storm-almanac.jar` |
 | Repo layout | Done | Gradle multi-module backend, Vite frontend, ADR folder |
-| Domain model (`gamedata`) | Compiles, untested | Records and sealed hierarchies complete; no persistence, no fixtures. Equipment settled as an `Entity` with a `kind` field — ADR 0007 |
+| Domain model (`gamedata`) | Compiles, untested | Records and sealed hierarchies complete; **still no persistence and no fixtures**. Equipment settled as an `Entity` with a `kind` field — ADR 0007 |
+| `gamedata` schema | **Applied, and empty** | `V2__gamedata_canonical_schema.sql`, 28 tables incl. the catalog axis. Six invariants proven by `GameDataSchemaTest` against real Postgres. Has never held real game data |
 | Module ports | Compiles, no impls | `Optimizer`, `SolveCoordinator`, `DropReportStore`, `BannerEngine`, repositories |
 | `WilsonInterval` | **Done** | 6 tests passing |
 | `PityRule` | **Done** | 9 tests passing against both games' published rates |
@@ -76,7 +76,12 @@ works". It does not mean that:
 - **The frontend has never been served**, only typechecked and built. No page
   has been loaded in a browser and it has never spoken to the API.
 - **Nothing but health has any behaviour.** Every port is still an interface
-  with no implementation, and the domain model has never been persisted.
+  with no implementation, and the domain model has never been persisted — the
+  schema that would persist it now exists, which is not the same thing.
+- **The schema has never held real game data.** Its constraints are proven
+  against fixtures this project wrote, not against an upstream bundle. The first
+  real ingest is where a modelling mistake will actually surface, and until then
+  "the schema is right" is a claim, not a result.
 
 ---
 
@@ -209,9 +214,50 @@ Ordered. Do them in this order.
       **Gap carried, not waved away:** nothing stops a later commit reading
       `Entity.kind` inside `planner`, and `GameAgnosticismTest` scans for game
       slugs, not field reads. See **N4**.
-- [ ] **N3 — Then open Phase 1.** Canonical schema first, ingestion second.
-      Note **F1** (evaluate 必要的记录 as the real drop upstream) and **Q3**
-      (assume nothing is redistributable — read to validate, never vendor).
+- [x] ~~**N3 — Then open Phase 1.**~~ **Open. The canonical schema has landed**
+      as `V2__gamedata_canonical_schema.sql` — 28 tables, 7 indexes, applied for
+      real against PostgreSQL 16.15 (*"Migrating schema to version 2 — gamedata
+      canonical schema"*, `Successfully applied 2 migrations`) and covered by
+      six tests in `GameDataSchemaTest`, all passing. Three decisions are
+      written into it and are worth carrying forward:
+      1. **A version is a full snapshot, not a delta.** Every row belongs to one
+         `game_data_version`; publishing inserts a fresh set and mutates
+         nothing. That is what keeps an old plan correct after a patch, and it
+         makes the diff an ordinary set comparison rather than a history walk.
+         Game data is thousands of rows per version, so the duplication is not
+         worth optimising away.
+      2. **A reference cannot cross a version boundary — structurally.** Every
+         versioned table carries `version_id` with a `UNIQUE (version_id, id)`,
+         and every child uses a composite `(version_id, …)` foreign key, so a v2
+         stage citing a v1 item is *refused by the database*. Costs one column
+         per table. Without it the headline feature of this phase sits one
+         ingest bug away from quietly lying, and nothing would show.
+      3. **Draft and published are different states**, with a CHECK that a
+         published row has an approval timestamp and a draft has none. Backs
+         `GameDefinitionRepository`'s promise that "latest" means latest
+         approved, never latest fetched.
+      Also: **`attribution` is `NOT NULL` on every version.** "Numbers and text
+      only, attributed" is a project invariant, so an unattributed snapshot
+      should not be representable. Ties to **Q3**.
+      **Still to do in Phase 1:** ingestion, versioned publishing with diffs,
+      `gamedata-cli`, and tests over real patch data including a patch that
+      changes something. See **N6**. **F1** (evaluate 必要的记录 as the real
+      drop upstream) and **Q3** (assume nothing is redistributable — read to
+      validate, never vendor) both still gate the ingest work.
+- [ ] **N6 — Ingestion, then publishing with diffs.** The schema is ready and
+      empty. In order: a parser adapter producing a `GameDefinition`, the JPA
+      entities and a `GameDefinitionRepository` implementation, then the diff
+      report over two versions, then `gamedata-cli`.
+      **Two things to settle before writing the JPA layer:**
+      - **`available_days` is `TEXT[]`.** Readable in psql, which matters when a
+        human approves a publish, but Hibernate is `ddl-auto: validate` and
+        array mapping is the kind of thing that validates fine until it does
+        not. **Confirm it validates on the first entity that maps it**; a
+        `smallint` bitmask is the fallback and costs a migration.
+      - **The composite foreign keys are unusual to map.** Every child needs
+        `version_id` as part of its association. Expect this to be the awkward
+        part of the JPA work, and do not "simplify" it away — it is the
+        invariant, not decoration.
 - [ ] **N4 — Enforce that `Entity.kind` is never read outside the catalog.**
       ADR 0007 asserts it and nothing checks it. `GameAgnosticismTest` scans the
       guarded sources for game slugs, not for field reads, so a `kind`-switch in
@@ -261,7 +307,8 @@ previous one's criterion is met.
       has been.
       **The box gets ticked when, and only when, a real URL answers 200.**
 
-- [ ] **Phase 1 · Game data foundation** — 2.5 weeks
+- [ ] **Phase 1 · Game data foundation** — 2.5 weeks — *in progress, opened
+      2026-09-05*
       Canonical schema, R1999 ingestion (items, stages, characters, upgrade
       costs), versioned publishing with diffs, `gamedata-cli`. Tests over real
       patch data, including a patch that changes something. Includes the catalog
@@ -269,6 +316,13 @@ previous one's criterion is met.
       retrofitting a second data axis into a published schema later is miserable.
       **Exit:** the API answers "what does Insight 2 cost?" and "what does her S2
       do at rank 3?"; a patch diff report renders for both axes.
+      **Landed:** the canonical schema (`V2__gamedata_canonical_schema.sql`, 28
+      tables), including the catalog axis, and `GameDataSchemaTest` proving its
+      invariants against a real Postgres. The schema is **applied and empty** —
+      it has never held a row of real game data.
+      **Not started:** ingestion, publishing, diffs, the CLI, the API. Nothing
+      here answers either exit question yet, and the schema existing is not
+      evidence that it can. See **N6**.
 
 - [ ] **Phase 2 · Optimizer core** — 2 weeks
       ojAlgo MIP model, crafting recursion, integer runs, solve caching,
@@ -548,6 +602,60 @@ Carry these forward until answered; strike through with the answer when resolved
 ## Session log
 
 Append one entry per session. Newest first.
+
+### 2026-09-05 (third session) — Phase 1 opens: the canonical schema
+
+- **`V2__gamedata_canonical_schema.sql` landed.** 28 tables, 7 indexes, the
+  whole domain including the catalog axis. Verified rather than assumed: Flyway
+  reports *"Migrating schema to version 2 — gamedata canonical schema"* and
+  `Successfully applied 2 migrations` against PostgreSQL 16.15 in a
+  Testcontainers run. Build green, 26 tests.
+- **The three decisions the schema is built on**, in case a later session is
+  tempted to undo one:
+  1. *A version is a full snapshot, not a delta.* Publishing inserts a complete
+     new row set and mutates nothing, so an old plan stays correct after a patch
+     and the diff is a set comparison rather than a history walk. Game data is
+     thousands of rows; the duplication is not worth optimising away.
+  2. *A reference cannot cross a version boundary, structurally.* Every child
+     uses a composite `(version_id, …)` foreign key against a
+     `UNIQUE (version_id, id)` on its parent, so a v2 stage citing a v1 item is
+     refused by Postgres. One extra column per table. The alternative leaves the
+     diff — this phase's headline feature — one ingest bug from silently lying,
+     with nothing to show for it.
+  3. *Draft and published are different states*, enforced by a CHECK, because
+     `GameDefinitionRepository` promises that "latest" means latest approved.
+- **`attribution` is `NOT NULL` on every version.** "Numbers and text only,
+  attributed" is a project invariant, so an unattributed snapshot should not be
+  representable at all. Cheap now; a migration later.
+- **`GameDataSchemaTest` — six tests, and they check both directions.** A
+  constraint that only ever rejects is indistinguishable from a broken table, so
+  each one also proves the legitimate case still goes through. The one worth
+  keeping in mind: **in Postgres, NaN sorts above every number**, so the obvious
+  `expected_yield >= 0` would have waved NaN straight through — it is the upper
+  bound against `Infinity` that actually catches it. `Drop.java` already got
+  this right in Java; the schema now matches, and there is a test that fails if
+  either drifts.
+  Deliberately **not** a Spring test: it tests the schema, and booting the
+  application to do it would only make it slower.
+- **One domain fix on the way in.** `Skill.Rank.upgradeCost` was
+  `List<String>` — item ids as bare strings, against the project's own rule that
+  identifiers are typed, and the only cost in the model that was not
+  `List<ItemStack>`. Now `List<ItemStack>`, which also expresses "four of these
+  and one of those", which a list of ids cannot. Same reasoning as ADR 0007's
+  `kind` field and the same free window: nothing constructs a `Skill` yet.
+  **The window is closing** — once ingestion writes fixtures, shape changes stop
+  being free.
+- **Tooling note that cost several retries:** the Bash heredoc broke repeatedly
+  on the large SQL and Java content. Writing the file directly worked first try.
+  For anything over ~100 lines, write the file rather than piping a heredoc.
+- **What Phase 1 still needs, and it is most of it:** ingestion, the JPA layer,
+  publishing with diffs, `gamedata-cli`, and the API that answers the two exit
+  questions. The schema is applied and **empty** — it has never held a row of
+  real game data, and that first ingest is where a modelling mistake will
+  actually surface. See **N6**, which also flags the two things to settle before
+  the JPA work: whether Hibernate validates the `TEXT[]` column, and that the
+  composite foreign keys will be awkward to map and must not be "simplified"
+  away.
 
 ### 2026-09-05 (second session) — the equipment question, answered from the code
 
