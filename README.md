@@ -84,6 +84,44 @@ frontend/             React 19 + TypeScript + Vite, PWA with offline editing
 docs/adr/             every decision names the trigger that would reverse it
 ```
 
+## Onboarding a game
+
+A title is **a data bundle plus a parser adapter**, and no backend code. The
+same jar the server runs from is also `gamedata-cli`:
+
+```bash
+java -jar storm-almanac.jar --gamedata=preview proving-ground-1.1.json
+```
+
+`preview` says what approving that file would change, against what is published
+now, without writing a row — because publishing is a human approval and an
+approval nobody could review is a rubber stamp. Then `ingest` writes it as a
+draft and `publish` makes it live.
+
+A version is a full snapshot rather than a delta, so a plan computed last patch
+stays correct, and a patch report is an ordinary set comparison:
+
+```
+proving-ground: 1.0 → 1.1
+
+progression · 5 change(s)
+  + item 'sigil-radiant'
+  ~ stage 'pg-1-1' · drop ore-rough: 1.4 → 1.6
+  - stage 'pg-event-1'
+  ~ upgrade 'warden-insight-2' · cost gold: 20000 → 18000
+
+catalog · 2 change(s)
+  ~ entity 'warden' · atk at tier 1 level 40: 415.0 → 430.0
+  ~ entity 'warden' · skill warden-strike rank 2 damage: 1.32 → 1.28
+```
+
+The two axes are separate because a balance patch moves combat multipliers
+without touching a single material cost, and a reader who came for one does not
+want to page through the other.
+
+The format, the commands and what gets rejected:
+[docs/game-data-bundles.md](docs/game-data-bundles.md).
+
 ## The rules the build enforces
 
 Two tests in `:app` turn the project's central claims into failing builds rather
