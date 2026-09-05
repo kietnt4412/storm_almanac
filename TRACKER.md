@@ -146,8 +146,15 @@ Ordered. Do them in this order.
       [docs/prior-art.md](docs/prior-art.md). Found a real defect in our `Drop`
       record (fixed) and narrowed Q2/Q3. Four follow-ups F1–F4 recorded there;
       **F4 blocks Phase 1 ingestion.**
-- [ ] **B7 — Write the positioning paragraph.** One paragraph. If it is not
-      sharp, the project is not either. Put it at the top of the README.
+- [x] ~~**B7 — Write the positioning paragraph.**~~ Drafted and placed at the top
+      of the README. It is deliberately narrow, and takes its claims from
+      [docs/prior-art.md](docs/prior-art.md) rather than from ambition: the
+      differentiator is not "we have a solver" — ArkPlanner has one — it is
+      *per-player, against estimates with confidence intervals, with the
+      reasoning shown, behind a game-agnostic model.*
+      **Re-read it before Phase 4's launch.** If the product cannot yet do
+      everything the paragraph claims, the paragraph is a promise, not
+      positioning, and one of the two has to change.
 
 ---
 
