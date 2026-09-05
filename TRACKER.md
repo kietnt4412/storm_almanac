@@ -6,7 +6,8 @@ the next session starts from a lie.
 
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks)
 - Last updated: **2026-09-05**
-- Current phase: **Phase 0 — Ground** (in progress)
+- Current phase: **Phase 0 — Ground** (complete but for D1's deploy; closing on
+  **N1**, then Phase 1 opens on **N2**)
 - Track B status: **not started, and gated** — see [the gate](#the-gate)
 
 ---
@@ -135,12 +136,17 @@ Ordered. Do them in this order.
          the pipeline green while nothing deploys.
       4. Runs #1–#4 all failed for the reasons above. **Run #5 is the green
          one**, on `1a58dd5`.
-      5. **Still open — the one thing left in Phase 0.** `build` now runs
-         `ApplicationBootTest`,
-         which starts a Testcontainers Postgres. `ubuntu-latest` ships Docker so
-         it should pass, but this has never run on the runner. If it is flaky
-         there, tag it and split it into its own job rather than deleting it —
-         it is the only test that has ever caught a real defect.
+      5. **Run #6+ — result not yet seen.** `dev` was pushed and merged to
+         `main` via **PR #1** (`73007df`) at the end of the 2026-09-05 session,
+         which fires the pipeline twice (the PR, then the push to `main`).
+         Neither result was observed: `gh` is installed but not authenticated,
+         so `gh run list` still refuses. **First action next session:** run
+         `gh auth login`, then `gh run list --limit 5`.
+         What is new in that run and has never executed on the runner:
+         `ApplicationBootTest` starts a **Testcontainers Postgres**.
+         `ubuntu-latest` ships a Docker daemon so it should pass. If it is flaky
+         there, tag it and split it into its own job — **do not delete it.** It
+         is the only test in this repo that has ever caught a real defect.
       **Validate YAML locally before pushing** — `js-yaml` in the scratchpad
       parses all five files in seconds and is cheaper than a CI round trip.
       A green pipeline is Phase 0's exit criterion, and a workflow that has never
@@ -161,6 +167,23 @@ Ordered. Do them in this order.
       **Re-read it before Phase 4's launch.** If the product cannot yet do
       everything the paragraph claims, the paragraph is a promise, not
       positioning, and one of the two has to change.
+
+### Next session starts here
+
+- [ ] **N1 — Confirm the pipeline is green on the current tree.** `gh auth
+      login`, then `gh run list --limit 5`. This is the last thing standing
+      between Phase 0 and its exception-closure. If `ApplicationBootTest` fails
+      on the runner, fix it there — see B4 item 5.
+- [ ] **N2 — Answer Q6 / F4: how is equipment modelled?** Kornblume's
+      `psychubes.json` is equippable, upgradeable gear that is neither our
+      `Entity` nor our `Item`. **This blocks Phase 1 ingestion**, so settle it
+      before writing any schema. The leaning on record is to treat equipment as
+      an `Entity`, because PGR's Memories are equipment-like too and one concept
+      covering both games is the abstraction doing its job. Write it up as an
+      ADR — this is a shape decision, not a detail.
+- [ ] **N3 — Then open Phase 1.** Canonical schema first, ingestion second.
+      Note **F1** (evaluate 必要的记录 as the real drop upstream) and **Q3**
+      (assume nothing is redistributable — read to validate, never vendor).
 
 ---
 
@@ -450,13 +473,13 @@ Carry these forward until answered; strike through with the answer when resolved
   disclosure before the simulator ships (Phase 5).
 - ~~**Q5 — Repository host.**~~ **Answered: GitHub**, HTTPS remote at
   `github.com/kietnt4412/storm_almanac`. Superseded by Q7 below.
-- **Q7 — How is CI status checked from a session?** New, 2026-09-05. The repo
-  is not anonymously readable (the Actions API 404s) and there is no `gh` CLI
-  here, so CI status cannot be read from the terminal at all. Run #5 was
-  confirmed by screenshot instead, which worked but does not scale — every
-  future check costs a round trip through you. **Install `gh` and authenticate**
-  (`winget install GitHub.cli`), or make the repo public. Worth doing before
-  Phase 1, when pushes get frequent.
+- **Q7 — How is CI status checked from a session?** *Half answered
+  2026-09-05.* The repo is private, so the Actions API 404s anonymously. `gh` is
+  now **installed** — but not authenticated, so `gh run list` still refuses and
+  run #5 had to be confirmed by screenshot. **One command closes this:
+  `gh auth login`.** It is interactive and involves credentials, so it has to be
+  run by hand. Do it before Phase 1; pushes get frequent from there and every
+  unverified pipeline is a phase exit criterion nobody can check.
 
 ---
 
@@ -524,9 +547,18 @@ Append one entry per session. Newest first.
 - **B7 written**, from `docs/prior-art.md` rather than from ambition. The
   temptation was "we have a solver"; ArkPlanner has one, so the paragraph claims
   the four narrower things that are actually differentiated.
-- Phase 0 is now complete except for its deliberately-broken exit criterion.
-  Next session starts Phase 1, and **F4/Q6 (equipment modelling) blocks
-  ingestion** — settle that first.
+- Closed the session by pushing `dev` and merging **PR #1** into `main`
+  (`73007df`). `gh` was installed, but not authenticated — so the resulting
+  pipeline runs were *not* observed, and `ApplicationBootTest` has still never
+  executed on the runner. **That is N1, and it is the only thing between Phase 0
+  and closure.** Recording it as open rather than assuming it passed: assuming
+  is how B1a sat ticked-but-stale for three sessions.
+- Phase 0 is otherwise complete, with its exit criterion deliberately unmet per
+  D1. Phase 1 opens on **N2 — Q6/F4, equipment modelling**, which blocks
+  ingestion and deserves an ADR rather than an inline decision.
+
+**State at session end:** `main` at `73007df`, working tree clean, 17 tests
+green locally, compose stack verified and left running.
 
 ### 2026-09-02 — prior-art read; first real model defect found
 
