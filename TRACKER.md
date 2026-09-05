@@ -6,9 +6,9 @@ the next session starts from a lie.
 
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks)
 - Last updated: **2026-09-05**
-- Current phase: **Phase 0 — Ground** — *every criterion met except the deploy,
-  which is deferred by decision D1, not missed.* CI is green on `main` and
-  proven. **Phase 1 opens on N3.**
+- Current phase: **Phase 0 — Ground — closed**, except the deploy, which is
+  deferred by decision D1 rather than missed. CI green on `a82da1e`.
+  **Phase 1 opens on N3.**
 - Track B status: **not started, and gated** — see [the gate](#the-gate)
 
 ---
@@ -56,7 +56,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 | `GameAgnosticismTest` | **Passing** | Source scan over planner/gacha/stats |
 | Health endpoint | **Done — served and verified** | `GET /api/health` → 200 from a real container. Was 401; see the session log |
 | Docker Compose | **Verified** | `docker compose up --build` from cold: image builds, all three services healthy |
-| CI workflow | **Green on `main`** | Runs `33963222427` (PR) and `33963295323` (merge to `main`), both success, with `ApplicationBootTest` really running Testcontainers on the runner. Not yet run on `021279e` |
+| CI workflow | **Green on the current tree** | PR #2 merged as `a82da1e`; runs `33964292888` (PR) and `33964297527` (push to `main`), both success, `ApplicationBootTest` PASSED on the runner. Deprecation warnings pending — see **N5** |
 | Frontend | **Green locally** | 415 deps resolved clean, typecheck + `vite build` pass, PWA SW generated |
 | Track B | Package docs only | Deliberately empty — see the gate |
 
@@ -65,11 +65,11 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 Be precise about this, because the temptation is to read "build green" as "it
 works". It does not mean that:
 
-- **CI is now proven on the merged tree** — runs `33963222427` and
-  `33963295323`, both green, with `ApplicationBootTest` and its Testcontainers
-  Postgres actually executing on the runner. *But it has not seen this
-  session's commit* (`021279e`, the `Entity.kind` change), which is unpushed.
-  The rule that keeps this honest: a pipeline is proven for the tree it ran on
+- **CI is proven on the current tree, as of `a82da1e`.** Runs `33964292888`
+  (PR #2) and `33964297527` (push to `main`), both green, with
+  `ApplicationBootTest` and its Testcontainers Postgres executing on the runner.
+  Every commit in this session has now been through the pipeline. The rule that
+  keeps this honest still stands: a pipeline is proven for the tree it ran on
   and no other.
 - **Nothing is deployed.** By decision — see deviation D1. The `deploy` job is
   `if: false` and there is no URL to smoke.
@@ -219,6 +219,17 @@ Ordered. Do them in this order.
       `ModuleBoundaryTest`. **Not urgent and deliberately not written yet** — the
       guarded modules are empty, so the rule would pass vacuously and prove
       nothing. Write it with the first real planner code, in Phase 2.
+- [ ] **N5 — Upgrade the CI actions before they break.** Run `33964297527`
+      passed but warned twice, and both are on a clock:
+      1. **Node 20 is deprecated.** `actions/checkout@v4`, `setup-java@v4`,
+         `upload-artifact@v4`, `gradle/actions/setup-gradle@v4` and
+         `wrapper-validation@v4` all target it and are already being *forced*
+         onto Node 24 by the runner. Forced today, unsupported tomorrow.
+      2. **`setup-java@v4` is deprecated outright** — migrate to `@v5`.
+      Not urgent, and deliberately not done in the same session that closed
+      Phase 0: bumping five actions at once is a change that wants its own green
+      run to attribute a failure to. Do it as a standalone PR early in Phase 1,
+      while the pipeline is quiet, rather than tangled in the first schema work.
 
 ---
 
@@ -229,22 +240,26 @@ previous one's criterion is met.
 
 ### Track A — product
 
-- [ ] **Phase 0 · Ground** — 1 week — *in progress*
+- [ ] **Phase 0 · Ground** — 1 week — **closed by exception 2026-09-05, box
+      deliberately left unticked**
       Repo, CI, Docker Compose, ADR folder, hello-world deployed to production
       before any real code. Read Kornblume and Penguin Statistics. Write the
       positioning paragraph.
       **Exit:** a green pipeline deploying a health endpoint to a real URL.
-      **⚠ Cannot be met as written — see deviation D1.** Closing this phase on
-      "green pipeline, deploy deferred" is an exception, not the criterion.
-      **Landed:** repo, git, ADRs 1–6, compose file, domain model, a green local
+      **⚠ Not met as written — see deviation D1.** Closing on "green pipeline,
+      deploy deferred" is an exception, not the criterion, and the box stays
+      unticked to say so. A ticked box here would be the tracker telling the
+      next session a lie about what this project has actually shipped.
+      **Landed:** repo, git, ADRs 1–7, compose file, domain model, a green local
       backend build, a verified frontend build, the prior-art read, the
-      positioning paragraph, **a green CI run (#5)**, and **an application that
-      actually boots and serves `/api/health`**.
-      **Missing:** a real deploy (deferred by D1, and not coming before Phase 4)
-      and one green CI run over the current tree.
-      **Everything in this phase that could be met, has been.** The only gap is
-      the one D1 opened deliberately. Close it once CI is green on the current
-      commits — as an exception, with D1 cited, and do not tick the box.
+      positioning paragraph, **CI green on the current tree** (`a82da1e`, runs
+      `33964292888` and `33964297527`, with `ApplicationBootTest` executing on
+      the runner), and **an application that actually boots and serves
+      `/api/health`**.
+      **Still missing, and only this:** a real deploy. Deferred by D1, not
+      coming before Phase 4. Every other item in this phase that could be met,
+      has been.
+      **The box gets ticked when, and only when, a real URL answers 200.**
 
 - [ ] **Phase 1 · Game data foundation** — 2.5 weeks
       Canonical schema, R1999 ingestion (items, stages, characters, upgrade
@@ -579,6 +594,22 @@ Append one entry per session. Newest first.
   actually execute, or silently skip? Read the log, not the badge: both
   `ApplicationBootTest` cases show `PASSED` on the runner. Testcontainers works
   on `ubuntu-latest`. Nothing to tag, nothing to split.
+- **Then this session's own commits went through it too.** Pushed to `dev`, and
+  **nothing fired** — which was not a failure but the workflow doing what it
+  says: `ci.yml` triggers on `push: branches: [main]` and `pull_request`, so a
+  push to `dev` with no open PR runs nothing at all. Worth knowing before
+  reading silence as breakage. PR #2 merged as `a82da1e`; runs `33964292888`
+  and `33964297527` both green, `ApplicationBootTest` PASSED on both. Every
+  commit made this session is now verified by CI.
+- **Two deprecation warnings surfaced on that run**, recorded as **N5**: Node 20
+  is deprecated and five actions are already being force-migrated to Node 24 by
+  the runner, and `setup-java@v4` is deprecated outright. Green today, on a
+  clock. Left for its own PR rather than bundled into a Phase-0 closing commit.
+- **Git and `gh` are authenticated separately, and only `gh` is.** `git fetch`
+  fails with "could not read Username" — no credential helper is wired for git
+  itself, so pushes stay manual. `gh auth setup-git` would fix it.
+  `branch.dev.remote` is also unset, so `git status` cannot report ahead/behind
+  on `dev`; `git push -u origin dev` once would fix that.
 - **Also re-learned, cheaply:** `2>&1` on a native exe in PowerShell 5.1 wraps
   the JVM's stderr banner as a `NativeCommandError` that *looks* like a build
   failure. `./gradlew build` exited 0. Read the exit code, not the red text.
