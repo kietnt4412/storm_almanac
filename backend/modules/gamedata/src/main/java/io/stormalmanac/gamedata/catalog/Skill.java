@@ -1,5 +1,6 @@
 package io.stormalmanac.gamedata.catalog;
 
+import io.stormalmanac.gamedata.ItemStack;
 import java.util.List;
 import java.util.Map;
 
@@ -14,11 +15,16 @@ import java.util.Map;
 public record Skill(String id, String displayName, List<Rank> ranks) {
 
     /**
-     * @param values     named multipliers, e.g. {@code {"damage": 1.32}}
-     * @param upgradeCost referenced by id into the game's item table
+     * @param values      named multipliers, e.g. {@code {"damage": 1.32}}
+     * @param upgradeCost what it costs to reach this rank from the previous one.
+     *                    An {@link ItemStack} list like every other cost in the
+     *                    model: a bare list of item ids could not say
+     *                    "four of these and one of those", and untyped ids are
+     *                    against the rules the rest of the domain keeps.
      */
-    public record Rank(int rank, Map<String, Double> values, String description, List<String> upgradeCost) {
+    public record Rank(int rank, Map<String, Double> values, String description, List<ItemStack> upgradeCost) {
         public Rank {
+            if (rank < 1) throw new IllegalArgumentException("rank must be >= 1");
             values = Map.copyOf(values);
             upgradeCost = List.copyOf(upgradeCost);
         }

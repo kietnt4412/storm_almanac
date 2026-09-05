@@ -6,9 +6,8 @@ the next session starts from a lie.
 
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks)
 - Last updated: **2026-09-05**
-- Current phase: **Phase 0 — Ground** — *every criterion met except the deploy,
-  which is deferred by decision D1, not missed.* CI is green on `main` and
-  proven. **Phase 1 opens on N3.**
+- Current phase: **Phase 1 — Game data foundation**, opened 2026-09-05 with the
+  canonical schema. Phase 0 is closed by exception (deploy deferred by D1).
 - Track B status: **not started, and gated** — see [the gate](#the-gate)
 
 ---
@@ -46,9 +45,10 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 
 | Area | State | Notes |
 |------|-------|-------|
-| Backend build | **Green** | `./gradlew build` — 17 tests, `storm-almanac.jar` |
+| Backend build | **Green** | `./gradlew build` — 26 tests, `storm-almanac.jar` |
 | Repo layout | Done | Gradle multi-module backend, Vite frontend, ADR folder |
-| Domain model (`gamedata`) | Compiles, untested | Records and sealed hierarchies complete; no persistence, no fixtures. Equipment settled as an `Entity` with a `kind` field — ADR 0007 |
+| Domain model (`gamedata`) | Compiles, untested | Records and sealed hierarchies complete; **still no persistence and no fixtures**. Equipment settled as an `Entity` with a `kind` field — ADR 0007 |
+| `gamedata` schema | **Applied, and empty** | `V2__gamedata_canonical_schema.sql`, 28 tables incl. the catalog axis. Six invariants proven by `GameDataSchemaTest` against real Postgres. Has never held real game data |
 | Module ports | Compiles, no impls | `Optimizer`, `SolveCoordinator`, `DropReportStore`, `BannerEngine`, repositories |
 | `WilsonInterval` | **Done** | 6 tests passing |
 | `PityRule` | **Done** | 9 tests passing against both games' published rates |
@@ -56,7 +56,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 | `GameAgnosticismTest` | **Passing** | Source scan over planner/gacha/stats |
 | Health endpoint | **Done — served and verified** | `GET /api/health` → 200 from a real container. Was 401; see the session log |
 | Docker Compose | **Verified** | `docker compose up --build` from cold: image builds, all three services healthy |
-| CI workflow | **Green on `main`** | Runs `33963222427` (PR) and `33963295323` (merge to `main`), both success, with `ApplicationBootTest` really running Testcontainers on the runner. Not yet run on `021279e` |
+| CI workflow | **Green on the current tree** | PR #2 merged as `a82da1e`; runs `33964292888` (PR) and `33964297527` (push to `main`), both success, `ApplicationBootTest` PASSED on the runner. Deprecation warnings pending — see **N5** |
 | Frontend | **Green locally** | 415 deps resolved clean, typecheck + `vite build` pass, PWA SW generated |
 | Track B | Package docs only | Deliberately empty — see the gate |
 
@@ -65,18 +65,23 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 Be precise about this, because the temptation is to read "build green" as "it
 works". It does not mean that:
 
-- **CI is now proven on the merged tree** — runs `33963222427` and
-  `33963295323`, both green, with `ApplicationBootTest` and its Testcontainers
-  Postgres actually executing on the runner. *But it has not seen this
-  session's commit* (`021279e`, the `Entity.kind` change), which is unpushed.
-  The rule that keeps this honest: a pipeline is proven for the tree it ran on
+- **CI is proven on the current tree, as of `a82da1e`.** Runs `33964292888`
+  (PR #2) and `33964297527` (push to `main`), both green, with
+  `ApplicationBootTest` and its Testcontainers Postgres executing on the runner.
+  Every commit in this session has now been through the pipeline. The rule that
+  keeps this honest still stands: a pipeline is proven for the tree it ran on
   and no other.
 - **Nothing is deployed.** By decision — see deviation D1. The `deploy` job is
   `if: false` and there is no URL to smoke.
 - **The frontend has never been served**, only typechecked and built. No page
   has been loaded in a browser and it has never spoken to the API.
 - **Nothing but health has any behaviour.** Every port is still an interface
-  with no implementation, and the domain model has never been persisted.
+  with no implementation, and the domain model has never been persisted — the
+  schema that would persist it now exists, which is not the same thing.
+- **The schema has never held real game data.** Its constraints are proven
+  against fixtures this project wrote, not against an upstream bundle. The first
+  real ingest is where a modelling mistake will actually surface, and until then
+  "the schema is right" is a claim, not a result.
 
 ---
 
@@ -209,9 +214,50 @@ Ordered. Do them in this order.
       **Gap carried, not waved away:** nothing stops a later commit reading
       `Entity.kind` inside `planner`, and `GameAgnosticismTest` scans for game
       slugs, not field reads. See **N4**.
-- [ ] **N3 — Then open Phase 1.** Canonical schema first, ingestion second.
-      Note **F1** (evaluate 必要的记录 as the real drop upstream) and **Q3**
-      (assume nothing is redistributable — read to validate, never vendor).
+- [x] ~~**N3 — Then open Phase 1.**~~ **Open. The canonical schema has landed**
+      as `V2__gamedata_canonical_schema.sql` — 28 tables, 7 indexes, applied for
+      real against PostgreSQL 16.15 (*"Migrating schema to version 2 — gamedata
+      canonical schema"*, `Successfully applied 2 migrations`) and covered by
+      six tests in `GameDataSchemaTest`, all passing. Three decisions are
+      written into it and are worth carrying forward:
+      1. **A version is a full snapshot, not a delta.** Every row belongs to one
+         `game_data_version`; publishing inserts a fresh set and mutates
+         nothing. That is what keeps an old plan correct after a patch, and it
+         makes the diff an ordinary set comparison rather than a history walk.
+         Game data is thousands of rows per version, so the duplication is not
+         worth optimising away.
+      2. **A reference cannot cross a version boundary — structurally.** Every
+         versioned table carries `version_id` with a `UNIQUE (version_id, id)`,
+         and every child uses a composite `(version_id, …)` foreign key, so a v2
+         stage citing a v1 item is *refused by the database*. Costs one column
+         per table. Without it the headline feature of this phase sits one
+         ingest bug away from quietly lying, and nothing would show.
+      3. **Draft and published are different states**, with a CHECK that a
+         published row has an approval timestamp and a draft has none. Backs
+         `GameDefinitionRepository`'s promise that "latest" means latest
+         approved, never latest fetched.
+      Also: **`attribution` is `NOT NULL` on every version.** "Numbers and text
+      only, attributed" is a project invariant, so an unattributed snapshot
+      should not be representable. Ties to **Q3**.
+      **Still to do in Phase 1:** ingestion, versioned publishing with diffs,
+      `gamedata-cli`, and tests over real patch data including a patch that
+      changes something. See **N6**. **F1** (evaluate 必要的记录 as the real
+      drop upstream) and **Q3** (assume nothing is redistributable — read to
+      validate, never vendor) both still gate the ingest work.
+- [ ] **N6 — Ingestion, then publishing with diffs.** The schema is ready and
+      empty. In order: a parser adapter producing a `GameDefinition`, the JPA
+      entities and a `GameDefinitionRepository` implementation, then the diff
+      report over two versions, then `gamedata-cli`.
+      **Two things to settle before writing the JPA layer:**
+      - **`available_days` is `TEXT[]`.** Readable in psql, which matters when a
+        human approves a publish, but Hibernate is `ddl-auto: validate` and
+        array mapping is the kind of thing that validates fine until it does
+        not. **Confirm it validates on the first entity that maps it**; a
+        `smallint` bitmask is the fallback and costs a migration.
+      - **The composite foreign keys are unusual to map.** Every child needs
+        `version_id` as part of its association. Expect this to be the awkward
+        part of the JPA work, and do not "simplify" it away — it is the
+        invariant, not decoration.
 - [ ] **N4 — Enforce that `Entity.kind` is never read outside the catalog.**
       ADR 0007 asserts it and nothing checks it. `GameAgnosticismTest` scans the
       guarded sources for game slugs, not for field reads, so a `kind`-switch in
@@ -219,6 +265,17 @@ Ordered. Do them in this order.
       `ModuleBoundaryTest`. **Not urgent and deliberately not written yet** — the
       guarded modules are empty, so the rule would pass vacuously and prove
       nothing. Write it with the first real planner code, in Phase 2.
+- [ ] **N5 — Upgrade the CI actions before they break.** Run `33964297527`
+      passed but warned twice, and both are on a clock:
+      1. **Node 20 is deprecated.** `actions/checkout@v4`, `setup-java@v4`,
+         `upload-artifact@v4`, `gradle/actions/setup-gradle@v4` and
+         `wrapper-validation@v4` all target it and are already being *forced*
+         onto Node 24 by the runner. Forced today, unsupported tomorrow.
+      2. **`setup-java@v4` is deprecated outright** — migrate to `@v5`.
+      Not urgent, and deliberately not done in the same session that closed
+      Phase 0: bumping five actions at once is a change that wants its own green
+      run to attribute a failure to. Do it as a standalone PR early in Phase 1,
+      while the pipeline is quiet, rather than tangled in the first schema work.
 
 ---
 
@@ -229,24 +286,29 @@ previous one's criterion is met.
 
 ### Track A — product
 
-- [ ] **Phase 0 · Ground** — 1 week — *in progress*
+- [ ] **Phase 0 · Ground** — 1 week — **closed by exception 2026-09-05, box
+      deliberately left unticked**
       Repo, CI, Docker Compose, ADR folder, hello-world deployed to production
       before any real code. Read Kornblume and Penguin Statistics. Write the
       positioning paragraph.
       **Exit:** a green pipeline deploying a health endpoint to a real URL.
-      **⚠ Cannot be met as written — see deviation D1.** Closing this phase on
-      "green pipeline, deploy deferred" is an exception, not the criterion.
-      **Landed:** repo, git, ADRs 1–6, compose file, domain model, a green local
+      **⚠ Not met as written — see deviation D1.** Closing on "green pipeline,
+      deploy deferred" is an exception, not the criterion, and the box stays
+      unticked to say so. A ticked box here would be the tracker telling the
+      next session a lie about what this project has actually shipped.
+      **Landed:** repo, git, ADRs 1–7, compose file, domain model, a green local
       backend build, a verified frontend build, the prior-art read, the
-      positioning paragraph, **a green CI run (#5)**, and **an application that
-      actually boots and serves `/api/health`**.
-      **Missing:** a real deploy (deferred by D1, and not coming before Phase 4)
-      and one green CI run over the current tree.
-      **Everything in this phase that could be met, has been.** The only gap is
-      the one D1 opened deliberately. Close it once CI is green on the current
-      commits — as an exception, with D1 cited, and do not tick the box.
+      positioning paragraph, **CI green on the current tree** (`a82da1e`, runs
+      `33964292888` and `33964297527`, with `ApplicationBootTest` executing on
+      the runner), and **an application that actually boots and serves
+      `/api/health`**.
+      **Still missing, and only this:** a real deploy. Deferred by D1, not
+      coming before Phase 4. Every other item in this phase that could be met,
+      has been.
+      **The box gets ticked when, and only when, a real URL answers 200.**
 
-- [ ] **Phase 1 · Game data foundation** — 2.5 weeks
+- [ ] **Phase 1 · Game data foundation** — 2.5 weeks — *in progress, opened
+      2026-09-05*
       Canonical schema, R1999 ingestion (items, stages, characters, upgrade
       costs), versioned publishing with diffs, `gamedata-cli`. Tests over real
       patch data, including a patch that changes something. Includes the catalog
@@ -254,6 +316,13 @@ previous one's criterion is met.
       retrofitting a second data axis into a published schema later is miserable.
       **Exit:** the API answers "what does Insight 2 cost?" and "what does her S2
       do at rank 3?"; a patch diff report renders for both axes.
+      **Landed:** the canonical schema (`V2__gamedata_canonical_schema.sql`, 28
+      tables), including the catalog axis, and `GameDataSchemaTest` proving its
+      invariants against a real Postgres. The schema is **applied and empty** —
+      it has never held a row of real game data.
+      **Not started:** ingestion, publishing, diffs, the CLI, the API. Nothing
+      here answers either exit question yet, and the schema existing is not
+      evidence that it can. See **N6**.
 
 - [ ] **Phase 2 · Optimizer core** — 2 weeks
       ojAlgo MIP model, crafting recursion, integer runs, solve caching,
@@ -534,6 +603,60 @@ Carry these forward until answered; strike through with the answer when resolved
 
 Append one entry per session. Newest first.
 
+### 2026-09-05 (third session) — Phase 1 opens: the canonical schema
+
+- **`V2__gamedata_canonical_schema.sql` landed.** 28 tables, 7 indexes, the
+  whole domain including the catalog axis. Verified rather than assumed: Flyway
+  reports *"Migrating schema to version 2 — gamedata canonical schema"* and
+  `Successfully applied 2 migrations` against PostgreSQL 16.15 in a
+  Testcontainers run. Build green, 26 tests.
+- **The three decisions the schema is built on**, in case a later session is
+  tempted to undo one:
+  1. *A version is a full snapshot, not a delta.* Publishing inserts a complete
+     new row set and mutates nothing, so an old plan stays correct after a patch
+     and the diff is a set comparison rather than a history walk. Game data is
+     thousands of rows; the duplication is not worth optimising away.
+  2. *A reference cannot cross a version boundary, structurally.* Every child
+     uses a composite `(version_id, …)` foreign key against a
+     `UNIQUE (version_id, id)` on its parent, so a v2 stage citing a v1 item is
+     refused by Postgres. One extra column per table. The alternative leaves the
+     diff — this phase's headline feature — one ingest bug from silently lying,
+     with nothing to show for it.
+  3. *Draft and published are different states*, enforced by a CHECK, because
+     `GameDefinitionRepository` promises that "latest" means latest approved.
+- **`attribution` is `NOT NULL` on every version.** "Numbers and text only,
+  attributed" is a project invariant, so an unattributed snapshot should not be
+  representable at all. Cheap now; a migration later.
+- **`GameDataSchemaTest` — six tests, and they check both directions.** A
+  constraint that only ever rejects is indistinguishable from a broken table, so
+  each one also proves the legitimate case still goes through. The one worth
+  keeping in mind: **in Postgres, NaN sorts above every number**, so the obvious
+  `expected_yield >= 0` would have waved NaN straight through — it is the upper
+  bound against `Infinity` that actually catches it. `Drop.java` already got
+  this right in Java; the schema now matches, and there is a test that fails if
+  either drifts.
+  Deliberately **not** a Spring test: it tests the schema, and booting the
+  application to do it would only make it slower.
+- **One domain fix on the way in.** `Skill.Rank.upgradeCost` was
+  `List<String>` — item ids as bare strings, against the project's own rule that
+  identifiers are typed, and the only cost in the model that was not
+  `List<ItemStack>`. Now `List<ItemStack>`, which also expresses "four of these
+  and one of those", which a list of ids cannot. Same reasoning as ADR 0007's
+  `kind` field and the same free window: nothing constructs a `Skill` yet.
+  **The window is closing** — once ingestion writes fixtures, shape changes stop
+  being free.
+- **Tooling note that cost several retries:** the Bash heredoc broke repeatedly
+  on the large SQL and Java content. Writing the file directly worked first try.
+  For anything over ~100 lines, write the file rather than piping a heredoc.
+- **What Phase 1 still needs, and it is most of it:** ingestion, the JPA layer,
+  publishing with diffs, `gamedata-cli`, and the API that answers the two exit
+  questions. The schema is applied and **empty** — it has never held a row of
+  real game data, and that first ingest is where a modelling mistake will
+  actually surface. See **N6**, which also flags the two things to settle before
+  the JPA work: whether Hibernate validates the `TEXT[]` column, and that the
+  composite foreign keys will be awkward to map and must not be "simplified"
+  away.
+
 ### 2026-09-05 (second session) — the equipment question, answered from the code
 
 - **N2 done: [ADR 0007](docs/adr/0007-equipment-is-an-entity.md) — equipment is
@@ -579,6 +702,22 @@ Append one entry per session. Newest first.
   actually execute, or silently skip? Read the log, not the badge: both
   `ApplicationBootTest` cases show `PASSED` on the runner. Testcontainers works
   on `ubuntu-latest`. Nothing to tag, nothing to split.
+- **Then this session's own commits went through it too.** Pushed to `dev`, and
+  **nothing fired** — which was not a failure but the workflow doing what it
+  says: `ci.yml` triggers on `push: branches: [main]` and `pull_request`, so a
+  push to `dev` with no open PR runs nothing at all. Worth knowing before
+  reading silence as breakage. PR #2 merged as `a82da1e`; runs `33964292888`
+  and `33964297527` both green, `ApplicationBootTest` PASSED on both. Every
+  commit made this session is now verified by CI.
+- **Two deprecation warnings surfaced on that run**, recorded as **N5**: Node 20
+  is deprecated and five actions are already being force-migrated to Node 24 by
+  the runner, and `setup-java@v4` is deprecated outright. Green today, on a
+  clock. Left for its own PR rather than bundled into a Phase-0 closing commit.
+- **Git and `gh` are authenticated separately, and only `gh` is.** `git fetch`
+  fails with "could not read Username" — no credential helper is wired for git
+  itself, so pushes stay manual. `gh auth setup-git` would fix it.
+  `branch.dev.remote` is also unset, so `git status` cannot report ahead/behind
+  on `dev`; `git push -u origin dev` once would fix that.
 - **Also re-learned, cheaply:** `2>&1` on a native exe in PowerShell 5.1 wraps
   the JVM's stderr banner as a `NativeCommandError` that *looks* like a build
   failure. `./gradlew build` exited 0. Read the exit code, not the red text.
