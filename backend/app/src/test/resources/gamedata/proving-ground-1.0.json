@@ -1,0 +1,242 @@
+{
+  "_comment": [
+    "A synthetic title, invented for this repository. It is not a real game and",
+    "its numbers are not any real game's numbers.",
+    "",
+    "That is deliberate, and it is not a placeholder for real data arriving later.",
+    "Open question Q3 says to assume upstream bundles are not redistributable:",
+    "the consolidated community sources carry no licence, and absence of a licence",
+    "is all rights reserved rather than permission. We may read them to validate",
+    "the schema and the numbers; we may not vendor them as fixtures.",
+    "",
+    "So this bundle exists to exercise every shape the canonical format can hold —",
+    "all four source kinds, both sink kinds, the catalog axis, a rotating stage, an",
+    "expiring event, and a banner with soft pity and a floor. proving-ground-1.1",
+    "is the same game one patch later and is what the diff is computed against."
+  ],
+
+  "game": { "id": "proving-ground", "displayName": "The Proving Ground", "energyUnit": "Vigour" },
+  "sequence": 0,
+  "label": "1.0",
+  "attribution": "Synthetic fixture authored for Storm Almanac. Not derived from any published game data.",
+
+  "items": [
+    { "id": "gold",         "displayName": "Gold",          "rarity": { "label": "1*", "rank": 1 }, "category": "currency" },
+    { "id": "ore-rough",    "displayName": "Rough Ore",     "rarity": { "label": "2*", "rank": 2 }, "category": "material" },
+    { "id": "ore-refined",  "displayName": "Refined Ore",   "rarity": { "label": "3*", "rank": 3 }, "category": "material" },
+    { "id": "sigil-lesser", "displayName": "Lesser Sigil",  "rarity": { "label": "3*", "rank": 3 }, "category": "insight" },
+    { "id": "sigil-greater","displayName": "Greater Sigil", "rarity": { "label": "4*", "rank": 4 }, "category": "insight" },
+    { "id": "shard",        "displayName": "Ember Shard",   "rarity": { "label": "3*", "rank": 3 }, "category": "fodder-material" }
+  ],
+
+  "entities": [
+    {
+      "id": "warden",
+      "displayName": "The Warden",
+      "kind": "character",
+      "rarity": { "label": "5*", "rank": 5 },
+      "element": "Ember",
+      "tags": ["vanguard", "ranged"],
+      "statCurves": [
+        {
+          "stat": "atk",
+          "breakpoints": [
+            { "ascensionTier": 0, "level": 1,  "value": 84.0 },
+            { "ascensionTier": 0, "level": 20, "value": 210.0 },
+            { "ascensionTier": 1, "level": 20, "value": 260.0 },
+            { "ascensionTier": 1, "level": 40, "value": 415.0 }
+          ]
+        }
+      ],
+      "skills": [
+        {
+          "id": "warden-strike",
+          "displayName": "Kindling Strike",
+          "ranks": [
+            {
+              "rank": 1,
+              "description": "Deals Ember damage to one target.",
+              "values": { "damage": 1.20, "cost": 2.0 },
+              "upgradeCost": []
+            },
+            {
+              "rank": 2,
+              "description": "Deals Ember damage to one target and applies Scorch.",
+              "values": { "damage": 1.32, "cost": 2.0 },
+              "upgradeCost": [
+                { "item": "sigil-lesser", "quantity": 2 },
+                { "item": "gold", "quantity": 3000 }
+              ]
+            }
+          ]
+        }
+      ],
+      "talents": [
+        {
+          "id": "warden-poise",
+          "displayName": "Poise",
+          "unlockCondition": "insight-1",
+          "effect": "Immune to the first stagger each battle."
+        }
+      ]
+    },
+    {
+      "id": "amulet-ember",
+      "displayName": "Ember Amulet",
+      "kind": "equipment",
+      "rarity": { "label": "4*", "rank": 4 },
+      "tags": ["offensive"],
+      "statCurves": [
+        {
+          "stat": "hp",
+          "breakpoints": [
+            { "ascensionTier": 0, "level": 1,  "value": 120.0 },
+            { "ascensionTier": 0, "level": 30, "value": 640.0 }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "stages": [
+    {
+      "id": "pg-1-1",
+      "displayName": "Ashfall Approach",
+      "energyCost": 10,
+      "drops": [
+        { "item": "gold", "expectedYield": 240.0 },
+        { "item": "ore-rough", "expectedYield": 1.4 }
+      ]
+    },
+    {
+      "id": "pg-2-3",
+      "displayName": "The Sigil Vault",
+      "energyCost": 20,
+      "drops": [
+        { "item": "ore-refined", "expectedYield": 0.2 },
+        { "item": "sigil-lesser", "expectedYield": 0.45 }
+      ],
+      "availability": { "days": ["TUESDAY", "FRIDAY"] }
+    },
+    {
+      "id": "pg-event-1",
+      "displayName": "Emberfall (event)",
+      "energyCost": 15,
+      "drops": [
+        { "item": "shard", "expectedYield": 2.0 }
+      ],
+      "availability": { "opensAt": "2026-08-01T00:00:00Z", "closesAt": "2026-09-15T00:00:00Z" }
+    }
+  ],
+
+  "crafts": [
+    {
+      "id": "refine-ore",
+      "consumes": [
+        { "item": "ore-rough", "quantity": 3 },
+        { "item": "gold", "quantity": 100 }
+      ],
+      "produces": [
+        { "item": "ore-refined", "quantity": 1 }
+      ]
+    }
+  ],
+
+  "shops": [
+    {
+      "id": "weekly-sigil",
+      "currency": "gold",
+      "price": 500,
+      "offer": { "item": "sigil-greater", "quantity": 1 },
+      "periodLimit": 3,
+      "period": "P7D"
+    }
+  ],
+
+  "rewards": [
+    {
+      "id": "daily-login",
+      "cadence": "DAILY",
+      "grants": [ { "item": "gold", "quantity": 300 } ]
+    },
+    {
+      "id": "weekly-quest",
+      "cadence": "WEEKLY",
+      "grants": [
+        { "item": "sigil-lesser", "quantity": 2 },
+        { "item": "gold", "quantity": 1000 }
+      ]
+    }
+  ],
+
+  "upgrades": [
+    {
+      "id": "warden-insight-1",
+      "entity": "warden",
+      "fromState": "insight-0",
+      "toState": "insight-1",
+      "costs": [
+        { "item": "sigil-lesser", "quantity": 4 },
+        { "item": "gold", "quantity": 5000 }
+      ]
+    },
+    {
+      "id": "warden-insight-2",
+      "entity": "warden",
+      "fromState": "insight-1",
+      "toState": "insight-2",
+      "costs": [
+        { "item": "sigil-greater", "quantity": 6 },
+        { "item": "ore-refined", "quantity": 8 },
+        { "item": "gold", "quantity": 20000 }
+      ]
+    },
+    {
+      "id": "amulet-level-30",
+      "entity": "amulet-ember",
+      "fromState": "level-1",
+      "toState": "level-30",
+      "costs": [
+        { "item": "ore-refined", "quantity": 4 },
+        { "item": "gold", "quantity": 8000 }
+      ]
+    }
+  ],
+
+  "fodder": [
+    {
+      "id": "amulet-feed",
+      "consumesCategory": "fodder-material",
+      "minimumRarity": { "label": "3*", "rank": 3 },
+      "progressPerUnit": 5,
+      "costs": [ { "item": "gold", "quantity": 200 } ]
+    }
+  ],
+
+  "banners": [
+    {
+      "id": "warden-debut",
+      "displayName": "Kindling — The Warden",
+      "bannerType": "character",
+      "pityScope": "BANNER_TYPE",
+      "baseRates": [
+        { "rarity": { "label": "4*", "rank": 4 }, "rate": 0.085 },
+        { "rarity": { "label": "5*", "rank": 5 }, "rate": 0.015 }
+      ],
+      "pityRules": [
+        {
+          "rarity": { "label": "5*", "rank": 5 },
+          "hardAt": 70,
+          "softFrom": 60,
+          "softJumpTo": 0.04,
+          "softStep": 0.025
+        }
+      ],
+      "floors": [
+        { "everyN": 10, "minimumRarity": { "label": "4*", "rank": 4 } }
+      ],
+      "featured": { "chanceAtHit": 1.0, "guaranteeAfterLoss": 1 },
+      "availability": { "opensAt": "2026-08-01T00:00:00Z", "closesAt": "2026-08-22T00:00:00Z" }
+    }
+  ]
+}

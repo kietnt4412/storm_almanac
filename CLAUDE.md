@@ -48,7 +48,7 @@ comment.
 
 ## Build
 
-No Gradle wrapper is committed yet — see TRACKER.md action **B0**.
+The wrapper is committed and pins Gradle 9.6.0.
 
 ```bash
 cd backend && ./gradlew build
@@ -60,3 +60,14 @@ docker compose up
 
 Working directory matters for `GameAgnosticismTest`: it resolves guarded source
 roots relative to `backend/app`.
+
+The tests need a Docker daemon: several start a real Postgres through
+Testcontainers, because a schema is not proven by a migration that applies.
+
+The same jar is also `gamedata-cli`. Onboarding a title is a bundle plus a
+parser adapter, and publishing it is a human approval, so the loop is
+*preview, ingest, publish*:
+
+```bash
+java -jar backend/app/build/libs/storm-almanac.jar --gamedata=preview bundle.json
+```

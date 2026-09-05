@@ -24,6 +24,7 @@ springBootStarterSecurity   = { module = "org.springframework.boot:spring-boot-s
 springBootStarterOauth2     = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
 springBootStarterRedis      = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
 springBootStarterTest       = { module = "org.springframework.boot:spring-boot-starter-test" }
+jacksonDatabind             = { module = "com.fasterxml.jackson.core:jackson-databind" }
 flywayCore                  = { module = "org.flywaydb:flyway-core" }
 flywayPostgres              = { module = "org.flywaydb:flyway-database-postgresql" }
 postgresql                  = { module = "org.postgresql:postgresql" }
