@@ -6,7 +6,9 @@ the next session starts from a lie.
 
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks)
 - Last updated: **2026-09-05**
-- Current phase: **Phase 0 — Ground** (in progress)
+- Current phase: **Phase 0 — Ground** — *every criterion met except the deploy,
+  which is deferred by decision D1, not missed.* CI is green on `main` and
+  proven. **Phase 1 opens on N3.**
 - Track B status: **not started, and gated** — see [the gate](#the-gate)
 
 ---
@@ -46,7 +48,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 |------|-------|-------|
 | Backend build | **Green** | `./gradlew build` — 17 tests, `storm-almanac.jar` |
 | Repo layout | Done | Gradle multi-module backend, Vite frontend, ADR folder |
-| Domain model (`gamedata`) | Compiles, untested | Records and sealed hierarchies complete; no persistence, no fixtures |
+| Domain model (`gamedata`) | Compiles, untested | Records and sealed hierarchies complete; no persistence, no fixtures. Equipment settled as an `Entity` with a `kind` field — ADR 0007 |
 | Module ports | Compiles, no impls | `Optimizer`, `SolveCoordinator`, `DropReportStore`, `BannerEngine`, repositories |
 | `WilsonInterval` | **Done** | 6 tests passing |
 | `PityRule` | **Done** | 9 tests passing against both games' published rates |
@@ -54,7 +56,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 | `GameAgnosticismTest` | **Passing** | Source scan over planner/gacha/stats |
 | Health endpoint | **Done — served and verified** | `GET /api/health` → 200 from a real container. Was 401; see the session log |
 | Docker Compose | **Verified** | `docker compose up --build` from cold: image builds, all three services healthy |
-| CI workflow | **Green** | `ci` #5 on `1a58dd5`, 2m 58s, both jobs. Took five runs; this session's commits have not been through it yet |
+| CI workflow | **Green on `main`** | Runs `33963222427` (PR) and `33963295323` (merge to `main`), both success, with `ApplicationBootTest` really running Testcontainers on the runner. Not yet run on `021279e` |
 | Frontend | **Green locally** | 415 deps resolved clean, typecheck + `vite build` pass, PWA SW generated |
 | Track B | Package docs only | Deliberately empty — see the gate |
 
@@ -63,10 +65,12 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 Be precise about this, because the temptation is to read "build green" as "it
 works". It does not mean that:
 
-- **CI has not seen this session's commits.** Run #5 was green, but on
-  `1a58dd5`. `build` now starts a Testcontainers Postgres, which has never run
-  on the runner. Until a run goes green *with* that test, the pipeline is
-  proven for the old tree and not the current one.
+- **CI is now proven on the merged tree** — runs `33963222427` and
+  `33963295323`, both green, with `ApplicationBootTest` and its Testcontainers
+  Postgres actually executing on the runner. *But it has not seen this
+  session's commit* (`021279e`, the `Entity.kind` change), which is unpushed.
+  The rule that keeps this honest: a pipeline is proven for the tree it ran on
+  and no other.
 - **Nothing is deployed.** By decision — see deviation D1. The `deploy` job is
   `if: false` and there is no URL to smoke.
 - **The frontend has never been served**, only typechecked and built. No page
@@ -135,12 +139,17 @@ Ordered. Do them in this order.
          the pipeline green while nothing deploys.
       4. Runs #1–#4 all failed for the reasons above. **Run #5 is the green
          one**, on `1a58dd5`.
-      5. **Still open — the one thing left in Phase 0.** `build` now runs
-         `ApplicationBootTest`,
-         which starts a Testcontainers Postgres. `ubuntu-latest` ships Docker so
-         it should pass, but this has never run on the runner. If it is flaky
-         there, tag it and split it into its own job rather than deleting it —
-         it is the only test that has ever caught a real defect.
+      5. **Run #6+ — result not yet seen.** `dev` was pushed and merged to
+         `main` via **PR #1** (`73007df`) at the end of the 2026-09-05 session,
+         which fires the pipeline twice (the PR, then the push to `main`).
+         Neither result was observed: `gh` is installed but not authenticated,
+         so `gh run list` still refuses. **First action next session:** run
+         `gh auth login`, then `gh run list --limit 5`.
+         What is new in that run and has never executed on the runner:
+         `ApplicationBootTest` starts a **Testcontainers Postgres**.
+         `ubuntu-latest` ships a Docker daemon so it should pass. If it is flaky
+         there, tag it and split it into its own job — **do not delete it.** It
+         is the only test in this repo that has ever caught a real defect.
       **Validate YAML locally before pushing** — `js-yaml` in the scratchpad
       parses all five files in seconds and is cheaper than a CI round trip.
       A green pipeline is Phase 0's exit criterion, and a workflow that has never
@@ -161,6 +170,55 @@ Ordered. Do them in this order.
       **Re-read it before Phase 4's launch.** If the product cannot yet do
       everything the paragraph claims, the paragraph is a promise, not
       positioning, and one of the two has to change.
+
+### Next session starts here
+
+- [x] ~~**N1 — Confirm the pipeline is green on the current tree.**~~ **Done —
+      green, twice.** Run `33963222427` (`ci` on the `dev` PR, 1m43s) and run
+      `33963295323` (`ci` on the `main` push merging PR #1, 2m24s). Both
+      success. **The specific thing B4 item 5 was worried about is confirmed,
+      not assumed:** the log shows `ApplicationBootTest` executing on the runner
+      — *"the health endpoint answers 200 to an anonymous request" PASSED* and
+      *"anything that is not explicitly public is denied"* PASSED — so the
+      Testcontainers Postgres really does start on `ubuntu-latest`. It did not
+      skip. No need to tag or split it.
+      Also re-confirmed from the CLI: the three `nightly-chaos` entries are
+      `skipped`, exactly as B4 said. Do not chase them.
+      **What it took:** `gh` is installed (2.100.0) but **not on `PATH`** — the
+      same winget-MSI behaviour already recorded for the JDK under B0. It is at
+      `C:\Program Files\GitHub CLI\gh.exe`. In PowerShell a quoted path is not a
+      command; it needs the call operator:
+      `& "C:\Program Files\GitHub CLI\gh.exe" run list --limit 8`.
+- [x] ~~**N2 — Answer Q6 / F4: how is equipment modelled?**~~ **Done —
+      [ADR 0007](docs/adr/0007-equipment-is-an-entity.md): equipment is an
+      `Entity`.** The leaning on record held, but the deciding argument turned
+      out not to be the PGR-Memories one. It is that **`Upgrade` and `Goal` both
+      key on `EntityId`**, so anything upgradeable already has to be an
+      `Entity` or force both records to change — and that the Entity/Item dual
+      identity gear needs is *already in the model on purpose*, since `Item`'s
+      javadoc puts a character's copies in the inventory while the character is
+      an `Entity`. Also established, and it removes a whole axis from the
+      argument: **gacha is untouched** — `BannerModel` and `FeaturedRule` are
+      rarity-shaped and neither mentions `EntityId`.
+      **Code change:** `Entity` gains a required `kind` field
+      (`"character"` / `"equipment"`), opaque and game-supplied, for catalog
+      routing only. Backend build green with it. It cost nothing to add now —
+      **nothing in the repo constructs an `Entity` yet**, so the shape was still
+      free; in Phase 1 it would have meant touching the ingest adapter and every
+      fixture.
+      **Gap carried, not waved away:** nothing stops a later commit reading
+      `Entity.kind` inside `planner`, and `GameAgnosticismTest` scans for game
+      slugs, not field reads. See **N4**.
+- [ ] **N3 — Then open Phase 1.** Canonical schema first, ingestion second.
+      Note **F1** (evaluate 必要的记录 as the real drop upstream) and **Q3**
+      (assume nothing is redistributable — read to validate, never vendor).
+- [ ] **N4 — Enforce that `Entity.kind` is never read outside the catalog.**
+      ADR 0007 asserts it and nothing checks it. `GameAgnosticismTest` scans the
+      guarded sources for game slugs, not for field reads, so a `kind`-switch in
+      `planner` would pass today. The natural home is an ArchUnit rule beside
+      `ModuleBoundaryTest`. **Not urgent and deliberately not written yet** — the
+      guarded modules are empty, so the rule would pass vacuously and prove
+      nothing. Write it with the first real planner code, in Phase 2.
 
 ---
 
@@ -439,30 +497,91 @@ Carry these forward until answered; strike through with the answer when resolved
   all rights reserved by default — absence of a licence is not permission. We
   may read it to validate schema and numbers; we may not vendor it as seed data.
   **F2** is to ask the maintainer directly.
-- **Q6 — How is equipment modelled?** New, from the prior-art read. Kornblume
-  ships `psychubes.json`: equippable, upgradeable gear that is neither our
-  `Entity` (characters) nor our `Item` (materials). Leaning toward treating
-  equipment as an `Entity`, since PGR's Memories are equipment-like too and one
-  concept covering both games would be the abstraction working. **Blocks Phase 1
-  ingestion** — see F4.
+- ~~**Q6 — How is equipment modelled?**~~ **Answered 2026-09-05: it is an
+  `Entity`.** [ADR 0007](docs/adr/0007-equipment-is-an-entity.md). The leaning
+  was right; the reason was not the one written here. What actually decides it
+  is that `Upgrade` and `Goal` key on `EntityId`, so an upgradeable thing has to
+  be an `Entity` already, and the Entity/Item dual identity gear needs is the
+  same one `Item`'s javadoc already grants a character's copies. Gacha turned
+  out to be indifferent — `BannerModel` never mentions `EntityId`. `Entity`
+  gained a required opaque `kind`, catalog-only; enforcing "catalog-only" is
+  **N4**. **F4 is closed and Phase 1 ingestion is unblocked.**
 - **Q4 — Rate verification.** The pity numbers in `PityRuleTest` come from the
   secondary sources the plan cites. They must be checked against in-game
   disclosure before the simulator ships (Phase 5).
 - ~~**Q5 — Repository host.**~~ **Answered: GitHub**, HTTPS remote at
   `github.com/kietnt4412/storm_almanac`. Superseded by Q7 below.
-- **Q7 — How is CI status checked from a session?** New, 2026-09-05. The repo
-  is not anonymously readable (the Actions API 404s) and there is no `gh` CLI
-  here, so CI status cannot be read from the terminal at all. Run #5 was
-  confirmed by screenshot instead, which worked but does not scale — every
-  future check costs a round trip through you. **Install `gh` and authenticate**
-  (`winget install GitHub.cli`), or make the repo public. Worth doing before
-  Phase 1, when pushes get frequent.
+- ~~**Q7 — How is CI status checked from a session?**~~ **Answered
+  2026-09-05: authenticated `gh`, by full path.** The user ran `gh auth login`
+  by hand (interactive, handles credentials — a session cannot drive it); the
+  account is `kietnt4412`, HTTPS, token scopes `repo`, `workflow`, `read:org`,
+  `gist`. **Two gotchas, both now paid for:** `gh` is not on `PATH`, so use
+  `C:\Program Files\GitHub CLI\gh.exe`; and PowerShell will not execute a
+  quoted path without the call operator `&`. The recipe that works:
+
+  ```powershell
+  & "C:\Program Files\GitHub CLI\gh.exe" run list --limit 8
+  & "C:\Program Files\GitHub CLI\gh.exe" run view <id> --log
+  ```
+
+  Confirmed independently this session: the repo is private, so
+  `api.github.com` **404s anonymously** — there is no unauthenticated read-only
+  path, and screenshots were the only prior option. No more screenshots.
 
 ---
 
 ## Session log
 
 Append one entry per session. Newest first.
+
+### 2026-09-05 (second session) — the equipment question, answered from the code
+
+- **N2 done: [ADR 0007](docs/adr/0007-equipment-is-an-entity.md) — equipment is
+  an `Entity`.** The conclusion matches the leaning already on record, but the
+  argument that decides it is not the one that was written down, and that is
+  worth keeping. The prior-art note argued from PGR's Memories being
+  equipment-like. The stronger reason was sitting in our own model: **`Upgrade`
+  and `Goal` both key on `EntityId`**, so anything upgradeable that can be a
+  planning goal *already* has to be an `Entity` — the alternative is not "a
+  third concept", it is "a third concept plus a widened key on two records plus
+  a second shape of upgradeable thing for the planner to know about". And the
+  Entity/Item dual identity gear needs is not new either: `Item`'s javadoc
+  already puts a character's *copies* in the inventory while the character is an
+  `Entity`. Gear reuses that pattern exactly.
+- **Gacha is indifferent, which was worth checking before arguing.**
+  `BannerModel` and `FeaturedRule` are rarity-shaped; neither mentions
+  `EntityId` anywhere. Whatever equipment is, the gacha module does not change.
+  That removed a whole axis from the decision.
+- **`Entity` gained a required `kind`** (`"character"` / `"equipment"`), opaque
+  and game-supplied, for catalog routing and grouping. Backend build green
+  with it. **The timing was free and will not be again:** nothing in the repo
+  constructs an `Entity` yet, so adding a record component cost zero call sites.
+  In Phase 1 it would have meant the ingest adapter and every fixture.
+- **The honest gap, recorded as N4:** the ADR asserts that `planner`, `gacha`
+  and `stats` never read `kind`, and nothing enforces that.
+  `GameAgnosticismTest` scans for game slugs, not field reads. The rule is
+  deliberately *not* written yet — the guarded modules are empty, so it would
+  pass vacuously and prove nothing. It goes in with the first real planner code.
+- **N1 done, and Phase 0 is closed but for the deferred deploy.** The wall was
+  the same one as last session and it came down mid-session: `gh` is installed
+  (2.100.0, winget) but **not on `PATH`** — the same MSI behaviour already
+  recorded for the JDK — and `gh auth login` is interactive and handles
+  credentials, so it cannot be driven from a session. Handed to the user, who
+  ran it. Re-confirmed independently first that there was no way around it: the
+  repo is private, so `api.github.com/repos/kietnt4412/storm_almanac` **404s
+  anonymously**. **Cost me a round trip:** I handed over the command in a
+  `bash` block and the user ran it in PowerShell, where a quoted path is not a
+  command — it needs the call operator `&`. Give PowerShell commands in
+  PowerShell form on this machine.
+- **The result: green twice, and green for the right reason.** Runs
+  `33963222427` (PR) and `33963295323` (merge to `main`). B4 item 5 asked
+  something narrower than "did the run pass" — did the new Testcontainers test
+  actually execute, or silently skip? Read the log, not the badge: both
+  `ApplicationBootTest` cases show `PASSED` on the runner. Testcontainers works
+  on `ubuntu-latest`. Nothing to tag, nothing to split.
+- **Also re-learned, cheaply:** `2>&1` on a native exe in PowerShell 5.1 wraps
+  the JVM's stderr banner as a `NativeCommandError` that *looks* like a build
+  failure. `./gradlew build` exited 0. Read the exit code, not the red text.
 
 ### 2026-09-05 — the app runs; booting it found a 401 on the one endpoint
 
@@ -524,9 +643,18 @@ Append one entry per session. Newest first.
 - **B7 written**, from `docs/prior-art.md` rather than from ambition. The
   temptation was "we have a solver"; ArkPlanner has one, so the paragraph claims
   the four narrower things that are actually differentiated.
-- Phase 0 is now complete except for its deliberately-broken exit criterion.
-  Next session starts Phase 1, and **F4/Q6 (equipment modelling) blocks
-  ingestion** — settle that first.
+- Closed the session by pushing `dev` and merging **PR #1** into `main`
+  (`73007df`). `gh` was installed, but not authenticated — so the resulting
+  pipeline runs were *not* observed, and `ApplicationBootTest` has still never
+  executed on the runner. **That is N1, and it is the only thing between Phase 0
+  and closure.** Recording it as open rather than assuming it passed: assuming
+  is how B1a sat ticked-but-stale for three sessions.
+- Phase 0 is otherwise complete, with its exit criterion deliberately unmet per
+  D1. Phase 1 opens on **N2 — Q6/F4, equipment modelling**, which blocks
+  ingestion and deserves an ADR rather than an inline decision.
+
+**State at session end:** `main` at `73007df`, working tree clean, 17 tests
+green locally, compose stack verified and left running.
 
 ### 2026-09-02 — prior-art read; first real model defect found
 
