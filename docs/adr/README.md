@@ -15,3 +15,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0005](0005-game-agnostic-domain-model.md) | No game-specific code outside game data | Accepted |
 | [0006](0006-wilson-intervals-for-drop-rates.md) | Wilson score intervals for drop rates | Accepted |
 | [0007](0007-equipment-is-an-entity.md) | Equipment is an `Entity` | Accepted |
+| [0008](0008-gamedata-persistence-is-jdbc.md) | The gamedata module persists with JDBC, not JPA | Accepted |
