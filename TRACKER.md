@@ -56,7 +56,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 | `GameAgnosticismTest` | **Passing** | Source scan over planner/gacha/stats |
 | Health endpoint | **Done — served and verified** | `GET /api/health` → 200 from a real container. Was 401; see the session log |
 | Docker Compose | **Verified** | `docker compose up --build` from cold: image builds, all three services healthy |
-| CI workflow | **Green on the current tree** | PR #2 merged as `a82da1e`; runs `33964292888` (PR) and `33964297527` (push to `main`), both success, `ApplicationBootTest` PASSED on the runner. Deprecation warnings pending — see **N5** |
+| CI workflow | **Green on the current tree** | PR #3 merged as `662d999`; runs `33965175789` (PR) and `33965237825` (push to `main`), both success. All 6 `GameDataSchemaTest` cases and both `ApplicationBootTest` cases PASSED on the runner. Deprecation warnings pending — see **N5** |
 | Frontend | **Green locally** | 415 deps resolved clean, typecheck + `vite build` pass, PWA SW generated |
 | Track B | Package docs only | Deliberately empty — see the gate |
 
@@ -65,12 +65,13 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 Be precise about this, because the temptation is to read "build green" as "it
 works". It does not mean that:
 
-- **CI is proven on the current tree, as of `a82da1e`.** Runs `33964292888`
-  (PR #2) and `33964297527` (push to `main`), both green, with
-  `ApplicationBootTest` and its Testcontainers Postgres executing on the runner.
-  Every commit in this session has now been through the pipeline. The rule that
-  keeps this honest still stands: a pipeline is proven for the tree it ran on
-  and no other.
+- **CI is proven on the current tree, as of `662d999`.** Runs `33965175789`
+  (PR #3) and `33965237825` (push to `main`), both green. Two Testcontainers
+  Postgres instances now run side by side on `ubuntu-latest` —
+  `ApplicationBootTest`'s and `GameDataSchemaTest`'s — with no slowdown
+  (`BUILD SUCCESSFUL in 1m 1s`). Every commit made this session has been through
+  the pipeline. The rule that keeps this honest still stands: a pipeline is
+  proven for the tree it ran on and no other.
 - **Nothing is deployed.** By decision — see deviation D1. The `deploy` job is
   `if: false` and there is no URL to smoke.
 - **The frontend has never been served**, only typechecked and built. No page
@@ -175,7 +176,7 @@ Ordered. Do them in this order.
       **Re-read it before Phase 4's launch.** If the product cannot yet do
       everything the paragraph claims, the paragraph is a promise, not
       positioning, and one of the two has to change.
-
+### Done 2026-09-05 — N1, N2 and N3
 ### Next session starts here
 
 - [x] ~~**N1 — Confirm the pipeline is green on the current tree.**~~ **Done —
@@ -244,6 +245,9 @@ Ordered. Do them in this order.
       changes something. See **N6**. **F1** (evaluate 必要的记录 as the real
       drop upstream) and **Q3** (assume nothing is redistributable — read to
       validate, never vendor) both still gate the ingest work.
+
+### Next session starts here
+
 - [ ] **N6 — Ingestion, then publishing with diffs.** The schema is ready and
       empty. In order: a parser adapter producing a `GameDefinition`, the JPA
       entities and a `GameDefinitionRepository` implementation, then the diff
@@ -265,17 +269,19 @@ Ordered. Do them in this order.
       `ModuleBoundaryTest`. **Not urgent and deliberately not written yet** — the
       guarded modules are empty, so the rule would pass vacuously and prove
       nothing. Write it with the first real planner code, in Phase 2.
-- [ ] **N5 — Upgrade the CI actions before they break.** Run `33964297527`
-      passed but warned twice, and both are on a clock:
-      1. **Node 20 is deprecated.** `actions/checkout@v4`, `setup-java@v4`,
-         `upload-artifact@v4`, `gradle/actions/setup-gradle@v4` and
-         `wrapper-validation@v4` all target it and are already being *forced*
-         onto Node 24 by the runner. Forced today, unsupported tomorrow.
+- [ ] **N5 — Upgrade the CI actions before they break.** Green runs, warning
+      twice, and both warnings are on a clock:
+      1. **Node 20 is deprecated.** Six actions target it and are already being
+         *forced* onto Node 24 by the runner: `actions/checkout@v4`,
+         `setup-java@v4`, `upload-artifact@v4`, `gradle/actions/setup-gradle@v4`,
+         `gradle/actions/wrapper-validation@v4` in the backend job, and
+         `actions/setup-node@v4` in the frontend job. Forced today, unsupported
+         tomorrow.
       2. **`setup-java@v4` is deprecated outright** — migrate to `@v5`.
-      Not urgent, and deliberately not done in the same session that closed
-      Phase 0: bumping five actions at once is a change that wants its own green
-      run to attribute a failure to. Do it as a standalone PR early in Phase 1,
-      while the pipeline is quiet, rather than tangled in the first schema work.
+      Not urgent, and deliberately kept out of both the Phase 0 close and the
+      schema commit: bumping six actions at once is a change that wants its own
+      green run to attribute a failure to. Do it as a standalone PR while the
+      pipeline is quiet, not tangled into the ingestion work.
 
 ---
 
@@ -648,6 +654,16 @@ Append one entry per session. Newest first.
 - **Tooling note that cost several retries:** the Bash heredoc broke repeatedly
   on the large SQL and Java content. Writing the file directly worked first try.
   For anything over ~100 lines, write the file rather than piping a heredoc.
+- **CI green on the schema, first try, and the unknown resolved.** PR #3 merged
+  as `662d999`; runs `33965175789` (PR) and `33965237825` (push to `main`), both
+  success. All six `GameDataSchemaTest` cases PASSED **on the runner**, which
+  answers the one thing worth watching: `GameDataSchemaTest` starts a *second*
+  Testcontainers Postgres alongside `ApplicationBootTest`'s, and two of them run
+  side by side on `ubuntu-latest` with no slowdown — `BUILD SUCCESSFUL in 1m 1s`,
+  faster than the previous run with one.
+- **The frontend job showed a sixth deprecated action** that the backend-only
+  reading of N5 had missed: `actions/setup-node@v4`. N5 corrected from five to
+  six.
 - **What Phase 1 still needs, and it is most of it:** ingestion, the JPA layer,
   publishing with diffs, `gamedata-cli`, and the API that answers the two exit
   questions. The schema is applied and **empty** — it has never held a row of
