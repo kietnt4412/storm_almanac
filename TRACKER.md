@@ -44,7 +44,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 
 | Area | State | Notes |
 |------|-------|-------|
-| Backend build | **Green** | `./gradlew build` — 17 tests, `storm-almanac.jar`. Needs a truststore flag on this machine, see E1 |
+| Backend build | **Green** | `./gradlew build` — 17 tests, `storm-almanac.jar` |
 | Repo layout | Done | Gradle multi-module backend, Vite frontend, ADR folder |
 | Domain model (`gamedata`) | Compiles, untested | Records and sealed hierarchies complete; no persistence, no fixtures |
 | Module ports | Compiles, no impls | `Optimizer`, `SolveCoordinator`, `DropReportStore`, `BannerEngine`, repositories |
@@ -54,7 +54,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 | `GameAgnosticismTest` | **Passing** | Source scan over planner/gacha/stats |
 | Health endpoint | **Done — served and verified** | `GET /api/health` → 200 from a real container. Was 401; see the session log |
 | Docker Compose | **Verified** | `docker compose up --build` from cold: image builds, all three services healthy |
-| CI workflow | Red x3, fixes pending push | Runs #1/#2 predate the wrapper; #3 hit the two issues below |
+| CI workflow | **Green** | `ci` #5 on `1a58dd5`, 2m 58s, both jobs. Took five runs; this session's commits have not been through it yet |
 | Frontend | **Green locally** | 415 deps resolved clean, typecheck + `vite build` pass, PWA SW generated |
 | Track B | Package docs only | Deliberately empty — see the gate |
 
@@ -63,12 +63,10 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 Be precise about this, because the temptation is to read "build green" as "it
 works". It does not mean that:
 
-- **CI has still never passed.** Every fix for runs #1–#4 is committed, but no
-  run has been observed green. The repo is not readable anonymously and there is
-  no `gh` CLI on this machine, so the status could not be checked from here —
-  see **Q7**. Until a green run is seen, the pipeline is unproven. It is also
-  newly unproven in one respect: `build` now runs a Testcontainers test, which
-  needs a working Docker daemon on the runner.
+- **CI has not seen this session's commits.** Run #5 was green, but on
+  `1a58dd5`. `build` now starts a Testcontainers Postgres, which has never run
+  on the runner. Until a run goes green *with* that test, the pipeline is
+  proven for the old tree and not the current one.
 - **Nothing is deployed.** By decision — see deviation D1. The `deploy` job is
   `if: false` and there is no URL to smoke.
 - **The frontend has never been served**, only typechecked and built. No page
@@ -111,8 +109,17 @@ Ordered. Do them in this order.
       conflicts, `npm run typecheck` and `npm run build` both clean, PWA service
       worker generated. Tailwind warns "no utility classes detected" — expected,
       the Phase 0 shell uses inline styles; it resolves itself at Phase 4.
-- [ ] **B4 — Get CI green.** Two independent failures found in run #3, both
-      fixed locally and awaiting a push:
+- [x] ~~**B4 — Get CI green.**~~ **Done: `ci` run #5 passed on `1a58dd5`**,
+      2m 58s, both jobs. Confirmed from the Actions tab on 2026-09-05 (it took
+      five runs; #1–#4 are written up below and each was a distinct failure).
+      Also confirmed: the three `nightly-chaos` runs in the tab are **skips, not
+      failures** — that workflow is `if: false` until Phase 10 has a suite, and
+      a skipped scheduled run is the correct appearance. Do not chase them.
+      **Caveat, and it is a real one:** #5 predates this session's three
+      commits, and `build` now starts a Testcontainers Postgres. That has never
+      run on the runner. B4 is green for the pipeline *as it stood* — see
+      item 5 below.
+      The four failures that got it there:
       1. `backend/gradlew` was committed mode `100644`. Git on Windows does not
          track the exec bit, so `./gradlew` was "Permission denied" on Ubuntu.
          Fixed with `git update-index --chmod=+x backend/gradlew`. **Watch for
@@ -126,11 +133,10 @@ Ordered. Do them in this order.
          Fixed with block scalars. The `deploy` job is now `if: false` until Q1
          is answered, because a job that echoes a TODO and exits 0 would paint
          the pipeline green while nothing deploys.
-      4. **Not yet confirmed.** All of the above is committed and pushed, but no
-         run has been *observed* green. This machine has no `gh` CLI and the
-         repo is not anonymously readable, so the API returns 404 — see **Q7**.
-         **Check the Actions tab and record the run number here.**
-      5. New risk from this session: `build` now runs `ApplicationBootTest`,
+      4. Runs #1–#4 all failed for the reasons above. **Run #5 is the green
+         one**, on `1a58dd5`.
+      5. **Still open — the one thing left in Phase 0.** `build` now runs
+         `ApplicationBootTest`,
          which starts a Testcontainers Postgres. `ubuntu-latest` ships Docker so
          it should pass, but this has never run on the runner. If it is flaky
          there, tag it and split it into its own job rather than deleting it —
@@ -172,10 +178,15 @@ previous one's criterion is met.
       **Exit:** a green pipeline deploying a health endpoint to a real URL.
       **⚠ Cannot be met as written — see deviation D1.** Closing this phase on
       "green pipeline, deploy deferred" is an exception, not the criterion.
-      **Landed:** repo, git, ADRs 1–6, compose file, CI skeleton, health
-      endpoint, domain model, and a green local backend build.
-      **Missing:** a booted app, a verified frontend, a CI run that has actually
-      happened, a real deploy, the prior-art reading, the positioning paragraph.
+      **Landed:** repo, git, ADRs 1–6, compose file, domain model, a green local
+      backend build, a verified frontend build, the prior-art read, the
+      positioning paragraph, **a green CI run (#5)**, and **an application that
+      actually boots and serves `/api/health`**.
+      **Missing:** a real deploy (deferred by D1, and not coming before Phase 4)
+      and one green CI run over the current tree.
+      **Everything in this phase that could be met, has been.** The only gap is
+      the one D1 opened deliberately. Close it once CI is green on the current
+      commits — as an exception, with D1 cited, and do not tick the box.
 
 - [ ] **Phase 1 · Game data foundation** — 2.5 weeks
       Canonical schema, R1999 ingestion (items, stages, characters, upgrade
@@ -365,7 +376,15 @@ workloads. It may be; that is a decision to make with open eyes, not by default.
 Not deviations — nothing about the design changed. These are local facts that
 cost time to rediscover.
 
-### E1 · Avast intercepts TLS, so Gradle cannot fetch new dependencies
+### E1 · Avast intercepted TLS, so Gradle could not fetch new dependencies
+
+> **Resolved 2026-09-05.** Avast's HTTPS scanning was turned off. Verified by
+> `./gradlew --refresh-dependencies` with **no** truststore flag: fresh metadata
+> resolved over TLS and Testcontainers came back at 1.21.3. No workaround is
+> needed and none is committed. Kept below because the symptom is baffling if it
+> ever returns — and it returns silently, since everything already cached keeps
+> working.
+
 
 Avast's HTTPS scanning is a man-in-the-middle: it re-signs every TLS connection
 with its own root CA. Windows trusts that CA, so `curl` and node work
@@ -433,11 +452,11 @@ Carry these forward until answered; strike through with the answer when resolved
   `github.com/kietnt4412/storm_almanac`. Superseded by Q7 below.
 - **Q7 — How is CI status checked from a session?** New, 2026-09-05. The repo
   is not anonymously readable (the Actions API 404s) and there is no `gh` CLI
-  here, so **B4 cannot be verified from the terminal at all** — the pipeline's
-  greenness is currently unknowable without opening a browser. Either install
-  `gh` and authenticate, or make the repo public. This is not cosmetic: B4 is
-  Phase 0's exit criterion and it is the one thing that has never been observed
-  to work.
+  here, so CI status cannot be read from the terminal at all. Run #5 was
+  confirmed by screenshot instead, which worked but does not scale — every
+  future check costs a round trip through you. **Install `gh` and authenticate**
+  (`winget install GitHub.cli`), or make the repo public. Worth doing before
+  Phase 1, when pushes get frequent.
 
 ---
 
@@ -489,6 +508,25 @@ Append one entry per session. Newest first.
   showed it open. Corrected. The file says "tick boxes as work lands"; this is
   what happens when that slips.
 - Backend green: 17 tests. Left the compose stack running.
+- **B4 answered from a screenshot: `ci` run #5 passed on `1a58dd5`**, 2m 58s,
+  both jobs. Five runs to get there, each failing for a different reason, and
+  none of the four failures was a code defect — exec bits, a missing lockfile,
+  invalid YAML, and a fake-green deploy job. Also settled that the three
+  `nightly-chaos` entries are skips (`if: false`), not failures.
+  Worth noting how this was confirmed: the repo is private and there is no `gh`
+  here, so the Actions API 404s and the answer had to come through a human with
+  a browser. That is Q7, and it should be fixed before Phase 1.
+- **E1 resolved the same day it was found** — Avast's HTTPS scanning turned off
+  at the source rather than worked around in the build. Verified with
+  `--refresh-dependencies` and no flag. Nothing was committed for it, which is
+  the right outcome: a machine-specific TLS workaround in a shared build file
+  is a trap for the next person, and for CI.
+- **B7 written**, from `docs/prior-art.md` rather than from ambition. The
+  temptation was "we have a solver"; ArkPlanner has one, so the paragraph claims
+  the four narrower things that are actually differentiated.
+- Phase 0 is now complete except for its deliberately-broken exit criterion.
+  Next session starts Phase 1, and **F4/Q6 (equipment modelling) blocks
+  ingestion** — settle that first.
 
 ### 2026-09-02 — prior-art read; first real model defect found
 
