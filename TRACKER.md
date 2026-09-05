@@ -6,8 +6,9 @@ the next session starts from a lie.
 
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks)
 - Last updated: **2026-09-05**
-- Current phase: **Phase 0 — Ground** (complete but for D1's deploy; closing on
-  **N1**, then Phase 1 opens on **N3** — N2 is answered by [ADR 0007](docs/adr/0007-equipment-is-an-entity.md))
+- Current phase: **Phase 0 — Ground** — *every criterion met except the deploy,
+  which is deferred by decision D1, not missed.* CI is green on `main` and
+  proven. **Phase 1 opens on N3.**
 - Track B status: **not started, and gated** — see [the gate](#the-gate)
 
 ---
@@ -55,7 +56,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 | `GameAgnosticismTest` | **Passing** | Source scan over planner/gacha/stats |
 | Health endpoint | **Done — served and verified** | `GET /api/health` → 200 from a real container. Was 401; see the session log |
 | Docker Compose | **Verified** | `docker compose up --build` from cold: image builds, all three services healthy |
-| CI workflow | **Green** | `ci` #5 on `1a58dd5`, 2m 58s, both jobs. Took five runs; this session's commits have not been through it yet |
+| CI workflow | **Green on `main`** | Runs `33963222427` (PR) and `33963295323` (merge to `main`), both success, with `ApplicationBootTest` really running Testcontainers on the runner. Not yet run on `021279e` |
 | Frontend | **Green locally** | 415 deps resolved clean, typecheck + `vite build` pass, PWA SW generated |
 | Track B | Package docs only | Deliberately empty — see the gate |
 
@@ -64,10 +65,12 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 Be precise about this, because the temptation is to read "build green" as "it
 works". It does not mean that:
 
-- **CI has not seen this session's commits.** Run #5 was green, but on
-  `1a58dd5`. `build` now starts a Testcontainers Postgres, which has never run
-  on the runner. Until a run goes green *with* that test, the pipeline is
-  proven for the old tree and not the current one.
+- **CI is now proven on the merged tree** — runs `33963222427` and
+  `33963295323`, both green, with `ApplicationBootTest` and its Testcontainers
+  Postgres actually executing on the runner. *But it has not seen this
+  session's commit* (`021279e`, the `Entity.kind` change), which is unpushed.
+  The rule that keeps this honest: a pipeline is proven for the tree it ran on
+  and no other.
 - **Nothing is deployed.** By decision — see deviation D1. The `deploy` job is
   `if: false` and there is no URL to smoke.
 - **The frontend has never been served**, only typechecked and built. No page
@@ -170,10 +173,22 @@ Ordered. Do them in this order.
 
 ### Next session starts here
 
-- [ ] **N1 — Confirm the pipeline is green on the current tree.** `gh auth
-      login`, then `gh run list --limit 5`. This is the last thing standing
-      between Phase 0 and its exception-closure. If `ApplicationBootTest` fails
-      on the runner, fix it there — see B4 item 5.
+- [x] ~~**N1 — Confirm the pipeline is green on the current tree.**~~ **Done —
+      green, twice.** Run `33963222427` (`ci` on the `dev` PR, 1m43s) and run
+      `33963295323` (`ci` on the `main` push merging PR #1, 2m24s). Both
+      success. **The specific thing B4 item 5 was worried about is confirmed,
+      not assumed:** the log shows `ApplicationBootTest` executing on the runner
+      — *"the health endpoint answers 200 to an anonymous request" PASSED* and
+      *"anything that is not explicitly public is denied"* PASSED — so the
+      Testcontainers Postgres really does start on `ubuntu-latest`. It did not
+      skip. No need to tag or split it.
+      Also re-confirmed from the CLI: the three `nightly-chaos` entries are
+      `skipped`, exactly as B4 said. Do not chase them.
+      **What it took:** `gh` is installed (2.100.0) but **not on `PATH`** — the
+      same winget-MSI behaviour already recorded for the JDK under B0. It is at
+      `C:\Program Files\GitHub CLI\gh.exe`. In PowerShell a quoted path is not a
+      command; it needs the call operator:
+      `& "C:\Program Files\GitHub CLI\gh.exe" run list --limit 8`.
 - [x] ~~**N2 — Answer Q6 / F4: how is equipment modelled?**~~ **Done —
       [ADR 0007](docs/adr/0007-equipment-is-an-entity.md): equipment is an
       `Entity`.** The leaning on record held, but the deciding argument turned
@@ -496,13 +511,22 @@ Carry these forward until answered; strike through with the answer when resolved
   disclosure before the simulator ships (Phase 5).
 - ~~**Q5 — Repository host.**~~ **Answered: GitHub**, HTTPS remote at
   `github.com/kietnt4412/storm_almanac`. Superseded by Q7 below.
-- **Q7 — How is CI status checked from a session?** *Half answered
-  2026-09-05.* The repo is private, so the Actions API 404s anonymously. `gh` is
-  now **installed** — but not authenticated, so `gh run list` still refuses and
-  run #5 had to be confirmed by screenshot. **One command closes this:
-  `gh auth login`.** It is interactive and involves credentials, so it has to be
-  run by hand. Do it before Phase 1; pushes get frequent from there and every
-  unverified pipeline is a phase exit criterion nobody can check.
+- ~~**Q7 — How is CI status checked from a session?**~~ **Answered
+  2026-09-05: authenticated `gh`, by full path.** The user ran `gh auth login`
+  by hand (interactive, handles credentials — a session cannot drive it); the
+  account is `kietnt4412`, HTTPS, token scopes `repo`, `workflow`, `read:org`,
+  `gist`. **Two gotchas, both now paid for:** `gh` is not on `PATH`, so use
+  `C:\Program Files\GitHub CLI\gh.exe`; and PowerShell will not execute a
+  quoted path without the call operator `&`. The recipe that works:
+
+  ```powershell
+  & "C:\Program Files\GitHub CLI\gh.exe" run list --limit 8
+  & "C:\Program Files\GitHub CLI\gh.exe" run view <id> --log
+  ```
+
+  Confirmed independently this session: the repo is private, so
+  `api.github.com` **404s anonymously** — there is no unauthenticated read-only
+  path, and screenshots were the only prior option. No more screenshots.
 
 ---
 
@@ -538,16 +562,23 @@ Append one entry per session. Newest first.
   `GameAgnosticismTest` scans for game slugs, not field reads. The rule is
   deliberately *not* written yet — the guarded modules are empty, so it would
   pass vacuously and prove nothing. It goes in with the first real planner code.
-- **N1 still open, and it is the same wall as last session.** `gh` is installed
+- **N1 done, and Phase 0 is closed but for the deferred deploy.** The wall was
+  the same one as last session and it came down mid-session: `gh` is installed
   (2.100.0, winget) but **not on `PATH`** — the same MSI behaviour already
-  recorded for the JDK; it lives at `C:\Program Files\GitHub CLI\gh.exe`.
-  Re-confirmed Q7's finding independently: the repo is private, so
-  `api.github.com/repos/kietnt4412/storm_almanac` **404s anonymously** and there
-  is no read-only path around the login. `gh auth login` is interactive and
-  handles credentials, so it cannot be driven from a session — it was handed to
-  the user mid-session. **Note for next time:** a quoted path is not a command
-  in PowerShell; it needs the call operator, `& "C:\Program Files\GitHub
-  CLI\gh.exe" auth login`.
+  recorded for the JDK — and `gh auth login` is interactive and handles
+  credentials, so it cannot be driven from a session. Handed to the user, who
+  ran it. Re-confirmed independently first that there was no way around it: the
+  repo is private, so `api.github.com/repos/kietnt4412/storm_almanac` **404s
+  anonymously**. **Cost me a round trip:** I handed over the command in a
+  `bash` block and the user ran it in PowerShell, where a quoted path is not a
+  command — it needs the call operator `&`. Give PowerShell commands in
+  PowerShell form on this machine.
+- **The result: green twice, and green for the right reason.** Runs
+  `33963222427` (PR) and `33963295323` (merge to `main`). B4 item 5 asked
+  something narrower than "did the run pass" — did the new Testcontainers test
+  actually execute, or silently skip? Read the log, not the badge: both
+  `ApplicationBootTest` cases show `PASSED` on the runner. Testcontainers works
+  on `ubuntu-latest`. Nothing to tag, nothing to split.
 - **Also re-learned, cheaply:** `2>&1` on a native exe in PowerShell 5.1 wraps
   the JVM's stderr banner as a `NativeCommandError` that *looks* like a build
   failure. `./gradlew build` exited 0. Read the exit code, not the red text.
