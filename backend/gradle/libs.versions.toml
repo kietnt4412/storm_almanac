@@ -8,9 +8,12 @@ ojalgo          = "55.1.0"
 junit           = "5.11.4"
 assertj         = "3.27.3"
 archunit        = "1.3.0"
-testcontainers  = "1.20.4"
 jqwik           = "1.9.2"
 
+# Versions omitted below are managed by the Spring Boot BOM imported in the root
+# build. Pinning them here as well produces skew: a pin of testcontainers 1.20.4
+# left the direct artifacts at 1.20.4 while the BOM pulled the shared core to
+# 1.21.3 transitively.
 [libraries]
 springBootStarterWeb        = { module = "org.springframework.boot:spring-boot-starter-web" }
 springBootStarterWebsocket  = { module = "org.springframework.boot:spring-boot-starter-websocket" }
@@ -30,8 +33,8 @@ junitPlatformLauncher       = { module = "org.junit.platform:junit-platform-laun
 assertj                     = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 archunit                    = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
 jqwik                       = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
-testcontainersPostgres      = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
-testcontainersJunit         = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+testcontainersPostgres      = { module = "org.testcontainers:postgresql" }
+testcontainersJunit         = { module = "org.testcontainers:junit-jupiter" }
 
 [plugins]
 springBoot    = { id = "org.springframework.boot", version.ref = "springBoot" }

@@ -23,6 +23,10 @@ dependencies {
 
     testImplementation(libs.springBootStarterTest)
     testImplementation(libs.archunit)
+
+    // ApplicationBootTest starts the real context against a real Postgres.
+    testImplementation(libs.testcontainersPostgres)
+    testImplementation(libs.testcontainersJunit)
 }
 
 tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
