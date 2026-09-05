@@ -241,4 +241,8 @@ operationally necessary rather than merely polite.
   whether they would object to a derived tool. Blocks Q3 closing.
 - **F3** — Read `backend-next` Go source for the real `DropMatrixService`
   estimator, before claiming anywhere that our statistics are better.
-- **F4** — Decide the equipment question (4.3) before Phase 1 ingestion.
+- ~~**F4** — Decide the equipment question (4.3) before Phase 1 ingestion.~~
+  **Closed 2026-09-05: equipment is an `Entity`**, per
+  [ADR 0007](adr/0007-equipment-is-an-entity.md). §4.3's option (1) won, though
+  on a different argument than §4.3 gives — see the ADR. Phase 1 ingestion is
+  unblocked.

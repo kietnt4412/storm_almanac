@@ -14,3 +14,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0004](0004-solver-ojalgo.md) | ojAlgo for the mixed-integer program | Accepted |
 | [0005](0005-game-agnostic-domain-model.md) | No game-specific code outside game data | Accepted |
 | [0006](0006-wilson-intervals-for-drop-rates.md) | Wilson score intervals for drop rates | Accepted |
+| [0007](0007-equipment-is-an-entity.md) | Equipment is an `Entity` | Accepted |

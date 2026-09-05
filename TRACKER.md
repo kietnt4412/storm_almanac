@@ -7,7 +7,7 @@ the next session starts from a lie.
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks)
 - Last updated: **2026-09-05**
 - Current phase: **Phase 0 — Ground** (complete but for D1's deploy; closing on
-  **N1**, then Phase 1 opens on **N2**)
+  **N1**, then Phase 1 opens on **N3** — N2 is answered by [ADR 0007](docs/adr/0007-equipment-is-an-entity.md))
 - Track B status: **not started, and gated** — see [the gate](#the-gate)
 
 ---
@@ -47,7 +47,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 |------|-------|-------|
 | Backend build | **Green** | `./gradlew build` — 17 tests, `storm-almanac.jar` |
 | Repo layout | Done | Gradle multi-module backend, Vite frontend, ADR folder |
-| Domain model (`gamedata`) | Compiles, untested | Records and sealed hierarchies complete; no persistence, no fixtures |
+| Domain model (`gamedata`) | Compiles, untested | Records and sealed hierarchies complete; no persistence, no fixtures. Equipment settled as an `Entity` with a `kind` field — ADR 0007 |
 | Module ports | Compiles, no impls | `Optimizer`, `SolveCoordinator`, `DropReportStore`, `BannerEngine`, repositories |
 | `WilsonInterval` | **Done** | 6 tests passing |
 | `PityRule` | **Done** | 9 tests passing against both games' published rates |
@@ -174,16 +174,36 @@ Ordered. Do them in this order.
       login`, then `gh run list --limit 5`. This is the last thing standing
       between Phase 0 and its exception-closure. If `ApplicationBootTest` fails
       on the runner, fix it there — see B4 item 5.
-- [ ] **N2 — Answer Q6 / F4: how is equipment modelled?** Kornblume's
-      `psychubes.json` is equippable, upgradeable gear that is neither our
-      `Entity` nor our `Item`. **This blocks Phase 1 ingestion**, so settle it
-      before writing any schema. The leaning on record is to treat equipment as
-      an `Entity`, because PGR's Memories are equipment-like too and one concept
-      covering both games is the abstraction doing its job. Write it up as an
-      ADR — this is a shape decision, not a detail.
+- [x] ~~**N2 — Answer Q6 / F4: how is equipment modelled?**~~ **Done —
+      [ADR 0007](docs/adr/0007-equipment-is-an-entity.md): equipment is an
+      `Entity`.** The leaning on record held, but the deciding argument turned
+      out not to be the PGR-Memories one. It is that **`Upgrade` and `Goal` both
+      key on `EntityId`**, so anything upgradeable already has to be an
+      `Entity` or force both records to change — and that the Entity/Item dual
+      identity gear needs is *already in the model on purpose*, since `Item`'s
+      javadoc puts a character's copies in the inventory while the character is
+      an `Entity`. Also established, and it removes a whole axis from the
+      argument: **gacha is untouched** — `BannerModel` and `FeaturedRule` are
+      rarity-shaped and neither mentions `EntityId`.
+      **Code change:** `Entity` gains a required `kind` field
+      (`"character"` / `"equipment"`), opaque and game-supplied, for catalog
+      routing only. Backend build green with it. It cost nothing to add now —
+      **nothing in the repo constructs an `Entity` yet**, so the shape was still
+      free; in Phase 1 it would have meant touching the ingest adapter and every
+      fixture.
+      **Gap carried, not waved away:** nothing stops a later commit reading
+      `Entity.kind` inside `planner`, and `GameAgnosticismTest` scans for game
+      slugs, not field reads. See **N4**.
 - [ ] **N3 — Then open Phase 1.** Canonical schema first, ingestion second.
       Note **F1** (evaluate 必要的记录 as the real drop upstream) and **Q3**
       (assume nothing is redistributable — read to validate, never vendor).
+- [ ] **N4 — Enforce that `Entity.kind` is never read outside the catalog.**
+      ADR 0007 asserts it and nothing checks it. `GameAgnosticismTest` scans the
+      guarded sources for game slugs, not for field reads, so a `kind`-switch in
+      `planner` would pass today. The natural home is an ArchUnit rule beside
+      `ModuleBoundaryTest`. **Not urgent and deliberately not written yet** — the
+      guarded modules are empty, so the rule would pass vacuously and prove
+      nothing. Write it with the first real planner code, in Phase 2.
 
 ---
 
@@ -462,12 +482,15 @@ Carry these forward until answered; strike through with the answer when resolved
   all rights reserved by default — absence of a licence is not permission. We
   may read it to validate schema and numbers; we may not vendor it as seed data.
   **F2** is to ask the maintainer directly.
-- **Q6 — How is equipment modelled?** New, from the prior-art read. Kornblume
-  ships `psychubes.json`: equippable, upgradeable gear that is neither our
-  `Entity` (characters) nor our `Item` (materials). Leaning toward treating
-  equipment as an `Entity`, since PGR's Memories are equipment-like too and one
-  concept covering both games would be the abstraction working. **Blocks Phase 1
-  ingestion** — see F4.
+- ~~**Q6 — How is equipment modelled?**~~ **Answered 2026-09-05: it is an
+  `Entity`.** [ADR 0007](docs/adr/0007-equipment-is-an-entity.md). The leaning
+  was right; the reason was not the one written here. What actually decides it
+  is that `Upgrade` and `Goal` key on `EntityId`, so an upgradeable thing has to
+  be an `Entity` already, and the Entity/Item dual identity gear needs is the
+  same one `Item`'s javadoc already grants a character's copies. Gacha turned
+  out to be indifferent — `BannerModel` never mentions `EntityId`. `Entity`
+  gained a required opaque `kind`, catalog-only; enforcing "catalog-only" is
+  **N4**. **F4 is closed and Phase 1 ingestion is unblocked.**
 - **Q4 — Rate verification.** The pity numbers in `PityRuleTest` come from the
   secondary sources the plan cites. They must be checked against in-game
   disclosure before the simulator ships (Phase 5).
@@ -486,6 +509,48 @@ Carry these forward until answered; strike through with the answer when resolved
 ## Session log
 
 Append one entry per session. Newest first.
+
+### 2026-09-05 (second session) — the equipment question, answered from the code
+
+- **N2 done: [ADR 0007](docs/adr/0007-equipment-is-an-entity.md) — equipment is
+  an `Entity`.** The conclusion matches the leaning already on record, but the
+  argument that decides it is not the one that was written down, and that is
+  worth keeping. The prior-art note argued from PGR's Memories being
+  equipment-like. The stronger reason was sitting in our own model: **`Upgrade`
+  and `Goal` both key on `EntityId`**, so anything upgradeable that can be a
+  planning goal *already* has to be an `Entity` — the alternative is not "a
+  third concept", it is "a third concept plus a widened key on two records plus
+  a second shape of upgradeable thing for the planner to know about". And the
+  Entity/Item dual identity gear needs is not new either: `Item`'s javadoc
+  already puts a character's *copies* in the inventory while the character is an
+  `Entity`. Gear reuses that pattern exactly.
+- **Gacha is indifferent, which was worth checking before arguing.**
+  `BannerModel` and `FeaturedRule` are rarity-shaped; neither mentions
+  `EntityId` anywhere. Whatever equipment is, the gacha module does not change.
+  That removed a whole axis from the decision.
+- **`Entity` gained a required `kind`** (`"character"` / `"equipment"`), opaque
+  and game-supplied, for catalog routing and grouping. Backend build green
+  with it. **The timing was free and will not be again:** nothing in the repo
+  constructs an `Entity` yet, so adding a record component cost zero call sites.
+  In Phase 1 it would have meant the ingest adapter and every fixture.
+- **The honest gap, recorded as N4:** the ADR asserts that `planner`, `gacha`
+  and `stats` never read `kind`, and nothing enforces that.
+  `GameAgnosticismTest` scans for game slugs, not field reads. The rule is
+  deliberately *not* written yet — the guarded modules are empty, so it would
+  pass vacuously and prove nothing. It goes in with the first real planner code.
+- **N1 still open, and it is the same wall as last session.** `gh` is installed
+  (2.100.0, winget) but **not on `PATH`** — the same MSI behaviour already
+  recorded for the JDK; it lives at `C:\Program Files\GitHub CLI\gh.exe`.
+  Re-confirmed Q7's finding independently: the repo is private, so
+  `api.github.com/repos/kietnt4412/storm_almanac` **404s anonymously** and there
+  is no read-only path around the login. `gh auth login` is interactive and
+  handles credentials, so it cannot be driven from a session — it was handed to
+  the user mid-session. **Note for next time:** a quoted path is not a command
+  in PowerShell; it needs the call operator, `& "C:\Program Files\GitHub
+  CLI\gh.exe" auth login`.
+- **Also re-learned, cheaply:** `2>&1` on a native exe in PowerShell 5.1 wraps
+  the JVM's stderr banner as a `NativeCommandError` that *looks* like a build
+  failure. `./gradlew build` exited 0. Read the exit code, not the red text.
 
 ### 2026-09-05 — the app runs; booting it found a 401 on the one endpoint
 
