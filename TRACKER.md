@@ -6,13 +6,14 @@ the next session starts from a lie.
 
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks)
 - Last updated: **2026-09-06** (sixth session)
-- Current phase: **Phase 1 — Game data foundation**, opened 2026-09-05 with the
-  canonical schema; ingestion, versioned publishing with diffs and
-  `gamedata-cli` landed the same day; the API that serves them landed
-  2026-09-06; and **the sixth session met the other half of the exit criterion —
-  real patch data, from a real upstream, in tests.** Both halves are now met.
-  **The box is not ticked yet, and only because CI has not run on this tree —
-  see N10.** Phase 0 stays closed by exception (deploy deferred by D1).
+- Current phase: **between Phase 1 and Phase 2.** **Phase 1 is closed and its
+  box is ticked**, 2026-09-06 — both halves of the exit criterion met, and CI
+  confirmed the tree (N10: runs `34035918992` and `34035923889`). It ran two
+  days against an estimate of 2.5 weeks, which says more about the estimate
+  having assumed a licensing negotiation than about the pace.
+  **Phase 2 — Optimizer core — is next and not yet opened; see N11.**
+  Phase 0 stays closed by exception (deploy deferred by D1) and its box stays
+  unticked, because nothing is deployed.
 - Track B status: **not started, and gated** — see [the gate](#the-gate)
 - Standing caveat, read it every session: **the strongest test in this
   repository is one CI does not run.** Upstream data is fetched and never
@@ -95,7 +96,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 | `GameAgnosticismTest` | **Passing** | Source scan over planner/gacha/stats |
 | Health endpoint | **Done — served and verified** | `GET /api/health` → 200 from a real container. Was 401; see the session log |
 | Docker Compose | **Verified** | `docker compose up --build` from cold: image builds, all three services healthy |
-| CI workflow | **Green — but one tree behind** | Last green on `e2239b3`: runs `34002586027` (`dev` PR) and `34002589214` (`main` push, PR #5), both success, with all 10 `GameDataApiTest` cases PASSED on the runner and no slowdown from the web context. **This session's work has not run yet — see N10.** Deprecation warnings still pending — see **N5** |
+| CI workflow | **Green on the current tree** | Runs `34035918992` (`dev` PR, `9b592b4`) and `34035923889` (`main` push, PR #6, `5e4b9f4`), both success. All 18 `KornblumeAdapterTest` cases PASSED on the runner and `RealUpstreamPatchTest` skipped, which is the designed state — see N10. Six seconds slower for a whole new module. Deprecation warnings still pending — see **N5** |
 | Frontend | **Green locally** | 415 deps resolved clean, typecheck + `vite build` pass, PWA SW generated |
 | Track B | Package docs only | Deliberately empty — see the gate |
 
@@ -104,12 +105,11 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 Be precise about this, because the temptation is to read "build green" as "it
 works". It does not mean that:
 
-- **CI has not run on this session's work.** It was green on `e2239b3` (runs
-  `34002586027` and `34002589214`). Since then this session added **a whole
-  Gradle module** — `:adapters:reverse-1999`, 18 tests — and three more test
-  classes in `:app`. None of it has executed on the runner. **First action next
-  session: push, then check — N10.** The rule stands: a pipeline is proven for
-  the tree it ran on and no other.
+- ~~**CI has not run on this session's work.**~~ **It has, and it is green.**
+  Runs `34035918992` (`dev` PR, `9b592b4`) and `34035923889` (`main` push,
+  `5e4b9f4`), both success, with the new adapter module executing on the runner.
+  The rule stands for next time: a pipeline is proven for the tree it ran on and
+  no other, so this entry comes back the moment anything is committed.
 - **CI does not run the test that matters most, and never will as things
   stand.** `RealUpstreamPatchTest` is the only test in the repository that
   touches data this project did not author, and it skips on the runner because
@@ -527,20 +527,31 @@ Ordered. Do them in this order.
       the consolidated numbers are shown to be wrong, not on principle). **F2**
       is no longer a follow-up — it is a *release blocker*, and the ADR says so.
 
+- [x] ~~**N10 — Confirm the pipeline is green on this session's work.**~~ **Done
+      — green, twice, and both specific things checked in the log rather than
+      inferred from a tick.** Run `34035918992` (`ci` on the `dev` PR, head
+      `9b592b4`, 1m32s) and run `34035923889` (`ci` on the `main` push merging
+      PR #6, head `5e4b9f4`, backend job 1m49s). Both success; `deploy` skipped
+      as designed.
+      1. **The new Gradle module builds on the runner.** All 18
+         `KornblumeAdapterTest` cases PASSED there, including the two that
+         mattered most for a first run on Linux — the Cyrillic slug case and the
+         resource-directory lookup — plus all 3 `CanonicalBundleRoundTripTest`
+         cases.
+      2. **`RealUpstreamPatchTest` shows as three SKIPPED**, on both runs. Not
+         passed, so no snapshot leaked onto the runner; not failed, so the skip
+         condition is right. This is the designed state and it is the one to
+         keep re-checking: the day those three turn green on CI without somebody
+         deciding to make them, upstream data has been committed by accident.
+      **No slowdown from the extra module** — the PR job went 1m26s → 1m32s and
+      the main backend job went 2m8s → 1m49s. Six seconds for a module and 18
+      tests.
+
 ### Next session starts here
 
-- [ ] **N10 — Confirm the pipeline is green on this session's work.** Same rule
-      as N1 and N9, and there are two specific things this time. First, a whole
-      new Gradle module (`:adapters:reverse-1999`) joins the build — 18 tests
-      that have never run on the runner. Second, `RealUpstreamPatchTest` **must
-      appear as three SKIPPED cases, not three passes and not three failures**.
-      A pass would mean a snapshot reached the runner, which should be
-      impossible; a failure would mean the skip condition is wrong. Read the log
-      and check which. The recipe (Q7):
-      `& "C:\Program Files\GitHub CLI\gh.exe" run list --limit 5`.
-- [ ] **N11 — Open Phase 2, the optimizer core.** Phase 1's exit criterion is
-      met on both halves as of this session; tick its box once N10 confirms the
-      pipeline. Phase 2 is the ojAlgo MIP, crafting recursion, integer runs,
+- [ ] **N11 — Open Phase 2, the optimizer core.** Phase 1 is closed and its box
+      is ticked; N10 confirmed the pipeline on `5e4b9f4`.
+      Phase 2 is the ojAlgo MIP, crafting recursion, integer runs,
       solve caching, explanation output and both objectives, with an exit of
       *agrees with community-accepted answers on 5 benchmark goal sets; p95 solve
       under 2s*.
@@ -602,8 +613,12 @@ previous one's criterion is met.
       has been.
       **The box gets ticked when, and only when, a real URL answers 200.**
 
-- [ ] **Phase 1 · Game data foundation** — 2.5 weeks — *in progress, opened
-      2026-09-05*
+- [x] **Phase 1 · Game data foundation** — 2.5 weeks — **closed 2026-09-06**,
+      opened 2026-09-05. Two days, not 2.5 weeks, and that is worth being
+      suspicious of rather than pleased about — the estimate assumed hunting for
+      data and negotiating for it, and what actually happened is that the
+      licensing question was deferred rather than answered (ADR 0009). The
+      engineering was the small half.
       Canonical schema, R1999 ingestion (items, stages, characters, upgrade
       costs), versioned publishing with diffs, `gamedata-cli`. Tests over real
       patch data, including a patch that changes something. Includes the catalog
@@ -634,11 +649,19 @@ previous one's criterion is met.
         adapt, ingest, publish and diff. The patch changes something on both
         axes: four characters released, one material and four recipes added,
         euphoria and mastery tracks appearing on existing characters.
-      **Two honest qualifications, and neither is a reason to leave the box
-      unticked once N10 confirms the pipeline:**
+      **CI confirmed the tree on 2026-09-06 (N10)** — runs `34035918992` and
+      `34035923889`, both success, with all 18 adapter tests executing on the
+      runner and `RealUpstreamPatchTest` correctly skipping. **The box is ticked
+      on that.**
+      **Two qualifications the tick does not erase, and they travel with the
+      phase rather than closing with it:**
       1. **CI does not run the real-data tests** — the snapshots are not
          redistributable, ADR 0009. The criterion is met locally and
-         reproducibly, not on the runner.
+         reproducibly, not on the runner. Unlike Phase 0's D1, this is *not* an
+         exception to the criterion: the criterion says "tests over real patch
+         data", not "tests CI runs". But it does mean a regression in the
+         adapter can reach `main` green, and that is a standing risk, not a
+         solved problem.
       2. **The catalog half is proven on real data only for stat curves.**
          Kornblume publishes no skill or talent text, so *"what does her S2 do at
          rank 3?"* is answered from the synthetic fixture. The schema, the API
@@ -1024,9 +1047,25 @@ and 10 Scroll of Starlit Ascent, in named items.
 reverse-1999 3.3"* — Igor was released in 3.5, so version pinning did the exact
 thing it was built for, against data nobody here wrote.
 
-**Left for next session:** N10 (push and check CI — and specifically confirm
-`RealUpstreamPatchTest` shows as **skipped**, not passed and not failed) and
-N11 (open Phase 2). One thing found in passing that Phase 2 must not trip over:
+**One near-miss, caught at `git add` and worth the paragraph.** The first
+`.gitignore` rule for the snapshots was `**/upstream/`, which is exactly the
+pattern a reasonable person writes — and it silently stopped tracking the
+adapter's *own* test fixtures under `src/test/resources/upstream/`. Locally
+everything passed, because the files were on disk. On the runner it would have
+been a compile failure in a module that had never built there, and the obvious
+suspect would have been the new Gradle module rather than a line in
+`.gitignore`. The fetch target is now `build/upstream-snapshots` and the ignore
+rule names it specifically. **A broad ignore rule fails by omission, and an
+omission is invisible in `git status`** — the only reason this surfaced is that
+the staged file list was read rather than skimmed.
+
+**Then pushed, merged as PR #6, and N10 closed in the same session.** Runs
+`34035918992` and `34035923889`, both green; the adapter module built on the
+runner and `RealUpstreamPatchTest` skipped, which is the designed state rather
+than a disappointment. **Phase 1 is closed and its box is ticked.**
+
+**Left for next session:** N11 — open Phase 2. One thing found in passing that
+Phase 2 must not trip over:
 `Stage.potentialOutput()` rounds an expected yield *up* to a whole item, which
 is right for a catalogue listing and wrong for the MIP constraint, which needs
 the yield itself.
