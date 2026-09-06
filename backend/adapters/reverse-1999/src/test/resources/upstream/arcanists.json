@@ -1,0 +1,63 @@
+[
+  {
+    "Id": 1,
+    "IsReleased": true,
+    "Name": "Regulus",
+    "Rarity": 6,
+    "Afflatus": "Star",
+    "Stats": {
+      "0-1":  [266, 1257, 101, 136, 368, 12.3, 148.4],
+      "0-30": [404, 1907, 153, 206, 368, 12.3, 148.4],
+      "1-40": [677, 3197, 257, 345, 417, 13.93, 150.85]
+    },
+    "Insight": [
+      { "Id": 1, "Material": ["Sharpodonty", "Page of Starlight"], "Quantity": [18000, 6] },
+      { "Id": 2, "Material": ["Sharpodonty", "Holy Silver"], "Quantity": [40000, 10] }
+    ],
+    "Resonance": [
+      { "Id": 2, "Material": ["Moment of Dissonance"], "Quantity": [5] },
+      { "Id": 3, "Material": ["Moment of Dissonance", "Silver Ore"], "Quantity": [5, 6] }
+    ],
+    "Frequency": [
+      { "Type": "Cross",      "Id": 5, "Material": ["Holy Silver"], "Quantity": [1] },
+      { "Type": "Inverted-T", "Id": 5, "Material": ["Silver Ore"],  "Quantity": [2] }
+    ],
+    "Euphoria": [
+      { "Id": 1, "Material": ["Sprout of Reverie"], "Quantity": [40] }
+    ],
+    "Mastery": []
+  },
+  {
+    "Id": 2,
+    "IsReleased": true,
+    "Name": "Зима",
+    "Rarity": 5,
+    "Afflatus": "Spirit",
+    "Stats": {
+      "0-1":  [0, 0, 0, 0, 0, 0, 0],
+      "0-30": [0, 0, 0, 0, 0, 0, 0]
+    },
+    "Insight": [
+      { "Id": 1, "Material": ["Sharpodonty"], "Quantity": [12000] }
+    ],
+    "Resonance": [],
+    "Frequency": [],
+    "Euphoria": [],
+    "Mastery": []
+  },
+  {
+    "Id": 3,
+    "IsReleased": false,
+    "Name": "Paper Heron",
+    "Rarity": 6,
+    "Afflatus": "Beast",
+    "Stats": {},
+    "Insight": [
+      { "Id": 1, "Material": ["Sharpodonty"], "Quantity": [18000] }
+    ],
+    "Resonance": [],
+    "Frequency": [],
+    "Euphoria": [],
+    "Mastery": []
+  }
+]

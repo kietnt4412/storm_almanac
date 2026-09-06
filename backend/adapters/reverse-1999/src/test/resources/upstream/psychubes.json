@@ -1,0 +1,6 @@
+[
+  { "Id": 1, "IsReleased": true,  "Name": "Gluttony",    "Rarity": 6, "Tag": "ATK, Critical" },
+  { "Id": 2, "IsReleased": true,  "Name": "Hopscotch",   "Rarity": 5, "Tag": "None" },
+  { "Id": 3, "IsReleased": true,  "Name": "Silent Aria", "Rarity": 4, "Tag": null },
+  { "Id": 4, "IsReleased": false, "Name": null, "Rarity": 6, "Tag": null }
+]

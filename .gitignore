@@ -30,3 +30,13 @@ substrate-data/
 # OS
 .DS_Store
 Thumbs.db
+
+# Upstream game-data snapshots. Fetched by backend/tools/fetch-upstream.sh,
+# never committed: the sources carry no licence, and absence of a licence is
+# all rights reserved rather than permission. See Q3 in TRACKER.md and ADR 0009.
+#
+# Named specifically rather than as **/upstream/, which was the first attempt
+# and silently stopped tracking the adapter's own test fixtures under
+# src/test/resources/upstream/. A broad ignore rule fails by omission and the
+# omission does not show up until CI cannot compile.
+upstream-snapshots/

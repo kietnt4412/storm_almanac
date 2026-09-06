@@ -1,0 +1,9 @@
+[
+  { "Id": 1, "Name": "Sharpodonty",       "Rarity": 3, "Category": "Base Item",        "IsReleased": true },
+  { "Id": 2, "Name": "Silver Ore",        "Rarity": 3, "Category": "Build Material",   "IsReleased": true },
+  { "Id": 3, "Name": "Holy Silver",       "Rarity": 4, "Category": "Build Material",   "IsReleased": true },
+  { "Id": 4, "Name": "Page of Starlight", "Rarity": 3, "Category": "Insight Material", "IsReleased": true },
+  { "Id": 5, "Name": "Moment of Dissonance", "Rarity": 3, "Category": "Resonate Material", "IsReleased": true },
+  { "Id": 6, "Name": "Sprout of Reverie", "Rarity": 5, "Category": "Reveries Material", "IsReleased": true },
+  { "Id": 7, "Name": "Café Crème",        "Rarity": 4, "Category": "Build Material",   "IsReleased": true }
+]

@@ -7,8 +7,10 @@ import io.stormalmanac.gamedata.GameDefinitionRepository;
 import io.stormalmanac.gamedata.diff.VersionDiff;
 import io.stormalmanac.gamedata.ingest.BundleFormatException;
 import io.stormalmanac.gamedata.ingest.CanonicalBundleParser;
+import io.stormalmanac.gamedata.ingest.CanonicalBundleWriter;
 import io.stormalmanac.gamedata.ingest.GameDataBundle;
 import io.stormalmanac.gamedata.ingest.GameDataIngestRepository;
+import io.stormalmanac.gamedata.ingest.UpstreamAdapter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -32,6 +34,8 @@ import org.springframework.stereotype.Component;
  * a web server, so this can be run on a host that is already serving.
  *
  * <pre>
+ * java -jar storm-almanac.jar --gamedata=adapters
+ * java -jar storm-almanac.jar --gamedata=adapt    reverse-1999 ./snapshot 0 1.0 out.json
  * java -jar storm-almanac.jar --gamedata=validate bundle.json
  * java -jar storm-almanac.jar --gamedata=preview  bundle.json
  * java -jar storm-almanac.jar --gamedata=ingest   bundle.json
@@ -40,6 +44,13 @@ import org.springframework.stereotype.Component;
  * java -jar storm-almanac.jar --gamedata=versions proving-ground
  * java -jar storm-almanac.jar --gamedata=diff     proving-ground 0 1
  * </pre>
+ *
+ * <p>{@code adapt} is the step before all of them and only exists for titles
+ * whose data somebody else publishes: it converts an upstream snapshot into a
+ * canonical bundle <em>file</em>, which then goes through the same three
+ * commands a hand-written bundle does. Writing the file out rather than
+ * ingesting straight from the adapter is the point — it is what lets a person
+ * read the thing, diff it, and keep the exact bytes that were approved.
  *
  * <p>The commands are shaped around <em>preview, ingest, publish</em>, because
  * publishing is a human approval and an approval nobody could have reviewed is
@@ -109,6 +120,8 @@ public class GameDataCli implements ApplicationRunner {
     int execute(String command, List<String> args) {
         try {
             return switch (command) {
+                case "adapters" -> adapters();
+                case "adapt" -> adapt(args);
                 case "validate" -> validate(one(args, "validate <bundle.json>"));
                 case "preview" -> preview(one(args, "preview <bundle.json>"));
                 case "ingest" -> ingest(one(args, "ingest <bundle.json>"));
@@ -120,7 +133,8 @@ public class GameDataCli implements ApplicationRunner {
             };
         } catch (Misuse misuse) {
             out.println(misuse.getMessage());
-            out.println("usage: --gamedata=<validate|preview|ingest|publish|drafts|versions|diff> [args]");
+            out.println("usage: --gamedata=<adapters|adapt|validate|preview|ingest"
+                    + "|publish|drafts|versions|diff> [args]");
             return MISUSE;
         } catch (BundleFormatException | GameDataIngestRepository.PublishedVersionIsImmutableException
                 | GameDataIngestRepository.NoDraftToPublishException refusal) {
@@ -130,6 +144,50 @@ public class GameDataCli implements ApplicationRunner {
     }
 
     // ── Commands ────────────────────────────────────────────────────────────
+
+    /** Which titles this build can onboard, which is a shorter list than it looks. */
+    private int adapters() {
+        UpstreamAdapters.all().forEach(adapter ->
+                out.printf("  %-16s %s%n", adapter.game().value(), adapter.expects()));
+        return OK;
+    }
+
+    /**
+     * An upstream snapshot, as a canonical bundle file.
+     *
+     * <p>Writes nothing to the database on purpose. The output is a file that
+     * {@code preview} can be pointed at, and the notes the adapter prints on the
+     * way through are the part worth reading: they say what it refused to
+     * convert. A snapshot that yields half a catalogue should be caught here,
+     * not after publishing.
+     */
+    private int adapt(List<String> args) {
+        if (args.size() != 4 && args.size() != 5) {
+            throw new Misuse("adapt <game> <upstream-dir> <sequence> <label> [out.json]");
+        }
+        GameId game = new GameId(args.get(0));
+        UpstreamAdapter adapter = UpstreamAdapters.forGame(game, note -> out.println("  " + note))
+                .orElseThrow(() -> new Misuse("no adapter for '" + game.value()
+                        + "'; --gamedata=adapters lists the ones this build has"));
+
+        GameDataBundle bundle = adapter.adapt(Path.of(args.get(1)), number(args.get(2)), args.get(3));
+        String canonical = new CanonicalBundleWriter().write(bundle);
+
+        if (args.size() == 4) {
+            out.print(canonical);
+            return OK;
+        }
+        Path target = Path.of(args.get(4));
+        try {
+            Files.writeString(target, canonical);
+        } catch (IOException e) {
+            throw new BundleFormatException("cannot write " + target.toAbsolutePath() + ": " + e.getMessage(), e);
+        }
+        out.printf("wrote %s %s to %s. Nothing is in the database yet:%n",
+                bundle.game().id().value(), bundle.label(), target);
+        out.printf("  --gamedata=preview %s%n", target);
+        return OK;
+    }
 
     private int validate(String file) {
         GameDataBundle bundle = read(file);

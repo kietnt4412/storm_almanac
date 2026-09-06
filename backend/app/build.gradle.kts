@@ -14,6 +14,10 @@ dependencies {
     implementation(project(":modules:gacha"))
     implementation(project(":modules:stats"))
 
+    // One title, one adapter. :app is the only module allowed to know these
+    // exist, and it uses them from the CLI alone — see ModuleBoundaryTest.
+    implementation(project(":adapters:reverse-1999"))
+
     implementation(libs.springBootStarterWeb)
     implementation(libs.springBootStarterActuator)
     implementation(libs.springBootStarterJdbc)

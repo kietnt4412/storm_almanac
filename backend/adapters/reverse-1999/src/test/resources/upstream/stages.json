@@ -1,0 +1,38 @@
+{
+  "1-1": {
+    "id": 0,
+    "name": "1-1",
+    "category": "Story",
+    "cost": 8,
+    "drops": {
+      "Silver Ore": 0.239,
+      "Sharpodonty": 2.187
+    }
+  },
+  "1-1H": {
+    "id": 1,
+    "name": "1-1H",
+    "category": "Hard",
+    "cost": 12,
+    "drops": {
+      "Holy Silver": 0.41
+    }
+  },
+  "Mountain Echoes VI": {
+    "id": 2,
+    "name": "Mountain Echoes VI",
+    "category": "Insight",
+    "cost": 30,
+    "drops": {
+      "Page of Starlight": 3.0
+    }
+  },
+  "Unreleased": {
+    "id": 99,
+    "name": "Unreleased",
+    "cost": 0,
+    "drops": {
+      "Café Crème": 1
+    }
+  }
+}
