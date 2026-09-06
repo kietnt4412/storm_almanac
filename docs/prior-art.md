@@ -236,9 +236,16 @@ operationally necessary rather than merely polite.
 ## 6. Follow-ups
 
 - **F1** — Identify and evaluate 必要的记录 as the actual drop-data upstream.
-  Blocks Q2 closing.
+  Blocks Q2 closing. **Deferred 2026-09-06:** Kornblume is now ingested through
+  `:adapters:reverse-1999` and its drop table is credited to 必要的记录 in every
+  bundle attribution. Going direct is a second adapter, worth doing when the
+  consolidated numbers are shown to be stale or wrong — not on principle.
 - **F2** — Ask the Kornblume maintainer directly about data licensing and
   whether they would object to a derived tool. Blocks Q3 closing.
+  **Still open, and now scoped by [ADR 0009](adr/0009-upstream-data-is-fetched-never-vendored.md)
+  (2026-09-06):** the adapter was built and the data is read, never vendored.
+  F2 stops being a follow-up and becomes a blocker at the moment this service is
+  deployed publicly — not before.
 - **F3** — Read `backend-next` Go source for the real `DropMatrixService`
   estimator, before claiming anywhere that our statistics are better.
 - ~~**F4** — Decide the equipment question (4.3) before Phase 1 ingestion.~~

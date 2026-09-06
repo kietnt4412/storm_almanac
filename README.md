@@ -77,6 +77,7 @@ backend/
   modules/stats       drop reports, aggregation, estimate publication
   modules/api         REST + WebSocket edge
   app                 the single deployable
+  adapters/reverse-1999     one title's upstream, converted — the whole cost of a game
   substrate/almanac-store   Track B · LSM storage engine        (phase 7)
   substrate/almanac-raft    Track B · consensus                 (phase 8)
   substrate/almanac-chaos   Track B · fault injection           (phase 10)
@@ -122,6 +123,31 @@ want to page through the other.
 
 The format, the commands and what gets rejected:
 [docs/game-data-bundles.md](docs/game-data-bundles.md).
+
+### Where a bundle comes from
+
+Nobody hand-writes a thousand rows. For a title whose data somebody else already
+publishes, an adapter converts a snapshot into a canonical bundle *file*, which
+then goes through the same three commands:
+
+```bash
+./tools/fetch-upstream.sh
+java -jar storm-almanac.jar --gamedata=adapt reverse-1999 build/upstream-snapshots/3.5 1 3.5 out.json
+```
+
+The whole cost of a title is one Gradle module under `backend/adapters/` — the
+build enforces that, since only `app` may depend on one. `adapt` prints what it
+refused to convert as it goes, because a snapshot that silently yields half a
+catalogue should be caught before anybody approves it.
+
+**On the data itself, plainly:** the upstream sources carry no licence, so this
+repository contains none of their data and never will. The script fetches into
+an ignored directory; the tests that use it skip when it is absent, which is the
+state CI is in. That is deliberate and it means **the strongest test here is one
+the pipeline does not run** — see
+[ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md). The
+committed fixtures are a synthetic title, `proving-ground`, invented for this
+repository.
 
 ## Reading it back
 

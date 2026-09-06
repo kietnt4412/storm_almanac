@@ -1,0 +1,9 @@
+[
+  {
+    "Id": 1,
+    "Name": "Holy Silver",
+    "Rarity": 4,
+    "Material": ["Silver Ore", "Sharpodonty"],
+    "Quantity": [3, 500]
+  }
+]

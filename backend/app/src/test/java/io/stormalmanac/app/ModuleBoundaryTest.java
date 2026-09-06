@@ -41,6 +41,7 @@ class ModuleBoundaryTest {
                 .layer("planner").definedBy("io.stormalmanac.planner..")
                 .layer("gacha").definedBy("io.stormalmanac.gacha..")
                 .layer("api").definedBy("io.stormalmanac.api..")
+                .layer("adapters").definedBy("io.stormalmanac.adapters..")
                 .layer("app").definedBy("io.stormalmanac.app..")
                 .layer("store").definedBy("io.stormalmanac.store..")
                 .layer("raft").definedBy("io.stormalmanac.raft..")
@@ -48,9 +49,9 @@ class ModuleBoundaryTest {
 
                 // The shared kernel is depended on by everyone and depends on no one.
                 .whereLayer("common").mayOnlyBeAccessedByLayers(
-                        "gamedata", "identity", "player", "stats", "planner", "gacha", "api", "app")
+                        "gamedata", "identity", "player", "stats", "planner", "gacha", "api", "app", "adapters")
                 .whereLayer("gamedata").mayOnlyBeAccessedByLayers(
-                        "player", "stats", "planner", "gacha", "api", "app")
+                        "player", "stats", "planner", "gacha", "api", "app", "adapters")
                 .whereLayer("player").mayOnlyBeAccessedByLayers("planner", "gacha", "api", "app")
                 .whereLayer("stats").mayOnlyBeAccessedByLayers("planner", "api", "app", "store")
                 .whereLayer("planner").mayOnlyBeAccessedByLayers("api", "app", "raft")
@@ -59,6 +60,10 @@ class ModuleBoundaryTest {
                 // The API edge is the only module that knows about all the others,
                 // and nothing may reach back into it.
                 .whereLayer("api").mayOnlyBeAccessedByLayers("app")
+                // One title, one adapter, and only the CLI in :app ever reaches for one.
+                // A core module depending on an adapter would be the exact failure the
+                // game-agnosticism rule exists to prevent, arriving through the back door.
+                .whereLayer("adapters").mayOnlyBeAccessedByLayers("app")
                 .whereLayer("app").mayNotBeAccessedByAnyLayer()
 
                 // Track B is reachable only through the ports it implements.

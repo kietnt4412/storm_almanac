@@ -247,5 +247,43 @@ reserved rather than permission — see open question **Q3** in
 The acceptance fixtures in this repository are therefore a **synthetic title**,
 `proving-ground`, invented here and built to exercise every shape above. It is a
 real answer rather than a placeholder — the plan's own cut list says a synthetic
-test game proves the abstraction — but it does mean the pipeline has not yet met
-anybody else's data.
+test game proves the abstraction.
+
+### Adapters, and the step before the loop
+
+Nobody hand-writes a thousand rows. For a title somebody else already publishes
+data for, a **parser adapter** converts a snapshot into a canonical bundle file,
+which then goes through the four commands above unchanged:
+
+```bash
+java -jar storm-almanac.jar --gamedata=adapters
+```
+
+```bash
+java -jar storm-almanac.jar --gamedata=adapt reverse-1999 ./snapshot 1 3.5 out.json
+```
+
+An adapter lives in its own Gradle module under `backend/adapters/`, implements
+`UpstreamAdapter`, and is the only place a game-specific quirk is allowed to
+exist. `ModuleBoundaryTest` enforces that: only `:app` may depend on the
+adapters layer, so a core module reaching for one fails the build.
+
+`adapt` writes a file rather than ingesting directly, and that is the point —
+the file is what a person reads, diffs and approves, and an adapter gets no
+privileges for being code. It also prints what it refused to convert as it goes:
+
+```
+  skipped 1 stage(s) costing no Activity: a free source is an unbounded one
+  skipped 4 unreleased character(s)
+  skipped 590 resonance-pattern cost row(s): they are alternatives for one step
+  converted 91 items, 99 stages, 50 crafts, 151 entities, 2012 upgrades
+```
+
+Read those lines. A snapshot that quietly yields half a catalogue should be
+caught here rather than after publishing.
+
+**The data itself is fetched, never committed** —
+[ADR 0009](adr/0009-upstream-data-is-fetched-never-vendored.md).
+`backend/tools/fetch-upstream.sh` downloads into an ignored directory, and
+`RealUpstreamPatchTest` skips when it is absent, which is the state CI is in.
+The pipeline has met somebody else's data; this repository holds none of it.
