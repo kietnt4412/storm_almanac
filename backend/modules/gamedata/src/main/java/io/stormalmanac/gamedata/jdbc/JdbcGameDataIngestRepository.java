@@ -91,10 +91,11 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
                 UPDATE gamedata.game_data_version
                    SET status = 'PUBLISHED', published_at = now()
                  WHERE game_id = ? AND sequence = ? AND status = 'DRAFT'
-                RETURNING label, published_at
+                RETURNING label, published_at, attribution
                 """,
                 (rs, row) -> new GameDataVersion(
-                        game, sequence, rs.getString("label"), Timestamps.instant(rs, "published_at")),
+                        game, sequence, rs.getString("label"),
+                        Timestamps.instant(rs, "published_at"), rs.getString("attribution")),
                 game.value(), sequence);
 
         if (approved.isEmpty()) {

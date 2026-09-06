@@ -27,8 +27,14 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * prove that the application starts from cold against a database nothing has
  * touched, and sharing a schema that another class has been writing to would
  * quietly weaken exactly the thing it is for.
+ *
+ * <p>The context serves HTTP because {@code GameDataApiTest} needs it to, and a
+ * second context that differed only in {@code webEnvironment} would mean a
+ * second container, a second boot and a second copy of this class. The two
+ * classes that do not make a request are not harmed by a servlet container they
+ * never call.
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class GameDataDatabaseTest {
 
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
