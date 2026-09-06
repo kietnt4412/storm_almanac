@@ -107,6 +107,7 @@ proving-ground: 1.0 → 1.1
 progression · 5 change(s)
   + item 'sigil-radiant'
   ~ stage 'pg-1-1' · drop ore-rough: 1.4 → 1.6
+  + stage 'pg-3-1'
   - stage 'pg-event-1'
   ~ upgrade 'warden-insight-2' · cost gold: 20000 → 18000
 
@@ -121,6 +122,31 @@ want to page through the other.
 
 The format, the commands and what gets rejected:
 [docs/game-data-bundles.md](docs/game-data-bundles.md).
+
+## Reading it back
+
+Published game data is served read-only and without an account — reference
+numbers a stranger arriving from a search should not have to sign up to read:
+
+```
+GET /api/games/{game}/versions
+GET /api/games/{game}/entities                    [?version=N]
+GET /api/games/{game}/entities/{entity}           [?version=N]
+GET /api/games/{game}/entities/{entity}/upgrades  [?version=N]
+GET /api/games/{game}/diff?from=N&to=M
+```
+
+`?version=N` pins a read to one published snapshot; without it you get the
+latest approved one. Every response carries the version its numbers came from
+and the attribution that came with them, because a page that cannot say which
+patch it describes is the failure the whole versioning model exists to prevent.
+
+`/diff` answers with structured changes, or with the report above verbatim if
+you ask for `text/plain` — one renderer, so what a reviewer approved and what a
+reader sees cannot drift apart.
+
+Publishing has no endpoint. It is a human approval through the CLI, so only
+`GET` is public here and everything else is denied.
 
 ## The rules the build enforces
 

@@ -3,6 +3,7 @@ package io.stormalmanac.identity;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -41,13 +42,24 @@ public class SecurityConfig {
      *   <li>{@code /api/health} — phase 0's deliverable, smoked by the pipeline
      *       against the deployed URL with no credentials to offer.
      *   <li>the actuator health group — container and orchestrator probes.
+     *   <li>{@code GET /api/games/**} — published game data. Reference numbers,
+     *       attributed, that a stranger arriving from a search reads without an
+     *       account; the funnel does not survive a login wall. Read-only by
+     *       method, not merely by convention: publishing is a human approval
+     *       through {@code gamedata-cli} and has no endpoint, so a POST here is
+     *       denied rather than 405'd.
      * </ul>
      *
      * Everything else is denied until phase 3 gives it an identity to check.
+     * Each public route is listed here one at a time on purpose — the matcher is
+     * the list of things this application will answer to a stranger, and it
+     * should be short enough to read.
      */
     @Bean
     SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests(auth -> auth.requestMatchers("/api/health", actuatorHealth)
+        return http.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.GET, "/api/games/**")
+                        .permitAll()
+                        .requestMatchers("/api/health", actuatorHealth)
                         .permitAll()
                         .anyRequest()
                         .authenticated())

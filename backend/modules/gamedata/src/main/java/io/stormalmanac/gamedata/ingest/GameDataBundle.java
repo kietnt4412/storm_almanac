@@ -92,7 +92,7 @@ public record GameDataBundle(
     public GameDefinition definitionApprovedAt(Instant approvedAt) {
         return new GameDefinition(
                 game,
-                new GameDataVersion(game.id(), sequence, label, approvedAt),
+                new GameDataVersion(game.id(), sequence, label, approvedAt, attribution),
                 items,
                 sources,
                 sinks,

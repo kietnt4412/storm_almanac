@@ -207,8 +207,8 @@ public class GameDataCli implements ApplicationRunner {
         if (args.size() != 3) throw new Misuse("diff <game> <fromSequence> <toSequence>");
         GameId game = new GameId(args.get(0));
 
-        Optional<GameDefinition> from = load(game, number(args.get(1)));
-        Optional<GameDefinition> to = load(game, number(args.get(2)));
+        Optional<GameDefinition> from = definitions.find(game, number(args.get(1)));
+        Optional<GameDefinition> to = definitions.find(game, number(args.get(2)));
         if (from.isEmpty() || to.isEmpty()) {
             out.println("refused: both sequences must name a published version of " + game.value());
             return REFUSED;
@@ -218,12 +218,6 @@ public class GameDataCli implements ApplicationRunner {
     }
 
     // ── Plumbing ────────────────────────────────────────────────────────────
-
-    private Optional<GameDefinition> load(GameId game, long sequence) {
-        // find() keys on the sequence; the label and approval time on this
-        // record are not knowable here and are not read.
-        return definitions.find(game, new GameDataVersion(game, sequence, "", Instant.EPOCH));
-    }
 
     private GameDataBundle read(String file) {
         Path path = Path.of(file);

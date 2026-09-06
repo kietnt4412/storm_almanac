@@ -71,8 +71,8 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
     public Optional<GameDefinition> findLatest(GameId game) {
         return versionRow(
                 """
-                SELECT v.id, v.sequence, v.label, v.published_at, g.id AS game_id,
-                       g.display_name AS game_name, g.energy_unit
+                SELECT v.id, v.sequence, v.label, v.published_at, v.attribution,
+                       g.id AS game_id, g.display_name AS game_name, g.energy_unit
                   FROM gamedata.game_data_version v
                   JOIN gamedata.game g ON g.id = v.game_id
                  WHERE v.game_id = ? AND v.status = 'PUBLISHED'
@@ -84,16 +84,16 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<GameDefinition> find(GameId game, GameDataVersion version) {
+    public Optional<GameDefinition> find(GameId game, long sequence) {
         return versionRow(
                 """
-                SELECT v.id, v.sequence, v.label, v.published_at, g.id AS game_id,
-                       g.display_name AS game_name, g.energy_unit
+                SELECT v.id, v.sequence, v.label, v.published_at, v.attribution,
+                       g.id AS game_id, g.display_name AS game_name, g.energy_unit
                   FROM gamedata.game_data_version v
                   JOIN gamedata.game g ON g.id = v.game_id
                  WHERE v.game_id = ? AND v.sequence = ? AND v.status = 'PUBLISHED'
                 """,
-                game.value(), version.sequence());
+                game.value(), sequence);
     }
 
     @Override
@@ -101,14 +101,14 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
     public List<GameDataVersion> versions(GameId game) {
         return jdbc.query(
                 """
-                SELECT sequence, label, published_at
+                SELECT sequence, label, published_at, attribution
                   FROM gamedata.game_data_version
                  WHERE game_id = ? AND status = 'PUBLISHED'
                  ORDER BY sequence DESC
                 """,
                 (rs, row) -> new GameDataVersion(
                         game, rs.getLong("sequence"), rs.getString("label"),
-                        Timestamps.instant(rs, "published_at")),
+                        Timestamps.instant(rs, "published_at"), rs.getString("attribution")),
                 game.value());
     }
 
@@ -121,7 +121,8 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
                         new GameId(rs.getString("game_id")),
                         rs.getLong("sequence"),
                         rs.getString("label"),
-                        Timestamps.instant(rs, "published_at"))),
+                        Timestamps.instant(rs, "published_at"),
+                        rs.getString("attribution"))),
                 args);
 
         return headers.stream().findFirst().map(this::load);

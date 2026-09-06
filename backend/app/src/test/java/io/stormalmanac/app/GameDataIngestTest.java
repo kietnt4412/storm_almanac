@@ -144,11 +144,7 @@ class GameDataIngestTest extends GameDataDatabaseTest {
         ingestAndPublish("proving-ground-1.0.json");
         ingestAndPublish("proving-ground-1.1.json");
 
-        // find() keys on the sequence; the rest of the record is what the caller
-        // happens to be holding, and 1.0's real approval time is not knowable here.
-        GameDefinition old = definitions
-                .find(PROVING_GROUND, new GameDataVersion(PROVING_GROUND, 0, "1.0", Instant.EPOCH))
-                .orElseThrow();
+        GameDefinition old = definitions.find(PROVING_GROUND, 0).orElseThrow();
 
         assertThat(old.version().label()).isEqualTo("1.0");
         assertThat(yieldOf(old, "pg-1-1", "ore-rough")).isEqualTo(1.4);
@@ -249,9 +245,7 @@ class GameDataIngestTest extends GameDataDatabaseTest {
         ingestAndPublish("proving-ground-1.0.json");
         ingestAndPublish("proving-ground-1.1.json");
 
-        GameDefinition one = definitions
-                .find(PROVING_GROUND, new GameDataVersion(PROVING_GROUND, 0, "1.0", Instant.EPOCH))
-                .orElseThrow();
+        GameDefinition one = definitions.find(PROVING_GROUND, 0).orElseThrow();
         GameDefinition two = definitions.findLatest(PROVING_GROUND).orElseThrow();
 
         VersionDiff fromTheDatabase = VersionDiff.between(one, two);
