@@ -34,6 +34,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Reverse: 1999, from a Kornblume data snapshot.
@@ -57,12 +60,36 @@ import java.util.function.Consumer;
  * publishes them under {@code public/data}:
  *
  * <pre>
- * &lt;dir&gt;/items.json      materials and currencies
- * &lt;dir&gt;/stages.json     stages, activity cost, drop tables
- * &lt;dir&gt;/formulas.json   crafting recipes
- * &lt;dir&gt;/arcanists.json  characters, stat blocks, upgrade costs
- * &lt;dir&gt;/psychubes.json  equipment
+ * &lt;dir&gt;/items.json                  materials and currencies
+ * &lt;dir&gt;/stages3_3_greedy.json       stages, activity cost, sampled drop tables
+ * &lt;dir&gt;/stages.json                 the same, unsampled and stale — read only as a fallback
+ * &lt;dir&gt;/formulas.json               crafting recipes
+ * &lt;dir&gt;/arcanists.json              characters, stat blocks, upgrade costs
+ * &lt;dir&gt;/psychubes.json              equipment
  * </pre>
+ *
+ * <h2>Which stage file, and why it is not {@code stages.json}</h2>
+ *
+ * <p>The upstream publishes its drop tables more than once and only one of them
+ * is live. {@code stages.json} is the older shape — a proportion per item, three
+ * decimal places, no sample size — and the snapshots pinned by
+ * {@code tools/fetch-upstream.sh} carry <b>chapters 1 to 4 only</b> in it. The
+ * file its own planner reads is the newest {@code stages<major>_<minor>_greedy.json},
+ * which carries every chapter, a raw drop <em>count</em> per item and the
+ * {@code count} of sampled runs those came from; the upstream divides one by the
+ * other at read time and so do we.
+ *
+ * <p>So this adapter takes the highest-versioned {@code _greedy} file present and
+ * falls back to {@code stages.json} only when there is none, saying which it
+ * read either way. The version in that filename lags the patch label — the
+ * snapshot labelled 3.5 ships {@code stages3_3_greedy.json} — because the drop
+ * data is resampled on its own schedule, so picking the newest file present is
+ * the only rule that matches what the upstream itself does.
+ *
+ * <p><b>This was found by going looking for the community's answers</b> and
+ * noticing they name stages our data did not have. Reading the stale file cost
+ * nothing visible: the bundle was well-formed, the round trip held, the solver
+ * was fast, and every plan it produced was computed against a third of the game.
  *
  * <h2>What is deliberately not converted, and why</h2>
  *
@@ -99,6 +126,15 @@ import java.util.function.Consumer;
  *       because a plan that farms for something not in the game is not a plan.
  *       They arrive on their own in a later snapshot, and the patch diff is
  *       where they should show up.
+ *   <li><b>The sample size behind a drop rate</b> — the {@code _greedy} files
+ *       carry {@code count}, the number of runs a stage's drop counts were
+ *       observed over, and it ranges from 1 (a fixed reward, not a sample) to
+ *       tens of thousands. {@code Drop} holds a yield and nothing else, so the
+ *       mean survives the conversion and the evidence behind it does not. That
+ *       is a real loss and it is open question <b>Q8</b>: the optimizer cannot
+ *       tell a rate measured over 16 000 runs from one measured over 40, and
+ *       {@code stats} cannot publish an interval for a number it never saw the
+ *       sample of.
  *   <li><b>Skills, talents, banners, rewards, fodder</b> — this upstream simply
  *       does not publish them. An empty section is the truthful output.
  * </ul>
@@ -141,7 +177,9 @@ public final class KornblumeAdapter implements UpstreamAdapter {
 
     @Override
     public String expects() {
-        return "a directory holding items.json, stages.json, formulas.json, arcanists.json"
+        return "a directory holding items.json, stages.json (or the newer"
+                + " stages<major>_<minor>_greedy.json that the upstream's own planner reads),"
+                + " formulas.json, arcanists.json"
                 + " and psychubes.json, as published under kornblume's public/data";
     }
 
@@ -157,7 +195,8 @@ public final class KornblumeAdapter implements UpstreamAdapter {
 
         List<Item> items = items(read(upstream, "items.json"), itemNames);
         List<Source> sources = new ArrayList<>();
-        sources.addAll(stages(read(upstream, "stages.json"), itemNames));
+        String stageFile = stageFile(upstream);
+        sources.addAll(stages(read(upstream, stageFile), stageFile, itemNames));
         sources.addAll(crafts(read(upstream, "formulas.json"), itemNames, notes));
 
         List<Sink> sinks = new ArrayList<>();
@@ -219,23 +258,62 @@ public final class KornblumeAdapter implements UpstreamAdapter {
         return items;
     }
 
-    // ── stages.json ─────────────────────────────────────────────────────────
+    // ── the stage table: a sampled one if there is one, else stages.json ────
 
-    private List<Stage> stages(JsonNode root, Names itemNames) {
+    /** {@code stages3_3_greedy.json} and its predecessors: the sampled tables. */
+    private static final Pattern SAMPLED_STAGES = Pattern.compile("stages(\\d+)_(\\d+)_greedy\\.json");
+
+    /** The older unsampled table. Read only when there is no sampled one. */
+    private static final String LEGACY_STAGES = "stages.json";
+
+    /**
+     * The stage file the upstream's own planner would read from this directory.
+     *
+     * <p>Highest {@code (major, minor)} wins, and the comparison is numeric
+     * because these names do not order as text: {@code stages3_3_greedy} sorts
+     * after {@code stages10_0_greedy} in any listing, and would quietly win the
+     * day a chapter ten of drop data arrives.
+     */
+    private String stageFile(Path upstream) {
+        String best = null;
+        long newest = Long.MIN_VALUE;
+        try (Stream<Path> files = Files.list(upstream)) {
+            for (Path file : files.toList()) {
+                Matcher matched = SAMPLED_STAGES.matcher(file.getFileName().toString());
+                if (!matched.matches()) {
+                    continue;
+                }
+                long version = Long.parseLong(matched.group(1)) * 1_000_000L
+                        + Long.parseLong(matched.group(2));
+                if (version > newest) {
+                    newest = version;
+                    best = file.getFileName().toString();
+                }
+            }
+        } catch (IOException e) {
+            throw new BundleFormatException(
+                    "cannot list " + upstream.toAbsolutePath() + ": " + e.getMessage(), e);
+        }
+        return best != null ? best : LEGACY_STAGES;
+    }
+
+    private List<Stage> stages(JsonNode root, String file, Names itemNames) {
         List<Stage> stages = new ArrayList<>();
         int freeStages = 0;
+        long sampledRuns = 0;
 
         if (root == null || !root.isObject()) {
             // Alone among the five files this one is a map keyed by stage name,
             // not a list. An array here would iterate to nothing and produce a
             // bundle with no stages in it, which is the quiet failure.
-            throw new BundleFormatException("stages.json must hold a JSON object keyed by stage name");
+            throw new BundleFormatException(file + " must hold a JSON object keyed by stage name");
         }
 
         for (Map.Entry<String, JsonNode> entry : root.properties()) {
             String key = entry.getKey();
             JsonNode node = entry.getValue();
-            int cost = (int) integer(node, "cost", "stages.json \"" + key + "\"");
+            String at = file + " \"" + key + "\"";
+            int cost = (int) integer(node, "cost", at);
 
             if (cost <= 0) {
                 // Free output. Left out on purpose — see the class javadoc.
@@ -243,22 +321,45 @@ public final class KornblumeAdapter implements UpstreamAdapter {
                 continue;
             }
 
+            // A sampled file holds raw counts and the number of runs they were
+            // seen over; the older file holds the quotient already. Dividing by
+            // an absent count would invent a rate, and dividing by a zero one
+            // would produce an infinite yield — which is a free source, the
+            // failure this adapter has already met twice.
+            long observed = node.has("count") ? integer(node, "count", at) : 0;
+            if (node.has("count") && observed <= 0) {
+                throw new BundleFormatException(at + " reports " + observed
+                        + " sampled runs, so its drop counts cannot be read as a rate");
+            }
+            sampledRuns += observed;
+
             List<Drop> drops = new ArrayList<>();
             JsonNode dropTable = node.get("drops");
             if (dropTable != null && dropTable.isObject()) {
                 for (Map.Entry<String, JsonNode> drop : dropTable.properties()) {
                     if (!drop.getValue().isNumber()) {
-                        throw new BundleFormatException("stages.json \"" + key + "\" drops \""
+                        throw new BundleFormatException(at + " drops \""
                                 + drop.getKey() + "\" with a value that is not a number");
                     }
                     drops.add(new Drop(
                             new ItemId(itemNames.reference(drop.getKey(), "stage \"" + key + "\"")),
-                            // Already expected quantity per run, above 1.0 for the
-                            // generous stages. This is why Drop holds a yield and
-                            // not a probability — see docs/prior-art.md §4.1.
-                            drop.getValue().doubleValue()));
+                            // Expected quantity per run either way, and above 1.0
+                            // on the generous stages. This is why Drop holds a
+                            // yield and not a probability — docs/prior-art.md §4.1.
+                            observed > 0
+                                    ? drop.getValue().doubleValue() / observed
+                                    : drop.getValue().doubleValue()));
                 }
             }
+            // A stage's drops are a set, and `Stage.drops()` is a List, so the
+            // order is load-bearing for equality whether anybody meant it to be
+            // or not. Emitting them in the upstream's key order makes a bundle
+            // depend on how somebody else's JSON happens to be written, and made
+            // the round trip through the schema compare unequal the moment that
+            // order changed. Sorted here, once, so a conversion is the same
+            // bundle every time and the store gives back what went in.
+            drops.sort(Comparator.comparing(drop -> drop.item().value()));
+
             stages.add(new Stage(
                     new StageId(Names.slug(key)),
                     node.hasNonNull("name") ? node.get("name").asText() : key,
@@ -269,6 +370,17 @@ public final class KornblumeAdapter implements UpstreamAdapter {
         if (freeStages > 0) {
             notes.accept("skipped " + freeStages + " stage(s) costing no Activity:"
                     + " a free source is an unbounded one");
+        }
+        if (sampledRuns > 0) {
+            notes.accept("read drop tables from " + file + ": " + stages.size()
+                    + " stage(s) measured over " + sampledRuns + " sampled runs, whose sample"
+                    + " sizes this model cannot carry — see Q8");
+        } else {
+            notes.accept("read drop tables from " + file + ", which carries no sample sizes"
+                    + " and, in the snapshots pinned so far, only the first four chapters."
+                    + " The upstream's own planner reads the newest"
+                    + " stages<major>_<minor>_greedy.json; if this snapshot has one it was"
+                    + " not fetched");
         }
         return stages;
     }
