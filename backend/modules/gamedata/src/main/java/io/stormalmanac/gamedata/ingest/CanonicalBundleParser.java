@@ -202,11 +202,20 @@ public final class CanonicalBundleParser {
     }
 
     private static Craft craft(JsonNode node, String at) {
-        return new Craft(
-                text(node, "id", at + ".id"),
-                stacks(node, "consumes", at),
-                stacks(node, "produces", at),
-                availability(node, at));
+        List<ItemStack> consumes = stacks(node, "consumes", at);
+        List<ItemStack> produces = stacks(node, "produces", at);
+        // Checked here as well as in Craft so the refusal says which entry in
+        // which file. A bundle is a document a human approves, and "craft
+        // 'craft-sharpodonty' consumes nothing" is a sentence they can act on
+        // where a stack trace off a record constructor is not.
+        if (consumes.isEmpty()) {
+            throw new BundleFormatException(at + ".consumes is empty: a craft that consumes"
+                    + " nothing is unbounded free supply, and the optimizer would mint it");
+        }
+        if (produces.isEmpty()) {
+            throw new BundleFormatException(at + ".produces is empty: nothing would ever run it");
+        }
+        return new Craft(text(node, "id", at + ".id"), consumes, produces, availability(node, at));
     }
 
     private static Shop shop(JsonNode node, String at) {

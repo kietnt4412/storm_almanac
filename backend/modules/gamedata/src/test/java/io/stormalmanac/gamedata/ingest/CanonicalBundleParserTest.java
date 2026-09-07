@@ -195,6 +195,36 @@ class CanonicalBundleParserTest {
     }
 
     @Test
+    @DisplayName("a craft that consumes nothing is refused, because free supply is unbounded supply")
+    void aCraftMustConsumeSomething() {
+        // Found by the optimizer's first solve over a real upstream, not by
+        // reading the format. Kornblume lists base materials in the same file as
+        // its recipes, with an empty material array; converted faithfully, one of
+        // them became a craft that made currency out of nothing at zero energy,
+        // and the solver ran it 294 250 times. The refusal belongs here rather
+        // than in the solver: a bundle carrying such a row is wrong before
+        // anybody solves anything with it.
+        assertThatThrownBy(() -> parser.parse(minimal("""
+                "crafts": [ { "id": "mint", "consumes": [],
+                              "produces": [ { "item": "ore", "quantity": 1 } ] } ]
+                """)))
+                .isInstanceOf(BundleFormatException.class)
+                .hasMessageContaining("crafts[0].consumes is empty")
+                .hasMessageContaining("unbounded free supply");
+    }
+
+    @Test
+    @DisplayName("a craft that produces nothing is refused too, for the mirror-image reason")
+    void aCraftMustProduceSomething() {
+        assertThatThrownBy(() -> parser.parse(minimal("""
+                "crafts": [ { "id": "burn", "consumes": [ { "item": "ore", "quantity": 1 } ],
+                              "produces": [] } ]
+                """)))
+                .isInstanceOf(BundleFormatException.class)
+                .hasMessageContaining("crafts[0].produces is empty");
+    }
+
+    @Test
     @DisplayName("a file that is not JSON is reported as that, not as a missing field")
     void notJsonAtAll() {
         assertThatThrownBy(() -> parser.parse("<html>404 Not Found</html>"))

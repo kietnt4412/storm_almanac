@@ -5,5 +5,12 @@
     "Rarity": 4,
     "Material": ["Silver Ore", "Sharpodonty"],
     "Quantity": [3, 500]
+  },
+  {
+    "Id": 2,
+    "Name": "Sharpodonty",
+    "Rarity": 1,
+    "Material": [],
+    "Quantity": []
   }
 ]

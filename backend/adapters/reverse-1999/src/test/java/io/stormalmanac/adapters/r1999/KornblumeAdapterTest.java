@@ -179,6 +179,20 @@ class KornblumeAdapterTest {
         }
 
         @Test
+        @DisplayName("a formula with no materials is a catalogue row, not a recipe that mints currency")
+        void dropsMateriallessFormulas() {
+            // The upstream lists base materials in the same file as its recipes,
+            // with an empty Material array. Converted faithfully it becomes a
+            // craft that consumes nothing, which to a MIP is free unbounded
+            // supply — the same defect as the free stage above, found the hard
+            // way: the optimizer's first solve over a real snapshot crafted
+            // 294 250 Sharpodonty out of nothing before anybody noticed.
+            assertThat(bundle.sources()).extracting(Source::id).doesNotContain("craft-sharpodonty");
+            assertThat(notes).anySatisfy(note ->
+                    assertThat(note).contains("1 formula(s) listing no materials"));
+        }
+
+        @Test
         @DisplayName("resonance patterns are alternatives, and an upgrade is not a choice")
         void dropsAlternativeCostRows() {
             // Two rows, one step, differing only by pattern. Converting both
