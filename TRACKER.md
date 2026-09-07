@@ -5,25 +5,34 @@ update it last. If a session ends without this file reflecting what happened,
 the next session starts from a lie.
 
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks)
-- Last updated: **2026-09-07** (seventh session)
+- Last updated: **2026-09-07** (eighth session)
 - Current phase: **Phase 2 — Optimizer core — is OPEN, opened 2026-09-07.**
   Phase 1 closed 2026-09-06 with both halves of its exit criterion met and CI
   confirming the tree (N10: runs `34035918992` and `34035923889`).
-  Phase 2's box is **not** ticked and will not be until both halves of *its*
-  criterion are met. **Half is met and measured: p95 solve is 1.8 s against a
-  2 s budget, on real Reverse: 1999 data.** The other half — *agrees with
-  community-accepted answers on 5 benchmark goal sets* — needs the community
-  answers, which are research rather than code. See **N12**.
+  **Both halves of Phase 2's criterion are now met** — p95 1.8 s against a 2 s
+  budget, and five benchmark goal sets where the cheapest stage this project
+  computes is the stage a published community guide names
+  ([the benchmark](docs/benchmarks/reverse-1999-community-answers.md), N12).
+  **The box is still not ticked**, and the reason is in N16: closing it means
+  CI green on this tree, and this session changed which data the optimizer has
+  been reading. Tick it next session or explain why not.
   Phase 0 stays closed by exception (deploy deferred by D1) and its box stays
   unticked, because nothing is deployed.
 - Track B status: **not started, and gated** — see [the gate](#the-gate)
 - Standing caveat, read it every session: **the strongest tests in this
   repository are ones CI does not run.** Upstream data is fetched and never
   committed ([ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md)),
-  so `RealUpstreamPatchTest` **and now `RealUpstreamPlanTest`** skip on the
-  runner — 10 of the 144 tests. Run `backend/tools/fetch-upstream.sh` before
-  trusting a green build to mean the pipeline handles real data, and note that
-  the optimizer's entire performance evidence lives in the second of those.
+  so `RealUpstreamPatchTest`, `RealUpstreamPlanTest` **and now
+  `CommunityBenchmarkTest`** skip on the runner — 15 of the 154 tests. Run
+  `backend/tools/fetch-upstream.sh` before trusting a green build to mean the
+  pipeline handles real data, and note that the optimizer's entire performance
+  evidence, and every comparison with an outside answer, lives in those three.
+- **Second standing caveat, new this session and the harder one: a green build
+  says nothing about whether the data going into it is the data the upstream
+  actually publishes.** The adapter spent five sessions reading a stale stage
+  table with two thirds of the game missing, and everything downstream — the
+  bundle, the round trip, the schema, the solver, the p95 — was green the whole
+  time. What caught it was going to look for somebody else's answer. See N12.
 
 ---
 
@@ -49,36 +58,49 @@ Rules that keep this file honest:
 
 **What exists:** the repo skeleton, the domain model, a green backend build, a
 game data pipeline that works end to end, an API that serves it, a real game's
-data going through all of it, and — as of this session — **an optimizer that
-turns that data into a plan**.
+data going through all of it, an optimizer that turns that data into a plan, and
+— as of this session — **a reason to believe the plan**.
 
-The load-bearing sentence, and it replaces the previous one: **the solver
-answers a real goal set over somebody else's real numbers, and says how much it
-does not know.** Five Reverse: 1999 characters to Insight 2 costs 2 411 Activity
-across twenty stages and six crafts, computed in a p95 of 1.8 s, with the plan
-itself stating *"no plan can be more than 2.95% cheaper"* — because the search
-stops on its budget rather than on optimality. See
-[ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md).
+The load-bearing sentence, and it replaces the previous one: **on five benchmark
+materials the cheapest stage this project computes is the stage a published
+community guide tells players to farm, and the optimizer's plan for a real goal
+set is cheaper than following that guide** — 3 624 Activity against 4 017, and
+the 4 017 does not even cover the whole demand. Twenty claims were compared;
+seventeen of the guide's quoted drop rates land within three percentage points
+of a sample this project had never seen. See
+[the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
 
-The previous load-bearing sentences still hold and are what made this one cheap:
-**the pipeline has met somebody else's data and held**, **the schema holds data
-and gives it back unchanged**, and **both of Phase 1's exit questions are
-answered by the API rather than by a test calling a repository**.
+The previous load-bearing sentences still hold: **the solver answers a real goal
+set over somebody else's real numbers and says how much it does not know**
+([ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md)), **the
+pipeline has met somebody else's data and held**, and **both of Phase 1's exit
+questions are answered by the API rather than by a test calling a repository**.
 
-**Real data found a real defect on its first solve, again.** The upstream lists
-base materials in the same file as its recipes, as rows with no ingredients; the
-adapter converted them faithfully into crafts that consume nothing, and the
-optimizer — correctly, given the model it was handed — minted 294 250 Sharpodonty
-out of thin air. `Craft` now refuses the shape outright, the parser refuses it
-with a located message, and the adapter skips those twelve rows and says so.
-*A free source is an unbounded one* was already the rule for stages; it just had
-not been applied to conversions.
+**The benchmark found a defect before it ran once, and it is the largest one this
+project has had.** The adapter was reading `stages.json`, and the upstream's own
+planner reads the newest `stages<major>_<minor>_greedy.json`. At both pinned
+commits `stages.json` carries **chapters 1 to 4 only** — 99 stages of the 105 the
+game has, overlapping the live table by 40. **Two thirds of the game were missing
+for five sessions and nothing noticed:** the bundle was well-formed, the parser
+accepted it, the schema round-tripped it, the solver was fast, and the plans were
+computed against a third of the content. What caught it was looking up what the
+community says the best stage is and finding stages our data had never heard of.
+Fixed in `KornblumeAdapter` (newest sampled table wins, counts divided by the
+sampled run count, and it says which file it read) and in
+`tools/fetch-upstream.sh` (which now pins the sampled table per snapshot).
 
-**And it found a fact about the game, not about us.** 45 of 118 characters'
-Insight 2 cannot be planned from patch 3.5 at all, because their materials are
-listed only against the upstream's synthetic `Unreleased` stage. The optimizer
-refuses those by name rather than inventing a source, which is the whole
-argument for refusing free sources in the first place.
+**A "fact about the game" from last session was a fact about that bug.** *45 of
+118 characters' Insight 2 cannot be planned from patch 3.5* is **withdrawn**.
+Against the table the upstream actually uses, **all 118 can**, and the test that
+asserted the old number now asserts the opposite as a canary — a released
+character with no source for a material means the stage table is short again.
+
+**And the benchmark found the thing to do next.** Every disagreement with the
+community over 25% is a sample-size disagreement. The upstream publishes how many
+runs each stage's drop table was observed over — from **105 to 41 212** — and the
+model throws that number away, so a mean over 105 runs outranks a mean over
+2 680. That is **Q8** ceasing to be a formality: the missing sample size is
+currently choosing the plan. It is now **N17**, and it is ahead of the time axis.
 
 **The caveat that goes everywhere this claim goes:** the upstream carries no
 licence, so its data is fetched and never committed
@@ -93,7 +115,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 
 | Area | State | Notes |
 |------|-------|-------|
-| Backend build | **Green** | `./gradlew build` — 144 tests (134 on CI, without an upstream snapshot, when `RealUpstreamPatchTest` and `RealUpstreamPlanTest` skip), `storm-almanac.jar` |
+| Backend build | **Green** | `./gradlew build` — **154 tests**, counted from this run's XML rather than carried forward: `:app` 71, `gamedata` 23, `planner` 30, `stats` 6, the adapter 24. On CI it is **139**, because the 15 snapshot-gated ones skip: `RealUpstreamPatchTest` 3, `RealUpstreamPlanTest` 7, `CommunityBenchmarkTest` 5. `storm-almanac.jar` produced |
 | Repo layout | Done | Gradle multi-module backend, Vite frontend, ADR folder |
 | Domain model (`gamedata`) | **Persisted and round-tripped** | Records and sealed hierarchies complete, and now written and read back by record equality across the whole graph. Equipment settled as an `Entity` with a `kind` field — ADR 0007, now proven through the schema too |
 | `gamedata` schema | **Applied, populated, round-tripped** | `V2` (28 tables) plus `V3` (a version can now actually be deleted). Six invariants proven by `GameDataSchemaTest`; the round trip proven by `GameDataIngestTest` on the synthetic fixture and by `RealUpstreamPatchTest` on two real Reverse: 1999 patches. **It has now held a real upstream** — the caveat is only that CI has not, see ADR 0009 |
@@ -101,16 +123,17 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 | Persistence (`gamedata.jdbc`) | **Done** | `JdbcGameDataIngestRepository` (write, one transaction) and `JdbcGameDefinitionRepository` (read, published only). JDBC not JPA — ADR 0008 |
 | Patch diff (`VersionDiff`) | **Done** | Three axes; subjects diffed before fields. 9 tests over the two fixture versions, plus one over versions loaded from the database |
 | `gamedata-cli` | **Done** | `--gamedata=<adapters\|adapt\|validate\|preview\|ingest\|drafts\|publish\|versions\|diff>` on the same jar. `adapt` converts an upstream snapshot into a canonical file, so the loop is *adapt, preview, ingest, publish* and an adapter gets no privileges for being code. 6 CLI tests plus the full onboarding walkthrough |
-| Parser adapters | **One, and it meets real data** | `:adapters:reverse-1999` converts a Kornblume snapshot: 18 tests over upstream-shaped fixtures, plus `RealUpstreamPatchTest` over two real patches. `ModuleBoundaryTest` lets only `:app` reach the adapters layer, so a core module depending on a title fails the build. ADR 0009 |
+| Parser adapters | **One, and it now reads what the upstream reads** | `:adapters:reverse-1999` converts a Kornblume snapshot: 22 tests over upstream-shaped fixtures, plus `RealUpstreamPatchTest` over two real patches. **It takes the newest `stages<major>_<minor>_greedy.json` and divides drop counts by the sampled run count, as the upstream's own planner does**, falls back to `stages.json`, and says which it read either way — reading the stale one silently cost five sessions of plans over a third of the game. `ModuleBoundaryTest` lets only `:app` reach the adapters layer, so a core module depending on a title fails the build. ADR 0009 |
 | `CanonicalBundleWriter` | **Done** | The parser read backwards, so an adapter's output is a file a human approves. Pinned to the parser by `CanonicalBundleRoundTripTest`, including idempotence |
 | Game data API | **Done — served and verified** | `GameDataController` + `GameDataReadModel` over five routes: versions, catalog index, catalog page, upgrade costs, patch diff (JSON or `text/plain`). Version-pinnable with `?version=N`; every response carries its version and attribution. 10 HTTP tests, plus a hand check against `docker compose up` |
 | Module ports | Partly implemented | `GameDefinitionRepository` has one, and its `find` now keys on a bare sequence rather than a fabricated `GameDataVersion`. **`Optimizer` now has `MipOptimizer` behind it.** `SolveCoordinator`, `DropReportStore`, `BannerEngine` are still interfaces with nothing behind them |
 | Demand resolution (`DemandResolver`) | **Done** | Goals + roster + upgrade graph → an item demand vector, by walking the DAG *backwards* from the target so an unowned entity and a part-levelled one are the same traversal. Handles multi-track entities, already-met goals, shared steps. Refuses by name: an unreachable state, an unknown entity, a probabilistic goal, an ambiguous two-route state. 10 tests |
 | The MIP (`EnergyMip`) | **Done for stages and crafts** | ojAlgo `ExpressionsBasedModel`, integer runs and conversions, inventory subtracted, reachability pruning, and every variable **bounded** by what could ever be useful — the bound is what makes a real patch solvable at all. Crafting recursion is an absence, not a feature: crafts are variables and intermediates are constraint rows. 12 tests, every expected number worked out by hand in its comment. **Shops, rewards, fodder and weekday rotation are not in the model**, and items whose only source is one of those are refused by name |
-| Yield source (`YieldTable`) | **Done, and it is a seam** | Declared `Drop.expectedYield` everywhere; a measured `DropEstimate` overrides it only where the units provably agree, because `pointEstimate` is a *proportion* and the constraint needs an expected *quantity*. See **Q8** — this is a real mismatch parked at the boundary, not a formality |
-| `Optimizer` (`MipOptimizer`) | **Done — least energy** | Wires repositories to the resolver and the model, pins the plan to its game-data version, fingerprints the request (`SolveKey`, the Phase 2 cache key without the cache yet), and explains itself: shadow prices by re-solve, binding stages, and a note saying where the numbers came from. Budget split between search and explanation; ADR 0010. 8 tests, plus 5 in `PlannerAcceptanceTest` over the parsed fixture and 6 in `RealUpstreamPlanTest` over a real patch |
+| Yield source (`YieldTable`) | **Done, and it is the seam that now matters** | Declared `Drop.expectedYield` everywhere; a measured `DropEstimate` overrides it only where the units provably agree, because `pointEstimate` is a *proportion* and the constraint needs an expected *quantity*. **Q8 stopped being theoretical this session**: the upstream publishes a sample size per stage — 105 to 41 212 runs — the model drops it, and every benchmark disagreement over 25% is a hundred-run mean outranking a thousand-run one. See **N17** |
+| `Optimizer` (`MipOptimizer`) | **Done — least energy** | Wires repositories to the resolver and the model, pins the plan to its game-data version, fingerprints the request (`SolveKey`, the Phase 2 cache key without the cache yet), and explains itself: shadow prices by re-solve, binding stages, and a note saying where the numbers came from. Budget split between search and explanation; ADR 0010. 8 tests, plus 5 in `PlannerAcceptanceTest` over the parsed fixture, 7 in `RealUpstreamPlanTest` over a real patch and 5 in `CommunityBenchmarkTest` against a published guide |
 | Objectives | **One model, both answered** | `LEAST_ENERGY` and `FEWEST_DAYS` are the same plan under an untimed model, because days are energy over a constant. Said out loud in the plan's notes rather than implied. They separate when the model gains a time axis, which is the same work that adds shops, rewards and rotation |
 | Solve caching | **Key only** | `SolveKey` hashes a canonical rendering of (version, goals, objective, energy/day, inventory, roster). Nothing caches on it yet — no Redis, no `SolveCoordinator` implementation |
+| Community benchmark | **Done — Phase 2's other half** | `CommunityBenchmarkTest`: twenty per-material "best stage" claims from a published guide, compared with what this model computes. Five exact agreements, seventeen quoted rates reproduced within three points, and every disagreement over 25% traced to a sample size the model does not carry. Skips without a snapshot, like everything else that touches real data. [The document](docs/benchmarks/reverse-1999-community-answers.md) carries the provenance |
 | `WilsonInterval` | **Done** | 6 tests passing |
 | `PityRule` | **Done** | 9 tests passing against both games' published rates |
 | `ModuleBoundaryTest` | **Passing** | ArchUnit; Track B layers declared optional until they exist |
@@ -126,34 +149,48 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 Be precise about this, because the temptation is to read "build green" as "it
 works". It does not mean that:
 
-- ~~**CI has not run on this session's work.**~~ **It has, and it is green.**
-  Runs `34072743411` (`ci` on the `dev` PR, backend job 1m37s) and `34072752969`
-  (`ci` on the `main` push merging PR #7, backend job 1m56s), both success,
-  `deploy` skipped as designed. Both N13 checks read out of the log rather than
-  inferred — see N13. The rule stands for next time: a pipeline is proven for
-  the tree it ran on and no other, so this entry comes back the moment anything
-  is committed.
+- **CI has not run on this session's work, and neither has the local suite in
+  full.** The previous entry (runs `34072743411` and `34072752969`, both green)
+  was true of the tree it ran on, and this session changed the adapter, the
+  fetch script, the JDBC reader and four test classes. **The local build is
+  green** — 154 tests, Docker came up on the second attempt and the whole suite
+  ran, including the round-trip test that caught the drop-ordering defect. What
+  has not happened is the pipeline: nothing is committed or pushed. **N16 is to
+  push and read the CI log** — and only then tick Phase 2.
 - **CI does not run the tests that matter most, and never will as things
   stand.** Two classes now touch data this project did not author, and both skip
   on the runner because the snapshots are not committed — ADR 0009, deliberately.
-  Locally the suite is 144 tests; on CI it is 134, and the ten missing ones are
-  the ones that would catch an upstream-shape surprise **and the only evidence
-  the optimizer is fast enough or right about anything real.** Every performance
-  number in this file — p95 1.8 s, a 2.95% gap — comes from a test the pipeline
-  does not run. **A green pipeline is therefore weaker evidence than it looks,
-  and it got weaker this session.** Before trusting one, run
-  `backend/tools/fetch-upstream.sh` and the suite again.
+  Three classes now touch data this project did not
+  author and all three skip on the runner, which is 15 tests: `RealUpstreamPatchTest`,
+  `RealUpstreamPlanTest` and `CommunityBenchmarkTest`. They are the ones that
+  would catch an upstream-shape surprise, **and the only evidence the optimizer is
+  fast enough or right about anything real.** Every performance number in this
+  file — p95 1.8 s, a 2.80% gap — and every comparison with an outside answer
+  comes from a test the pipeline does not run. **A green pipeline is therefore
+  weaker evidence than it looks, and it got weaker again this session.** This is
+  no longer a theoretical worry: the stale stage table that cost five sessions of
+  plans over a third of the game would not have been caught by any test CI runs,
+  and was not caught by any test at all — a person went looking. Before trusting
+  a green build, run `backend/tools/fetch-upstream.sh` and the suite again.
 - **The optimizer has never been asked a question by anything but a test.**
   There is no HTTP route, no `SolveCoordinator` implementation, no cache behind
   `SolveKey`, and no player state to solve against — `PlayerStateRepository` is
   still an interface, which is Phase 3's job. Every solve in this repository is
   driven by a hand-built fake profile.
-- **The plan has never been checked against an answer somebody else worked
-  out.** It is self-consistent — apply its runs at the declared yields and the
-  demand is covered — and it beats a per-item greedy baseline, and it is within
-  2.95% of what the linear relaxation says is possible. None of that is the same
-  as being *right about the game*. **This is the open half of Phase 2's exit
-  criterion and it is N12.** A confidently wrong optimizer is worse than none.
+- ~~**The plan has never been checked against an answer somebody else worked
+  out.**~~ **Done 2026-09-07 (eighth session), and it was worth every hour.**
+  Twenty per-material "best stage" claims from a published community guide,
+  compared with what this model computes: five exact agreements, seventeen quoted
+  drop rates reproduced within three percentage points, and a plan that costs
+  3 624 Activity against 4 017 for following the guide material by material. See
+  [the benchmark](docs/benchmarks/reverse-1999-community-answers.md) and
+  `CommunityBenchmarkTest`.
+  **What is genuinely still unverified about it:** it is *one* guide, written for
+  patch 2.7 against a 3.3 sample, and it answers "which stage for this material"
+  rather than "what should I do this week". A second, independent source would
+  turn "agrees with the community" from a claim into a measurement. And the
+  agreement is on the stage *ranking*, which is arithmetic on the data — the
+  search itself is still checked only against itself.
 - **Nothing is deployed.** By decision — see deviation D1. The `deploy` job is
   `if: false` and there is no URL to smoke.
 - **The frontend has never been served**, only typechecked and built. No page
@@ -172,12 +209,19 @@ works". It does not mean that:
   record equality and diffed. It surprised us twice on first contact, which was
   the entire point: a Cyrillic character name that ASCII slugging erased, and
   placeholder rows whose `Name` is `null`. Both fixed, both now have tests.
-  What genuinely remains, and it is smaller: **the adapter converts less than
-  the upstream publishes** — no shop offers, no alternative resonance-pattern
-  costs, no unreleased content — each with a reason in `KornblumeAdapter`'s
-  javadoc and a line printed on every run. And **it has met one upstream, not
-  two.** The second game is Phase 11's job and is where the abstraction is
-  actually tested.
+  What genuinely remains: **the adapter converts less than the upstream
+  publishes** — no shop offers, no alternative resonance-pattern costs, no
+  unreleased content, **and no sample sizes** — each with a reason in
+  `KornblumeAdapter`'s javadoc and a line printed on every run. And **it has met
+  one upstream, not two.** The second game is Phase 11's job and is where the
+  abstraction is actually tested.
+  **Corrected 2026-09-07 (eighth session):** the sentence above used to be filed
+  under "smaller", and one item on that list was not small at all. Until this
+  session the adapter also converted the wrong stage file — the upstream's older
+  table, chapters 1 to 4 of twelve — and the schema was faithfully round-tripping
+  a third of the game. **"The adapter converts less than the upstream publishes"
+  is only a reassuring sentence when somebody has checked what it converts
+  against what the upstream actually reads.**
 - **No skills or talents have ever been ingested from a real upstream.** The
   catalog axis is proven end to end on the synthetic fixture only, because
   Kornblume does not publish skill text. The API answers *"what does her S2 do
@@ -670,22 +714,103 @@ Ordered. Do them in this order.
       times without being recomputed. Fixed everywhere above. A number carried
       forward is a number nobody re-derived.
 
+### Done 2026-09-07 (eighth session) — N12
+
+- [x] ~~**N12 — Close Phase 2: the five benchmark goal sets.**~~ **Done, and it
+      found a bigger thing than it was looking for.** The community answers are
+      transcribed, cited and compared in
+      [docs/benchmarks/reverse-1999-community-answers.md](docs/benchmarks/reverse-1999-community-answers.md);
+      the comparison is `CommunityBenchmarkTest`, five tests, skipping without a
+      snapshot like everything else that touches real data.
+      **The source** is Prydwen's *Insight Materials Cheat Sheet (2.7 patch)*,
+      read 2026-09-07 — twenty claims of the form *material → best stage → drop
+      rate*. Nothing is vendored: twenty short factual claims with a URL is a
+      citation, and ADR 0009 is about data files.
+      **The defect it found before it ran once, which is the session's headline:**
+      `KornblumeAdapter` was reading `stages.json`, and the upstream's own planner
+      reads the newest `stages<major>_<minor>_greedy.json`. At both pinned commits
+      `stages.json` carries **chapters 1 to 4 only** — 99 stages, overlapping the
+      live 105-stage table by 40, with a drop-to-stage mapping the game has since
+      retuned. **Two thirds of the game were missing for five sessions and every
+      green thing stayed green.** The community names stages our data had never
+      heard of, which is how it surfaced.
+      Fixed in three places: the adapter picks the highest-versioned sampled table
+      and divides drop counts by the sampled run count (as `normalizeDrops` does
+      upstream), falls back to `stages.json`, and **says which file it read either
+      way**; `tools/fetch-upstream.sh` pins the sampled table per snapshot
+      (3.3 → `stages3_0_greedy.json`, 3.5 → `stages3_3_greedy.json`, because the
+      drop data is resampled on its own schedule and the filename lags the label);
+      and four new adapter tests cover preference, numeric version ordering
+      (`stages10_0_greedy` must beat `stages3_3_greedy`), the fallback note, and a
+      `count` of zero, which is a denominator and therefore a free source.
+      **A previous "fact about the game" is withdrawn.** *45 of 118 characters'
+      Insight 2 cannot be planned from patch 3.5* was a fact about the stale file.
+      All 118 can. The test that asserted it now asserts the opposite, as a canary
+      for the stage table going short again.
+      **What the comparison itself says:**
+      - **Five exact agreements** — Holy Silver (10-9H), Salted Mandrake (3-13H),
+        Perpetual Cog (7-16H), Pyroxene Ore (9-1H), Alopecurus Pratensis (8-18H).
+        That is the exit criterion, on its own terms. Seven more agree within 8%.
+      - **Seventeen of the guide's quoted rates land within three percentage
+        points** of a sample this project had never seen. Two independent
+        measurements of the same game agreeing is the strongest evidence yet that
+        the pipeline carries real numbers rather than plausible ones.
+      - **The plan beats the advice**: 3 624 Activity against 4 017 for following
+        the guide material by material — and the 4 017 does not cover the whole
+        demand. One run drops five materials; a per-material plan pays for each.
+      - **Four items in the guide's list are the same items under different
+        English names**, and the rates are what identified them: Red Lacquer Slab
+        is Red Lacquer Tablet, Golden Grass Incense is Golden Herb Incense,
+        Luminite Ore is Pyroxene Ore, and Fox Tail is Alopecurus Pratensis, which
+        is literally foxtail grass.
+      - **Every disagreement over 25% is a sample-size disagreement.** See N17.
+      **A third defect, found by the suite rather than by the benchmark.** With
+      the new stage file the schema round trip failed on drop *ordering*:
+      `Stage.drops()` is a `List`, the adapter emitted the upstream's JSON key
+      order, and `JdbcGameDefinitionRepository` reads drops back ordered by
+      `stage_drop.item_id` — a surrogate handed out in catalogue-ingest order.
+      They coincided under `stages.json` and do not under the sampled tables, so
+      *"the schema gives the data back unchanged"* had been true by coincidence.
+      Both ends now sort by item id and an adapter test pins it.
+      **The instruction in the old text was right and is worth keeping:** judge a
+      disagreement against the model before the solver. Not one of these turned
+      out to be the search. They were the input file, the sample size, and what
+      the word "best" means.
+
 ### Next session starts here
 
-- [ ] **N12 — Close Phase 2: the five benchmark goal sets.** The open half of the
-      exit criterion, and it is research before it is code. *"Run the solver
-      against goal sets the community has already settled. If it disagrees with
-      the accepted best stage, find out why before writing another feature."*
-      What exists to build on: `RealUpstreamPlanTest` already solves real goal
-      sets and asserts self-consistency, so the harness is there and what is
-      missing is five *external* answers to compare against — a wiki's "best
-      stage for Sharpodonty", a community farming guide, Kornblume's own planner
-      output for the same goals.
-      **Judge a disagreement against the model before the solver.** The most
-      likely explanations, in order: the model has no shops or rewards, so it
-      cannot see income a guide assumes; the declared yields are the upstream's
-      claim rather than a measurement (Q8); and only then, the search stopping on
-      its budget (ADR 0010 sets 5% as the number that would move us to OR-Tools).
+- [ ] **N16 — Get a clean local run and a green CI, then tick Phase 2.** Both
+      halves of the exit criterion are met and the box stays unticked until a
+      pipeline confirms the tree, which is the rule N13 established and it is not
+      being bent for a good session.
+      **The local half is done.** `./gradlew build` is green on this tree: 154
+      tests, counted from the run's XML rather than carried forward. Docker did
+      eventually start — it takes minutes on this machine and `docker info` hangs
+      rather than failing while it does, so give it time instead of concluding it
+      is broken.
+      **What is left is the pipeline.** Nothing is committed. Commit, push, and
+      read the log rather than the tick: the two checks are that the adapter's 24
+      tests execute on the runner, and that the 15 snapshot-gated ones show as
+      **skipped** — 3 + 7 + 5. If any of those 15 ever passes on CI, upstream data
+      has been committed by accident.
+- [ ] **N17 — Give `stats` a mean per run and a sample size, and let the
+      optimizer see it. This is Q8, and it is now the most valuable thing in the
+      backlog.** The benchmark showed why: the upstream publishes how many runs
+      each stage's drop counts were observed over — 105 to 41 212 — the adapter
+      divides by it and throws it away, and **every disagreement with the
+      community over 25% is a hundred-run mean outranking a well-sampled one**:
+      Milled Magnesia prefers 4-5H (105 runs) over 5-8H by 154%, Liquefied Terror
+      prefers 4-4H (113 runs) over 9-3H by 224%. `argmin` cannot tell a good stage
+      from a lucky sample.
+      What this needs, in order: a sample size on `Drop` (schema, parser, writer,
+      diff — it is a domain change, not a planner one); `YieldTable` preferring a
+      well-sampled rate; and then the real Q8 question, which is that a *mean per
+      run* needs a different interval than Wilson's — Wilson stays right for "did
+      it drop", and "how many dropped" is a different question that may supersede
+      [ADR 0006](docs/adr/0006-wilson-intervals-for-drop-rates.md) in part.
+      **Do this before N14.** A time axis over yields nobody trusts is a bigger
+      model to be wrong in — which is the argument the old N14 entry made about
+      N12, and it was right then too.
 - [ ] **N14 — Give the solver a time axis, and with it shops, rewards and
       rotation.** The largest thing the model does not do, and the one that makes
       `FEWEST_DAYS` a different plan from `LEAST_ENERGY` rather than the same one
@@ -693,8 +818,12 @@ Ordered. Do them in this order.
       currently refused by name: a shop's cap is "n per period" and a reward's is
       "once per day", and neither has an honest place in a model with no days in
       it. Expect this to be the expensive half of Phase 2.
-      **Do N12 first.** A time axis added to a model nobody has checked against a
-      real answer is a bigger model to be wrong in.
+      **Note for whoever starts it:** the upstream does publish `shops.json`, and
+      the fetch script does not fetch it. It states `{Material, Quantity}` under an
+      opaque shop key with no currency, no unit price and no reset period, which
+      is why `KornblumeAdapter` refuses it — but read it before designing the time
+      axis rather than after.
+      **Do N17 first.**
 - [ ] **N15 — Cache a solve on its key, and implement `SolveCoordinator`.**
       `SolveKey` exists and nothing uses it. The single-node coordinator is
       explicitly Phase 2's ("a single-node implementation ships in phase 2 and
@@ -816,14 +945,20 @@ previous one's criterion is met.
       `SolveKey`, and [ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md).
       Crafting recursion, integer runs, explanation output and both objectives
       are done; solve caching has its key and no cache.
-      **Half the exit criterion is met and measured:**
+      **Both halves of the exit criterion are met and measured. The box stays
+      unticked until CI confirms the tree — N16.**
       - *p95 solve under 2s* — **met, 2026-09-07.** 1.8 s over 50 solves of a
         five-character Reverse: 1999 goal set. Measured on real data, locally
-        only, by a test CI does not run.
+        only, by a test CI does not run. **Read it as the budget rather than as a
+        measurement of difficulty:** median, p95 and max all land within 5 ms of
+        each other, because the search is stopped by its budget every time. The
+        number that means something is the 2.80% optimality gap beside it.
       - *agrees with community-accepted answers on 5 benchmark goal sets* —
-        **not met, and not started.** The answers have to be found before they
-        can be compared against. **N12.**
-      **Three things the tick, when it comes, must not be read as covering:**
+        **met, 2026-09-07 (eighth session).** Five materials where the cheapest
+        stage this project computes is the stage a published guide names, out of
+        twenty claims compared, with every disagreement traced to a cause. **N12**,
+        and [the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
+      **Four things the tick, when it comes, must not be read as covering:**
       1. **The model has no time axis**, so no shops, no rewards, no weekday
          rotation, and `FEWEST_DAYS` is `LEAST_ENERGY` with a division. Items
          whose only source is a shop or a reward are refused by name rather than
@@ -831,7 +966,11 @@ previous one's criterion is met.
       2. **The search is stopped by its budget, not finished by it.** The plan
          says so and says the size of the doubt (2.95% on the measured goal set).
          ADR 0010.
-      3. **Fodder is in the domain model and not in the solver.** Advancing an
+      3. **Drop rates carry no sample size, and it is currently choosing stages.**
+         The benchmark's own finding: a mean over 105 runs and a mean over 41 212
+         are the same number to this model, and the noisy one wins more often
+         than it should. **Q8, N17** — this is ahead of the time axis.
+      4. **Fodder is in the domain model and not in the solver.** Advancing an
          item by consuming other items of a class is a sink the demand vector
          does not express yet, and it is Punishing: Gray Raven's whole
          progression system — so this is Phase 11 work arriving early or a real
@@ -1068,6 +1207,15 @@ Carry these forward until answered; strike through with the answer when resolved
   found and maps cleanly onto our model, so treat it as a reference schema and
   cross-check. Remaining work is **F1** in `docs/prior-art.md`: evaluate
   必要的记录 as the real drop-data upstream.
+  **Narrowed again 2026-09-07 (eighth session).** The drop data is not hidden
+  behind Kornblume — it is in the repository, in the files this project was not
+  reading. `stages<major>_<minor>_greedy.json` carries **raw drop counts and the
+  number of sampled runs behind them**, which is the sampling itself rather than
+  a presentation of it, and the adapter now reads it. So F1's question changes
+  shape: what going to the drop-data upstream directly would buy is *fresher*
+  sampling and *more* of it, not different numbers — against the cost of a second
+  upstream to adapt. Do not start it before **N17** has somewhere to put a sample
+  size, because that is what would make more sampling worth having.
 - **Q3 — Seed data provenance.** *Answered provisionally: assume not
   redistributable.* The Kornblume repository has **no `LICENSE` file**, so it is
   all rights reserved by default — absence of a licence is not permission. We
@@ -1117,11 +1265,21 @@ Carry these forward until answered; strike through with the answer when resolved
   stage where the declared number is least trustworthy.
   **The real answer is that `stats` owes `planner` a mean per run and a sample
   size, not only a proportion** — and a mean per run needs a different interval
-  than Wilson's, which is a statement about a binomial. **Settle it in Phase 6,
-  before any estimate is published**, because a published estimate in the wrong
-  unit is a number that silently halves plans. It may supersede
+  than Wilson's, which is a statement about a binomial. It may supersede
   [ADR 0006](docs/adr/0006-wilson-intervals-for-drop-rates.md) in part: Wilson
   stays right for "did it drop", and "how many dropped" is a different question.
+  **Escalated 2026-09-07 (eighth session): this is no longer a boundary
+  formality to settle in Phase 6, it is choosing plans today.** Two things
+  changed. First, the sample size exists and we are throwing it away: the
+  upstream's sampled stage tables carry a `count` per stage — the number of runs
+  its drop counts were observed over, from **105 to 41 212** — and the adapter
+  divides by it and drops it, because `Drop` has nowhere to put it. Second, the
+  community benchmark showed what that costs: **every disagreement with a
+  published guide over 25% is a hundred-run mean outranking a well-sampled one.**
+  Milled Magnesia prefers 4-5H (105 runs) to the guide's 5-8H by 154%; Liquefied
+  Terror prefers 4-4H (113 runs) to 9-3H by 224%. A noisy mean is a high mean
+  about as often as a low one, and `argmin` picks whichever stage got lucky.
+  Now **N17**, and it is ahead of the time axis in the queue.
 - **Q4 — Rate verification.** The pity numbers in `PityRuleTest` come from the
   secondary sources the plan cites. They must be checked against in-game
   disclosure before the simulator ships (Phase 5).
@@ -1150,7 +1308,110 @@ Carry these forward until answered; strike through with the answer when resolved
 
 Append one entry per session. Newest first.
 
-### 2026-09-07 (seventh session) — the solver meets somebody else's data, and mints 294 250 gold
+### 2026-09-07 (eighth session) — the community's answers, and the two thirds of the game we were missing
+
+**N12 closed, and Phase 2's second exit criterion with it.** The session's one
+task was to find out what the community says the best stage is and compare. It
+took about ten minutes of reading to discover that the comparison could not be
+made at all, because the stages players are told to farm were not in our data.
+
+**What was wrong.** `KornblumeAdapter` read `stages.json`. The upstream's own
+planner reads the newest `stages<major>_<minor>_greedy.json` — `getDrops()` in
+`src/composables/planner.ts` returns `dataStore.stages3_3_greedy`, and
+`normalizeDrops` divides each drop count by the stage's `count`. `stages.json` is
+the older shape: a bare proportion, no sample size, and **chapters 1 to 4 only**.
+99 stages against the live table's 105, overlapping by 40, with a drop-to-stage
+mapping the game has since retuned — 1-14H drops Liquefied Terror in the old file
+and Sharp Needle in the new one.
+
+**Five sessions of work sat on top of that and nothing went red.** The bundle was
+well-formed. The parser accepted it. The schema round-tripped it by record
+equality. The optimizer solved it in 1.8 s and explained itself. The CI pipeline
+was green twice. Every one of those was true of a third of the game. **The only
+thing that caught it was a person going to look at what somebody else said the
+answer was** — which is precisely the argument the plan makes for having a
+benchmark at all, arriving before the benchmark was written.
+
+**A "fact about the game" is withdrawn.** Last session recorded *45 of 118
+characters' Insight 2 cannot be planned from patch 3.5, because their materials
+appear only against the synthetic `Unreleased` stage.* That was a fact about the
+stale file. Against the table the upstream actually uses, **all 118 can be
+planned**, and none of them needs `Unreleased`. `RealUpstreamPlanTest` now
+asserts the reverse as a canary: a released character with no source for a
+material means the stage table has gone short again.
+
+**The fix, in three places.**
+- The adapter takes the highest-versioned sampled table it finds, compares
+  versions numerically (`stages10_0_greedy` must beat `stages3_3_greedy`, which
+  no listing order gives you), divides counts by the sampled run count, falls
+  back to `stages.json`, and **says which file it read either way**. Silence is
+  what let this run for five sessions.
+- `tools/fetch-upstream.sh` pins the sampled table per snapshot: 3.3 →
+  `stages3_0_greedy.json`, 3.5 → `stages3_3_greedy.json`. The version in the
+  filename lags the patch label because the drop data is resampled on its own
+  schedule, so it cannot be derived from the label and is written down instead.
+- Four new adapter tests: preference over `stages.json`, numeric version
+  ordering, the fallback note, and a `count` of zero — which is a denominator,
+  and an infinite yield is a free source, the same defect this adapter has now
+  met three ways.
+
+**Then the benchmark, which is what N12 was actually for.** Twenty claims from
+Prydwen's *Insight Materials Cheat Sheet (2.7 patch)*, transcribed with their
+source into `docs/benchmarks/reverse-1999-community-answers.md` and compared by
+`CommunityBenchmarkTest`:
+
+- **Five exact agreements** — Holy Silver (10-9H), Salted Mandrake (3-13H),
+  Perpetual Cog (7-16H), Pyroxene Ore (9-1H), Alopecurus Pratensis (8-18H) — the
+  exit criterion's five, on its own terms. Seven more agree within 8%.
+- **Seventeen of the guide's quoted drop rates land within three percentage
+  points** of a sample this project had never seen. Two independent measurements
+  of the same game agreeing is the best evidence so far that the pipeline is
+  carrying real numbers and not plausible ones.
+- **The plan beats the advice**: 3 624 Activity against 4 017 for following the
+  guide material by material, and the 4 017 does not cover the whole demand.
+- **Four of the guide's items are ours under different English names**, and the
+  rates identified them rather than the names: Red Lacquer Slab is Red Lacquer
+  Tablet, Golden Grass Incense is Golden Herb Incense, Luminite Ore is Pyroxene
+  Ore, and Fox Tail is Alopecurus Pratensis — literally foxtail grass.
+- **One claim is deliberately not tested**: the guide's Magnesia Crystal pick,
+  2-9H, is not in the upstream's sampled table at all. Written down rather than
+  dropped.
+
+**And the benchmark's own finding, which is the thing to do next.** Every
+disagreement over 25% is a sample-size disagreement. The upstream publishes how
+many runs each stage's drop counts came from — **105 to 41 212** — the adapter
+divides by it and throws it away, and the model then treats a hundred-run mean
+exactly like a forty-thousand-run one. Milled Magnesia prefers 4-5H (105 runs) to
+the guide's 5-8H by 154%; Liquefied Terror prefers 4-4H (113 runs) to 9-3H by
+224%. A noisy mean is a high mean about as often as a low one, and `argmin` picks
+whichever stage got lucky. **Q8 has stopped being a boundary formality for
+Phase 6 and is now N17, ahead of the time axis.**
+
+**And a third defect, which only the full suite could find.** Docker would not
+start for most of the session, so the Testcontainers tests did not run at first.
+When it finally came up, `RealUpstreamPatchTest` failed — the schema round trip,
+on the same stages it had been round-tripping happily for two sessions. **The
+drops were all there and in a different order.** `Stage.drops()` is a `List`, so
+record equality is order-sensitive; the adapter emitted drops in the upstream's
+JSON key order and `JdbcGameDefinitionRepository` reads them back ordered by
+`stage_drop.item_id`, a surrogate handed out in catalogue-ingest order. Those two
+coincided under `stages.json` and stop coinciding under the sampled tables.
+**"The schema gives somebody else's numbers back unchanged" was true by luck**,
+and the luck ran out the moment the input file changed. Both ends now sort by
+item id, and an adapter test pins it.
+That is worth remembering as a pattern rather than a bug: **this session's three
+defects were all invariants that had never actually been tested, only
+coincidentally satisfied.**
+
+**Where the build ended up:** green. 154 tests locally, 139 on CI once the 15
+snapshot-gated ones skip. Nothing is committed or pushed, so **Phase 2's box
+stays unticked** even though both halves of its criterion are met. That is N16,
+and it is now only the pipeline half.
+
+**Housekeeping.** `RealUpstreamPlanTest`'s fixture — the snapshot load and the
+two fake repositories — moved into a shared `RealUpstream` class, because the
+benchmark needed the same one and two copies of a fake drift.
+
 
 **Phase 2 opened.** The optimizer went from four interfaces with nothing behind
 them to a working mixed-integer program that answers a real goal set over a real
