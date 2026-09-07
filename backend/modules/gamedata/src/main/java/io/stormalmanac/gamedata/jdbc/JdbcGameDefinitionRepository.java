@@ -34,6 +34,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -267,6 +268,15 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
     // ── Sources ─────────────────────────────────────────────────────────────
 
     private List<Stage> stages(long version, Map<Long, ItemId> items) {
+        // Ordered by the item's id and not by the row's, which is the difference
+        // between a canonical order and an accidental one. `stage_drop.item_id`
+        // is a surrogate handed out in the order items were ingested, so ordering
+        // by it returns whatever order the catalogue happened to arrive in — and
+        // `Stage.drops()` is a List, so two orders of the same drops are two
+        // unequal stages. That made "the schema gives the data back unchanged"
+        // true only while an upstream listed a stage's drops in the same order it
+        // listed its items. The Reverse: 1999 sampled tables do not, and the
+        // round-trip test failed the moment the adapter started reading them.
         Map<Long, List<Drop>> drops = grouped(version,
                 """
                 SELECT stage_id, item_id, expected_yield
@@ -274,6 +284,7 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
                 """,
                 "stage_id", (rs, row) -> new Drop(
                         items.get(rs.getLong("item_id")), rs.getDouble("expected_yield")));
+        drops.values().forEach(list -> list.sort(Comparator.comparing(drop -> drop.item().value())));
 
         return jdbc.query(
                 """

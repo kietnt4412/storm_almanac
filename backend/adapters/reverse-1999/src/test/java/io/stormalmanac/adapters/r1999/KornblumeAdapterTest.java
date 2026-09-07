@@ -282,6 +282,138 @@ class KornblumeAdapterTest {
         }
     }
 
+    @Nested
+    @DisplayName("the stage table is the one the upstream's own planner reads")
+    class StageTables {
+
+        /**
+         * The sampled shape, as the upstream publishes it: a raw drop count per
+         * item and the number of runs it was observed over. Two stages, and one
+         * of them ("1-1") also exists in the fixture's stages.json with different
+         * numbers, so a test can tell which file was read.
+         */
+        private static final String SAMPLED = """
+                {
+                  "1-1": {
+                    "id": 0,
+                    "name": "1-1",
+                    "category": "Story",
+                    "cost": 8,
+                    "count": 400,
+                    "drops": {
+                      "Silver Ore": 100,
+                      "Sharpodonty": 1000
+                    }
+                  },
+                  "9-15H": {
+                    "id": 3,
+                    "name": "9-15H",
+                    "category": "Hard",
+                    "cost": 20,
+                    "count": 1000,
+                    "drops": {
+                      "Holy Silver": 325
+                    }
+                  }
+                }
+                """;
+
+        @Test
+        @DisplayName("a sampled table wins over stages.json, and its counts become rates")
+        void prefersTheSampledTable(@TempDir Path dir) throws IOException {
+            // The defect this exists to prevent, and it was a live one: stages.json
+            // is the older table and in the pinned snapshots it carries the first
+            // four chapters only. Reading it produced a bundle that parsed, round
+            // tripped and solved — over a third of the game.
+            copy(dir);
+            Files.writeString(dir.resolve("stages3_3_greedy.json"), SAMPLED);
+
+            List<String> said = new ArrayList<>();
+            GameDataBundle sampled = new KornblumeAdapter(said::add).adapt(dir, 0, "1.0");
+
+            assertThat(stageIn(sampled, "9-15h").drops())
+                    .as("a stage only the sampled table has must be in the bundle")
+                    .containsExactly(new Drop(new ItemId("holy-silver"), 0.325));
+            assertThat(stageIn(sampled, "1-1").drops())
+                    .as("counts over runs, not the stale proportion stages.json states")
+                    .containsExactlyInAnyOrder(
+                            new Drop(new ItemId("silver-ore"), 0.25),
+                            new Drop(new ItemId("sharpodonty"), 2.5));
+            assertThat(said).anySatisfy(note -> assertThat(note)
+                    .contains("stages3_3_greedy.json")
+                    .contains("1400 sampled runs"));
+        }
+
+        @Test
+        @DisplayName("the newest sampled table wins, and newest is not alphabetical")
+        void picksTheHighestVersion(@TempDir Path dir) throws IOException {
+            // stages3_3_greedy sorts after stages10_0_greedy in every listing,
+            // which is the wrong answer the first time the upstream reaches a
+            // tenth major version. Comparing the numbers is not premature: the
+            // failure it prevents is silent and looks exactly like fresh data.
+            copy(dir);
+            Files.writeString(dir.resolve("stages3_3_greedy.json"), SAMPLED);
+            Files.writeString(dir.resolve("stages10_0_greedy.json"),
+                    SAMPLED.replace("\"Holy Silver\": 325", "\"Holy Silver\": 650"));
+
+            List<String> said = new ArrayList<>();
+            GameDataBundle newest = new KornblumeAdapter(said::add).adapt(dir, 0, "1.0");
+
+            assertThat(stageIn(newest, "9-15h").drops())
+                    .containsExactly(new Drop(new ItemId("holy-silver"), 0.65));
+            assertThat(said).anySatisfy(note ->
+                    assertThat(note).contains("stages10_0_greedy.json"));
+        }
+
+        @Test
+        @DisplayName("with no sampled table the old one is read, and the note says so")
+        void fallsBackAndSaysSo() {
+            // The fixture directory has no sampled table, so this is the path the
+            // rest of this class runs on. It stays supported because a snapshot
+            // fetched before this change still parses — but it is announced,
+            // because silence is what let the stale file go unnoticed.
+            assertThat(notes).anySatisfy(note -> assertThat(note)
+                    .contains("stages.json")
+                    .contains("no sample sizes"));
+        }
+
+        @Test
+        @DisplayName("a stage's drops come out in a fixed order, whatever order the upstream listed them")
+        void ordersDropsCanonically(@TempDir Path dir) throws IOException {
+            // Not tidiness. `Stage.drops()` is a List, so two orders of the same
+            // drops are two unequal stages, and the schema round trip compares by
+            // record equality — which means the upstream's JSON key order was
+            // silently load-bearing. It held only while a stage listed its drops
+            // in the same order the catalogue listed its items, and the sampled
+            // tables do not. Both ends now sort by item id: here, and in
+            // JdbcGameDefinitionRepository when it reads them back.
+            copy(dir);
+            Files.writeString(dir.resolve("stages3_3_greedy.json"), SAMPLED);
+
+            GameDataBundle sampled = new KornblumeAdapter().adapt(dir, 0, "1.0");
+
+            assertThat(stageIn(sampled, "1-1").drops())
+                    .extracting(drop -> drop.item().value())
+                    .containsExactly("sharpodonty", "silver-ore");
+        }
+
+        @Test
+        @DisplayName("a sampled table claiming no runs is refused, not divided by")
+        void refusesAnEmptySample(@TempDir Path dir) throws IOException {
+            // count is a denominator. Zero makes every yield infinite, and an
+            // infinite yield is a free source — the same defect as the zero-cost
+            // stage and the ingredient-less craft, arriving a third way.
+            copy(dir);
+            Files.writeString(dir.resolve("stages3_3_greedy.json"),
+                    SAMPLED.replace("\"count\": 1000", "\"count\": 0"));
+
+            assertThatThrownBy(() -> new KornblumeAdapter().adapt(dir, 0, "1.0"))
+                    .isInstanceOf(BundleFormatException.class)
+                    .hasMessageContaining("9-15H")
+                    .hasMessageContaining("0 sampled runs");
+        }
+    }
+
     @Test
     @DisplayName("a directory missing a file says which file and what the layout should be")
     void refusesAnIncompleteSnapshot(@TempDir Path dir) throws IOException {
@@ -297,7 +429,11 @@ class KornblumeAdapterTest {
     // ── Helpers ─────────────────────────────────────────────────────────────
 
     private static Stage stage(String id) {
-        return bundle.sources().stream()
+        return stageIn(bundle, id);
+    }
+
+    private static Stage stageIn(GameDataBundle from, String id) {
+        return from.sources().stream()
                 .filter(Stage.class::isInstance).map(Stage.class::cast)
                 .filter(s -> s.stageId().equals(new StageId(id)))
                 .findFirst().orElseThrow(() -> new AssertionError("no stage " + id));

@@ -2,47 +2,28 @@ package io.stormalmanac.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.stormalmanac.common.GameDataVersion;
-import io.stormalmanac.common.id.AccountId;
 import io.stormalmanac.common.id.EntityId;
-import io.stormalmanac.common.id.GameId;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.gamedata.Craft;
 import io.stormalmanac.gamedata.GameDefinition;
-import io.stormalmanac.gamedata.GameDefinitionRepository;
 import io.stormalmanac.gamedata.Goal;
 import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.Stage;
 import io.stormalmanac.gamedata.Upgrade;
-import io.stormalmanac.gamedata.ingest.CanonicalBundleParser;
-import io.stormalmanac.gamedata.ingest.CanonicalBundleWriter;
-import io.stormalmanac.gamedata.ingest.GameDataBundle;
-import io.stormalmanac.gamedata.ingest.UpstreamAdapter;
 import io.stormalmanac.planner.Conversion;
-import io.stormalmanac.planner.MipOptimizer;
 import io.stormalmanac.planner.Optimizer;
 import io.stormalmanac.planner.Objective;
 import io.stormalmanac.planner.Plan;
 import io.stormalmanac.planner.SolveRequest;
 import io.stormalmanac.planner.StageRun;
-import io.stormalmanac.player.Goals;
 import io.stormalmanac.player.Inventory;
-import io.stormalmanac.player.PlayerProfile;
-import io.stormalmanac.player.PlayerStateRepository;
-import io.stormalmanac.player.Roster;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
@@ -50,11 +31,12 @@ import org.junit.jupiter.api.condition.EnabledIf;
 /**
  * The optimizer against a real patch of somebody else's game.
  *
- * <p>Ninety-nine stages, real drop tables carrying three decimal places, and
- * upgrade costs nobody here chose. This is the only place the solver meets
- * numbers that were not arranged to make its sums come out, and it is therefore
- * the only place its p95 means anything: a model with three stages and one craft
- * says nothing about a branch-and-bound tree over a hundred integer variables.
+ * <p>A hundred and five stages across twelve chapters, drop rates sampled over
+ * anywhere from a hundred to forty thousand runs, and upgrade costs nobody here
+ * chose. This is the only place the solver meets numbers that were not arranged
+ * to make its sums come out, and it is therefore the only place its p95 means
+ * anything: a model with three stages and one craft says nothing about a
+ * branch-and-bound tree over a hundred integer variables.
  *
  * <h2>Why this test skips itself</h2>
  *
@@ -69,26 +51,26 @@ import org.junit.jupiter.api.condition.EnabledIf;
  * ./gradlew :app:test --tests '*RealUpstreamPlanTest'
  * </pre>
  *
- * <h2>What this does not yet claim</h2>
+ * <h2>What this claims, and what {@link CommunityBenchmarkTest} claims instead</h2>
  *
- * <p>Phase 2's exit criterion is agreement with community-accepted answers on
- * five benchmark goal sets. That needs the community answers, which are a thing
- * to go and find rather than a thing to compute, so what is checked here is
- * weaker and still worth having: that a plan over real data is <em>sufficient</em>
- * — apply its runs at the declared yields and every demanded item is covered —
- * and that it is no worse than the obvious plan a player would make by hand.
- * A solver that is fast, self-consistent and confidently wrong is the failure
- * mode the plan warns about, and only the benchmark sets close it.
+ * <p>Everything here is the solver checked against itself: that a plan is
+ * <em>sufficient</em> — apply its runs at the declared yields and every demanded
+ * item is covered — that it beats the obvious plan a player would make by hand,
+ * and that it comes in under its budget. A solver that is fast, self-consistent
+ * and confidently wrong passes every one of them.
+ *
+ * <p>The one test that could catch that is next door: {@code CommunityBenchmarkTest}
+ * compares the stage this model calls cheapest with the stage a published guide
+ * tells players to farm, and it is the only assertion in this repository whose
+ * expected value was not computed here.
  */
 @EnabledIf("snapshotIsPresent")
 class RealUpstreamPlanTest {
 
-    private static final GameId REVERSE_1999 = new GameId("reverse-1999");
-    private static final String PATCH = "3.5";
-    private static final Instant NOW = Instant.parse("2026-09-07T12:00:00Z");
-    private static final ProfileId PROFILE = new ProfileId("real-plan");
+    private static final String PATCH = RealUpstream.PATCH;
+    private static final ProfileId PROFILE = RealUpstream.PROFILE;
 
-    private final GameDefinition definition = load();
+    private final GameDefinition definition = RealUpstream.definition();
 
     @Test
     @DisplayName("a plan over a real patch covers every material the goal actually costs")
@@ -189,7 +171,7 @@ class RealUpstreamPlanTest {
 
         System.out.printf(
                 "RealUpstreamPlanTest: %d solves over %s %s — median %d ms, p95 %d ms, max %d ms%n",
-                millis.size(), REVERSE_1999.value(), PATCH,
+                millis.size(), RealUpstream.REVERSE_1999.value(), PATCH,
                 millis.get(millis.size() / 2), p95, millis.get(millis.size() - 1));
 
         // Each solve here also computes shadow prices, which are one extra solve
@@ -199,35 +181,52 @@ class RealUpstreamPlanTest {
     }
 
     @Test
-    @DisplayName("some real goals are impossible in this patch, and the refusal names the material")
-    void someGoalsAreHonestlyImpossible() {
-        // The finding that arrived with this test and is worth keeping as one.
-        // The upstream carries a synthetic "Unreleased" stage so its own solver
-        // can name materials that no real stage drops yet; the adapter refuses it
-        // because a zero-cost source is an unbounded one. The consequence is that
-        // Cicada Wings, Perpetual Cog and the two recipes needing them have no
-        // source in this snapshot at all — so a plan for a character who needs
-        // them cannot exist, and pretending otherwise would be the confidently
-        // wrong answer the plan warns about.
-        List<Goal> refused = new ArrayList<>();
-        List<String> reasons = new ArrayList<>();
-        for (EntityId entity : charactersReaching("insight-2")) {
-            Goal goal = Goal.deterministic(entity, "insight-2");
+    @DisplayName("every released character's Insight 2 has a source in this patch")
+    void nothingReleasedIsUnreachable() {
+        // This assertion is the reverse of the one it replaces, and the reversal
+        // is the story of this test.
+        //
+        // It used to assert that some goals were impossible, and it passed: 45 of
+        // 118 characters could not be planned, and the reason looked principled —
+        // their materials appeared only against the upstream's synthetic
+        // "Unreleased" stage, which the adapter refuses because a zero-cost source
+        // is an unbounded one. It was not principled. The adapter was reading
+        // stages.json, which at both pinned commits carries chapters 1 to 4 only,
+        // while the upstream's own planner reads the newest sampled table and sees
+        // all twelve. Two thirds of the game were missing and the bundle, the
+        // round trip and the solver all looked healthy.
+        //
+        // So this now checks the thing whose absence hid that: a released
+        // character whose Insight 2 no stage and no craft can supply means the
+        // stage table is truncated, not that the game is.
+        List<String> unreachable = new ArrayList<>();
+        List<String> unsolved = new ArrayList<>();
+        List<EntityId> characters = charactersReaching("insight-2");
+        for (EntityId entity : characters) {
             try {
-                solve(List.of(goal), Inventory.empty(PROFILE));
+                // A short budget on purpose: reachability is decided before the
+                // search starts, so this asks the question this test is about and
+                // does not pay 118 times for an answer it throws away.
+                solve(List.of(Goal.deterministic(entity, "insight-2")),
+                        Inventory.empty(PROFILE), Duration.ofMillis(250));
             } catch (Optimizer.InfeasibleGoalException e) {
-                refused.add(goal);
-                reasons.add(e.getMessage());
+                (e.getMessage().startsWith("nothing available can produce ")
+                        ? unreachable : unsolved).add(entity.value() + ": " + e.getMessage());
             }
         }
 
-        assertThat(refused).as("this snapshot has characters whose materials it cannot supply")
-                .isNotEmpty();
-        assertThat(reasons).allSatisfy(reason -> assertThat(reason)
-                .as("a refusal has to name the item, not just say no")
-                .startsWith("nothing available can produce "));
-        System.out.printf("RealUpstreamPlanTest: %d of %d insight-2 goals are unsupplyable in %s; e.g. %s%n",
-                refused.size(), charactersReaching("insight-2").size(), PATCH, reasons.get(0));
+        assertThat(unreachable)
+                .as("a released character with no source for a material means the stage"
+                        + " table is short, not that the material is unobtainable")
+                .isEmpty();
+        // The rest is the budget, not the data: 250 ms is not always enough to
+        // land an integer solution, and "the search gave up" must not be allowed
+        // to read as "the game cannot supply this".
+        assertThat(unsolved).allSatisfy(reason ->
+                assertThat(reason).contains("no combination of the").contains("solver state"));
+        System.out.printf("RealUpstreamPlanTest: %d insight-2 goals in %s, %d unreachable,"
+                        + " %d unsolved inside 250 ms%n",
+                characters.size(), PATCH, unreachable.size(), unsolved.size());
     }
 
     @Test
@@ -374,99 +373,22 @@ class RealUpstreamPlanTest {
     }
 
     // ── plumbing ────────────────────────────────────────────────────────────
+    //
+    // The snapshot, the conversion and the two fakes live in RealUpstream, so
+    // that this class and CommunityBenchmarkTest solve against the same thing.
 
     private Plan solve(List<Goal> goals, Inventory inventory) {
-        MipOptimizer optimizer = new MipOptimizer(
-                new OneVersion(definition),
-                new FixedPlayer(REVERSE_1999, inventory),
-                null,
-                Clock.fixed(NOW, ZoneOffset.UTC),
-                Duration.ofSeconds(2));
-
-        return optimizer.solve(new SolveRequest(
-                PROFILE, definition.version(), goals, Objective.LEAST_ENERGY, 240));
+        return solve(goals, inventory, Duration.ofSeconds(2));
     }
 
-    private static GameDefinition load() {
-        UpstreamAdapter adapter = UpstreamAdapters.forGame(REVERSE_1999, note -> { }).orElseThrow();
-        GameDataBundle converted = adapter.adapt(snapshot().resolve(PATCH), 0, PATCH);
-        return new CanonicalBundleParser()
-                .parse(new CanonicalBundleWriter().write(converted))
-                .definitionApprovedAt(Instant.EPOCH);
-    }
-
-    static Path snapshot() {
-        String configured = System.getProperty("storm-almanac.upstream");
-        return configured != null ? Path.of(configured) : Path.of("..", "build", "upstream-snapshots");
+    private Plan solve(List<Goal> goals, Inventory inventory, Duration budget) {
+        return RealUpstream.optimizer(definition, inventory, budget)
+                .solve(new SolveRequest(
+                        PROFILE, definition.version(), goals, Objective.LEAST_ENERGY, 240));
     }
 
     @SuppressWarnings("unused") // named by @EnabledIf
     static boolean snapshotIsPresent() {
-        return Files.isReadable(snapshot().resolve(PATCH).resolve("items.json"));
-    }
-
-    private record OneVersion(GameDefinition definition) implements GameDefinitionRepository {
-        @Override
-        public Optional<GameDefinition> findLatest(GameId game) {
-            return find(game, definition.version().sequence());
-        }
-
-        @Override
-        public Optional<GameDefinition> find(GameId game, long sequence) {
-            return game.equals(definition.game().id()) && sequence == definition.version().sequence()
-                    ? Optional.of(definition)
-                    : Optional.empty();
-        }
-
-        @Override
-        public List<GameDataVersion> versions(GameId game) {
-            return List.of(definition.version());
-        }
-    }
-
-    private record FixedPlayer(GameId game, Inventory inventory) implements PlayerStateRepository {
-        @Override
-        public List<PlayerProfile> profilesOf(AccountId account) {
-            return List.of(profile());
-        }
-
-        @Override
-        public Optional<PlayerProfile> findProfile(ProfileId id) {
-            return Optional.of(profile());
-        }
-
-        private PlayerProfile profile() {
-            return new PlayerProfile(PROFILE, new AccountId("real-plan"), game, "Tester", "global");
-        }
-
-        @Override
-        public Inventory inventoryOf(ProfileId profile) {
-            return inventory;
-        }
-
-        @Override
-        public Roster rosterOf(ProfileId profile) {
-            return new Roster(profile, Map.of());
-        }
-
-        @Override
-        public Goals goalsOf(ProfileId profile) {
-            return new Goals(profile, List.of());
-        }
-
-        @Override
-        public void saveInventory(Inventory value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void saveRoster(Roster value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void saveGoals(Goals value) {
-            throw new UnsupportedOperationException();
-        }
+        return RealUpstream.snapshotIsPresent();
     }
 }
