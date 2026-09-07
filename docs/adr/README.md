@@ -17,3 +17,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0007](0007-equipment-is-an-entity.md) | Equipment is an `Entity` | Accepted |
 | [0008](0008-gamedata-persistence-is-jdbc.md) | The gamedata module persists with JDBC, not JPA | Accepted |
 | [0009](0009-upstream-data-is-fetched-never-vendored.md) | Upstream game data is fetched, never vendored | Accepted |
+| [0010](0010-a-plan-is-the-best-provable-in-the-budget.md) | A plan is the cheapest one provable inside the budget | Accepted |

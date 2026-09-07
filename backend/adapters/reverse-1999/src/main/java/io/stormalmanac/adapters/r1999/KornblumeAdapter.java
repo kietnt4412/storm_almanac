@@ -86,6 +86,15 @@ import java.util.function.Consumer;
  *       {@code Unreleased} row so its own solver can name items that no real
  *       stage drops yet. A zero-cost source is free output: an optimizer would
  *       run it without bound and report that everything is obtainable today.
+ *   <li><b>A formula that lists no materials</b> — the same file holds recipes
+ *       and base materials, and a base material's row has an empty
+ *       {@code Material} array. Converted faithfully it becomes a craft that
+ *       consumes nothing, which is the zero-cost source above wearing a
+ *       different hat. This one was not reasoned out in advance: the optimizer
+ *       found it on its first real solve and cheerfully crafted 294 250
+ *       Sharpodonty out of nothing. {@code Craft} now refuses the shape
+ *       outright, so the rule is kept for every future upstream and not only
+ *       this one.
  *   <li><b>Unreleased characters and equipment</b> — kept out of the catalogue,
  *       because a plan that farms for something not in the game is not a plan.
  *       They arrive on their own in a later snapshot, and the patch diff is
@@ -149,7 +158,7 @@ public final class KornblumeAdapter implements UpstreamAdapter {
         List<Item> items = items(read(upstream, "items.json"), itemNames);
         List<Source> sources = new ArrayList<>();
         sources.addAll(stages(read(upstream, "stages.json"), itemNames));
-        sources.addAll(crafts(read(upstream, "formulas.json"), itemNames));
+        sources.addAll(crafts(read(upstream, "formulas.json"), itemNames, notes));
 
         List<Sink> sinks = new ArrayList<>();
         List<Entity> entities = new ArrayList<>();
@@ -266,19 +275,40 @@ public final class KornblumeAdapter implements UpstreamAdapter {
 
     // ── formulas.json ───────────────────────────────────────────────────────
 
-    private List<Craft> crafts(JsonNode root, Names itemNames) {
+    private List<Craft> crafts(JsonNode root, Names itemNames, Consumer<String> notes) {
         List<Craft> crafts = new ArrayList<>();
+        int catalogueRows = 0;
+
         for (JsonNode node : array(root, "formulas.json")) {
             String produced = text(node, "Name", "formulas.json");
             String at = "formula \"" + produced + "\"";
+
+            // The upstream lists base materials in the same file as its recipes,
+            // as rows with an empty Material array — Sharpodonty, Silver Ore and
+            // ten others. They are catalogue entries, not conversions, and
+            // converting them faithfully produced a craft that made currency out
+            // of nothing at zero energy. The optimizer found it immediately and
+            // ran it 294 250 times, which is the correct answer to the wrong
+            // model. Same rule as the free stages above: a free source is an
+            // unbounded one.
+            List<ItemStack> materials = stacks(node, at, itemNames);
+            if (materials.isEmpty()) {
+                catalogueRows++;
+                continue;
+            }
             crafts.add(new Craft(
                     "craft-" + itemNames.reference(produced, at),
-                    stacks(node, at, itemNames),
+                    materials,
                     // Upstream states no output quantity, and every recipe it
                     // publishes makes one. Stated here rather than assumed
                     // silently: if a recipe ever makes two, this is the line.
                     List.of(new ItemStack(new ItemId(itemNames.reference(produced, at)), 1)),
                     Availability.ALWAYS));
+        }
+        if (catalogueRows > 0) {
+            notes.accept("skipped " + catalogueRows + " formula(s) listing no materials:"
+                    + " a base material's catalogue row, not a recipe, and a craft that"
+                    + " consumes nothing is an unbounded source");
         }
         return crafts;
     }

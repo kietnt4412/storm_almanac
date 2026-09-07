@@ -1,0 +1,268 @@
+package io.stormalmanac.planner;
+
+import io.stormalmanac.common.GameDataVersion;
+import io.stormalmanac.common.id.ItemId;
+import io.stormalmanac.common.id.PlanId;
+import io.stormalmanac.common.id.StageId;
+import io.stormalmanac.gamedata.GameDefinition;
+import io.stormalmanac.gamedata.GameDefinitionRepository;
+import io.stormalmanac.player.Inventory;
+import io.stormalmanac.player.PlayerProfile;
+import io.stormalmanac.player.PlayerStateRepository;
+import io.stormalmanac.player.Roster;
+import io.stormalmanac.stats.DropEstimateRepository;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * The {@link Optimizer} port, wired to the real repositories.
+ *
+ * <p>This class does the fetching and the narrating; {@link EnergyMip} does the
+ * arithmetic and {@link DemandResolver} does the graph walk. Keeping them apart
+ * is what lets the model be tested without a database and lets the shadow prices
+ * below be computed by re-solving rather than by trusting a dual value.
+ *
+ * <p><b>On the two objectives.</b> Both are accepted and both are answered, and
+ * under the current model they are answered by the same plan — a deliberately
+ * stated fact rather than an oversight. With no time axis, the number of days a
+ * plan takes is its energy divided by a constant, so the ordering of plans by
+ * days is the ordering by energy. They separate exactly when the model gains
+ * weekday rotation and expiring stages, because then a cheaper plan can be a
+ * slower one. The plan's notes say so on every {@code FEWEST_DAYS} solve rather
+ * than letting a caller infer that a distinct model ran.
+ */
+public final class MipOptimizer implements Optimizer {
+
+    /**
+     * The plan's synchronous budget. Past this the request belongs in the queue
+     * {@link SolveCoordinator} describes; the solver is told so it returns the
+     * best it has rather than running long.
+     */
+    public static final Duration DEFAULT_BUDGET = Duration.ofSeconds(2);
+
+    /**
+     * How much of the budget the search itself may have. The rest pays for the
+     * explanation, which costs one re-solve per demanded item.
+     *
+     * <p>A count cap was the first attempt and was the wrong shape. Sixteen items
+     * is nothing when a solve takes eight milliseconds and far too many when it
+     * takes a second, and the number that matters to a caller is how long they
+     * wait, not how many re-solves happened.
+     */
+    private static final double SEARCH_BUDGET_SHARE = 0.5;
+
+    /**
+     * The whole answer, explanation included, is finished by this fraction of the
+     * budget. The margin exists because the budget is a promise to a caller
+     * waiting on a request, and a solver told to stop at exactly two seconds
+     * stops slightly after.
+     */
+    private static final double ANSWER_DEADLINE_SHARE = 0.9;
+
+    /** Below this there is no point starting another re-solve. */
+    private static final long MINIMUM_RESOLVE_MILLIS = 5;
+
+    private final GameDefinitionRepository definitions;
+    private final PlayerStateRepository players;
+    private final DropEstimateRepository estimates;
+    private final DemandResolver demands = new DemandResolver();
+    private final Clock clock;
+    private final Duration budget;
+
+    /**
+     * @param estimates measured drop rates, or {@code null} while nothing
+     *                  publishes any. A null repository means "every coefficient
+     *                  is the bundle's declared yield", which is the honest state
+     *                  of the world until phase 6 and is said in the plan's notes
+     */
+    public MipOptimizer(
+            GameDefinitionRepository definitions,
+            PlayerStateRepository players,
+            DropEstimateRepository estimates,
+            Clock clock,
+            Duration budget) {
+        this.definitions = definitions;
+        this.players = players;
+        this.estimates = estimates;
+        this.clock = clock;
+        this.budget = budget;
+    }
+
+    public MipOptimizer(GameDefinitionRepository definitions, PlayerStateRepository players) {
+        this(definitions, players, null, Clock.systemUTC(), DEFAULT_BUDGET);
+    }
+
+    @Override
+    public Plan solve(SolveRequest request) {
+        long startedAtNanos = System.nanoTime();
+        PlayerProfile profile = players.findProfile(request.profile())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "no profile " + request.profile().value()));
+
+        GameDataVersion asked = request.gameVersion();
+        if (!asked.game().equals(profile.game())) {
+            throw new IllegalArgumentException(
+                    "profile " + profile.id().value() + " plays " + profile.game().value()
+                            + " and the request names " + asked.game().value());
+        }
+        GameDefinition definition = definitions.find(profile.game(), asked.sequence())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "no published version " + asked.sequence() + " of " + profile.game().value()));
+
+        Inventory inventory = players.inventoryOf(profile.id());
+        Roster roster = players.rosterOf(profile.id());
+        Demand demand = demands.resolve(definition, roster, request.goals());
+
+        Instant now = clock.instant();
+        YieldTable yields = YieldTable.of(definition, estimates);
+        // The budget covers the whole answer, so the search gets what is left
+        // after the explanation's share. Handing the solver the full two seconds
+        // and then explaining on top of that is how a "two-second budget" becomes
+        // a four-second wait.
+        long searchMillis =
+                (long) (budget.toMillis() * SEARCH_BUDGET_SHARE);
+        EnergyMip.Inputs inputs = new EnergyMip.Inputs(
+                definition, yields, inventory.quantities(), demand.quantities(), now, searchMillis);
+
+        EnergyMip.Outcome outcome = EnergyMip.solve(inputs);
+
+        return new Plan(
+                PlanId.of("plan-" + SolveKey.of(definition.version(), request, inventory, roster)),
+                profile.id(),
+                definition.version(),
+                request.objective(),
+                outcome.stageRuns(),
+                outcome.conversions(),
+                outcome.totalEnergy(),
+                etaDays(outcome.totalEnergy(), request.energyPerDay()),
+                explain(request, demand, yields, inputs, outcome, startedAtNanos),
+                now);
+    }
+
+    /**
+     * Energy is spent at a flat rate here, so the estimate is a division. It is
+     * the only place the request's {@code energyPerDay} is used, and it is
+     * deliberately not rounded up: "3.4 days" is a truer thing to show a player
+     * than "4 days", and the rounding belongs to whoever renders it.
+     */
+    private static double etaDays(int totalEnergy, int energyPerDay) {
+        if (energyPerDay <= 0) {
+            throw new IllegalArgumentException("energyPerDay must be positive, was " + energyPerDay);
+        }
+        return totalEnergy / (double) energyPerDay;
+    }
+
+    private Explanation explain(
+            SolveRequest request,
+            Demand demand,
+            YieldTable yields,
+            EnergyMip.Inputs inputs,
+            EnergyMip.Outcome outcome,
+            long startedAtNanos) {
+
+        List<String> notes = new ArrayList<>();
+        notes.add("Minimised energy over %d stage(s) and %d craft(s), against %d item constraint(s)."
+                .formatted(outcome.stageVariables(), outcome.craftVariables(), outcome.constraints()));
+        if (!outcome.provenOptimal()) {
+            notes.add(Double.isNaN(outcome.optimalityGap())
+                    ? "The search stopped on its time budget, so this is the cheapest plan found"
+                            + " rather than the cheapest plan, and how much cheaper one could be is"
+                            + " not known."
+                    : "The search stopped on its time budget: this is the cheapest plan found, and"
+                            + " no plan can be more than %.2f%% cheaper."
+                                    .formatted(outcome.optimalityGap() * 100));
+        }
+
+        if (demand.steps().isEmpty()) {
+            notes.add("Nothing to do: the roster already satisfies every goal.");
+        } else {
+            notes.add("Paying for %d upgrade step(s): %s."
+                    .formatted(demand.steps().size(), String.join(", ", demand.steps())));
+        }
+        if (!demand.alreadyMet().isEmpty()) {
+            notes.add("Already met, and not costed: " + demand.alreadyMet().stream()
+                    .map(goal -> goal.entity().value() + " " + goal.targetState())
+                    .reduce((a, b) -> a + ", " + b).orElse(""));
+        }
+
+        int measured = yields.measuredCount();
+        notes.add(measured == 0
+                ? "Every drop rate here is the bundle's declared yield. No player reports have"
+                        + " been aggregated yet, so these numbers are the upstream's claim rather"
+                        + " than a measurement."
+                : measured + " drop coefficient(s) came from player reports; the rest are declared.");
+
+        if (request.objective() == Objective.FEWEST_DAYS) {
+            notes.add("Fewest days and least energy are the same plan under this model: with no"
+                    + " time axis, days are energy divided by a constant. They separate once"
+                    + " rotating and expiring stages are modelled.");
+        }
+
+        Map<ItemId, Double> shadowPrices = shadowPrices(demand, inputs, outcome, notes, startedAtNanos);
+        List<StageId> binding = outcome.stageRuns().stream().map(StageRun::stage).toList();
+        return new Explanation(shadowPrices, binding, List.copyOf(notes));
+    }
+
+    /**
+     * What one more of each item would actually cost, in energy.
+     *
+     * <p>Computed by re-solving with the demand raised by one, not by reading a
+     * dual value off the LP relaxation. ojAlgo will hand over multipliers, but
+     * they are the <em>relaxation's</em> shadow prices, and this is an integer
+     * program: the relaxation's marginal cost is not the marginal cost of one
+     * more unit, and the sentence this number ends up in — "one more Greater
+     * Sigil costs you 40 energy" — is a claim about the real plan. A re-solve is
+     * more expensive and it is the number that was promised.
+     *
+     * <p>Zero is a real and useful answer: it means the item falls out of runs
+     * the plan already makes for something else.
+     */
+    private Map<ItemId, Double> shadowPrices(
+            Demand demand,
+            EnergyMip.Inputs inputs,
+            EnergyMip.Outcome base,
+            List<String> notes,
+            long startedAtNanos) {
+
+        long deadline = startedAtNanos + (long) (budget.toNanos() * ANSWER_DEADLINE_SHARE);
+
+        Map<ItemId, Double> prices = new LinkedHashMap<>();
+        for (ItemId item : demand.quantities().keySet()) {
+            // Each re-solve gets only what is left, so the last one cannot run
+            // past the budget the caller was promised. On a small model this
+            // never binds and every item is priced; on a hard one the plan comes
+            // back with fewer prices and a line saying why, which is better than
+            // a plan that arrives late.
+            long remaining = (deadline - System.nanoTime()) / 1_000_000;
+            if (remaining < MINIMUM_RESOLVE_MILLIS) {
+                notes.add("Shadow prices stopped at %d of %d item(s): pricing one more of each costs"
+                        .formatted(prices.size(), demand.quantities().size())
+                        + " a re-solve, and the budget for this answer ran out.");
+                break;
+            }
+            Map<ItemId, Integer> raised = new HashMap<>(demand.quantities());
+            raised.merge(item, 1, Integer::sum);
+            try {
+                EnergyMip.Outcome marginal = EnergyMip.solve(
+                        inputs.withDemand(raised).withBudget(Math.min(remaining, inputs.budgetMillis())));
+                // Only comparable when both ends were solved to optimality. A
+                // difference between two time-limited answers is noise with a
+                // number on it, and a number a player would act on.
+                if (base.provenOptimal() && marginal.provenOptimal()) {
+                    prices.put(item, (double) (marginal.totalEnergy() - base.totalEnergy()));
+                }
+            } catch (Optimizer.InfeasibleGoalException e) {
+                // One more unit put the goal set out of reach, which is worth
+                // saying and is not worth failing the whole plan over.
+                notes.add("One more " + item.value() + " is not obtainable: " + e.getMessage());
+            }
+        }
+        return prices;
+    }
+}

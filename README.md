@@ -143,8 +143,8 @@ catalogue should be caught before anybody approves it.
 **On the data itself, plainly:** the upstream sources carry no licence, so this
 repository contains none of their data and never will. The script fetches into
 an ignored directory; the tests that use it skip when it is absent, which is the
-state CI is in. That is deliberate and it means **the strongest test here is one
-the pipeline does not run** — see
+state CI is in. That is deliberate and it means **the strongest tests here are
+ones the pipeline does not run** — see
 [ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md). The
 committed fixtures are a synthetic title, `proving-ground`, invented for this
 repository.
@@ -173,6 +173,38 @@ reader sees cannot drift apart.
 
 Publishing has no endpoint. It is a human approval through the CLI, so only
 `GET` is public here and everything else is denied.
+
+## Planning
+
+Given what a player owns and what they want, the planner finds the cheapest way
+to close the gap: a mixed-integer program over stage runs and crafting
+conversions, minimising energy, with whole-number runs because *"run 3-4 exactly
+17.3 times"* is not advice. Crafting is not expanded recursively — every recipe
+is a variable and every intermediate material is a constraint, so the solver
+prices the whole chain and picks the route.
+
+**There is no endpoint for it yet.** It is reachable from tests and nothing else,
+because a plan needs a player's inventory and roster and those are the next
+phase's job.
+
+What it will say when it answers matters more than that it answers, so it is
+worth stating up front:
+
+- **A plan is the cheapest one the solver could prove inside two seconds**, and
+  when that is not the cheapest plan it says so *and how much cheaper one could
+  be* — measured, not hedged. On a five-character Reverse: 1999 goal set that is
+  2 411 Activity, p95 1.8 s, and a plan within 2.95% of anything that could
+  exist. [ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md).
+- **It refuses rather than invents.** A material with no source in the patch
+  being planned against is named, not costed at zero — including the 45 of 118
+  characters whose Insight 2 materials the current snapshot has no source for.
+- **It says where its numbers came from.** Every drop rate today is the
+  upstream's declared yield rather than a measurement, and the plan says that on
+  every solve.
+
+Shops, free income and weekday rotation are not modelled yet; items whose only
+source is one of those are refused by name for that reason. That is also why
+"fewest days" and "least energy" are currently the same plan.
 
 ## The rules the build enforces
 
