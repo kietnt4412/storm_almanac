@@ -21,7 +21,7 @@ the next session starts from a lie.
   repository are ones CI does not run.** Upstream data is fetched and never
   committed ([ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md)),
   so `RealUpstreamPatchTest` **and now `RealUpstreamPlanTest`** skip on the
-  runner — 9 of the 143 tests. Run `backend/tools/fetch-upstream.sh` before
+  runner — 10 of the 144 tests. Run `backend/tools/fetch-upstream.sh` before
   trusting a green build to mean the pipeline handles real data, and note that
   the optimizer's entire performance evidence lives in the second of those.
 
@@ -93,7 +93,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 
 | Area | State | Notes |
 |------|-------|-------|
-| Backend build | **Green** | `./gradlew build` — 143 tests (134 without an upstream snapshot, when `RealUpstreamPatchTest` and `RealUpstreamPlanTest` skip), `storm-almanac.jar` |
+| Backend build | **Green** | `./gradlew build` — 144 tests (134 on CI, without an upstream snapshot, when `RealUpstreamPatchTest` and `RealUpstreamPlanTest` skip), `storm-almanac.jar` |
 | Repo layout | Done | Gradle multi-module backend, Vite frontend, ADR folder |
 | Domain model (`gamedata`) | **Persisted and round-tripped** | Records and sealed hierarchies complete, and now written and read back by record equality across the whole graph. Equipment settled as an `Entity` with a `kind` field — ADR 0007, now proven through the schema too |
 | `gamedata` schema | **Applied, populated, round-tripped** | `V2` (28 tables) plus `V3` (a version can now actually be deleted). Six invariants proven by `GameDataSchemaTest`; the round trip proven by `GameDataIngestTest` on the synthetic fixture and by `RealUpstreamPatchTest` on two real Reverse: 1999 patches. **It has now held a real upstream** — the caveat is only that CI has not, see ADR 0009 |
@@ -117,7 +117,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 | `GameAgnosticismTest` | **Passing** | Source scan over planner/gacha/stats |
 | Health endpoint | **Done — served and verified** | `GET /api/health` → 200 from a real container. Was 401; see the session log |
 | Docker Compose | **Verified** | `docker compose up --build` from cold: image builds, all three services healthy |
-| CI workflow | **Green on the current tree** | Runs `34035918992` (`dev` PR, `9b592b4`) and `34035923889` (`main` push, PR #6, `5e4b9f4`), both success. All 18 `KornblumeAdapterTest` cases PASSED on the runner and `RealUpstreamPatchTest` skipped, which is the designed state — see N10. Six seconds slower for a whole new module. Deprecation warnings still pending — see **N5** |
+| CI workflow | **Green on the current tree** | Runs `34072743411` (`dev` PR) and `34072752969` (`main` push, PR #7), both success. All 30 planner tests PASSED on the runner; `RealUpstreamPlanTest` (7) and `RealUpstreamPatchTest` (3) skipped, which is the designed state — see N13. Four seconds slower for a new source set and 51 tests. Deprecation warnings still pending — see **N5** |
 | Frontend | **Green locally** | 415 deps resolved clean, typecheck + `vite build` pass, PWA SW generated |
 | Track B | Package docs only | Deliberately empty — see the gate |
 
@@ -126,18 +126,17 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 Be precise about this, because the temptation is to read "build green" as "it
 works". It does not mean that:
 
-- **CI has not run on this session's work.** The entry came back, exactly as the
-  previous session's version of it predicted it would. The last green runs are
-  `34035918992` and `34035923889` on `5e4b9f4`, and **this session's tree is not
-  that tree** — a whole new module's worth of main code, a domain invariant added
-  to `Craft`, a changed adapter fixture. **N13 is to confirm it.** Two specific
-  things to check rather than infer, both new: the planner module's 30 tests
-  execute on the runner, and `RealUpstreamPlanTest` shows as **six SKIPPED**, not
-  passed and not failed.
+- ~~**CI has not run on this session's work.**~~ **It has, and it is green.**
+  Runs `34072743411` (`ci` on the `dev` PR, backend job 1m37s) and `34072752969`
+  (`ci` on the `main` push merging PR #7, backend job 1m56s), both success,
+  `deploy` skipped as designed. Both N13 checks read out of the log rather than
+  inferred — see N13. The rule stands for next time: a pipeline is proven for
+  the tree it ran on and no other, so this entry comes back the moment anything
+  is committed.
 - **CI does not run the tests that matter most, and never will as things
   stand.** Two classes now touch data this project did not author, and both skip
   on the runner because the snapshots are not committed — ADR 0009, deliberately.
-  Locally the suite is 143 tests; on CI it is 134, and the nine missing ones are
+  Locally the suite is 144 tests; on CI it is 134, and the ten missing ones are
   the ones that would catch an upstream-shape surprise **and the only evidence
   the optimizer is fast enough or right about anything real.** Every performance
   number in this file — p95 1.8 s, a 2.95% gap — comes from a test the pipeline
@@ -584,13 +583,13 @@ Ordered. Do them in this order.
       the main backend job went 2m8s → 1m49s. Six seconds for a module and 18
       tests.
 
-### Done 2026-09-07 (seventh session) — N11
+### Done 2026-09-07 (seventh session) — N11 and N13
 
 - [x] ~~**N11 — Open Phase 2, the optimizer core.**~~ **Opened and most of the
       way through it.** The MIP, demand resolution, crafting recursion, integer
       runs, explanation output and the cache key all landed; **both halves of the
       phase's exit criterion are not met, and only one of them is close** — see
-      N12. 50 new tests, 93 → 143.
+      N12. 51 new tests, 93 → 144.
       **The warning in the old text was right and was worth writing down:**
       `Stage.potentialOutput()` rounds a yield up to an integer and is a
       catalogue figure, not a constraint coefficient. `YieldTable` reads
@@ -647,17 +646,32 @@ Ordered. Do them in this order.
       ADR 0010's whole subject and it is the number to re-read before deciding
       ojAlgo has passed.
 
+- [x] ~~**N13 — Confirm the pipeline is green on this session's work.**~~ **Done
+      — green, twice, and both checks read out of the log rather than inferred
+      from a tick.** Run `34072743411` (`ci` on the `dev` PR, backend 1m37s) and
+      run `34072752969` (`ci` on the `main` push merging PR #7, backend 1m56s).
+      Both success; `deploy` skipped as designed. No slowdown worth the name for
+      a whole new source set and 51 tests — the main backend job went 1m52s →
+      1m56s.
+      1. **The planner module's 30 tests executed on the runner.** All 30, all
+         PASSED. This was the specific worry: a new test source set in an
+         existing module that silently is not picked up looks identical to a
+         green build.
+      2. **`RealUpstreamPlanTest` shows as seven SKIPPED**, and
+         `RealUpstreamPatchTest` as three — ten in all. Not passed, so no
+         snapshot leaked onto the runner; not failed, so the skip conditions are
+         right. **This is the state to keep re-checking**: the day any of those
+         ten turn green on CI without somebody deciding to make them, upstream
+         data has been committed by accident.
+      **One correction it forced, and it is the reason to read the log:** this
+      entry predicted *six* skips and the truth is seven. The local suite is
+      **144** tests, not the 143 written down at the end of the session — the
+      count was taken before the last test was added and then repeated three
+      times without being recomputed. Fixed everywhere above. A number carried
+      forward is a number nobody re-derived.
+
 ### Next session starts here
 
-- [ ] **N13 — Confirm the pipeline is green on this session's work.** First
-      action, before anything else. `gh` recipe is in Q7. Two things to check in
-      the log rather than infer from a tick:
-      1. **The planner module's 30 tests execute on the runner.** It is a new
-         source set in an existing module; a test directory that silently is not
-         picked up looks identical to a green build.
-      2. **`RealUpstreamPlanTest` shows as six SKIPPED** — not passed, which
-         would mean a snapshot leaked into the repository, and not failed, which
-         would mean the skip condition is wrong.
 - [ ] **N12 — Close Phase 2: the five benchmark goal sets.** The open half of the
       exit criterion, and it is research before it is code. *"Run the solver
       against goal sets the community has already settled. If it disagrees with
@@ -1140,7 +1154,7 @@ Append one entry per session. Newest first.
 
 **Phase 2 opened.** The optimizer went from four interfaces with nothing behind
 them to a working mixed-integer program that answers a real goal set over a real
-patch. 93 tests to 143. The phase's box stays unticked because half its exit
+patch. 93 tests to 144. The phase's box stays unticked because half its exit
 criterion is untouched — see N12 — and that half is the one that decides whether
 the answers are *right* rather than merely fast.
 
@@ -1231,6 +1245,17 @@ about) all matched on the first run, shadow price included. Then
 **Environment note:** Docker Desktop was not running at the start of the session,
 which shows up as `initializationError` on every Testcontainers class and looks
 alarming out of context. It is not a defect in the tree — start Docker and rerun.
+
+**CI confirmed the tree the same day (N13).** Runs `34072743411` and
+`34072752969`, both success, PR #7 merged to `main`. The two things worth
+checking were checked in the log: all 30 planner tests executed on the runner —
+a new test source set that is silently not picked up looks exactly like a green
+build — and the ten real-data tests showed as SKIPPED rather than passed or
+failed. **Reading the log also caught a lie in this file:** the entry predicted
+six skips and there are seven, because the local suite is 144 tests and not the
+143 written down three times without being recounted. Corrected. The test count
+is exactly the kind of number that gets carried forward instead of re-derived,
+which is what this file exists to prevent.
 
 **Not done, and deliberately:** no HTTP route for a solve, no cache behind
 `SolveKey`, no `SolveCoordinator` implementation, no time axis and therefore no
