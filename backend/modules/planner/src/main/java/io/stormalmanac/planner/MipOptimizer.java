@@ -3,6 +3,7 @@ package io.stormalmanac.planner;
 import io.stormalmanac.common.GameDataVersion;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.PlanId;
+import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.common.id.StageId;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.GameDefinitionRepository;
@@ -19,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The {@link Optimizer} port, wired to the real repositories.
@@ -74,28 +76,42 @@ public final class MipOptimizer implements Optimizer {
     private final DemandResolver demands = new DemandResolver();
     private final Clock clock;
     private final Duration budget;
+    private final SolveCache cache;
 
     /**
      * @param estimates measured drop rates, or {@code null} while nothing
      *                  publishes any. A null repository means "every coefficient
      *                  is the bundle's declared yield", which is the honest state
      *                  of the world until phase 6 and is said in the plan's notes
+     * @param cache     where a finished plan is kept under its {@link SolveKey},
+     *                  or {@code null} for no caching at all
      */
     public MipOptimizer(
             GameDefinitionRepository definitions,
             PlayerStateRepository players,
             DropEstimateRepository estimates,
             Clock clock,
-            Duration budget) {
+            Duration budget,
+            SolveCache cache) {
         this.definitions = definitions;
         this.players = players;
         this.estimates = estimates;
         this.clock = clock;
         this.budget = budget;
+        this.cache = cache == null ? SolveCache.none() : cache;
+    }
+
+    public MipOptimizer(
+            GameDefinitionRepository definitions,
+            PlayerStateRepository players,
+            DropEstimateRepository estimates,
+            Clock clock,
+            Duration budget) {
+        this(definitions, players, estimates, clock, budget, SolveCache.none());
     }
 
     public MipOptimizer(GameDefinitionRepository definitions, PlayerStateRepository players) {
-        this(definitions, players, null, Clock.systemUTC(), DEFAULT_BUDGET);
+        this(definitions, players, null, Clock.systemUTC(), DEFAULT_BUDGET, SolveCache.none());
     }
 
     @Override
@@ -117,6 +133,21 @@ public final class MipOptimizer implements Optimizer {
 
         Inventory inventory = players.inventoryOf(profile.id());
         Roster roster = players.rosterOf(profile.id());
+
+        // The lookup goes here and not earlier: the key is a fingerprint of the
+        // player's state, so the state has to be read before the question can be
+        // recognised. Those reads are three indexed lookups against the profile
+        // and the solve they save is seconds, so the ordering costs nothing worth
+        // measuring — but it does mean this cache never saves a database round
+        // trip, only the arithmetic. Said plainly here because a cache that is
+        // assumed to short-circuit more than it does is how a load test surprises
+        // somebody.
+        String key = SolveKey.of(definition.version(), request, inventory, roster);
+        Optional<Plan> cached = cache.get(key);
+        if (cached.isPresent()) {
+            return served(cached.get(), profile.id());
+        }
+
         Demand demand = demands.resolve(definition, roster, request.goals());
 
         Instant now = clock.instant();
@@ -132,8 +163,8 @@ public final class MipOptimizer implements Optimizer {
 
         EnergyMip.Outcome outcome = EnergyMip.solve(inputs);
 
-        return new Plan(
-                PlanId.of("plan-" + SolveKey.of(definition.version(), request, inventory, roster)),
+        Plan plan = new Plan(
+                PlanId.of("plan-" + key),
                 profile.id(),
                 definition.version(),
                 request.objective(),
@@ -143,6 +174,62 @@ public final class MipOptimizer implements Optimizer {
                 etaDays(outcome.totalEnergy(), request.energyPerDay()),
                 explain(request, demand, yields, inputs, outcome, startedAtNanos),
                 now);
+
+        // Stored as computed, without the "served from cache" note: that note
+        // describes this delivery of the plan, not the plan, and a cached copy
+        // that accumulated one per hit would be a plan whose explanation grew
+        // every time somebody read it.
+        cache.put(key, plan);
+        return plan;
+    }
+
+    /**
+     * A cached plan, handed to whoever asked this time.
+     *
+     * <p>Two things are re-stamped and one deliberately is not. The profile is,
+     * because {@link SolveKey} fingerprints a player's <em>state</em> and not
+     * their identity: two profiles holding the same items, the same roster and
+     * the same goals ask the same question and deserve the same answer, but the
+     * envelope has to name whoever is reading it. The note is added for the same
+     * reason.
+     *
+     * <p>{@code computedAt} is <b>not</b> touched. A cache hit is a plan computed
+     * earlier, and re-stamping the timestamp would turn that into a plan computed
+     * now — a lie told by a field that exists to prevent exactly that, and one
+     * nobody could catch from the outside.
+     */
+    private Plan served(Plan cached, ProfileId asker) {
+        Duration age = Duration.between(cached.computedAt(), clock.instant());
+        List<String> notes = new ArrayList<>(cached.explanation().notes());
+        notes.add(("Served from cache: this plan was computed %s ago, against the same game"
+                + " version, goals, inventory and roster. It was not re-solved. A patch"
+                + " publishes a new version and so a different question, which is not in"
+                + " this cache.")
+                .formatted(readable(age)));
+
+        return new Plan(
+                cached.id(),
+                asker,
+                cached.computedAgainst(),
+                cached.objective(),
+                cached.stageRuns(),
+                cached.conversions(),
+                cached.totalEnergy(),
+                cached.etaDays(),
+                new Explanation(
+                        cached.explanation().shadowPrice(),
+                        cached.explanation().bindingStages(),
+                        notes),
+                cached.computedAt());
+    }
+
+    /** Coarse on purpose: nobody acts on the difference between 61 and 62 seconds. */
+    private static String readable(Duration age) {
+        long seconds = Math.max(0, age.getSeconds());
+        if (seconds < 60) return seconds + "s";
+        if (seconds < 3600) return (seconds / 60) + "m";
+        if (seconds < 86_400) return (seconds / 3600) + "h";
+        return (seconds / 86_400) + "d";
     }
 
     /**

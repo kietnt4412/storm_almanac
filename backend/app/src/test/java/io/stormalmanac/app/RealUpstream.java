@@ -11,6 +11,7 @@ import io.stormalmanac.gamedata.ingest.CanonicalBundleWriter;
 import io.stormalmanac.gamedata.ingest.GameDataBundle;
 import io.stormalmanac.gamedata.ingest.UpstreamAdapter;
 import io.stormalmanac.planner.MipOptimizer;
+import io.stormalmanac.planner.SolveCache;
 import io.stormalmanac.player.Goals;
 import io.stormalmanac.player.Inventory;
 import io.stormalmanac.player.PlayerProfile;
@@ -58,13 +59,35 @@ final class RealUpstream {
                 .definitionApprovedAt(Instant.EPOCH);
     }
 
+    /**
+     * <b>Cache-free, and it has to stay that way.</b> The p95 test asks the same
+     * question fifty-five times, which is the right shape for a timing
+     * measurement and exactly the wrong shape for a cache: hand this method a
+     * real {@link SolveCache} and fifty-four of those solves become lookups, the
+     * p95 drops to nothing, and phase 2's exit criterion silently starts
+     * measuring a hash map. Anything wanting a cached optimizer builds its own —
+     * see {@link #cachingOptimizer}.
+     */
     static MipOptimizer optimizer(GameDefinition definition, Inventory inventory, Duration budget) {
         return new MipOptimizer(
                 new OneVersion(definition),
                 new FixedPlayer(REVERSE_1999, inventory),
                 null,
                 Clock.fixed(NOW, ZoneOffset.UTC),
-                budget);
+                budget,
+                SolveCache.none());
+    }
+
+    /** The same optimizer with a cache behind it, for the tests that want one. */
+    static MipOptimizer cachingOptimizer(
+            GameDefinition definition, Inventory inventory, Duration budget, SolveCache cache) {
+        return new MipOptimizer(
+                new OneVersion(definition),
+                new FixedPlayer(REVERSE_1999, inventory),
+                null,
+                Clock.fixed(NOW, ZoneOffset.UTC),
+                budget,
+                cache);
     }
 
     /** The directory the fetch script writes into, or wherever {@code -D} says. */

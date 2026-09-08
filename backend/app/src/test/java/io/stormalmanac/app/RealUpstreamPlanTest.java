@@ -12,8 +12,10 @@ import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.Stage;
 import io.stormalmanac.gamedata.Upgrade;
 import io.stormalmanac.planner.Conversion;
-import io.stormalmanac.planner.Optimizer;
+import io.stormalmanac.planner.InProcessSolveCache;
+import io.stormalmanac.planner.MipOptimizer;
 import io.stormalmanac.planner.Objective;
+import io.stormalmanac.planner.Optimizer;
 import io.stormalmanac.planner.Plan;
 import io.stormalmanac.planner.SolveRequest;
 import io.stormalmanac.planner.StageRun;
@@ -370,6 +372,51 @@ class RealUpstreamPlanTest {
                 .append(" costs ").append(price).append(" Activity\n"));
         plan.explanation().notes().forEach(note -> out.append("  · ").append(note).append('\n'));
         return out.toString();
+    }
+
+    @Test
+    @DisplayName("a repeat of a real question is served from cache, and is the same plan")
+    void theCacheEarnsItsKeepOnARealPatch() {
+        // The number that justifies the cache existing, measured where the p95
+        // is measured: the same goal set over 99 stages and 2 000-odd upgrades,
+        // not a fixture with three of each. On the toy model a hit and a solve
+        // are both too fast to tell apart.
+        List<Goal> goals = fiveCharactersTo("insight-2");
+        InProcessSolveCache cache = new InProcessSolveCache();
+        MipOptimizer optimizer = RealUpstream.cachingOptimizer(
+                definition, Inventory.empty(PROFILE), Duration.ofSeconds(2), cache);
+        SolveRequest request =
+                new SolveRequest(PROFILE, definition.version(), goals, Objective.LEAST_ENERGY, 240);
+
+        long coldStart = System.nanoTime();
+        Plan cold = optimizer.solve(request);
+        long coldMillis = (System.nanoTime() - coldStart) / 1_000_000;
+
+        long warmStart = System.nanoTime();
+        Plan warm = optimizer.solve(request);
+        long warmMillis = (System.nanoTime() - warmStart) / 1_000_000;
+
+        System.out.printf(
+                "RealUpstreamPlanTest: solve %d ms, cached repeat %d ms%n", coldMillis, warmMillis);
+
+        // The answer is the answer, whichever way it arrived.
+        assertThat(warm.id()).isEqualTo(cold.id());
+        assertThat(warm.totalEnergy()).isEqualTo(cold.totalEnergy());
+        assertThat(warm.stageRuns()).isEqualTo(cold.stageRuns());
+        assertThat(warm.explanation().shadowPrice()).isEqualTo(cold.explanation().shadowPrice());
+        assertThat(warm.explanation().notes()).contains(cold.explanation().notes().toArray(String[]::new));
+
+        // A hit says so, and does not claim to have been computed just now.
+        assertThat(warm.computedAt()).isEqualTo(cold.computedAt());
+        assertThat(warm.explanation().notes())
+                .anySatisfy(note -> assertThat(note).contains("Served from cache"));
+
+        assertThat(cache.hitCount()).isEqualTo(1);
+        // A generous bound, deliberately. This solve runs to its two-second
+        // budget every time, so the claim being tested is "a repeat does not
+        // re-solve" and not a benchmark; asserting a tight number here would be
+        // asserting how fast this machine is.
+        assertThat(warmMillis).isLessThan(coldMillis / 10);
     }
 
     // ── plumbing ────────────────────────────────────────────────────────────

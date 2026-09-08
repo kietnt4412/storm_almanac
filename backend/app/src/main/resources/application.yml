@@ -38,7 +38,9 @@ storm-almanac:
   substrate:
     drop-report-store: postgres    # postgres | almanac-store
     solve-coordinator: single-node # single-node | almanac-raft
-    solve-cache: redis             # redis | almanac-raft-kv
+    # in-process until there is a second node to share with — see
+    # docs/adr/0012-the-solve-cache-is-in-process-until-there-is-a-second-node.md
+    solve-cache: in-process        # in-process | redis | almanac-raft-kv
 
 server:
   port: ${PORT:8080}
