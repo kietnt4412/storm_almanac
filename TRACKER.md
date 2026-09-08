@@ -12,9 +12,11 @@ the next session starts from a lie.
   ([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)).
   **Agreement with the published community guide went from five exact matches to
   nine**, and the plan got 7% more expensive, which is the same fact said twice.
-  **Q8 is answered and closed.** Local build green at **171 tests**; CI has not
-  yet seen it — that is the first thing next session, and Phase 2's box does not
-  depend on it.
+  **Q8 is answered and closed.** Local build green at **171 tests**, and CI has
+  confirmed the tree — run `34176134653` on `30a6c45`: 156 passed, 15 skipped, 0
+  failed. **[PR #9](https://github.com/kietnt4412/storm_almanac/pull/9) is open
+  and unmerged**, so `main` is one session behind `dev`; merging it is the first
+  thing next session unless the owner does it sooner.
 - Current phase: **Phase 2 — Optimizer core — CLOSED on its exit criterion
   2026-09-08 (N16), opened 2026-09-07.** Both halves are met and measured —
   p95 1.8 s against a 2 s budget, and five benchmark goal sets where the
@@ -174,7 +176,7 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 | `GameAgnosticismTest` | **Passing** | Source scan over planner/gacha/stats |
 | Health endpoint | **Done — served and verified** | `GET /api/health` → 200 from a real container. Was 401; see the session log |
 | Docker Compose | **Verified** | `docker compose up --build` from cold: image builds, all three services healthy |
-| CI workflow | **Green on the current tree** | Runs `34072743411` (`dev` PR) and `34072752969` (`main` push, PR #7), both success. All 30 planner tests PASSED on the runner; `RealUpstreamPlanTest` (7) and `RealUpstreamPatchTest` (3) skipped, which is the designed state — see N13. Four seconds slower for a new source set and 51 tests. Deprecation warnings still pending — see **N5** |
+| CI workflow | **Green on the current `dev` tree** | Run `34176134653` (`dev` PR #9, `30a6c45`), success, 1m 54s: **156 passed, 15 skipped, 0 failed**, all 25 adapter tests on the runner, and the three snapshot-gated classes skipping — which is the designed state, see N13. `main` is still at `d34a31b` (run `34116880372`); PR #9 is open. The `api.version=1.44` test-task property (E2) changed nothing on the runner. Deprecation warnings still pending — see **N5** |
 | Frontend | **Green locally** | 415 deps resolved clean, typecheck + `vite build` pass, PWA SW generated |
 | Track B | Package docs only | Deliberately empty — see the gate |
 
@@ -192,12 +194,13 @@ works". It does not mean that:
   snapshot-gated classes (`CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3,
   `RealUpstreamPlanTest` 7). The local half was green on this same tree — 154
   tests — and the tree had not changed at that point, so it was not re-run.
-  **That statement is about the tree N16 closed on, and the tree has moved since:
-  N17 landed in the same session and CI has not seen it.** The local build is
-  green on it — 171 tests, all five modules, nothing skipped because the
-  snapshots are present here — and **the first action next session is to push
-  and read the log**, expecting 156 passed and the same 15 skipped. Phase 2's
-  box does not depend on that run; N17's honesty does.
+  **N17's tree was then confirmed the same way, in the same session**: run
+  `34176134653` on `30a6c45` ([PR #9](https://github.com/kietnt4412/storm_almanac/pull/9)),
+  success, **156 passed, 15 skipped, 0 failed**, with all 25 adapter tests
+  executing on the runner and the same three classes skipping. Locally the tree
+  is 171 tests with nothing skipped, because the snapshots are present here.
+  **PR #9 is open and not merged** — `main` is still at `d34a31b`, so the tree
+  CI confirmed is `dev`.
 - **CI does not run the tests that matter most, and never will as things
   stand.** Two classes now touch data this project did not author, and both skip
   on the runner because the snapshots are not committed — ADR 0009, deliberately.
@@ -1598,6 +1601,13 @@ more sampling — which is now what Q2/F1 would buy.
    the test tasks; upgrading Testcontainers is a migration, not a bump, because
    2.x renamed the artifacts. **Environment note E2**, and **E1 came back** while
    working on it — the Windows-ROOT truststore flag is needed again.
+
+**The pipeline confirmed N17 too, in the same session this time.** Run
+`34176134653` on `30a6c45` (PR #9): success, **156 passed, 15 skipped, 0
+failed**, all 25 adapter tests on the runner, the same three classes skipping.
+The `api.version` property changed nothing there — the runner's engine was never
+the one refusing. **PR #9 is deliberately left unmerged**: `main` is a session
+behind, and merging it is a decision rather than a step.
 
 ### 2026-09-07 (eighth session) — the community's answers, and the two thirds of the game we were missing
 
