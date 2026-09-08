@@ -198,6 +198,18 @@ public final class MipOptimizer implements Optimizer {
                         + " than a measurement."
                 : measured + " drop coefficient(s) came from player reports; the rest are declared.");
 
+        int discounted = yields.discountedCount();
+        if (discounted > 0) {
+            // Said out loud because it makes this plan cost more than the naive
+            // arithmetic would, and a player comparing it against a community
+            // guide deserves to know why rather than to find it out.
+            notes.add(discounted + " drop rate(s) carry the number of runs they were sampled"
+                    + " over, and are used at the conservative end of a 95% interval rather than"
+                    + " at face value. A stage sampled a hundred times has to beat one sampled"
+                    + " ten thousand times by more than luck before this plan will send you"
+                    + " there.");
+        }
+
         if (request.objective() == Objective.FEWEST_DAYS) {
             notes.add("Fewest days and least energy are the same plan under this model: with no"
                     + " time axis, days are energy divided by a constant. They separate once"

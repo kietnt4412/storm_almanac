@@ -171,6 +171,37 @@ class GameDataSchemaTest {
     }
 
     @Test
+    @DisplayName("a drop's sample size defaults to none and can never go negative")
+    void sampleSizeIsNonNegativeAndDefaultsToDeclared() throws SQLException {
+        try (Connection db = open()) {
+            String game = game(db, "sample");
+            long version = version(db, game, 0);
+            long item = item(db, version, "sulfur");
+            long stage = stage(db, version, "1-1");
+
+            // Every row written before V4 existed is a declared yield, because
+            // nothing could have recorded a sample for it. The default is what
+            // makes that true of the rows already in a deployed database, not
+            // only of the ones written from now on.
+            exec(db,
+                    "INSERT INTO gamedata.stage_drop (stage_id, version_id, item_id, expected_yield)"
+                            + " VALUES (?, ?, ?, 0.4)",
+                    stage, version, item);
+            assertThat(count(db, "SELECT count(*) FROM gamedata.stage_drop"
+                    + " WHERE stage_id = " + stage + " AND sampled_runs = 0")).isEqualTo(1);
+
+            long other = item(db, version, "gold");
+            assertThatThrownBy(() -> exec(db,
+                    "INSERT INTO gamedata.stage_drop"
+                            + " (stage_id, version_id, item_id, expected_yield, sampled_runs)"
+                            + " VALUES (?, ?, ?, 0.4, -1)",
+                    stage, version, other))
+                    .isInstanceOf(SQLException.class)
+                    .hasMessageContaining("stage_drop_sampled_runs_non_negative");
+        }
+    }
+
+    @Test
     @DisplayName("an upgrade graph rejects a duplicate edge between the same two states")
     void upgradeEdgesAreUnique() throws SQLException {
         try (Connection db = open()) {

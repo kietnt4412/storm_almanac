@@ -197,7 +197,12 @@ public final class CanonicalBundleParser {
                 (int) integer(node, "energyCost", at + ".energyCost"),
                 each(node, "drops", (d, dAt) -> new Drop(
                         new ItemId(text(d, "item", dAt + ".item")),
-                        number(d, "expectedYield", dAt + ".expectedYield")), at),
+                        number(d, "expectedYield", dAt + ".expectedYield"),
+                        // Optional, and its absence means "declared, not
+                        // measured" rather than "measured over nothing". A
+                        // bundle written before this field existed parses to
+                        // exactly what it meant.
+                        sampledRuns(d, dAt)), at),
                 availability(node, at));
     }
 
@@ -387,6 +392,30 @@ public final class CanonicalBundleParser {
         if (node == null || node.isNull()) throw new BundleFormatException(at + " is required");
         if (!node.isIntegralNumber()) throw new BundleFormatException(at + " must be a whole number");
         return node.longValue();
+    }
+
+    /**
+     * A drop's sample size: optional, whole, and positive when it is there.
+     *
+     * <p>Refuses zero explicitly rather than folding it into the absent case.
+     * Both end up as a declared yield, but a bundle that writes
+     * {@code "sampledRuns": 0} is making a claim — that somebody measured this
+     * over no runs — and the honest response to a claim that cannot be true is
+     * to reject the file, not to quietly agree with it.
+     */
+    private static long sampledRuns(JsonNode parent, String at) {
+        JsonNode node = parent.get("sampledRuns");
+        if (node == null || node.isNull()) return 0;
+        if (!node.isIntegralNumber()) {
+            throw new BundleFormatException(at + ".sampledRuns must be a whole number of runs");
+        }
+        long runs = node.longValue();
+        if (runs <= 0) {
+            throw new BundleFormatException(at + ".sampledRuns is " + runs
+                    + ": a measured yield needs at least one run behind it, and a yield the"
+                    + " data declares rather than measures omits the field");
+        }
+        return runs;
     }
 
     private static int integerOr(JsonNode parent, String field, int fallback) {

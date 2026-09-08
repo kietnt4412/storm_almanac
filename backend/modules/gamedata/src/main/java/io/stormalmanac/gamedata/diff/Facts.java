@@ -2,6 +2,7 @@ package io.stormalmanac.gamedata.diff;
 
 import io.stormalmanac.gamedata.Availability;
 import io.stormalmanac.gamedata.Craft;
+import io.stormalmanac.gamedata.Drop;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.Item;
@@ -72,7 +73,7 @@ final class Facts {
                     about.put("energy", String.valueOf(stage.energyCost()));
                     about.put("availability", availability(stage.availability()));
                     stage.drops().forEach(drop ->
-                            about.put("drop " + drop.item().value(), String.valueOf(drop.expectedYield())));
+                            about.put("drop " + drop.item().value(), sampledYield(drop)));
                 }
                 case Craft craft -> {
                     Map<String, String> about = subject(facts, Axis.PROGRESSION, "craft", craft.id());
@@ -183,6 +184,21 @@ final class Facts {
 
     private static String rarity(Rarity rarity) {
         return rarity.label() + " (" + rarity.rank() + ")";
+    }
+
+    /**
+     * A drop reads as its yield and, when there is one, the sample behind it.
+     *
+     * <p>One fact rather than two, because a resample changes both together and
+     * a reader approving a publish wants to see <em>"0.21 over 105 runs →
+     * 0.16 over 2 680 runs"</em> on one line. Splitting them would report the
+     * same event twice and would let a diff show a rate holding steady while the
+     * evidence for it collapsed.
+     */
+    private static String sampledYield(Drop drop) {
+        return drop.isSampled()
+                ? drop.expectedYield() + " over " + drop.sampledRuns() + " runs"
+                : String.valueOf(drop.expectedYield());
     }
 
     private static String availability(Availability availability) {

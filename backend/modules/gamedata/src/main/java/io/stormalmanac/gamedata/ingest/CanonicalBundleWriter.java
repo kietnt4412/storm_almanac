@@ -146,6 +146,11 @@ public final class CanonicalBundleWriter {
         array(node, "drops", stage.drops(), (d, drop) -> {
             d.put("item", drop.item().value());
             d.put("expectedYield", drop.expectedYield());
+            // Written only when there is one, because absence is the canonical
+            // spelling of "declared, not measured" — see Drop. Writing a zero
+            // would say something false and would also churn every bundle
+            // converted before this field existed.
+            if (drop.isSampled()) d.put("sampledRuns", drop.sampledRuns());
         });
         availability(node, stage.availability());
     }

@@ -126,15 +126,22 @@ import java.util.stream.Stream;
  *       because a plan that farms for something not in the game is not a plan.
  *       They arrive on their own in a later snapshot, and the patch diff is
  *       where they should show up.
- *   <li><b>The sample size behind a drop rate</b> — the {@code _greedy} files
- *       carry {@code count}, the number of runs a stage's drop counts were
- *       observed over, and it ranges from 1 (a fixed reward, not a sample) to
- *       tens of thousands. {@code Drop} holds a yield and nothing else, so the
- *       mean survives the conversion and the evidence behind it does not. That
- *       is a real loss and it is open question <b>Q8</b>: the optimizer cannot
- *       tell a rate measured over 16 000 runs from one measured over 40, and
- *       {@code stats} cannot publish an interval for a number it never saw the
- *       sample of.
+ *   <li><s><b>The sample size behind a drop rate.</b></s> <b>Carried, since
+ *       Q8/N17.</b> The {@code _greedy} files publish {@code count}, the number
+ *       of runs a stage's drop counts were observed over; it survives onto
+ *       {@link Drop#sampledRuns()} and the planner discounts a thin sample
+ *       rather than believing it (ADR 0011). Losing it was not a small omission:
+ *       every disagreement over 25% between this project's stage ranking and a
+ *       published community guide came from a hundred-run mean outranking a
+ *       thousand-run one.
+ *       <p>One judgement is made here rather than downstream. A {@code count} of
+ *       exactly <b>1</b> is a fixed reward and not a sample — in both pinned
+ *       snapshots those are precisely the 12 Insight and 2 Resource stages,
+ *       which pay a flat 9 000 Sharpodonty or 2 Pages and were never observed at
+ *       all, while every genuinely sampled stage carries at least 105 runs. They
+ *       convert as declared yields. Handing the planner a sample size of 1 would
+ *       have it apply a 95% bound to a number nobody measured and refuse to farm
+ *       the only source of several currencies.
  *   <li><b>Skills, talents, banners, rewards, fodder</b> — this upstream simply
  *       does not publish them. An empty section is the truthful output.
  * </ul>
@@ -300,6 +307,7 @@ public final class KornblumeAdapter implements UpstreamAdapter {
     private List<Stage> stages(JsonNode root, String file, Names itemNames) {
         List<Stage> stages = new ArrayList<>();
         int freeStages = 0;
+        int fixedRewardStages = 0;
         long sampledRuns = 0;
 
         if (root == null || !root.isObject()) {
@@ -331,7 +339,19 @@ public final class KornblumeAdapter implements UpstreamAdapter {
                 throw new BundleFormatException(at + " reports " + observed
                         + " sampled runs, so its drop counts cannot be read as a rate");
             }
-            sampledRuns += observed;
+
+            // A count of exactly one is this upstream saying "this stage pays
+            // out this, every time" — not "we watched it once". Every stage with
+            // count 1 in both pinned snapshots is a Resource or Insight stage
+            // with a fixed reward (Mintage Aesthetics VI: 9 000 Sharpodonty),
+            // and every sampled stage carries at least 105. Passing the 1 on as
+            // a sample size would hand the planner a 95% lower bound of about a
+            // fifth of the true yield on the only source of several currencies,
+            // and it would be the model being *precise* about a number nobody
+            // measured. So it converts as a declared yield, which is what it is.
+            boolean declared = observed <= 1;
+            if (!declared) sampledRuns += observed;
+            if (observed == 1) fixedRewardStages++;
 
             List<Drop> drops = new ArrayList<>();
             JsonNode dropTable = node.get("drops");
@@ -348,7 +368,10 @@ public final class KornblumeAdapter implements UpstreamAdapter {
                             // yield and not a probability — docs/prior-art.md §4.1.
                             observed > 0
                                     ? drop.getValue().doubleValue() / observed
-                                    : drop.getValue().doubleValue()));
+                                    : drop.getValue().doubleValue(),
+                            // And how many runs that mean is a mean of, which
+                            // this adapter used to divide by and throw away.
+                            declared ? 0 : observed));
                 }
             }
             // A stage's drops are a set, and `Stage.drops()` is a List, so the
@@ -373,8 +396,14 @@ public final class KornblumeAdapter implements UpstreamAdapter {
         }
         if (sampledRuns > 0) {
             notes.accept("read drop tables from " + file + ": " + stages.size()
-                    + " stage(s) measured over " + sampledRuns + " sampled runs, whose sample"
-                    + " sizes this model cannot carry — see Q8");
+                    + " stage(s), of which " + (stages.size() - fixedRewardStages)
+                    + " are measured over " + sampledRuns + " sampled runs in total."
+                    + " Each stage's own sample size is carried through onto its drops, so a"
+                    + " thin sample is discounted rather than believed — see ADR 0011");
+            if (fixedRewardStages > 0) {
+                notes.accept(fixedRewardStages + " stage(s) state a fixed reward (count 1)"
+                        + " and convert as declared yields, not as one-run samples");
+            }
         } else {
             notes.accept("read drop tables from " + file + ", which carries no sample sizes"
                     + " and, in the snapshots pinned so far, only the first four chapters."

@@ -279,11 +279,13 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
         // round-trip test failed the moment the adapter started reading them.
         Map<Long, List<Drop>> drops = grouped(version,
                 """
-                SELECT stage_id, item_id, expected_yield
+                SELECT stage_id, item_id, expected_yield, sampled_runs
                   FROM gamedata.stage_drop WHERE version_id = ? ORDER BY stage_id, item_id
                 """,
                 "stage_id", (rs, row) -> new Drop(
-                        items.get(rs.getLong("item_id")), rs.getDouble("expected_yield")));
+                        items.get(rs.getLong("item_id")),
+                        rs.getDouble("expected_yield"),
+                        rs.getLong("sampled_runs")));
         drops.values().forEach(list -> list.sort(Comparator.comparing(drop -> drop.item().value())));
 
         return jdbc.query(

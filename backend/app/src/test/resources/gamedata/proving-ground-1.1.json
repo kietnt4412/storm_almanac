@@ -8,6 +8,10 @@
     "    - warden-insight-2 gold cost 20000 -> 18000   (changed)",
     "    - pg-event-1 gone, the event ended            (removed)",
     "    - pg-3-1 and sigil-radiant                    (added)",
+    "    - pg-3-1's drops carry sampledRuns, which 1.0's do not: this is the",
+    "      only fixture drop measured rather than declared, and it is here so",
+    "      the field survives the writer, the parser and the schema. 1.0 stays",
+    "      entirely declared so the acceptance plans remain hand-checkable.",
     "  catalog axis",
     "    - warden-strike rank 2 damage 1.32 -> 1.28    (changed)",
     "    - warden atk at tier 1 level 40 415 -> 430    (changed)",
@@ -126,8 +130,8 @@
       "displayName": "The Radiant Deep",
       "energyCost": 25,
       "drops": [
-        { "item": "shard", "expectedYield": 1.1 },
-        { "item": "sigil-radiant", "expectedYield": 0.08 }
+        { "item": "shard", "expectedYield": 1.1, "sampledRuns": 4200 },
+        { "item": "sigil-radiant", "expectedYield": 0.08, "sampledRuns": 4200 }
       ]
     }
   ],
