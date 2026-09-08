@@ -1054,8 +1054,16 @@ now explicitly cache-free with that written above it, and a separate
 ninth session — and is now indexed alongside 0012.
 
 **Numbers.** 189 tests, 171 before: planner 35 → 52, `:app` 73 → 74. Zero skipped
-locally because the snapshots were present, so the 16 gated tests genuinely ran;
-CI will show 173 passed, 16 skipped. p95 unchanged at 1 808 ms, which is the
+locally because the snapshots were present, so the 16 gated tests genuinely ran.
+
+**CI confirmed it**, run `34182911475` on `3fdc277` ([PR #10](https://github.com/kietnt4412/storm_almanac/pull/10)),
+`BUILD SUCCESSFUL in 1m 6s`: **0 failed, 16 skipped**, and the skips are exactly
+the three snapshot-gated classes and nothing else — `RealUpstreamPlanTest` 8 (7
+before, the new cache test is the eighth), `CommunityBenchmarkTest` 5,
+`RealUpstreamPatchTest` 3. Nothing touching upstream data passed on the runner,
+which is the state ADR 0009 requires; a pass there would have meant a snapshot
+was committed by accident. The two Node-20 deprecation warnings and the
+`setup-java@v4` one are still there — **N5**. p95 unchanged at 1 808 ms, which is the
 point — the cache is not in that path.
 
 ### 2026-09-08 (ninth session) — the pipeline confirms the tree, and a number the model was throwing away

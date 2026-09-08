@@ -30,8 +30,9 @@ being finished with is.
   [D1](#d1--deployment-deferred-2026-09-02) — and its box stays unticked, because
   nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
-- **Open right now:** the tenth session's PR, carrying N15. `main` is at
-  `176f151` (PR #9, merged, and its push run went green). See *Next actions*.
+- **Open right now:** [PR #10](https://github.com/kietnt4412/storm_almanac/pull/10),
+  carrying N15. **Green and unmerged** — run `34182911475` on `3fdc277`, 0 failed,
+  16 skipped. `main` is at `176f151`. Merging it is the first action next session.
 - **N14's data premise is half gone, and this was checked rather than assumed.**
   The upstream `shops.json` was fetched at both pinned commits — byte-identical,
   6 397 bytes, six opaque keys and 69 rows of `{Material, Quantity}` with **no
@@ -121,7 +122,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
 | Backend build | **Green** | **189 tests** from the run's XML: `:app` 74, `gamedata` 25, `planner` 52, `stats` 13, adapter 25. **173 on CI**, because 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
-| CI workflow | **Green on `main`** | Run `34180192277` (`176f151`, the PR #9 merge). The tenth session's PR is the next one to confirm. Action deprecations pending — **N5** |
+| CI workflow | **Green on `dev`** | Run `34182911475` (PR #10, `3fdc277`): 0 failed, **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. `main` is `176f151`. Action deprecations pending — **N5** |
 | Domain model (`gamedata`) | **Persisted and round-tripped** | Record equality across the whole graph. `Drop` carries `sampledRuns`, where 0 means *declared*; equipment is an `Entity` (ADR 0007) |
 | `gamedata` schema | **Applied, populated, round-tripped** | `V2` (28 tables), `V3` (a version is deletable), `V4` (`stage_drop.sampled_runs`). Seven invariants in `GameDataSchemaTest`, proven on the fixture and on two real R1999 patches |
 | Ingest, write, read | **Done** | `CanonicalBundleParser` (14 tests, mostly refusal messages), `CanonicalBundleWriter` pinned to it by a round trip, JDBC both directions (ADR 0008) |
@@ -206,8 +207,9 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **Merge the tenth session's PR**, and confirm the `main` push run goes
-      green. Do this first.
+- [ ] **Merge [PR #10](https://github.com/kietnt4412/storm_almanac/pull/10).**
+      Green on `3fdc277`, unmerged, so `main` is a session behind. Do this first,
+      and confirm the `main` push run goes green too.
 - [ ] **N14 — Give the solver a time axis, and with it rewards and rotation.**
       The largest thing the model does not do, and what makes `FEWEST_DAYS` a
       different plan from `LEAST_ENERGY` rather than the same one divided by a
@@ -553,7 +555,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-08 | tenth | N15: a solve is cached on its key (1 806 ms → 2 ms on the real patch) and a queue runs it once; and the read that took shops out of N14 |
+| 2026-09-08 | tenth | N15: a solve is cached on its key (1 806 ms → 2 ms on the real patch) and a queue runs it once, CI-confirmed on `3fdc277`; and the read that took shops out of N14 |
 | 2026-09-08 | ninth | N16 and N17: CI confirmed the tree and Phase 2 closed; then drop yields learned how many runs they were measured over, and agreement with the community went from five to nine |
 | 2026-09-07 | eighth | N12: the community's answers — and the discovery that the adapter had been reading a stage table missing two thirds of the game |
 | 2026-09-07 | seventh | N11 and N13: the optimizer answers a real goal set and says how much it does not know (ADR 0010) |
