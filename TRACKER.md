@@ -5,17 +5,24 @@ update it last. If a session ends without this file reflecting what happened,
 the next session starts from a lie.
 
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks)
-- Last updated: **2026-09-07** (eighth session)
-- Current phase: **Phase 2 — Optimizer core — is OPEN, opened 2026-09-07.**
-  Phase 1 closed 2026-09-06 with both halves of its exit criterion met and CI
-  confirming the tree (N10: runs `34035918992` and `34035923889`).
-  **Both halves of Phase 2's criterion are now met** — p95 1.8 s against a 2 s
-  budget, and five benchmark goal sets where the cheapest stage this project
-  computes is the stage a published community guide names
-  ([the benchmark](docs/benchmarks/reverse-1999-community-answers.md), N12).
-  **The box is still not ticked**, and the reason is in N16: closing it means
-  CI green on this tree, and this session changed which data the optimizer has
-  been reading. Tick it next session or explain why not.
+- Last updated: **2026-09-08** (ninth session)
+- Current phase: **Phase 2 — Optimizer core — CLOSED on its exit criterion
+  2026-09-08 (N16), opened 2026-09-07.** Both halves are met and measured —
+  p95 1.8 s against a 2 s budget, and five benchmark goal sets where the
+  cheapest stage this project computes is the stage a published community guide
+  names ([the benchmark](docs/benchmarks/reverse-1999-community-answers.md),
+  N12) — and **CI has now confirmed the tree**: run `34116854550` on `93f4de4`
+  and run `34116880372` on `d34a31b` (PR #8 merged to `main`), both success,
+  **139 passed, 15 skipped, 0 failed**, with the adapter's 24 tests executing on
+  the runner. That was the last condition N16 held the box for, so the box is
+  ticked.
+  **What the tick does not say:** three named pieces of Phase 2 scope are still
+  open and they are the next work — **N17** (sample sizes, and they are choosing
+  stages today), **N14** (the time axis), **N15** (the cache behind `SolveKey`).
+  The criterion is met; the phase's scope is not exhausted, and Phase 3 is
+  therefore **not opened yet** — N17 comes first, for the reason N17 gives.
+  Phase 1 closed 2026-09-06 the same way (N10: runs `34035918992` and
+  `34035923889`).
   Phase 0 stays closed by exception (deploy deferred by D1) and its box stays
   unticked, because nothing is deployed.
 - Track B status: **not started, and gated** — see [the gate](#the-gate)
@@ -149,14 +156,15 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 Be precise about this, because the temptation is to read "build green" as "it
 works". It does not mean that:
 
-- **CI has not run on this session's work, and neither has the local suite in
-  full.** The previous entry (runs `34072743411` and `34072752969`, both green)
-  was true of the tree it ran on, and this session changed the adapter, the
-  fetch script, the JDBC reader and four test classes. **The local build is
-  green** — 154 tests, Docker came up on the second attempt and the whole suite
-  ran, including the round-trip test that caught the drop-ordering defect. What
-  has not happened is the pipeline: nothing is committed or pushed. **N16 is to
-  push and read the CI log** — and only then tick Phase 2.
+- ~~**CI has not run on this session's work.**~~ **Resolved 2026-09-08 (N16).**
+  The eighth session's work was committed, pushed and merged as PR #8, and CI
+  ran on it: `34116854550` (`dev` PR, `93f4de4` — the tree this file describes)
+  and `34116880372` (`main` push, `d34a31b`), both success. The log was read
+  rather than the tick: **139 passed, 15 skipped, 0 failed**, the adapter's 24
+  tests executed on the runner, and the 15 skips are exactly the three
+  snapshot-gated classes (`CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3,
+  `RealUpstreamPlanTest` 7). The local half was green on this same tree — 154
+  tests — and the tree has not changed since, so it was not re-run.
 - **CI does not run the tests that matter most, and never will as things
   stand.** Two classes now touch data this project did not author, and both skip
   on the runner because the snapshots are not committed — ADR 0009, deliberately.
@@ -777,22 +785,38 @@ Ordered. Do them in this order.
       out to be the search. They were the input file, the sample size, and what
       the word "best" means.
 
+### Done 2026-09-08 (ninth session) — N16
+
+- [x] ~~**N16 — Get a clean local run and a green CI, then tick Phase 2.**~~
+      **Done. Phase 2's box is ticked.** The eighth session's work had in fact
+      been committed and pushed after this entry was written — `dev` is
+      `93f4de4`, merged to `main` as **PR #8** (`d34a31b`) — so what this session
+      owed was the half the entry insisted on: reading the log rather than the
+      tick.
+      **What the log says**, for run `34116854550` (`dev` PR, head `93f4de4`,
+      1m 24s) and run `34116880372` (`main` push, head `d34a31b`, 1m 46s), both
+      success: **139 PASSED, 15 SKIPPED, 0 FAILED**, `BUILD SUCCESSFUL in 1m 5s`.
+      Both checks the entry named are satisfied — `:adapters:reverse-1999:test`
+      ran and **all 24 of its tests PASSED on the runner**, and the 15 skips are
+      exactly the three snapshot-gated classes and nothing else:
+      `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3, `RealUpstreamPlanTest`
+      7. Nothing that touches upstream data passed on CI, which is the state ADR
+      0009 requires; a pass there would have meant a snapshot had been committed
+      by accident.
+      **The local half was not re-run and did not need to be.** It was green on
+      this tree last session (154 tests) and the working tree is clean at the
+      same commit — re-running proves the machine, not the code.
+      **Phase 2 is closed on its criterion, and Phase 3 is not opened.** The
+      criterion is two measurements and both are made; the phase's scope still
+      has N17, N14 and N15 in it, and N17 goes first because a sample size the
+      model throws away is currently picking stages.
+      **Worth keeping:** the tracker said "nothing is committed" and the
+      repository disagreed. Both were written by the same session. Push before
+      writing the entry that describes the push, or the file lies in the one
+      direction it is meant to prevent.
+
 ### Next session starts here
 
-- [ ] **N16 — Get a clean local run and a green CI, then tick Phase 2.** Both
-      halves of the exit criterion are met and the box stays unticked until a
-      pipeline confirms the tree, which is the rule N13 established and it is not
-      being bent for a good session.
-      **The local half is done.** `./gradlew build` is green on this tree: 154
-      tests, counted from the run's XML rather than carried forward. Docker did
-      eventually start — it takes minutes on this machine and `docker info` hangs
-      rather than failing while it does, so give it time instead of concluding it
-      is broken.
-      **What is left is the pipeline.** Nothing is committed. Commit, push, and
-      read the log rather than the tick: the two checks are that the adapter's 24
-      tests execute on the runner, and that the 15 snapshot-gated ones show as
-      **skipped** — 3 + 7 + 5. If any of those 15 ever passes on CI, upstream data
-      has been committed by accident.
 - [ ] **N17 — Give `stats` a mean per run and a sample size, and let the
       optimizer see it. This is Q8, and it is now the most valuable thing in the
       backlog.** The benchmark showed why: the upstream publishes how many runs
@@ -936,7 +960,8 @@ previous one's criterion is met.
          rank 3?"* is answered from the synthetic fixture. The schema, the API
          and the diff all handle it; this upstream has nothing to put in it.
 
-- [ ] **Phase 2 · Optimizer core** — 2 weeks — **opened 2026-09-07**
+- [x] **Phase 2 · Optimizer core** — 2 weeks — **closed 2026-09-08**, opened
+      2026-09-07
       ojAlgo MIP model, crafting recursion, integer runs, solve caching,
       explanation output, both objectives.
       **Exit:** agrees with community-accepted answers on 5 benchmark goal sets;
@@ -945,8 +970,19 @@ previous one's criterion is met.
       `SolveKey`, and [ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md).
       Crafting recursion, integer runs, explanation output and both objectives
       are done; solve caching has its key and no cache.
-      **Both halves of the exit criterion are met and measured. The box stays
-      unticked until CI confirms the tree — N16.**
+      **Both halves of the exit criterion are met and measured, and CI has
+      confirmed the tree (N16, 2026-09-08): runs `34116854550` (`93f4de4`) and
+      `34116880372` (`d34a31b`, PR #8), both success, 139 passed / 15 skipped /
+      0 failed, the adapter's 24 tests executing on the runner. The box is
+      ticked on that.**
+      **Two things the tick does not close, and they travel with the phase:**
+      *the phase's own scope is not exhausted* — solve caching has a key and no
+      cache (**N15**), there is no time axis (**N14**), and drop rates carry no
+      sample size (**N17**) — and *the criterion was measured by tests CI does
+      not run*, exactly as in Phase 1. Both halves of the criterion rest on
+      `RealUpstreamPlanTest` and `CommunityBenchmarkTest`, which skipped on both
+      of the runs above. Reproducing it is `backend/tools/fetch-upstream.sh` and
+      one flag; it is not something a green pipeline will ever tell you.
       - *p95 solve under 2s* — **met, 2026-09-07.** 1.8 s over 50 solves of a
         five-character Reverse: 1999 goal set. Measured on real data, locally
         only, by a test CI does not run. **Read it as the budget rather than as a
@@ -1307,6 +1343,58 @@ Carry these forward until answered; strike through with the answer when resolved
 ## Session log
 
 Append one entry per session. Newest first.
+
+### 2026-09-08 (ninth session) — the pipeline confirms the tree, and Phase 2 closes
+
+**One item: N16.** The eighth session left Phase 2's box unticked with a single
+condition attached — CI green on this tree, read from the log rather than
+assumed. That condition is now met and the box is ticked.
+
+**The tracker and the repository disagreed about the starting state, and the
+repository was right.** N16 said "nothing is committed or pushed". In fact `dev`
+was at `93f4de4` on the remote and had been merged to `main` as PR #8
+(`d34a31b`): the eighth session did the push *after* writing the entry that
+described it as outstanding. Nothing was lost, but the file spent a day telling
+the next session a smaller lie than it exists to prevent. **Tick and write as the
+work lands.**
+
+**What CI actually says**, both runs success:
+
+| Run | Trigger | Head | Time |
+|-----|---------|------|------|
+| `34116854550` | `dev` pull request | `93f4de4` | 1m 24s |
+| `34116880372` | push to `main` (PR #8) | `d34a31b` | 1m 46s |
+
+Counted out of the downloaded log rather than from the green check: **139
+PASSED, 15 SKIPPED, 0 FAILED**, `BUILD SUCCESSFUL in 1m 5s`. The two checks N16
+named:
+
+- `:adapters:reverse-1999:test` ran and **all 24 of its tests passed on the
+  runner** — the adapter rewritten last session for the sampled stage tables is
+  exercised by the pipeline, not only by this machine.
+- The 15 skips are **exactly** the three snapshot-gated classes:
+  `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3, `RealUpstreamPlanTest`
+  7. None of them passed, which is the state
+  [ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md) requires:
+  a pass there would mean upstream data had been committed by accident.
+
+The local half was not re-run. It was green on this tree last session (154
+tests), the working tree is clean at the same commit, and re-running it would
+have measured the machine rather than the code.
+
+**Phase 2 is closed on its criterion. It is not finished, and the distinction is
+the point.** The criterion is two measurements — p95 under 2 s, agreement with
+community answers on five goal sets — and both are made. The phase's *scope*
+still contains a cache that does not exist (N15), a model with no time in it
+(N14), and drop rates with no sample size (N17). The box records the criterion,
+the caveats beneath it record the rest, and **Phase 3 is deliberately not
+opened**: N17 goes first, because a number the model throws away is currently
+choosing which stage a player is told to farm.
+
+**The standing caveat got no weaker.** Both halves of the criterion this tick
+rests on were measured by tests that skipped on both of those green runs. A
+green pipeline confirms the tree compiles and the game-agnostic parts hold; it
+has never once confirmed that this project's numbers are right.
 
 ### 2026-09-07 (eighth session) — the community's answers, and the two thirds of the game we were missing
 
