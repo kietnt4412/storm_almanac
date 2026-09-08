@@ -32,7 +32,7 @@ import org.springframework.context.ApplicationContext;
  * ingest, publish, diff — is the acceptance test for that claim, and it runs
  * against the same repositories the server uses.
  */
-class GameDataCliTest extends GameDataDatabaseTest {
+class GameDataCliTest extends SharedDatabaseTest {
 
     private static final GameId PROVING_GROUND = new GameId("proving-ground");
 

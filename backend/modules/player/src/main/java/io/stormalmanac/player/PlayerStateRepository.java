@@ -12,6 +12,15 @@ public interface PlayerStateRepository {
 
     Optional<PlayerProfile> findProfile(ProfileId id);
 
+    /**
+     * Create a profile, or rename an existing one.
+     *
+     * <p>The caller owns the {@link ProfileId}, as it does for every other
+     * aggregate here. Nothing in this module invents identity: a profile is
+     * created by whoever holds the account that will own it.
+     */
+    void saveProfile(PlayerProfile profile);
+
     Inventory inventoryOf(ProfileId profile);
 
     Roster rosterOf(ProfileId profile);

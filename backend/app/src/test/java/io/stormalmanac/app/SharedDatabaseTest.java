@@ -9,8 +9,14 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * One Postgres for every gamedata test class in this JVM, and one Spring
+ * One Postgres for every database-backed test class in this JVM, and one Spring
  * context to go with it.
+ *
+ * <p>It was {@code GameDataDatabaseTest} until phase 3, when the player and
+ * identity schemas arrived and a second class of test needed the same database.
+ * The name was the whole reason to rename it: a base class called "GameData" is
+ * one a later session reads as not applying to them, and the cost of that
+ * reading is a second container and a second context boot on every push.</p>
  *
  * <p>Started in a static initialiser rather than by {@code @Testcontainers} and
  * {@code @Container}, which start and stop a container per test class. Two
@@ -35,7 +41,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * never call.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-abstract class GameDataDatabaseTest {
+abstract class SharedDatabaseTest {
 
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
 
@@ -54,14 +60,23 @@ abstract class GameDataDatabaseTest {
     protected JdbcTemplate jdbc;
 
     /**
-     * Each test starts from an empty schema rather than from whatever the
-     * previous one published. Deleting the version rows is enough:
+     * Each test starts from an empty database rather than from whatever the
+     * previous one wrote.
+     *
+     * <p>In gamedata, deleting the version rows is enough:
      * {@code ON DELETE CASCADE} reaches every versioned table from there — which
      * is itself worth exercising, since V2 shipped a version that could not
      * actually be deleted and V3 is the fix.
+     *
+     * <p>Profiles are deleted separately rather than left to cascade from the
+     * account, because V5 deliberately puts no foreign key across the schema
+     * boundary. That is the invariant showing up in the place it is least
+     * convenient, which is the honest place for it to show up.
      */
     @BeforeEach
     void emptyTheSchema() {
+        jdbc.update("DELETE FROM player.profile");
+        jdbc.update("DELETE FROM identity.account");
         jdbc.update("DELETE FROM gamedata.game_data_version");
         jdbc.update("DELETE FROM gamedata.game");
     }
