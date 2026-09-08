@@ -9,11 +9,15 @@ import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
 import io.stormalmanac.gamedata.Source;
 import io.stormalmanac.gamedata.Stage;
+import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -35,8 +39,12 @@ import org.ojalgo.type.context.NumberContext;
  * minimise    sum_s x_s * energy_s
  * subject to  for every relevant item i:
  *               sum_s x_s * yield[s,i]
- *             + sum_c y_c * (produce[c,i] - consume[c,i])  &gt;=  demand_i - inventory_i
- *             x_s, y_c integer and &gt;= 0
+ *             + sum_c y_c * (produce[c,i] - consume[c,i])
+ *             + sum_r z_r * grant[r,i]                     &gt;=  demand_i - inventory_i
+ *             for every set of stages sharing a weekday restriction:
+ *               sum_s x_s * energy_s                       &lt;=  days it is open * energyPerDay
+ *             z_r                                          &lt;=  occurrences of r's cadence
+ *             x_s, y_c, z_r integer and &gt;= 0
  * </pre>
  *
  * <p>No repositories, no clock, no Spring: inputs in, an answer or a refusal
@@ -50,21 +58,51 @@ import org.ojalgo.type.context.NumberContext;
  * algebra makes it. A recursive expansion instead would have to pick a depth,
  * and would have to choose between routes the solver can simply price.
  *
- * <h2>What this model does not yet contain</h2>
+ * <h2>The time axis, and why it is a parameter rather than an index</h2>
+ *
+ * <p>The obvious way to give a plan a calendar is to index every stage variable
+ * by day, which multiplies the model by the horizon: a patch with a hundred
+ * useful stages over thirty days is three thousand integer variables where there
+ * were a hundred, and phase 2 closed with its p95 at 90% of its budget. So the
+ * horizon is not an index here. It is a <em>scalar</em>, and everything time
+ * makes true is a capacity computed from it:
+ *
  * <ul>
- *   <li><b>Shops and rewards.</b> Both are {@link Source}s and neither is a
- *       variable yet. A shop's cap is "n per period" and a reward's is "once per
- *       day", and a model with no time axis has no honest place to put either;
- *       uncapped, a shop lets the solver buy its way out of every constraint,
- *       which is the failure {@link Shop} was written to warn about. Items whose
- *       only source is one of these are reported as unreachable <em>by name</em>
- *       rather than quietly costed at zero.
- *   <li><b>Weekday rotation.</b> A stage open on Tuesdays and Fridays is treated
- *       as open, because a plan spanning days reaches every weekday. What is
- *       honoured is expiry and release: a stage that has closed, or has not yet
- *       opened, is not a source. Rotation starts to matter when the model gains
- *       a time axis, which is also where "fewest days" becomes a different plan
- *       rather than the same one divided by a constant.
+ *   <li><b>Energy is finite</b> — a plan running {@code D} days may spend
+ *       {@code D * energyPerDay}, which is the row that stops "wait long enough"
+ *       from being a free lunch.
+ *   <li><b>A cadence is a count</b> — a weekly reward fires {@code D / 7} times,
+ *       and because the claim variable is an integer that division is exact
+ *       rather than rounded.
+ *   <li><b>Rotation is a shared capacity</b> — stages open on Tuesdays and
+ *       Fridays compete for the energy of the Tuesdays and Fridays in the
+ *       window, and nothing else does. See {@link #rotationCapacity}.
+ * </ul>
+ *
+ * <p>Every one of those is linear in a <em>fixed</em> {@code D}, so
+ * {@link Objective#LEAST_ENERGY} adds no integer variables at all beyond one per
+ * reward, and a game whose data declares neither rewards nor rotation — which is
+ * every game this project has ingested so far — gets a model the same size as
+ * the one phase 2 measured. {@link Objective#FEWEST_DAYS} needs {@code D} itself
+ * minimised, and gets it by {@linkplain #fewestDays binary search} over a
+ * feasibility question that is monotone in {@code D}, rather than by making
+ * {@code D} a variable the branch-and-bound has to branch on.
+ *
+ * <h2>What this model still does not contain</h2>
+ * <ul>
+ *   <li><b>Shops.</b> A {@link Shop} is the one {@link Source} that is still not
+ *       a variable. The cap it needs — "n per period" — now has somewhere honest
+ *       to live, and the reason it stays out is data rather than modelling: the
+ *       one upstream this project reads publishes a shop table with no currency,
+ *       no price and no reset period, so there is nothing to put in the cap. An
+ *       item whose only source is a shop is still reported as unreachable
+ *       <em>by name</em> rather than quietly costed at zero.
+ *   <li><b>Expiry within the horizon, as a shared capacity.</b> A stage that
+ *       closes in three days is bounded by what three days of energy could buy
+ *       (see {@link #closingCap}), which is a real bound and not a joint one: two
+ *       stages both closing on Friday are each capped, and not capped
+ *       <em>together</em>. Correcting that needs the days to be an index after
+ *       all, which is the trade this class exists to avoid.
  *   <li><b>Fodder.</b> Consuming a class of items for progress on another item
  *       of that class is a sink the demand vector does not yet express.
  * </ul>
@@ -78,18 +116,20 @@ final class EnergyMip {
      * for any plan with fewer than a million conversions, so it can never trade
      * a real energy saving away.
      *
-     * <p><b>It is applied only when the craft graph has a cycle, and that
-     * restraint is load-bearing.</b> Energy costs are whole numbers and so are
-     * run counts, so without this weight the objective is integral — and an
-     * integral objective lets branch-and-bound discard any node whose bound is
-     * within one of the incumbent, which is most of the tree. Adding a
-     * millionth to every conversion takes that away and asks the solver to
-     * resolve ten significant digits instead. On the fixture nobody noticed; on
-     * a real patch, where a currency demand runs to six figures, ojAlgo
-     * recursed until the stack gave out. The tie-break only ever mattered for a
-     * lossless conversion cycle, so it is now paid for only where one exists.
+     * <p><b>It is applied only where the tie actually exists, and that restraint
+     * is load-bearing.</b> Energy costs are whole numbers and so are run counts,
+     * so without this weight the objective is integral — and an integral
+     * objective lets branch-and-bound discard any node whose bound is within one
+     * of the incumbent, which is most of the tree. Adding a millionth to every
+     * variable takes that away and asks the solver to resolve ten significant
+     * digits instead. On the fixture nobody noticed; on a real patch, where a
+     * currency demand runs to six figures, ojAlgo recursed until the stack gave
+     * out. So conversions pay it only when the craft graph has a cycle, and
+     * reward claims only when the game declares any rewards at all — which the
+     * one real upstream does not, so the patch that found the stack overflow
+     * still gets an integral objective.
      */
-    private static final double CONVERSION_TIE_BREAK = 1.0e-6;
+    private static final double TIE_BREAK = 1.0e-6;
 
     /**
      * How close to optimal is close enough to stop searching.
@@ -107,40 +147,88 @@ final class EnergyMip {
      */
     private static final NumberContext GAP = NumberContext.of(4, 4);
 
+    /**
+     * How many distinct weekday restrictions get the exact treatment.
+     *
+     * <p>Rotation is a transportation problem — energy is supplied by days and
+     * consumed by stages that may only draw on some of them — and such a problem
+     * is feasible exactly when every <em>subset</em> of consumers fits inside the
+     * supply of the days it can reach. That is one row per subset, so the cost is
+     * {@code 2^k} in the number of distinct day-sets, not in the number of
+     * stages. Real data has a handful: the acceptance fixture has one, and the
+     * only real upstream read so far has none. Past this many the rows are cut
+     * back to one per day-set plus the total, which is a relaxation — it can call
+     * a schedule feasible that is not — and the plan says so.
+     */
+    private static final int EXACT_ROTATION_GROUPS = 6;
+
+    /** Below this many milliseconds a probe is not worth starting. */
+    private static final long MINIMUM_PROBE_MILLIS = 25;
+
     private EnergyMip() {}
 
     /**
-     * @param stageVariables how many stages survived pruning and became variables
-     * @param craftVariables how many crafts did
-     * @param constraints    how many item balance rows the model carried
-     * @param provenOptimal  false when the search stopped on its time budget, so
-     *                       this is the cheapest plan found rather than the
-     *                       cheapest plan
-     * @param optimalityGap  how much of this plan's energy could conceivably be
-     *                       saved, as a fraction: the distance to the linear
-     *                       relaxation's bound, which no integer plan can beat.
-     *                       Zero when optimality was proven, {@code NaN} when the
-     *                       bound could not be computed
+     * @param rewardClaims    free income the plan leans on
+     * @param daysNeeded      whole days the plan cannot be compressed below,
+     *                        because of a cadence it waits on or a stage that is
+     *                        only open some weekdays. Zero when nothing but
+     *                        energy constrains the calendar
+     * @param horizonUsed     the horizon this plan was solved against, which for
+     *                        {@link Objective#FEWEST_DAYS} is the answer the
+     *                        search settled on rather than the one asked for
+     * @param stageVariables  how many stages survived pruning and became variables
+     * @param craftVariables  how many crafts did
+     * @param rewardVariables how many rewards did
+     * @param constraints     how many item balance rows the model carried
+     * @param provenOptimal   false when the search stopped on its time budget, so
+     *                        this is the cheapest plan found rather than the
+     *                        cheapest plan
+     * @param optimalityGap   how much of this plan's energy could conceivably be
+     *                        saved, as a fraction: the distance to the linear
+     *                        relaxation's bound, which no integer plan can beat.
+     *                        Zero when optimality was proven, {@code NaN} when the
+     *                        bound could not be computed
+     * @param rotationExact   false when there were too many distinct weekday
+     *                        restrictions to enforce exactly, so the schedule is
+     *                        checked group by group rather than jointly
      */
     record Outcome(
             List<StageRun> stageRuns,
             List<Conversion> conversions,
+            List<RewardClaim> rewardClaims,
             int totalEnergy,
+            int daysNeeded,
+            int horizonUsed,
             int stageVariables,
             int craftVariables,
+            int rewardVariables,
             int constraints,
             boolean provenOptimal,
-            double optimalityGap
+            double optimalityGap,
+            boolean rotationExact
     ) {}
 
-    /** Everything the model reads. Deliberately a value: the same inputs give the same plan. */
+    /**
+     * Everything the model reads. Deliberately a value: the same inputs give the
+     * same plan.
+     *
+     * @param at           when the plan starts, which fixes the weekday the
+     *                     horizon begins on. Weekdays are read in UTC: a game's
+     *                     own reset timezone is not in the bundle, and inventing
+     *                     one would be a guess dressed as data
+     * @param energyPerDay what the player earns and is willing to spend per day
+     * @param horizonDays  how many days the plan may take
+     */
     record Inputs(
             GameDefinition definition,
             YieldTable yields,
             Map<ItemId, Integer> inventory,
             Map<ItemId, Integer> demand,
             Instant at,
-            long budgetMillis
+            long budgetMillis,
+            Objective objective,
+            int energyPerDay,
+            int horizonDays
     ) {
         int inventoryOf(ItemId item) {
             return inventory.getOrDefault(item, 0);
@@ -151,24 +239,116 @@ final class EnergyMip {
         }
 
         Inputs withDemand(Map<ItemId, Integer> replacement) {
-            return new Inputs(definition, yields, inventory, replacement, at, budgetMillis);
+            return new Inputs(definition, yields, inventory, replacement, at, budgetMillis,
+                    objective, energyPerDay, horizonDays);
         }
 
         Inputs withBudget(long millis) {
-            return new Inputs(definition, yields, inventory, demand, at, millis);
+            return new Inputs(definition, yields, inventory, demand, at, millis,
+                    objective, energyPerDay, horizonDays);
+        }
+
+        /**
+         * The same question over a fixed number of days, asked for least energy.
+         *
+         * <p>Used twice: by the {@link #fewestDays} search, which asks it once per
+         * probe, and by the caller pricing shadow prices against a plan whose
+         * horizon has already been decided. Re-running the search for every
+         * marginal item would price each of them against a different calendar.
+         */
+        Inputs pinnedTo(int days) {
+            return new Inputs(definition, yields, inventory, demand, at, budgetMillis,
+                    Objective.LEAST_ENERGY, energyPerDay, days);
         }
     }
 
     static Outcome solve(Inputs in) {
         if (in.demand().isEmpty()) {
-            return new Outcome(List.of(), List.of(), 0, 0, 0, 0, true, 0.0);
+            return empty(in.horizonDays());
         }
+        return in.objective() == Objective.FEWEST_DAYS ? fewestDays(in) : solveAt(in, in.horizonDays());
+    }
+
+    /**
+     * The shortest horizon the goal set fits into, and the cheapest plan inside it.
+     *
+     * <p>This is the objective's whole difference from least energy, and it is a
+     * search rather than a variable because feasibility is <b>monotone in the
+     * horizon</b>: another day adds energy, may add a reward occurrence, and may
+     * add a day a rotating stage is open, and it takes nothing away. A monotone
+     * predicate over a range of thirty is five probes by bisection, against a
+     * branch-and-bound that would have to carry the day count as an integer
+     * variable coupling every capacity row in the model.
+     *
+     * <p>The two objectives coincide exactly when neither a cadence nor a
+     * rotation binds — then the only thing days buy is energy, the fastest plan
+     * is the cheapest one, and both come back with the same runs. That is a
+     * property of the <em>game data</em>, not of the model, and the plan says
+     * which of the two it is looking at rather than leaving a reader to guess.
+     */
+    private static Outcome fewestDays(Inputs in) {
+        int probes = Math.max(1, 32 - Integer.numberOfLeadingZeros(Math.max(1, in.horizonDays())) + 1);
+        long probeBudget = Math.max(MINIMUM_PROBE_MILLIS, in.budgetMillis() / (probes + 1L));
+
+        // The horizon the caller asked for has to work, or nothing does. Probing
+        // it first turns an impossible goal set into the solver's own refusal —
+        // re-run on the full budget so the message is the one a caller would have
+        // got had they asked for least energy — rather than into a bisection that
+        // narrows onto a failure and has to invent one.
+        if (!feasibleAt(in.withBudget(probeBudget), in.horizonDays())) {
+            return solveAt(in, in.horizonDays());
+        }
+
+        int low = 0;
+        int high = in.horizonDays();
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (feasibleAt(in.withBudget(probeBudget), mid)) {
+                high = mid;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        // Whatever the probes did not spend belongs to the answer: the probes
+        // only had to decide feasible-or-not, and this one has to be the cheapest
+        // plan inside the horizon they settled on.
+        long remaining = Math.max(MINIMUM_PROBE_MILLIS, in.budgetMillis() - probeBudget * probes);
+        return solveAt(in.withBudget(remaining), low);
+    }
+
+    /**
+     * Can the goal set be met at all in this many days?
+     *
+     * <p>A probe that runs out of budget is treated as a <b>no</b>. That is the
+     * conservative direction: it can only make the answer longer than the true
+     * shortest plan, never shorter, so the plan handed to a player is one they
+     * can actually execute. The alternative — assuming a timed-out probe
+     * succeeded — promises a deadline the model never proved.
+     */
+    private static boolean feasibleAt(Inputs in, int days) {
+        try {
+            solveAt(in, days);
+            return true;
+        } catch (Optimizer.InfeasibleGoalException e) {
+            return false;
+        }
+    }
+
+    private static Outcome empty(int horizon) {
+        return new Outcome(List.of(), List.of(), List.of(), 0, 0, horizon, 0, 0, 0, 0, true, 0.0, true);
+    }
+
+    private static Outcome solveAt(Inputs in, int horizonDays) {
+        if (in.demand().isEmpty()) return empty(horizonDays);
 
         List<Stage> stages = open(in.definition().stages(), Stage::availability, in.at());
         List<Craft> crafts = open(in.definition().crafts(), Craft::availability, in.at());
+        List<Reward> rewards = claimable(
+                open(in.definition().rewards(), Reward::availability, in.at()), in.at(), horizonDays);
         Set<ItemId> relevant = relevantItems(in.demand().keySet(), crafts);
 
-        requireReachable(in, stages, crafts, relevant);
+        requireReachable(in, stages, crafts, rewards, relevant, horizonDays);
 
         // Prune: a stage dropping nothing anybody needs is a variable the
         // branch-and-bound tree pays for and never uses.
@@ -177,6 +357,9 @@ final class EnergyMip {
                 .toList();
         List<Craft> usefulCrafts = crafts.stream()
                 .filter(c -> c.produces().stream().anyMatch(p -> relevant.contains(p.item())))
+                .toList();
+        List<Reward> usefulRewards = rewards.stream()
+                .filter(r -> r.grants().stream().anyMatch(g -> relevant.contains(g.item())))
                 .toList();
 
         ExpressionsBasedModel model = new ExpressionsBasedModel();
@@ -189,16 +372,32 @@ final class EnergyMip {
         for (Stage stage : useful) {
             Variable variable = model.newVariable("run:" + stage.stageId().value())
                     .lower(0).integer(true).weight(stage.energyCost());
-            capRuns(variable, cap(stage, in.yields(), relevant, ceiling));
+            capRuns(variable, Math.min(
+                    cap(stage, in.yields(), relevant, ceiling),
+                    closingCap(stage, in, horizonDays)));
             runs.add(variable);
         }
-        double conversionWeight = hasCycle(usefulCrafts) ? CONVERSION_TIE_BREAK : 0.0;
+        double conversionWeight = hasCycle(usefulCrafts) ? TIE_BREAK : 0.0;
         List<Variable> made = new ArrayList<>(usefulCrafts.size());
         for (Craft craft : usefulCrafts) {
             Variable variable = model.newVariable("craft:" + craft.id())
                     .lower(0).integer(true).weight(conversionWeight);
             capRuns(variable, cap(craft, relevant, ceiling));
             made.add(variable);
+        }
+        // Free income is free, so nothing in the objective distinguishes a plan
+        // that leans on four weekly quests from one that leans on all thirty
+        // dailies it never needed — and the second would be reported to a player
+        // as something the plan is counting on. The same millionth that keeps
+        // pointless crafts out keeps unclaimed rewards out, and is paid only by
+        // games that declare rewards at all.
+        double rewardWeight = usefulRewards.isEmpty() ? 0.0 : TIE_BREAK;
+        List<Variable> claims = new ArrayList<>(usefulRewards.size());
+        for (Reward reward : usefulRewards) {
+            Variable variable = model.newVariable("claim:" + reward.id())
+                    .lower(0).integer(true).weight(rewardWeight)
+                    .upper(occurrences(reward, in.at(), horizonDays));
+            claims.add(variable);
         }
 
         for (ItemId item : relevant) {
@@ -211,8 +410,14 @@ final class EnergyMip {
                 int net = net(usefulCrafts.get(c), item);
                 if (net != 0) balance.set(made.get(c), net);
             }
+            for (int r = 0; r < usefulRewards.size(); r++) {
+                int granted = quantity(usefulRewards.get(r).grants(), item);
+                if (granted != 0) balance.set(claims.get(r), granted);
+            }
             balance.lower(in.demandOf(item) - in.inventoryOf(item));
         }
+
+        boolean rotationExact = rotationCapacity(model, useful, runs, in, horizonDays);
 
         Optimisation.Result result;
         try {
@@ -232,10 +437,11 @@ final class EnergyMip {
         }
         if (!result.getState().isFeasible()) {
             throw new Optimizer.InfeasibleGoalException(
-                    "no combination of the " + useful.size() + " available stage(s) and "
-                            + usefulCrafts.size() + " craft(s) meets the goal set in "
-                            + in.definition().game().id() + " "
-                            + in.definition().version().label()
+                    "no combination of the " + useful.size() + " available stage(s), "
+                            + usefulCrafts.size() + " craft(s) and " + usefulRewards.size()
+                            + " reward(s) meets the goal set in " + in.definition().game().id()
+                            + " " + in.definition().version().label() + " within " + horizonDays
+                            + " day(s) at " + in.energyPerDay() + " energy a day"
                             + " (solver state " + result.getState() + ")");
         }
 
@@ -247,7 +453,7 @@ final class EnergyMip {
             if (count > 0) {
                 plan.add(new StageRun(stage.stageId(), count, stage.energyCost()));
                 // Summed from the integers rather than read off the objective:
-                // the objective carries the conversion tie-break and is therefore
+                // the objective carries the tie-break weights and is therefore
                 // not an energy total, and a plan whose stated cost does not add
                 // up is worse than no plan.
                 totalEnergy += count * stage.energyCost();
@@ -258,21 +464,243 @@ final class EnergyMip {
             int count = wholeUnits(result.doubleValue(index++));
             if (count > 0) conversions.add(new Conversion(craft.id(), count));
         }
+        List<RewardClaim> claimed = new ArrayList<>();
+        Map<Reward, Integer> claimCounts = new LinkedHashMap<>();
+        for (Reward reward : usefulRewards) {
+            int count = wholeUnits(result.doubleValue(index++));
+            if (count > 0) {
+                claimed.add(new RewardClaim(reward.id(), count));
+                claimCounts.put(reward, count);
+            }
+        }
 
         plan.sort(Comparator.comparingInt(StageRun::totalEnergy).reversed()
                 .thenComparing(run -> run.stage().value()));
         conversions.sort(Comparator.comparing(Conversion::sourceOrSinkId));
+        claimed.sort(Comparator.comparing(RewardClaim::reward));
         boolean optimal = result.getState().isOptimal();
         return new Outcome(
                 List.copyOf(plan),
                 List.copyOf(conversions),
+                List.copyOf(claimed),
                 totalEnergy,
+                daysNeeded(plan, claimCounts, in, horizonDays),
+                horizonDays,
                 useful.size(),
                 usefulCrafts.size(),
+                usefulRewards.size(),
                 relevant.size(),
                 optimal,
-                optimal ? 0.0 : gapAgainstRelaxation(model, result.getValue()));
+                optimal ? 0.0 : gapAgainstRelaxation(model, result.getValue()),
+                rotationExact);
     }
+
+    // ── the time axis ───────────────────────────────────────────────────────
+
+    /**
+     * The rows that make a day a finite thing.
+     *
+     * <p>Stages are grouped by the weekday restriction they declare — every stage
+     * with no restriction is one group, every stage open only on Tuesdays and
+     * Fridays is another — and each group's energy is capped by the energy of the
+     * days it can reach. That much is obvious. What is less obvious is that
+     * capping each group on its own is <em>wrong</em>: a stage open on Tuesdays
+     * only and a stage open on Tuesdays and Fridays both fit their own caps while
+     * between them demanding more Tuesdays than the window contains.
+     *
+     * <p>So the rows are written over every subset of groups, against the days
+     * that subset's union can reach. That is exactly the condition under which
+     * the underlying transportation problem has a solution, and the number of
+     * rows is {@code 2^k} in the number of <em>distinct restrictions</em> rather
+     * than in the number of stages — one row for a game with no rotation at all,
+     * three for the one in the acceptance fixture. Past
+     * {@value #EXACT_ROTATION_GROUPS} distinct restrictions it falls back to one
+     * row per group plus a total, returns false, and the plan says the schedule
+     * was checked group by group rather than jointly.
+     *
+     * <p>One approximation remains and is deliberate: energy is allowed to split
+     * across days as if it were continuous, so a plan is not asked to prove each
+     * individual run fits inside one day's budget. On real numbers — a run costs
+     * tens, a day supplies hundreds — that is slack nobody can act on.
+     *
+     * @return whether the constraint written is the exact one
+     */
+    private static boolean rotationCapacity(
+            ExpressionsBasedModel model,
+            List<Stage> useful,
+            List<Variable> runs,
+            Inputs in,
+            int horizonDays) {
+
+        if (useful.isEmpty()) return true;
+
+        Map<Set<DayOfWeek>, List<Integer>> groups = new LinkedHashMap<>();
+        for (int i = 0; i < useful.size(); i++) {
+            groups.computeIfAbsent(useful.get(i).availability().days(), k -> new ArrayList<>()).add(i);
+        }
+
+        List<Set<DayOfWeek>> daySets = List.copyOf(groups.keySet());
+        boolean exact = daySets.size() <= EXACT_ROTATION_GROUPS;
+        List<List<Integer>> subsets = exact
+                ? subsetsOf(daySets.size())
+                : eachGroupAndTheWhole(daySets.size());
+
+        int row = 0;
+        for (List<Integer> subset : subsets) {
+            Set<DayOfWeek> reachable = EnumSet.noneOf(DayOfWeek.class);
+            boolean anyUnrestricted = false;
+            for (int g : subset) {
+                Set<DayOfWeek> days = daySets.get(g);
+                if (days.isEmpty()) anyUnrestricted = true;
+                reachable.addAll(days);
+            }
+            long days = anyUnrestricted
+                    ? horizonDays
+                    : matchingDays(reachable, in.at(), horizonDays);
+
+            Expression capacity = model.newExpression("days:" + row++);
+            for (int g : subset) {
+                for (int i : groups.get(daySets.get(g))) {
+                    capacity.set(runs.get(i), useful.get(i).energyCost());
+                }
+            }
+            capacity.upper(days * (long) in.energyPerDay());
+        }
+        return exact;
+    }
+
+    /** Every non-empty subset of {@code n} groups, smallest first. */
+    private static List<List<Integer>> subsetsOf(int n) {
+        List<List<Integer>> subsets = new ArrayList<>();
+        for (int mask = 1; mask < (1 << n); mask++) {
+            List<Integer> members = new ArrayList<>();
+            for (int g = 0; g < n; g++) {
+                if ((mask & (1 << g)) != 0) members.add(g);
+            }
+            subsets.add(members);
+        }
+        return subsets;
+    }
+
+    /** The relaxation used when there are too many groups to enumerate. */
+    private static List<List<Integer>> eachGroupAndTheWhole(int n) {
+        List<List<Integer>> subsets = new ArrayList<>();
+        for (int g = 0; g < n; g++) subsets.add(List.of(g));
+        List<Integer> all = new ArrayList<>();
+        for (int g = 0; g < n; g++) all.add(g);
+        subsets.add(all);
+        return subsets;
+    }
+
+    /**
+     * How many of the next {@code horizonDays} days fall on one of these weekdays.
+     *
+     * <p>Counted rather than approximated as {@code horizon * |days| / 7}. Over a
+     * horizon of ten days that approximation is out by a whole day either way,
+     * and a day of energy is tens of stage runs.
+     */
+    private static long matchingDays(Set<DayOfWeek> days, Instant from, int horizonDays) {
+        if (days.isEmpty()) return horizonDays;
+        DayOfWeek start = from.atZone(ZoneOffset.UTC).getDayOfWeek();
+        long matching = 0;
+        for (int i = 0; i < horizonDays; i++) {
+            if (days.contains(start.plus(i))) matching++;
+        }
+        return matching;
+    }
+
+    /** Rewards that fire at least once inside the horizon; the rest are not sources. */
+    private static List<Reward> claimable(List<Reward> rewards, Instant at, int horizonDays) {
+        return rewards.stream().filter(r -> occurrences(r, at, horizonDays) > 0).toList();
+    }
+
+    /**
+     * How many times a reward can be collected before the horizon or the reward
+     * itself runs out, whichever comes first.
+     *
+     * <p>An event reward that ends on Thursday grants three more dailies, not
+     * thirty: a plan that assumed otherwise would be cheap on paper and short of
+     * materials in practice.
+     */
+    private static int occurrences(Reward reward, Instant at, int horizonDays) {
+        Instant closes = reward.availability().closesAt();
+        int days = horizonDays;
+        if (closes != null) {
+            days = (int) Math.max(0, Math.min(horizonDays, Duration.between(at, closes).toDays()));
+        }
+        return reward.cadence().occurrencesIn(days);
+    }
+
+    /**
+     * The most runs a stage that is closing could absorb before it closes.
+     *
+     * <p>Not a joint constraint — see the class comment — but it is the
+     * difference between a plan that farms an expiring event within the days it
+     * has left and one that farms it five hundred times on its final afternoon.
+     */
+    private static long closingCap(Stage stage, Inputs in, int horizonDays) {
+        Instant closes = stage.availability().closesAt();
+        if (closes == null || stage.energyCost() <= 0) return Long.MAX_VALUE;
+
+        long days = Math.max(0, Math.min(horizonDays, Duration.between(in.at(), closes).toDays()));
+        return days * (long) in.energyPerDay() / stage.energyCost();
+    }
+
+    /**
+     * The shortest number of whole days this particular plan can be executed in,
+     * ignoring the energy total.
+     *
+     * <p>Energy alone gives a fractional answer — 105 energy at 60 a day is 1.75
+     * days and always was — and the caller keeps that. What this adds is the part
+     * that only comes in whole days: a plan claiming four weekly quests cannot be
+     * done in less than four weeks however much energy is spare, and a plan
+     * needing nine runs of a Tuesday-and-Friday stage needs enough Tuesdays and
+     * Fridays to have happened.
+     *
+     * <p>Zero when neither binds, which is the common case and the reason a game
+     * with no rewards and no rotation gets exactly the plan and the estimate it
+     * got before this class had a calendar.
+     */
+    private static int daysNeeded(
+            List<StageRun> plan, Map<Reward, Integer> claims, Inputs in, int horizonDays) {
+
+        int needed = 0;
+        for (Map.Entry<Reward, Integer> claim : claims.entrySet()) {
+            for (int days = needed; days <= horizonDays; days++) {
+                if (occurrences(claim.getKey(), in.at(), days) >= claim.getValue()) {
+                    needed = days;
+                    break;
+                }
+            }
+        }
+
+        Map<Set<DayOfWeek>, Long> energyByRestriction = new LinkedHashMap<>();
+        for (StageRun run : plan) {
+            Set<DayOfWeek> days = restrictionOf(in.definition(), run);
+            if (days.isEmpty()) continue; // the unrestricted ones are the energy figure
+            energyByRestriction.merge(days, (long) run.totalEnergy(), Long::sum);
+        }
+        for (Map.Entry<Set<DayOfWeek>, Long> entry : energyByRestriction.entrySet()) {
+            for (int days = needed; days <= horizonDays; days++) {
+                if (matchingDays(entry.getKey(), in.at(), days) * (long) in.energyPerDay()
+                        >= entry.getValue()) {
+                    needed = days;
+                    break;
+                }
+            }
+        }
+        return needed;
+    }
+
+    private static Set<DayOfWeek> restrictionOf(GameDefinition definition, StageRun run) {
+        return definition.stages().stream()
+                .filter(s -> s.stageId().equals(run.stage()))
+                .findFirst()
+                .map(s -> s.availability().days())
+                .orElse(Set.of());
+    }
+
+    // ── the rest, unchanged in intent ───────────────────────────────────────
 
     /**
      * How much of this plan could conceivably be saved, as a fraction.
@@ -334,11 +762,19 @@ final class EnergyMip {
      * this model does not price yet" is the same fact with somewhere to go.
      */
     private static void requireReachable(
-            Inputs in, List<Stage> stages, List<Craft> crafts, Set<ItemId> relevant) {
+            Inputs in,
+            List<Stage> stages,
+            List<Craft> crafts,
+            List<Reward> rewards,
+            Set<ItemId> relevant,
+            int horizonDays) {
 
         Set<ItemId> producible = new HashSet<>();
         for (Stage stage : stages) {
             producible.addAll(in.yields().yieldsOf(stage.stageId()).keySet());
+        }
+        for (Reward reward : rewards) {
+            for (ItemStack granted : reward.grants()) producible.add(granted.item());
         }
         Deque<Craft> pending = new ArrayDeque<>(crafts);
         boolean grew = true;
@@ -358,7 +794,8 @@ final class EnergyMip {
         List<String> unreachable = new ArrayList<>();
         for (ItemId item : relevant) {
             if (in.demandOf(item) <= in.inventoryOf(item) || producible.contains(item)) continue;
-            unreachable.add(item.value() + " (" + whyNot(in.definition(), item, in.at()) + ")");
+            unreachable.add(item.value() + " ("
+                    + whyNot(in.definition(), item, in.at(), horizonDays) + ")");
         }
         if (!unreachable.isEmpty()) {
             throw new Optimizer.InfeasibleGoalException(
@@ -374,18 +811,22 @@ final class EnergyMip {
      * own ingredients do not exist sends a reader to look for a bug in the
      * recipe; naming the recipe and the reason sends them to the right place.
      */
-    private static String whyNot(GameDefinition definition, ItemId item, Instant at) {
+    private static String whyNot(
+            GameDefinition definition, ItemId item, Instant at, int horizonDays) {
+
         List<String> closed = new ArrayList<>();
         List<String> recipes = new ArrayList<>();
         Shop shop = null;
-        Reward reward = null;
+        Reward tooSlow = null;
 
         for (Source source : definition.sources()) {
             if (source.potentialOutput().stream().noneMatch(s -> s.item().equals(item))) continue;
             if (source instanceof Shop offer) {
                 shop = offer;
             } else if (source instanceof Reward grant) {
-                reward = grant;
+                // Reachable rewards are modelled now, so one reaching here either
+                // is not open or does not come round inside the horizon.
+                tooSlow = grant;
             } else if (source instanceof Craft craft) {
                 recipes.add(craft.id());
             } else if (!isReachable(source.availability(), at)) {
@@ -399,11 +840,12 @@ final class EnergyMip {
         }
         if (shop != null) {
             return "its only source is the shop \"" + shop.id() + "\", and shop purchases"
-                    + " are not modelled until the plan has a time axis";
+                    + " are not modelled: this game's data gives no price or reset period to cap"
+                    + " them with";
         }
-        if (reward != null) {
-            return "its only source is the " + reward.cadence() + " reward \"" + reward.id()
-                    + "\", and free income is not modelled until the plan has a time axis";
+        if (tooSlow != null) {
+            return "its only source is the " + tooSlow.cadence() + " reward \"" + tooSlow.id()
+                    + "\", which does not come round inside a " + horizonDays + "-day horizon";
         }
         if (!recipes.isEmpty()) {
             return "no stage drops it and the recipe(s) that make it — " + String.join(", ", recipes)
@@ -417,9 +859,9 @@ final class EnergyMip {
     }
 
     /**
-     * Open now, or open later today, or open on some other weekday — all count.
-     * Closed for good, or not released yet, do not. Weekday rotation is
-     * deliberately not a filter here; see the class comment.
+     * Open now, or open later this week, or open on some other weekday — all
+     * count here. Closed for good, or not released yet, do not. Weekday rotation
+     * is not a filter, it is a capacity: see {@link #rotationCapacity}.
      */
     private static boolean isReachable(Availability availability, Instant at) {
         if (availability.opensAt() != null && at.isBefore(availability.opensAt())) return false;

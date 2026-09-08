@@ -24,6 +24,7 @@ class InProcessSolveCacheTest {
                 Objective.LEAST_ENERGY,
                 List.of(),
                 List.of(),
+                List.of(),
                 0,
                 0.0,
                 new Explanation(Map.of(), List.of(), List.of()),

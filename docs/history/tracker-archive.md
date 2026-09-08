@@ -673,6 +673,40 @@ entry was met, not that the code exists.
       **Drop estimates are still not in the key**, as the entry required; carried
       forward as **N18** so that it is read before Phase 6 rather than after.
 
+### Done 2026-09-08 (eleventh session) — PR #10 and N14
+
+- [x] ~~**Merge PR #10.**~~ **Already merged** when the session opened, and its
+      `main` push run `34183236122` was green in 1m 55s. `main` is `9bad5aa`.
+      Second session running where the tracker recorded the intent and the remote
+      already held the outcome — **read the remote before the file.**
+
+- [x] ~~**N14 — Give the solver a time axis, and with it rewards and rotation.**~~
+      **Done, and the formulation is the decision worth remembering**
+      ([ADR 0013](../adr/0013-the-horizon-is-a-scalar-not-an-index.md)). The
+      horizon is a **scalar**, not an index: day-indexing every stage variable
+      would have taken a hundred integer variables to three thousand and broken
+      the p95 Phase 2 was closed on. Every consequence of time is linear in a
+      fixed horizon instead — an energy cap, a cadence count, and rotation as a
+      capacity shared over *subsets* of distinct weekday restrictions.
+      `FEWEST_DAYS` is a binary search over the horizon, because feasibility is
+      monotone in it, and not a variable the branch-and-bound has to carry.
+      **The number that mattered held: p95 1 805 ms → 1 807 ms**, and the
+      benchmark is unchanged to the unit — 3 880 Activity against 4 017, nine
+      agreements.
+      **The two objectives are now different plans.** On the acceptance fixture,
+      Insight 1 costs **0 energy over 28 days** or **370 energy over 2**.
+      **What the entry got wrong, and it matters:** it scoped N14 as "rewards
+      plus rotation" on the grounds that shops had no upstream data. Rewards and
+      rotation have none either — `KornblumeAdapter` emits `Availability.ALWAYS`
+      for every source and no rewards at all. So on real data this change is
+      exercised by the energy budget alone and everything else is proven on the
+      synthetic fixture. Carried into the tracker's *unverified* list rather than
+      left to be rediscovered.
+      **Shops stayed out**, per the tenth session's decision, but their refusal
+      changed meaning: the cap now has somewhere to live, and what is missing is
+      a price, a currency and a reset period the upstream does not publish. A
+      `Shop` variable is about a dozen lines the day one does.
+
 ---
 
 ## Closed phases, in full
@@ -945,6 +979,129 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+### 2026-09-08 (eleventh session) — the plan gets a calendar, and the horizon turns out to be load-bearing
+
+**One item: N14, the last thing in Phase 2's scope.** Phase 2's exit criterion
+was met three sessions ago; this is what the tick did not cover.
+
+#### The formulation decision, and why it was made before any code
+
+The tracker's own warning was the constraint: **p95 1 808 ms against a 2 000 ms
+assertion**, 90% of the budget, on roughly a hundred stage variables. The
+obvious time axis — index every stage variable by day, `x[s,d]` — makes that
+three thousand variables over a thirty-day horizon, and branch-and-bound does
+not degrade linearly in integer variables. There was no reading under which the
+number Phase 2 closed on survives that.
+
+So the horizon is a **scalar parameter**, not an index, and every consequence of
+time is a capacity computed from it.
+[ADR 0013](../adr/0013-the-horizon-is-a-scalar-not-an-index.md) has the full
+argument and the reversal trigger. The three rows:
+
+- energy is finite: `sum_s x_s * energy_s <= D * energyPerDay`
+- a cadence is a count: `z_r <= occurrences(cadence, D)` — **exact**, because
+  `z_r` is an integer, so `7 * z <= D` is `z <= floor(D/7)` with no rounding
+- rotation is a **shared** capacity, one row per *subset* of distinct weekday
+  restrictions
+
+**The subset part is the one thing here that is not obvious and is not
+optional.** Capping each rotation group against its own days is wrong: a stage
+open Tuesdays only and a stage open Tuesdays-or-Fridays can each fit their own
+cap while between them demanding more Tuesdays than the window holds. The
+condition that rules that out is one row per subset — `2^k` in the number of
+*distinct restrictions* (one for a game with no rotation, three for the fixture),
+not `2^stages`. There is a test that fails without it: 20 ore and 30 relic over a
+week is 100 against 100 and 150 against 200 group by group, and 250 against 200
+jointly.
+
+#### FEWEST_DAYS is a search, not a variable
+
+Making `D` a variable would couple every capacity row and put the day count into
+the branch-and-bound. It is not needed: **feasibility is monotone in the
+horizon** — another day adds energy, may add a cadence occurrence, may add an
+open day, and takes nothing away. So five probes bisect thirty days, and the
+answer is a least-energy solve pinned to the horizon the search settled on. A
+timed-out probe counts as infeasible, which can only make the answer longer than
+the true shortest plan, never shorter.
+
+#### The thing that was not anticipated: the horizon is load-bearing
+
+Free income accrues at no energy cost, so **with an unbounded horizon the
+cheapest plan is always "wait", without limit.** `LEAST_ENERGY` has no answer
+until something bounds the calendar. That is why `SolveRequest` carries
+`horizonDays` and why it is not a formality — it is what makes the objective
+well-posed. It also means `LEAST_ENERGY` always spends the whole horizon, which
+is correct rather than lazy.
+
+On the acceptance fixture this is vivid, and both numbers were derived on paper
+before the test was run and came out exactly:
+
+| Insight 1, same goal | Energy | Days |
+|---|---|---|
+| `LEAST_ENERGY`, 30-day horizon | **0** | 28 |
+| `FEWEST_DAYS` | **370** | 2 |
+
+Four weekly quests grant 8 sigil-lesser and 4 000 gold; four daily logins close
+the last 1 000. Nothing is farmed. Asked the other way: NOW is a Monday, a
+two-day horizon holds exactly one Tuesday, `pg-2-3` is open on it, 9 runs at 20
+is 180 of the 240 that Tuesday supplies, and 19 runs of `pg-1-1` cover the gold.
+A one-day horizon holds no Tuesday and no Friday and is refused. **The old model
+returned one plan and a note apologising for it.**
+
+#### What it cost on real data: nothing, and that cuts both ways
+
+**p95 1 805 ms → 1 807 ms.** The benchmark is unchanged to the unit: 3 880
+Activity against the guide's 4 017, nine agreements. The optimality gap moved
+2.37% → 2.30%.
+
+The reason is worth stating plainly rather than being pleased about.
+`KornblumeAdapter` emits `Availability.ALWAYS` for **every** source and **no
+rewards at all** — checked by grep, not assumed — and the upstream publishes no
+weekday field anywhere. So on the only real upstream this project has read, the
+time axis adds one capacity row and no integer variables, and **rewards and
+rotation turn out to be in exactly the same data position as shops were found to
+be in the tenth session.** The whole change is exercised on real data by the
+energy budget alone; the rest is proven on the synthetic fixture, which is the
+same standing the catalog axis has had since Phase 1.
+
+That is not an argument against having done it — the model is where a second
+game (Phase 11) and our own drop reports (Phase 6) plug in, and `FEWEST_DAYS`
+was returning a wrong answer with a note attached. It is an argument against
+reading "N14 landed" as "the optimizer now schedules real weeks".
+
+#### Two smaller decisions worth keeping
+
+**Cadences round against the player.** `MONTHLY` is 31 days, not 30, because a
+calendar month is 28 to 31 and a plan assuming the short one promises income that
+may not arrive. `EVENT` and `ONE_OFF` count **once** however long the horizon,
+because their schedule is not in the bundle. Same reasoning as ADR 0011's
+sample-size discount, applied to time instead of to drop rates.
+
+**Reward claims pay the tie-break weight, and only where rewards exist.** Free
+income is free, so nothing in the objective distinguishes a plan leaning on four
+weekly quests from one leaning on thirty dailies it never needed — and the second
+would be reported to a player as something the plan depends on. The millionth
+that keeps pointless crafts out fixes it. It costs the objective its
+integrality, which is what overflowed ojAlgo's stack on a real patch in the
+seventh session, so it is paid **only by games that declare rewards** — and the
+real patch declares none, so that patch still gets an integral objective. The
+conversion tie-break already had exactly this shape; this follows it.
+
+#### Shops: the refusal survived and changed meaning
+
+A `Shop` variable is now about a dozen lines — the cap has somewhere to live. It
+was **not** written, per the tenth session's recorded scope decision. What
+changed is the message: it no longer says "not modelled until the plan has a time
+axis" but names the actual gap, which is that the upstream gives no price, no
+currency and no reset period. **The refusal is now a data refusal rather than a
+modelling one**, and that is worth a sentence to whoever picks up Q2.
+
+#### Numbers
+
+189 tests → **200**, 0 failures, 0 skipped locally with the snapshots present.
+One bug found by the tests rather than by reading: the rotation subset rows
+indexed the group map by ordinal instead of by day-set, which NPE'd every solve.
 
 ### 2026-09-08 (tenth session) — the cache that says what it is, and the shop data that is not there
 
