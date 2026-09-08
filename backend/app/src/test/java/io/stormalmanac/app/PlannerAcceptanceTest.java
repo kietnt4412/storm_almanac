@@ -18,6 +18,7 @@ import io.stormalmanac.planner.MipOptimizer;
 import io.stormalmanac.planner.Objective;
 import io.stormalmanac.planner.Optimizer;
 import io.stormalmanac.planner.Plan;
+import io.stormalmanac.planner.RewardClaim;
 import io.stormalmanac.planner.SolveRequest;
 import io.stormalmanac.player.Goals;
 import io.stormalmanac.player.Inventory;
@@ -63,38 +64,87 @@ class PlannerAcceptanceTest {
     private final GameDefinition provingGround = load();
 
     @Test
-    @DisplayName("the cheapest way to Insight 1 is nine runs of the sigil stage and twenty-one of the gold one")
+    @DisplayName("over a month the cheapest way to Insight 1 is to farm nothing and collect the free income")
     void solvesTheFixturesFirstInsight() {
-        // warden-insight-1 costs 4 sigil-lesser and 5 000 gold.
-        //   sigil-lesser drops only at pg-2-3, 0.45 a run: 4 / 0.45 = 8.9 -> 9 runs at 20 = 180
-        //   gold drops only at pg-1-1, 240 a run:      5 000 / 240 = 20.8 -> 21 runs at 10 = 210
+        // warden-insight-1 costs 4 sigil-lesser and 5 000 gold, and over a
+        // thirty-day horizon the fixture hands both of them out for nothing:
+        //   weekly-quest fires 30 / 7 = 4 times, granting 8 sigil-lesser and
+        //     4 000 gold — the sigils alone cover the goal twice over
+        //   daily-login fires 30 times at 300 gold, and four of them close the
+        //     last 1 000 of the gold
+        // Farming any of it would cost energy the plan does not have to spend, so
+        // the answer is a calendar rather than a grind. This is the whole
+        // difference the time axis makes, and it is why LEAST_ENERGY needs a
+        // horizon: without one, "wait" is free and unbounded.
         Plan plan = solve(goal(WARDEN, "insight-1"), Inventory.empty(PROFILE), Map.of());
 
-        assertThat(plan.stageRuns()).extracting(run -> run.stage().value(), run -> run.runs())
-                .containsExactlyInAnyOrder(
-                        org.assertj.core.groups.Tuple.tuple("pg-2-3", 9),
-                        org.assertj.core.groups.Tuple.tuple("pg-1-1", 21));
-        assertThat(plan.totalEnergy()).isEqualTo(390);
+        assertThat(plan.totalEnergy()).isZero();
+        assertThat(plan.stageRuns()).isEmpty();
+        assertThat(plan.rewardClaims()).containsExactlyInAnyOrder(
+                new RewardClaim("weekly-quest", 4), new RewardClaim("daily-login", 4));
+        // Four weekly quests take four weeks however much energy is spare.
+        assertThat(plan.etaDays()).isEqualTo(28.0);
         assertThat(plan.computedAgainst().label()).isEqualTo("1.0");
+    }
+
+    @Test
+    @DisplayName("fewest days buys the calendar back with energy, and least energy sells it")
+    void theTwoObjectivesAreNowDifferentPlans() {
+        // The same goal, asked the other way. NOW is a Monday, so a two-day
+        // horizon contains exactly one Tuesday and pg-2-3 is open on it:
+        //   4 sigil-lesser at 0.45 a run is 9 runs at 20 = 180 energy, and one
+        //     Tuesday supplies 240 — it fits, and one day would not, because a
+        //     one-day horizon contains no Tuesday and no Friday at all
+        //   5 000 gold less the two daily logins is 4 400, at 240 a run that is
+        //     19 runs of pg-1-1 at 10 = 190
+        // 370 energy for two days against nothing at all for twenty-eight. Those
+        // are different plans in the way the phase-2 note promised and the old
+        // model could not deliver: the trade is real and a player can see it.
+        Plan fastest = solve(goal(WARDEN, "insight-1"), Inventory.empty(PROFILE), Map.of(),
+                Objective.FEWEST_DAYS, 30);
+
+        assertThat(fastest.totalEnergy()).isEqualTo(370);
+        assertThat(fastest.etaDays()).isEqualTo(2.0);
+        assertThat(fastest.explanation().notes()).anySatisfy(note ->
+                assertThat(note).contains("shortest horizon this goal set fits into is 2 day(s)"));
+    }
+
+    @Test
+    @DisplayName("a rotating stage cannot be farmed on a day it is shut, however much energy there is")
+    void rotationBindsEvenWithEnergyToSpare() {
+        // A one-day horizon starting on a Monday reaches no Tuesday and no
+        // Friday, so pg-2-3 has no open day to be run on and the only source of
+        // sigil-lesser inside a day is the weekly quest, which does not come
+        // round either. 240 energy is plenty and buys nothing.
+        assertThatThrownBy(() -> solve(
+                goal(WARDEN, "insight-1"), Inventory.empty(PROFILE), Map.of(),
+                Objective.LEAST_ENERGY, 1))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("within 1 day(s)");
     }
 
     @Test
     @DisplayName("crafting the refined ore beats farming it, and the solver finds that without being told")
     void prefersTheCraftWhenTheCraftIsCheaper() {
         // amulet-level-30 costs 4 ore-refined and 8 000 gold. Two routes:
-        //   farm it at pg-2-3, 0.2 a run: 20 runs at 20 = 400, plus 34 runs of
-        //     pg-1-1 for the gold = 340. Total 740.
-        //   craft it: 4 refine-ore consume 12 ore-rough and 400 gold, so pg-1-1
-        //     must cover 8 400 gold = 35 runs at 10 = 350, and those 35 runs also
-        //     yield 49 ore-rough, comfortably past the 12 needed. Total 350.
-        // Nothing in the model knows the second route exists until the solver
-        // prices it: the craft is a variable and the ore is a constraint row.
+        //   farm the ore at pg-2-3, 0.2 a run: 20 runs at 20 = 400.
+        //   craft it: 4 refine-ore consume 12 ore-rough and 400 gold, and
+        //     ore-rough comes only from pg-1-1 at 1.4 a run, so 12 / 1.4 = 8.6
+        //     -> 9 runs at 10 = 90.
+        // The gold is free over the horizon — 4 weekly quests and 8 daily logins
+        // cover the 8 400 the goal and the craft want between them, less the
+        // 2 160 those 9 runs bring in — so what is left to price is the ore, and
+        // the craft wins on it. Nothing in the model knows the second route
+        // exists until the solver prices it: the craft is a variable and the ore
+        // is a constraint row.
         Plan plan = solve(goal(AMULET, "level-30"), Inventory.empty(PROFILE), Map.of());
 
-        assertThat(plan.totalEnergy()).isEqualTo(350);
+        assertThat(plan.totalEnergy()).isEqualTo(90);
         assertThat(plan.conversions()).containsExactly(new Conversion("refine-ore", 4));
         assertThat(plan.stageRuns()).singleElement()
                 .satisfies(run -> assertThat(run.stage().value()).isEqualTo("pg-1-1"));
+        assertThat(plan.explanation().notes()).anySatisfy(note ->
+                assertThat(note).contains("Counting on free income"));
     }
 
     @Test
@@ -110,20 +160,23 @@ class PlannerAcceptanceTest {
     }
 
     @Test
-    @DisplayName("a goal whose only source is the shop is refused by name, because shops are not priced yet")
+    @DisplayName("a goal whose only source is the shop is still refused by name, and the reason has changed")
     void theShopGapIsSaidOutLoud() {
         // warden-insight-2 costs 6 sigil-greater, and the only source of one in
-        // this bundle is the weekly shop. The model has no time axis and so no
-        // honest place for a per-period cap; an uncapped shop would let the
-        // solver buy its way out of the constraint. Until then this is a refusal
-        // that names the gap, not a plan that pretends the item is free.
+        // this bundle is the weekly shop. The reason this is a refusal is no
+        // longer that the model has nowhere to put a per-period cap — it has one
+        // now, next to the reward cadences. It is that the one upstream this
+        // project reads publishes a shop table with no currency, no price and no
+        // reset period, so there is nothing to put in the cap. A refusal naming
+        // the gap beats a plan that pretends the item is free.
         assertThatThrownBy(() -> solve(
                 goal(WARDEN, "insight-2"),
                 Inventory.empty(PROFILE),
                 Map.of(WARDEN, "insight-1")))
                 .isInstanceOf(Optimizer.InfeasibleGoalException.class)
                 .hasMessageContaining("sigil-greater")
-                .hasMessageContaining("weekly-sigil");
+                .hasMessageContaining("weekly-sigil")
+                .hasMessageContaining("no price or reset period");
     }
 
     @Test
@@ -133,10 +186,14 @@ class PlannerAcceptanceTest {
 
         assertThat(plan.explanation().notes())
                 .anySatisfy(note -> assertThat(note).contains("amulet-level-30"));
-        // One more refined ore is one more craft: 3 ore-rough (already spare) and
-        // 100 gold, which the 35 runs do not have room for, so it is one more run.
+        // One more refined ore is one more craft, so 3 more ore-rough. Nine runs
+        // of pg-1-1 yield 12.6 and the five crafts want 15, so it is two more
+        // runs — the lump, not the average.
         assertThat(plan.explanation().shadowPrice())
-                .containsEntry(ItemId.of("ore-refined"), 10.0);
+                .containsEntry(ItemId.of("ore-refined"), 20.0);
+        // Gold is free at this horizon: the rewards have room for one more.
+        assertThat(plan.explanation().shadowPrice())
+                .containsEntry(ItemId.of("gold"), 0.0);
         assertThat(plan.explanation().bindingStages()).extracting(id -> id.value())
                 .containsExactly("pg-1-1");
     }
@@ -144,6 +201,16 @@ class PlannerAcceptanceTest {
     // ── plumbing ────────────────────────────────────────────────────────────
 
     private Plan solve(Goal goal, Inventory inventory, Map<EntityId, String> roster) {
+        return solve(goal, inventory, roster, Objective.LEAST_ENERGY, 30);
+    }
+
+    private Plan solve(
+            Goal goal,
+            Inventory inventory,
+            Map<EntityId, String> roster,
+            Objective objective,
+            int horizonDays) {
+
         MipOptimizer optimizer = new MipOptimizer(
                 new OneVersion(provingGround),
                 new FixedPlayer(provingGround.game().id(), inventory, new Roster(PROFILE, roster)),
@@ -152,7 +219,7 @@ class PlannerAcceptanceTest {
                 Duration.ofSeconds(2));
 
         return optimizer.solve(new SolveRequest(
-                PROFILE, provingGround.version(), List.of(goal), Objective.LEAST_ENERGY, 240));
+                PROFILE, provingGround.version(), List.of(goal), objective, 240, horizonDays));
     }
 
     private static Goal goal(EntityId entity, String state) {

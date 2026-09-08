@@ -54,6 +54,10 @@ public record GameDefinition(
         return sources.stream().filter(Craft.class::isInstance).map(Craft.class::cast).toList();
     }
 
+    public List<Reward> rewards() {
+        return sources.stream().filter(Reward.class::isInstance).map(Reward.class::cast).toList();
+    }
+
     /** Stages that declare a drop for this item, used to prune the solver's variable set. */
     public List<StageId> stagesDropping(ItemId item) {
         return stages().stream()

@@ -18,7 +18,8 @@ import java.util.Map;
  * The fingerprint of a solve.
  *
  * <p>A solve is a pure function of the game version, the goal set, the
- * objective, the inventory and the roster. Hash that tuple and two things follow
+ * objective, the horizon and rate the plan is bounded by, the inventory and the
+ * roster. Hash that tuple and two things follow
  * for free: the same question asked twice gets the same answer, and the answer
  * can be cached under this key without a cache invalidation strategy — a patch
  * publishes a new version, which is a different key, so a stale plan is not
@@ -46,7 +47,8 @@ public final class SolveKey {
                 .append("game=").append(version.game().value())
                 .append("\nsequence=").append(version.sequence())
                 .append("\nobjective=").append(request.objective())
-                .append("\nenergyPerDay=").append(request.energyPerDay());
+                .append("\nenergyPerDay=").append(request.energyPerDay())
+                .append("\nhorizonDays=").append(request.horizonDays());
 
         canonical.append("\ngoals=");
         List<Goal> goals = request.goals().stream()

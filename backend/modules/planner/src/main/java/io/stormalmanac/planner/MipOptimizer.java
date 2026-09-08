@@ -31,13 +31,15 @@ import java.util.Optional;
  * below be computed by re-solving rather than by trusting a dual value.
  *
  * <p><b>On the two objectives.</b> Both are accepted and both are answered, and
- * under the current model they are answered by the same plan — a deliberately
- * stated fact rather than an oversight. With no time axis, the number of days a
- * plan takes is its energy divided by a constant, so the ordering of plans by
- * days is the ordering by energy. They separate exactly when the model gains
- * weekday rotation and expiring stages, because then a cheaper plan can be a
- * slower one. The plan's notes say so on every {@code FEWEST_DAYS} solve rather
- * than letting a caller infer that a distinct model ran.
+ * since the model gained a time axis they are answered by genuinely different
+ * searches: least energy takes the whole horizon and spends as little as it can
+ * inside it, fewest days finds the shortest horizon the goal set fits into and
+ * then spends as little as it can inside <em>that</em>. Whether the two plans
+ * differ is a fact about the game's data rather than about the model — where
+ * nothing rotates and nothing accrues on a cadence, days are energy divided by a
+ * constant and the two coincide. The plan's notes say which case a reader is
+ * looking at, because "these came out the same" and "these are the same
+ * question" are different claims.
  */
 public final class MipOptimizer implements Optimizer {
 
@@ -159,7 +161,8 @@ public final class MipOptimizer implements Optimizer {
         long searchMillis =
                 (long) (budget.toMillis() * SEARCH_BUDGET_SHARE);
         EnergyMip.Inputs inputs = new EnergyMip.Inputs(
-                definition, yields, inventory.quantities(), demand.quantities(), now, searchMillis);
+                definition, yields, inventory.quantities(), demand.quantities(), now, searchMillis,
+                request.objective(), request.energyPerDay(), request.horizonDays());
 
         EnergyMip.Outcome outcome = EnergyMip.solve(inputs);
 
@@ -170,8 +173,9 @@ public final class MipOptimizer implements Optimizer {
                 request.objective(),
                 outcome.stageRuns(),
                 outcome.conversions(),
+                outcome.rewardClaims(),
                 outcome.totalEnergy(),
-                etaDays(outcome.totalEnergy(), request.energyPerDay()),
+                etaDays(outcome, request.energyPerDay()),
                 explain(request, demand, yields, inputs, outcome, startedAtNanos),
                 now);
 
@@ -214,6 +218,7 @@ public final class MipOptimizer implements Optimizer {
                 cached.objective(),
                 cached.stageRuns(),
                 cached.conversions(),
+                cached.rewardClaims(),
                 cached.totalEnergy(),
                 cached.etaDays(),
                 new Explanation(
@@ -233,16 +238,24 @@ public final class MipOptimizer implements Optimizer {
     }
 
     /**
-     * Energy is spent at a flat rate here, so the estimate is a division. It is
-     * the only place the request's {@code energyPerDay} is used, and it is
-     * deliberately not rounded up: "3.4 days" is a truer thing to show a player
-     * than "4 days", and the rounding belongs to whoever renders it.
+     * How long the plan takes: the longer of what its energy costs and what its
+     * calendar costs.
+     *
+     * <p>Energy is spent at a flat rate, so that half is a division and is
+     * deliberately not rounded up — "3.4 days" is a truer thing to show a player
+     * than "4 days", and the rounding belongs to whoever renders it. The other
+     * half comes in whole days and cannot be divided at all: a plan leaning on
+     * four weekly quests takes four weeks even with the energy to spare, and a
+     * plan needing nine runs of a Tuesday-and-Friday stage waits for Tuesdays.
+     *
+     * <p>Where a game declares neither cadences nor rotation the second half is
+     * zero and this is the division it always was.
      */
-    private static double etaDays(int totalEnergy, int energyPerDay) {
+    private static double etaDays(EnergyMip.Outcome outcome, int energyPerDay) {
         if (energyPerDay <= 0) {
             throw new IllegalArgumentException("energyPerDay must be positive, was " + energyPerDay);
         }
-        return totalEnergy / (double) energyPerDay;
+        return Math.max(outcome.totalEnergy() / (double) energyPerDay, outcome.daysNeeded());
     }
 
     private Explanation explain(
@@ -254,8 +267,11 @@ public final class MipOptimizer implements Optimizer {
             long startedAtNanos) {
 
         List<String> notes = new ArrayList<>();
-        notes.add("Minimised energy over %d stage(s) and %d craft(s), against %d item constraint(s)."
-                .formatted(outcome.stageVariables(), outcome.craftVariables(), outcome.constraints()));
+        notes.add("Minimised energy over %d stage(s), %d craft(s) and %d reward(s), against %d item"
+                .formatted(outcome.stageVariables(), outcome.craftVariables(),
+                        outcome.rewardVariables(), outcome.constraints())
+                + " constraint(s), inside a %d-day horizon at %d energy a day."
+                        .formatted(outcome.horizonUsed(), request.energyPerDay()));
         if (!outcome.provenOptimal()) {
             notes.add(Double.isNaN(outcome.optimalityGap())
                     ? "The search stopped on its time budget, so this is the cheapest plan found"
@@ -297,10 +313,41 @@ public final class MipOptimizer implements Optimizer {
                     + " there.");
         }
 
+        if (!outcome.rewardClaims().isEmpty()) {
+            // The single biggest way this plan can be wrong in practice, and it
+            // is not the solver's fault: a plan is cheap partly because somebody
+            // logs in. Saying which grants and how many turns that from an
+            // assumption into something a reader can check against their own week.
+            notes.add("Counting on free income over the horizon: " + outcome.rewardClaims().stream()
+                    .map(claim -> claim.reward() + " ×" + claim.times())
+                    .reduce((a, b) -> a + ", " + b).orElse("")
+                    + ". Miss those and the plan costs more energy than it says.");
+        }
+        if (outcome.daysNeeded() > 0) {
+            notes.add(("This plan cannot be finished in less than %d day(s) however much energy is"
+                    + " spare, because it waits on a reward cadence or on a stage that is only open"
+                    + " some weekdays.").formatted(outcome.daysNeeded()));
+        }
+        if (!outcome.rotationExact()) {
+            notes.add("This game declares more distinct weekday restrictions than are checked"
+                    + " jointly, so the schedule was checked one restriction at a time. Two sets of"
+                    + " stages competing for the same weekday may between them want more of it than"
+                    + " the horizon holds.");
+        }
+
         if (request.objective() == Objective.FEWEST_DAYS) {
-            notes.add("Fewest days and least energy are the same plan under this model: with no"
-                    + " time axis, days are energy divided by a constant. They separate once"
-                    + " rotating and expiring stages are modelled.");
+            notes.add(outcome.horizonUsed() < request.horizonDays()
+                    ? ("The shortest horizon this goal set fits into is %d day(s), against the %d"
+                            + " asked for; this is the cheapest plan inside it.")
+                                    .formatted(outcome.horizonUsed(), request.horizonDays())
+                    : ("This goal set needs the whole %d-day horizon, so fewest days and least"
+                            + " energy are asking the same question of it.")
+                                    .formatted(request.horizonDays()));
+        }
+        if (outcome.rewardVariables() == 0 && request.objective() == Objective.FEWEST_DAYS) {
+            notes.add("Nothing in this game's data accrues on a cadence, so days here buy nothing"
+                    + " but energy and the fastest plan is the cheapest one. That is a fact about"
+                    + " the data, not about the model.");
         }
 
         Map<ItemId, Double> shadowPrices = shadowPrices(demand, inputs, outcome, notes, startedAtNanos);
@@ -321,6 +368,12 @@ public final class MipOptimizer implements Optimizer {
      *
      * <p>Zero is a real and useful answer: it means the item falls out of runs
      * the plan already makes for something else.
+     *
+     * <p>Every re-solve is pinned to the horizon the plan itself settled on, and
+     * asked for least energy whatever the plan's objective was. Otherwise a
+     * fewest-days plan would price each marginal item against a calendar the
+     * search had rediscovered for that item alone, and "one more sigil costs 40"
+     * would silently mean "against a plan one day longer than yours".
      */
     private Map<ItemId, Double> shadowPrices(
             Demand demand,
@@ -330,6 +383,7 @@ public final class MipOptimizer implements Optimizer {
             long startedAtNanos) {
 
         long deadline = startedAtNanos + (long) (budget.toNanos() * ANSWER_DEADLINE_SHARE);
+        EnergyMip.Inputs pinned = inputs.pinnedTo(base.horizonUsed());
 
         Map<ItemId, Double> prices = new LinkedHashMap<>();
         for (ItemId item : demand.quantities().keySet()) {
@@ -349,7 +403,7 @@ public final class MipOptimizer implements Optimizer {
             raised.merge(item, 1, Integer::sum);
             try {
                 EnergyMip.Outcome marginal = EnergyMip.solve(
-                        inputs.withDemand(raised).withBudget(Math.min(remaining, inputs.budgetMillis())));
+                        pinned.withDemand(raised).withBudget(Math.min(remaining, inputs.budgetMillis())));
                 // Only comparable when both ends were solved to optimality. A
                 // difference between two time-limited answers is noise with a
                 // number on it, and a number a player would act on.

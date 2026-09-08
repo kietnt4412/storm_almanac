@@ -145,8 +145,12 @@ class MipOptimizerTest {
     }
 
     @Test
-    @DisplayName("fewest days says out loud that it is the same plan as least energy for now")
-    void fewestDaysIsHonestAboutBeingTheSameModel() {
+    @DisplayName("fewest days says why it came out the same, and blames the data rather than the model")
+    void fewestDaysNamesTheReasonTheTwoObjectivesCoincide() {
+        // This game declares no rewards and nothing that rotates, so a day buys
+        // nothing but energy and the fastest plan is the cheapest one. That is
+        // worth a sentence: "they came out the same" and "they are the same
+        // question" are different claims, and only the first one is true here.
         GameDefinition definition = workshop();
         Plan energy = optimizerOver(definition, Inventory.empty(PROFILE))
                 .solve(request(definition, Objective.LEAST_ENERGY));
@@ -154,10 +158,40 @@ class MipOptimizerTest {
                 .solve(request(definition, Objective.FEWEST_DAYS));
 
         assertThat(days.totalEnergy()).isEqualTo(energy.totalEnergy());
-        assertThat(days.explanation().notes())
-                .anySatisfy(note -> assertThat(note).contains("same plan under this model"));
-        assertThat(energy.explanation().notes())
-                .noneSatisfy(note -> assertThat(note).contains("same plan under this model"));
+        assertThat(days.etaDays()).isEqualTo(energy.etaDays());
+        assertThat(days.explanation().notes()).anySatisfy(note ->
+                assertThat(note).contains("Nothing in this game's data accrues on a cadence"));
+        assertThat(energy.explanation().notes()).noneSatisfy(note ->
+                assertThat(note).contains("Nothing in this game's data accrues on a cadence"));
+    }
+
+    @Test
+    @DisplayName("a plan bounded by a horizon it cannot fit into is refused, in days and energy")
+    void theHorizonCanRefuseAPlan() {
+        // 105 energy at 60 a day is two days' worth; one day is not enough.
+        GameDefinition definition = workshop();
+        SolveRequest tooShort = new SolveRequest(
+                PROFILE, definition.version(), List.of(Goal.deterministic(HERO, "insight-1")),
+                Objective.LEAST_ENERGY, 60, 1);
+
+        assertThatThrownBy(() -> optimizerOver(definition, Inventory.empty(PROFILE)).solve(tooShort))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("within 1 day(s) at 60 energy a day");
+    }
+
+    @Test
+    @DisplayName("two horizons are two questions, and the cache key knows it")
+    void theHorizonIsPartOfTheFingerprint() {
+        GameDefinition definition = workshop();
+        MipOptimizer optimizer = optimizerOver(definition, Inventory.empty(PROFILE));
+        List<Goal> goals = List.of(Goal.deterministic(HERO, "insight-1"));
+
+        Plan thirty = optimizer.solve(new SolveRequest(
+                PROFILE, definition.version(), goals, Objective.LEAST_ENERGY, 60, 30));
+        Plan seven = optimizer.solve(new SolveRequest(
+                PROFILE, definition.version(), goals, Objective.LEAST_ENERGY, 60, 7));
+
+        assertThat(thirty.id()).isNotEqualTo(seven.id());
     }
 
     @Test

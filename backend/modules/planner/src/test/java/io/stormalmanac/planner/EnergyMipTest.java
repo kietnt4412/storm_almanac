@@ -17,8 +17,10 @@ import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
+import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.Period;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,10 +53,33 @@ class EnergyMipTest {
                 .build();
     }
 
+    /**
+     * A horizon and a rate wide enough that neither binds.
+     *
+     * <p>Every test below that predates the time axis asserts an energy total
+     * worked out on paper, and those totals are still the answer — but only
+     * because a month at a thousand a day is far more than any of them spends.
+     * The tests that are <em>about</em> the calendar name their own numbers.
+     */
+    private static final int UNCONSTRAINED_RATE = 1000;
+    private static final int UNCONSTRAINED_HORIZON = 30;
+
     private static EnergyMip.Outcome solve(
             GameDefinition definition, Map<ItemId, Integer> inventory, Map<ItemId, Integer> demand) {
+        return solve(definition, inventory, demand, Objective.LEAST_ENERGY,
+                UNCONSTRAINED_RATE, UNCONSTRAINED_HORIZON);
+    }
+
+    private static EnergyMip.Outcome solve(
+            GameDefinition definition,
+            Map<ItemId, Integer> inventory,
+            Map<ItemId, Integer> demand,
+            Objective objective,
+            int energyPerDay,
+            int horizonDays) {
         return EnergyMip.solve(new EnergyMip.Inputs(
-                definition, YieldTable.declared(definition), inventory, demand, NOW, 2000L));
+                definition, YieldTable.declared(definition), inventory, demand, NOW, 2000L,
+                objective, energyPerDay, horizonDays));
     }
 
     @Test
@@ -159,22 +184,62 @@ class EnergyMipTest {
         assertThatThrownBy(() -> solve(definition, Map.of(), Map.of(RELIC, 1)))
                 .isInstanceOf(Optimizer.InfeasibleGoalException.class)
                 .hasMessageContaining("weekly-relic")
-                .hasMessageContaining("time axis");
+                .hasMessageContaining("no price or reset period");
     }
 
     @Test
-    @DisplayName("an item granted only by a reward is refused by name for the same reason")
-    void rewardOnlyItemIsRefusedRatherThanFree() {
+    @DisplayName("an item a reward grants is supplied by waiting, and the plan says how many times")
+    void rewardIncomeIsSupply() {
+        // The weekly quest grants 2 relics and fires 30 / 7 = 4 times in the
+        // horizon. One relic is wanted, so one claim covers it and nothing is
+        // farmed — the whole point of giving the model a calendar.
         GameDefinition definition = TestGame.builder()
                 .stage(GOLD_STAGE, 5, GOLD, 100.0)
                 .source(new Reward("weekly-quest", Reward.Cadence.WEEKLY,
                         List.of(new ItemStack(RELIC, 2)), Availability.ALWAYS))
                 .build();
 
-        assertThatThrownBy(() -> solve(definition, Map.of(), Map.of(RELIC, 1)))
+        EnergyMip.Outcome outcome = solve(definition, Map.of(), Map.of(RELIC, 1));
+
+        assertThat(outcome.totalEnergy()).isZero();
+        assertThat(outcome.stageRuns()).isEmpty();
+        assertThat(outcome.rewardClaims()).containsExactly(new RewardClaim("weekly-quest", 1));
+        // A week is a week: no amount of spare energy makes the quest come round sooner.
+        assertThat(outcome.daysNeeded()).isEqualTo(7);
+    }
+
+    @Test
+    @DisplayName("a cadence that does not come round inside the horizon is refused by name")
+    void aRewardTooSlowForTheHorizonIsNotASource() {
+        GameDefinition definition = TestGame.builder()
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .source(new Reward("weekly-quest", Reward.Cadence.WEEKLY,
+                        List.of(new ItemStack(RELIC, 2)), Availability.ALWAYS))
+                .build();
+
+        assertThatThrownBy(() -> solve(definition, Map.of(), Map.of(RELIC, 1),
+                Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, 5))
                 .isInstanceOf(Optimizer.InfeasibleGoalException.class)
                 .hasMessageContaining("weekly-quest")
-                .hasMessageContaining("WEEKLY");
+                .hasMessageContaining("5-day horizon");
+    }
+
+    @Test
+    @DisplayName("free income is not claimed for its own sake: the plan reports what it leans on")
+    void unusedRewardsAreNotClaimed() {
+        // Thirty daily logins are available and one is needed. A plan reporting
+        // all thirty would be telling a player it depends on a month of logins
+        // when it depends on one day of them.
+        GameDefinition definition = TestGame.builder()
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .source(new Reward("daily-login", Reward.Cadence.DAILY,
+                        List.of(new ItemStack(RELIC, 1)), Availability.ALWAYS))
+                .build();
+
+        EnergyMip.Outcome outcome = solve(definition, Map.of(), Map.of(RELIC, 1));
+
+        assertThat(outcome.rewardClaims()).containsExactly(new RewardClaim("daily-login", 1));
+        assertThat(outcome.daysNeeded()).isEqualTo(1);
     }
 
     @Test
@@ -187,19 +252,120 @@ class EnergyMipTest {
     }
 
     @Test
-    @DisplayName("a rotating stage still counts, because a plan spanning days reaches every weekday")
-    void weekdayRotationDoesNotRemoveAStage() {
+    @DisplayName("a rotating stage is limited by the energy of the days it is actually open")
+    void rotationIsACapacityRatherThanAFilter() {
+        // NOW is a Monday. A fourteen-day horizon starting on a Monday contains
+        // the Tuesdays at offsets 1 and 8 — two of them — so a Tuesday-only stage
+        // gets 2 * 30 = 60 energy, which is six runs and twelve ore.
+        assertThat(NOW.atZone(ZoneOffset.UTC).getDayOfWeek()).isEqualTo(DayOfWeek.MONDAY);
         GameDefinition definition = TestGame.builder()
-                .stage(ORE_STAGE, 10,
-                        new Availability(Set.of(java.time.DayOfWeek.TUESDAY), null, null), ORE, 2.0)
+                .stage(ORE_STAGE, 10, new Availability(Set.of(DayOfWeek.TUESDAY), null, null),
+                        ORE, 2.0)
                 .build();
-        // NOW is a Monday; the stage opens tomorrow and the plan takes days anyway.
-        assertThat(NOW.atZone(java.time.ZoneOffset.UTC).getDayOfWeek())
-                .isEqualTo(java.time.DayOfWeek.MONDAY);
 
-        EnergyMip.Outcome outcome = solve(definition, Map.of(), Map.of(ORE, 4));
+        EnergyMip.Outcome outcome =
+                solve(definition, Map.of(), Map.of(ORE, 12), Objective.LEAST_ENERGY, 30, 14);
 
-        assertThat(outcome.totalEnergy()).isEqualTo(20);
+        assertThat(outcome.totalEnergy()).isEqualTo(60);
+        // Both Tuesdays have to have happened, and the second is nine days out.
+        assertThat(outcome.daysNeeded()).isEqualTo(9);
+    }
+
+    @Test
+    @DisplayName("a rotating stage cannot be farmed past the days the horizon gives it")
+    void rotationCanMakeAGoalUnreachableInTime() {
+        GameDefinition definition = TestGame.builder()
+                .stage(ORE_STAGE, 10, new Availability(Set.of(DayOfWeek.TUESDAY), null, null),
+                        ORE, 2.0)
+                .build();
+
+        // Fourteen ore is seven runs, seventy energy, and two Tuesdays supply sixty.
+        assertThatThrownBy(() -> solve(
+                definition, Map.of(), Map.of(ORE, 14), Objective.LEAST_ENERGY, 30, 14))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("within 14 day(s)")
+                .hasMessageContaining("30 energy a day");
+    }
+
+    @Test
+    @DisplayName("two rotations sharing a weekday are capped together, not one at a time")
+    void rotationsCompeteForTheSameDays() {
+        // A week from Monday holds one Tuesday and one Friday, 100 energy each.
+        //   s-ore is Tuesday-only and wants 20 ore = 10 runs = 100 energy.
+        //   s-relic is Tuesday-or-Friday and wants 30 relic = 15 runs = 150 energy.
+        // Each fits its own days — 100 <= 100 and 150 <= 200 — and together they
+        // want 250 out of the 200 the two days between them supply. Checking the
+        // groups one at a time would call this a plan.
+        GameDefinition definition = rotatingPair();
+
+        assertThatThrownBy(() -> solve(
+                definition, Map.of(), Map.of(ORE, 20, RELIC, 30), Objective.LEAST_ENERGY, 100, 7))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class);
+
+        // The same shape with twenty relics is 200 against 200, and is a plan.
+        EnergyMip.Outcome outcome = solve(
+                definition, Map.of(), Map.of(ORE, 20, RELIC, 20), Objective.LEAST_ENERGY, 100, 7);
+        assertThat(outcome.totalEnergy()).isEqualTo(200);
+    }
+
+    private static GameDefinition rotatingPair() {
+        return TestGame.builder()
+                .stage(ORE_STAGE, 10, new Availability(Set.of(DayOfWeek.TUESDAY), null, null),
+                        ORE, 2.0)
+                .stage(RELIC_STAGE, 10,
+                        new Availability(Set.of(DayOfWeek.TUESDAY, DayOfWeek.FRIDAY), null, null),
+                        RELIC, 2.0)
+                .build();
+    }
+
+    @Test
+    @DisplayName("fewest days and least energy are different plans once free income accrues")
+    void theTwoObjectivesSeparate() {
+        // s-gold pays 100 gold for 5 energy; the daily login pays 100 for nothing.
+        // At 10 energy a day, a day is worth 2 runs (200 gold) plus the login
+        // (100), so 1 000 gold needs ceil(1000 / 300) = 4 days.
+        GameDefinition definition = TestGame.builder()
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .source(new Reward("daily-login", Reward.Cadence.DAILY,
+                        List.of(new ItemStack(GOLD, 100)), Availability.ALWAYS))
+                .build();
+
+        EnergyMip.Outcome cheapest =
+                solve(definition, Map.of(), Map.of(GOLD, 1000), Objective.LEAST_ENERGY, 10, 30);
+        EnergyMip.Outcome fastest =
+                solve(definition, Map.of(), Map.of(GOLD, 1000), Objective.FEWEST_DAYS, 10, 30);
+
+        // Waiting is free, so the cheapest plan waits: ten logins, no farming.
+        assertThat(cheapest.totalEnergy()).isZero();
+        assertThat(cheapest.daysNeeded()).isEqualTo(10);
+
+        // The fastest plan buys the other twenty days with energy.
+        assertThat(fastest.horizonUsed()).isEqualTo(4);
+        assertThat(fastest.totalEnergy()).isEqualTo(30);
+        assertThat(fastest.rewardClaims()).containsExactly(new RewardClaim("daily-login", 4));
+    }
+
+    @Test
+    @DisplayName("with nothing on a cadence and nothing rotating, the two objectives coincide")
+    void theTwoObjectivesCoincideWhenTheDataSaysNothingAboutTime() {
+        // Not a property of the model — a property of a game whose data declares
+        // no rewards and no rotation, which is every game ingested so far.
+        EnergyMip.Outcome cheapest = solve(workshop(), Map.of(), Map.of(INGOT, 6));
+        EnergyMip.Outcome fastest = solve(workshop(), Map.of(), Map.of(INGOT, 6),
+                Objective.FEWEST_DAYS, UNCONSTRAINED_RATE, UNCONSTRAINED_HORIZON);
+
+        assertThat(fastest.totalEnergy()).isEqualTo(cheapest.totalEnergy()).isEqualTo(105);
+        assertThat(fastest.daysNeeded()).isZero();
+    }
+
+    @Test
+    @DisplayName("a goal that will not fit in the horizon's energy is refused, and says so in days")
+    void theHorizonIsAConstraintAndNotADecoration() {
+        // 6 ingots cost 105 energy; three days at 20 a day is 60.
+        assertThatThrownBy(() -> solve(
+                workshop(), Map.of(), Map.of(INGOT, 6), Objective.LEAST_ENERGY, 20, 3))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("within 3 day(s) at 20 energy a day");
     }
 
     @Test
