@@ -26,6 +26,15 @@ dependencies {
     runtimeOnly(libs.postgresql)
 
     testImplementation(libs.springBootStarterTest)
+    // Signs a test request in as an OIDC user without standing up a provider.
+    // The alternative is a mock authorization server, which would be testing
+    // Spring Security's protocol implementation rather than this application's
+    // authorization rules — and those rules are the thing that must not be wrong.
+    testImplementation(libs.springSecurityTest)
+    // identity keeps the OAuth2 starter to itself (implementation, not api), so
+    // it reaches this module at runtime but not at compile time. The end-to-end
+    // test builds an OIDC principal by hand, so it needs the types here too.
+    testImplementation(libs.springBootStarterOauth2)
     testImplementation(libs.archunit)
 
     // ApplicationBootTest starts the real context against a real Postgres.
