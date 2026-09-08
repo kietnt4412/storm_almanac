@@ -709,6 +709,47 @@ entry was met, not that the code exists.
 
 ---
 
+### Done 2026-09-08 (twelfth session) — PRs #11 and #12, N21 and N22
+
+- [x] ~~**Merge PR #11.**~~ **Already merged** when the session opened, and so
+      was **PR #12** behind it. `main` is `eb2894a`; runs `34203224613` and
+      `34205089646` both green, **16 skipped and exactly the three
+      snapshot-gated classes**. **Third session running** where the tracker
+      recorded the intent and the remote already held the outcome. The lesson is
+      not "check the remote" — the last two entries said that. It is that a
+      session which pushes and then runs out of room to write the line leaves
+      this exact residue, and the cheap fix is to write the tracker line *with*
+      the push rather than after it.
+
+- [x] ~~**Open Phase 3 — Identity and player state.**~~ **Opened and its exit
+      criterion met**, 2026-09-08, in two commits.
+      **N21** gave `identity` and `player` their schemas and put an
+      implementation behind both ports. The four decisions in `V5`'s header are
+      the part worth keeping: no foreign key crosses a schema (a cross-schema key
+      is a cross-module coupling the database enforces, and it is what makes
+      extraction a rewrite); nothing points into `gamedata` either, and there it
+      is not a choice, because gamedata rows are version-scoped and an inventory
+      outlives every patch; an identity is `(provider, subject)` and never an
+      email; and absent means zero, with a `CHECK` so the two representations
+      cannot diverge.
+      **N22** wired the rest: sign-in that creates the account while the
+      principal is being built, `oauth2Login` installed only when a provider is
+      configured, `IF_REQUIRED` sessions and CSRF back on — both phase 0 decisions
+      that carried "phase 3 revisits this" — one authorization method every
+      account-scoped route goes through, and a synchronous plan route reading
+      goals, inventory and roster from Postgres.
+      **What the tick does not cover, and it is a lot:** the OAuth token exchange
+      has never run against a provider; the end-to-end test is MockMvc rather
+      than a socket, for a stated reason; and **there is no sync** — Phase 3's
+      scope names it, PUT replaces, and no per-key patch route exists. All three
+      are in the tracker's unverified list.
+      **`Optimizer` and `SolveCache` are beans now**, which is what N15's refusal
+      to register them was waiting for: they finally sit on a path a real request
+      takes. `SolveCoordinator` is still not one, on the same reasoning — there is
+      no asynchronous surface for a ticket to be useful on.
+
+---
+
 ## Closed phases, in full
 
 The live tracker keeps each phase's exit criterion, its status and the
@@ -848,6 +889,35 @@ was written when each closed.
 
 ---
 
+- [x] **Phase 3 · Identity and player state** — 1 week — **closed 2026-09-08**
+      OAuth, inventory, roster, goals, multiple profiles, sync.
+      **Exit:** a plan computed end-to-end from stored state on a real account.
+      **Met.** `PlanFromStoredStateTest` signs a person in, the sign-in creates
+      the account, the account creates a profile, the profile is given an
+      inventory, a roster and goals over HTTP, and `POST
+      /api/me/profiles/{id}/plan` reads all three back out of Postgres. The
+      request body carries `energyPerDay` and `horizonDays` and nothing else,
+      because those are the two things that are facts about the sitting rather
+      than about the account. **Every plan in this repository before that one was
+      computed from a goal set a test handed the optimizer.**
+      **Landed:** `V5` (six tables across two schemas), `JdbcAccountRepository`,
+      `JdbcPlayerStateRepository`, `SignIn` and the two user services,
+      `CurrentAccount`, `OwnedProfiles`, `PlayerController`, `PlanController`,
+      `PlannerConfiguration`, `oauth2Login` behind a configured-provider check,
+      `IF_REQUIRED` sessions and CSRF re-enabled — both phase 0 decisions that
+      carried "phase 3 revisits this" — and 28 tests.
+      **What the tick does not cover.** **Sync was not built, and it is in the
+      scope line above**: PUT replaces a whole aggregate, there is no per-key
+      patch route and no merge, and the `updated_at` column last-write-wins would
+      need was deliberately left out of `V5` so that it arrives with the merge
+      rather than looking implemented without it. Tracked as **N23**.
+      Two further qualifications, both in the live tracker's unverified list:
+      the **OAuth token exchange has never run** against a real provider, because
+      no client secret exists and no redirect URI can be registered without a URL
+      (D1); and the end-to-end test goes through **MockMvc rather than a socket**,
+      because an authenticated session cannot be minted over one without an
+      authorization server to redirect to.
+
 ## Answered questions
 
 Struck through with the answer, as the tracker's rule requires. Kept in full
@@ -979,6 +1049,193 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+### 2026-09-08 (twelfth session) — Phase 3 opens and closes: the optimizer finally meets a real account
+
+**Two items, N21 and N22, and between them Phase 3's exit criterion is met:** a
+plan computed end-to-end from stored state on a real account.
+
+#### The tracker was a step behind, and the check took a minute
+
+The first next action was "merge PR #11". It was already merged, and so was
+**PR #12** behind it — both before this session started. `main` is `eb2894a`,
+runs `34203224613` and `34205089646`, both green, **16 skipped and they are
+exactly the three snapshot-gated classes** (`RealUpstreamPlanTest` 8,
+`CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3). Nothing was wrong; the
+session that pushed them ended before it could write the line. Worth recording
+only because the tracker's own first rule is that a session ending without this
+file reflecting what happened starts the next one from a lie — and the cost of
+that lie here was one `gh pr list`, which is the cheap version.
+
+#### N21 — the schema, and four decisions that are not obvious afterwards
+
+`V5` gives `identity` and `player` their tables. The DDL is unremarkable; the
+four decisions written into its header are the part worth keeping.
+
+**1. No foreign key crosses a schema.** `player.profile.account_id` names a row
+in `identity.account` and has no `REFERENCES` clause. The invariant is "one
+schema per module, modules talk through events", and its justification is that
+extracting a module later is a deployment change rather than a rewrite — which
+stops being true the moment one module's DDL cannot be applied without another's.
+`ModuleBoundaryTest` enforces the Java half and can see nothing of this half, so
+it is written down instead. **The cost is real and is stated rather than hidden:
+a deleted account leaves orphan profiles until something reacts to an event, and
+nothing publishes that event yet.**
+
+**2. Nothing points into `gamedata` either, and there it is not a choice.** Every
+gamedata row is scoped to one `game_data_version` and replaced wholesale by the
+next patch (V2's first decision). A player's inventory outlives every patch, so it
+*cannot* point at rows a publish deletes. Items and entities are therefore stored
+as the upstream slug — the same string `ItemId` and `EntityId` wrap — and resolve
+against whichever version a plan is solved against. **An item that disappears from
+the game stays in the inventory and stops being demanded**, which is the behaviour
+a player expects and the one a foreign key would forbid.
+
+**3. An identity is `(provider, subject)`, never an email.** Providers let people
+change their email and some let people change it to one they do not control.
+Keying an account on the email claim is the standard account-takeover route into
+a service like this one, it costs nothing to avoid, and it is now asserted in two
+places rather than commented in one: `SignInTest` refuses a provider payload
+carrying an email and no subject, and `PlayerStateDatabaseTest` shows two
+providers claiming the same email producing two accounts.
+
+**4. Absent means zero.** An inventory row with quantity 0 and no row at all are
+the same state, `Inventory.with(item, 0)` already collapses them in Java, and a
+`CHECK (quantity > 0)` makes the database agree so the two cannot diverge. There
+is a test that bypasses Java and inserts the zero directly, because a constraint
+nobody has watched refuse anything is a comment.
+
+**Each save replaces a whole aggregate**, which is what
+`saveInventory(Inventory)` says and not a placeholder for something cleverer. The
+javadoc names what that costs: two devices saving concurrently do not merge, the
+second wins entirely, and a row the first added is gone. Correct for the contract
+as written, wrong for a phone that was offline for an hour — which is why the
+per-key timestamp last-write-wins would need is **deliberately not in the
+schema**. It arrives with the merge, in the same change, on the same reasoning
+that keeps drop estimates out of `SolveKey` until phase 6 publishes one.
+
+`GameDataDatabaseTest` became **`SharedDatabaseTest`**. The rename is the whole
+point of the change: a base class named for one module is one the next session
+reads as not applying to them, and that reading costs a second container and a
+second context boot on every push forever.
+
+#### N22 — sign-in, the routes, and the first plan nobody handed a goal set
+
+**What actually changed.** Every plan in this repository before today was
+computed from a goal set a test passed to the optimizer. `PlanFromStoredStateTest`
+passes it nothing: a person signs in, the sign-in creates the account, the account
+creates a profile, the profile is given an inventory, a roster and goals over
+HTTP, and `POST /api/me/profiles/{id}/plan` reads all three back out of Postgres.
+The body carries `energyPerDay` and `horizonDays` and nothing else, because those
+are the two things that are facts about the sitting rather than about the account.
+
+**Where the principal is minted, and why it matters.** Sign-in is the only event
+that carries a provider subject, so it is the only place an account can be
+created — but doing it in an authentication success handler would leave a window:
+by the time a handler runs the principal is already in the security context, and a
+request arriving on that session would find a principal that cannot name its
+account. Creating the account *while the principal is being built* closes it.
+
+**Everything provider-specific is one pure function.** `SignIn.from(provider,
+attributes)` is the whole of it, and the only difference between providers that is
+not cosmetic is which key holds the stable subject: OIDC says `sub`, Discord says
+`id` because Discord is OAuth2 without the OIDC half. That is also why `identity`
+carries two user services rather than one. Seven tests over the attribute maps
+Google and Discord actually return, and no authorization server stood up to get
+them — a mock provider would test Spring's protocol implementation rather than
+ours.
+
+**Login is conditional and the deny is not.** `oauth2Login` installs only when a
+`ClientRegistrationRepository` exists. No client secrets exist: nothing is
+deployed (D1) and a registration is issued against a redirect URI that has no
+URL to be issued against. Declaring the registrations with empty
+`${GOOGLE_CLIENT_ID:}` placeholders is **not** a harmless default — a
+`ClientRegistration` refuses a blank client id, so the application would fail to
+start everywhere the secret is absent, which is everywhere including CI. So
+`application.yml` documents the properties in a comment and declares none of
+them. What is *not* conditional is the authorization: an unconfigured deployment
+serves the public catalog and refuses everything else, which is the correct
+behaviour for one, and `ApplicationBootTest` still passes unchanged.
+
+**Two phase 0 decisions came due.** `SessionCreationPolicy.STATELESS` and the
+disabled CSRF both carried "phase 3 revisits this" in their comments, and both
+were revisited: `IF_REQUIRED`, so a `permitAll` probe still mints no session and a
+signed-in browser gets one; and CSRF back on with `CookieCsrfTokenRepository`,
+with a test that a write without a token is 403.
+
+**Authorization lives in one method.** `OwnedProfiles.require` is what every
+account-scoped route goes through, for the same reason `CurrentAccount` is one
+class: this is the check whose absence hands one player another player's
+inventory, and a check copied into eight controller methods will be missing from
+the ninth. **Somebody else's profile answers 404 and not 403** — a 403 confirms
+the profile exists, which turns a guessable id into an oracle for enumerating
+them. And every route is under `/api/me`, so **no route takes an account id**,
+which means there is no route whose authorization can be forgotten.
+
+**The route is synchronous, and `SolveCoordinator` is still not a bean.**
+`MipOptimizer` is bounded at two seconds and returns the best it has proven
+rather than running long; a two-second budget is a promise a synchronous route
+can keep. The coordinator exists to hand back a ticket for a solve that does
+*not* fit that budget, and there is no asynchronous surface for a ticket to be
+useful on — the WebSocket push that would make one is phase 9's neighbourhood.
+`SolveCache` and `Optimizer` *are* beans now, and the reason is exactly the one
+N15 gave for not registering them then: they finally sit on a path a real request
+takes. This is what "registering beans nothing consumes would have been ceremony"
+was waiting for.
+
+#### What this does not cover, said before anyone reads the tick as more than it is
+
+- **The OAuth token exchange has never run.** No provider is configured, no
+  client secret exists, and no redirect has ever been followed. What is tested is
+  the principal, the account it creates, and every authorization rule around it.
+  The exchange itself is Spring's code and remains unexercised until there is a
+  deployment to register a redirect URI for.
+- **The end-to-end test goes through MockMvc, not a socket.** That is a
+  deliberate step down from `GameDataApiTest`'s real HTTP and is stated in the
+  test's javadoc. It is there because an authenticated session cannot be minted
+  over a socket without an authorization server to redirect to. The real filter
+  chain, dispatcher, Jackson and database are all exercised — the anonymous and
+  cross-account cases both fail *at the filter chain* — but the servlet container
+  is not, and that is the layer that caught phase 0's 401.
+- **There is no sync.** Phase 3's scope names it and this session did not build
+  it. PUT replaces; there is no per-key patch route and no merge. Anything the
+  plan says about offline editing is still unimplemented, not merely untested.
+- **Nothing is deployed, and the frontend has still never been served.** Both
+  unchanged from last session.
+
+#### The machine, not the project
+
+The user asked to stop git prompting for an account on every push. Windows
+Credential Manager held two GitHub logins —
+`git:https://tuankiet4412@github.com` alongside `git:https://github.com`
+(`kietnt4412`) — and Git Credential Manager shows a picker whenever there is more
+than one. Deleted the stray one and pinned
+`credential.https://github.com.username = kietnt4412`. The push at the end of the
+session went through with no prompt. Recorded as **E3**.
+
+#### Numbers
+
+**228 tests, 0 failed, 0 skipped locally** with snapshots present. Twenty-eight
+new across the session: 200 → 214 on N21 (`PlayerStateDatabaseTest`, 14) → 228 on
+N22 (`PlanFromStoredStateTest` 7, `SignInTest` 7). **CI runs 212**, since the
+same 16 snapshot-gated ones skip there as always — a pass there would mean a
+snapshot had been committed by accident.
+
+The p95 was not re-measured and did not need to be: nothing in either commit
+touches the model, the solver or the yields. `RealUpstreamPlanTest` passed
+unchanged, which includes its p95 assertion.
+
+**The tracker came out at 610 lines against its own "about 550", and that is a
+decision rather than drift.** It was 584; closing a phase added a Status
+rewrite, five table rows and four unverified entries, and about forty lines were
+cut elsewhere to pay for it — the closed phases on the board collapsed to one
+line each with their full prose moved here, three statistics rows merged into
+one, E2 and Q3 tightened, N18 and N19 compressed. What was *not* cut is the
+unverified list, which is where the pressure now is: seventeen entries, and it is
+the most valuable section in the file. **The next session that needs room should
+take it from the `Current state` table's Phase 1 rows** — the gamedata pipeline
+is closed, stable and fully described here — and not from the list of things this
+project has not proven.
 
 ### 2026-09-08 (eleventh session) — the plan gets a calendar, and the horizon turns out to be load-bearing
 

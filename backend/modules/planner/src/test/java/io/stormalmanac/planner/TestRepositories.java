@@ -105,6 +105,11 @@ final class TestRepositories {
         }
 
         @Override
+        public void saveProfile(PlayerProfile value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public void saveInventory(Inventory value) {
             throw new UnsupportedOperationException();
         }

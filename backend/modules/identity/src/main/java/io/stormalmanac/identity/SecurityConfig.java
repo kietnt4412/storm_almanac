@@ -1,5 +1,6 @@
 package io.stormalmanac.identity;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,8 +9,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 /**
  * The application's single filter chain.
@@ -21,8 +29,24 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
  * and the deploy smoke test fails. That is invisible to a unit test that calls
  * the controller method directly, and was found by booting the container.
  *
- * <p>Phase 3 replaces the deny-by-default half with OAuth2 login. The public
+ * <p>Phase 3 replaced the deny-by-default half with OAuth2 login. The public
  * half stays public: an unauthenticated liveness probe is the point of it.
+ *
+ * <h2>Login is conditional, and that is deliberate</h2>
+ *
+ * <p>{@code oauth2Login} is only installed when a {@link ClientRegistrationRepository}
+ * exists, which is to say when someone has configured a provider's client id and
+ * secret. No secrets exist: nothing is deployed (see D1 in TRACKER.md), and a
+ * client registration is issued against a redirect URI, which needs a URL. Wiring
+ * login unconditionally would mean the application refuses to start anywhere it
+ * has not been given credentials — including in every test and on every
+ * developer's machine — so the chain is assembled around what is configured
+ * rather than around what is intended.
+ *
+ * <p>The half that is <em>not</em> conditional is the authorization: every route
+ * outside the public list is denied without an authenticated account whether or
+ * not a provider is configured. An unconfigured deployment serves the public
+ * catalog and refuses everything else, which is the correct behaviour for one.
  */
 @Configuration
 @EnableWebSecurity
@@ -56,8 +80,14 @@ public class SecurityConfig {
      * should be short enough to read.
      */
     @Bean
-    SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.GET, "/api/games/**")
+    SecurityFilterChain apiSecurity(
+            HttpSecurity http,
+            ObjectProvider<ClientRegistrationRepository> registrations,
+            ObjectProvider<OAuth2UserService<OidcUserRequest, OidcUser>> oidcUsers,
+            ObjectProvider<OAuth2UserService<OAuth2UserRequest, OAuth2User>> oauth2Users)
+            throws Exception {
+
+        http.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.GET, "/api/games/**")
                         .permitAll()
                         .requestMatchers("/api/health", actuatorHealth)
                         .permitAll()
@@ -68,13 +98,27 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .formLogin(form -> form.disable())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
-                // Without this every anonymous health check mints a JSESSIONID.
-                // A probe every ten seconds would accumulate sessions forever.
-                // Phase 3 revisits this when OAuth2 login needs a session.
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // No browser-submitted state exists yet. Phase 3 re-enables this
-                // for the cookie-authenticated surface it introduces.
-                .csrf(csrf -> csrf.disable())
-                .build();
+                // Was STATELESS, because an anonymous health check every ten
+                // seconds would otherwise accumulate a JSESSIONID forever. It
+                // still does not: IF_REQUIRED mints a session when something
+                // needs one, and a permitAll probe never does. What changed is
+                // that a signed-in browser now needs one.
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                // A cookie-authenticated surface exists now, so CSRF protection
+                // is back on. The token goes in a cookie the page can read,
+                // which is what a separate front end needs to echo it in a
+                // header; that is not a weakening — the attacker's page cannot
+                // read a cookie from another origin, which is the whole
+                // mechanism.
+                .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
+
+        if (registrations.getIfAvailable() != null) {
+            http.oauth2Login(login -> login.userInfoEndpoint(userInfo -> {
+                oidcUsers.ifAvailable(userInfo::oidcUserService);
+                oauth2Users.ifAvailable(userInfo::userService);
+            }));
+        }
+
+        return http.build();
     }
 }

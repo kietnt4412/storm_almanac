@@ -21,6 +21,36 @@ spring:
     redis:
       url: ${REDIS_URL:redis://localhost:6379}
 
+  # OAuth2 login is configured, deliberately, nowhere.
+  #
+  # SecurityConfig installs oauth2Login only when a ClientRegistrationRepository
+  # exists, which is to say only when a provider is configured here. Declaring
+  # the registrations with empty ${GOOGLE_CLIENT_ID:} placeholders would not be
+  # a harmless default: a ClientRegistration refuses a blank client id, so the
+  # application would fail to start everywhere the secret is absent — which is
+  # everywhere, since nothing is deployed and a client registration is issued
+  # against a redirect URI that does not exist yet (D1 in TRACKER.md).
+  #
+  # To turn login on, add — and keep the secrets out of this file:
+  #
+  #   spring.security.oauth2.client.registration.google.client-id: ...
+  #   spring.security.oauth2.client.registration.google.client-secret: ...
+  #   spring.security.oauth2.client.registration.google.scope: openid,profile,email
+  #
+  #   spring.security.oauth2.client.registration.discord.client-id: ...
+  #   spring.security.oauth2.client.registration.discord.client-secret: ...
+  #   spring.security.oauth2.client.registration.discord.scope: identify,email
+  #   spring.security.oauth2.client.registration.discord.authorization-grant-type: authorization_code
+  #   spring.security.oauth2.client.registration.discord.redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+  #   spring.security.oauth2.client.provider.discord.authorization-uri: https://discord.com/oauth2/authorize
+  #   spring.security.oauth2.client.provider.discord.token-uri: https://discord.com/api/oauth2/token
+  #   spring.security.oauth2.client.provider.discord.user-info-uri: https://discord.com/api/users/@me
+  #   spring.security.oauth2.client.provider.discord.user-name-attribute: id
+  #
+  # Google needs no provider block: Boot knows it. Discord does, because it is
+  # OAuth2 without the OIDC half — the same reason identity carries two user
+  # services rather than one.
+
 management:
   endpoints:
     web:

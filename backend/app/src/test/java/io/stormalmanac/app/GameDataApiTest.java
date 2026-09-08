@@ -43,7 +43,7 @@ import org.springframework.http.ResponseEntity;
  * resolving an item's name, or a response stops carrying the version its
  * numbers came from, that is a broken promise to a reader and it fails here.
  */
-class GameDataApiTest extends GameDataDatabaseTest {
+class GameDataApiTest extends SharedDatabaseTest {
 
     private static final GameId PROVING_GROUND = new GameId("proving-ground");
 

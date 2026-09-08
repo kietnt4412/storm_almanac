@@ -13,36 +13,44 @@ being finished with is.
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks).
   [README.md](README.md) is the public face; [CLAUDE.md](CLAUDE.md) is the
   working agreement.
-- Last updated: **2026-09-08** (eleventh session)
+- Last updated: **2026-09-08** (twelfth session)
 
 ---
 
 ## Status
 
-- **Phase 2 — Optimizer core — is CLOSED, criterion and scope both**, 2026-09-08.
-  The criterion was met three sessions ago (p95 1 805 ms against a 2 s budget;
-  nine benchmark materials where the cheapest stage this project computes is the
-  one a published community guide names). **N14 closed the last thing in its
-  scope** this session, and the p95 survived it: **1 807 ms**.
-- **Phase 3 — Identity and player state — is the next phase to open**, and
-  nothing in Phase 2 is holding it up any more.
-- **Phase 0 stays closed by exception** — deploy deferred by
-  [D1](#d1--deployment-deferred-2026-09-02) — and its box stays unticked, because
-  nothing is deployed.
+- **Phase 3 — Identity and player state — is CLOSED**, 2026-09-08, criterion met.
+  A plan is computed end-to-end from stored state on a real account: a person
+  signs in, the sign-in creates the account, the profile is given an inventory, a
+  roster and goals over HTTP, and the plan route reads all three back out of
+  Postgres. **Read [what the tick does not cover](#what-is-still-unverified)
+  before treating Phase 3's scope as finished — sync is in its scope and was not
+  built.**
+- **Phase 2 stays closed, criterion and scope both.** Nothing this session touched
+  the model, the solver or the yields, and `RealUpstreamPlanTest` passed unchanged
+  — which includes its p95 assertion.
+- **Phase 4 — Frontend v1 and launch — is the next phase to open**, and it is the
+  one that reverses [D1](#d1--deployment-deferred-2026-09-02) by its own terms.
+- **Phase 0 stays closed by exception** — deploy deferred by D1 — and its box
+  stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
-- **Open right now:** [PR #11](https://github.com/kietnt4412/storm_almanac/pull/11),
-  carrying N14. **Green and unmerged** — run `34202755795` on `2d3fd09`, 0 failed,
-  16 skipped and they are exactly the three snapshot-gated classes. `main` is at
-  `9bad5aa`. Merging it is the first action next session.
-- **The time axis has no real data to eat**, checked rather than assumed — see
-  [the unverified list](#what-is-still-unverified). N14 is proven on the fixture
-  alone.
-- **And the reason is better than "the upstream is silent" —**
-  [the economy facts](docs/game-facts/reverse-1999-economy.md), maintainer-supplied
-  2026-09-08. **R1999 has no weekday rotation at all**, so `Availability.ALWAYS`
-  is *correct* rather than a gap; and its daily and weekly income **is conditional
-  on spending Activity**, so entering it as a `Reward` would make every plan
-  systematically too cheap. Read that file before treating either as an omission.
+- **Open right now:** [PR #13](https://github.com/kietnt4412/storm_almanac/pull/13),
+  carrying N21 and N22. **Green and unmerged** — run `34208848060` on `5ad2462`,
+  0 failed, 16 skipped and they are exactly the three snapshot-gated classes.
+  `main` is at `eb2894a`. Merging it is the first action next session, and
+  **write that line with the push rather than after it** — three sessions running
+  have opened on a next action the remote had already done.
+- **The optimizer has now been asked a question by something other than a test**,
+  which had been true of nothing in this repository until today. What has *not*
+  happened is a real OAuth exchange: no provider is configured and no client
+  secret exists, so login is installed only when one is.
+- **The time axis still has no real data to eat**, checked rather than assumed;
+  N14 is proven on the fixture alone. The reason is better than "the upstream is
+  silent" — **R1999 has no weekday rotation at all**, so `Availability.ALWAYS` is
+  *correct* rather than a gap, and its daily income **is conditional on spending
+  Activity**, so entering it as a `Reward` would make every plan systematically
+  too cheap. Read [the economy facts](docs/game-facts/reverse-1999-economy.md)
+  before treating either as an omission.
 
 ### Two standing caveats, read them every session
 
@@ -50,7 +58,7 @@ being finished with is.
    data is fetched and never committed
    ([ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md)), so
    `RealUpstreamPatchTest`, `RealUpstreamPlanTest` and `CommunityBenchmarkTest`
-   skip on the runner — 16 of the 189 tests. **Every performance number and every
+   skip on the runner — 16 of the 228 tests. **Every performance number and every
    comparison with an outside answer in this file comes from a test the pipeline
    does not run.** Run `backend/tools/fetch-upstream.sh` before trusting a green
    build to mean the pipeline handles real data.
@@ -67,7 +75,10 @@ being finished with is.
 1. **At session start:** read *Status*, *Current state*, *Next actions* and
    *Open questions*. Do not re-derive them from the code.
 2. **During the session:** tick boxes as work lands, not when it is planned, and
-   push before writing the entry that describes the push.
+   push before writing the entry that describes the push — but **write the
+   tracker line in the same breath as the push.** Three sessions running have
+   opened on a next action the remote had already done, because the session that
+   pushed ran out of room before it wrote the line.
 3. **At session end:** update *Last updated* and *Current state*, prune *Next
    actions*, and **append the session entry to
    [the archive](docs/history/tracker-archive.md#session-log)** — then add one
@@ -93,8 +104,9 @@ Rules that keep this file honest:
 
 **What exists:** the repo skeleton, the domain model, a green backend build, a
 game data pipeline that works end to end, an API that serves it, a real game's
-data going through all of it, an optimizer that turns that data into a plan, and
-a reason to believe the plan.
+data going through all of it, an optimizer that turns that data into a plan, a
+reason to believe the plan, and — since this session — an account that can own
+one, ask for it over HTTP, and be refused when it asks for somebody else's.
 
 **The load-bearing claim:** on **nine** benchmark materials the cheapest stage
 this project computes is the stage a published community guide tells players to
@@ -104,13 +116,10 @@ demand. Seventeen of the guide's twenty quoted drop rates land within three
 percentage points of a sample this project had never seen. See
 [the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
 
-Nine agreements, where the eighth session measured five: a drop yield carries how
-many runs it was observed over and the solver uses the conservative end of a 95%
-interval on it
-([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)),
-which made the plan 7% dearer and the agreement better at the same time. The
-account of how that happened is in
-[the archive](docs/history/tracker-archive.md#session-log).
+Nine and not five because a drop yield carries how many runs it was observed over
+and the solver uses the conservative end of a 95% interval on it
+([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)) —
+7% dearer and better agreement at once.
 
 Still true from earlier phases: **the solver says how much it does not know**
 ([ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md)), **the
@@ -122,8 +131,8 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **200 tests**, 0 failed, 0 skipped locally with snapshots present. **184 on CI**, because the same 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
-| CI workflow | **Green on `dev`** | Run `34202755795` (PR #11, `2d3fd09`): 0 failed, **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. `main` is `9bad5aa`. Action deprecations pending — **N5** |
+| Backend build | **Green** | **228 tests**, 0 failed, 0 skipped locally with snapshots present. **212 on CI**, because the same 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
+| CI workflow | **Green on `dev`** | Run `34208848060` (PR #13, `5ad2462`): 0 failed, **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. `main` is `eb2894a`. Action deprecations pending — **N5** |
 | Domain model (`gamedata`) | **Persisted and round-tripped** | Record equality across the whole graph. `Drop` carries `sampledRuns`, where 0 means *declared*; equipment is an `Entity` (ADR 0007) |
 | `gamedata` schema | **Applied, populated, round-tripped** | `V2` (28 tables), `V3` (a version is deletable), `V4` (`stage_drop.sampled_runs`). Seven invariants in `GameDataSchemaTest`, proven on the fixture and on two real R1999 patches |
 | Ingest, write, read | **Done** | `CanonicalBundleParser` (14 tests, mostly refusal messages), `CanonicalBundleWriter` pinned to it by a round trip, JDBC both directions (ADR 0008) |
@@ -140,8 +149,12 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Solve caching | **Done, in-process** | `SolveCache` is get and put over a `SolveKey` and has **no invalidation method** — a patch is a different key, not a stale entry. On the real 3.5 patch a repeat question goes **1 806 ms → 2 ms**. Not Redis, and [ADR 0012](docs/adr/0012-the-solve-cache-is-in-process-until-there-is-a-second-node.md) says why |
 | `SolveCoordinator` | **Single-node, done** | One execution per idempotency key however submits interleave; a ticket to poll; an honest queue depth. **Does not survive a restart, deliberately** — making it durable here would answer the question Phase 9 exists to ask |
 | Community benchmark | **Done, and now ADR 0011's regression test** | Twenty published claims against what this model computes, ranked on the yields the **solver** uses with the raw ranking printed beside them |
-| `WilsonInterval` / `PoissonRateInterval` | **Done** | 6 and 7 tests. Wilson for "did it drop", Poisson for "how many dropped" |
-| `PityRule` | **Done** | 9 tests against both games' published rates |
+| Statistics primitives | **Done** | `WilsonInterval` (6 tests) for "did it drop", `PoissonRateInterval` (7) for "how many dropped", `PityRule` (9) against both games' published rates |
+| `identity` / `player` schema | **Applied and round-tripped** | `V5` (6 tables). Four decisions in its header: **no FK crosses a schema**, nothing points into `gamedata` (version-scoped rows, an inventory outlives a patch), an identity is `(provider, subject)` and **never an email**, and absent means zero with a `CHECK` to keep the two representations from diverging |
+| Sign-in | **Done, never exchanged a token** | Account created while the principal is built, not in a success handler. Everything provider-specific is `SignIn.from` — a pure function; OIDC says `sub`, Discord says `id`. **`oauth2Login` installs only when a provider is configured**, because no client secret exists (D1) and a blank client id fails a `ClientRegistration` outright. The deny is not conditional |
+| Player API | **Served and authorized** | Everything under `/api/me`, so **no route takes an account id** and none's authorization can be forgotten. `OwnedProfiles.require` is the one check; another account's profile is **404, not 403**, so an id is not an enumeration oracle. PUT replaces a whole aggregate — there is no patch route, and no sync |
+| Plan route | **Done — Phase 3's criterion** | `POST /api/me/profiles/{id}/plan`, synchronous because a two-second budget is a promise the optimizer can keep. Goals, inventory and roster come from Postgres; the body carries only `energyPerDay` and `horizonDays`. `?version=N` pins the patch |
+| Bean wiring | **`Optimizer` and `SolveCache` are beans; `SolveCoordinator` is not** | Registered now because they finally sit on a path a real request takes — which is what N15's refusal was waiting for. The coordinator hands back a ticket for a solve that does not fit the synchronous budget, and there is no asynchronous surface for a ticket to be useful on |
 | Architecture tests | **Passing** | `ModuleBoundaryTest` (Track B layers optional until they exist) and `GameAgnosticismTest` (source scan over planner/gacha/stats) |
 | Docker Compose | **Verified** | `up --build` from cold: image builds, all three services healthy |
 | Frontend | **Green locally, never served** | Typecheck and `vite build` pass, PWA SW generated. No page has been loaded in a browser |
@@ -154,19 +167,29 @@ works". It does not mean that:
 
 - **CI does not run the tests that matter most, and never will as things stand.**
   Three classes touch data this project did not author and all three skip on the
-  runner — 15 tests. They are the ones that would catch an upstream-shape
+  runner — 16 tests. They are the ones that would catch an upstream-shape
   surprise, **and the only evidence the optimizer is fast enough or right about
   anything real.** The stale stage table that cost five sessions of plans would
   not have been caught by any test CI runs, and was not caught by any test at
   all — a person went looking.
-- **The optimizer has never been asked a question by anything but a test**, and
-  neither N15 nor N14 changed that. There is a `SolveCoordinator` and a `SolveCache`,
-  and **neither is wired to anything**: no HTTP route, no Spring bean, and no
-  player state to solve against — `PlayerStateRepository` is still an interface,
-  which is Phase 3's job. Every solve here is driven by a hand-built fake profile.
-  The seams exist and are tested; nothing in the running application reaches
-  them. Registering beans nothing consumes would have been ceremony, so it was
-  not done.
+- **The OAuth exchange has never run.** N22 replaced the older "the optimizer has
+  never been asked a question by anything but a test" — it has now — but what
+  makes it reachable is a principal, and **no principal has ever come from a real
+  provider.** No client id, no secret, no redirect followed, because there is no
+  URL to register one against (D1). Tested: the account, the principal, and every
+  authorization rule around them. Untested: the token exchange. The first
+  deployment is where this stops being theoretical.
+- **The end-to-end test goes through MockMvc, not a socket** — a deliberate step
+  down from `GameDataApiTest`'s real HTTP, because an authenticated session cannot
+  be minted over one without an authorization server to redirect to. The filter
+  chain, dispatcher, Jackson and database are exercised; **the servlet container
+  is not, and that is the layer that caught Phase 0's 401.**
+- **There is no sync, and it is in Phase 3's scope.** PUT replaces a whole
+  aggregate: two devices do not merge, the second wins entirely, and a row the
+  first added is gone. **Do not read Phase 3's tick as covering it** — the work
+  is **N23**.
+- **`SolveCoordinator` is still not wired to anything**, deliberately; see the
+  table row above.
 - **Nothing has measured whether the cache is worth having in production**, only
   that a hit is 900× cheaper than a solve. Hit *rate* depends on whether two
   players ever ask the same question, which needs users. The counters are there
@@ -225,19 +248,26 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **Merge [PR #11](https://github.com/kietnt4412/storm_almanac/pull/11).**
-      Green on `2d3fd09` and CI-confirmed, unmerged, so `main` is a session
+- [ ] **Merge [PR #13](https://github.com/kietnt4412/storm_almanac/pull/13).**
+      Green on `acd3efb` and CI-confirmed, unmerged, so `main` is a session
       behind. Do this first, and confirm the `main` push run goes green too.
-- [ ] **Open Phase 3 — Identity and player state.** The first phase whose exit
-      criterion needs an actual account: OAuth, inventory, roster, goals,
-      multiple profiles, sync. **Read this before starting it:** the optimizer,
-      the cache and the coordinator all exist and none of them is a Spring bean,
-      because there was no player state to solve against. Phase 3 is what makes
-      registering them mean something, so it is also where they get wired — a
-      `PlayerStateRepository` with an implementation behind it, and then a route.
-      `RealUpstream.optimizer` is deliberately cache-free, because the p95 test
-      asks one question fifty-five times; do not hand it a cache to make a timing
-      number look better.
+- [ ] **N23 — Offline sync: the per-key patch Phase 3 owes.** Phase 3's scope
+      names sync and Phase 3 did not build it, so this is a debt against a ticked
+      box rather than a new idea. `PUT /inventory` replaces the whole map, which
+      is correct for its signature and wrong for two devices: the second save
+      wins entirely. What it needs is a second route with a different method
+      (`PATCH`, per key), the `updated_at` column `V5` deliberately left out, and
+      a merge that resolves per key rather than per aggregate. **The column and
+      the merge go in together** — a timestamp nobody reads is a feature that
+      only looks implemented, which is the reasoning that kept it out.
+      Do it before Phase 4's offline PWA depends on it, not after.
+- [ ] **Open Phase 4 — Frontend v1, and launch.** The frontend has been built and
+      typechecked and **never served**; no page has been loaded in a browser and
+      it has never spoken to the API. Phase 4 is also where
+      [D1](#d1--deployment-deferred-2026-09-02) reverses by its own terms, so
+      hosting is decided here rather than deferred again — and until there is a
+      URL, **no OAuth provider can be registered**, which means the sign-in path
+      stays unexercised end to end. Those two are the same task, not two.
 - [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
       `EnergyMip.matchingDays` reads weekdays in **UTC** — a game assumption in a
       game-agnostic module. R1999 Global rolls over at **05:00 UTC−5, weekly
@@ -246,22 +276,18 @@ Ordered. Completed ones move to
       inert at Phase 11**. Costs a bundle field, parser, writer, a migration and
       the JDBC round trip — do it *with* that game, not speculatively.
 - [ ] **N18 — Put drop estimates into `SolveKey` in the same change that first
-      publishes one.** Left out today because nothing publishes any, so folding an
-      empty repository into the fingerprint would be ceremony. The moment Phase 6
-      does, a cached plan computed against yesterday's rates is served as today's
-      — the one staleness bug the key's design cannot catch on its own, and it is
-      silent. **This belongs in the Phase 6 change itself, not after it.** Both
-      `SolveKey` and `SolveCache` say so in their javadoc; this line exists so it
-      is also somewhere a session reads before starting.
+      publishes one.** Left out because nothing publishes any. The moment Phase 6
+      does, a plan cached against yesterday's rates is served as today's — the one
+      staleness bug the key's design cannot catch, and it is silent. **In the
+      Phase 6 change itself, not after it.** `SolveKey` and `SolveCache` both say
+      so in their javadoc; this line is so a session reads it before starting.
 - [ ] **N19 — Write `RedisSolveCache` when there is a second node.** Deferred by
-      [ADR 0012](docs/adr/0012-the-solve-cache-is-in-process-until-there-is-a-second-node.md),
-      whose reversal trigger is a second process that can serve the same profile —
-      a second API replica, a solver worker split out of the web node, or the
-      Phase 9 cluster. **It is also owed before any benchmark is published against
-      the Phase 8 replicated KV**, regardless of node count: a hand-built
-      replicated cache measured against an in-process map is measuring the
-      network, and ADR 0003 forbids a comparison shaped to flatter the hand-built
-      side.
+      [ADR 0012](docs/adr/0012-the-solve-cache-is-in-process-until-there-is-a-second-node.md);
+      the reversal trigger is a second process that can serve the same profile.
+      **Also owed before any benchmark against the Phase 8 replicated KV**,
+      regardless of node count: a replicated cache measured against an in-process
+      map is measuring the network, and ADR 0003 forbids a comparison shaped to
+      flatter the hand-built side.
 - [ ] **N4 — Enforce that `Entity.kind` is never read outside the catalog.**
       ADR 0007 asserts it and nothing checks it: `GameAgnosticismTest` scans for
       game slugs, not field reads, so a `kind`-switch in `planner` would pass
@@ -292,37 +318,23 @@ previous one's criterion is met. The full "Landed" record for closed phases is i
 
 ### Track A — product
 
-- [ ] **Phase 0 · Ground** — 1 week — **closed by exception 2026-09-05, box
-      deliberately unticked.**
-      **Exit:** a green pipeline deploying a health endpoint to a real URL.
-      Everything landed except the deploy — repo, CI, compose, ADRs, the
-      positioning paragraph, an application that boots and serves `/api/health`.
-      **Not met as written**, see [D1](#d1--deployment-deferred-2026-09-02). The
-      box gets ticked when, and only when, a real URL answers 200.
+Phases 0 to 3 are closed; what stays here is one line each and the qualification
+a session would be wrong not to read.
 
-- [x] **Phase 1 · Game data foundation** — 2.5 weeks — **closed 2026-09-06.**
-      **Exit:** the API answers "what does Insight 2 cost?" and "what does her S2
-      do at rank 3?"; a patch diff report renders for both axes; tests over real
-      patch data. Both halves met and CI-confirmed (N10).
-      **Two qualifications travel with it**, both live in
-      [the unverified list](#what-is-still-unverified): CI does not run the
-      real-data tests, and the catalog half is proven on real data only for stat
-      curves.
-
-- [x] **Phase 2 · Optimizer core** — 2 weeks — **closed 2026-09-08, scope
-      finished 2026-09-08.**
-      **Exit:** agrees with community-accepted answers on 5 benchmark goal sets;
-      p95 solve under 2s. Nine agreements and 1 805 ms, both CI-confirmed on
-      `30a6c45`; still nine and 1 807 ms after the time axis landed.
-      **What the tick does not cover:** the search is **stopped by its budget,
-      not finished by it**, and says so with the size of the doubt (2.30%,
-      ADR 0010); **fodder** is in the domain model and not in the solver; and the
-      time axis, the shop refusal and the two surviving benchmark disagreements
-      are all in [the unverified list](#what-is-still-unverified).
-
-- [ ] **Phase 3 · Identity and player state** — 1 week
-      OAuth, inventory, roster, goals, multiple profiles, sync.
-      **Exit:** a plan computed end-to-end from stored state on a real account.
+- [ ] **Phase 0 · Ground** — **closed by exception 2026-09-05, box deliberately
+      unticked.** Everything landed except the deploy.
+      **Not met as written** — [D1](#d1--deployment-deferred-2026-09-02). The box
+      gets ticked when, and only when, a real URL answers 200.
+- [x] **Phase 1 · Game data foundation** — **closed 2026-09-06.** Both halves
+      met, CI-confirmed (N10). Two qualifications, both in
+      [the unverified list](#what-is-still-unverified).
+- [x] **Phase 2 · Optimizer core** — **closed 2026-09-08, criterion and scope.**
+      Nine agreements, p95 1 807 ms. **The search is stopped by its budget, not
+      finished by it**, and says so with the size of the doubt (2.30%, ADR 0010).
+- [x] **Phase 3 · Identity and player state** — **closed 2026-09-08.** A plan
+      computed from stored state on a real account.
+      **Sync is in its scope line and was not built** — **N23**. Two further
+      qualifications in [the unverified list](#what-is-still-unverified).
 
 - [ ] **Phase 4 · Frontend v1 — and launch** — 2.5 weeks
       Inventory editor built for fast bulk entry, goal picker, plan view with
@@ -498,14 +510,29 @@ and modifies nothing. Not committed to `gradle.properties`, because
 
 **Fixed, committed, and only worth knowing if it comes back.**
 `backend/build.gradle.kts` sets `systemProperty("api.version", "1.44")` on every
-`Test` task — a system property on the *task*, not an environment variable, and
-the distinction is the whole fix. Why, and why the obvious alternatives do
-nothing, is in
+`Test` task — on the *task*, not an environment variable, and the distinction is
+the whole fix. Why, and why the obvious alternatives do nothing:
 [the archive](docs/history/tracker-archive.md#e2--the-full-account).
 
 **Also:** Docker Desktop takes minutes to start on this machine and `docker info`
 hangs rather than failing while it does. Give it time instead of concluding it is
 broken.
+
+### E3 · Git prompted for an account on every push
+
+**Fixed 2026-09-08.** Windows Credential Manager held two GitHub logins —
+`git:https://tuankiet4412@github.com` alongside `git:https://github.com`
+(`kietnt4412`) — and Git Credential Manager shows an account picker whenever
+there is more than one. Neither `git config` nor `gh auth` had a second identity,
+so looking there finds nothing; the second credential is only visible to
+`cmdkey /list`. The stray one was deleted and the surviving username pinned:
+
+```bash
+git config --global credential.https://github.com.username kietnt4412
+```
+
+The pin is what stops it coming back the next time a second account touches this
+machine.
 
 ---
 
@@ -544,18 +571,17 @@ then move the entry to
   reader assumes. Resolve by checking content that differs between the two
   releases; until then do not write "3.5" publicly without saying which.
 - **Q3 — Seed data provenance.** *Answered operationally, open on one point.*
-  The Kornblume repository has **no `LICENSE` file**, so it is all rights
-  reserved by default — absence of a licence is not permission. Enforced since
-  2026-09-06 by
-  [ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md): upstream
-  data is fetched at need and never committed, the fetch script writes into an
-  ignored directory, and the real-data tests skip when it is absent. The
-  committed fixtures are the synthetic `proving-ground` title and should stay
-  that way.
+  Kornblume has **no `LICENSE` file**, so it is all rights reserved by default —
+  absence of a licence is not permission. Enforced since 2026-09-06 by
+  [ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md): fetched
+  at need, never committed, real-data tests skip when it is absent, and the
+  committed fixtures are the synthetic `proving-ground` title.
   **What stays open:** the owner's scope is personal and portfolio use, and
   **F2 — ask the maintainer directly — becomes a release blocker the moment this
   is deployed publicly.** It needs a human to send a message; a session cannot.
-  Nothing in this entry authorises a public deployment carrying upstream numbers.
+  **Phase 4 is that moment**, so this is now a blocker on the next phase rather
+  than a distant one. Nothing in this entry authorises a public deployment
+  carrying upstream numbers.
 - **Q4 — Rate verification.** The pity numbers in `PityRuleTest` come from the
   secondary sources the plan cites. They must be checked against in-game
   disclosure before the simulator ships (Phase 5).
@@ -569,6 +595,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-08 | twelfth | Phase 3 opened and closed: V5 gives identity and player their schemas with four decisions in its header, sign-in creates the account while the principal is built, and a plan is computed from goals nobody handed the optimizer — 228 tests, and sync is the piece of the scope that was not built (N23) |
 | 2026-09-08 | eleventh | N14: the plan gets a calendar — the horizon as a scalar rather than an index (ADR 0013), p95 held at 1 807 ms, the two objectives finally disagree (0 energy / 28 days against 370 / 2) — then the maintainer supplied what the game actually does, and two of the answers were corrections |
 | 2026-09-08 | tenth | N15: a solve is cached on its key (1 806 ms → 2 ms on the real patch) and a queue runs it once, CI-confirmed on `3fdc277`; and the read that took shops out of N14 |
 | 2026-09-08 | ninth | N16 and N17: CI confirmed the tree and Phase 2 closed; then drop yields learned how many runs they were measured over, and agreement with the community went from five to nine |

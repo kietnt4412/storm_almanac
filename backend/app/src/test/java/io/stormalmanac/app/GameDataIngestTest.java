@@ -41,7 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * shape the format has instead: all four source kinds, both sink kinds, the
  * catalog axis, a rotating stage, an expiring event, and a banner with soft pity.
  */
-class GameDataIngestTest extends GameDataDatabaseTest {
+class GameDataIngestTest extends SharedDatabaseTest {
 
     static final GameId PROVING_GROUND = new GameId("proving-ground");
 

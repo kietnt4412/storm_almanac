@@ -58,7 +58,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * it elsewhere.
  */
 @EnabledIf("snapshotsArePresent")
-class RealUpstreamPatchTest extends GameDataDatabaseTest {
+class RealUpstreamPatchTest extends SharedDatabaseTest {
 
     private static final GameId REVERSE_1999 = new GameId("reverse-1999");
 

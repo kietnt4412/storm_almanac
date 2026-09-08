@@ -46,11 +46,26 @@ disclosure before anything ships that a player would act on.
 
 ## 1. There is no weekday rotation. This is the finding.
 
-The six candidate stage families — **Brutes Wilds**, **Mountain Echoes**,
-**Starfall Locale**, **Sylvanus Shape** (the four Afflatus-specific Insight
-locations), plus **The Poussiere** and **Mintage Aesthetics** (Resource) — are
-**permanent and open every day**. They are not a Monday/Tuesday rotation; they
-are four material specialisations that happen to be separate stages.
+The six candidate stage families are **permanent and open every day**. They are
+not a Monday/Tuesday rotation; the four Insight ones are Afflatus
+specialisations that happen to be separate stages:
+
+| Family | Kind | Specialisation | Days |
+|---|---|---|---|
+| Brutes Wilds II / IV / VI | Insight | **Beast** | all seven |
+| Mountain Echoes II / IV / VI | Insight | **Mineral** | all seven |
+| Starfall Locale II / IV / VI | Insight | **Star** | all seven |
+| Sylvanus Shape II / IV / VI | Insight | **Plant** | all seven |
+| The Poussiere VI | Resource | 12 500 Dust + 250 Sharpodonty, **25 Activity** | all seven |
+| Mintage Aesthetics VI | Resource | 9 000 Sharpodonty, **25 Activity** | all seven |
+
+The tiers of a family share a schedule. The two Resource yields and their 25
+Activity cost are class A — already in the fetched table and already in the
+bundle, so they are confirmation rather than new data.
+
+**`Availability` already has the shape recommended for this.** Its `days` is
+`Set<DayOfWeek>` where **empty means every day**, so a permanent stage needs no
+declaration at all and `ALWAYS` is the default. No change needed.
 
 **So `KornblumeAdapter` emitting `Availability.ALWAYS` for every source is
 correct, not a gap.** The eleventh session recorded rotation as "data the
@@ -102,12 +117,18 @@ whether to spend a candy. See the tracker.
 
 This is the sharpest correction and it invalidates the obvious modelling.
 
-Daily and Weekly **Activeness** hand out Clear Drops, Wilderness Shells,
-Picrasma Candy, Penumbra Can and Re-Roar. It is tempting to enter these as
-`Reward(DAILY, …)` and `Reward(WEEKLY, …)`. **That would be wrong**, because
-some of the objectives that earn Activeness *require spending Cellular
-Activity*. The income is conditional on the farming, so a solver told it is
-unconditional would:
+**Daily Activeness** hands out Clear Drops and Wilderness Shells. **Weekly
+Activeness** hands out Clear Drops, Wilderness Shells, Picrasma Candy (the Jar
+specifically), Penumbra Can (a completion reward), **Re-Roar ×2** and **Track of
+the Lost**, depending on the reward tier. The Re-Roar grant was added by the
+post-3.2 system and exists to recover missed Roaring Calendar rewards — it is a
+recovery token, not Activity income, and must be represented as its own item
+rather than folded into an energy figure.
+
+It is tempting to enter all of this as `Reward(DAILY, …)` and
+`Reward(WEEKLY, …)`. **That would be wrong**, because some of the objectives that
+earn Activeness *require spending Cellular Activity*. The income is conditional
+on the farming, so a solver told it is unconditional would:
 
 1. subtract the grants from the demand,
 2. never pay for them,
@@ -116,13 +137,17 @@ unconditional would:
 which is the expensive direction to be wrong in, and silent.
 
 `Reward` has no way to say "this arrives only if you spend N energy". Expressing
-it needs either a precondition on the reward or a source that consumes energy
-and produces items — a shape the model does not have. **Until it does, entering
+it needs either a precondition on the reward — the suggested field is
+`requiresActivitySpend: boolean`, though a boolean only *flags* the problem and a
+solver needs the quantity to price it — or a source that consumes energy and
+produces items, a shape the model does not have. **Until it does, entering
 Activeness as free income is a bug, and leaving it out is correct.**
 
-**The Roaring Month is paid** (300 Crystal Drops up front, then 90 Clear Drops
-and a candy daily for 30 days). Whatever it is, it is not free income and does
-not belong in a `Reward`.
+**The Roaring Month is paid**, so it is not free income and does not belong in a
+`Reward` whatever else it is. For the record, since somebody will ask: 300
+Crystal Drops on purchase, then 90 Clear Drops and one time-limited Picrasma
+Candy per day for 30 days — **300 Crystal Drops, 2 700 Clear Drops and 30 candy**
+if every day is claimed.
 
 **Event and mail grants** — for example 3.5's *Gift of the Stars*: 600 Clear
 Drops, 5 Jars of Picrasma Candy, 10 000 Roar Decibel — are genuinely
@@ -145,6 +170,7 @@ limits:
 | Fragment Shop — Oneiric Shop | Oneiric Fluid | weekly + monthly + permanent |
 | Wilderness Shop | Wilderness Shell | permanent / rotating |
 | Teller Machine | Crystal / real money | offer-specific |
+| Brainwave Shop *(later system)* | Primordial Pattern | mode / event-specific |
 
 **`Shop` cannot represent half of these.** Its cap is
 `(int periodLimit, Period period)` — "n per period", with `0` meaning
