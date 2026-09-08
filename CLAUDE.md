@@ -2,13 +2,21 @@
 
 ## Start here
 
-1. **Read [TRACKER.md](TRACKER.md) first.** It carries the current phase, what is
-   actually done versus merely written, the next actions, and the open questions.
-   It is the handoff between sessions — trust it over re-deriving from the code.
-2. **Update TRACKER.md before the session ends.** Tick boxes only when the exit
-   criterion is met. Append a session-log entry. Move anything unresolved into
-   *Open questions*.
-3. The full design is [plan.html](plan.html). `README.md` is the public face.
+1. **Read [TRACKER.md](TRACKER.md) first, all of it.** It carries the current
+   phase, what is actually done versus merely written, the next actions, and the
+   open questions. It is the handoff between sessions — trust it over re-deriving
+   from the code. It is deliberately kept short enough to read in full; if it
+   stops being that, fix it rather than skimming it.
+2. **History is in [docs/history/tracker-archive.md](docs/history/tracker-archive.md)** —
+   the session log, closed next actions, closed phases, answered questions. Read
+   it when you need to know *why* something is the way it is, not at session
+   start. Nothing is ever deleted from it.
+3. **Update both before the session ends.** Tick a box only when the exit
+   criterion is met. **Append the session-log entry to the archive** and add one
+   line to the tracker's index. Move anything unresolved into *Open questions*,
+   and move anything finished out of the tracker into the archive — the tracker
+   grows by the length of what it stops carrying.
+4. The full design is [plan.html](plan.html). `README.md` is the public face.
 
 ## Non-negotiables
 
