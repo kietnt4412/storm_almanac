@@ -30,9 +30,10 @@ being finished with is.
   [D1](#d1--deployment-deferred-2026-09-02) — and its box stays unticked, because
   nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
-- **Open right now:** nothing merged-and-pending. `main` is at `9bad5aa` (PR #10,
-  run `34183236122` green). N14 is committed on `dev` and **not yet pushed or
-  CI-confirmed** — that is the first action next session.
+- **Open right now:** [PR #11](https://github.com/kietnt4412/storm_almanac/pull/11),
+  carrying N14. **Green and unmerged** — run `34202755795` on `2d3fd09`, 0 failed,
+  16 skipped and they are exactly the three snapshot-gated classes. `main` is at
+  `9bad5aa`. Merging it is the first action next session.
 - **The time axis has no real data to eat**, checked rather than assumed — see
   [the unverified list](#what-is-still-unverified). Rewards, rotation and shops
   are all absent from this upstream, so N14 is proven on the fixture alone.
@@ -116,7 +117,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
 | Backend build | **Green** | **200 tests**, 0 failed, 0 skipped locally with snapshots present. **184 on CI**, because the same 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
-| CI workflow | **Green on `main`** | Run `34183236122` (`9bad5aa`) in 1m 55s. The 16 skips are exactly the three snapshot-gated classes — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. **N14 is not yet through CI.** Action deprecations pending — **N5** |
+| CI workflow | **Green on `dev`** | Run `34202755795` (PR #11, `2d3fd09`): 0 failed, **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. `main` is `9bad5aa`. Action deprecations pending — **N5** |
 | Domain model (`gamedata`) | **Persisted and round-tripped** | Record equality across the whole graph. `Drop` carries `sampledRuns`, where 0 means *declared*; equipment is an `Entity` (ADR 0007) |
 | `gamedata` schema | **Applied, populated, round-tripped** | `V2` (28 tables), `V3` (a version is deletable), `V4` (`stage_drop.sampled_runs`). Seven invariants in `GameDataSchemaTest`, proven on the fixture and on two real R1999 patches |
 | Ingest, write, read | **Done** | `CanonicalBundleParser` (14 tests, mostly refusal messages), `CanonicalBundleWriter` pinned to it by a round trip, JDBC both directions (ADR 0008) |
@@ -210,10 +211,9 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **Push N14 and confirm CI.** Committed on `dev` as `ea30cfd` and green
-      locally at 200 tests; the remote has not seen it. Open the PR, check the
-      run skips exactly the sixteen snapshot-gated tests, merge, and confirm the
-      `main` push run.
+- [ ] **Merge [PR #11](https://github.com/kietnt4412/storm_almanac/pull/11).**
+      Green on `2d3fd09` and CI-confirmed, unmerged, so `main` is a session
+      behind. Do this first, and confirm the `main` push run goes green too.
 - [ ] **Open Phase 3 — Identity and player state.** The first phase whose exit
       criterion needs an actual account: OAuth, inventory, roster, goals,
       multiple profiles, sync. **Read this before starting it:** the optimizer,
