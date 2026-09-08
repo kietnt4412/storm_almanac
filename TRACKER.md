@@ -13,33 +13,29 @@ being finished with is.
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks).
   [README.md](README.md) is the public face; [CLAUDE.md](CLAUDE.md) is the
   working agreement.
-- Last updated: **2026-09-08** (tenth session)
+- Last updated: **2026-09-08** (eleventh session)
 
 ---
 
 ## Status
 
-- **Phase 2 — Optimizer core — is CLOSED on its exit criterion**, 2026-09-08.
-  Both halves measured (p95 1 805 ms against a 2 s budget; nine benchmark
-  materials where the cheapest stage this project computes is the one a published
-  community guide names) and CI confirmed the tree.
-- **Phase 3 is not opened.** Phase 2's *scope* now has only **N14** (the time
-  axis) left in it; **N15 closed 2026-09-08**. The criterion is met; the phase is
-  not finished, and the distinction is deliberate.
+- **Phase 2 — Optimizer core — is CLOSED, criterion and scope both**, 2026-09-08.
+  The criterion was met three sessions ago (p95 1 805 ms against a 2 s budget;
+  nine benchmark materials where the cheapest stage this project computes is the
+  one a published community guide names). **N14 closed the last thing in its
+  scope** this session, and the p95 survived it: **1 807 ms**.
+- **Phase 3 — Identity and player state — is the next phase to open**, and
+  nothing in Phase 2 is holding it up any more.
 - **Phase 0 stays closed by exception** — deploy deferred by
   [D1](#d1--deployment-deferred-2026-09-02) — and its box stays unticked, because
   nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
-- **Open right now:** [PR #10](https://github.com/kietnt4412/storm_almanac/pull/10),
-  carrying N15. **Green and unmerged** — run `34182911475` on `3fdc277`, 0 failed,
-  16 skipped. `main` is at `176f151`. Merging it is the first action next session.
-- **N14's data premise is half gone, and this was checked rather than assumed.**
-  The upstream `shops.json` was fetched at both pinned commits — byte-identical,
-  6 397 bytes, six opaque keys and 69 rows of `{Material, Quantity}` with **no
-  currency, no price, no reset period, and no way to tell an offer from its
-  cost**. `Shop` needs all of those. So a time axis unblocks **rewards and
-  rotation** and does **not** unblock shops from this upstream; that half needs a
-  second source or nothing. `KornblumeAdapter`'s refusal is correct and permanent.
+- **Open right now:** nothing merged-and-pending. `main` is at `9bad5aa` (PR #10,
+  run `34183236122` green). N14 is committed on `dev` and **not yet pushed or
+  CI-confirmed** — that is the first action next session.
+- **The time axis has no real data to eat**, checked rather than assumed — see
+  [the unverified list](#what-is-still-unverified). Rewards, rotation and shops
+  are all absent from this upstream, so N14 is proven on the fixture alone.
 
 ### Two standing caveats, read them every session
 
@@ -101,15 +97,13 @@ demand. Seventeen of the guide's twenty quoted drop rates land within three
 percentage points of a sample this project had never seen. See
 [the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
 
-**Nine, where the eighth session measured five, and the four extra were bought by
-N17 rather than by tuning:** a drop yield now carries how many runs it was
-observed over, and the solver gets the lower end of a 95% interval on that mean
-rather than the mean
-([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)).
-The plan also got 7% dearer — 3 624 to 3 880 — which is the same fact from the
-other side: the old number was optimistic, not cheap. The change was made because
-the evidence demanded it and the agreement followed; that ordering is the only
-reason the agreement means anything.
+Nine agreements, where the eighth session measured five: a drop yield carries how
+many runs it was observed over and the solver uses the conservative end of a 95%
+interval on it
+([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)),
+which made the plan 7% dearer and the agreement better at the same time. The
+account of how that happened is in
+[the archive](docs/history/tracker-archive.md#session-log).
 
 Still true from earlier phases: **the solver says how much it does not know**
 ([ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md)), **the
@@ -121,8 +115,8 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **189 tests** from the run's XML: `:app` 74, `gamedata` 25, `planner` 52, `stats` 13, adapter 25. **173 on CI**, because 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
-| CI workflow | **Green on `dev`** | Run `34182911475` (PR #10, `3fdc277`): 0 failed, **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. `main` is `176f151`. Action deprecations pending — **N5** |
+| Backend build | **Green** | **200 tests**, 0 failed, 0 skipped locally with snapshots present. **184 on CI**, because the same 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
+| CI workflow | **Green on `main`** | Run `34183236122` (`9bad5aa`) in 1m 55s. The 16 skips are exactly the three snapshot-gated classes — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. **N14 is not yet through CI.** Action deprecations pending — **N5** |
 | Domain model (`gamedata`) | **Persisted and round-tripped** | Record equality across the whole graph. `Drop` carries `sampledRuns`, where 0 means *declared*; equipment is an `Entity` (ADR 0007) |
 | `gamedata` schema | **Applied, populated, round-tripped** | `V2` (28 tables), `V3` (a version is deletable), `V4` (`stage_drop.sampled_runs`). Seven invariants in `GameDataSchemaTest`, proven on the fixture and on two real R1999 patches |
 | Ingest, write, read | **Done** | `CanonicalBundleParser` (14 tests, mostly refusal messages), `CanonicalBundleWriter` pinned to it by a round trip, JDBC both directions (ADR 0008) |
@@ -131,10 +125,11 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Parser adapters | **One, reading what the upstream reads** | `:adapters:reverse-1999`, 25 tests. Newest `stages<major>_<minor>_greedy.json`, counts divided by the sampled run count and **that count carried onto every `Drop`**; `count: 1` converts as declared, because here it marks a fixed-reward stage |
 | Game data API | **Served and verified** | Five game-data routes plus health, version-pinnable, every response carrying its version and attribution. 10 HTTP tests plus a hand check against `docker compose up` |
 | Demand resolution | **Done** | Goals + roster + upgrade graph → a demand vector, walking the DAG backwards. Refuses by name rather than guessing: unreachable states, unknown entities, probabilistic goals, ambiguous routes |
-| The MIP (`EnergyMip`) | **Done for stages and crafts** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. **No shops, rewards, fodder or rotation**; items sourced only from those are refused by name |
+| The MIP (`EnergyMip`) | **Done for stages, crafts and rewards** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. **No shops and no fodder**; items sourced only from those are refused by name |
+| The time axis | **Done — as a scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). An energy cap, cadence counts, and rotation as a capacity shared over *subsets* of distinct weekday restrictions. **No variable is indexed by day**, which is why the p95 survived: 1 805 → **1 807 ms**. Proven on the fixture; the real upstream declares nothing time-varying |
 | Yield source (`YieldTable`) | **Done, and it carries the sample** | Declared yields, discounted to the lower end of a 95% `PoissonRateInterval` wherever a sample size exists (ADR 0011). No sample means used as declared |
 | `Optimizer` (`MipOptimizer`) | **Done — least energy** | Pins the plan to its version, fingerprints the request (`SolveKey`), explains itself with shadow prices by re-solve. Budget split between search and explanation — ADR 0010 |
-| Objectives | **One model, both answered** | `LEAST_ENERGY` and `FEWEST_DAYS` are the same plan until the model has time in it — **N14** |
+| Objectives | **Two searches over one model** | `LEAST_ENERGY` takes the whole horizon; `FEWEST_DAYS` binary-searches for the shortest one that fits, then solves for least energy inside it. On the fixture, Insight 1 is **0 energy over 28 days or 370 over 2**. They still coincide wherever a game's data has nothing on a cadence, and the plan says which case it is |
 | Solve caching | **Done, in-process** | `SolveCache` is get and put over a `SolveKey` and has **no invalidation method** — a patch is a different key, not a stale entry. On the real 3.5 patch a repeat question goes **1 806 ms → 2 ms**. Not Redis, and [ADR 0012](docs/adr/0012-the-solve-cache-is-in-process-until-there-is-a-second-node.md) says why |
 | `SolveCoordinator` | **Single-node, done** | One execution per idempotency key however submits interleave; a ticket to poll; an honest queue depth. **Does not survive a restart, deliberately** — making it durable here would answer the question Phase 9 exists to ask |
 | Community benchmark | **Done, and now ADR 0011's regression test** | Twenty published claims against what this model computes, ranked on the yields the **solver** uses with the raw ranking printed beside them |
@@ -158,7 +153,7 @@ works". It does not mean that:
   not have been caught by any test CI runs, and was not caught by any test at
   all — a person went looking.
 - **The optimizer has never been asked a question by anything but a test**, and
-  N15 did not change that. There is now a `SolveCoordinator` and a `SolveCache`,
+  neither N15 nor N14 changed that. There is a `SolveCoordinator` and a `SolveCache`,
   and **neither is wired to anything**: no HTTP route, no Spring bean, and no
   player state to solve against — `PlayerStateRepository` is still an interface,
   which is Phase 3's job. Every solve here is driven by a hand-built fake profile.
@@ -186,6 +181,14 @@ works". It does not mean that:
 - **Nothing has ever called the API under load.** Every request loads a whole
   version — fifteen queries — a deliberate deferral written into
   `GameDataReadModel`'s javadoc. The number to beat does not exist yet.
+- **The time axis has never met real data, and cannot on this upstream.**
+  Rewards, weekday rotation and shops are all modelled or refused on the strength
+  of the synthetic fixture alone, because `KornblumeAdapter` emits
+  `Availability.ALWAYS` for every source and no rewards, and the upstream file has
+  no weekday field. On the real 3.5 patch the whole of N14 reduces to one energy
+  row. **Do not read "the optimizer has a calendar" as "the optimizer schedules
+  real weeks"** — the first is true, the second waits on a second game (Phase 11)
+  or a second data source (**Q2**).
 - **The adapter converts less than the upstream publishes** — no shop offers, no
   alternative resonance-pattern costs, no unreleased content — each with a reason
   in `KornblumeAdapter`'s javadoc. That sentence is only reassuring when somebody
@@ -207,36 +210,20 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **Merge [PR #10](https://github.com/kietnt4412/storm_almanac/pull/10).**
-      Green on `3fdc277`, unmerged, so `main` is a session behind. Do this first,
-      and confirm the `main` push run goes green too.
-- [ ] **N14 — Give the solver a time axis, and with it rewards and rotation.**
-      The largest thing the model does not do, and what makes `FEWEST_DAYS` a
-      different plan from `LEAST_ENERGY` rather than the same one divided by a
-      constant. Expect this to be the expensive half of Phase 2.
-      **Shops are no longer part of it.** The prerequisite read happened in the
-      tenth session and the answer was worse than expected: `shops.json` carries
-      six opaque keys and 69 `{Material, Quantity}` rows and nothing else — no
-      currency, no price, no reset period, and no marker separating an offer from
-      its cost. It is also byte-identical at both pinned commits, so it is static.
-      A time axis gives a shop cap somewhere honest to live and **still leaves
-      nothing to put in it.** Scope N14 as rewards plus rotation; shops need a
-      second upstream (see **Q2**) or they stay refused by name, which is the
-      correct behaviour and is already tested.
-      **Watch the budget.** p95 is **1 808 ms against a 2 000 ms assertion** — 90%
-      of it — with no time axis at all. Day-indexing the stage variables
-      multiplies the model by the horizon, so this change is the one most likely
-      to break the number Phase 2 was closed on. Decide the horizon and the
-      formulation *before* writing the variables, and re-measure early rather
-      than at the end.
-      **What it inherits from N17:** yields are discounted for their sample, so
-      the time axis goes over coefficients that are conservative rather than
-      central. Do not "fix" that by taking the point estimate back as the model
-      grows; ADR 0011 has the reversal trigger, and it is a measurement, not a
-      preference.
-      **What it inherits from N15:** `RealUpstream.optimizer` is deliberately
-      cache-free, because the p95 test asks one question fifty-five times. Do not
-      hand it a cache to make a timing number look better.
+- [ ] **Push N14 and confirm CI.** Committed on `dev` as `ea30cfd` and green
+      locally at 200 tests; the remote has not seen it. Open the PR, check the
+      run skips exactly the sixteen snapshot-gated tests, merge, and confirm the
+      `main` push run.
+- [ ] **Open Phase 3 — Identity and player state.** The first phase whose exit
+      criterion needs an actual account: OAuth, inventory, roster, goals,
+      multiple profiles, sync. **Read this before starting it:** the optimizer,
+      the cache and the coordinator all exist and none of them is a Spring bean,
+      because there was no player state to solve against. Phase 3 is what makes
+      registering them mean something, so it is also where they get wired — a
+      `PlayerStateRepository` with an implementation behind it, and then a route.
+      `RealUpstream.optimizer` is deliberately cache-free, because the p95 test
+      asks one question fifty-five times; do not hand it a cache to make a timing
+      number look better.
 - [ ] **N18 — Put drop estimates into `SolveKey` in the same change that first
       publishes one.** Left out today because nothing publishes any, so folding an
       empty repository into the fingerprint would be ceremony. The moment Phase 6
@@ -299,16 +286,20 @@ previous one's criterion is met. The full "Landed" record for closed phases is i
       runner), and the catalog half is proven on real data only for stat curves,
       because this upstream publishes no skill text.
 
-- [x] **Phase 2 · Optimizer core** — 2 weeks — **closed 2026-09-08.**
+- [x] **Phase 2 · Optimizer core** — 2 weeks — **closed 2026-09-08, scope
+      finished 2026-09-08.**
       **Exit:** agrees with community-accepted answers on 5 benchmark goal sets;
       p95 solve under 2s. Nine agreements and 1 805 ms, both CI-confirmed on
-      `30a6c45`.
-      **What the tick does not cover:** the model has **no time axis** (N14), so
-      no shops, rewards or rotation; the search is **stopped by its budget, not
-      finished by it** and says so with the size of the doubt (2.37%, ADR 0010);
-      **fodder** is in the domain model and not in the solver; and the sample-size
-      discount is only as good as its Poisson assumption, which **cannot rescue a
-      105-run sample** — two large disagreements with the community survived it.
+      `30a6c45`; still nine and 1 807 ms after the time axis landed.
+      **What the tick does not cover:** the time axis is real but **has never met
+      real data** — this upstream declares no rewards, no rotation and no usable
+      shop table, so N14 is proven on the synthetic fixture (ADR 0013); **shops**
+      are refused for want of a price rather than for want of a model; the search
+      is **stopped by its budget, not finished by it** and says so with the size
+      of the doubt (2.30%, ADR 0010); **fodder** is in the domain model and not in
+      the solver; and the sample-size discount is only as good as its Poisson
+      assumption, which **cannot rescue a 105-run sample** — two large
+      disagreements with the community survived it.
 
 - [ ] **Phase 3 · Identity and player state** — 1 week
       OAuth, inventory, roster, goals, multiple profiles, sync.
@@ -529,6 +520,11 @@ then move the entry to
   Magnesia at 105 runs, Liquefied Terror at 113). ADR 0011 discounts a thin
   sample honestly; only more sampling makes it thick. Weigh it against Phase 6,
   where our own drop reports would do the same job with data we own.
+  **It also owns everything the time axis cannot exercise.** After N14 the model
+  prices rewards, weekday rotation and (in a dozen lines it does not have)
+  shops — and this upstream publishes none of the three. A second source is now
+  the only thing standing between a working calendar and a calendar that has met
+  real data. See [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md).
 - **Q3 — Seed data provenance.** *Answered operationally, open on one point.*
   The Kornblume repository has **no `LICENSE` file**, so it is all rights
   reserved by default — absence of a licence is not permission. Enforced since
@@ -555,6 +551,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-08 | eleventh | N14: the plan gets a calendar — the horizon as a scalar rather than an index (ADR 0013), p95 held at 1 807 ms, and the two objectives finally disagree (0 energy / 28 days against 370 / 2) |
 | 2026-09-08 | tenth | N15: a solve is cached on its key (1 806 ms → 2 ms on the real patch) and a queue runs it once, CI-confirmed on `3fdc277`; and the read that took shops out of N14 |
 | 2026-09-08 | ninth | N16 and N17: CI confirmed the tree and Phase 2 closed; then drop yields learned how many runs they were measured over, and agreement with the community went from five to nine |
 | 2026-09-07 | eighth | N12: the community's answers — and the discovery that the adapter had been reading a stage table missing two thirds of the game |
