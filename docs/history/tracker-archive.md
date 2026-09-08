@@ -645,6 +645,34 @@ entry was met, not that the code exists.
          `PoissonRateInterval` is beside `WilsonInterval`; `Drop` holds a count
          and says in prose where the decision about it lives.
 
+### Done 2026-09-08 (tenth session) — PR #9 and N15
+
+- [x] ~~**Merge PR #9.**~~ **Already merged** when the session opened, at
+      `2026-09-08T01:17Z`, and its `main` push run `34180192277` was green in
+      2m 12s. `main` is `176f151`. The ninth session pushed the merge and the
+      tracker recorded the intent rather than the outcome — the mirror image of
+      the mistake the ninth session's own entry warns about, and the reason the
+      first act of a session should be reading the remote rather than the file.
+
+- [x] ~~**N15 — Cache a solve on its key, and implement `SolveCoordinator`.**~~
+      **Done, in a shape the entry did not ask for and an ADR explains.**
+      `SolveCache` is the port — `get` and `put`, and deliberately no
+      invalidation method, because a key carries the game-data version, so a
+      patch does not stale an entry, it makes a different key under which nothing
+      is stored. `InProcessSolveCache` is a bounded LRU with hit and miss
+      counters. `SingleNodeSolveCoordinator` is the queue: one execution per
+      idempotency key however sixteen threads interleave, a pollable ticket, an
+      honest queue depth.
+      **The measurement that justifies it:** on the real 3.5 patch a repeat
+      question goes **1 806 ms → 2 ms**, measured in `RealUpstreamPlanTest`
+      beside the p95 rather than on the toy fixture, where a hit and a solve are
+      both too fast to tell apart.
+      **Not Redis**, which is what ADR 0003's table says — see
+      [ADR 0012](../adr/0012-the-solve-cache-is-in-process-until-there-is-a-second-node.md).
+      Carried forward as **N19**.
+      **Drop estimates are still not in the key**, as the entry required; carried
+      forward as **N18** so that it is read before Phase 6 rather than after.
+
 ---
 
 ## Closed phases, in full
@@ -873,6 +901,40 @@ applies.
 
 ---
 
+## E2 — the full account
+
+Moved out of the tracker on 2026-09-08 (tenth session). The operative half — the
+one line in `build.gradle.kts` and why it is a system property — stays there.
+This is the part that only matters if the problem comes back.
+
+Docker Engine 29 raised the minimum client API version to **1.40**. Spring Boot
+3.5.6's BOM manages Testcontainers **1.21.3**, whose docker-java 3.4.2 defaults
+to **1.32**, so every container-backed test died at startup with
+`Status 400: client version 1.32 is too old`.
+
+**It looked like a broken machine rather than a broken build:** 33 tests failed
+across six classes with three different-looking symptoms while `docker ps` worked
+fine.
+
+The fix, in `backend/build.gradle.kts`:
+
+```kotlin
+tasks.withType<Test>().configureEach { systemProperty("api.version", "1.44") }
+```
+
+`api.version` is docker-java's own config key. It is a **system property on the
+test task**, not an environment variable, because a Gradle test worker inherits
+the *daemon's* environment and not the shell's — `DOCKER_API_VERSION=…` on the
+command line does nothing.
+
+**Rejected:** upgrading Testcontainers. 1.21.4 still pins docker-java 3.4.2, and
+2.0.5 pins 3.7.1 but **renamed the module artifacts** (`org.testcontainers:postgresql`
+stops at 1.21.4), so it is a migration wanting its own change and its own green
+run. Forcing the external `com.github.docker-java` artifacts newer does nothing
+either: the core is shaded into the Testcontainers jar.
+
+---
+
 ## Session log
 
 **Append one entry per session, newest first, here — not in the tracker.** The
@@ -883,6 +945,118 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+### 2026-09-08 (tenth session) — the cache that says what it is, and the shop data that is not there
+
+**Two items: a prerequisite read that changed N14, and N15.**
+
+#### The read that came first, and what it cost N14
+
+N14's tracker entry carried an instruction: the upstream publishes `shops.json`,
+the fetch script does not fetch it, **read it before designing the time axis
+rather than after.** So that came first, and it was the right order.
+
+Fetched at both pinned commits — `d49efab2a18f` (3.3) and `8b40541a9c42` (3.5).
+**Identical, byte for byte:** 6 397 bytes, same MD5. So the file is static across
+the range this project reads, which is itself information: it is not resampled
+and not patch-tracked.
+
+What is in it, in full:
+
+- **Six opaque keys** — `jb1`, `jb2`, `1.21`, `1.22`, `1.31`, `1.32`.
+- **69 rows**, each `{Material, Quantity}`.
+- **Two field names in the entire file.** No currency, no unit price, no reset
+  period, no stock limit, and **no marker distinguishing an offer from its
+  cost** — `jb1` lists `Dust 75000` beside `Brief Cacophony 5` with nothing to
+  say which is being bought and which is being paid.
+
+Our `Shop` record needs currency, price, offer, `periodLimit`, `period` and
+availability. Five of those six are simply absent upstream.
+
+**What this does to N14.** Its entry claimed a time axis "unblocks the three
+source kinds currently refused by name". That is true for rewards and rotation
+and **false for shops**: a time axis gives a per-period cap somewhere honest to
+live and leaves nothing to put in it. `KornblumeAdapter`'s refusal is not a
+deferral to be cleared by modelling work — it is correct, and permanent for this
+upstream. N14 has been rescoped in the tracker accordingly, and shops now hang
+off **Q2** (a second data source) rather than off N14.
+
+**Worth keeping:** the instruction to read first was written by a previous
+session that suspected the data was thin. It was thinner than suspected, and the
+cost of finding out afterwards would have been a day-indexed MIP built partly
+around a source kind that cannot be populated.
+
+#### N14 or N15 first — and why the order changed
+
+With shops gone from N14, the session put the fork to the user rather than
+guessing, because a second fact had turned up: **p95 is 1 808 ms against a
+2 000 ms assertion**, 90% of the budget, with no time axis at all. Day-indexing
+the stage variables multiplies the model by the horizon. N14 is the change most
+likely to break the number Phase 2 was closed on, and N15's cache is the thing
+that absorbs it. N15 went first, by decision.
+
+#### N15 — a solve is cached on its key, and a queue runs it once
+
+`SolveKey` had existed since the seventh session with nothing using it.
+
+**`SolveCache`** is the port, and it is two methods. **There is no invalidation
+method, and that is the design**: a key carries the game-data version, so a patch
+does not stale an entry — it makes a different key under which nothing is stored.
+The old entry is not refreshed, it is unreachable. Eviction is therefore a
+memory-pressure concern and never a correctness one.
+
+**`InProcessSolveCache`** is a bounded LRU (400 entries, a number labelled as the
+guess it is) with hit and miss counters, so whether it earns its keep stays a
+measurement.
+
+**The number:** on the real 3.5 patch — 99 stages, 2 000-odd upgrades — a repeat
+question goes **1 806 ms → 2 ms**. Measured in `RealUpstreamPlanTest` beside the
+p95, deliberately: on the three-stage fixture a hit and a solve are both under a
+millisecond and the test would prove nothing.
+
+**Three judgements worth keeping.**
+
+1. **Not Redis, which is what ADR 0003's table says.** Redis buys a cache shared
+   between nodes; there is one node and under D1 not even one deployed. What it
+   costs is a serialisation contract for `Plan` — written by one deploy, read by
+   the next, failing quietly when a field moves — for a benefit currently equal
+   to zero. [ADR 0012](../adr/0012-the-solve-cache-is-in-process-until-there-is-a-second-node.md)
+   records it and the reversal trigger is **the second node, not a date**. It is
+   also owed before any benchmark against the Phase 8 replicated KV, because a
+   hand-built replicated cache measured against an in-process map is measuring
+   the network — which is exactly the flattery ADR 0003 forbids.
+2. **A cache hit re-stamps the profile and leaves `computedAt` alone.**
+   `SolveKey` fingerprints a player's *state*, not their identity, so two
+   profiles holding the same items with the same roster and goals share one
+   solve — but the envelope has to name whoever is reading it. `computedAt` is
+   not touched, because a plan computed half an hour ago did not become a plan
+   computed now by being read, and re-stamping it would be a lie told by the one
+   field that exists to prevent exactly that. The hit also adds a note saying so,
+   and the note goes on the *copy* handed over, never on the stored plan — a
+   cached plan whose explanation grew every time somebody read it was the obvious
+   version of this bug, and there is a test for it.
+3. **The coordinator does not survive a restart, on purpose.** The queue is heap;
+   a kill loses every in-flight solve. That is written into the class as the
+   honest bound of a single-node coordinator rather than patched, because making
+   it durable here would answer the question Phase 9 exists to ask. Its
+   exactly-once promise is real and narrow: sixteen threads racing one idempotency
+   key produce one execution and a queue depth of one, and there is a latched test
+   that holds the solve open to prove it.
+
+**A trap found and defused.** `RealUpstream.optimizer` is what the p95 test uses,
+and that test asks the *same question* fifty-five times. Hand it a cache and
+fifty-four of those become hash-map lookups, the p95 drops to nothing, and Phase
+2's exit criterion silently starts measuring a `LinkedHashMap`. The factory is
+now explicitly cache-free with that written above it, and a separate
+`cachingOptimizer` exists for tests that want one.
+
+**Also done:** ADR 0011 was missing from `docs/adr/README.md` — a gap left by the
+ninth session — and is now indexed alongside 0012.
+
+**Numbers.** 189 tests, 171 before: planner 35 → 52, `:app` 73 → 74. Zero skipped
+locally because the snapshots were present, so the 16 gated tests genuinely ran;
+CI will show 173 passed, 16 skipped. p95 unchanged at 1 808 ms, which is the
+point — the cache is not in that path.
 
 ### 2026-09-08 (ninth session) — the pipeline confirms the tree, and a number the model was throwing away
 

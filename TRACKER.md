@@ -13,7 +13,7 @@ being finished with is.
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks).
   [README.md](README.md) is the public face; [CLAUDE.md](CLAUDE.md) is the
   working agreement.
-- Last updated: **2026-09-08** (ninth session)
+- Last updated: **2026-09-08** (tenth session)
 
 ---
 
@@ -23,16 +23,22 @@ being finished with is.
   Both halves measured (p95 1 805 ms against a 2 s budget; nine benchmark
   materials where the cheapest stage this project computes is the one a published
   community guide names) and CI confirmed the tree.
-- **Phase 3 is not opened.** Phase 2's *scope* still has **N14** (the time axis)
-  and **N15** (the solve cache) in it. The criterion is met; the phase is not
-  finished, and the distinction is deliberate.
+- **Phase 3 is not opened.** Phase 2's *scope* now has only **N14** (the time
+  axis) left in it; **N15 closed 2026-09-08**. The criterion is met; the phase is
+  not finished, and the distinction is deliberate.
 - **Phase 0 stays closed by exception** — deploy deferred by
   [D1](#d1--deployment-deferred-2026-09-02) — and its box stays unticked, because
   nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
-- **Open right now:** [PR #9](https://github.com/kietnt4412/storm_almanac/pull/9)
-  is green and unmerged, so `main` (`d34a31b`) is one session behind `dev`
-  (`0d1e824`). Merging it is the first action next session.
+- **Open right now:** the tenth session's PR, carrying N15. `main` is at
+  `176f151` (PR #9, merged, and its push run went green). See *Next actions*.
+- **N14's data premise is half gone, and this was checked rather than assumed.**
+  The upstream `shops.json` was fetched at both pinned commits — byte-identical,
+  6 397 bytes, six opaque keys and 69 rows of `{Material, Quantity}` with **no
+  currency, no price, no reset period, and no way to tell an offer from its
+  cost**. `Shop` needs all of those. So a time axis unblocks **rewards and
+  rotation** and does **not** unblock shops from this upstream; that half needs a
+  second source or nothing. `KornblumeAdapter`'s refusal is correct and permanent.
 
 ### Two standing caveats, read them every session
 
@@ -40,7 +46,7 @@ being finished with is.
    data is fetched and never committed
    ([ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md)), so
    `RealUpstreamPatchTest`, `RealUpstreamPlanTest` and `CommunityBenchmarkTest`
-   skip on the runner — 15 of the 171 tests. **Every performance number and every
+   skip on the runner — 16 of the 189 tests. **Every performance number and every
    comparison with an outside answer in this file comes from a test the pipeline
    does not run.** Run `backend/tools/fetch-upstream.sh` before trusting a green
    build to mean the pipeline handles real data.
@@ -114,8 +120,8 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **171 tests** from the run's XML: `:app` 73, `gamedata` 25, `planner` 35, `stats` 13, adapter 25. **156 on CI**, because 15 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
-| CI workflow | **Green on `dev`** | Run `34176134653` (PR #9, `30a6c45`): 156 passed, 15 skipped, 0 failed. `main` is at `d34a31b`. Action deprecations pending — **N5** |
+| Backend build | **Green** | **189 tests** from the run's XML: `:app` 74, `gamedata` 25, `planner` 52, `stats` 13, adapter 25. **173 on CI**, because 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
+| CI workflow | **Green on `main`** | Run `34180192277` (`176f151`, the PR #9 merge). The tenth session's PR is the next one to confirm. Action deprecations pending — **N5** |
 | Domain model (`gamedata`) | **Persisted and round-tripped** | Record equality across the whole graph. `Drop` carries `sampledRuns`, where 0 means *declared*; equipment is an `Entity` (ADR 0007) |
 | `gamedata` schema | **Applied, populated, round-tripped** | `V2` (28 tables), `V3` (a version is deletable), `V4` (`stage_drop.sampled_runs`). Seven invariants in `GameDataSchemaTest`, proven on the fixture and on two real R1999 patches |
 | Ingest, write, read | **Done** | `CanonicalBundleParser` (14 tests, mostly refusal messages), `CanonicalBundleWriter` pinned to it by a round trip, JDBC both directions (ADR 0008) |
@@ -128,7 +134,8 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Yield source (`YieldTable`) | **Done, and it carries the sample** | Declared yields, discounted to the lower end of a 95% `PoissonRateInterval` wherever a sample size exists (ADR 0011). No sample means used as declared |
 | `Optimizer` (`MipOptimizer`) | **Done — least energy** | Pins the plan to its version, fingerprints the request (`SolveKey`), explains itself with shadow prices by re-solve. Budget split between search and explanation — ADR 0010 |
 | Objectives | **One model, both answered** | `LEAST_ENERGY` and `FEWEST_DAYS` are the same plan until the model has time in it — **N14** |
-| Solve caching | **Key only** | `SolveKey` exists; nothing caches on it — **N15** |
+| Solve caching | **Done, in-process** | `SolveCache` is get and put over a `SolveKey` and has **no invalidation method** — a patch is a different key, not a stale entry. On the real 3.5 patch a repeat question goes **1 806 ms → 2 ms**. Not Redis, and [ADR 0012](docs/adr/0012-the-solve-cache-is-in-process-until-there-is-a-second-node.md) says why |
+| `SolveCoordinator` | **Single-node, done** | One execution per idempotency key however submits interleave; a ticket to poll; an honest queue depth. **Does not survive a restart, deliberately** — making it durable here would answer the question Phase 9 exists to ask |
 | Community benchmark | **Done, and now ADR 0011's regression test** | Twenty published claims against what this model computes, ranked on the yields the **solver** uses with the raw ranking printed beside them |
 | `WilsonInterval` / `PoissonRateInterval` | **Done** | 6 and 7 tests. Wilson for "did it drop", Poisson for "how many dropped" |
 | `PityRule` | **Done** | 9 tests against both games' published rates |
@@ -149,10 +156,18 @@ works". It does not mean that:
   anything real.** The stale stage table that cost five sessions of plans would
   not have been caught by any test CI runs, and was not caught by any test at
   all — a person went looking.
-- **The optimizer has never been asked a question by anything but a test.** No
-  HTTP route, no `SolveCoordinator`, no cache behind `SolveKey`, and no player
-  state to solve against — `PlayerStateRepository` is still an interface, which
-  is Phase 3's job. Every solve here is driven by a hand-built fake profile.
+- **The optimizer has never been asked a question by anything but a test**, and
+  N15 did not change that. There is now a `SolveCoordinator` and a `SolveCache`,
+  and **neither is wired to anything**: no HTTP route, no Spring bean, and no
+  player state to solve against — `PlayerStateRepository` is still an interface,
+  which is Phase 3's job. Every solve here is driven by a hand-built fake profile.
+  The seams exist and are tested; nothing in the running application reaches
+  them. Registering beans nothing consumes would have been ceremony, so it was
+  not done.
+- **Nothing has measured whether the cache is worth having in production**, only
+  that a hit is 900× cheaper than a solve. Hit *rate* depends on whether two
+  players ever ask the same question, which needs users. The counters are there
+  so that this stays a measurement rather than a belief.
 - **The benchmark is one guide.** Written for patch 2.7 against a 3.3 sample, and
   it answers "which stage for this material" rather than "what should I do this
   week". A second independent source would turn "agrees with the community" from
@@ -191,32 +206,52 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **Merge [PR #9](https://github.com/kietnt4412/storm_almanac/pull/9).** Green
-      on `30a6c45`, unmerged, so `main` is a session behind. Do this first, and
-      confirm the `main` push run goes green too.
-- [ ] **N14 — Give the solver a time axis, and with it shops, rewards and
-      rotation.** The largest thing the model does not do, and what makes
-      `FEWEST_DAYS` a different plan from `LEAST_ENERGY` rather than the same one
-      divided by a constant. It unblocks the three source kinds currently refused
-      by name: a shop's cap is "n per period" and a reward's is "once per day",
-      and neither has an honest place in a model with no days in it. Expect this
-      to be the expensive half of Phase 2.
-      **Before designing it:** the upstream publishes `shops.json` and the fetch
-      script does not fetch it. It states `{Material, Quantity}` under an opaque
-      shop key with no currency, no unit price and no reset period, which is why
-      `KornblumeAdapter` refuses it — read it first rather than after.
-      **What it inherits from N17:** yields are now discounted for their sample,
-      so the time axis is going over coefficients that are conservative rather
-      than central. Do not "fix" that by taking the point estimate back as the
-      model grows; ADR 0011 has the reversal trigger, and it is a measurement,
-      not a preference.
-- [ ] **N15 — Cache a solve on its key, and implement `SolveCoordinator`.**
-      `SolveKey` exists and nothing uses it. The single-node coordinator is
-      explicitly Phase 2's ("a single-node implementation ships in phase 2 and
-      stays"), and it is the queue Phase 9 later replicates. **Drop estimates are
-      deliberately not in the key yet** — nothing publishes any — and they must go
-      in the moment Phase 6 does, or a plan cached against yesterday's rates is
-      served as today's.
+- [ ] **Merge the tenth session's PR**, and confirm the `main` push run goes
+      green. Do this first.
+- [ ] **N14 — Give the solver a time axis, and with it rewards and rotation.**
+      The largest thing the model does not do, and what makes `FEWEST_DAYS` a
+      different plan from `LEAST_ENERGY` rather than the same one divided by a
+      constant. Expect this to be the expensive half of Phase 2.
+      **Shops are no longer part of it.** The prerequisite read happened in the
+      tenth session and the answer was worse than expected: `shops.json` carries
+      six opaque keys and 69 `{Material, Quantity}` rows and nothing else — no
+      currency, no price, no reset period, and no marker separating an offer from
+      its cost. It is also byte-identical at both pinned commits, so it is static.
+      A time axis gives a shop cap somewhere honest to live and **still leaves
+      nothing to put in it.** Scope N14 as rewards plus rotation; shops need a
+      second upstream (see **Q2**) or they stay refused by name, which is the
+      correct behaviour and is already tested.
+      **Watch the budget.** p95 is **1 808 ms against a 2 000 ms assertion** — 90%
+      of it — with no time axis at all. Day-indexing the stage variables
+      multiplies the model by the horizon, so this change is the one most likely
+      to break the number Phase 2 was closed on. Decide the horizon and the
+      formulation *before* writing the variables, and re-measure early rather
+      than at the end.
+      **What it inherits from N17:** yields are discounted for their sample, so
+      the time axis goes over coefficients that are conservative rather than
+      central. Do not "fix" that by taking the point estimate back as the model
+      grows; ADR 0011 has the reversal trigger, and it is a measurement, not a
+      preference.
+      **What it inherits from N15:** `RealUpstream.optimizer` is deliberately
+      cache-free, because the p95 test asks one question fifty-five times. Do not
+      hand it a cache to make a timing number look better.
+- [ ] **N18 — Put drop estimates into `SolveKey` in the same change that first
+      publishes one.** Left out today because nothing publishes any, so folding an
+      empty repository into the fingerprint would be ceremony. The moment Phase 6
+      does, a cached plan computed against yesterday's rates is served as today's
+      — the one staleness bug the key's design cannot catch on its own, and it is
+      silent. **This belongs in the Phase 6 change itself, not after it.** Both
+      `SolveKey` and `SolveCache` say so in their javadoc; this line exists so it
+      is also somewhere a session reads before starting.
+- [ ] **N19 — Write `RedisSolveCache` when there is a second node.** Deferred by
+      [ADR 0012](docs/adr/0012-the-solve-cache-is-in-process-until-there-is-a-second-node.md),
+      whose reversal trigger is a second process that can serve the same profile —
+      a second API replica, a solver worker split out of the web node, or the
+      Phase 9 cluster. **It is also owed before any benchmark is published against
+      the Phase 8 replicated KV**, regardless of node count: a hand-built
+      replicated cache measured against an in-process map is measuring the
+      network, and ADR 0003 forbids a comparison shaped to flatter the hand-built
+      side.
 - [ ] **N4 — Enforce that `Entity.kind` is never read outside the catalog.**
       ADR 0007 asserts it and nothing checks it: `GameAgnosticismTest` scans for
       game slugs, not field reads, so a `kind`-switch in `planner` would pass
@@ -456,33 +491,16 @@ and modifies nothing. Not committed to `gradle.properties`, because
 
 ### E2 · Docker Engine 29 refuses Testcontainers' API version
 
-**Fixed in the build, and the fix is committed** — this one is not really
-machine-specific: every machine that takes the Docker 29 update hits it, and the
-GitHub runner will when it does.
-
-Docker Engine 29 raised the minimum client API version to **1.40**. Spring Boot
-3.5.6's BOM manages Testcontainers **1.21.3**, whose docker-java 3.4.2 defaults
-to **1.32**, so every container-backed test dies at startup with
-`Status 400: client version 1.32 is too old`. It looks like a broken machine
-rather than a broken build: 33 tests failed across six classes with three
-different-looking symptoms while `docker ps` worked fine.
-
-The fix, in `backend/build.gradle.kts`:
-
-```kotlin
-tasks.withType<Test>().configureEach { systemProperty("api.version", "1.44") }
-```
-
-`api.version` is docker-java's own config key. It is a **system property on the
-test task**, not an environment variable, because a Gradle test worker inherits
-the *daemon's* environment and not the shell's — `DOCKER_API_VERSION=…` on the
-command line does nothing.
-
-**Rejected:** upgrading Testcontainers. 1.21.4 still pins docker-java 3.4.2, and
-2.0.5 pins 3.7.1 but **renamed the module artifacts** (`org.testcontainers:postgresql`
-stops at 1.21.4), so it is a migration wanting its own change and its own green
-run. Forcing the external `com.github.docker-java` artifacts newer does nothing
-either: the core is shaded into the Testcontainers jar.
+**Fixed, committed, and only worth knowing if it comes back.** Docker Engine 29
+raised the minimum client API version to 1.40; the managed Testcontainers 1.21.3
+defaults to 1.32, so every container-backed test died at startup looking like a
+broken machine rather than a broken build. `backend/build.gradle.kts` sets
+`systemProperty("api.version", "1.44")` on every `Test` task — docker-java's own
+config key, a **system property on the task** and not an environment variable,
+because a Gradle test worker inherits the daemon's environment and not the
+shell's. Upgrading Testcontainers was considered and rejected. The full account,
+including why the obvious fixes do nothing, is in
+[the archive](docs/history/tracker-archive.md#e2--the-full-account).
 
 **Also:** Docker Desktop takes minutes to start on this machine and `docker info`
 hangs rather than failing while it does. Give it time instead of concluding it is
@@ -535,6 +553,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-08 | tenth | N15: a solve is cached on its key (1 806 ms → 2 ms on the real patch) and a queue runs it once; and the read that took shops out of N14 |
 | 2026-09-08 | ninth | N16 and N17: CI confirmed the tree and Phase 2 closed; then drop yields learned how many runs they were measured over, and agreement with the community went from five to nine |
 | 2026-09-07 | eighth | N12: the community's answers — and the discovery that the adapter had been reading a stage table missing two thirds of the game |
 | 2026-09-07 | seventh | N11 and N13: the optimizer answers a real goal set and says how much it does not know (ADR 0010) |
