@@ -35,8 +35,14 @@ being finished with is.
   16 skipped and they are exactly the three snapshot-gated classes. `main` is at
   `9bad5aa`. Merging it is the first action next session.
 - **The time axis has no real data to eat**, checked rather than assumed — see
-  [the unverified list](#what-is-still-unverified). Rewards, rotation and shops
-  are all absent from this upstream, so N14 is proven on the fixture alone.
+  [the unverified list](#what-is-still-unverified). N14 is proven on the fixture
+  alone.
+- **And the reason is better than "the upstream is silent" —**
+  [the economy facts](docs/game-facts/reverse-1999-economy.md), maintainer-supplied
+  2026-09-08. **R1999 has no weekday rotation at all**, so `Availability.ALWAYS`
+  is *correct* rather than a gap; and its daily and weekly income **is conditional
+  on spending Activity**, so entering it as a `Reward` would make every plan
+  systematically too cheap. Read that file before treating either as an omission.
 
 ### Two standing caveats, read them every session
 
@@ -182,14 +188,22 @@ works". It does not mean that:
 - **Nothing has ever called the API under load.** Every request loads a whole
   version — fifteen queries — a deliberate deferral written into
   `GameDataReadModel`'s javadoc. The number to beat does not exist yet.
-- **The time axis has never met real data, and cannot on this upstream.**
-  Rewards, weekday rotation and shops are all modelled or refused on the strength
-  of the synthetic fixture alone, because `KornblumeAdapter` emits
-  `Availability.ALWAYS` for every source and no rewards, and the upstream file has
-  no weekday field. On the real 3.5 patch the whole of N14 reduces to one energy
-  row. **Do not read "the optimizer has a calendar" as "the optimizer schedules
-  real weeks"** — the first is true, the second waits on a second game (Phase 11)
-  or a second data source (**Q2**).
+- **The time axis has never met real data, and on this game it never will.**
+  Rewards, rotation and shops are modelled or refused on the strength of the
+  synthetic fixture alone, and on the real 3.5 patch the whole of N14 reduces to
+  one energy row. **Do not read "the optimizer has a calendar" as "the optimizer
+  schedules real weeks."** The rotation machinery waits for a game that rotates —
+  Phase 11 is the next chance. See
+  [the economy facts](docs/game-facts/reverse-1999-economy.md).
+- **Three shapes the model cannot express**, each of which would be a *silent*
+  wrong answer if faked. Not defects in what shipped —
+  [details and provenance](docs/game-facts/reverse-1999-economy.md):
+  **(a) an item that restores energy** (Picrasma Candy, 60 Activity) — `Stage` is
+  the only source touching the energy budget and only ever consumes;
+  **(b) a reward conditional on spending energy** — R1999's Activeness is a rebate
+  on farming, not income, which is why leaving it out is correct;
+  **(c) a lifetime purchase limit** — `Shop` caps at "n per `Period`"; permanent
+  stock is "five, ever".
 - **The adapter converts less than the upstream publishes** — no shop offers, no
   alternative resonance-pattern costs, no unreleased content — each with a reason
   in `KornblumeAdapter`'s javadoc. That sentence is only reassuring when somebody
@@ -224,6 +238,13 @@ Ordered. Completed ones move to
       `RealUpstream.optimizer` is deliberately cache-free, because the p95 test
       asks one question fifty-five times; do not hand it a cache to make a timing
       number look better.
+- [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
+      `EnergyMip.matchingDays` reads weekdays in **UTC** — a game assumption in a
+      game-agnostic module. R1999 Global rolls over at **05:00 UTC−5, weekly
+      Monday**. Inert today because nothing ingested rotates, so it is deferred on
+      the same reasoning that kept unused beans out of N15, and it **stops being
+      inert at Phase 11**. Costs a bundle field, parser, writer, a migration and
+      the JDBC round trip — do it *with* that game, not speculatively.
 - [ ] **N18 — Put drop estimates into `SolveKey` in the same change that first
       publishes one.** Left out today because nothing publishes any, so folding an
       empty repository into the fingerprint would be ceremony. The moment Phase 6
@@ -244,9 +265,11 @@ Ordered. Completed ones move to
 - [ ] **N4 — Enforce that `Entity.kind` is never read outside the catalog.**
       ADR 0007 asserts it and nothing checks it: `GameAgnosticismTest` scans for
       game slugs, not field reads, so a `kind`-switch in `planner` would pass
-      today. Natural home is an ArchUnit rule beside `ModuleBoundaryTest`. Write
-      it with the first real planner code — until the guarded modules have some,
-      the rule passes vacuously and proves nothing.
+      today. Natural home is an ArchUnit rule beside `ModuleBoundaryTest`.
+      **Its deferral has expired.** The entry said to write it "with the first
+      real planner code"; `planner` is now ~2 000 lines across a resolver, a MIP
+      and an optimizer, so the rule would no longer pass vacuously. It is cheap
+      and it is owed.
 - [ ] **N5 — Upgrade the CI actions before they break.** Green but warning twice,
       both on a clock: **Node 20 is deprecated** and six actions are already being
       forced onto Node 24 by the runner (`checkout@v4`, `setup-java@v4`,
@@ -281,25 +304,21 @@ previous one's criterion is met. The full "Landed" record for closed phases is i
       **Exit:** the API answers "what does Insight 2 cost?" and "what does her S2
       do at rank 3?"; a patch diff report renders for both axes; tests over real
       patch data. Both halves met and CI-confirmed (N10).
-      **Two qualifications travel with it:** CI does not run the real-data tests
-      (ADR 0009 — the criterion is met locally and reproducibly, not on the
-      runner), and the catalog half is proven on real data only for stat curves,
-      because this upstream publishes no skill text.
+      **Two qualifications travel with it**, both live in
+      [the unverified list](#what-is-still-unverified): CI does not run the
+      real-data tests, and the catalog half is proven on real data only for stat
+      curves.
 
 - [x] **Phase 2 · Optimizer core** — 2 weeks — **closed 2026-09-08, scope
       finished 2026-09-08.**
       **Exit:** agrees with community-accepted answers on 5 benchmark goal sets;
       p95 solve under 2s. Nine agreements and 1 805 ms, both CI-confirmed on
       `30a6c45`; still nine and 1 807 ms after the time axis landed.
-      **What the tick does not cover:** the time axis is real but **has never met
-      real data** — this upstream declares no rewards, no rotation and no usable
-      shop table, so N14 is proven on the synthetic fixture (ADR 0013); **shops**
-      are refused for want of a price rather than for want of a model; the search
-      is **stopped by its budget, not finished by it** and says so with the size
-      of the doubt (2.30%, ADR 0010); **fodder** is in the domain model and not in
-      the solver; and the sample-size discount is only as good as its Poisson
-      assumption, which **cannot rescue a 105-run sample** — two large
-      disagreements with the community survived it.
+      **What the tick does not cover:** the search is **stopped by its budget,
+      not finished by it**, and says so with the size of the doubt (2.30%,
+      ADR 0010); **fodder** is in the domain model and not in the solver; and the
+      time axis, the shop refusal and the two surviving benchmark disagreements
+      are all in [the unverified list](#what-is-still-unverified).
 
 - [ ] **Phase 3 · Identity and player state** — 1 week
       OAuth, inventory, roster, goals, multiple profiles, sync.
@@ -397,18 +416,11 @@ is taken.
 
 ## Invariants — do not violate without an ADR
 
-1. **No game-specific code in `planner`, `gacha` or `stats`.** Not one
-   `if (game == ...)`. Enforced by `GameAgnosticismTest`.
-2. **No cross-module database reads.** Modules talk through `EventPublisher`.
-   Enforced by `ModuleBoundaryTest`.
-3. **Every hand-built component keeps its boring implementation**, selectable by
-   `storm-almanac.substrate.*`, and the benchmark gets published either way —
-   including if the boring one wins.
-4. **Everything is versioned by `GameDataVersion`.** Plans, estimates and catalog
-   pages record what they were computed against. A patch invalidates loudly.
-5. **Ingestion is automated; publishing is a manual approval.**
-6. **No game assets, ever.** Numbers and text only, attributed. Never touch the
-   game client.
+**They live in [CLAUDE.md](CLAUDE.md#non-negotiables) and are not repeated here.**
+That file is read at the start of every session by definition, so a second copy
+is a second thing to keep in sync and a place for the two to disagree. Two of the
+six are enforced by tests — `GameAgnosticismTest` and `ModuleBoundaryTest` — and
+those are the ones a change is most likely to trip.
 
 ---
 
@@ -484,15 +496,11 @@ and modifies nothing. Not committed to `gradle.properties`, because
 
 ### E2 · Docker Engine 29 refuses Testcontainers' API version
 
-**Fixed, committed, and only worth knowing if it comes back.** Docker Engine 29
-raised the minimum client API version to 1.40; the managed Testcontainers 1.21.3
-defaults to 1.32, so every container-backed test died at startup looking like a
-broken machine rather than a broken build. `backend/build.gradle.kts` sets
-`systemProperty("api.version", "1.44")` on every `Test` task — docker-java's own
-config key, a **system property on the task** and not an environment variable,
-because a Gradle test worker inherits the daemon's environment and not the
-shell's. Upgrading Testcontainers was considered and rejected. The full account,
-including why the obvious fixes do nothing, is in
+**Fixed, committed, and only worth knowing if it comes back.**
+`backend/build.gradle.kts` sets `systemProperty("api.version", "1.44")` on every
+`Test` task — a system property on the *task*, not an environment variable, and
+the distinction is the whole fix. Why, and why the obvious alternatives do
+nothing, is in
 [the archive](docs/history/tracker-archive.md#e2--the-full-account).
 
 **Also:** Docker Desktop takes minutes to start on this machine and `docker info`
@@ -525,6 +533,16 @@ then move the entry to
   shops — and this upstream publishes none of the three. A second source is now
   the only thing standing between a working calendar and a calendar that has met
   real data. See [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md).
+- **Q5 — Is our "3.5" the same 3.5 anyone else means?** *New 2026-09-08, and the
+  same shape as the mistake that cost five sessions.* `fetch-upstream.sh` pins
+  `8b40541a9c42`, message `update 3.5`, dated **2026-03-17** — confirmed through
+  the GitHub API, not assumed. Global 3.5 ran **2026-05-28 to 2026-07-02**. Two
+  and a half months apart, most likely because Kornblume tracks **CN**, which
+  runs ahead. If so, everything here called "3.5" is CN 3.5. **This does not
+  invalidate the nine agreements** — the guide was already known to be written
+  for 2.7 against a 3.3 sample — but the version labels may not mean what a
+  reader assumes. Resolve by checking content that differs between the two
+  releases; until then do not write "3.5" publicly without saying which.
 - **Q3 — Seed data provenance.** *Answered operationally, open on one point.*
   The Kornblume repository has **no `LICENSE` file**, so it is all rights
   reserved by default — absence of a licence is not permission. Enforced since
@@ -551,7 +569,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-08 | eleventh | N14: the plan gets a calendar — the horizon as a scalar rather than an index (ADR 0013), p95 held at 1 807 ms, and the two objectives finally disagree (0 energy / 28 days against 370 / 2) |
+| 2026-09-08 | eleventh | N14: the plan gets a calendar — the horizon as a scalar rather than an index (ADR 0013), p95 held at 1 807 ms, the two objectives finally disagree (0 energy / 28 days against 370 / 2) — then the maintainer supplied what the game actually does, and two of the answers were corrections |
 | 2026-09-08 | tenth | N15: a solve is cached on its key (1 806 ms → 2 ms on the real patch) and a queue runs it once, CI-confirmed on `3fdc277`; and the read that took shops out of N14 |
 | 2026-09-08 | ninth | N16 and N17: CI confirmed the tree and Phase 2 closed; then drop yields learned how many runs they were measured over, and agreement with the community went from five to nine |
 | 2026-09-07 | eighth | N12: the community's answers — and the discovery that the adapter had been reading a stage table missing two thirds of the game |

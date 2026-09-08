@@ -144,6 +144,14 @@ import java.util.stream.Stream;
  *       the only source of several currencies.
  *   <li><b>Skills, talents, banners, rewards, fodder</b> — this upstream simply
  *       does not publish them. An empty section is the truthful output.
+ *   <li><b>Weekday rotation</b> — every source gets {@link Availability#ALWAYS},
+ *       and <b>that is the right answer rather than a missing one.</b> The four
+ *       Insight families and the two Resource stages are permanent and open
+ *       every day; they are material specialisations, not a weekday rotation.
+ *       The upstream publishes no weekday field because there is nothing to
+ *       publish. Recorded, with its provenance, in
+ *       {@code docs/game-facts/reverse-1999-economy.md} — worth reading before
+ *       concluding this line is a gap to be closed.
  * </ul>
  */
 public final class KornblumeAdapter implements UpstreamAdapter {
