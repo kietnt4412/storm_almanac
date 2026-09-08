@@ -58,6 +58,34 @@ class CanonicalBundleParserTest {
     }
 
     @Test
+    @DisplayName("a drop can say how many runs it was sampled over, and an omitted one is declared")
+    void sampledRunsAreOptionalAndMeanDeclaredWhenAbsent() {
+        Stage stage = (Stage) parser.parse(minimal("""
+                "stages": [ { "id": "1-1", "displayName": "First", "energyCost": 10,
+                              "drops": [ { "item": "ore", "expectedYield": 0.2, "sampledRuns": 2680 },
+                                         { "item": "ore", "expectedYield": 9000 } ] } ]
+                """)).sources().getFirst();
+
+        assertThat(stage.drops().getFirst().sampledRuns()).isEqualTo(2680);
+        assertThat(stage.drops().getFirst().isSampled()).isTrue();
+        // Absence is the canonical spelling of "the data declares this", which
+        // is what every bundle written before the field existed meant.
+        assertThat(stage.drops().getLast().sampledRuns()).isZero();
+        assertThat(stage.drops().getLast().isSampled()).isFalse();
+    }
+
+    @Test
+    @DisplayName("a sample of no runs is a claim that cannot be true, so the bundle is refused")
+    void zeroSampledRunsIsRefused() {
+        assertThatThrownBy(() -> parser.parse(minimal("""
+                "stages": [ { "id": "1-1", "displayName": "First", "energyCost": 10,
+                              "drops": [ { "item": "ore", "expectedYield": 1.0, "sampledRuns": 0 } ] } ]
+                """)))
+                .isInstanceOf(BundleFormatException.class)
+                .hasMessageContaining("at least one run");
+    }
+
+    @Test
     @DisplayName("an omitted availability means the source is always open")
     void availabilityDefaultsToAlways() {
         // Nearly every source in a real bundle is always available. Spelling it

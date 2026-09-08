@@ -17,6 +17,7 @@ import io.stormalmanac.planner.Objective;
 import io.stormalmanac.planner.Optimizer;
 import io.stormalmanac.planner.Plan;
 import io.stormalmanac.planner.SolveRequest;
+import io.stormalmanac.planner.YieldTable;
 import io.stormalmanac.player.Inventory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -47,10 +48,27 @@ import org.junit.jupiter.api.condition.EnabledIf;
  * <h2>What agreement can and cannot mean</h2>
  *
  * <p>The guide answers "which stage is best for this material", which in our
- * model is {@code argmin} of Activity per unit at the declared yields, so that is
- * what is compared. It is a check on the <b>data and the model</b>, and only then
- * on the search: a stage ranking is arithmetic, and no branch-and-bound is
- * involved in getting it wrong.
+ * model is {@code argmin} of Activity per unit, so that is what is compared. It
+ * is a check on the <b>data and the model</b>, and only then on the search: a
+ * stage ranking is arithmetic, and no branch-and-bound is involved in getting it
+ * wrong.
+ *
+ * <p><b>Per unit of what, though.</b> Since
+ * {@code docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md}
+ * there are two answers and this test reports both, because conflating them is
+ * how a correction gets read as a regression:
+ *
+ * <ul>
+ *   <li><b>The supported yield</b> — the lower end of a 95% interval on the
+ *       mean, which is the coefficient {@link io.stormalmanac.planner.YieldTable}
+ *       hands the solver. The ranking below is on this, because it is the
+ *       ranking a player is actually given.
+ *   <li><b>The raw point estimate</b> — the upstream's observed mean, which is
+ *       what a guide quotes. {@link #theNumbersAgree()} compares on this and must
+ *       keep doing so: it is two independent <em>measurements</em> of the same
+ *       game, and discounting one side would compare a measurement against a
+ *       decision about a measurement.
+ * </ul>
  *
  * <p>The two sides are also not contemporaries. The guide is written against
  * patch 2.7 and this snapshot's drop tables were resampled at 3.3, so a
@@ -138,6 +156,8 @@ class CommunityBenchmarkTest {
     private final GameDefinition definition = RealUpstream.definition();
     private final Map<String, ItemId> byName = itemsByDisplayName();
     private final Map<String, Integer> sampleSizes = sampleSizes();
+    /** Exactly the table the optimizer solves against, built the same way. */
+    private final YieldTable planned = YieldTable.declared(definition);
 
     @Test
     @DisplayName("every stage the community names as best is in this snapshot")
@@ -194,28 +214,41 @@ class CommunityBenchmarkTest {
         // twenty, because reporting only the five that agree would be choosing
         // the benchmark after seeing the result.
         List<String> exact = new ArrayList<>();
+        List<String> exactOnRawRates = new ArrayList<>();
         System.out.printf("%nCommunityBenchmarkTest — %s %s, %d stages%n",
                 RealUpstream.REVERSE_1999.value(), RealUpstream.PATCH, definition.stages().size());
-        System.out.printf("%-22s %-8s %8s %7s %5s  %-8s %8s %7s %7s%n",
-                "material", "theirs", "per-unit", "runs", "rank", "ours", "per-unit", "runs", "gap");
+        System.out.printf("%-22s %-8s %8s %7s %5s  %-8s %8s %7s %7s %8s%n",
+                "material", "theirs", "per-unit", "runs", "rank", "ours", "per-unit", "runs",
+                "gap", "raw pick");
 
         for (Answer answer : ANSWERS) {
             ItemId item = itemOf(answer);
             List<Stage> ranked = rankedFor(item);
             Stage claimed = stageOf(answer.stage());
             Stage best = ranked.getFirst();
+            Stage rawBest = rankedRawFor(item).getFirst();
             double gap = perUnit(claimed, item) / perUnit(best, item) - 1;
             if (best.equals(claimed)) {
                 exact.add(answer.material());
             }
-            System.out.printf("%-22s %-8s %8.1f %7d %2d/%-3d %-8s %8.1f %7d %6.1f%%%n",
+            if (rawBest.equals(claimed)) {
+                exactOnRawRates.add(answer.material());
+            }
+            System.out.printf("%-22s %-8s %8.1f %7d %2d/%-3d %-8s %8.1f %7d %6.1f%% %8s%n",
                     answer.material(), answer.stage(), perUnit(claimed, item),
                     sampleSizes.getOrDefault(claimed.displayName(), 0),
                     ranked.indexOf(claimed) + 1, ranked.size(),
                     best.stageId().value(), perUnit(best, item),
-                    sampleSizes.getOrDefault(best.displayName(), 0), 100 * gap);
+                    sampleSizes.getOrDefault(best.displayName(), 0), 100 * gap,
+                    rawBest.equals(best) ? "same" : rawBest.stageId().value());
         }
-        System.out.println("agreed exactly: " + String.join(", ", exact));
+        // Both counts, always. The first is what a player is told; the second is
+        // what they would have been told before ADR 0011, and the difference is
+        // the only honest way to say what discounting a thin sample bought.
+        System.out.println("agreed exactly, on the yields the solver uses: "
+                + String.join(", ", exact));
+        System.out.println("agreed exactly, on raw point estimates: "
+                + String.join(", ", exactOnRawRates));
 
         assertThat(exact)
                 .as("Phase 2 closes on five goal sets where the answer is somebody else's")
@@ -231,9 +264,15 @@ class CommunityBenchmarkTest {
         // a noisy mean is a high mean about as often as it is a low one.
         List<String> unexplained = new ArrayList<>();
         List<String> explained = new ArrayList<>();
+        List<String> onRawRates = new ArrayList<>();
         for (Answer answer : ANSWERS) {
             ItemId item = itemOf(answer);
             Stage claimed = stageOf(answer.stage());
+            Stage rawBest = rankedRawFor(item).getFirst();
+            if (rawPerUnit(claimed, item) / rawPerUnit(rawBest, item) - 1 > 0.25) {
+                onRawRates.add(answer.material());
+            }
+
             Stage best = rankedFor(item).getFirst();
             double gap = perUnit(claimed, item) / perUnit(best, item) - 1;
             if (gap <= 0.25) {
@@ -247,7 +286,9 @@ class CommunityBenchmarkTest {
         }
 
         System.out.println("disagreements over 25%: " + explained.size() + " on a small sample, "
-                + unexplained.size() + " not");
+                + unexplained.size() + " not"
+                + " (on raw point estimates, before ADR 0011: " + onRawRates.size()
+                + " — " + String.join(", ", onRawRates) + ")");
         explained.forEach(line -> System.out.println("  " + line));
         assertThat(unexplained)
                 .as("a large disagreement with well-sampled data on both sides is a defect"
@@ -343,14 +384,25 @@ class CommunityBenchmarkTest {
 
     // ── the model's own answer to the question the guide answers ────────────
 
+    /** Ranked the way the solver ranks them: on the yield the sample supports. */
     private List<Stage> rankedFor(ItemId item) {
+        return rankedBy(item, this::perUnit);
+    }
+
+    /** Ranked the way a guide quoting an observed rate ranks them. ADR 0011. */
+    private List<Stage> rankedRawFor(ItemId item) {
+        return rankedBy(item, CommunityBenchmarkTest::rawPerUnit);
+    }
+
+    private List<Stage> rankedBy(ItemId item, java.util.function.ToDoubleBiFunction<Stage, ItemId> cost) {
         List<Stage> ranked = new ArrayList<>(definition.stages().stream()
                 .filter(stage -> yieldOf(stage, item) > 0)
                 .toList());
-        ranked.sort(Comparator.comparingDouble(stage -> perUnit(stage, item)));
+        ranked.sort(Comparator.comparingDouble(stage -> cost.applyAsDouble(stage, item)));
         return ranked;
     }
 
+    /** The upstream's observed mean: what a guide quotes, and what a resample moves. */
     private static double yieldOf(Stage stage, ItemId item) {
         return stage.drops().stream()
                 .filter(drop -> drop.item().equals(item))
@@ -358,7 +410,17 @@ class CommunityBenchmarkTest {
                 .findFirst().orElse(0);
     }
 
-    private static double perUnit(Stage stage, ItemId item) {
+    /** What the solver is given: the same mean, discounted for its sample. */
+    private double plannedYield(Stage stage, ItemId item) {
+        return planned.yield(stage.stageId(), item);
+    }
+
+    private double perUnit(Stage stage, ItemId item) {
+        double each = plannedYield(stage, item);
+        return each <= 0 ? Double.POSITIVE_INFINITY : stage.energyCost() / each;
+    }
+
+    private static double rawPerUnit(Stage stage, ItemId item) {
         double each = yieldOf(stage, item);
         return each <= 0 ? Double.POSITIVE_INFINITY : stage.energyCost() / each;
     }

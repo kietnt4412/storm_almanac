@@ -5,17 +5,34 @@ update it last. If a session ends without this file reflecting what happened,
 the next session starts from a lie.
 
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks)
-- Last updated: **2026-09-07** (eighth session)
-- Current phase: **Phase 2 — Optimizer core — is OPEN, opened 2026-09-07.**
-  Phase 1 closed 2026-09-06 with both halves of its exit criterion met and CI
-  confirming the tree (N10: runs `34035918992` and `34035923889`).
-  **Both halves of Phase 2's criterion are now met** — p95 1.8 s against a 2 s
-  budget, and five benchmark goal sets where the cheapest stage this project
-  computes is the stage a published community guide names
-  ([the benchmark](docs/benchmarks/reverse-1999-community-answers.md), N12).
-  **The box is still not ticked**, and the reason is in N16: closing it means
-  CI green on this tree, and this session changed which data the optimizer has
-  been reading. Tick it next session or explain why not.
+- Last updated: **2026-09-08** (ninth session)
+- **This session also closed N17** — drop yields now carry the number of runs
+  they were sampled over, and the solver is given what that sample supports
+  rather than what it happened to show
+  ([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)).
+  **Agreement with the published community guide went from five exact matches to
+  nine**, and the plan got 7% more expensive, which is the same fact said twice.
+  **Q8 is answered and closed.** Local build green at **171 tests**, and CI has
+  confirmed the tree — run `34176134653` on `30a6c45`: 156 passed, 15 skipped, 0
+  failed. **[PR #9](https://github.com/kietnt4412/storm_almanac/pull/9) is open
+  and unmerged**, so `main` is one session behind `dev`; merging it is the first
+  thing next session unless the owner does it sooner.
+- Current phase: **Phase 2 — Optimizer core — CLOSED on its exit criterion
+  2026-09-08 (N16), opened 2026-09-07.** Both halves are met and measured —
+  p95 1.8 s against a 2 s budget, and five benchmark goal sets where the
+  cheapest stage this project computes is the stage a published community guide
+  names ([the benchmark](docs/benchmarks/reverse-1999-community-answers.md),
+  N12) — and **CI has now confirmed the tree**: run `34116854550` on `93f4de4`
+  and run `34116880372` on `d34a31b` (PR #8 merged to `main`), both success,
+  **139 passed, 15 skipped, 0 failed**, with the adapter's 24 tests executing on
+  the runner. That was the last condition N16 held the box for, so the box is
+  ticked.
+  **What the tick does not say:** the phase's scope is not exhausted. **N17 closed
+  later the same day** — sample sizes now reach the solver — and **N14** (the time
+  axis) and **N15** (the cache behind `SolveKey`) are still open. Phase 3 is
+  therefore not opened yet.
+  Phase 1 closed 2026-09-06 the same way (N10: runs `34035918992` and
+  `34035923889`).
   Phase 0 stays closed by exception (deploy deferred by D1) and its box stays
   unticked, because nothing is deployed.
 - Track B status: **not started, and gated** — see [the gate](#the-gate)
@@ -23,7 +40,7 @@ the next session starts from a lie.
   repository are ones CI does not run.** Upstream data is fetched and never
   committed ([ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md)),
   so `RealUpstreamPatchTest`, `RealUpstreamPlanTest` **and now
-  `CommunityBenchmarkTest`** skip on the runner — 15 of the 154 tests. Run
+  `CommunityBenchmarkTest`** skip on the runner — 15 of the 171 tests. Run
   `backend/tools/fetch-upstream.sh` before trusting a green build to mean the
   pipeline handles real data, and note that the optimizer's entire performance
   evidence, and every comparison with an outside answer, lives in those three.
@@ -61,14 +78,26 @@ game data pipeline that works end to end, an API that serves it, a real game's
 data going through all of it, an optimizer that turns that data into a plan, and
 — as of this session — **a reason to believe the plan**.
 
-The load-bearing sentence, and it replaces the previous one: **on five benchmark
+The load-bearing sentence, and it replaces the previous one: **on nine benchmark
 materials the cheapest stage this project computes is the stage a published
 community guide tells players to farm, and the optimizer's plan for a real goal
-set is cheaper than following that guide** — 3 624 Activity against 4 017, and
+set is cheaper than following that guide** — 3 880 Activity against 4 017, and
 the 4 017 does not even cover the whole demand. Twenty claims were compared;
 seventeen of the guide's quoted drop rates land within three percentage points
 of a sample this project had never seen. See
 [the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
+
+**Nine, where the previous session measured five, and the four extra were bought
+by N17 rather than by tuning.** A drop yield now carries how many runs it was
+observed over, and the solver is handed the lower end of a 95% interval on that
+mean instead of the mean itself
+([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)).
+Four materials where this project used to prefer a thinly sampled stage with a
+flattering mean now name the stage the community names. **The plan also got 7%
+more expensive** — 3 624 to 3 880 — and that is the same fact stated from the
+other side: the old number was optimistic, not cheap. The change was made because
+the evidence demanded it, and the agreement is what happened next; that ordering
+is the only reason the agreement means anything.
 
 The previous load-bearing sentences still hold: **the solver answers a real goal
 set over somebody else's real numbers and says how much it does not know**
@@ -95,12 +124,19 @@ Against the table the upstream actually uses, **all 118 can**, and the test that
 asserted the old number now asserts the opposite as a canary — a released
 character with no source for a material means the stage table is short again.
 
-**And the benchmark found the thing to do next.** Every disagreement with the
-community over 25% is a sample-size disagreement. The upstream publishes how many
-runs each stage's drop table was observed over — from **105 to 41 212** — and the
-model throws that number away, so a mean over 105 runs outranks a mean over
-2 680. That is **Q8** ceasing to be a formality: the missing sample size is
-currently choosing the plan. It is now **N17**, and it is ahead of the time axis.
+**And the benchmark found the thing to do next, which this session then did.**
+Every disagreement with the community over 25% was a sample-size disagreement:
+the upstream publishes how many runs each stage's drop table was observed over —
+from **105 to 41 212** — and the model threw that number away, so a mean over 105
+runs outranked a mean over 2 680. **Fixed 2026-09-08 as N17** (ADR 0011): the
+sample size travels the whole pipeline, and `YieldTable` hands the solver a 95%
+lower bound on the mean instead of the mean. **Q8 is answered and closed.**
+What the fix bought, measured rather than hoped: **nine exact agreements instead
+of five**, one of the four large disagreements gone (Rough Silver Ingot, 29% to
+7.9%), and the other three shrunk without resolving — because a 95% bound
+discounts a thin sample in proportion rather than dismissing it, so a 105-run
+mean four times higher still wins, correctly, on this evidence. Those remaining
+belong to the sample, not the model, and the fix for them is more sampling.
 
 **The caveat that goes everywhere this claim goes:** the upstream carries no
 licence, so its data is fetched and never committed
@@ -115,32 +151,32 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 
 | Area | State | Notes |
 |------|-------|-------|
-| Backend build | **Green** | `./gradlew build` — **154 tests**, counted from this run's XML rather than carried forward: `:app` 71, `gamedata` 23, `planner` 30, `stats` 6, the adapter 24. On CI it is **139**, because the 15 snapshot-gated ones skip: `RealUpstreamPatchTest` 3, `RealUpstreamPlanTest` 7, `CommunityBenchmarkTest` 5. `storm-almanac.jar` produced |
+| Backend build | **Green** | `./gradlew build` — **171 tests**, counted from this run's XML rather than carried forward: `:app` 73, `gamedata` 25, `planner` 35, `stats` 13, the adapter 25. On CI it is **156**, because the 15 snapshot-gated ones skip: `RealUpstreamPatchTest` 3, `RealUpstreamPlanTest` 7, `CommunityBenchmarkTest` 5. `storm-almanac.jar` produced. **The Test tasks now set `api.version=1.44`** — without it every container-backed test fails on a machine that has taken the Docker 29 update, see environment note E2 |
 | Repo layout | Done | Gradle multi-module backend, Vite frontend, ADR folder |
-| Domain model (`gamedata`) | **Persisted and round-tripped** | Records and sealed hierarchies complete, and now written and read back by record equality across the whole graph. Equipment settled as an `Entity` with a `kind` field — ADR 0007, now proven through the schema too |
-| `gamedata` schema | **Applied, populated, round-tripped** | `V2` (28 tables) plus `V3` (a version can now actually be deleted). Six invariants proven by `GameDataSchemaTest`; the round trip proven by `GameDataIngestTest` on the synthetic fixture and by `RealUpstreamPatchTest` on two real Reverse: 1999 patches. **It has now held a real upstream** — the caveat is only that CI has not, see ADR 0009 |
-| Ingest (`CanonicalBundleParser`) | **Done** | Canonical JSON → `GameDataBundle`, validated before a connection opens; 12 tests, mostly on the rejection messages |
+| Domain model (`gamedata`) | **Persisted and round-tripped** | Records and sealed hierarchies complete, and now written and read back by record equality across the whole graph. **`Drop` carries `sampledRuns` since N17** — 0 means the data declares the yield rather than measuring it, and a bundle claiming a measurement over zero runs is refused rather than defaulted. Equipment settled as an `Entity` with a `kind` field — ADR 0007, now proven through the schema too |
+| `gamedata` schema | **Applied, populated, round-tripped** | `V2` (28 tables), `V3` (a version can now actually be deleted) and `V4` (`stage_drop.sampled_runs`, defaulting to 0 = declared). Seven invariants proven by `GameDataSchemaTest`; the round trip proven by `GameDataIngestTest` on the synthetic fixture and by `RealUpstreamPatchTest` on two real Reverse: 1999 patches. **It has now held a real upstream** — the caveat is only that CI has not, see ADR 0009 |
+| Ingest (`CanonicalBundleParser`) | **Done** | Canonical JSON → `GameDataBundle`, validated before a connection opens; 14 tests, mostly on the rejection messages. A drop's optional `sampledRuns` reads through it, the writer emits it only when there is one, and absence is the canonical spelling of "declared" |
 | Persistence (`gamedata.jdbc`) | **Done** | `JdbcGameDataIngestRepository` (write, one transaction) and `JdbcGameDefinitionRepository` (read, published only). JDBC not JPA — ADR 0008 |
 | Patch diff (`VersionDiff`) | **Done** | Three axes; subjects diffed before fields. 9 tests over the two fixture versions, plus one over versions loaded from the database |
 | `gamedata-cli` | **Done** | `--gamedata=<adapters\|adapt\|validate\|preview\|ingest\|drafts\|publish\|versions\|diff>` on the same jar. `adapt` converts an upstream snapshot into a canonical file, so the loop is *adapt, preview, ingest, publish* and an adapter gets no privileges for being code. 6 CLI tests plus the full onboarding walkthrough |
-| Parser adapters | **One, and it now reads what the upstream reads** | `:adapters:reverse-1999` converts a Kornblume snapshot: 22 tests over upstream-shaped fixtures, plus `RealUpstreamPatchTest` over two real patches. **It takes the newest `stages<major>_<minor>_greedy.json` and divides drop counts by the sampled run count, as the upstream's own planner does**, falls back to `stages.json`, and says which it read either way — reading the stale one silently cost five sessions of plans over a third of the game. `ModuleBoundaryTest` lets only `:app` reach the adapters layer, so a core module depending on a title fails the build. ADR 0009 |
+| Parser adapters | **One, and it now reads what the upstream reads** | `:adapters:reverse-1999` converts a Kornblume snapshot: 25 tests over upstream-shaped fixtures, plus `RealUpstreamPatchTest` over two real patches. **It takes the newest `stages<major>_<minor>_greedy.json`, divides drop counts by the sampled run count as the upstream's own planner does, and since N17 carries that run count through onto every `Drop`** — with `count: 1` converted as a declared yield, because in this upstream that marks a fixed-reward stage rather than a sample of one. It falls back to `stages.json` and says which it read either way — reading the stale one silently cost five sessions of plans over a third of the game. `ModuleBoundaryTest` lets only `:app` reach the adapters layer, so a core module depending on a title fails the build. ADR 0009 |
 | `CanonicalBundleWriter` | **Done** | The parser read backwards, so an adapter's output is a file a human approves. Pinned to the parser by `CanonicalBundleRoundTripTest`, including idempotence |
 | Game data API | **Done — served and verified** | `GameDataController` + `GameDataReadModel` over five routes: versions, catalog index, catalog page, upgrade costs, patch diff (JSON or `text/plain`). Version-pinnable with `?version=N`; every response carries its version and attribution. 10 HTTP tests, plus a hand check against `docker compose up` |
 | Module ports | Partly implemented | `GameDefinitionRepository` has one, and its `find` now keys on a bare sequence rather than a fabricated `GameDataVersion`. **`Optimizer` now has `MipOptimizer` behind it.** `SolveCoordinator`, `DropReportStore`, `BannerEngine` are still interfaces with nothing behind them |
 | Demand resolution (`DemandResolver`) | **Done** | Goals + roster + upgrade graph → an item demand vector, by walking the DAG *backwards* from the target so an unowned entity and a part-levelled one are the same traversal. Handles multi-track entities, already-met goals, shared steps. Refuses by name: an unreachable state, an unknown entity, a probabilistic goal, an ambiguous two-route state. 10 tests |
 | The MIP (`EnergyMip`) | **Done for stages and crafts** | ojAlgo `ExpressionsBasedModel`, integer runs and conversions, inventory subtracted, reachability pruning, and every variable **bounded** by what could ever be useful — the bound is what makes a real patch solvable at all. Crafting recursion is an absence, not a feature: crafts are variables and intermediates are constraint rows. 12 tests, every expected number worked out by hand in its comment. **Shops, rewards, fodder and weekday rotation are not in the model**, and items whose only source is one of those are refused by name |
-| Yield source (`YieldTable`) | **Done, and it is the seam that now matters** | Declared `Drop.expectedYield` everywhere; a measured `DropEstimate` overrides it only where the units provably agree, because `pointEstimate` is a *proportion* and the constraint needs an expected *quantity*. **Q8 stopped being theoretical this session**: the upstream publishes a sample size per stage — 105 to 41 212 runs — the model drops it, and every benchmark disagreement over 25% is a hundred-run mean outranking a thousand-run one. See **N17** |
+| Yield source (`YieldTable`) | **Done, and it now carries the sample** | Declared `Drop.expectedYield` everywhere, **discounted to the lower end of a 95% `PoissonRateInterval` wherever the drop says how many runs it was measured over** — ADR 0011, N17. A yield with no sample behind it (a fixed-reward stage) is used as declared, because there is no sampling error to discount. A measured `DropEstimate` still overrides only where the units provably agree, because `pointEstimate` is a *proportion* and the constraint needs an expected *quantity*; that branch collapses into the first one when Phase 6 publishes estimates as means. 5 tests in `YieldTableTest`, plus 7 on the interval itself in `stats` |
 | `Optimizer` (`MipOptimizer`) | **Done — least energy** | Wires repositories to the resolver and the model, pins the plan to its game-data version, fingerprints the request (`SolveKey`, the Phase 2 cache key without the cache yet), and explains itself: shadow prices by re-solve, binding stages, and a note saying where the numbers came from. Budget split between search and explanation; ADR 0010. 8 tests, plus 5 in `PlannerAcceptanceTest` over the parsed fixture, 7 in `RealUpstreamPlanTest` over a real patch and 5 in `CommunityBenchmarkTest` against a published guide |
 | Objectives | **One model, both answered** | `LEAST_ENERGY` and `FEWEST_DAYS` are the same plan under an untimed model, because days are energy over a constant. Said out loud in the plan's notes rather than implied. They separate when the model gains a time axis, which is the same work that adds shops, rewards and rotation |
 | Solve caching | **Key only** | `SolveKey` hashes a canonical rendering of (version, goals, objective, energy/day, inventory, roster). Nothing caches on it yet — no Redis, no `SolveCoordinator` implementation |
-| Community benchmark | **Done — Phase 2's other half** | `CommunityBenchmarkTest`: twenty per-material "best stage" claims from a published guide, compared with what this model computes. Five exact agreements, seventeen quoted rates reproduced within three points, and every disagreement over 25% traced to a sample size the model does not carry. Skips without a snapshot, like everything else that touches real data. [The document](docs/benchmarks/reverse-1999-community-answers.md) carries the provenance |
+| Community benchmark | **Done — Phase 2's other half, and now the regression test for ADR 0011** | `CommunityBenchmarkTest`: twenty per-material "best stage" claims from a published guide, compared with what this model computes. **Nine exact agreements** (five before N17), seventeen quoted rates reproduced within three points, and every disagreement over 25% traced to a small sample on one side. It now ranks on the yields the **solver** uses and prints the raw-point-estimate ranking beside them, because comparing a discounted number against a quoted one silently would read a correction as a regression. Skips without a snapshot. [The document](docs/benchmarks/reverse-1999-community-answers.md) carries the provenance |
 | `WilsonInterval` | **Done** | 6 tests passing |
 | `PityRule` | **Done** | 9 tests passing against both games' published rates |
 | `ModuleBoundaryTest` | **Passing** | ArchUnit; Track B layers declared optional until they exist |
 | `GameAgnosticismTest` | **Passing** | Source scan over planner/gacha/stats |
 | Health endpoint | **Done — served and verified** | `GET /api/health` → 200 from a real container. Was 401; see the session log |
 | Docker Compose | **Verified** | `docker compose up --build` from cold: image builds, all three services healthy |
-| CI workflow | **Green on the current tree** | Runs `34072743411` (`dev` PR) and `34072752969` (`main` push, PR #7), both success. All 30 planner tests PASSED on the runner; `RealUpstreamPlanTest` (7) and `RealUpstreamPatchTest` (3) skipped, which is the designed state — see N13. Four seconds slower for a new source set and 51 tests. Deprecation warnings still pending — see **N5** |
+| CI workflow | **Green on the current `dev` tree** | Run `34176134653` (`dev` PR #9, `30a6c45`), success, 1m 54s: **156 passed, 15 skipped, 0 failed**, all 25 adapter tests on the runner, and the three snapshot-gated classes skipping — which is the designed state, see N13. `main` is still at `d34a31b` (run `34116880372`); PR #9 is open. The `api.version=1.44` test-task property (E2) changed nothing on the runner. Deprecation warnings still pending — see **N5** |
 | Frontend | **Green locally** | 415 deps resolved clean, typecheck + `vite build` pass, PWA SW generated |
 | Track B | Package docs only | Deliberately empty — see the gate |
 
@@ -149,14 +185,22 @@ HTTPS at `github.com/kietnt4412/storm_almanac`, two commits in.
 Be precise about this, because the temptation is to read "build green" as "it
 works". It does not mean that:
 
-- **CI has not run on this session's work, and neither has the local suite in
-  full.** The previous entry (runs `34072743411` and `34072752969`, both green)
-  was true of the tree it ran on, and this session changed the adapter, the
-  fetch script, the JDBC reader and four test classes. **The local build is
-  green** — 154 tests, Docker came up on the second attempt and the whole suite
-  ran, including the round-trip test that caught the drop-ordering defect. What
-  has not happened is the pipeline: nothing is committed or pushed. **N16 is to
-  push and read the CI log** — and only then tick Phase 2.
+- ~~**CI has not run on this session's work.**~~ **Resolved 2026-09-08 (N16).**
+  The eighth session's work was committed, pushed and merged as PR #8, and CI
+  ran on it: `34116854550` (`dev` PR, `93f4de4` — the tree this file describes)
+  and `34116880372` (`main` push, `d34a31b`), both success. The log was read
+  rather than the tick: **139 passed, 15 skipped, 0 failed**, the adapter's 24
+  tests executed on the runner, and the 15 skips are exactly the three
+  snapshot-gated classes (`CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3,
+  `RealUpstreamPlanTest` 7). The local half was green on this same tree — 154
+  tests — and the tree had not changed at that point, so it was not re-run.
+  **N17's tree was then confirmed the same way, in the same session**: run
+  `34176134653` on `30a6c45` ([PR #9](https://github.com/kietnt4412/storm_almanac/pull/9)),
+  success, **156 passed, 15 skipped, 0 failed**, with all 25 adapter tests
+  executing on the runner and the same three classes skipping. Locally the tree
+  is 171 tests with nothing skipped, because the snapshots are present here.
+  **PR #9 is open and not merged** — `main` is still at `d34a31b`, so the tree
+  CI confirmed is `dev`.
 - **CI does not run the tests that matter most, and never will as things
   stand.** Two classes now touch data this project did not author, and both skip
   on the runner because the snapshots are not committed — ADR 0009, deliberately.
@@ -777,40 +821,82 @@ Ordered. Do them in this order.
       out to be the search. They were the input file, the sample size, and what
       the word "best" means.
 
+### Done 2026-09-08 (ninth session) — N16
+
+- [x] ~~**N16 — Get a clean local run and a green CI, then tick Phase 2.**~~
+      **Done. Phase 2's box is ticked.** The eighth session's work had in fact
+      been committed and pushed after this entry was written — `dev` is
+      `93f4de4`, merged to `main` as **PR #8** (`d34a31b`) — so what this session
+      owed was the half the entry insisted on: reading the log rather than the
+      tick.
+      **What the log says**, for run `34116854550` (`dev` PR, head `93f4de4`,
+      1m 24s) and run `34116880372` (`main` push, head `d34a31b`, 1m 46s), both
+      success: **139 PASSED, 15 SKIPPED, 0 FAILED**, `BUILD SUCCESSFUL in 1m 5s`.
+      Both checks the entry named are satisfied — `:adapters:reverse-1999:test`
+      ran and **all 24 of its tests PASSED on the runner**, and the 15 skips are
+      exactly the three snapshot-gated classes and nothing else:
+      `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3, `RealUpstreamPlanTest`
+      7. Nothing that touches upstream data passed on CI, which is the state ADR
+      0009 requires; a pass there would have meant a snapshot had been committed
+      by accident.
+      **The local half was not re-run and did not need to be.** It was green on
+      this tree last session (154 tests) and the working tree is clean at the
+      same commit — re-running proves the machine, not the code.
+      **Phase 2 is closed on its criterion, and Phase 3 is not opened.** The
+      criterion is two measurements and both are made; the phase's scope still
+      has N17, N14 and N15 in it, and N17 goes first because a sample size the
+      model throws away is currently picking stages.
+      **Worth keeping:** the tracker said "nothing is committed" and the
+      repository disagreed. Both were written by the same session. Push before
+      writing the entry that describes the push, or the file lies in the one
+      direction it is meant to prevent.
+
 ### Next session starts here
 
-- [ ] **N16 — Get a clean local run and a green CI, then tick Phase 2.** Both
-      halves of the exit criterion are met and the box stays unticked until a
-      pipeline confirms the tree, which is the rule N13 established and it is not
-      being bent for a good session.
-      **The local half is done.** `./gradlew build` is green on this tree: 154
-      tests, counted from the run's XML rather than carried forward. Docker did
-      eventually start — it takes minutes on this machine and `docker info` hangs
-      rather than failing while it does, so give it time instead of concluding it
-      is broken.
-      **What is left is the pipeline.** Nothing is committed. Commit, push, and
-      read the log rather than the tick: the two checks are that the adapter's 24
-      tests execute on the runner, and that the 15 snapshot-gated ones show as
-      **skipped** — 3 + 7 + 5. If any of those 15 ever passes on CI, upstream data
-      has been committed by accident.
-- [ ] **N17 — Give `stats` a mean per run and a sample size, and let the
-      optimizer see it. This is Q8, and it is now the most valuable thing in the
-      backlog.** The benchmark showed why: the upstream publishes how many runs
-      each stage's drop counts were observed over — 105 to 41 212 — the adapter
-      divides by it and throws it away, and **every disagreement with the
-      community over 25% is a hundred-run mean outranking a well-sampled one**:
-      Milled Magnesia prefers 4-5H (105 runs) over 5-8H by 154%, Liquefied Terror
-      prefers 4-4H (113 runs) over 9-3H by 224%. `argmin` cannot tell a good stage
-      from a lucky sample.
-      What this needs, in order: a sample size on `Drop` (schema, parser, writer,
-      diff — it is a domain change, not a planner one); `YieldTable` preferring a
-      well-sampled rate; and then the real Q8 question, which is that a *mean per
-      run* needs a different interval than Wilson's — Wilson stays right for "did
-      it drop", and "how many dropped" is a different question that may supersede
-      [ADR 0006](docs/adr/0006-wilson-intervals-for-drop-rates.md) in part.
-      **Do this before N14.** A time axis over yields nobody trusts is a bigger
-      model to be wrong in — which is the argument the old N14 entry made about
-      N12, and it was right then too.
+- [x] ~~**N17 — Give `stats` a mean per run and a sample size, and let the
+      optimizer see it. This is Q8.**~~ **Done 2026-09-08, and it bought more
+      than it was asked for.** The sample size now travels the whole pipeline —
+      `Drop.sampledRuns`, the canonical bundle (optional; absent means
+      *declared*), `V4` on `stage_drop`, both JDBC directions, the patch diff —
+      and `YieldTable` hands the solver the lower end of a 95%
+      `PoissonRateInterval` on the mean instead of the mean itself.
+      [**ADR 0011**](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)
+      records it and narrows ADR 0006 rather than superseding it: Wilson stays
+      right for *"did it drop"*, and *"how many dropped"* is a rate, unbounded
+      above, and needs the counting analogue.
+      **What it measurably changed**, all from `CommunityBenchmarkTest` and
+      `RealUpstreamPlanTest` on the real snapshot:
+      - **Exact agreements with the community guide went from five to nine.**
+        Bifurcated Skeleton (10-13H), Clawed Pendulum (11-5H), Goose Neck (5-4H)
+        and Red Lacquer Tablet (9-1H) joined the five, in every case because this
+        project had been preferring a thinly sampled stage with a flattering
+        mean. **The change was made for the evidence, and the agreement followed;
+        that ordering is the only thing that makes it worth reporting.**
+      - **Disagreements over 25% went from four to three.** Rough Silver Ingot
+        fell from 29% to 7.9%. Milled Magnesia (145%) and Liquefied Terror (210%)
+        shrank and did not resolve, and **that is the honest outcome**: a 95%
+        bound discounts a thin sample in proportion, it does not dismiss it, so a
+        105-run mean four times higher still wins. Both remaining rows still have
+        a small sample on one side, which is what the test asserts.
+      - **The plan costs 7% more** — 3 624 → 3 880 Activity on the same goal set,
+        against the guide's 4 017. The old number was optimistic rather than
+        cheap. p95 is **1 805 ms** (budget 2 s) and the optimality gap **2.37%**.
+      **Three things worth carrying forward:**
+      1. **The benchmark was ranking on numbers the solver does not use.** It
+         computed Activity-per-unit from `Drop.expectedYield()` directly, so with
+         N17 in place it would have gone on reporting the old ranking forever. It
+         now ranks on `YieldTable`'s coefficients and prints the raw-point-estimate
+         ranking beside them. A benchmark that does not consume what production
+         consumes measures the wrong thing quietly.
+      2. **`count: 1` in this upstream is a declaration, not a sample.** All 14
+         such stages are the Insight and Resource ones with flat payouts, and
+         every sampled stage carries at least 105 runs. Reading that 1 as a
+         sample would have put a 95% bound on a number nobody measured and made
+         the only source of several currencies look unfarmable. The judgement
+         lives in the adapter, which is the module allowed to know a game.
+      3. **`stats` owns the statistics and `gamedata` only carries the number.**
+         `PoissonRateInterval` is beside `WilsonInterval`; `Drop` holds a count
+         and says in prose where the decision about it lives.
 - [ ] **N14 — Give the solver a time axis, and with it shops, rewards and
       rotation.** The largest thing the model does not do, and the one that makes
       `FEWEST_DAYS` a different plan from `LEAST_ENERGY` rather than the same one
@@ -823,7 +909,12 @@ Ordered. Do them in this order.
       opaque shop key with no currency, no unit price and no reset period, which
       is why `KornblumeAdapter` refuses it — but read it before designing the time
       axis rather than after.
-      **Do N17 first.**
+      ~~**Do N17 first.**~~ N17 is done (2026-09-08), so this is next — with one
+      thing it inherits: yields are now discounted for their sample, so a time
+      axis is being added over coefficients that are conservative rather than
+      central. Do not "fix" that by taking the point estimate back when the model
+      grows; ADR 0011 has the reversal trigger and it is a measurement, not a
+      preference.
 - [ ] **N15 — Cache a solve on its key, and implement `SolveCoordinator`.**
       `SolveKey` exists and nothing uses it. The single-node coordinator is
       explicitly Phase 2's ("a single-node implementation ships in phase 2 and
@@ -936,7 +1027,8 @@ previous one's criterion is met.
          rank 3?"* is answered from the synthetic fixture. The schema, the API
          and the diff all handle it; this upstream has nothing to put in it.
 
-- [ ] **Phase 2 · Optimizer core** — 2 weeks — **opened 2026-09-07**
+- [x] **Phase 2 · Optimizer core** — 2 weeks — **closed 2026-09-08**, opened
+      2026-09-07
       ojAlgo MIP model, crafting recursion, integer runs, solve caching,
       explanation output, both objectives.
       **Exit:** agrees with community-accepted answers on 5 benchmark goal sets;
@@ -945,8 +1037,19 @@ previous one's criterion is met.
       `SolveKey`, and [ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md).
       Crafting recursion, integer runs, explanation output and both objectives
       are done; solve caching has its key and no cache.
-      **Both halves of the exit criterion are met and measured. The box stays
-      unticked until CI confirms the tree — N16.**
+      **Both halves of the exit criterion are met and measured, and CI has
+      confirmed the tree (N16, 2026-09-08): runs `34116854550` (`93f4de4`) and
+      `34116880372` (`d34a31b`, PR #8), both success, 139 passed / 15 skipped /
+      0 failed, the adapter's 24 tests executing on the runner. The box is
+      ticked on that.**
+      **Two things the tick does not close, and they travel with the phase:**
+      *the phase's own scope is not exhausted* — solve caching has a key and no
+      cache (**N15**), there is no time axis (**N14**), and drop rates carry no
+      sample size (**N17**) — and *the criterion was measured by tests CI does
+      not run*, exactly as in Phase 1. Both halves of the criterion rest on
+      `RealUpstreamPlanTest` and `CommunityBenchmarkTest`, which skipped on both
+      of the runs above. Reproducing it is `backend/tools/fetch-upstream.sh` and
+      one flag; it is not something a green pipeline will ever tell you.
       - *p95 solve under 2s* — **met, 2026-09-07.** 1.8 s over 50 solves of a
         five-character Reverse: 1999 goal set. Measured on real data, locally
         only, by a test CI does not run. **Read it as the budget rather than as a
@@ -966,10 +1069,14 @@ previous one's criterion is met.
       2. **The search is stopped by its budget, not finished by it.** The plan
          says so and says the size of the doubt (2.95% on the measured goal set).
          ADR 0010.
-      3. **Drop rates carry no sample size, and it is currently choosing stages.**
-         The benchmark's own finding: a mean over 105 runs and a mean over 41 212
-         are the same number to this model, and the noisy one wins more often
-         than it should. **Q8, N17** — this is ahead of the time axis.
+      3. ~~**Drop rates carry no sample size, and it is currently choosing
+         stages.**~~ **Fixed the same day, 2026-09-08, N17 and ADR 0011.** Yields
+         carry the runs behind them and the solver gets a 95% lower bound rather
+         than the observed mean. What replaces this caveat is smaller and still
+         real: **the discount is only as good as its Poisson assumption**, which
+         is conservative for a single-drop stage and optimistic for a multi-drop
+         one, and **it cannot rescue a 105-run sample** — two of the four large
+         disagreements with the community survived it, both on thin evidence.
       4. **Fodder is in the domain model and not in the solver.** Advancing an
          item by consuming other items of a class is a sink the demand vector
          does not express yet, and it is Punishing: Gray Raven's whole
@@ -1149,9 +1256,56 @@ workloads. It may be; that is a decision to make with open eyes, not by default.
 Not deviations — nothing about the design changed. These are local facts that
 cost time to rediscover.
 
+### E2 · Docker Engine 29 refuses Testcontainers' API version — fixed in the build
+
+> **Not machine-specific in the end, which is why the fix is committed.** Every
+> machine that takes the Docker 29 update hits this, and the GitHub runner will
+> when it does. It sits here because that is where it was found.
+
+Docker Engine 29 raised the minimum client API version to **1.40**. Spring Boot
+3.5.6's BOM manages Testcontainers **1.21.3**, whose docker-java 3.4.2 defaults
+to **1.32**, so every container-backed test dies at startup with:
+
+```
+Status 400: client version 1.32 is too old. Minimum supported API version is 1.40
+```
+
+**It looks like a broken machine, not a broken build.** 33 tests failed across
+six classes with `NoClassDefFoundError`, `ExceptionInInitializerError` and
+`ContainerLaunchException` — three different symptoms of one cause, none of them
+naming it — while `docker ps` worked fine and the non-container tests passed.
+
+**The fix, committed in `backend/build.gradle.kts`:**
+
+```kotlin
+tasks.withType<Test>().configureEach { systemProperty("api.version", "1.44") }
+```
+
+`api.version` is docker-java's own config key. It is a **system property on the
+test task** and not an environment variable, because a Gradle test worker
+inherits the *daemon's* environment rather than the shell's — `DOCKER_API_VERSION=…`
+and `API_VERSION=…` on the command line both do nothing, which costs a while to
+work out.
+
+**What was tried and rejected:** upgrading Testcontainers. 1.21.4 still pins
+docker-java 3.4.2, and 2.0.5 pins 3.7.1 but **renamed the module artifacts** —
+`org.testcontainers:postgresql` stops at 1.21.4 — so it is a migration rather
+than a version bump, and one that wants its own change and its own green run.
+Note also that the docker-java *core* is shaded into the Testcontainers jar, so
+forcing the external `com.github.docker-java` artifacts newer changes nothing.
+
+**E1 came back while doing this** and the recorded workaround still works:
+`-Djavax.net.ssl.trustStoreType=Windows-ROOT` for any build that resolves a new
+dependency. Avast's HTTPS scanning is on again.
+
 ### E1 · Avast intercepted TLS, so Gradle could not fetch new dependencies
 
-> **Resolved 2026-09-05.** Avast's HTTPS scanning was turned off. Verified by
+> **Resolved 2026-09-05, and BACK as of 2026-09-08 (ninth session).** A build
+> that resolved a new dependency failed with the PKIX error below, and
+> `-Djavax.net.ssl.trustStoreType=Windows-ROOT` fixed it again — so the note is
+> live, not historical. The 2026-09-05 text follows.
+>
+> Avast's HTTPS scanning was turned off. Verified by
 > `./gradlew --refresh-dependencies` with **no** truststore flag: fresh metadata
 > resolved over TLS and Testcontainers came back at 1.21.3. No workaround is
 > needed and none is committed. Kept below because the symptom is baffling if it
@@ -1249,7 +1403,21 @@ Carry these forward until answered; strike through with the answer when resolved
   out to be indifferent — `BannerModel` never mentions `EntityId`. `Entity`
   gained a required opaque `kind`, catalog-only; enforcing "catalog-only" is
   **N4**. **F4 is closed and Phase 1 ingestion is unblocked.**
-- **Q8 — A drop estimate is a proportion; the optimizer needs a quantity.**
+- ~~**Q8 — A drop estimate is a proportion; the optimizer needs a quantity.**~~
+  **Answered and closed 2026-09-08 (ninth session) by N17 and
+  [ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md).**
+  The answer is the one this entry kept circling: a yield is a **mean per run**,
+  it carries the **number of runs** behind it, and the interval for it is the
+  Poisson score interval rather than Wilson's. `PoissonRateInterval` is in
+  `stats`, `Drop.sampledRuns` is in the domain and the schema, and `YieldTable`
+  gives the solver the lower bound. ADR 0006 is **narrowed, not superseded** —
+  Wilson is still right for a proportion, and `DropEstimate` is still one until
+  Phase 6 publishes means instead. **What is left of it is Phase 6 work and is
+  written into `YieldTable`'s javadoc:** a measured estimate is still a
+  proportion, still usable only where the units agree, and still not discounted
+  for its own sample. The history below is kept because it is how the answer was
+  arrived at.
+  *Original entry:*
   *Opened 2026-09-07, seventh session.* `DropEstimate.pointEstimate` carries a
   Wilson score interval, which makes it a binomial **proportion**: the share of
   runs that yielded the item. The MIP constraint is
@@ -1307,6 +1475,139 @@ Carry these forward until answered; strike through with the answer when resolved
 ## Session log
 
 Append one entry per session. Newest first.
+
+### 2026-09-08 (ninth session) — the pipeline confirms the tree, and a number the model was throwing away
+
+**Two items: N16 and N17.** Taking them in order.
+
+#### N16 — the pipeline confirms the tree
+
+The eighth session left Phase 2's box unticked with a single
+condition attached — CI green on this tree, read from the log rather than
+assumed. That condition is now met and the box is ticked.
+
+**The tracker and the repository disagreed about the starting state, and the
+repository was right.** N16 said "nothing is committed or pushed". In fact `dev`
+was at `93f4de4` on the remote and had been merged to `main` as PR #8
+(`d34a31b`): the eighth session did the push *after* writing the entry that
+described it as outstanding. Nothing was lost, but the file spent a day telling
+the next session a smaller lie than it exists to prevent. **Tick and write as the
+work lands.**
+
+**What CI actually says**, both runs success:
+
+| Run | Trigger | Head | Time |
+|-----|---------|------|------|
+| `34116854550` | `dev` pull request | `93f4de4` | 1m 24s |
+| `34116880372` | push to `main` (PR #8) | `d34a31b` | 1m 46s |
+
+Counted out of the downloaded log rather than from the green check: **139
+PASSED, 15 SKIPPED, 0 FAILED**, `BUILD SUCCESSFUL in 1m 5s`. The two checks N16
+named:
+
+- `:adapters:reverse-1999:test` ran and **all 24 of its tests passed on the
+  runner** — the adapter rewritten last session for the sampled stage tables is
+  exercised by the pipeline, not only by this machine.
+- The 15 skips are **exactly** the three snapshot-gated classes:
+  `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3, `RealUpstreamPlanTest`
+  7. None of them passed, which is the state
+  [ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md) requires:
+  a pass there would mean upstream data had been committed by accident.
+
+The local half was not re-run. It was green on this tree last session (154
+tests), the working tree is clean at the same commit, and re-running it would
+have measured the machine rather than the code.
+
+**Phase 2 is closed on its criterion. It is not finished, and the distinction is
+the point.** The criterion is two measurements — p95 under 2 s, agreement with
+community answers on five goal sets — and both are made. The phase's *scope*
+still contains a cache that does not exist (N15), a model with no time in it
+(N14), and — when this was written, an hour before N17 closed — drop rates with
+no sample size. The box records the criterion, the caveats beneath it record the
+rest, and **Phase 3 is deliberately not opened**.
+
+**The standing caveat got no weaker.** Both halves of the criterion this tick
+rests on were measured by tests that skipped on both of those green runs. A
+green pipeline confirms the tree compiles and the game-agnostic parts hold; it
+has never once confirmed that this project's numbers are right.
+
+#### N17 — the sample size reaches the solver
+
+**The finding it acts on, restated once:** the upstream publishes how many runs
+each stage's drop counts were observed over — 105 to 41 212 — the adapter divided
+by it and discarded it, and every disagreement over 25% between this project's
+stage ranking and a published guide was a hundred-run mean outranking a
+well-sampled one. `argmin` cannot tell a good stage from a lucky one.
+
+**What was built**, in the order the old N17 entry laid out and it was the right
+order:
+
+1. **`Drop` carries `sampledRuns`**, and it travels: canonical bundle (optional,
+   and absent means *declared*), `V4` on `stage_drop` (default 0, a non-negative
+   check, and a comment saying why 0 cannot mean "measured over nothing"), both
+   JDBC directions, the patch diff (one fact, `0.21 over 105 runs`, so a resample
+   does not read as two unrelated changes).
+2. **`PoissonRateInterval` in `stats`** — the counting analogue of Wilson's score
+   interval, `(C + z²/2 ± z·sqrt(C + z²/4)) / n`. Unbounded above, non-negative,
+   and `[0, z²/n]` when nothing has been seen.
+3. **`YieldTable` gives the solver the lower bound** wherever a sample exists and
+   the declared value where none does. The plan says so in its notes.
+
+[**ADR 0011**](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)
+records the decision and **narrows ADR 0006 rather than superseding it**: Wilson
+is still right for *"did it drop"*; *"how many dropped"* is a different question.
+**Q8 is closed.**
+
+**What it changed, measured on the real snapshot:**
+
+| | before | after |
+|---|---|---|
+| Exact agreements with the guide | 5 | **9** |
+| Disagreements over 25% | 4 | **3** |
+| Plan cost, five characters to Insight 2 | 3 624 | **3 880** (guide: 4 017) |
+| p95 solve / optimality gap | 1 804 ms / 2.80% | 1 805 ms / **2.37%** |
+
+Bifurcated Skeleton, Clawed Pendulum, Goose Neck and Red Lacquer Tablet joined
+the five, each because this project had been preferring a thin sample with a
+flattering mean. **The plan getting 7% dearer is the same fact from the other
+side** — the old number was optimistic, not cheap — and the margin over the
+guide's own advice narrowed from 393 Activity to 137.
+
+**Two of the four large disagreements survived, and that is the honest result.**
+A 95% bound discounts a thin sample in proportion; it does not dismiss it, so a
+105-run mean four times higher still wins. Milled Magnesia (145%) and Liquefied
+Terror (210%) belong to the evidence, not to the model, and the fix for them is
+more sampling — which is now what Q2/F1 would buy.
+
+**Three things this session learned that are worth more than the feature:**
+
+1. **The benchmark was not measuring what production does.** It ranked stages on
+   `Drop.expectedYield()` directly, so N17 could have landed in full and the
+   benchmark would have gone on printing the old table forever, agreeing with
+   itself. It now ranks on `YieldTable`'s own coefficients and prints the raw
+   ranking beside them. **A benchmark that does not consume what the product
+   consumes measures the wrong thing, quietly** — the same failure shape as the
+   stale stage file, one level up.
+2. **`count: 1` is a declaration, not a sample.** All 14 such stages in both
+   pinned snapshots are the Insight and Resource ones paying a flat 9 000
+   Sharpodonty or 2 Pages; every sampled stage carries at least 105 runs. Reading
+   the 1 as a sample would have put a 95% bound on a number nobody measured and
+   made the only source of several currencies look unfarmable. Adapters are where
+   an upstream's conventions get translated, and this is one.
+3. **A "green build" needed a build fix before it could be green at all.** Docker
+   Engine 29 refuses the API version Testcontainers 1.21.3 speaks, so 33 tests
+   failed across six classes with three unrelated-looking symptoms while
+   `docker ps` worked fine. Fixed by `systemProperty("api.version", "1.44")` on
+   the test tasks; upgrading Testcontainers is a migration, not a bump, because
+   2.x renamed the artifacts. **Environment note E2**, and **E1 came back** while
+   working on it — the Windows-ROOT truststore flag is needed again.
+
+**The pipeline confirmed N17 too, in the same session this time.** Run
+`34176134653` on `30a6c45` (PR #9): success, **156 passed, 15 skipped, 0
+failed**, all 25 adapter tests on the runner, the same three classes skipping.
+The `api.version` property changed nothing there — the runner's engine was never
+the one refusing. **PR #9 is deliberately left unmerged**: `main` is a session
+behind, and merging it is a decision rather than a step.
 
 ### 2026-09-07 (eighth session) — the community's answers, and the two thirds of the game we were missing
 

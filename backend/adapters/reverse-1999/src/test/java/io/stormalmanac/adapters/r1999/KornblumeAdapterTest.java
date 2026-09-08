@@ -333,12 +333,12 @@ class KornblumeAdapterTest {
 
             assertThat(stageIn(sampled, "9-15h").drops())
                     .as("a stage only the sampled table has must be in the bundle")
-                    .containsExactly(new Drop(new ItemId("holy-silver"), 0.325));
+                    .containsExactly(new Drop(new ItemId("holy-silver"), 0.325, 1000));
             assertThat(stageIn(sampled, "1-1").drops())
                     .as("counts over runs, not the stale proportion stages.json states")
                     .containsExactlyInAnyOrder(
-                            new Drop(new ItemId("silver-ore"), 0.25),
-                            new Drop(new ItemId("sharpodonty"), 2.5));
+                            new Drop(new ItemId("silver-ore"), 0.25, 400),
+                            new Drop(new ItemId("sharpodonty"), 2.5, 400));
             assertThat(said).anySatisfy(note -> assertThat(note)
                     .contains("stages3_3_greedy.json")
                     .contains("1400 sampled runs"));
@@ -360,7 +360,7 @@ class KornblumeAdapterTest {
             GameDataBundle newest = new KornblumeAdapter(said::add).adapt(dir, 0, "1.0");
 
             assertThat(stageIn(newest, "9-15h").drops())
-                    .containsExactly(new Drop(new ItemId("holy-silver"), 0.65));
+                    .containsExactly(new Drop(new ItemId("holy-silver"), 0.65, 1000));
             assertThat(said).anySatisfy(note ->
                     assertThat(note).contains("stages10_0_greedy.json"));
         }
@@ -395,6 +395,39 @@ class KornblumeAdapterTest {
             assertThat(stageIn(sampled, "1-1").drops())
                     .extracting(drop -> drop.item().value())
                     .containsExactly("sharpodonty", "silver-ore");
+        }
+
+        @Test
+        @DisplayName("a stage that states a fixed reward converts as declared, not as a one-run sample")
+        void countOfOneIsADeclaration(@TempDir Path dir) throws IOException {
+            // In both pinned snapshots the stages carrying "count": 1 are the 12
+            // Insight and 2 Resource stages — flat payouts of 9 000 Sharpodonty
+            // or 2 Pages, never observed at all — while every genuinely sampled
+            // stage carries at least 105 runs. Passing that 1 downstream would
+            // have the planner apply a 95% bound to a number nobody measured and
+            // refuse to farm the only source of several currencies.
+            copy(dir);
+            Files.writeString(dir.resolve("stages3_3_greedy.json"), SAMPLED.replace("""
+                      "count": 1000,
+                    """, """
+                      "count": 1,
+                    """));
+
+            List<String> said = new ArrayList<>();
+            GameDataBundle bundle = new KornblumeAdapter(said::add).adapt(dir, 0, "1.0");
+
+            assertThat(stageIn(bundle, "9-15h").drops())
+                    .as("325 per run, stated rather than sampled")
+                    .containsExactly(new Drop(new ItemId("holy-silver"), 325.0));
+            assertThat(stageIn(bundle, "9-15h").drops().getFirst().isSampled()).isFalse();
+            assertThat(stageIn(bundle, "1-1").drops().getFirst().isSampled())
+                    .as("a real sample in the same file is untouched by this rule")
+                    .isTrue();
+            assertThat(said).anySatisfy(note -> assertThat(note)
+                    .contains("1 stage(s) state a fixed reward"));
+            assertThat(said).anySatisfy(note -> assertThat(note)
+                    .as("and the total no longer counts the stage that was never sampled")
+                    .contains("400 sampled runs"));
         }
 
         @Test

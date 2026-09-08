@@ -67,6 +67,27 @@ class GameDataIngestTest extends GameDataDatabaseTest {
     }
 
     @Test
+    @DisplayName("a drop's sample size survives the schema, and an absent one stays absent")
+    void sampleSizesRoundTrip() {
+        // 1.1 is the fixture with a measured stage in it: pg-3-1's two drops say
+        // they were observed over 4 200 runs, and every other drop in either
+        // fixture declares its yield instead. Both readings have to survive, and
+        // the failure mode is a column defaulting to zero and turning a
+        // measurement into a declaration on the way through — which nothing
+        // downstream would ever notice, because a declared yield is used as-is.
+        GameDataBundle bundle = bundle("proving-ground-1.1.json");
+        ingest.ingestDraft(bundle);
+        GameDataVersion published = ingest.publish(PROVING_GROUND, bundle.sequence());
+
+        GameDefinition loaded = definitions.findLatest(PROVING_GROUND).orElseThrow();
+
+        assertThat(loaded).isEqualTo(bundle.definitionApprovedAt(published.publishedAt()));
+        assertThat(dropOf(loaded, "pg-3-1", "shard").sampledRuns()).isEqualTo(4200);
+        assertThat(dropOf(loaded, "pg-3-1", "sigil-radiant").sampledRuns()).isEqualTo(4200);
+        assertThat(dropOf(loaded, "pg-1-1", "ore-rough").isSampled()).isFalse();
+    }
+
+    @Test
     @DisplayName("the schema answers what Insight 2 costs")
     void answersTheProgressionQuestion() {
         // Phase 1's exit criterion, asked of the data rather than of an endpoint.
@@ -287,11 +308,14 @@ class GameDataIngestTest extends GameDataDatabaseTest {
     }
 
     private static double yieldOf(GameDefinition data, String stage, String item) {
+        return dropOf(data, stage, item).expectedYield();
+    }
+
+    private static io.stormalmanac.gamedata.Drop dropOf(GameDefinition data, String stage, String item) {
         return data.stages().stream()
                 .filter(s -> s.id().equals(stage))
                 .flatMap(s -> s.drops().stream())
                 .filter(d -> d.item().equals(new ItemId(item)))
-                .mapToDouble(io.stormalmanac.gamedata.Drop::expectedYield)
                 .findFirst().orElseThrow();
     }
 

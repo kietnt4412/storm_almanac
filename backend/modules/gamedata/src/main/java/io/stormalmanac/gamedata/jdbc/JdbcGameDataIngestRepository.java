@@ -302,9 +302,10 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
                 Timestamps.at(stage.availability().closesAt()));
 
         stage.drops().forEach(drop -> jdbc.update(
-                "INSERT INTO gamedata.stage_drop (stage_id, version_id, item_id, expected_yield)"
-                        + " VALUES (?, ?, ?, ?)",
-                id, version, items.get(drop.item()), drop.expectedYield()));
+                "INSERT INTO gamedata.stage_drop"
+                        + " (stage_id, version_id, item_id, expected_yield, sampled_runs)"
+                        + " VALUES (?, ?, ?, ?, ?)",
+                id, version, items.get(drop.item()), drop.expectedYield(), drop.sampledRuns()));
     }
 
     private void writeCraft(long version, Craft craft, Map<ItemId, Long> items) {
