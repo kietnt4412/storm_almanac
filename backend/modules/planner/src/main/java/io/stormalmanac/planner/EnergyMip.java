@@ -213,9 +213,17 @@ final class EnergyMip {
      * same plan.
      *
      * @param at           when the plan starts, which fixes the weekday the
-     *                     horizon begins on. Weekdays are read in UTC: a game's
-     *                     own reset timezone is not in the bundle, and inventing
-     *                     one would be a guess dressed as data
+     *                     horizon begins on. <b>Weekdays are read in UTC, and
+     *                     that is a placeholder rather than a decision.</b> A
+     *                     game rolls its day over on its own clock — Reverse:
+     *                     1999 Global at 05:00 UTC−5, which is 10:00 UTC — so
+     *                     the zone and the hour are properties of the game and
+     *                     belong on its definition, not on this class. They are
+     *                     not there yet because adding them is a bundle field, a
+     *                     parser change and a migration, and no game this project
+     *                     has ingested rotates, so the assumption is currently
+     *                     inert. It stops being inert the moment one does; see
+     *                     {@code docs/game-facts/reverse-1999-economy.md}
      * @param energyPerDay what the player earns and is willing to spend per day
      * @param horizonDays  how many days the plan may take
      */

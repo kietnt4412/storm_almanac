@@ -1103,6 +1103,75 @@ modelling one**, and that is worth a sentence to whoever picks up Q2.
 One bug found by the tests rather than by reading: the rotation subset rows
 indexed the group map by ordinal instead of by day-set, which NPE'd every solve.
 
+#### Addendum, same session — the maintainer answered, and two of the answers were corrections
+
+Everything above was written believing rewards and rotation were data the
+upstream *fails* to publish. The maintainer was asked what the real game does and
+supplied an answer with community references. Two corrections, one confirmation
+and one new question came out of it. The full record, with its provenance
+separated into evidence classes, is in
+[docs/game-facts/reverse-1999-economy.md](../game-facts/reverse-1999-economy.md).
+
+**Correction 1 — there is no weekday rotation, so there is nothing to publish.**
+The four Afflatus Insight families (Brutes Wilds, Mountain Echoes, Starfall
+Locale, Sylvanus Shape) and the two Resource stages (The Poussiere, Mintage
+Aesthetics) are **permanent and open every day**. They are material
+specialisations, not a rotation. So `KornblumeAdapter` emitting
+`Availability.ALWAYS` is **correct rather than a gap**, and the sentence in the
+entry above — "the upstream publishes no weekday field" — is true but was framed
+as an omission when it is an accurate reflection of the game. Corrected in the
+adapter's javadoc so the next reader does not try to close a gap that is not
+there. The rotation machinery now waits on Phase 11 rather than on a second data
+source. `EXACT_ROTATION_GROUPS = 6` will not bind on this game; the worry about
+needing seven distinct restrictions was misplaced.
+
+**Correction 2 — the "free income" is not free, and modelling it would have been
+a silent bug.** Daily and Weekly Activeness hand out Clear Drops, Wilderness
+Shells, Picrasma Candy and more, and it is tempting to enter them as
+`Reward(DAILY, …)`. **Some of the objectives that earn Activeness require
+spending Cellular Activity.** So the income is conditional on the farming, and a
+solver told it is unconditional would subtract the grants, never pay for them,
+and return plans that are systematically too cheap — silently, and in the
+expensive direction. `Reward` cannot express a precondition, so **leaving
+Activeness out is correct**, and that is now written down as a reason rather than
+an accident. The Roaring Month is paid and is not income either. Event and mail
+grants *are* unconditional and are exactly what `Cadence.EVENT` is for.
+
+**Confirmation — 240 Activity a day.** Regeneration is 1 per 6 minutes, so 240 a
+day and 1 680 a week. `RealUpstreamPlanTest` and `CommunityBenchmarkTest` have
+been passing 240 all along; that number now has a source instead of being a
+plausible round figure. Picrasma Candy (60) and the Jar (120) are **items**, and
+must never be folded into the rate — which the model could not do anyway, because
+energy is not an item.
+
+**Three shapes the model cannot express**, all surfaced by this exchange and none
+of them a defect in what shipped: an item that restores energy; a reward
+conditional on spending energy; a lifetime ("five, ever") purchase limit, which
+`Shop`'s `(periodLimit, Period)` cannot say. Each would be a silent wrong answer
+if faked. In the tracker's unverified list.
+
+**Shops moved again.** The tenth session concluded shop data was unusable; that
+was right about `shops.json` and wrong as a claim about the game. Six permanent
+shop structures exist and several publish prices and limits. The refusal now
+stands on a third reason: **the cap has the wrong shape**, and the prices want
+verifying against the client rather than inventing.
+
+**New: Q5, and it is the shape of the mistake that cost five sessions.** The
+pinned snapshot `8b40541a9c42` has commit message `update 3.5` and date
+**2026-03-17** — confirmed through the GitHub API rather than assumed. Global 3.5
+ran **2026-05-28 to 2026-07-02**. Two and a half months apart, most likely
+because Kornblume tracks CN. If so, everything this repo calls "3.5" is CN 3.5.
+It does not invalidate the nine agreements — the guide was already known to be
+written for 2.7 against a 3.3 sample — but the version labels may not mean what a
+reader assumes, and that is worth resolving before anything is published.
+
+**On the sources.** The references behind all of this are community wikis and
+forum documentation reached through an AI search tool, so the citation trail is
+one hop longer than it looks. Same standing as the pity rates under **Q4**, and
+the same obligation: check against in-game disclosure before shipping anything a
+player would act on. Nothing from it entered a bundle, a test or the solver this
+session — it is recorded, not adopted.
+
 ### 2026-09-08 (tenth session) — the cache that says what it is, and the shop data that is not there
 
 **Two items: a prerequisite read that changed N14, and N15.**
