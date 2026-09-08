@@ -35,7 +35,7 @@ being finished with is.
   stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
 - **Open right now:** [PR #13](https://github.com/kietnt4412/storm_almanac/pull/13),
-  carrying N21 and N22. **Green and unmerged** — run `34208024841` on `acd3efb`,
+  carrying N21 and N22. **Green and unmerged** — run `34208848060` on `5ad2462`,
   0 failed, 16 skipped and they are exactly the three snapshot-gated classes.
   `main` is at `eb2894a`. Merging it is the first action next session, and
   **write that line with the push rather than after it** — three sessions running
@@ -132,7 +132,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
 | Backend build | **Green** | **228 tests**, 0 failed, 0 skipped locally with snapshots present. **212 on CI**, because the same 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
-| CI workflow | **Green on `dev`** | Run `34208024841` (PR #13, `acd3efb`): 0 failed, **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. `main` is `eb2894a`. Action deprecations pending — **N5** |
+| CI workflow | **Green on `dev`** | Run `34208848060` (PR #13, `5ad2462`): 0 failed, **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. `main` is `eb2894a`. Action deprecations pending — **N5** |
 | Domain model (`gamedata`) | **Persisted and round-tripped** | Record equality across the whole graph. `Drop` carries `sampledRuns`, where 0 means *declared*; equipment is an `Entity` (ADR 0007) |
 | `gamedata` schema | **Applied, populated, round-tripped** | `V2` (28 tables), `V3` (a version is deletable), `V4` (`stage_drop.sampled_runs`). Seven invariants in `GameDataSchemaTest`, proven on the fixture and on two real R1999 patches |
 | Ingest, write, read | **Done** | `CanonicalBundleParser` (14 tests, mostly refusal messages), `CanonicalBundleWriter` pinned to it by a round trip, JDBC both directions (ADR 0008) |
