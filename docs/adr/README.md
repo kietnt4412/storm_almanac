@@ -18,3 +18,5 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0008](0008-gamedata-persistence-is-jdbc.md) | The gamedata module persists with JDBC, not JPA | Accepted |
 | [0009](0009-upstream-data-is-fetched-never-vendored.md) | Upstream game data is fetched, never vendored | Accepted |
 | [0010](0010-a-plan-is-the-best-provable-in-the-budget.md) | A plan is the cheapest one provable inside the budget | Accepted |
+| [0011](0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md) | A yield is a mean per run, and the solver uses what its sample supports | Accepted |
+| [0012](0012-the-solve-cache-is-in-process-until-there-is-a-second-node.md) | The solve cache is in-process until there is a second node | Accepted |

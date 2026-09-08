@@ -62,8 +62,8 @@ class MipOptimizerTest {
 
     private static MipOptimizer optimizerOver(GameDefinition definition, Inventory inventory) {
         return new MipOptimizer(
-                new FakeDefinitions(definition),
-                new FakePlayers(definition.game().id(), inventory, new Roster(PROFILE, Map.of())),
+                new TestRepositories.Definitions(definition),
+                TestRepositories.Players.of(definition.game().id(), PROFILE, inventory, new Roster(PROFILE, Map.of())),
                 null,
                 Clock.fixed(NOW, ZoneOffset.UTC),
                 Duration.ofSeconds(2));
@@ -165,9 +165,9 @@ class MipOptimizerTest {
     void nothingToDoIsAnAnswer() {
         GameDefinition definition = workshop();
         MipOptimizer optimizer = new MipOptimizer(
-                new FakeDefinitions(definition),
-                new FakePlayers(definition.game().id(), Inventory.empty(PROFILE),
-                        new Roster(PROFILE, Map.of(HERO, "insight-1"))),
+                new TestRepositories.Definitions(definition),
+                TestRepositories.Players.of(definition.game().id(), PROFILE,
+                        Inventory.empty(PROFILE), new Roster(PROFILE, Map.of(HERO, "insight-1"))),
                 null,
                 Clock.fixed(NOW, ZoneOffset.UTC),
                 Duration.ofSeconds(2));
@@ -194,74 +194,5 @@ class MipOptimizerTest {
         assertThatThrownBy(() -> optimizerOver(definition, Inventory.empty(PROFILE)).solve(crossed))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("some-other-game");
-    }
-
-    // ── fakes ───────────────────────────────────────────────────────────────
-
-    private record FakeDefinitions(GameDefinition definition) implements GameDefinitionRepository {
-        @Override
-        public Optional<GameDefinition> findLatest(GameId game) {
-            return find(game, definition.version().sequence());
-        }
-
-        @Override
-        public Optional<GameDefinition> find(GameId game, long sequence) {
-            return game.equals(definition.game().id()) && sequence == definition.version().sequence()
-                    ? Optional.of(definition)
-                    : Optional.empty();
-        }
-
-        @Override
-        public List<GameDataVersion> versions(GameId game) {
-            return List.of(definition.version());
-        }
-    }
-
-    private record FakePlayers(GameId game, Inventory inventory, Roster roster)
-            implements PlayerStateRepository {
-
-        @Override
-        public List<PlayerProfile> profilesOf(AccountId account) {
-            return List.of(profile());
-        }
-
-        @Override
-        public Optional<PlayerProfile> findProfile(ProfileId id) {
-            return id.equals(PROFILE) ? Optional.of(profile()) : Optional.empty();
-        }
-
-        private PlayerProfile profile() {
-            return new PlayerProfile(PROFILE, new AccountId("a1"), game, "Tester", "global");
-        }
-
-        @Override
-        public Inventory inventoryOf(ProfileId profile) {
-            return inventory;
-        }
-
-        @Override
-        public Roster rosterOf(ProfileId profile) {
-            return roster;
-        }
-
-        @Override
-        public Goals goalsOf(ProfileId profile) {
-            return new Goals(profile, List.of());
-        }
-
-        @Override
-        public void saveInventory(Inventory value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void saveRoster(Roster value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void saveGoals(Goals value) {
-            throw new UnsupportedOperationException();
-        }
     }
 }
