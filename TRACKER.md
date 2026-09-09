@@ -85,9 +85,12 @@ being finished with is.
   `19197d3` and N24 is on it**: PR #16 merged and CI is green there on the push
   itself, run `34327808367`. The same tree was green as run `34327487736` on the
   PR — 0 failed, 16 skipped, exactly the three snapshot-gated classes (8 + 5 + 3).
-  `dev` is one tracker commit ahead. This is a fact here rather than a next action
-  because six sessions running have now opened on a "merge PR #n" the maintainer
-  had already clicked.
+  `dev` is ahead by this session's tracker commits, open as
+  [PR #17](https://github.com/kietnt4412/storm_almanac/pull/17) and green there
+  too — deliberately phrased without a count, because a line that names the
+  commit describing it is stale the moment it is written, which happened twice
+  today. This is a fact here rather than a next action because six sessions
+  running have now opened on a "merge PR #n" the maintainer had already clicked.
   **`DeployableJarTest` passed on the runner**, so the development sign-in's
   absence is proven against a jar CI built from a clean checkout rather than only
   one this machine did. The guard travels with the pipeline.
