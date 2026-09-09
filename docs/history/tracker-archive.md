@@ -1353,6 +1353,17 @@ better test than the one that was written, because "twenty facts are somebody
 else's" and "five are" are different decisions and only the count separates
 them.
 
+**CI confirmed the tree**: run `34308177004` on [PR #15](https://github.com/kietnt4412/storm_almanac/pull/15),
+green, 0 failed and 16 skipped — 8 `RealUpstreamPlanTest`, 5
+`CommunityBenchmarkTest`, 3 `RealUpstreamPatchTest`, which is exactly the
+snapshot gate and nothing else.
+
+**And a workflow fact worth not rediscovering.** The first push to `dev` ran no
+CI at all, silently. `ci.yml` fires on `pull_request` and on push to `main`, so
+**a push to `dev` with no open PR is unverified by the pipeline** — PR #14 had
+been merged between sessions, which closed the only thing that was watching the
+branch. Opening PR #15 is what produced a run.
+
 #### E1 and E4: two environment notes
 
 `-Djavax.net.ssl.trustStoreType=Windows-ROOT` was needed throughout — **E1 is

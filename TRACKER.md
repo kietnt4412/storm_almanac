@@ -76,12 +76,16 @@ being finished with is.
   stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
 - **The remote, checked 2026-09-09 — re-check it, do not trust it.** `main` is
-  `2864c95` (PR #13 merged, run `34217574439`). `dev` is `6376b33` as
-  [PR #14](https://github.com/kietnt4412/storm_almanac/pull/14), carrying N23 and
-  the Phase 4 opening — green, run `34298619283`, 0 failed and 16 skipped and
-  they are exactly the three snapshot-gated classes. This is a fact here rather
-  than a next action because four sessions running opened on a "merge PR #n" the
-  maintainer had already clicked between sessions.
+  `3f6ec02` (PR #14 merged, which happened *during* the previous session's write-up
+  and is why its Status line was already stale). `dev` is `1206f62` as
+  [PR #15](https://github.com/kietnt4412/storm_almanac/pull/15), carrying ADR 0015's
+  own commit plus N26 and ADR 0016 — **green, run `34308177004`**, 0 failed and
+  16 skipped, and they are exactly the three snapshot-gated classes (8 + 5 + 3).
+  This is a fact here rather than a next action because five sessions running
+  opened on a "merge PR #n" the maintainer had already clicked between sessions.
+  **A note the next session needs:** CI fires on `pull_request` and on push to
+  `main` only, so **a push to `dev` with no open PR runs nothing.** That happened
+  this session and is why PR #15 exists.
 - **The optimizer has been asked a question by something other than a test.**
   What has *not* happened is a real OAuth exchange: no provider is configured and
   no client secret exists, so login is installed only when one is.
