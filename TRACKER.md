@@ -47,7 +47,7 @@ being finished with is.
   stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
 - **The remote, checked 2026-09-09:** `main` is `2864c95` (PR #13 merged, run
-  `34217574439` green). `dev` is `85bd1cd`, carrying N23 as [PR #14](https://github.com/kietnt4412/storm_almanac/pull/14) — CI-confirmed green, run `34296288536`, 0 failed and 16 skipped and they are exactly the three snapshot-gated classes. **Check this line at
+  `34217574439` green). `dev` is `029fea7`, carrying N23 and the Phase 4 opening as [PR #14](https://github.com/kietnt4412/storm_almanac/pull/14) — CI-confirmed green, run `34298152921`, 0 failed and 16 skipped and they are exactly the three snapshot-gated classes. **Check this line at
   session start rather than trusting it** — four sessions running opened on a
   "merge PR #n" next action the maintainer had already done, because merging is a
   click that happens between sessions. That is why it is a fact here and no
