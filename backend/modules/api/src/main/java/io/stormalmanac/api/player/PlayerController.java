@@ -5,10 +5,14 @@ import io.stormalmanac.api.player.PlayerView.CreateProfileRequest;
 import io.stormalmanac.api.player.PlayerView.GoalView;
 import io.stormalmanac.api.player.PlayerView.GoalsRequest;
 import io.stormalmanac.api.player.PlayerView.GoalsResponse;
+import io.stormalmanac.api.player.PlayerView.InventoryPatchRequest;
+import io.stormalmanac.api.player.PlayerView.InventoryPatchResponse;
 import io.stormalmanac.api.player.PlayerView.InventoryRequest;
 import io.stormalmanac.api.player.PlayerView.InventoryResponse;
 import io.stormalmanac.api.player.PlayerView.MeResponse;
 import io.stormalmanac.api.player.PlayerView.ProfileResponse;
+import io.stormalmanac.api.player.PlayerView.RosterPatchRequest;
+import io.stormalmanac.api.player.PlayerView.RosterPatchResponse;
 import io.stormalmanac.api.player.PlayerView.RosterRequest;
 import io.stormalmanac.api.player.PlayerView.RosterResponse;
 import io.stormalmanac.common.id.AccountId;
@@ -20,15 +24,20 @@ import io.stormalmanac.gamedata.Goal;
 import io.stormalmanac.identity.AccountRepository;
 import io.stormalmanac.player.Goals;
 import io.stormalmanac.player.Inventory;
+import io.stormalmanac.player.InventoryEdit;
+import io.stormalmanac.player.MergeOutcome;
 import io.stormalmanac.player.PlayerProfile;
 import io.stormalmanac.player.PlayerStateRepository;
 import io.stormalmanac.player.Roster;
+import io.stormalmanac.player.RosterEdit;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -45,12 +54,14 @@ import org.springframework.web.bind.annotation.RestController;
  * GET  /api/me
  * POST /api/me/profiles
  * GET  /api/me/profiles/{profile}
- * GET  /api/me/profiles/{profile}/inventory
- * PUT  /api/me/profiles/{profile}/inventory
- * GET  /api/me/profiles/{profile}/roster
- * PUT  /api/me/profiles/{profile}/roster
- * GET  /api/me/profiles/{profile}/goals
- * PUT  /api/me/profiles/{profile}/goals
+ * GET   /api/me/profiles/{profile}/inventory
+ * PUT   /api/me/profiles/{profile}/inventory
+ * PATCH /api/me/profiles/{profile}/inventory
+ * GET   /api/me/profiles/{profile}/roster
+ * PUT   /api/me/profiles/{profile}/roster
+ * PATCH /api/me/profiles/{profile}/roster
+ * GET   /api/me/profiles/{profile}/goals
+ * PUT   /api/me/profiles/{profile}/goals
  * </pre>
  *
  * <p><b>Everything here is under {@code /api/me}, and that is load-bearing.</b>
@@ -59,13 +70,21 @@ import org.springframework.web.bind.annotation.RestController;
  * the one that authenticated. A profile id still appears in the path, because a
  * person runs several, and {@link OwnedProfiles} is what makes it safe there.
  *
- * <p><b>PUT, not PATCH, and the difference is the whole contract.</b> Each of
- * these bodies is the complete inventory, roster or goal list, and saving one
- * replaces what was there. That is what the repository's signature says and what
- * the schema stores. A per-key patch is a different route with a different
- * method, and it is what offline sync needs — it is not written yet, and
- * pretending PUT is it would mean a phone that was offline for an hour silently
- * deleting everything a browser added in the meantime.
+ * <p><b>PUT and PATCH are different contracts, not two spellings of save.</b> A
+ * PUT body is the complete inventory, roster or goal list and replaces what was
+ * there; that is what the repository's signature says and what the schema
+ * stores. A PATCH body names only the keys one device changed and when it
+ * changed them, and merges them per key. Collapsing the two — treating PUT as
+ * the sync route — is what makes a phone that was offline for an hour silently
+ * delete everything a browser added in the meantime.
+ *
+ * <p><b>Goals have no PATCH, and that is a decision rather than an omission.</b>
+ * An inventory and a roster are maps, so a key is a merge unit and two devices
+ * touching different keys have an obvious answer. Goals are an ordered list
+ * whose order is itself what the player is editing, and two devices that
+ * reordered it have no per-key answer at all. A PATCH route here would have to
+ * invent one, and inventing one would mean a plan computed against priorities
+ * nobody chose.
  */
 @RestController
 @RequestMapping("/api/me")
@@ -147,6 +166,42 @@ public class PlayerController {
         return InventoryResponse.of(inventory);
     }
 
+    /**
+     * Merge an offline device's inventory edits, key by key.
+     *
+     * <p>Returns the merged inventory <em>and</em> the keys whose edits lost, so
+     * a client is never left displaying a value the server did not take. The
+     * response is 200 rather than 207 even when some keys were rejected: the
+     * merge succeeded, and losing a tiebreak is the route working rather than
+     * failing.
+     */
+    @PatchMapping("/profiles/{profile}/inventory")
+    public InventoryPatchResponse patchInventory(
+            @PathVariable String profile, @RequestBody InventoryPatchRequest request) {
+        ProfileId id = owned.require(profile).id();
+
+        List<InventoryEdit> edits = new ArrayList<>();
+        each(request.items()).forEach((slug, edit) -> {
+            if (edit == null || edit.quantity() == null) {
+                throw new IllegalArgumentException("item '" + slug + "' has no quantity");
+            }
+            if (edit.quantity() < 0) {
+                throw new IllegalArgumentException(
+                        "item '" + slug + "' has a negative quantity: " + edit.quantity());
+            }
+            // Required rather than defaulted to now(): a server-stamped edit
+            // wins for having arrived late, which is the bug this route exists
+            // to fix rather than a convenient default.
+            if (edit.at() == null) {
+                throw new IllegalArgumentException("item '" + slug + "' does not say when it was edited");
+            }
+            edits.add(new InventoryEdit(ItemId.of(slug), edit.quantity(), edit.at()));
+        });
+
+        MergeOutcome<ItemId> outcome = players.mergeInventory(id, edits);
+        return InventoryPatchResponse.of(players.inventoryOf(id), outcome);
+    }
+
     @GetMapping("/profiles/{profile}/roster")
     public RosterResponse roster(@PathVariable String profile) {
         return RosterResponse.of(players.rosterOf(owned.require(profile).id()));
@@ -170,6 +225,38 @@ public class PlayerController {
         Roster roster = new Roster(id, states);
         players.saveRoster(roster);
         return RosterResponse.of(roster);
+    }
+
+    /**
+     * Merge an offline device's roster edits, key by key.
+     *
+     * <p>A null or absent {@code state} removes the entity from the roster, and
+     * is the one place a client can say "I no longer own this" — the PUT route
+     * says it by leaving the key out, which a patch by definition cannot.
+     */
+    @PatchMapping("/profiles/{profile}/roster")
+    public RosterPatchResponse patchRoster(@PathVariable String profile, @RequestBody RosterPatchRequest request) {
+        ProfileId id = owned.require(profile).id();
+
+        List<RosterEdit> edits = new ArrayList<>();
+        each(request.entities()).forEach((slug, edit) -> {
+            if (edit == null) {
+                throw new IllegalArgumentException("entity '" + slug + "' has no edit");
+            }
+            if (edit.at() == null) {
+                throw new IllegalArgumentException("entity '" + slug + "' does not say when it was edited");
+            }
+            // Blank is refused where null is accepted: null is "no longer
+            // owned", blank is a form that did not fill in, and treating the
+            // second as the first would delete a roster entry on a client bug.
+            if (edit.state() != null && edit.state().isBlank()) {
+                throw new IllegalArgumentException("entity '" + slug + "' has a blank current state");
+            }
+            edits.add(new RosterEdit(EntityId.of(slug), edit.state(), edit.at()));
+        });
+
+        MergeOutcome<EntityId> outcome = players.mergeRoster(id, edits);
+        return RosterPatchResponse.of(players.rosterOf(id), outcome);
     }
 
     @GetMapping("/profiles/{profile}/goals")

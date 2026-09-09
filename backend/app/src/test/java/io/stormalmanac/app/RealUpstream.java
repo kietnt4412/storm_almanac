@@ -2,7 +2,9 @@ package io.stormalmanac.app;
 
 import io.stormalmanac.common.GameDataVersion;
 import io.stormalmanac.common.id.AccountId;
+import io.stormalmanac.common.id.EntityId;
 import io.stormalmanac.common.id.GameId;
+import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.GameDefinitionRepository;
@@ -14,15 +16,19 @@ import io.stormalmanac.planner.MipOptimizer;
 import io.stormalmanac.planner.SolveCache;
 import io.stormalmanac.player.Goals;
 import io.stormalmanac.player.Inventory;
+import io.stormalmanac.player.InventoryEdit;
+import io.stormalmanac.player.MergeOutcome;
 import io.stormalmanac.player.PlayerProfile;
 import io.stormalmanac.player.PlayerStateRepository;
 import io.stormalmanac.player.Roster;
+import io.stormalmanac.player.RosterEdit;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -166,6 +172,16 @@ final class RealUpstream {
 
         @Override
         public void saveGoals(Goals value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public MergeOutcome<ItemId> mergeInventory(ProfileId profile, Collection<InventoryEdit> edits) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public MergeOutcome<EntityId> mergeRoster(ProfileId profile, Collection<RosterEdit> edits) {
             throw new UnsupportedOperationException();
         }
     }
