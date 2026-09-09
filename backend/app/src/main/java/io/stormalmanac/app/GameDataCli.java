@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
  * java -jar storm-almanac.jar --gamedata=preview  bundle.json
  * java -jar storm-almanac.jar --gamedata=ingest   bundle.json
  * java -jar storm-almanac.jar --gamedata=drafts   proving-ground
- * java -jar storm-almanac.jar --gamedata=publish  proving-ground 1
+ * java -jar storm-almanac.jar --gamedata=publish  proving-ground 1 [second-hand]
  * java -jar storm-almanac.jar --gamedata=versions proving-ground
  * java -jar storm-almanac.jar --gamedata=diff     proving-ground 0 1
  * </pre>
@@ -137,7 +137,8 @@ public class GameDataCli implements ApplicationRunner {
                     + "|publish|drafts|versions|diff> [args]");
             return MISUSE;
         } catch (BundleFormatException | GameDataIngestRepository.PublishedVersionIsImmutableException
-                | GameDataIngestRepository.NoDraftToPublishException refusal) {
+                | GameDataIngestRepository.NoDraftToPublishException
+                | GameDataIngestRepository.SecondHandDataException refusal) {
             out.println("refused: " + refusal.getMessage());
             return REFUSED;
         }
@@ -196,12 +197,15 @@ public class GameDataCli implements ApplicationRunner {
                 bundle.items().size(), bundle.entities().size(),
                 bundle.sources().size(), bundle.sinks().size(), bundle.banners().size());
         out.println("attribution: " + bundle.attribution());
+        provenance(bundle);
         return OK;
     }
 
     /** What this file would change, computed without writing a row. */
     private int preview(String file) {
-        report(read(file));
+        GameDataBundle bundle = read(file);
+        report(bundle);
+        provenance(bundle);
         return OK;
     }
 
@@ -210,6 +214,7 @@ public class GameDataCli implements ApplicationRunner {
         // The report first: if the ingest is refused, the operator still learns
         // what the file was proposing, which is usually the thing they need.
         report(bundle);
+        provenance(bundle);
         ingest.ingestDraft(bundle);
 
         out.printf("%ningested %s %s as a draft at sequence %d. Nothing is published yet:%n",
@@ -230,11 +235,58 @@ public class GameDataCli implements ApplicationRunner {
         out.print(VersionDiff.between(current.get(), bundle.definitionApprovedAt(Instant.EPOCH)).render());
     }
 
-    private int publish(List<String> args) {
-        if (args.size() != 2) throw new Misuse("publish <game> <sequence>");
-        GameId game = new GameId(args.get(0));
-        GameDataVersion published = ingest.publish(game, number(args.get(1)));
+    /**
+     * Where each of this bundle's facts came from.
+     *
+     * <p>Printed on every command that puts a bundle in front of a person,
+     * because publishing is a human approval and an approval that could not see
+     * this is exactly the rubber stamp ADR 0015 is about. The counts are the
+     * point: "1 second-hand fact" and "2 700 second-hand facts" are different
+     * decisions and a yes/no line would render them identically.
+     */
+    private void provenance(GameDataBundle bundle) {
+        out.println("provenance:");
+        bundle.factsByProvenance().forEach((provenance, facts) ->
+                out.printf("  %-24s %5d fact(s)  %-20s %s  %s%n",
+                        provenance.id(), facts, provenance.origin(),
+                        provenance.observedOn(),
+                        provenance.isFirstHand() ? "" : "<- NOT ours to publish"));
 
+        List<String> secondHand = bundle.secondHandFacts();
+        if (secondHand.isEmpty()) {
+            return;
+        }
+        out.printf("  %d of %d facts are somebody else's. This bundle will not publish without"
+                        + " the 'second-hand' argument, and ADR 0015 says it should not be shipped"
+                        + " with one either.%n",
+                secondHand.size(), bundle.factRefs().size());
+    }
+
+    /**
+     * The approval.
+     *
+     * <p>The optional third argument is the deliberate ugliness. ADR 0015 allows
+     * second-hand data to reach a published version — that is what keeps the
+     * Kornblume adapter usable as a cross-check to diff against — and forbids
+     * shipping it. A flag nobody has to type would collapse those two into one;
+     * a word somebody has to type, on a command line that ends up in a shell
+     * history, does not.
+     */
+    private int publish(List<String> args) {
+        if (args.size() != 2 && args.size() != 3) {
+            throw new Misuse("publish <game> <sequence> [second-hand]");
+        }
+        boolean secondHand = args.size() == 3;
+        if (secondHand && !args.get(2).equals("second-hand")) {
+            throw new Misuse("publish <game> <sequence> [second-hand]");
+        }
+        GameId game = new GameId(args.get(0));
+        GameDataVersion published = ingest.publish(game, number(args.get(1)), secondHand);
+
+        if (secondHand) {
+            out.println("WARNING: published data this project did not source."
+                    + " ADR 0015 says it must not be shipped.");
+        }
         out.printf("published %s %s at %s%n", game.value(), published.label(), published.publishedAt());
         return OK;
     }

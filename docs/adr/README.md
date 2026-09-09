@@ -23,3 +23,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0013](0013-the-horizon-is-a-scalar-not-an-index.md) | The planning horizon is a scalar, not an index | Accepted |
 | [0014](0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md) | Sync is last-write-wins per key, against a clock that outlives the value | Accepted |
 | [0015](0015-game-data-is-sourced-first-hand-not-adapted.md) | Game data is sourced first-hand, not adapted from a community aggregator | Accepted |
+| [0016](0016-provenance-is-a-property-of-the-data.md) | Provenance is a property of the data, and publishing enforces it | Accepted |

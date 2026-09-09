@@ -4,11 +4,13 @@ import io.stormalmanac.common.GameDataVersion;
 import io.stormalmanac.common.id.EntityId;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.Craft;
+import io.stormalmanac.gamedata.FactRef;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Game;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
 import io.stormalmanac.gamedata.Sink;
@@ -43,17 +45,38 @@ import java.util.Set;
  * validation below lives here rather than in any one adapter: every adapter
  * gets it, and none of them can skip it.
  *
- * @param sequence    monotonic within a game; the ordering key, supplied by
- *                    whoever fetched the snapshot rather than by the upstream
- * @param attribution where these numbers came from. Required, because "numbers
- *                    and text only, attributed" is a project invariant and an
- *                    unattributed snapshot is one nobody can defend later
+ * @param sequence        monotonic within a game; the ordering key, supplied by
+ *                        whoever fetched the snapshot rather than by the upstream
+ * @param attribution     where these numbers came from, in one sentence a reader
+ *                        sees. Required, because "numbers and text only,
+ *                        attributed" is a project invariant and an unattributed
+ *                        snapshot is one nobody can defend later
+ * @param provenance      the sourcing record behind those numbers, which is a
+ *                        different question from {@code attribution} and the one
+ *                        with teeth. Attribution is a credit line; this says who
+ *                        read what, where, and when, and it is what makes
+ *                        "self-sourced" falsifiable rather than merely asserted.
+ *                        At least one entry, ids unique. See ADR 0015
+ * @param sourcedBy       the id of the {@link Provenance} covering every fact
+ *                        that does not name its own. A default rather than a
+ *                        required per-fact field because the realistic bundle is
+ *                        one sitting, one screen, one reader — asking for 2 700
+ *                        identical strings would produce 2 700 copy-pastes and
+ *                        no more truth
+ * @param factProvenance  the exceptions: {@link FactRef} to provenance id, for
+ *                        the facts that did <em>not</em> come from
+ *                        {@code sourcedBy}. Overrides only; a fact absent here
+ *                        is covered by the default, so this map is small on
+ *                        purpose and every entry in it is a deliberate claim
  */
 public record GameDataBundle(
         Game game,
         long sequence,
         String label,
         String attribution,
+        List<Provenance> provenance,
+        String sourcedBy,
+        Map<String, String> factProvenance,
         List<Item> items,
         List<Source> sources,
         List<Sink> sinks,
@@ -74,6 +97,17 @@ public record GameDataBundle(
         sinks = List.copyOf(sinks);
         banners = List.copyOf(banners);
         entities = List.copyOf(entities);
+        // Silence is given a meaning rather than left as a hole: a bundle that
+        // declares nothing is a bundle whose facts came from nowhere anybody
+        // recorded, which is not first-hand and so cannot be published. See
+        // Provenance.Origin.UNRECORDED for why this is not simply a required
+        // field.
+        if (provenance.isEmpty() && (sourcedBy == null || sourcedBy.isBlank())) {
+            provenance = List.of(Provenance.unrecorded());
+            sourcedBy = Provenance.UNRECORDED_ID;
+        }
+        provenance = List.copyOf(provenance);
+        factProvenance = Map.copyOf(factProvenance);
 
         // Checked here, before a connection is opened, because the composite
         // foreign keys will reject a dangling reference with a message naming a
@@ -81,6 +115,8 @@ public record GameDataBundle(
         // approving a publish can act on; "stage '1-1' drops unknown item
         // 'sulfr'" is. See ADR 0008.
         validate(items, sources, sinks, entities);
+        validateProvenance(provenance, sourcedBy, factProvenance,
+                refsOf(items, sources, sinks, banners, entities));
     }
 
     /**
@@ -98,6 +134,136 @@ public record GameDataBundle(
                 sinks,
                 banners,
                 entities);
+    }
+
+    // ── Provenance ──────────────────────────────────────────────────────────
+
+    /**
+     * Every fact this bundle declares, in a stable order.
+     *
+     * <p>"Fact" here means one declared row — a stage, an item, a character —
+     * not one number inside it. That granularity is a deliberate stop: ADR 0015
+     * asks for provenance "per fact or at worst per source", and a stage's
+     * energy cost and its drop table are read off the same screen in the same
+     * sitting by the same person. Splitting them would multiply the typing
+     * without splitting the claim.
+     */
+    public List<String> factRefs() {
+        return refsOf(items, sources, sinks, banners, entities);
+    }
+
+    /**
+     * Where one fact came from.
+     *
+     * <p>Falls back to {@link #sourcedBy} rather than to nothing: a fact with no
+     * override is not a fact with no provenance, and returning empty here would
+     * make the common case look like the unsourced one.
+     *
+     * @throws BundleFormatException if the ref names nothing this bundle declares
+     */
+    public Provenance provenanceOf(String factRef) {
+        String id = factProvenance.getOrDefault(factRef, sourcedBy);
+        return provenance.stream()
+                .filter(candidate -> candidate.id().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new BundleFormatException(
+                        "no provenance declared for '" + factRef + "'"));
+    }
+
+    /**
+     * The facts this bundle is not entitled to publish, sorted.
+     *
+     * <p>The whole reason the provenance fields exist. ADR 0015's decision is
+     * unenforceable as prose — a laundered number and a sourced one are the same
+     * bytes — so the question has to be answerable mechanically, and the answer
+     * has to name names rather than return a boolean. An operator told "this
+     * bundle is not first-hand" can do nothing; one told "stage:1-1 came from
+     * kornblume-3.5" can go and read the stage screen.
+     */
+    public List<String> secondHandFacts() {
+        return factRefs().stream()
+                .filter(ref -> !provenanceOf(ref).isFirstHand())
+                .sorted()
+                .toList();
+    }
+
+    /** True when every fact here is this project's to publish. */
+    public boolean isFirstHand() {
+        return secondHandFacts().isEmpty();
+    }
+
+    /** How many facts each declared provenance actually covers, declaration order. */
+    public Map<Provenance, Long> factsByProvenance() {
+        Map<Provenance, Long> counts = new LinkedHashMap<>();
+        provenance.forEach(entry -> counts.put(entry, 0L));
+        factRefs().forEach(ref -> counts.merge(provenanceOf(ref), 1L, Long::sum));
+        return counts;
+    }
+
+    private static List<String> refsOf(
+            List<Item> items, List<Source> sources, List<Sink> sinks,
+            List<BannerModel> banners, List<Entity> entities) {
+
+        List<String> refs = new ArrayList<>();
+        items.forEach(item -> refs.add(FactRef.of(item)));
+        entities.forEach(entity -> refs.add(FactRef.of(entity)));
+        sources.forEach(source -> refs.add(FactRef.of(source)));
+        sinks.forEach(sink -> refs.add(FactRef.of(sink)));
+        banners.forEach(banner -> refs.add(FactRef.of(banner)));
+        return refs;
+    }
+
+    private static void validateProvenance(
+            List<Provenance> provenance, String sourcedBy,
+            Map<String, String> factProvenance, List<String> factRefs) {
+
+        Set<String> ids = new LinkedHashSet<>();
+        provenance.forEach(entry -> {
+            if (!ids.add(entry.id())) {
+                throw new BundleFormatException("duplicate provenance '" + entry.id() + "'");
+            }
+            // The id a silent bundle is given. A declared entry reusing it could
+            // give "unrecorded" a first-hand origin, and then the one slug whose
+            // meaning is fixed would be the one meaning nothing in particular.
+            if (entry.id().equals(Provenance.UNRECORDED_ID)
+                    && entry.origin() != Provenance.Origin.UNRECORDED) {
+                throw new BundleFormatException(
+                        "'" + Provenance.UNRECORDED_ID + "' is reserved for a bundle that declares"
+                                + " no provenance and cannot be redefined as "
+                                + entry.origin());
+            }
+        });
+        if (sourcedBy == null || sourcedBy.isBlank()) {
+            // Reachable only when the bundle declared provenance and then did not
+            // say which one covers the facts. Declaring some and defaulting to
+            // none is the shape most likely to be a half-finished edit, so it is
+            // refused rather than quietly treated as declaring none at all.
+            throw new BundleFormatException(
+                    "this bundle declares provenance " + ids + " but no sourcedBy naming which of"
+                            + " them covers a fact that does not override it");
+        }
+        if (!ids.contains(sourcedBy)) {
+            throw new BundleFormatException(
+                    "sourcedBy names undeclared provenance '" + sourcedBy + "'; declared: " + ids);
+        }
+
+        // An override pointing at nothing is the failure mode that matters: it
+        // reads as a deliberate exception and behaves as the default, so the
+        // bundle would claim first-hand sourcing for a fact somebody had
+        // explicitly marked otherwise.
+        Set<String> known = new LinkedHashSet<>(factRefs);
+        List<String> broken = new ArrayList<>();
+        factProvenance.forEach((ref, id) -> {
+            if (!known.contains(ref)) {
+                broken.add("factProvenance names '" + ref + "', which this bundle does not declare");
+            }
+            if (!ids.contains(id)) {
+                broken.add("fact '" + ref + "' names undeclared provenance '" + id + "'");
+            }
+        });
+        if (!broken.isEmpty()) {
+            throw new BundleFormatException(String.join(System.lineSeparator(), broken));
+        }
     }
 
     private static void validate(

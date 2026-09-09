@@ -13,6 +13,7 @@ import io.stormalmanac.gamedata.Drop;
 import io.stormalmanac.gamedata.Game;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Sink;
 import io.stormalmanac.gamedata.Source;
@@ -27,6 +28,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -236,11 +239,55 @@ public final class KornblumeAdapter implements UpstreamAdapter {
                 sequence,
                 label,
                 attribution(label),
+                List.of(provenance(label)),
+                PROVENANCE,
+                Map.of(),
                 items,
                 sources,
                 sinks,
                 List.of(),
                 entities);
+    }
+
+    /** The id every fact this adapter produces is sourced from. */
+    private static final String PROVENANCE = "kornblume-snapshot";
+
+    /**
+     * Says in the data what
+     * {@code docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md} says
+     * in prose: nothing this adapter produces is this project's to publish.
+     *
+     * <p>Hard-coded to {@link Provenance.Origin#THIRD_PARTY} rather than passed
+     * in, because there is no snapshot of somebody else's aggregator that would
+     * be anything else, and an adapter that could be told otherwise is an
+     * adapter one call site can launder data through. The consequence is
+     * deliberate and immediate: a bundle from here now fails a plain
+     * {@code publish}, and approving it takes the second, explicit step that
+     * names what is being approved.
+     *
+     * <p>This is not a deprecation. ADR 0015 keeps the adapter as a local
+     * cross-check that is never shipped — diffing the first self-sourced bundle
+     * against an independent reading of the same patch is worth more than this
+     * was ever worth as a source — and a cross-check has to be able to run.
+     *
+     * @param label the patch, so the date this snapshot describes is on the
+     *              record next to the date it was read
+     */
+    private static Provenance provenance(String label) {
+        return new Provenance(
+                PROVENANCE,
+                Provenance.Origin.THIRD_PARTY,
+                "Converted from a Kornblume snapshot of patch " + label
+                        + " (github.com/windbow27/kornblume), which carries no licence."
+                        + " Read as a cross-check, never published: see ADR 0015.",
+                // The day this ran, which is the honest answer to "when was this
+                // read" and the only date the adapter actually knows — the
+                // snapshot itself carries no timestamp, and a constant here
+                // would be a lie that gets worse with age. It does mean
+                // re-adapting the same snapshot tomorrow produces a
+                // one-line-different file, which is the one place this
+                // pipeline's output is deliberately not reproducible.
+                LocalDate.now(ZoneOffset.UTC));
     }
 
     /**

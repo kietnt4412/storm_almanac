@@ -781,6 +781,44 @@ entry was met, not that the code exists.
       and one batch stamp would have to lie about one of them.
       16 new tests, **244 total**, 0 failed and 0 skipped locally.
 
+### Done 2026-09-09 (fourteenth session) — N26
+
+- [x] ~~**N26 — Find out whether the game publishes its own drop rates.**~~
+      **Answered 2026-09-09, and the answer is no** for the half that matters.
+      Written up in
+      [the drop disclosure note](../game-facts/reverse-1999-drop-disclosure.md).
+
+      **Stage drop rates are not disclosed numerically.** The stage screen grades
+      each reward `Fixed`, `Common` or `Possible`, and only `Fixed` carries a
+      number — it means 100%. Every published percentage for a `Common` or
+      `Possible` drop, including the twenty this project benchmarks against, is
+      somebody's crowdsourced run count. So the cheapest way out of ADR 0015's
+      bootstrap problem does not exist, and the interim has to be chosen
+      deliberately: catalog-first launch, or thin honest samples.
+
+      **Measured rather than estimated**, on the pinned 3.5 snapshot's
+      `stages3_3_greedy.json` where `count: 1` marks a fixed-reward stage:
+      **105 stages, 779 drop facts, 15 declared and 764 sampled.** ~2% of the
+      drop axis is free. The reprieve is real and it is small.
+
+      **Two things came back that were not asked for, and both are worth more
+      than the answer.** *Gacha rates are disclosed* — Bluepoch states per-rarity
+      summon rates and the pity counter in the client's own rules screen — which
+      makes the live half of **Q4** one screen's worth of reading rather than a
+      research question, and makes it `PUBLISHER_DISCLOSURE` rather than a
+      sample. And *the `Fixed`/`Common`/`Possible` grade is itself a first-hand
+      fact*, available for all 595 stage-item pairs before a single run is
+      farmed, enough to order drops within a stage and to reject an estimate that
+      contradicts it — and the model has nowhere to put it. **Deliberately not
+      built this session**: it costs a bundle field, a parser, a writer, a
+      migration and a JDBC round trip, and its only consumer is Phase 6. Same
+      reasoning that deferred N20 and N18.
+
+      **The sourcing is secondary and says so.** This is a question *about* a
+      question, reached through a web search tool, and it selects which plan to
+      make rather than entering any bundle. Under the plan it selects, every
+      number is read first-hand anyway.
+
 ---
 
 ## Closed phases, in full
@@ -1174,6 +1212,161 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+### 2026-09-09 (fourteenth session) — the cheap way out was not there, and the decision grew teeth
+
+**N26 asked the question that would have made ADR 0015 cheap, and the answer was no. Then N27 turned out to be two jobs, one of which no session can do — so this session built the other one, and it is the one that makes 0015 enforceable rather than merely stated.**
+
+#### N26: the publisher discloses the rates that do not cost anything
+
+ADR 0015 named three ways out of its bootstrap problem, and the first would have
+collapsed the hard half entirely: many titles in this market disclose stage drop
+rates under regulatory pressure, and if Reverse: 1999 did, **595 statistical
+facts become 595 static ones** and Phase 6 goes back to being an improvement
+rather than a prerequisite.
+
+**It does not.** The stage screen grades each reward `Fixed`, `Common` or
+`Possible`, and puts a number on none but the first. Every published percentage
+for a `Common` or `Possible` drop is somebody's crowdsourced sample — including
+the twenty this project benchmarks against, which were never a disclosure to
+check ourselves against but another estimate.
+
+**The size of the reprieve was measured, not guessed.** On the pinned 3.5
+snapshot's `stages3_3_greedy.json`, where `count: 1` marks a fixed-reward stage:
+105 stages, **779 drop facts, 15 declared and 764 sampled**. Two percent.
+
+Two things came back that nobody asked for, and both are worth more than the
+answer:
+
+- **Gacha rates *are* disclosed**, per rarity, with the pity counter, in the
+  client's own summon rules. That is the live half of **Q4** reduced to one
+  screen's worth of reading, and it is `PUBLISHER_DISCLOSURE` rather than a
+  sample. Phase 5 needs it.
+- **The `Fixed`/`Common`/`Possible` grade is itself a first-hand fact.** It is
+  free, it exists for all 595 pairs before a single run is farmed, and it is
+  enough to order drops within a stage and to reject an estimate that
+  contradicts it — a `Fixed` reported at 40% is wrong on its face. **The model
+  has nowhere to put it, and this session deliberately did not build one.** It
+  costs a bundle field, a parser, a writer, a migration and a JDBC round trip,
+  and its only consumer is Phase 6. That is exactly the reasoning that deferred
+  N20 and N18, and the discipline is worth more than the field.
+
+#### N27 was two jobs, and one of them is not a session's to do
+
+The next action read "author the first self-sourced bundle, and give a fact its
+provenance". Working on it surfaced that those are not one task.
+
+**The authoring cannot be delegated to a session, and the reason is ADR 0015
+itself.** A fact enters because someone *read it in the game or in the
+publisher's disclosure*. An aggregator, a web search and an AI session are the
+same disqualified thing: none of them can reach a game screen, and all three can
+only surface what somebody else already wrote down. Producing a plausible-looking
+R1999 bundle here would have been laundering with extra steps — the precise
+failure 0015 was written to prevent, committed by the tooling built to prevent
+it. **So the honest output is that N27 is now the maintainer's**, with the loop
+written down in
+[authoring a first-hand bundle](../game-facts/authoring-a-first-hand-bundle.md)
+so that the reading is the only thing left.
+
+#### The half a session could do, and why it was the important half
+
+**ADR 0015 had a hole in it that no amount of prose could close.** A number read
+off a stage screen and a number copied out of Kornblume are *byte-identical once
+typed*. Nothing downstream could tell them apart; neither could the person who
+typed them, six months later. As written, 0015 was a promise about future
+behaviour with no mechanism — and this repository already knows what that is
+worth, because the adapter read a stale stage table for five sessions with two
+thirds of the game missing and every test stayed green, because nothing was
+checking the thing that was wrong.
+
+[ADR 0016](../adr/0016-provenance-is-a-property-of-the-data.md) is the
+mechanism. Four decisions in it, and the last two are the ones a future session
+would otherwise re-litigate:
+
+- **Provenance lives on the bundle, not on `Stage` or `Item`.** Sourcing is a
+  property of the act of reading, not of the game — and hanging it on a domain
+  record puts it one field access away from the solver. A solver that *can* read
+  where a number came from is one that can eventually be made to prefer numbers
+  from one place, which is a bias nobody asked for and nobody would notice.
+  `Drop.sampledRuns` stays the deliberate exception, because ADR 0011 makes the
+  solver genuinely need it.
+- **A default with per-fact overrides**, not a field on every fact. Requiring
+  2 700 identical strings produces 2 700 copy-pastes and no more truth, and the
+  pressure would be to generate them.
+- **Silence parses, and cannot publish.** A bundle declaring no provenance is
+  `UNRECORDED`, which is not first-hand. Requiring the field would put six lines
+  of ceremony on every throwaway test bundle, and ceremony under that pressure
+  gets filled in with whatever passes. Absence gets a defined, conservative
+  meaning instead — the same shape as `sampledRuns == 0` meaning *declared*.
+- **The gate is on `publish`, not `ingestDraft`, and has an explicit escape
+  hatch.** It has to: ADR 0015 keeps the Kornblume adapter as a cross-check, and
+  a cross-check must reach a published version to be diffed against one. So
+  `publish(game, sequence)` is the short call *and* the strict one;
+  `publish(game, sequence, true)` and the CLI's literal `second-hand` word are
+  what it costs to approve somebody else's data, on a command line that ends up
+  in a shell history. `KornblumeAdapter` hard-codes `THIRD_PARTY` and cannot be
+  told otherwise, so there is no call site to launder through.
+
+**Storage materialises every fact's provenance** — one row per declared fact,
+not one per override. The default is an authoring convenience and a database
+that stored it could not answer "where did this come from" without the file
+beside it. **The first-hand policy is in `Provenance.Origin` and nowhere else**:
+`V7` constrains the origin set and says nothing about which of them count, and
+the gate reads origins back as text and asks the enum, because a
+`WHERE origin <> 'THIRD_PARTY'` would be a second copy of the policy in a
+language that cannot fail to compile when the first one changes.
+
+**The one publish of real upstream data in this repository now says so in code.**
+`RealUpstreamPatchTest` passes `true`. That is the test admitting what the ADR
+says in prose, and it is the sort of thing that would have been a comment before.
+
+#### What this does not do, stated because it is tempting to overclaim
+
+**It does not make anything in this repository first-hand.** The only bundles
+that pass the gate are the synthetic fixtures, and they pass by declaring
+`AUTHORED_FIXTURE` — honest, and evidence of nothing about a real game. Every
+Reverse: 1999 number in the tracker still comes from Kornblume. The gate is what
+will stop that shipping; it is not progress on replacing it.
+
+**It does not stop a determined liar**, and is not meant to. Someone can mark a
+laundered fact `OBSERVED_IN_GAME`. What is now impossible is doing it *silently*:
+the default is honest, the exception is explicit, and both are in the file that
+was approved.
+
+**Provenance is written and never read.** The publish gate queries it; no API
+response carries it. A catalog page saying where a number came from is the
+honest end state and belongs with Phase 4's catalog screens (N25), not ahead of
+them.
+
+#### What the tests say, and the one that was wrong
+
+**257 tests, 0 failed, 0 skipped locally** with snapshots present — up from 244.
+Twelve new: `BundleProvenanceTest` (6, no database), `GameDataProvenanceTest`
+(5, real Postgres), and the CLI's second-hand walkthrough.
+
+**The gate's first real run failed the test rather than the code**, and the
+failure was worth keeping. The refusal lists the first five offending facts
+sorted and counts the rest; the assertion had picked `item:gold`, which sorts
+after `fodder:` and fell outside the five. The fix was to assert on the count as
+well — `20 fact(s)`, `banner:warden-debut (borrowed)`, `and more` — which is a
+better test than the one that was written, because "twenty facts are somebody
+else's" and "five are" are different decisions and only the count separates
+them.
+
+#### E1 and E4: two environment notes
+
+`-Djavax.net.ssl.trustStoreType=Windows-ROOT` was needed throughout — **E1 is
+still live**.
+
+**New, and worth recording because it cost twenty minutes:** Docker Desktop's
+GUI processes were running, its WSL distro read `Stopped`, and
+`com.docker.service` was `Stopped` too. That is *not* the "give it minutes" case
+E2's note warns about — the engine was never going to come up on its own, and
+`Start-Service` from a non-elevated session fails with `Cannot open
+com.docker.service service on computer '.'`. **The distinguishing check is
+`Get-Service com.docker.service`**: `Stopped` there means somebody has to click,
+and no amount of waiting substitutes. The maintainer restarted it and the whole
+suite ran.
 
 ### 2026-09-09 (thirteenth session) — the sync debt paid, and Phase 4 opens by being looked at
 

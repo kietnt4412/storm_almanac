@@ -61,7 +61,11 @@ class GameDataCliTest extends SharedDatabaseTest {
         // 1. Is the file even well-formed? No database involved yet.
         assertThat(run("validate", fixture("1.0"))).isEqualTo(GameDataCli.OK);
         assertThat(output()).contains("proving-ground 1.0 is well-formed")
-                .contains("6 items").contains("2 entities");
+                .contains("6 items").contains("2 entities")
+                // Where every fact came from, printed before anybody is asked to
+                // approve anything. ADR 0016: an approval that could not see this
+                // is the rubber stamp ADR 0015 is about.
+                .contains("provenance:").contains("AUTHORED_FIXTURE");
 
         // 2. What would it change? Nothing is published, so the honest answer is
         //    "this would be the first", not an empty diff.
@@ -99,6 +103,26 @@ class GameDataCliTest extends SharedDatabaseTest {
 
         assertThat(run("versions", "proving-ground")).isEqualTo(GameDataCli.OK);
         assertThat(output()).contains("1.1").contains("1.0");
+    }
+
+    @Test
+    @DisplayName("publishing somebody else's data takes a word the operator has to type")
+    void secondHandDataIsNotPublishedQuietly() {
+        // The Kornblume adapter's output reaches this path, and ADR 0015 says it
+        // must never be shipped. The gate cannot simply refuse — a cross-check
+        // has to reach a published version to be diffed against one — so what it
+        // does instead is make the second-hand publish impossible to do without
+        // saying so, on a command line that ends up in a shell history.
+        assertThat(run("ingest", fixture("second-hand"))).isEqualTo(GameDataCli.OK);
+        assertThat(output())
+                .contains("NOT ours to publish")
+                .contains("are somebody else's");
+
+        assertThat(run("publish", "proving-ground", "0")).isEqualTo(GameDataCli.REFUSED);
+        assertThat(output()).contains("refused:").contains("ADR 0015");
+
+        assertThat(run("publish", "proving-ground", "0", "second-hand")).isEqualTo(GameDataCli.OK);
+        assertThat(output()).contains("WARNING").contains("published proving-ground 1.0-borrowed at");
     }
 
     @Test
