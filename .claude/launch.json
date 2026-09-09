@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev", "--prefix", "frontend"],
       "port": 5173
+    },
+    {
+      "name": "api",
+      "runtimeExecutable": "backend\\gradlew.bat",
+      "runtimeArgs": ["-p", "backend", ":app:bootRun", "--console=plain"],
+      "port": 8080
     }
   ]
 }

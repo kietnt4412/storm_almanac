@@ -34,6 +34,13 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': { target: 'http://localhost:8080', changeOrigin: true },
+      // The development sign-in, which exists only on a backend started from
+      // source — it is excluded from the deployable jar. Proxied for the same
+      // reason /api is: a session cookie set on localhost:8080 is not a cookie
+      // localhost:5173 sends back, so a sign-in across two origins would appear
+      // to succeed and leave the page anonymous. Same-origin here is also what
+      // the deployed shape will be, via a rewrite (see D1 in TRACKER.md).
+      '/dev': { target: 'http://localhost:8080', changeOrigin: true },
     },
   },
 });
