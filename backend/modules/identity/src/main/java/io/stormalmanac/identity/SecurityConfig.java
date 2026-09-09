@@ -6,7 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -18,6 +20,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 /**
  * The application's single filter chain.
@@ -129,13 +132,12 @@ public class SecurityConfig {
                 // needs one, and a permitAll probe never does. What changed is
                 // that a signed-in browser now needs one.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                // A cookie-authenticated surface exists now, so CSRF protection
-                // is back on. The token goes in a cookie the page can read,
-                // which is what a separate front end needs to echo it in a
-                // header; that is not a weakening — the attacker's page cannot
-                // read a cookie from another origin, which is the whole
-                // mechanism.
-                .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
+                .csrf(browserCsrf());
+
+        // A second filter chain may exist ahead of this one — the development
+        // sign-in declares its own, in a jar the deployable artifact does not
+        // contain. This method does not know about it and must not: what makes
+        // that safe is the artifact, not a condition here.
 
         if (registrations.getIfAvailable() != null) {
             http.oauth2Login(login -> login.userInfoEndpoint(userInfo -> {
@@ -145,5 +147,41 @@ public class SecurityConfig {
         }
 
         return http.build();
+    }
+
+    /**
+     * CSRF as a browser-based single-page application actually performs it.
+     *
+     * <p>The token goes in a cookie the page can read, which is what a separate
+     * front end needs in order to echo it in a header; that is not a weakening —
+     * an attacker's page cannot read a cookie from another origin, which is the
+     * whole mechanism.
+     *
+     * <p><b>The second line is the one that took a real browser to find.</b>
+     * Spring Security 6 loads the CSRF token lazily: the cookie is written only
+     * on a response where something actually read the token, and nothing on a
+     * plain {@code GET} does. A single-page application therefore reads
+     * everything successfully, never receives an {@code XSRF-TOKEN} cookie, and
+     * has its first write refused — which presents as a broken session rather
+     * than as a missing header, on the first save a new user ever attempts.
+     * Setting the request attribute name to null opts out of the deferred load,
+     * so the token is resolved on every request and the cookie is there before
+     * it is needed.
+     *
+     * <p>It stayed invisible for two phases because every test of a write used
+     * MockMvc's {@code csrf()} post-processor, which hands the request the token
+     * production had not issued. {@code DevSignInTest} performs both halves the
+     * way a browser does, over a socket, and is where this is now pinned.
+     *
+     * <p>Shared rather than copied because the development sign-in declares a
+     * filter chain of its own and a browser meets both. Two spellings of one
+     * policy is how the two drift apart, and the drift would show up as a cookie
+     * that exists in one half of a flow.
+     */
+    public static Customizer<CsrfConfigurer<HttpSecurity>> browserCsrf() {
+        CsrfTokenRequestAttributeHandler eager = new CsrfTokenRequestAttributeHandler();
+        eager.setCsrfRequestAttributeName(null);
+        return csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRequestHandler(eager);
     }
 }

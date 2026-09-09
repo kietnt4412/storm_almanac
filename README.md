@@ -64,6 +64,23 @@ cd frontend && npm install && npm run dev
 The Gradle wrapper is committed and pins Gradle 9.6.0, so a JDK 21 is the only
 prerequisite.
 
+### Signing in locally
+
+No OAuth provider is configured, because a client registration is issued against
+a redirect URI and nothing is deployed yet. To work on the signed-in half, start
+the backend from source and use the development sign-in:
+
+```bash
+cd backend && ./gradlew :app:bootRun
+```
+
+Then `GET /dev/sign-in?as=<any name>` — it creates the account if it is new and
+leaves a session behind. **It is a separate Gradle module that the deployable jar
+does not contain**, so it exists on `bootRun` and cannot exist on a deployment;
+`docker compose` builds that same jar and therefore has no sign-in either. See
+[ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md),
+and `DeployableJarTest`, which opens the artifact and proves it.
+
 ## Layout
 
 ```

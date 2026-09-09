@@ -72,6 +72,14 @@ roots relative to `backend/app`.
 The tests need a Docker daemon: several start a real Postgres through
 Testcontainers, because a schema is not proven by a migration that applies.
 
+To work on anything behind `/api/me`, start the backend from source and use the
+development sign-in — `GET /dev/sign-in?as=<name>`. It lives in
+`:modules:identity-dev`, which `:app` takes `testAndDevelopmentOnly`, so it is on
+`bootRun` and **not in the deployable jar**; `DeployableJarTest` opens the jar and
+proves it, and [ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md)
+says why the guard is absence rather than a profile. Do not add a configuration
+switch that turns it on.
+
 The same jar is also `gamedata-cli`. Onboarding a title is a bundle plus a
 parser adapter, and publishing it is a human approval, so the loop is
 *preview, ingest, publish*:

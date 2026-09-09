@@ -8,6 +8,11 @@ include(
     ":modules:common",
     ":modules:gamedata",
     ":modules:identity",
+    // Development-only sign-in. Included in the build, excluded from the
+    // deployable jar by :app declaring it `testAndDevelopmentOnly` — see the
+    // package documentation in io.stormalmanac.devsignin, and DeployableJarTest,
+    // which opens storm-almanac.jar and proves it is not in there.
+    ":modules:identity-dev",
     ":modules:player",
     ":modules:planner",
     ":modules:gacha",

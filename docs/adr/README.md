@@ -24,3 +24,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0014](0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md) | Sync is last-write-wins per key, against a clock that outlives the value | Accepted |
 | [0015](0015-game-data-is-sourced-first-hand-not-adapted.md) | Game data is sourced first-hand, not adapted from a community aggregator | Accepted |
 | [0016](0016-provenance-is-a-property-of-the-data.md) | Provenance is a property of the data, and publishing enforces it | Accepted |
+| [0017](0017-the-development-sign-in-is-absent-from-the-artifact.md) | The development sign-in is absent from the artifact, not disabled in it | Accepted |

@@ -36,6 +36,14 @@ class ModuleBoundaryTest {
                 .layer("common").definedBy("io.stormalmanac.common..")
                 .layer("gamedata").definedBy("io.stormalmanac.gamedata..")
                 .layer("identity").definedBy("io.stormalmanac.identity..")
+                // On this test's classpath and not on the product's: :app takes
+                // it `testAndDevelopmentOnly`. Declared anyway, because a layer
+                // left undeclared is a layer whose dependencies this rule
+                // silently ignores, and "the development sign-in may reach
+                // identity, and nothing may reach the development sign-in" is
+                // exactly the kind of thing that should be checked rather than
+                // assumed. DeployableJarTest is what proves it is not shipped.
+                .layer("devsignin").definedBy("io.stormalmanac.devsignin..")
                 .layer("player").definedBy("io.stormalmanac.player..")
                 .layer("stats").definedBy("io.stormalmanac.stats..")
                 .layer("planner").definedBy("io.stormalmanac.planner..")
@@ -49,14 +57,15 @@ class ModuleBoundaryTest {
 
                 // The shared kernel is depended on by everyone and depends on no one.
                 .whereLayer("common").mayOnlyBeAccessedByLayers(
-                        "gamedata", "identity", "player", "stats", "planner", "gacha", "api", "app", "adapters")
+                        "gamedata", "identity", "player", "stats", "planner", "gacha", "api", "app", "adapters",
+                        "devsignin")
                 .whereLayer("gamedata").mayOnlyBeAccessedByLayers(
                         "player", "stats", "planner", "gacha", "api", "app", "adapters")
                 .whereLayer("player").mayOnlyBeAccessedByLayers("planner", "gacha", "api", "app")
                 .whereLayer("stats").mayOnlyBeAccessedByLayers("planner", "api", "app", "store")
                 .whereLayer("planner").mayOnlyBeAccessedByLayers("api", "app", "raft")
                 .whereLayer("gacha").mayOnlyBeAccessedByLayers("api", "app")
-                .whereLayer("identity").mayOnlyBeAccessedByLayers("api", "app")
+                .whereLayer("identity").mayOnlyBeAccessedByLayers("api", "app", "devsignin")
                 // The API edge is the only module that knows about all the others,
                 // and nothing may reach back into it.
                 .whereLayer("api").mayOnlyBeAccessedByLayers("app")
@@ -64,6 +73,7 @@ class ModuleBoundaryTest {
                 // A core module depending on an adapter would be the exact failure the
                 // game-agnosticism rule exists to prevent, arriving through the back door.
                 .whereLayer("adapters").mayOnlyBeAccessedByLayers("app")
+                .whereLayer("devsignin").mayNotBeAccessedByAnyLayer()
                 .whereLayer("app").mayNotBeAccessedByAnyLayer()
 
                 // Track B is reachable only through the ports it implements.

@@ -18,6 +18,21 @@ dependencies {
     // exist, and it uses them from the CLI alone — see ModuleBoundaryTest.
     implementation(project(":adapters:reverse-1999"))
 
+    // The development-only sign-in, and the one dependency in this file that is
+    // about what the artifact must NOT contain.
+    //
+    // `testAndDevelopmentOnly` puts it on the classpath of `bootRun` and of the
+    // tests, and the Spring Boot plugin excludes it from `bootJar`. So a
+    // developer running the backend locally has a login, the test suite can
+    // exercise every authorization rule behind a real session, and the jar that
+    // gets deployed does not contain the classes at all — which is a stronger
+    // guarantee than any profile or property could give, because there is
+    // nothing left to switch on. DeployableJarTest opens the jar and checks.
+    //
+    // If this line ever becomes `implementation`, the guard is gone and nothing
+    // else in the build would notice; that test is what notices.
+    testAndDevelopmentOnly(project(":modules:identity-dev"))
+
     implementation(libs.springBootStarterWeb)
     implementation(libs.springBootStarterActuator)
     implementation(libs.springBootStarterJdbc)
@@ -44,4 +59,14 @@ dependencies {
 
 tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
     archiveFileName.set("storm-almanac.jar")
+}
+
+// DeployableJarTest opens the artifact and asserts what is and is not inside it
+// — the development sign-in must not be, SecurityConfig must be. That only means
+// anything against a jar built from the current sources, so the test task builds
+// one and is told where it is rather than guessing from a working directory.
+tasks.named<Test>("test") {
+    val deployable = tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar")
+    dependsOn(deployable)
+    systemProperty("storm-almanac.deployable-jar", deployable.get().archiveFile.get().asFile.absolutePath)
 }
