@@ -1072,6 +1072,41 @@ either: the core is shaded into the Testcontainers jar.
 
 ---
 
+## D1 — the deferral, in full
+
+*Moved out of the tracker 2026-09-09, when it was reversed. The live file keeps
+the reversal and what the deferral still costs to buy back; this is the entry as
+it stood for seven sessions.*
+
+
+**Decision:** no money will be spent on this project, so no hosting is
+provisioned. The `deploy` job in `ci.yml` is `if: false`.
+
+**What this costs, stated plainly:**
+
+- **Phase 0 cannot meet its exit criterion.** "A green pipeline deploying a
+  health endpoint to a real URL" is not achievable without a URL. Phase 0 is
+  closed *with this exception noted*, not met. Do not tick it.
+- **The Track B gate loses its meaning.** The gate exists so `almanac-store` and
+  `almanac-raft` are shaped by real write volume, real read patterns and real
+  failure modes. With nothing deployed there is no traffic to observe, and the
+  plan is explicit that infrastructure built against imagined requirements is a
+  toy.
+- **The headline CV claim weakens.** "I run a live tool for two games with real
+  users" is the sentence this project is arranged to earn.
+- **Deploy problems get discovered late.** Phase 0 puts the deploy first
+  precisely because that is when it is cheapest to fix.
+
+**Mitigation, agreed:** revisit hosting at **Phase 4**, not at the end. Phases
+1–3 need no server, so nothing is blocked between now and then.
+
+**Reversal trigger:** the moment any free-tier host is acceptable, or the moment
+Phase 4 is reached — whichever is sooner. Before starting Phase 7, re-read this
+and decide consciously whether Track B is still worth doing on synthetic
+workloads. It may be; that is a decision to make with open eyes, not by default.
+
+---
+
 ## E3 — Git prompted for an account on every push
 
 *Moved out of the tracker 2026-09-09: fixed, pinned, and finished with.*

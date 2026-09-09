@@ -27,41 +27,32 @@ being finished with is.
   treating any of it as proven in production.
 - **Phase 2 stays closed, criterion and scope both.** Nothing this session touched
   the model, the solver or the yields.
-- **Phase 4 — Frontend v1 and launch — is OPEN**, 2026-09-09, and
-  **[D1 is reversed](#d1-is-reversed-2026-09-09)**: the maintainer chose
-  **Vercel for the frontend and Render for the backend**, both free tier, which
-  is D1's own stated trigger. Nothing is deployed yet — the decision is made, the
-  wiring is not.
-  **The frontend has now been served and has spoken to the API**, which had never
-  happened; doing it found two defects a typecheck cannot
-  ([below](#what-is-still-unverified)).
-  **Still needs a human, and blocks the launch rather than the code:**
-  **Q3/F2 — asking the Kornblume maintainer**, the moment upstream numbers are
-  served publicly.
-  **Blocks the authenticated UI:** no provider is configured, so `oauth2Login` is
-  not installed and **there is no way to sign in locally at all** — every
-  `/api/me` route answers 401 and no login URL exists. The inventory editor, the
-  goal picker and the plan view cannot be built against a running backend until
-  that is solved, by real credentials or by a development-only sign-in.
+- **Phase 4 — Frontend v1 and launch — is OPEN**, 2026-09-09.
+  **[D1 is reversed](#d1--deployment-deferred-2026-09-02)** — Vercel and Render,
+  free tier, still no money — and **the frontend has been served and has spoken
+  to the API**, which had never happened. Nothing is deployed: the decision is
+  made, the wiring is **B5**.
+  **Two blockers, and they are different in kind.** *The code:* no provider is
+  configured, so there is no login URL and every `/api/me` route is 401 —
+  Phase 4's whole signed-in product has nothing to develop against (**N24**).
+  *The launch:* **Q3/F2 — asking the Kornblume maintainer**, which needs a human
+  and bites the moment upstream numbers are served publicly.
 - **Phase 0 stays closed by exception** — deploy deferred by D1 — and its box
   stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
-- **The remote, checked 2026-09-09:** `main` is `2864c95` (PR #13 merged, run
-  `34217574439` green). `dev` is `029fea7`, carrying N23 and the Phase 4 opening as [PR #14](https://github.com/kietnt4412/storm_almanac/pull/14) — CI-confirmed green, run `34298152921`, 0 failed and 16 skipped and they are exactly the three snapshot-gated classes. **Check this line at
-  session start rather than trusting it** — four sessions running opened on a
-  "merge PR #n" next action the maintainer had already done, because merging is a
-  click that happens between sessions. That is why it is a fact here and no
-  longer a next action.
+- **The remote, checked 2026-09-09 — re-check it, do not trust it.** `main` is
+  `2864c95` (PR #13 merged, run `34217574439`). `dev` is `029fea7` as
+  [PR #14](https://github.com/kietnt4412/storm_almanac/pull/14), carrying N23 and
+  the Phase 4 opening — green, run `34298152921`, 0 failed and 16 skipped and
+  they are exactly the three snapshot-gated classes. This is a fact here rather
+  than a next action because four sessions running opened on a "merge PR #n" the
+  maintainer had already clicked between sessions.
 - **The optimizer has been asked a question by something other than a test.**
   What has *not* happened is a real OAuth exchange: no provider is configured and
   no client secret exists, so login is installed only when one is.
-- **The time axis still has no real data to eat**, checked rather than assumed;
-  N14 is proven on the fixture alone. The reason is better than "the upstream is
-  silent" — **R1999 has no weekday rotation at all**, so `Availability.ALWAYS` is
-  *correct* rather than a gap, and its daily income **is conditional on spending
-  Activity**, so entering it as a `Reward` would make every plan systematically
-  too cheap. Read [the economy facts](docs/game-facts/reverse-1999-economy.md)
-  before treating either as an omission.
+- **The time axis still has no real data to eat**, checked rather than assumed —
+  and the reason is better than "the upstream is silent". See
+  [the unverified list](#what-is-still-unverified) before treating it as a gap.
 
 ### Two standing caveats, read them every session
 
@@ -126,13 +117,12 @@ this project computes is the stage a published community guide tells players to
 farm, and the optimizer's plan for a real goal set is cheaper than following that
 guide — **3 880 Activity against 4 017**, and the 4 017 does not cover the whole
 demand. Seventeen of the guide's twenty quoted drop rates land within three
-percentage points of a sample this project had never seen. See
-[the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
-
-Nine and not five because a drop yield carries how many runs it was observed over
-and the solver uses the conservative end of a 95% interval on it
+percentage points of a sample this project had never seen. Nine and not five
+because a yield carries how many runs it was observed over and the solver uses
+the conservative end of a 95% interval on it
 ([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)) —
-7% dearer and better agreement at once.
+7% dearer and better agreement at once. See
+[the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
 
 Still true from earlier phases: **the solver says how much it does not know**
 ([ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md)), **the
@@ -221,38 +211,33 @@ works". It does not mean that:
   fix is more sampling — see **Q2**.
 - **Nothing is deployed.** By decision — [D1](#d1--deployment-deferred-2026-09-02).
   The `deploy` job is `if: false` and there is no URL to smoke.
-- ~~**The frontend has never been served.**~~ **Retired 2026-09-09**: it is
-  served, a page has been loaded in a browser, and it renders the health endpoint
-  from a live backend. What it renders is still the Phase 0 shell — 108 lines,
-  one page, one call — so this now says only that the plumbing works, not that
-  there is a product. **Doing it found two defects five sessions of green builds
-  had not**, both of the kind a typecheck structurally cannot see: an unmapped
-  path under the public catalog answered **401 instead of 404** (a client reads
-  that as a dead session and sends the reader to a login page), and the app
-  **declared no colours at all**, so it rendered near-black on near-black under a
-  dark system theme. Both fixed, the first with a test.
+- **The frontend is served and is still the Phase 0 shell.** One page, one call.
+  That the plumbing works is not that there is a product. *(The old "never
+  served" entry, and the two defects retiring it turned up, are in
+  [the session log](docs/history/tracker-archive.md#session-log).)*
 - **No authenticated page has ever been rendered, and cannot be yet.** With no
   provider configured there is no login URL and every `/api/me` route is 401, so
-  the whole signed-in half of the frontend has nothing to develop against.
+  the whole signed-in half of the frontend has nothing to develop against —
+  **N24**.
 - **Nothing has ever called the API under load.** Every request loads a whole
   version — fifteen queries — a deliberate deferral written into
   `GameDataReadModel`'s javadoc. The number to beat does not exist yet.
 - **The time axis has never met real data, and on this game it never will.**
-  Rewards, rotation and shops are modelled or refused on the strength of the
-  synthetic fixture alone, and on the real 3.5 patch the whole of N14 reduces to
-  one energy row. **Do not read "the optimizer has a calendar" as "the optimizer
-  schedules real weeks."** The rotation machinery waits for a game that rotates —
-  Phase 11 is the next chance. See
+  Rewards, rotation and shops are modelled or refused on the synthetic fixture
+  alone, and on the real 3.5 patch the whole of N14 reduces to one energy row.
+  **Do not read "the optimizer has a calendar" as "the optimizer schedules real
+  weeks."** This is not the upstream being silent: **R1999 has no weekday
+  rotation at all**, so `Availability.ALWAYS` is *correct*, and its daily income
+  **is conditional on spending Activity**, so entering it as a `Reward` would make
+  every plan systematically too cheap. The rotation machinery waits for a game
+  that rotates — Phase 11 is the next chance. See
   [the economy facts](docs/game-facts/reverse-1999-economy.md).
-- **Three shapes the model cannot express**, each of which would be a *silent*
-  wrong answer if faked. Not defects in what shipped —
-  [details and provenance](docs/game-facts/reverse-1999-economy.md):
-  **(a) an item that restores energy** (Picrasma Candy, 60 Activity) — `Stage` is
-  the only source touching the energy budget and only ever consumes;
-  **(b) a reward conditional on spending energy** — R1999's Activeness is a rebate
-  on farming, not income, which is why leaving it out is correct;
-  **(c) a lifetime purchase limit** — `Shop` caps at "n per `Period`"; permanent
-  stock is "five, ever".
+- **Three shapes the model cannot express**, each a *silent* wrong answer if
+  faked, none a defect in what shipped: **an item that restores energy**
+  (`Stage` is the only source touching the budget and only ever consumes),
+  **a reward conditional on spending energy**, and **a lifetime purchase limit**
+  (`Shop` caps at "n per `Period`", not "five, ever"). Examples and provenance in
+  [the economy facts](docs/game-facts/reverse-1999-economy.md).
 - **The adapter converts less than the upstream publishes** — no shop offers, no
   alternative resonance-pattern costs, no unreleased content — each with a reason
   in `KornblumeAdapter`'s javadoc. That sentence is only reassuring when somebody
@@ -274,26 +259,23 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **N24 — Make a signed-in page developable.** Phase 4's whole product is
-      behind `/api/me`, and **nothing can sign in**: no provider is configured,
-      so `oauth2Login` is not installed, there is no login URL, and every
-      account-scoped route answers 401. Two ways out and they are not equivalent.
-      **Register a real provider** — which needs the deployed URL, so it lands
-      with **B5** and finally runs the token exchange that has never run.
-      **Or a development-only sign-in**, which unblocks the UI immediately and is
-      the more dangerous of the two: it must be impossible to enable in
-      production, by construction rather than by configuration, and it proves
-      nothing about the exchange. **Doing the second is not an excuse to skip the
+- [ ] **N24 — Make a signed-in page developable.** Phase 4's product is all
+      behind `/api/me` and **nothing can sign in**: no provider configured, so no
+      `oauth2Login`, no login URL, 401 everywhere. Two ways out, not equivalent.
+      **A real provider** needs the deployed URL, so it lands with **B5** and
+      finally runs the exchange that never has. **A development-only sign-in**
+      unblocks the UI now and is the more dangerous: it must be impossible to
+      enable in production *by construction*, not by configuration, and it proves
+      nothing about the exchange. **The second is not an excuse to skip the
       first.**
 - [ ] **N25 — Build Phase 4's screens.** Inventory editor for fast bulk entry,
       goal picker, plan view with the per-stage breakdown, catalog browse and
-      search with the personalized overlay on every character page. **The overlay
-      is the whole argument for having a catalog**, so it ships with it.
-      Blocked on **N24** for everything signed-in; the catalog half is public and
-      is not.
-      **The client half of N23 belongs here too.** The merge exists on the
-      server; nothing queues an edit, retries it or stores it offline, and that
-      is what makes the PWA offline rather than merely installable.
+      search with the personalized overlay on every character page — **the
+      overlay is the whole argument for having a catalog**, so it ships with it.
+      Blocked on **N24** for everything signed-in; the catalog half is public.
+      **The client half of N23 is here too:** the merge exists on the server and
+      nothing queues, retries or stores an edit offline, which is the difference
+      between a PWA that is offline and one that is merely installable.
 - [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
       `EnergyMip.matchingDays` reads weekdays in **UTC** — a game assumption in a
       game-agnostic module. R1999 Global rolls over at **05:00 UTC−5, weekly
@@ -331,7 +313,7 @@ Ordered. Completed ones move to
       standalone PR while the pipeline is quiet: six action bumps at once want
       their own green run to attribute a failure to.
 - [ ] **B5 — Wire the real deploy: Vercel and Render.** No longer deferred —
-      [D1 is reversed](#d1-is-reversed-2026-09-09) and the hosts are chosen. The
+      [D1 is reversed](#d1--deployment-deferred-2026-09-02) and the hosts are chosen. The
       `deploy` job is still `if: false` and stays that way until there is a real
       URL to smoke, which is what this action produces. **Settle the two-origin
       question first**, in D1's reversal note: a Vercel rewrite of `/api/*` to
@@ -494,58 +476,33 @@ reasoning later — including you, in month six.
 
 ### D1 · Deployment deferred (2026-09-02)
 
-**Decision:** no money will be spent on this project, so no hosting is
-provisioned. The `deploy` job in `ci.yml` is `if: false`.
+**REVERSED 2026-09-09.** Heading kept verbatim so every link to it still lands.
 
-**What this costs, stated plainly:**
+**Was:** no money spent, so no hosting; the `deploy` job is `if: false`.
+**Now:** both halves of its own reversal trigger fired at once — Phase 4 reached,
+and a free tier accepted. **Vercel for the frontend, Render for the backend.**
+Still no money, so the premise stands; what changed is that a free tier is
+acceptable. [The entry in full is in the archive](docs/history/tracker-archive.md#d1--the-deferral-in-full).
 
-- **Phase 0 cannot meet its exit criterion.** "A green pipeline deploying a
-  health endpoint to a real URL" is not achievable without a URL. Phase 0 is
-  closed *with this exception noted*, not met. Do not tick it.
-- **The Track B gate loses its meaning.** The gate exists so `almanac-store` and
-  `almanac-raft` are shaped by real write volume, real read patterns and real
-  failure modes. With nothing deployed there is no traffic to observe, and the
-  plan is explicit that infrastructure built against imagined requirements is a
-  toy.
-- **The headline CV claim weakens.** "I run a live tool for two games with real
-  users" is the sentence this project is arranged to earn.
-- **Deploy problems get discovered late.** Phase 0 puts the deploy first
-  precisely because that is when it is cheapest to fix.
+**What the deferral cost is what the next sessions have to buy back**, and it is
+why this stays here rather than being deleted: **Phase 0's box is still unticked**
+(no URL has answered 200), **the Track B gate has no meaning** until there is real
+traffic to shape `almanac-store` against, and **deploy problems really were
+discovered late** — Phase 0 put the deploy first precisely because that is when
+it is cheapest to fix, and nothing has tested it since.
 
-**Mitigation, agreed:** revisit hosting at **Phase 4**, not at the end. Phases
-1–3 need no server, so nothing is blocked between now and then.
+**Nothing is deployed yet.** The decision is made, the wiring is not — **B5**.
+Two consequences of the split to settle before writing any of it:
 
-**Reversal trigger:** the moment any free-tier host is acceptable, or the moment
-Phase 4 is reached — whichever is sooner. Before starting Phase 7, re-read this
-and decide consciously whether Track B is still worth doing on synthetic
-workloads. It may be; that is a decision to make with open eyes, not by default.
-
-### ~~D1 is reversed, 2026-09-09~~
-
-Both halves of the trigger fired at once — Phase 4 opened, and the maintainer
-accepted a free tier: **Vercel for the frontend, Render for the backend.** Still
-no money spent, so D1's premise is intact; what changed is that a free tier is
-acceptable. **The entry stays above rather than being deleted**, because
-everything it says the deferral cost is what the next few sessions have to buy
-back — the Track B gate gets its meaning again only when there is real traffic,
-and deploy problems really are being discovered late, which is the point of the
-next line.
-
-**Nothing is deployed yet.** The decision is made and the wiring is not, and the
-`deploy` job in `ci.yml` is still `if: false` — **B5**. Two consequences of the
-split are worth deciding before writing any of it:
-
-- **Two origins or one.** The backend's whole session model is same-origin: a
-  cookie session, CSRF in a cookie the page reads, and an OAuth redirect landing
-  back where it started. A Vercel rewrite proxying `/api/*` to Render keeps all
-  of that untouched and costs an extra hop; two real origins costs CORS,
-  `SameSite=None; Secure`, and a redirect that has to cross back. **The rewrite
-  is the cheaper answer and should be taken deliberately, not by default** — the
-  hop is on the path of a two-second solve promise.
-- **The free tier sleeps.** A backend that cold-starts is a first request
-  measured in tens of seconds, against an optimizer whose budget is two. That is
-  a product decision (a warm-up ping, a loading state that tells the truth, or
-  accepting it) and it should be made before five strangers meet it.
+- **Two origins or one.** The backend's session model is same-origin throughout:
+  a cookie session, CSRF in a cookie the page reads, an OAuth redirect landing
+  back where it started. A Vercel rewrite of `/api/*` to Render preserves all of
+  it for one extra hop; two real origins cost CORS, `SameSite=None; Secure`, and
+  a redirect that has to cross back. **The rewrite is cheaper and should be taken
+  deliberately** — that hop sits on the path of a two-second solve promise.
+- **The free tier sleeps.** A cold start is tens of seconds against an optimizer
+  budgeted at two. Warm-up ping, an honest loading state, or accept it — decide
+  before five strangers meet it.
 
 ---
 
