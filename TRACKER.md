@@ -13,29 +13,35 @@ being finished with is.
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks).
   [README.md](README.md) is the public face; [CLAUDE.md](CLAUDE.md) is the
   working agreement.
-- Last updated: **2026-09-09** (fourteenth session)
+- Last updated: **2026-09-09** (fifteenth session)
 
 ---
 
 ## Status
 
-- **Phase 3 — Identity and player state — is CLOSED**, 2026-09-08, criterion met,
-  and **its scope is now closed too**: N23 built the sync the phase named and did
-  not deliver. A plan is computed end-to-end from stored state on a real account,
-  and two devices editing that state merge per key rather than overwriting each
-  other. Read [what is still unverified](#what-is-still-unverified) before
-  treating any of it as proven in production.
-- **Phase 2 stays closed, criterion and scope both.** Nothing this session touched
-  the model, the solver or the yields.
+- **Phases 1, 2 and 3 stay closed, criterion and scope.** One line each on the
+  [phase board](#track-a--product); the qualifications that matter are in
+  [what is still unverified](#what-is-still-unverified).
 - **Phase 4 — Frontend v1 and launch — is OPEN**, 2026-09-09.
   **[D1 is reversed](#d1--deployment-deferred-2026-09-02)** — Vercel and Render,
-  free tier, still no money — and **the frontend has been served and has spoken
-  to the API**, which had never happened. Nothing is deployed: the decision is
-  made, the wiring is **B5**.
-  **Two blockers, and they are different in kind.** *The code:* no provider is
-  configured, so there is no login URL and every `/api/me` route is 401 —
-  Phase 4's whole signed-in product has nothing to develop against (**N24**).
-  *The data:* see the next line — F2 is gone, and what replaced it is bigger.
+  free tier, still no money. Nothing is deployed: the decision is made, the
+  wiring is **B5**.
+  **The code blocker is gone.** N24 is done: **a browser has signed in, read
+  `/api/me`, created a profile and signed out**, through a development sign-in
+  that the deployable jar does not contain
+  ([ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md)).
+  The screens themselves are **N25** and none of them exist yet.
+  *The data blocker stands:* see the next line — F2 is gone, and what replaced it
+  is bigger.
+- **The first write from a browser would have been refused, and now is not.**
+  Spring Security 6 loads the CSRF token lazily, so no `XSRF-TOKEN` cookie was
+  ever issued and a single-page application could read everything and write
+  nothing. It survived two phases because every test of a write used MockMvc's
+  `csrf()` post-processor — the tests supplied the thing that was missing.
+  `SecurityConfig.browserCsrf` is the fix, shared by both filter chains, and
+  `DevSignInTest` pins it over a socket. **Read this as the argument for a
+  development sign-in whose sessions are ordinary sessions**: one that took a
+  shortcut would have hidden it.
 - **The project is going first-hand on game data**, decided 2026-09-09 —
   [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md),
   superseding 0009 on its conclusion and closing **Q2, Q3, F1 and F2** at once.
@@ -75,20 +81,33 @@ being finished with is.
 - **Phase 0 stays closed by exception** — deploy deferred by D1 — and its box
   stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
-- **The remote, checked 2026-09-09 — re-check it, do not trust it.** `main` is
-  `3f6ec02` (PR #14 merged, which happened *during* the previous session's write-up
-  and is why its Status line was already stale). `dev` is `1206f62` as
-  [PR #15](https://github.com/kietnt4412/storm_almanac/pull/15), carrying ADR 0015's
-  own commit plus N26 and ADR 0016 — **green, run `34308177004`**, 0 failed and
-  16 skipped, and they are exactly the three snapshot-gated classes (8 + 5 + 3).
-  This is a fact here rather than a next action because five sessions running
-  opened on a "merge PR #n" the maintainer had already clicked between sessions.
+- **The remote, checked 2026-09-09 — re-check it, do not trust it.** `main` was
+  `3f6ec02` at session start. `dev` carried `1206f62` as
+  [PR #15](https://github.com/kietnt4412/storm_almanac/pull/15) — green, run
+  `34308177004` — and this session pushed three commits on top: `164be5a` the
+  Dockerfile fix, `d03d03e` N24 and ADR 0017, and this tracker update. **Whether
+  they landed in PR #15 or a new one depends on whether #15 was merged between
+  sessions, so look rather than assume.** This is a fact here rather than a next
+  action because five sessions running opened on a "merge PR #n" the maintainer
+  had already clicked between sessions.
   **A note the next session needs:** CI fires on `pull_request` and on push to
-  `main` only, so **a push to `dev` with no open PR runs nothing.** That happened
-  this session and is why PR #15 exists.
+  `main` only, so **a push to `dev` with no open PR runs nothing.**
 - **The optimizer has been asked a question by something other than a test.**
   What has *not* happened is a real OAuth exchange: no provider is configured and
-  no client secret exists, so login is installed only when one is.
+  no client secret exists, so login is installed only when one is. The
+  development sign-in does not change that and is not meant to — it builds a
+  principal directly, and ADR 0017's reversal trigger is deleting it the moment a
+  real provider works locally.
+- **`backend/Dockerfile` has been broken since Phase 1 and the table below said
+  it was verified.** It copies `modules`, `substrate` and `app`; `adapters/`
+  arrived with Phase 1 and no COPY line arrived with it, while
+  `settings.gradle.kts` includes `:adapters:reverse-1999`. **Every image build
+  since has failed in six seconds** — Gradle 9 refuses to configure a project
+  whose directory does not exist, so it never reaches the compile that would also
+  have failed. Reproduced locally rather than argued. Fixed 2026-09-09, and it is
+  **B5**'s path, since Render builds from this file. Same shape as the stale
+  stage table: true when written, never re-checked, load-bearing for something
+  else.
 - **The time axis still has no real data to eat**, checked rather than assumed —
   and the reason is better than "the upstream is silent". See
   [the unverified list](#what-is-still-unverified) before treating it as a gap.
@@ -180,10 +199,10 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **257 tests**, 0 failed, 0 skipped locally with snapshots present. **241 on CI**, because the same 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
-| CI workflow | **Green on `main`** | Run `34217574439` (`2864c95`, PR #13 merged): 0 failed, **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. Action deprecations pending — **N5** |
-| Game data pipeline (Phase 1) | **Closed and stable** | Model, schema, ingest, diff and CLI, [described in full in the archive](docs/history/tracker-archive.md#closed-phases-in-full). `V2`–`V4`, 28 tables, seven invariants in `GameDataSchemaTest` proven on two real R1999 patches; parser and writer pinned to each other by a round trip (ADR 0008); onboarding a title is *adapt, preview, ingest, publish* and publishing is a human approval, not a flag. `Drop` carries `sampledRuns`, where 0 means *declared* |
-| Parser adapters | **One — and demoted to a cross-check by [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md), now in code** | Still reads what the upstream reads and **its output is no longer what the product will ship**. Since ADR 0016 it **hard-codes `THIRD_PARTY` provenance and cannot be told otherwise**, so what it produces fails a plain `publish` — there is no call site to launder data through. Kept, not deleted: diffing the first self-sourced bundle against an independent reading of the same patch is worth more as a check than it ever was as a source. `:adapters:reverse-1999`, 25 tests. Newest `stages<major>_<minor>_greedy.json`, counts divided by the sampled run count and **that count carried onto every `Drop`**; `count: 1` converts as declared, because here it marks a fixed-reward stage |
+| Backend build | **Green** | **264 tests**, 0 failed, 0 skipped locally with snapshots present. **248 on CI**, because the same 16 snapshot-gated ones skip. `:app:test` now depends on `:app:bootJar` — `DeployableJarTest` reads the artifact. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
+| CI workflow | **Green** | Latest is run `34308177004` on `dev` (PR #15); see *Status* for the remote, checked rather than trusted. **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. Action deprecations pending — **N5** |
+| Game data pipeline (Phase 1) | **Closed and stable** | Model, schema, ingest, diff and CLI, [in full in the archive](docs/history/tracker-archive.md#closed-phases-in-full). `V2`–`V4`, 28 tables, seven invariants proven on two real R1999 patches; parser and writer pinned by a round trip (ADR 0008); publishing is a human approval, not a flag. `Drop` carries `sampledRuns`, where 0 means *declared* |
+| Parser adapters | **One — and demoted to a cross-check by [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md), now in code** | `:adapters:reverse-1999`, 25 tests. **Its output is no longer what the product will ship**, and since ADR 0016 it hard-codes `THIRD_PARTY` provenance and cannot be told otherwise, so it fails a plain `publish` — there is no call site to launder data through. Kept, not deleted: diffing the first self-sourced bundle against an independent reading of the same patch is worth more as a check than it ever was as a source |
 | Provenance | **Done — written, enforced, not yet read back out** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). A bundle declares `Provenance` records, defaults every fact to one (`sourcedBy`) and overrides per `FactRef` (`kind:slug`); `V7` materialises **one row per declared fact**, because a default is an authoring convenience and a database that stored it could not answer the question alone. **`publish` refuses a version that is not first-hand and names the facts**; `publish(…, true)` and the CLI's `second-hand` word are the explicit exception. The first-hand policy lives in `Provenance.Origin` and nowhere else — the migration constrains the set and says nothing about which count. **Silence parses and cannot publish** (`UNRECORDED`). Nothing serves it yet: that is N25's catalog page |
 | Game data API | **Served and verified** | Five game-data routes plus health, version-pinnable, every response carrying its version and attribution. 10 HTTP tests plus a hand check against `docker compose up` |
 | Demand resolution | **Done** | Goals + roster + upgrade graph → a demand vector, walking the DAG backwards. Refuses by name rather than guessing: unreachable states, unknown entities, probabilistic goals, ambiguous routes |
@@ -197,14 +216,15 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Community benchmark | **Done, and now ADR 0011's regression test** | Twenty published claims against what this model computes, ranked on the yields the **solver** uses with the raw ranking printed beside them |
 | Statistics primitives | **Done** | `WilsonInterval` (6 tests) for "did it drop", `PoissonRateInterval` (7) for "how many dropped", `PityRule` (9) against both games' published rates |
 | `identity` / `player` schema | **Applied and round-tripped** | `V5` (6 tables). Four decisions in its header: **no FK crosses a schema**, nothing points into `gamedata` (version-scoped rows, an inventory outlives a patch), an identity is `(provider, subject)` and **never an email**, and absent means zero with a `CHECK` to keep the two representations from diverging. `V6` adds the two sync tables |
-| Sign-in | **Done, never exchanged a token** | Account created while the principal is built, not in a success handler. Everything provider-specific is `SignIn.from` — a pure function; OIDC says `sub`, Discord says `id`. **`oauth2Login` installs only when a provider is configured**, because no client secret exists (D1) and a blank client id fails a `ClientRegistration` outright. The deny is not conditional |
+| Sign-in | **Done, never exchanged a token** | Account created while the principal is built, not in a success handler. Everything provider-specific is `SignIn.from` — a pure function; OIDC says `sub`, Discord says `id`. **`oauth2Login` installs only when a provider is configured**, because no client secret exists (D1) and a blank client id fails a `ClientRegistration` outright. The deny is not conditional. CSRF is `SecurityConfig.browserCsrf`, shared with the development chain: the token is resolved eagerly, because the deferred default never issues the cookie a page needs to write |
 | Player API | **Served and authorized** | Everything under `/api/me`, so **no route takes an account id** and none's authorization can be forgotten. `OwnedProfiles.require` is the one check; another account's profile is **404, not 403**, so an id is not an enumeration oracle. PUT replaces a whole aggregate; PATCH merges per key |
 | Offline sync | **Done — inventory and roster** | `PATCH`, last-write-wins per key ([ADR 0014](docs/adr/0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md)). The clock is a **table, not a column**, because a removal deletes its row and a tombstone cannot live on the row it outlives; a `PUT` also writes a whole-aggregate **watermark**, because a full save speaks for keys that have never existed and no per-key row can say that. Client timestamps, clamped to the server's clock. The response names the keys that lost. **Goals have no PATCH** — an ordered list has no per-key merge |
 | Plan route | **Done — Phase 3's criterion** | `POST /api/me/profiles/{id}/plan`, synchronous because a two-second budget is a promise the optimizer can keep. Goals, inventory and roster come from Postgres; the body carries only `energyPerDay` and `horizonDays`. `?version=N` pins the patch |
 | Bean wiring | **`Optimizer` and `SolveCache` are beans; `SolveCoordinator` is not** | Registered now because they finally sit on a path a real request takes — which is what N15's refusal was waiting for. The coordinator hands back a ticket for a solve that does not fit the synchronous budget, and there is no asynchronous surface for a ticket to be useful on |
 | Architecture tests | **Passing** | `ModuleBoundaryTest` (Track B layers optional until they exist) and `GameAgnosticismTest` (source scan over planner/gacha/stats) |
-| Docker Compose | **Verified** | `up --build` from cold: image builds, all three services healthy |
-| Frontend | **Served, and still the Phase 0 shell** | 108 lines, one page, one call — it renders `/api/health` from a live backend and nothing else. `npm run dev --prefix frontend` (`.claude/launch.json`) proxies `/api` to `localhost:8080`, so local is same-origin. **Serving it found the two defects five sessions of green builds had not** — see [unverified](#what-is-still-unverified) |
+| Docker Compose | **Repaired 2026-09-09; it had been broken since Phase 1, and no image has been built end to end since** | The Dockerfile never learned about `adapters/`. **Verified rather than reasoned:** the tree the old file copied was reproduced locally and `:app:bootJar` fails on it in six seconds — Gradle 9 refuses to configure `:adapters` without its directory, so it never reaches compilation. The fixed tree builds the jar, and that jar contains no development sign-in. **What is still unproven is the image itself**: the in-container Gradle download reached 10% in twenty minutes and was abandoned, so `up --build` has not completed this session. A COPY list is a second copy of the module list and drifts in silence — anything added beside `modules`, `adapters`, `substrate`, `app` needs a line there |
+| Development sign-in | **Done, and absent from the artifact** | [ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md). `:modules:identity-dev` is `testAndDevelopmentOnly` on `:app`: on `bootRun` and the test classpath, **excluded from `bootJar`**, so no property or profile can reach it. `GET /dev/sign-in?as=<name>` mints an ordinary `AuthenticatedAccount` through the same `upsertFromOidc` the OAuth services use, provider `dev`. Its filter chain is declared in that module — `SecurityConfig` has no hook for it. `DeployableJarTest` opens `storm-almanac.jar`, walks the nested jars and proves both halves. **A developer who wants a login runs `bootRun`; compose builds the artifact, which does not have one** |
+| Frontend | **Signed in, and still one page** | It renders health, the account, its profiles and a button that creates one — a read, a write and the CSRF token in between, all observed in a browser. That is N24's proof and **not** a product: the inventory editor, goal picker, plan view and catalog are **N25**. `npm run dev --prefix frontend` (`.claude/launch.json`, which now also carries `api`) proxies `/api` **and `/dev`** to `localhost:8080`, so local is same-origin. The sign-in URL is chosen behind `import.meta.env.DEV`, so the development one is not in a production bundle |
 | `gacha`, Track B | **Empty** | Interfaces and package docs. Track B is [gated](#the-gate) |
 
 ### What is still unverified
@@ -219,18 +239,22 @@ works". It does not mean that:
   anything real.** The stale stage table that cost five sessions of plans would
   not have been caught by any test CI runs, and was not caught by any test at
   all — a person went looking.
-- **The OAuth exchange has never run.** N22 replaced the older "the optimizer has
-  never been asked a question by anything but a test" — it has now — but what
-  makes it reachable is a principal, and **no principal has ever come from a real
-  provider.** No client id, no secret, no redirect followed, because there is no
+- **The OAuth exchange has never run.** No principal has ever come from a real
+  provider: no client id, no secret, no redirect followed, because there is no
   URL to register one against (D1). Tested: the account, the principal, and every
-  authorization rule around them. Untested: the token exchange. The first
-  deployment is where this stops being theoretical.
-- **The end-to-end test goes through MockMvc, not a socket** — a deliberate step
-  down from `GameDataApiTest`'s real HTTP, because an authenticated session cannot
-  be minted over one without an authorization server to redirect to. The filter
-  chain, dispatcher, Jackson and database are exercised; **the servlet container
-  is not, and that is the layer that caught Phase 0's 401.**
+  authorization rule around them, now including over a socket. Untested: the
+  token exchange. **The development sign-in does not narrow this by one inch** —
+  it builds a principal directly — and reading N24 as "sign-in works" is exactly
+  the misreading ADR 0017 is written to prevent. The first deployment is where
+  this stops being theoretical.
+- **Most authenticated tests still go through MockMvc**, which is a deliberate
+  step down from real HTTP and no longer a forced one. `DevSignInTest` is the
+  exception and the first of its kind — a real port, a hand-kept cookie jar, no
+  security post-processor — so the servlet container is now exercised on the
+  signed-in path it never was. `PlanFromStoredStateTest` and `OfflineSyncTest`
+  have not been moved: they could be now, and until they are, **the layer that
+  caught Phase 0's 401 is covered for sign-in and profiles and not for the plan
+  or the merge.**
 - **No two real devices have ever synced.** N23's every scenario is one MockMvc
   request following another inside one JVM. The concurrency the merge SQL is
   shaped for — two requests interleaving on the same key — is argued for and not
@@ -258,14 +282,16 @@ works". It does not mean that:
   fix is more sampling — see **Q2**.
 - **Nothing is deployed.** By decision — [D1](#d1--deployment-deferred-2026-09-02).
   The `deploy` job is `if: false` and there is no URL to smoke.
-- **The frontend is served and is still the Phase 0 shell.** One page, one call.
-  That the plumbing works is not that there is a product. *(The old "never
-  served" entry, and the two defects retiring it turned up, are in
+- **The frontend is one page that signs in, and that is not a product.** It
+  proves the plumbing — a read, a write, a session — and it is not the inventory
+  editor, the goal picker, the plan view or the catalog, none of which exist
+  (**N25**). *(The earlier "never served" and "no authenticated page" entries,
+  and the defects retiring each of them turned up, are in
   [the session log](docs/history/tracker-archive.md#session-log).)*
-- **No authenticated page has ever been rendered, and cannot be yet.** With no
-  provider configured there is no login URL and every `/api/me` route is 401, so
-  the whole signed-in half of the frontend has nothing to develop against —
-  **N24**.
+- **Nothing has ever run against a jar built from a Dockerfile that works.** The
+  image build was repaired this session and the compose stack has not been stood
+  up end to end since. The **absence** of the development sign-in from that jar
+  *is* proven, by `DeployableJarTest`, on every build.
 - **Nothing has ever called the API under load.** Every request loads a whole
   version — fifteen queries — a deliberate deferral written into
   `GameDataReadModel`'s javadoc. The number to beat does not exist yet.
@@ -332,23 +358,17 @@ Ordered. Completed ones move to
       [authoring a first-hand bundle](docs/game-facts/authoring-a-first-hand-bundle.md).
       **Cheapest first read: the summon rules screen**, which closes the live half
       of **Q4** and is `PUBLISHER_DISCLOSURE` rather than a sample.
-- [ ] **N24 — Make a signed-in page developable.** Phase 4's product is all
-      behind `/api/me` and **nothing can sign in**: no provider configured, so no
-      `oauth2Login`, no login URL, 401 everywhere. Two ways out, not equivalent.
-      **A real provider** needs the deployed URL, so it lands with **B5** and
-      finally runs the exchange that never has. **A development-only sign-in**
-      unblocks the UI now and is the more dangerous: it must be impossible to
-      enable in production *by construction*, not by configuration, and it proves
-      nothing about the exchange. **The second is not an excuse to skip the
-      first.**
 - [ ] **N25 — Build Phase 4's screens.** Inventory editor for fast bulk entry,
       goal picker, plan view with the per-stage breakdown, catalog browse and
       search with the personalized overlay on every character page — **the
       overlay is the whole argument for having a catalog**, so it ships with it.
-      Blocked on **N24** for everything signed-in; the catalog half is public.
-      **The client half of N23 is here too:** the merge exists on the server and
-      nothing queues, retries or stores an edit offline, which is the difference
-      between a PWA that is offline and one that is merely installable.
+      **No longer blocked**: N24 gives a signed-in session to build against, and
+      the frontend already reads `/api/me`, writes through it and carries the
+      CSRF token. **The client half of N23 is here too:** the merge exists on the
+      server and nothing queues, retries or stores an edit offline, which is the
+      difference between a PWA that is offline and one that is merely
+      installable. **The catalog half is also where provenance is first read back
+      out** — it is written and served nowhere (ADR 0016).
 - [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
       `EnergyMip.matchingDays` reads weekdays in **UTC** — a game assumption in a
       game-agnostic module. R1999 Global rolls over at **05:00 UTC−5, weekly
@@ -393,7 +413,14 @@ Ordered. Completed ones move to
       Render keeps the same-origin session, CSRF and OAuth redirect the backend
       was built around; two real origins do not. **This is also what unblocks the
       OAuth exchange** — a provider registration needs a redirect URI, and a
-      redirect URI needs this. Ties to **N24**.
+      redirect URI needs this. **N24 is done and did not close it**: the sign-in
+      it delivered is a development one, and
+      [ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md)'s
+      reversal trigger is deleting `:modules:identity-dev` once a real provider
+      works locally. **This action ends with that module gone**, not merely with
+      a URL. It is also where the image build stops being theoretical — Render
+      builds from `backend/Dockerfile`, which had never copied `adapters/` and
+      was repaired 2026-09-09.
 
 ---
 
@@ -426,10 +453,10 @@ a session would be wrong not to read.
       OAuth exchange has never run, and no two real devices have ever synced.
 
 - [ ] **Phase 4 · Frontend v1 — and launch** — 2.5 weeks — **OPEN 2026-09-09.**
-      Landed so far: the app is served, a page has been loaded in a browser and
-      it speaks to a live API, and hosting is decided (Vercel + Render, D1
-      reversed). Nothing is deployed and nothing signed-in can be built yet —
-      **N24**.
+      Landed so far: the app is served, hosting is decided (Vercel + Render, D1
+      reversed), and **a browser has signed in, read its account, created a
+      profile and signed out** (N24, ADR 0017). Nothing is deployed, and the
+      screens the criterion is about do not exist — **N25**.
       Inventory editor built for fast bulk entry, goal picker, plan view with
       per-stage breakdown, offline PWA. Plus catalog browse and search with the
       personalized overlay on every character page — that overlay is the whole
@@ -544,20 +571,16 @@ acceptable. [The entry in full is in the archive](docs/history/tracker-archive.m
 **What the deferral cost is what the next sessions have to buy back:** Phase 0's
 box is still unticked, the Track B gate has no meaning without real traffic, and
 deploy problems really were discovered late — which is why Phase 0 put the deploy
-first, and nothing has tested it since.
+first. The Dockerfile being broken since Phase 1 and nobody noticing is that cost
+arriving.
 
-**Nothing is deployed yet.** The decision is made, the wiring is not — **B5**.
-Two consequences of the split to settle before writing any of it:
-
-- **Two origins or one.** The backend's session model is same-origin throughout:
-  a cookie session, CSRF in a cookie the page reads, an OAuth redirect landing
-  back where it started. A Vercel rewrite of `/api/*` to Render preserves all of
-  it for one extra hop; two real origins cost CORS, `SameSite=None; Secure`, and
-  a redirect that has to cross back. **The rewrite is cheaper and should be taken
-  deliberately** — that hop sits on the path of a two-second solve promise.
-- **The free tier sleeps.** A cold start is tens of seconds against an optimizer
-  budgeted at two. Warm-up ping, an honest loading state, or accept it — decide
-  before five strangers meet it.
+**Nothing is deployed yet.** The decision is made, the wiring is not — **B5**,
+which carries the two consequences to settle before writing any of it: **one
+origin or two** (a Vercel rewrite of `/api/*` preserves the same-origin cookie,
+CSRF and redirect the backend is built around; two real origins do not, and the
+hop sits on a two-second solve promise), and **the free tier sleeps** (a cold
+start is tens of seconds against a budget of two — warm-up ping, honest loading
+state, or accept it, decided before five strangers meet it).
 
 ---
 
@@ -595,16 +618,22 @@ variable, which is the whole fix. Only worth reading if it comes back:
 Docker Desktop takes minutes to start here and `docker info` hangs rather than
 failing while it does — **but waiting is only sometimes the answer**, and on
 2026-09-09 it was not: the GUI processes were up and the engine was never coming.
-**One command tells the two apart:**
+
+**Corrected 2026-09-09 (fifteenth session): `com.docker.service` is not the
+test.** The earlier note said `Stopped` means somebody has to start Docker
+Desktop by hand. That session read `Stopped` **and the engine answered anyway** —
+`docker info` returned server version 29.7.2 and Testcontainers ran all session.
+On the WSL2 backend the Windows service is not the engine, so `Stopped` is a hint
+at best and a false alarm at worst. **Ask the engine:**
 
 ```bash
-powershell -NoProfile -Command "wsl -l -v; Get-Service com.docker.service"
+docker info --format '{{.ServerVersion}}'
 ```
 
-`com.docker.service` = `Stopped` means somebody has to start Docker Desktop by
-hand and accept the elevation prompt. A session cannot — `Start-Service` from a
-non-elevated shell fails with *Cannot open com.docker.service service on
-computer '.'* — so **ask rather than keep waiting.**
+A version means it is up, whatever the service says. If that hangs or errors,
+*then* look at the service: `Stopped` there is a reason to ask a human, because
+a session cannot start it — `Start-Service` from a non-elevated shell fails with
+*Cannot open com.docker.service service on computer '.'*.
 
 ---
 
@@ -644,6 +673,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-09 | fifteenth | N24: a browser signs in, reads its account, creates a profile and signs out. The way in is a Gradle module the deployable jar does not contain — **[ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md)**, absence rather than configuration, with `DeployableJarTest` reading the artifact to prove it. On its first run it found a defect two phases old: **the CSRF cookie was never issued**, so any browser's first write would have been refused. Also the first authenticated request over a socket, and a Dockerfile broken since Phase 1. 264 tests, 0 failed, 0 skipped locally |
 | 2026-09-09 | fourteenth | N26 answered and the answer was no — the game grades a drop `Fixed`/`Common`/`Possible` and prices only the first, so 764 of 779 drop facts still have to be counted; gacha rates *are* disclosed, which is half of Q4. Then N27 split in two: the authoring is the maintainer's by ADR 0015's own integrity rule, so the session built the mechanism instead — **[ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md), provenance is a field and `publish` enforces it**. 257 tests, 0 failed, 0 skipped locally |
 | 2026-09-09 | thirteenth | N23 pays Phase 3's sync debt (ADR 0014: last-write-wins per key, a clock that outlives its value, a watermark a failing test found). Phase 4 opened — the frontend served for the first time, which found a 401 where a 404 belonged. Then the largest decision of the session: **go first-hand on game data** (ADR 0015), closing Q2, Q3, F1 and F2 — ~3 300 facts a patch, and a bootstrap problem to solve |
 | 2026-09-08 | twelfth | Phase 3 opened and closed: V5 gives identity and player their schemas with four decisions in its header, sign-in creates the account while the principal is built, and a plan is computed from goals nobody handed the optimizer — 228 tests, and sync is the piece of the scope that was not built (N23) |

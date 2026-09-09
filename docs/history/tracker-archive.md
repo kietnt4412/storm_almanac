@@ -819,6 +819,69 @@ entry was met, not that the code exists.
       make rather than entering any bundle. Under the plan it selects, every
       number is read first-hand anyway.
 
+### Done 2026-09-09 (fifteenth session) — N24
+
+- [x] ~~**N24 — Make a signed-in page developable.**~~ **Done 2026-09-09.**
+      [ADR 0017](../adr/0017-the-development-sign-in-is-absent-from-the-artifact.md).
+      A browser has signed in, read `/api/me`, created a profile and signed out.
+
+      **The way out taken was the development sign-in, and the entry was right
+      that it is the more dangerous one** — so the guard is not configuration.
+      `:modules:identity-dev` is a Gradle module `:app` takes through
+      `testAndDevelopmentOnly`: on `bootRun` and on the test classpath, excluded
+      from `bootJar`. **The deployable artifact does not contain the classes**,
+      so no profile, property or environment variable can reach them. The
+      entry's "impossible to enable in production *by construction*, not by
+      configuration" is met literally.
+
+      **`DeployableJarTest` is the guard on the guard.** The whole mechanism is
+      one word in a build file — `implementation` instead of
+      `testAndDevelopmentOnly` breaks nothing and nothing else in the build would
+      notice — so a test opens `storm-almanac.jar`, walks every nested dependency
+      jar, and asserts no class under `io/stormalmanac/devsignin/` is inside it.
+      It reads the archives rather than their names, so moving the classes into
+      `:modules:identity` fails it too. And the same scan must find
+      `SecurityConfig`: an absence test looking in the wrong place passes
+      forever.
+
+      **`SecurityConfig` does not know it exists.** The development chain is a
+      second `SecurityFilterChain`, declared in the module production does not
+      ship, `@Order(1)` with a `/dev/**` matcher ahead of the product's
+      catch-all. No `permitAll` for `/dev/**` in the product's matcher, and
+      nothing to remove when the module goes.
+
+      **The second half — and the entry did not ask for it.** The other reason
+      to prefer a development sign-in whose sessions are ordinary sessions is
+      that it exercises the real thing, and on its first run it found a defect
+      that had been in the product since Phase 3: **Spring Security 6 loads the
+      CSRF token lazily, so no `XSRF-TOKEN` cookie was ever issued and the first
+      write from any browser would have been refused.** Invisible for two phases
+      because every test of a write used MockMvc's `csrf()` post-processor, which
+      hands the request the token production had not handed out.
+      `SecurityConfig.browserCsrf` opts out of the deferred load and both chains
+      share it. **Confirmed the defect first, then fixed it**: the assertion
+      failed, the fix made it pass, and a real browser then wrote through the API.
+
+      **A gap in the tracker's own list closed with it.** "The end-to-end test
+      goes through MockMvc, not a socket" had stood since Phase 3 because a
+      session could not be minted over real HTTP without an authorization server.
+      It can now: `DevSignInTest` runs against a real port with a cookie jar kept
+      by hand and no Spring Security test post-processor in it — **the first
+      authenticated request this project has made over a socket.**
+
+      **What it does not prove, and the entry said this too.** No token has been
+      exchanged with a provider. The exchange still lands with **B5**, and this
+      is not an excuse to skip it — ADR 0017's reversal trigger is that
+      module being deleted the moment a real provider works locally.
+
+      **Two things found on the way, both recorded because they cost time.**
+      `TestRestTemplate` on Boot 3.5 resolves to a `JdkClientHttpRequestFactory`
+      that **follows redirects**, so the first run reported 401 for a sign-in
+      that had worked perfectly and redirected to a page needing the session the
+      client had not yet been handed — a test of a redirect has to be able to see
+      the redirect. And a `@Bean` method named after its `@Configuration` class
+      collides with it: `BeanDefinitionOverrideException`, not an obvious message.
+
 ---
 
 ## Closed phases, in full
@@ -1212,6 +1275,146 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+### 2026-09-09 (fifteenth session) — a page that knows who is reading it, and the write that would have been refused
+
+**N24 was the blocker on all of Phase 4's product, and it is gone: a browser has signed in, read its account, created a profile and signed out. The way in is a module the deployable jar does not contain — and building it found a defect in the product that two phases of green builds had not.**
+
+#### The decision was not whether to have a back door, but how to make having one safe
+
+The tracker's N24 offered two ways out and said they are not equivalent. A real
+provider needs the deployed URL and lands with **B5**; a development-only sign-in
+unblocks the interface now, proves nothing about the token exchange, and **is the
+more dangerous of the two**. It is, after all, a back door in an authentication
+system.
+
+Every configuration-shaped guard was rejected for one reason: a Spring profile is
+not activated until it is, `@ConditionalOnProperty` guards a property until
+somebody sets it, an environment check reads an environment somebody supplies.
+Each is one copied configuration away from a public service on which a URL is an
+account.
+
+**So the guard is absence.** `:modules:identity-dev` is a Gradle module that
+`:app` takes through `testAndDevelopmentOnly` — on `bootRun`, on the test
+classpath, excluded from `bootJar`. `storm-almanac.jar` does not contain the
+classes, so there is nothing left to switch on.
+[ADR 0017](../adr/0017-the-development-sign-in-is-absent-from-the-artifact.md)
+is the record.
+
+**The guard is one word in a build file, so a test reads the artifact.**
+`implementation` instead of `testAndDevelopmentOnly` breaks nothing and nothing
+else in the build would notice. `DeployableJarTest` opens the jar, walks every
+nested dependency jar and asserts no class under `io/stormalmanac/devsignin/` is
+anywhere inside — reading the archives rather than their names, because moving
+the classes into `:modules:identity` is the mistake most available to somebody
+who found the split inconvenient. It also asserts the same scan **finds**
+`SecurityConfig`, because an absence test that looks in the wrong place passes
+silently forever, and that the scan found more than a thousand classes at all.
+
+`SecurityConfig` does not know any of this exists. Spring Security composes
+chains, so the development one is declared entirely in the module production does
+not ship: `@Order(1)`, a `/dev/**` matcher ahead of the product's catch-all, no
+`permitAll` in the product's list and nothing to delete when the module goes.
+The frontend makes the same move behind `import.meta.env.DEV`, which Vite
+substitutes at build time — the development URL is not in a production bundle.
+
+#### The defect it found on its first run
+
+The argument for a development sign-in whose sessions are *ordinary* sessions is
+that it exercises the real thing. It did, immediately.
+
+**Spring Security 6 loads the CSRF token lazily.** The cookie is written only on
+a response where something actually read the token, and nothing on a plain `GET`
+does. So a single-page application reads everything successfully, never receives
+an `XSRF-TOKEN` cookie, and **its first write is refused** — which presents to a
+developer as a broken session rather than a missing header, on the first save any
+new user would ever attempt.
+
+It survived two phases because **every test of a write used MockMvc's `csrf()`
+post-processor**, which hands the request the token production had not issued.
+The tests were supplying the thing that was missing.
+
+The sequence was deliberate: the assertion was written, it failed on a real
+socket, and only then was `SecurityConfig.browserCsrf` written — the request
+attribute name set to null, opting out of the deferred load. Both filter chains
+share that one method rather than restating it, because a development sign-in
+that skipped it would have handed the frontend a session it could read with and
+not write with, and the difference would have been blamed on the frontend.
+
+Then a real browser did it: **sign in → read `/api/me` → POST a profile → sign
+out**, all of it same-origin through the Vite proxy, all of it observed rather
+than asserted.
+
+#### A gap in the tracker's own list, closed on the way
+
+"The end-to-end test goes through MockMvc, not a socket" had stood in *what is
+still unverified* since Phase 3, with the reason attached: an authenticated
+session could not be minted over real HTTP without an authorization server to
+redirect to. **It can now.** `DevSignInTest` runs against a real port with a
+cookie jar kept by hand and no Spring Security test post-processor anywhere in
+it — the first authenticated request this project has ever made over a socket.
+
+What it still does not prove is unchanged and worth repeating: **no token has
+been exchanged with a provider**. ADR 0017's reversal trigger is the module being
+deleted the moment a real provider works locally.
+
+#### The Dockerfile has been broken since Phase 1, and the tracker said it was verified
+
+Reading the deploy path for **B5** turned up something else. `backend/Dockerfile`
+was written at scaffold time and copies `modules`, `substrate` and `app`.
+`adapters/` arrived with Phase 1; **nothing added a COPY line for it**, while
+`settings.gradle.kts` includes `:adapters:reverse-1999` and `:app` compiles
+against `KornblumeAdapter`. So every image build since Phase 1 has failed, and
+the tracker's table has said *Docker Compose · Verified* the whole time — because
+it was verified, once, before the directory existed.
+
+**Reproduced rather than reasoned about**, because the in-container Gradle
+download was going to take an hour: the exact tree the old Dockerfile copies was
+assembled in a scratch directory and `:app:bootJar` run on it. It fails in **six
+seconds**, and earlier than expected — Gradle 9 refuses to configure a project
+whose `projectDir` does not exist, so it never reaches the compile error. The
+same tree with `adapters/` added builds the jar in seventeen seconds, and that
+jar contains no `devsignin` classes, which is the exclusion holding on the
+deployment path too. **The image itself has still not been built end to end this
+session** and the tracker says so.
+
+This is the same shape as the stale stage table: a claim that was true when
+written, never re-checked, and load-bearing for something else. It sits directly
+on **B5**'s path, since Render builds from this file.
+
+A COPY list is a second copy of the module list and it drifts in silence. The fix
+is one line and a comment saying so.
+
+#### Two hours of confusion worth writing down
+
+**`TestRestTemplate` on Boot 3.5 follows redirects.** It resolves to a
+`JdkClientHttpRequestFactory`, and the first run of `DevSignInTest` reported
+`401 UNAUTHORIZED` for a sign-in that had worked perfectly — the client chased
+the 302 to a page that needs the session it had not yet been handed, and reported
+*that* response. Nothing about the message pointed at the client. A test of a
+redirect has to be able to see the redirect; the class now builds a
+`Redirects.DONT_FOLLOW` client and says why.
+
+**A `@Bean` method named after its `@Configuration` class collides with it.**
+`DevSignInSecurity#devSignInSecurity` produced a `BeanDefinitionOverrideException`
+whose message names the same bean twice and does not say that is the problem.
+
+#### E4's one-command test is wrong on the WSL2 backend
+
+The environment note says `com.docker.service = Stopped` means somebody has to
+start Docker Desktop by hand. This session read `Stopped` **and the engine
+answered anyway** — `docker info` returned server version 29.7.2 and
+Testcontainers ran all session. The Windows service is not the engine when Docker
+Desktop runs on WSL2. `docker info` is the test; the service is a hint at best.
+
+#### Where this leaves Phase 4
+
+The signed-in half is developable, which is what N24 was for. What is now in
+front of the screens is **N25** — inventory editor, goal picker, plan view,
+catalog with the personalized overlay — and the client half of the sync, none of
+which had anything to run against this morning.
+
+---
 
 ### 2026-09-09 (fourteenth session) — the cheap way out was not there, and the decision grew teeth
 
