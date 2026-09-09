@@ -954,8 +954,45 @@ was written when each closed.
 ## Answered questions
 
 Struck through with the answer, as the tracker's rule requires. Kept in full
-because how an answer was reached is what tells the next reader whether it still
-applies.
+because how an answer was reached is what tells the next reader whether it still applies.
+
+### Q2 and Q3 — where the data comes from, and whether it may be redistributed
+
+*Both closed 2026-09-09 by [ADR 0015](../adr/0015-game-data-is-sourced-first-hand-not-adapted.md),
+which removed the question rather than answering it: the owner chose to source
+game data first-hand instead of sending F2. **F1 and F2 in
+[prior-art.md](../prior-art.md) close with them.** These are the entries as they
+stood.*
+
+- **Q2 — Where the drop data should come from.** *Narrowed twice, still open.*
+  Kornblume is not canonical — it is a presentation layer over Huiji Wiki
+  (characters), 必要的记录 (drop data) and ArkPlanner (algorithm). But the
+  sampling itself is in the repository, in `stages<major>_<minor>_greedy.json`:
+  raw drop counts and the number of runs behind them, which the adapter now reads
+  and carries. So **F1** in [docs/prior-art.md](docs/prior-art.md) — go to
+  必要的记录 directly — changes shape: what it buys is *fresher and more*
+  sampling, not different numbers, against the cost of a second upstream to
+  adapt.
+  **This is now the fix for the two surviving benchmark disagreements** (Milled
+  Magnesia at 105 runs, Liquefied Terror at 113). ADR 0011 discounts a thin
+  sample honestly; only more sampling makes it thick. Weigh it against Phase 6,
+  where our own drop reports would do the same job with data we own.
+  **It also owns everything the time axis cannot exercise.** After N14 the model
+  prices rewards, weekday rotation and (in a dozen lines it does not have)
+  shops — and this upstream publishes none of the three. A second source is now
+  the only thing standing between a working calendar and a calendar that has met
+  real data. See [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md).
+
+- **Q3 — Seed data provenance.** ~~**CLOSED 2026-09-09**~~, by removing the
+  question rather than answering it. Kornblume still has **no `LICENSE`**
+  (re-verified through the GitHub API that day: `license: null`). Rather than
+  send **F2**, the owner chose to source game data first-hand —
+  [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md),
+  which supersedes 0009 on its conclusion and keeps its mechanics. **F2 closes
+  with it**: it blocked deploying *upstream* numbers publicly, and there will not
+  be any. The publisher’s rights in names and text are untouched by this and are
+  why *numbers and text only, no game assets* stays an invariant.
+
 
 - ~~**Q1 — Hosting target.**~~ **Answered 2026-09-02: VPS, but deferred.** The
   constraint is no spend on this project. Consequence recorded under
@@ -1314,6 +1351,91 @@ every bit of that for the price of one hop; two real origins cost CORS,
 `SameSite=None; Secure` and a redirect that has to cross back. And **the free
 tier sleeps** — a cold start is tens of seconds against an optimizer that
 promises two, which is a product decision to make before five strangers meet it.
+
+#### And then the data question, which was the largest decision of the session
+
+Explaining why F2 exists turned into deciding not to send it.
+
+**The facts, re-verified rather than recited.** Kornblume: `license: null`, no
+LICENSE file in the tree, owner `windbow27`, not a fork, 90 stars, last pushed
+2026-08-24. Its README credits Huiji Wiki, 必要的记录 and ArkPlanner. All checked
+through the GitHub API that day rather than trusted from the seven-session-old
+note in prior-art.md.
+
+**The legal picture is more mixed than ADR 0009 implies, in both directions**, and
+it is worth having written down once. Raw facts are not copyrightable in the US
+(*Feist*, 1991), so a drop rate is thin ground for an aggregator to stand on —
+what can be protected is selection and arrangement, and we re-model into our own
+schema rather than copying theirs. But the EU/UK *sui generis* database right
+protects substantial extraction regardless of originality, and **the publisher's
+rights in names and text sit underneath everything and are unaffected by anything
+Kornblume could say**. So permission from windbow27 would never have been a
+complete answer, and its absence was never a complete prohibition.
+
+**None of that is why the decision went the way it did.** Presented with ask /
+launch on the synthetic title / source it first-hand, the owner chose the third.
+
+**What it costs, measured rather than guessed** — patch 3.5, counted from the
+local snapshot:
+
+| | count |
+|---|---|
+| items | 91 |
+| stages | 100 |
+| **individual drop-rate facts** | **595** |
+| recipes / material lines | 50 / 113 |
+| released arcanists | 118 |
+| insight material lines | ~972 |
+| resonance entries | ~1 502 |
+| psychubes | 37 |
+
+**~3 300 facts per patch, split ~2 700 static to 595 statistical**, and the split
+is the whole story. The static half is readable off a game screen: tedious,
+tractable, and mostly *additive* per patch once backfilled. **The 595 cannot be
+read off a screen at all** — each is an estimate over many runs.
+
+**Which produces the bootstrap problem, now the main risk in the project.** The
+optimizer cannot rank a stage without a yield → no drop data, no plan → own drop
+data needs Phase 6 → Phase 6 needs users → users need a plan. Three ways out, and
+the first would collapse the hard half entirely: **find out whether the game
+discloses its own rates** (**N26**); otherwise launch the catalog alone, which is
+public and already in Phase 4's scope; or seed thin, honest samples.
+
+**ADR 0011 turns out to be what makes this survivable, which nobody planned.** A
+yield carries the runs behind it and is discounted to a Poisson lower bound, so a
+hand-collected sample of twenty runs is *usable and honest* — the plan simply says
+how much it does not know. A model storing a bare rate would have made
+self-sourcing impossible to do truthfully.
+
+**Three things this deliberately did not do:**
+
+- **Delete the adapter.** It stays as a never-shipped cross-check. Removing it
+  first would leave the project with no real data at all and destroy the current
+  evidence before a substitute exists — and diffing the first self-sourced bundle
+  against an independent reading of the same patch is worth more as a check than
+  it ever was as a source. F2 blocked *public deployment of upstream numbers*; a
+  local test that ships nothing was never the blocked part.
+- **Keep the load-bearing claim quietly.** The nine agreements and 3 880 against
+  4 017 are computed from Kornblume-fed inputs. They are now a number to
+  **re-earn**, and the tracker says so where the claim is made. The benchmark
+  *method* survives — the guide it compares against is a separate artifact.
+- **Pretend the pipeline has to change.** It does not: schema, parser, writer,
+  CLI, diff, optimizer and statistics are game-agnostic by construction, and
+  **a hand-authored bundle needs no adapter at all** — the canonical JSON *is*
+  the authoring format and *preview, ingest, publish* already exists. Machinery
+  built to support a claim about second games turns out to cover this too.
+
+**The one thing that has to be added is provenance.** `Drop` carries
+`sampledRuns` (0 meaning *declared*); the catalog axis carries nothing
+equivalent, and without it "self-sourced" is unfalsifiable. **N27** starts with
+one stage and one character end to end rather than a backfill, because the point
+of the first bundle is to learn what authoring one costs before committing to
+2 700 of them. And the integrity rule is the whole decision: **a fact enters
+because someone read it in the game, not because they re-typed it out of an
+aggregator.** Re-typing would be laundering.
+
+Q2, Q3, F1 and F2 all close on this. Q5 dissolves for anything sourced after it —
+you know which region and patch you read, because you read it.
 
 #### What sync still does not do
 

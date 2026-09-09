@@ -35,8 +35,24 @@ being finished with is.
   **Two blockers, and they are different in kind.** *The code:* no provider is
   configured, so there is no login URL and every `/api/me` route is 401 —
   Phase 4's whole signed-in product has nothing to develop against (**N24**).
-  *The launch:* **Q3/F2 — asking the Kornblume maintainer**, which needs a human
-  and bites the moment upstream numbers are served publicly.
+  *The data:* see the next line — F2 is gone, and what replaced it is bigger.
+- **The project is going first-hand on game data**, decided 2026-09-09 —
+  [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md),
+  superseding 0009 on its conclusion and closing **Q2, Q3, F1 and F2** at once.
+  Kornblume is unlicensed, F2 was never sent, and rather than send it the owner
+  chose independence. **Nothing is deleted yet and the order matters:** the
+  adapter stays as a never-shipped cross-check until a replacement exists, because
+  removing it first leaves the project with no real data at all.
+  **The cost, measured on patch 3.5:** ~2 700 static catalog facts (91 items, 100
+  stages, 50 recipes, 118 arcanists carrying ~972 insight lines and ~1 502
+  resonance entries, 37 psychubes) and **595 drop-rate facts**. The first half is
+  typing and is mostly additive per patch. **The second half is the problem** —
+  see the bootstrap below.
+- **The bootstrap problem is the main risk in the project right now.** The
+  optimizer cannot rank a stage without a yield, so no drop data means no plan;
+  own drop data means Phase 6, which means users, which means a working plan.
+  **N26** is the cheap way out if it exists: find out whether the game discloses
+  its own drop rates.
 - **Phase 0 stays closed by exception** — deploy deferred by D1 — and its box
   stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
@@ -112,17 +128,24 @@ else's, two of that account's devices that can edit what it owns without deletin
 each other's work, and — since this session — a browser that has actually loaded
 a page of it.
 
-**The load-bearing claim:** on **nine** benchmark materials the cheapest stage
-this project computes is the stage a published community guide tells players to
-farm, and the optimizer's plan for a real goal set is cheaper than following that
-guide — **3 880 Activity against 4 017**, and the 4 017 does not cover the whole
-demand. Seventeen of the guide's twenty quoted drop rates land within three
-percentage points of a sample this project had never seen. Nine and not five
-because a yield carries how many runs it was observed over and the solver uses
-the conservative end of a 95% interval on it
-([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)) —
-7% dearer and better agreement at once. See
-[the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
+**The load-bearing claim — and it is now a number to re-earn.** On **nine**
+benchmark materials the cheapest stage this project computes is the stage a
+published community guide tells players to farm, and the optimizer's plan for a
+real goal set is cheaper than following that guide — **3 880 Activity against
+4 017**, with the 4 017 not covering the whole demand. Seventeen of the guide's
+twenty quoted rates land within three percentage points of a sample this project
+had never seen. Nine and not five because a yield carries how many runs it was
+observed over and the solver uses the conservative end of a 95% interval on it
+([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)).
+See [the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
+
+**Every one of those numbers is computed from Kornblume-fed inputs**, and
+[ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md) says the
+product will not ship that data. Until a self-sourced bundle reproduces them they
+are evidence about somebody else's numbers run through our solver. **The
+benchmark method survives untouched** — the guide it compares against is a
+separate published artifact — so this is a claim to re-earn, not a test to
+delete.
 
 Still true from earlier phases: **the solver says how much it does not know**
 ([ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md)), **the
@@ -137,7 +160,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Backend build | **Green** | **245 tests**, 0 failed, 0 skipped locally with snapshots present. **229 on CI**, because the same 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
 | CI workflow | **Green on `main`** | Run `34217574439` (`2864c95`, PR #13 merged): 0 failed, **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. Action deprecations pending — **N5** |
 | Game data pipeline (Phase 1) | **Closed and stable** | Model, schema, ingest, diff and CLI, [described in full in the archive](docs/history/tracker-archive.md#closed-phases-in-full). `V2`–`V4`, 28 tables, seven invariants in `GameDataSchemaTest` proven on two real R1999 patches; parser and writer pinned to each other by a round trip (ADR 0008); onboarding a title is *adapt, preview, ingest, publish* and publishing is a human approval, not a flag. `Drop` carries `sampledRuns`, where 0 means *declared* |
-| Parser adapters | **One, reading what the upstream reads** | `:adapters:reverse-1999`, 25 tests. Newest `stages<major>_<minor>_greedy.json`, counts divided by the sampled run count and **that count carried onto every `Drop`**; `count: 1` converts as declared, because here it marks a fixed-reward stage |
+| Parser adapters | **One — and demoted to a cross-check by [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)** | Still reads what the upstream reads and **its output is no longer what the product will ship**. Kept, not deleted: diffing the first self-sourced bundle against an independent reading of the same patch is worth more as a check than it ever was as a source. `:adapters:reverse-1999`, 25 tests. Newest `stages<major>_<minor>_greedy.json`, counts divided by the sampled run count and **that count carried onto every `Drop`**; `count: 1` converts as declared, because here it marks a fixed-reward stage |
 | Game data API | **Served and verified** | Five game-data routes plus health, version-pinnable, every response carrying its version and attribution. 10 HTTP tests plus a hand check against `docker compose up` |
 | Demand resolution | **Done** | Goals + roster + upgrade graph → a demand vector, walking the DAG backwards. Refuses by name rather than guessing: unreachable states, unknown entities, probabilistic goals, ambiguous routes |
 | The MIP (`EnergyMip`) | **Done for stages, crafts and rewards** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. **No shops and no fodder**; items sourced only from those are refused by name |
@@ -259,6 +282,27 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
+- [ ] **N26 — Find out whether the game publishes its own drop rates.** The
+      cheapest possible outcome of [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md),
+      and the one that decides how hard everything after it is. If R1999 discloses
+      stage drop rates in client or on an official channel, **595 statistical
+      facts become 595 static ones**, the bootstrap problem disappears, and Phase 6
+      goes back to being an improvement rather than a prerequisite. If it does
+      not, the interim has to be chosen deliberately — catalog-only launch, or
+      thin honest samples. **Do this before N27**, because it changes what N27 is.
+      It also answers half of **Q4**.
+- [ ] **N27 — Author the first self-sourced bundle, and give a fact its
+      provenance.** The canonical JSON *is* the authoring format and
+      `gamedata-cli` already does *preview, ingest, publish*, so **a hand-authored
+      bundle needs no adapter at all** — what is missing is the record of where a
+      fact came from. `Drop` carries `sampledRuns` (0 meaning *declared*); the
+      catalog axis carries nothing equivalent and needs to, or "self-sourced" is
+      unfalsifiable. **Start with one stage and one character end to end**, not
+      with a backfill: the point of the first bundle is to find out what authoring
+      one costs before committing to 2 700 of them.
+      **The integrity rule, and it is the whole decision:** a fact enters because
+      someone read it in the game or in the publisher's disclosure. Re-typing
+      Kornblume's numbers is laundering, not sourcing.
 - [ ] **N24 — Make a signed-in page developable.** Phase 4's product is all
       behind `/api/me` and **nothing can sign in**: no provider configured, so no
       `oauth2Login`, no login URL, 401 everywhere. Two ways out, not equivalent.
@@ -548,49 +592,33 @@ Carry these forward until answered; strike through with the answer when resolved
 then move the entry to
 [the archive](docs/history/tracker-archive.md#answered-questions).
 
-- **Q2 — Where the drop data should come from.** *Narrowed twice, still open.*
-  Kornblume is not canonical — it is a presentation layer over Huiji Wiki
-  (characters), 必要的记录 (drop data) and ArkPlanner (algorithm). But the
-  sampling itself is in the repository, in `stages<major>_<minor>_greedy.json`:
-  raw drop counts and the number of runs behind them, which the adapter now reads
-  and carries. So **F1** in [docs/prior-art.md](docs/prior-art.md) — go to
-  必要的记录 directly — changes shape: what it buys is *fresher and more*
-  sampling, not different numbers, against the cost of a second upstream to
-  adapt.
-  **This is now the fix for the two surviving benchmark disagreements** (Milled
-  Magnesia at 105 runs, Liquefied Terror at 113). ADR 0011 discounts a thin
-  sample honestly; only more sampling makes it thick. Weigh it against Phase 6,
-  where our own drop reports would do the same job with data we own.
-  **It also owns everything the time axis cannot exercise.** After N14 the model
-  prices rewards, weekday rotation and (in a dozen lines it does not have)
-  shops — and this upstream publishes none of the three. A second source is now
-  the only thing standing between a working calendar and a calendar that has met
-  real data. See [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md).
-- **Q5 — Is our "3.5" the same 3.5 anyone else means?** *New 2026-09-08, and the
-  same shape as the mistake that cost five sessions.* `fetch-upstream.sh` pins
-  `8b40541a9c42`, message `update 3.5`, dated **2026-03-17** — confirmed through
-  the GitHub API, not assumed. Global 3.5 ran **2026-05-28 to 2026-07-02**. Two
-  and a half months apart, most likely because Kornblume tracks **CN**, which
-  runs ahead. If so, everything here called "3.5" is CN 3.5. **This does not
-  invalidate the nine agreements** — the guide was already known to be written
-  for 2.7 against a 3.3 sample — but the version labels may not mean what a
-  reader assumes. Resolve by checking content that differs between the two
-  releases; until then do not write "3.5" publicly without saying which.
-- **Q3 — Seed data provenance.** *Answered operationally, open on one point.*
-  Kornblume has **no `LICENSE` file**, so it is all rights reserved by default —
-  absence of a licence is not permission. Enforced since 2026-09-06 by
-  [ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md): fetched
-  at need, never committed, real-data tests skip when it is absent, and the
-  committed fixtures are the synthetic `proving-ground` title.
-  **What stays open:** the owner's scope is personal and portfolio use, and
-  **F2 — ask the maintainer directly — becomes a release blocker the moment this
-  is deployed publicly.** It needs a human to send a message; a session cannot.
-  **Phase 4 is that moment**, so this is now a blocker on the next phase rather
-  than a distant one. Nothing in this entry authorises a public deployment
-  carrying upstream numbers.
+- **Q2 — Where the drop data should come from.** ~~**ANSWERED 2026-09-09:** from
+  our own reports.~~ [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)
+  settles it — Kornblume was never canonical, and going to its upstream
+  (必要的记录, **F1**) would have bought fresher sampling from a source with no
+  licence either. **Phase 6 is the answer**, and it is now on the critical path
+  rather than a nice-to-have. *What stays open* is the shape of the interim: the
+  optimizer cannot rank a stage without a yield, so see the bootstrap problem in
+  0015 and **N26**.
+- **Q3 — Seed data provenance.** ~~**CLOSED 2026-09-09**~~ by ADR 0015, which
+  removed the question rather than answering it: no upstream numbers will be
+  deployed, so **F2 closes with it**. [Full entry in the archive](docs/history/tracker-archive.md#answered-questions).
+- **Q5 — Is our "3.5" the same 3.5 anyone else means?** *Open for the existing
+  data; **dissolved for everything after ADR 0015**.* `fetch-upstream.sh` pins a
+  commit dated **2026-03-17** while Global 3.5 ran **2026-05-28 to 2026-07-02** —
+  two and a half months apart, most likely because Kornblume tracks **CN**. So
+  everything here labelled "3.5" is probably CN 3.5, and the labels may not mean
+  what a reader assumes. It does not invalidate the nine agreements (that guide
+  was already known to be 2.7 against a 3.3 sample). **Self-sourcing ends the
+  ambiguity by construction** — you know which region and patch you read, because
+  you read it — so this is a caveat on the old numbers rather than a question
+  about the new ones. Until then do not write "3.5" publicly without saying which.
 - **Q4 — Rate verification.** The pity numbers in `PityRuleTest` come from the
   secondary sources the plan cites. They must be checked against in-game
-  disclosure before the simulator ships (Phase 5).
+  disclosure before the simulator ships (Phase 5). **ADR 0015 raises the stakes:**
+  the same in-game disclosure is now the cheapest possible source for drop rates
+  too, and whether the game publishes them decides how hard Phase 6 is — see
+  **N26**.
 
 ---
 
@@ -601,7 +629,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-09 | thirteenth | N23 pays Phase 3's sync debt — a per-key `PATCH` merged last-write-wins (ADR 0014), a clock that outlives its value, a watermark a failing test found. Then Phase 4 opened: the frontend was served for the first time and four minutes of looking at it found a 401 where a 404 belonged and an app with no colours. 245 tests, and D1 reversed on Vercel + Render |
+| 2026-09-09 | thirteenth | N23 pays Phase 3's sync debt (ADR 0014: last-write-wins per key, a clock that outlives its value, a watermark a failing test found). Phase 4 opened — the frontend served for the first time, which found a 401 where a 404 belonged. Then the largest decision of the session: **go first-hand on game data** (ADR 0015), closing Q2, Q3, F1 and F2 — ~3 300 facts a patch, and a bootstrap problem to solve |
 | 2026-09-08 | twelfth | Phase 3 opened and closed: V5 gives identity and player their schemas with four decisions in its header, sign-in creates the account while the principal is built, and a plan is computed from goals nobody handed the optimizer — 228 tests, and sync is the piece of the scope that was not built (N23) |
 | 2026-09-08 | eleventh | N14: the plan gets a calendar — the horizon as a scalar rather than an index (ADR 0013), p95 held at 1 807 ms, the two objectives finally disagree (0 energy / 28 days against 370 / 2) — then the maintainer supplied what the game actually does, and two of the answers were corrections |
 | 2026-09-08 | tenth | N15: a solve is cached on its key (1 806 ms → 2 ms on the real patch) and a queue runs it once, CI-confirmed on `3fdc277`; and the read that took shops out of N14 |
