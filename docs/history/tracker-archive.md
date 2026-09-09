@@ -1407,6 +1407,24 @@ answered anyway** — `docker info` returned server version 29.7.2 and
 Testcontainers ran all session. The Windows service is not the engine when Docker
 Desktop runs on WSL2. `docker info` is the test; the service is a hint at best.
 
+#### The workflow trap fired again, and the pipeline confirmed the tree
+
+The previous session recorded that CI fires on `pull_request` and on push to
+`main` only, so **a push to `dev` with no open PR runs nothing, silently**. It
+happened again: PR #15 had been merged between sessions, so this session's push
+to `dev` was watched by nothing at all. Caught by looking rather than by
+anything failing. **PR #16** exists for that reason, and the rule for next time
+is to open the PR before trusting the push.
+
+Run `34327487736` on `0de2e50` is **green: 0 failed, 16 skipped**, and the skips
+are exactly the three snapshot-gated classes (8 + 5 + 3) — a pass there would
+mean a snapshot had been committed by accident.
+
+**One thing that is stronger than it was recorded as.** `DeployableJarTest`
+passed on the runner, which means the development sign-in's absence from
+`storm-almanac.jar` is proven against **a jar CI built from a clean checkout**,
+not only against one this machine produced. The guard travels with the pipeline.
+
 #### Where this leaves Phase 4
 
 The signed-in half is developable, which is what N24 was for. What is now in
