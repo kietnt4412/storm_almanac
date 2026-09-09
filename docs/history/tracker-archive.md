@@ -748,6 +748,39 @@ entry was met, not that the code exists.
       takes. `SolveCoordinator` is still not one, on the same reasoning — there is
       no asynchronous surface for a ticket to be useful on.
 
+### Done 2026-09-09 (thirteenth session) — PR #13 and N23
+
+- [x] ~~**Merge PR #13.**~~ **Already merged** when the session opened — `main`
+      is `2864c95`, run `34217574439` green. **Fourth session running.** The
+      previous entry diagnosed this correctly and the fix it named did not take:
+      the twelfth session did write its tracker line with its push, and the *PR
+      merge* still happened on the remote afterwards. So the residue is not
+      caused by running out of room; it is that merging a PR is a click that
+      happens outside the session, and a next action of the form "merge PR #n"
+      is stale the moment the maintainer opens GitHub. **Stop writing it as a
+      next action.** Check the remote at session start and record what it says —
+      which is what the *Status* line now asks for.
+
+- [x] ~~**N23 — Offline sync: the per-key patch Phase 3 owes.**~~ **Done**,
+      2026-09-09, in one commit. `PATCH` on inventory and roster, merged
+      last-write-wins per key; `PUT` keeps its replace-everything contract.
+      [ADR 0014](../adr/0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md)
+      carries the argument. Three things worth keeping here:
+      **the timestamp is a table and not a column**, because V5's fourth
+      decision makes clearing an item delete its row and a clock on that row
+      dies with it — after which a device offline since before the delete
+      re-adds the item, finds nothing to lose against, and the item comes back
+      with nobody told;
+      **a full save needed a watermark of its own**, which a failing test found
+      rather than the design — a `PUT` claims something about every slug in the
+      game including the ones the player has none of, and no per-key table has a
+      row to write that on, so without it a stale patch loses for a key the save
+      mentioned and wins for one it did not;
+      **and the timestamp is per key rather than per request**, because a device
+      that spent an hour offline changed one item at 09:00 and another at 11:00
+      and one batch stamp would have to lie about one of them.
+      16 new tests, **244 total**, 0 failed and 0 skipped locally.
+
 ---
 
 ## Closed phases, in full
@@ -1039,6 +1072,26 @@ either: the core is shaded into the Testcontainers jar.
 
 ---
 
+## E3 — Git prompted for an account on every push
+
+*Moved out of the tracker 2026-09-09: fixed, pinned, and finished with.*
+
+**Fixed 2026-09-08.** Windows Credential Manager held two GitHub logins —
+`git:https://tuankiet4412@github.com` alongside `git:https://github.com`
+(`kietnt4412`) — and Git Credential Manager shows an account picker whenever
+there is more than one. Neither `git config` nor `gh auth` had a second identity,
+so looking there finds nothing; the second credential is only visible to
+`cmdkey /list`. The stray one was deleted and the surviving username pinned:
+
+```bash
+git config --global credential.https://github.com.username kietnt4412
+```
+
+The pin is what stops it coming back the next time a second account touches this
+machine.
+
+---
+
 ## Session log
 
 **Append one entry per session, newest first, here — not in the tracker.** The
@@ -1049,6 +1102,120 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+### 2026-09-09 (thirteenth session) — the debt against a ticked box: sync
+
+**One item, N23, and it is the piece of Phase 3's scope Phase 3 did not build.**
+Phase 3 was closed on its exit criterion — a plan computed from stored state —
+while its scope line also said sync, and the twelfth session wrote that down
+honestly rather than quietly. This session paid it.
+
+#### The next action was stale again, for a new reason
+
+"Merge PR #13" was the first action. It was merged before the session opened,
+`main` at `2864c95`, run `34217574439` green. That is **four sessions running**.
+
+The eleventh and twelfth entries both diagnosed this as a session running out of
+room to write its tracker line after pushing, and prescribed writing the line
+*with* the push. The twelfth session did that. It happened anyway — which means
+the diagnosis was wrong. **Merging a PR is a click on GitHub that happens between
+sessions, so a next action of the form "merge PR #n" is stale as soon as the
+maintainer opens the browser.** It is not a next action at all; it is a fact
+about the remote, and facts about the remote belong in *Status*, checked at
+session start. That is the change made here, and it is the fourth attempt at
+this particular lesson.
+
+#### What sync had to decide, and why each rule earns its place
+
+`PUT /inventory` takes a complete map and stores it, and the implementation
+matches the signature exactly: delete every row, insert the body. A phone that
+was offline for an hour then saves, and every row a browser added meanwhile is
+gone — not merged, not flagged, gone.
+
+Three families of answer were weighed and two rejected in
+[ADR 0014](../adr/0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md).
+A **CRDT** is correct by construction and merges the wrong thing here: two
+devices that each read 40 in the game did not observe 80, and a counter is not
+an integer, so it costs the schema, the API and the client at once. A **revision
+token** turns every concurrent edit into "reload and type it again", which is the
+behaviour that makes people stop using a companion tool. **Last-write-wins per
+key** is what `Inventory`'s javadoc has promised since Phase 3 and what V5 left
+the timestamp column out for, saying it would arrive with the merge.
+
+Four rules decide a key. Each is here because its absence is a *silent* wrong
+answer:
+
+1. **The client says when it edited, per key.** A server stamp makes an edit win
+   for having arrived late, which is the bug rather than the fix. Per key and not
+   per request, because a device offline for an hour changed one item at 09:00
+   and another at 11:00 and one batch stamp would have to lie about one of them.
+2. **No edit may claim the future.** This is the bill for trusting a client
+   clock, and it is cheap: without the clamp a device set a year fast pins every
+   key it touches against every later edit from anywhere, permanently, with
+   nothing in the system able to correct it.
+3. **A removal is remembered after its value is gone.** The one that shaped the
+   schema. V5's decision 4 makes absent the only representation of zero, so
+   clearing an item deletes the row — and a timestamp on that row dies with it.
+   A device offline since before the delete re-adds the item, finds nothing to
+   lose against, and five thousand gold comes back from the dead. **A clock that
+   outlives its value cannot be a column on the row it outlives**, so V6 is a
+   table and V5's decision 4 is untouched.
+4. **A full save speaks for the keys it left out.** **This one was found by a
+   failing test, not by the design.** The first cut had `saveInventory` stamp
+   every key it wrote, which passes every obvious test and leaves a gap: a `PUT`
+   claims something about every slug in the game *including the ones the player
+   has none of*, and there is no row on which to record that and no way to
+   enumerate the keys it would need. So a stale patch lost for a key the save
+   mentioned and won for one it did not. `player.sync_watermark` is the fix — one
+   row per profile per aggregate — and finding it this way is the argument for
+   writing the adversarial test before believing the design.
+
+All four are decided in **one SQL statement** rather than in Java around a
+select. Read-then-write across two statements is a lost update waiting for a
+scheduler to find it, and two devices syncing at once is precisely the case the
+route exists for. The row count is the answer: 1 means the edit won and its value
+is written, 0 means it lost.
+
+#### What the response says, and what has no route
+
+The merge hands back **the keys that lost**. A merge that silently drops the
+losing half leaves the client showing a value the server does not hold, and the
+player then edits from a screen that is quietly wrong until something makes them
+reload.
+
+**Goals get no PATCH.** An inventory and a roster are maps, so a key is a merge
+unit. Goals are an ordered list whose *order* is what the player is editing, and
+two devices that reordered it have no per-key answer; inventing one would mean a
+plan computed against priorities nobody chose. The `CHECK` on both new tables
+names `inventory` and `roster` and nothing else, so the decision is enforced
+rather than merely documented.
+
+#### The three fakes throw
+
+Three `PlayerStateRepository` fakes exist in tests — two in `app`, one in
+`planner` — and all three now throw `UnsupportedOperationException` on the merge
+methods rather than implementing them. A fake that answered would be a second
+copy of the merge rules, drifting from the real one until a test passed against a
+merge nothing ships.
+
+#### Numbers
+
+**244 tests, 0 failed, 0 skipped locally** (228 before; the snapshot is present
+on this machine, so the 16 snapshot-gated ones ran). 16 new, all in
+`OfflineSyncTest`, and every one of them is a way the merge could be wrong
+without saying so.
+
+#### What sync still does not do
+
+- **No two real devices have ever synced.** Every scenario above is one MockMvc
+  request following another inside one JVM. The concurrency the SQL is shaped for
+  — two requests interleaving on the same key — is argued for and not measured.
+- **A merge publishes nothing.** Nothing downstream can react to a synced edit,
+  so a cached plan is not invalidated when an inventory moves under it. Not
+  needed until something wants it; worth knowing before Phase 6 caches anything
+  keyed on player state.
+- **The client half does not exist.** There is no queue, no retry, no offline
+  store — the PWA that would use this is Phase 4, and it has never been served.
 
 ### 2026-09-08 (twelfth session) — Phase 3 opens and closes: the optimizer finally meets a real account
 
