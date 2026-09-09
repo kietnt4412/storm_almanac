@@ -20,6 +20,16 @@
   "label": "1.0",
   "attribution": "Synthetic fixture authored for Storm Almanac. Not derived from any published game data.",
 
+  "provenance": [
+    {
+      "id": "invented",
+      "origin": "AUTHORED_FIXTURE",
+      "detail": "Written by hand for this repository to exercise every shape the canonical format can hold. Not observed anywhere, because there is nowhere to observe it.",
+      "observedOn": "2026-09-05"
+    }
+  ],
+  "sourcedBy": "invented",
+
   "items": [
     { "id": "gold",         "displayName": "Gold",          "rarity": { "label": "1*", "rank": 1 }, "category": "currency" },
     { "id": "ore-rough",    "displayName": "Rough Ore",     "rarity": { "label": "2*", "rank": 2 }, "category": "material" },

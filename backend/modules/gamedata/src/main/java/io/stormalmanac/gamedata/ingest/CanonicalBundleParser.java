@@ -15,6 +15,7 @@ import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Game;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
@@ -35,9 +36,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.DayOfWeek;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -116,6 +119,9 @@ public final class CanonicalBundleParser {
                 integer(root, "sequence", "sequence"),
                 textOrEmpty(root, "label"),
                 text(root, "attribution", "attribution"),
+                each(root, "provenance", CanonicalBundleParser::provenance),
+                textOrEmpty(root, "sourcedBy"),
+                factProvenance(root),
                 each(root, "items", CanonicalBundleParser::item),
                 sources,
                 sinks,
@@ -124,6 +130,53 @@ public final class CanonicalBundleParser {
     }
 
     // ── The domain shapes, one method each ──────────────────────────────────
+
+    private static Provenance provenance(JsonNode node, String at) {
+        String origin = text(node, "origin", at + ".origin");
+        try {
+            return new Provenance(
+                    text(node, "id", at + ".id"),
+                    Provenance.Origin.valueOf(origin),
+                    text(node, "detail", at + ".detail"),
+                    LocalDate.parse(text(node, "observedOn", at + ".observedOn")));
+        } catch (IllegalArgumentException e) {
+            // Covers both the unknown origin and the record's own validation, and
+            // names the alternatives: the set is small, closed and not guessable
+            // from the failure otherwise.
+            throw new BundleFormatException(at + ": " + e.getMessage()
+                    + " (origins: " + Arrays.toString(Provenance.Origin.values()) + ")", e);
+        } catch (DateTimeParseException e) {
+            throw new BundleFormatException(
+                    at + ".observedOn must be an ISO date, e.g. 2026-09-09, not '" + e.getParsedString() + "'", e);
+        }
+    }
+
+    /**
+     * The per-fact overrides, as a flat object of {@code factRef -> provenanceId}.
+     *
+     * <p>Absent means "every fact came from {@code sourcedBy}", which is the
+     * normal case and is why this is not required. What it must never mean is
+     * "no fact has a provenance" — {@link GameDataBundle} resolves an absent
+     * entry to the default rather than to nothing, so the two cannot be
+     * confused.
+     */
+    private static Map<String, String> factProvenance(JsonNode root) {
+        JsonNode node = root.get("factProvenance");
+        if (node == null || node.isNull()) return Map.of();
+        if (!node.isObject()) {
+            throw new BundleFormatException(
+                    "factProvenance must be an object of factRef -> provenance id");
+        }
+        Map<String, String> overrides = new LinkedHashMap<>();
+        node.properties().forEach(entry -> {
+            if (!entry.getValue().isTextual()) {
+                throw new BundleFormatException(
+                        "factProvenance." + entry.getKey() + " must be a provenance id");
+            }
+            overrides.put(entry.getKey(), entry.getValue().textValue());
+        });
+        return overrides;
+    }
 
     private static Item item(JsonNode node, String at) {
         return new Item(

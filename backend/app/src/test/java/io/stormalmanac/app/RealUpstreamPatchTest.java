@@ -79,7 +79,12 @@ class RealUpstreamPatchTest extends SharedDatabaseTest {
         for (int sequence = 0; sequence < PATCHES.size(); sequence++) {
             GameDataBundle bundle = convert(sequence, PATCHES.get(sequence));
             ingest.ingestDraft(bundle);
-            GameDataVersion published = ingest.publish(REVERSE_1999, bundle.sequence());
+            // Second-hand, and it has to say so. ADR 0015 demoted this adapter to
+            // a cross-check that is never shipped, and the plain publish now
+            // refuses what it produces — so this argument is the test admitting
+            // in code what the ADR says in prose, on the one publish in this
+            // repository that is not entitled to happen quietly.
+            GameDataVersion published = ingest.publish(REVERSE_1999, bundle.sequence(), true);
 
             GameDefinition read = definitions.find(REVERSE_1999, published.sequence()).orElseThrow();
 

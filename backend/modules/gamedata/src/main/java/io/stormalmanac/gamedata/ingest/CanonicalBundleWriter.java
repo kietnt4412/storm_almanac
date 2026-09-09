@@ -9,6 +9,7 @@ import io.stormalmanac.gamedata.Craft;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
@@ -78,6 +79,20 @@ public final class CanonicalBundleWriter {
         root.put("label", bundle.label());
         root.put("attribution", bundle.attribution());
 
+        array(root, "provenance", bundle.provenance(), this::provenance);
+        root.put("sourcedBy", bundle.sourcedBy());
+        // Sorted, not in map order. The overrides are the part of a bundle a
+        // reviewer reads line by line, and this file is diffed against the last
+        // one — an override list whose order tracked insertion would put noise
+        // in every patch diff. The parser reads it back into an unordered map,
+        // so nothing downstream can tell the difference.
+        if (!bundle.factProvenance().isEmpty()) {
+            ObjectNode overrides = root.putObject("factProvenance");
+            bundle.factProvenance().entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .forEach(entry -> overrides.put(entry.getKey(), entry.getValue()));
+        }
+
         array(root, "items", bundle.items(), this::item);
         array(root, "entities", bundle.entities(), this::entity);
         array(root, "stages", sourcesOf(bundle.sources(), Stage.class), this::stage);
@@ -91,6 +106,13 @@ public final class CanonicalBundleWriter {
     }
 
     // ── One method per shape, mirroring the parser ──────────────────────────
+
+    private void provenance(ObjectNode node, Provenance provenance) {
+        node.put("id", provenance.id());
+        node.put("origin", provenance.origin().name());
+        node.put("detail", provenance.detail());
+        node.put("observedOn", provenance.observedOn().toString());
+    }
 
     private void item(ObjectNode node, Item item) {
         node.put("id", item.id().value());

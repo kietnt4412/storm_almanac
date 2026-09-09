@@ -1,0 +1,46 @@
+{
+  "_comment": [
+    "The Proving Ground again, and this time sourced from somebody else.",
+    "",
+    "It exists so the publish gate can be exercised on a whole bundle rather than",
+    "on a record built in a test. ADR 0015 forbids shipping data this project did",
+    "not source; ADR 0016 makes that enforceable by refusing to publish a version",
+    "whose facts are not first-hand unless the operator says so out loud. This is",
+    "the file that has to be refused.",
+    "",
+    "Deliberately tiny. Every shape the format can hold is already covered by",
+    "proving-ground-1.0.json, and what is under test here is one field."
+  ],
+
+  "game": { "id": "proving-ground", "displayName": "The Proving Ground", "energyUnit": "Vigour" },
+  "sequence": 0,
+  "label": "1.0-borrowed",
+  "attribution": "Synthetic fixture authored for Storm Almanac. Not derived from any published game data.",
+
+  "provenance": [
+    {
+      "id": "an-aggregator",
+      "origin": "THIRD_PARTY",
+      "detail": "Retyped out of somebody else's planner. Invented, like the rest of this fixture — what is real about it is the origin, which is the one thing under test.",
+      "observedOn": "2026-09-09"
+    }
+  ],
+  "sourcedBy": "an-aggregator",
+
+  "items": [
+    { "id": "gold",      "displayName": "Gold",      "rarity": { "label": "1*", "rank": 1 }, "category": "currency" },
+    { "id": "ore-rough", "displayName": "Rough Ore", "rarity": { "label": "2*", "rank": 2 }, "category": "material" }
+  ],
+
+  "stages": [
+    {
+      "id": "pg-1-1",
+      "displayName": "The Threshold",
+      "energyCost": 10,
+      "drops": [
+        { "item": "ore-rough", "expectedYield": 1.4, "sampledRuns": 240 },
+        { "item": "gold", "expectedYield": 120.0, "sampledRuns": 240 }
+      ]
+    }
+  ]
+}

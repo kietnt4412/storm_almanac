@@ -16,9 +16,11 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0006](0006-wilson-intervals-for-drop-rates.md) | Wilson score intervals for drop rates | Accepted |
 | [0007](0007-equipment-is-an-entity.md) | Equipment is an `Entity` | Accepted |
 | [0008](0008-gamedata-persistence-is-jdbc.md) | The gamedata module persists with JDBC, not JPA | Accepted |
-| [0009](0009-upstream-data-is-fetched-never-vendored.md) | Upstream game data is fetched, never vendored | Accepted |
+| [0009](0009-upstream-data-is-fetched-never-vendored.md) | Upstream game data is fetched, never vendored | **Superseded in part by [0015](0015-game-data-is-sourced-first-hand-not-adapted.md)** |
 | [0010](0010-a-plan-is-the-best-provable-in-the-budget.md) | A plan is the cheapest one provable inside the budget | Accepted |
 | [0011](0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md) | A yield is a mean per run, and the solver uses what its sample supports | Accepted |
 | [0012](0012-the-solve-cache-is-in-process-until-there-is-a-second-node.md) | The solve cache is in-process until there is a second node | Accepted |
 | [0013](0013-the-horizon-is-a-scalar-not-an-index.md) | The planning horizon is a scalar, not an index | Accepted |
 | [0014](0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md) | Sync is last-write-wins per key, against a clock that outlives the value | Accepted |
+| [0015](0015-game-data-is-sourced-first-hand-not-adapted.md) | Game data is sourced first-hand, not adapted from a community aggregator | Accepted |
+| [0016](0016-provenance-is-a-property-of-the-data.md) | Provenance is a property of the data, and publishing enforces it | Accepted |

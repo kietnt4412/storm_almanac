@@ -781,6 +781,44 @@ entry was met, not that the code exists.
       and one batch stamp would have to lie about one of them.
       16 new tests, **244 total**, 0 failed and 0 skipped locally.
 
+### Done 2026-09-09 (fourteenth session) — N26
+
+- [x] ~~**N26 — Find out whether the game publishes its own drop rates.**~~
+      **Answered 2026-09-09, and the answer is no** for the half that matters.
+      Written up in
+      [the drop disclosure note](../game-facts/reverse-1999-drop-disclosure.md).
+
+      **Stage drop rates are not disclosed numerically.** The stage screen grades
+      each reward `Fixed`, `Common` or `Possible`, and only `Fixed` carries a
+      number — it means 100%. Every published percentage for a `Common` or
+      `Possible` drop, including the twenty this project benchmarks against, is
+      somebody's crowdsourced run count. So the cheapest way out of ADR 0015's
+      bootstrap problem does not exist, and the interim has to be chosen
+      deliberately: catalog-first launch, or thin honest samples.
+
+      **Measured rather than estimated**, on the pinned 3.5 snapshot's
+      `stages3_3_greedy.json` where `count: 1` marks a fixed-reward stage:
+      **105 stages, 779 drop facts, 15 declared and 764 sampled.** ~2% of the
+      drop axis is free. The reprieve is real and it is small.
+
+      **Two things came back that were not asked for, and both are worth more
+      than the answer.** *Gacha rates are disclosed* — Bluepoch states per-rarity
+      summon rates and the pity counter in the client's own rules screen — which
+      makes the live half of **Q4** one screen's worth of reading rather than a
+      research question, and makes it `PUBLISHER_DISCLOSURE` rather than a
+      sample. And *the `Fixed`/`Common`/`Possible` grade is itself a first-hand
+      fact*, available for all 595 stage-item pairs before a single run is
+      farmed, enough to order drops within a stage and to reject an estimate that
+      contradicts it — and the model has nowhere to put it. **Deliberately not
+      built this session**: it costs a bundle field, a parser, a writer, a
+      migration and a JDBC round trip, and its only consumer is Phase 6. Same
+      reasoning that deferred N20 and N18.
+
+      **The sourcing is secondary and says so.** This is a question *about* a
+      question, reached through a web search tool, and it selects which plan to
+      make rather than entering any bundle. Under the plan it selects, every
+      number is read first-hand anyway.
+
 ---
 
 ## Closed phases, in full
@@ -954,8 +992,45 @@ was written when each closed.
 ## Answered questions
 
 Struck through with the answer, as the tracker's rule requires. Kept in full
-because how an answer was reached is what tells the next reader whether it still
-applies.
+because how an answer was reached is what tells the next reader whether it still applies.
+
+### Q2 and Q3 — where the data comes from, and whether it may be redistributed
+
+*Both closed 2026-09-09 by [ADR 0015](../adr/0015-game-data-is-sourced-first-hand-not-adapted.md),
+which removed the question rather than answering it: the owner chose to source
+game data first-hand instead of sending F2. **F1 and F2 in
+[prior-art.md](../prior-art.md) close with them.** These are the entries as they
+stood.*
+
+- **Q2 — Where the drop data should come from.** *Narrowed twice, still open.*
+  Kornblume is not canonical — it is a presentation layer over Huiji Wiki
+  (characters), 必要的记录 (drop data) and ArkPlanner (algorithm). But the
+  sampling itself is in the repository, in `stages<major>_<minor>_greedy.json`:
+  raw drop counts and the number of runs behind them, which the adapter now reads
+  and carries. So **F1** in [docs/prior-art.md](docs/prior-art.md) — go to
+  必要的记录 directly — changes shape: what it buys is *fresher and more*
+  sampling, not different numbers, against the cost of a second upstream to
+  adapt.
+  **This is now the fix for the two surviving benchmark disagreements** (Milled
+  Magnesia at 105 runs, Liquefied Terror at 113). ADR 0011 discounts a thin
+  sample honestly; only more sampling makes it thick. Weigh it against Phase 6,
+  where our own drop reports would do the same job with data we own.
+  **It also owns everything the time axis cannot exercise.** After N14 the model
+  prices rewards, weekday rotation and (in a dozen lines it does not have)
+  shops — and this upstream publishes none of the three. A second source is now
+  the only thing standing between a working calendar and a calendar that has met
+  real data. See [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md).
+
+- **Q3 — Seed data provenance.** ~~**CLOSED 2026-09-09**~~, by removing the
+  question rather than answering it. Kornblume still has **no `LICENSE`**
+  (re-verified through the GitHub API that day: `license: null`). Rather than
+  send **F2**, the owner chose to source game data first-hand —
+  [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md),
+  which supersedes 0009 on its conclusion and keeps its mechanics. **F2 closes
+  with it**: it blocked deploying *upstream* numbers publicly, and there will not
+  be any. The publisher’s rights in names and text are untouched by this and are
+  why *numbers and text only, no game assets* stays an invariant.
+
 
 - ~~**Q1 — Hosting target.**~~ **Answered 2026-09-02: VPS, but deferred.** The
   constraint is no spend on this project. Consequence recorded under
@@ -1138,6 +1213,172 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+### 2026-09-09 (fourteenth session) — the cheap way out was not there, and the decision grew teeth
+
+**N26 asked the question that would have made ADR 0015 cheap, and the answer was no. Then N27 turned out to be two jobs, one of which no session can do — so this session built the other one, and it is the one that makes 0015 enforceable rather than merely stated.**
+
+#### N26: the publisher discloses the rates that do not cost anything
+
+ADR 0015 named three ways out of its bootstrap problem, and the first would have
+collapsed the hard half entirely: many titles in this market disclose stage drop
+rates under regulatory pressure, and if Reverse: 1999 did, **595 statistical
+facts become 595 static ones** and Phase 6 goes back to being an improvement
+rather than a prerequisite.
+
+**It does not.** The stage screen grades each reward `Fixed`, `Common` or
+`Possible`, and puts a number on none but the first. Every published percentage
+for a `Common` or `Possible` drop is somebody's crowdsourced sample — including
+the twenty this project benchmarks against, which were never a disclosure to
+check ourselves against but another estimate.
+
+**The size of the reprieve was measured, not guessed.** On the pinned 3.5
+snapshot's `stages3_3_greedy.json`, where `count: 1` marks a fixed-reward stage:
+105 stages, **779 drop facts, 15 declared and 764 sampled**. Two percent.
+
+Two things came back that nobody asked for, and both are worth more than the
+answer:
+
+- **Gacha rates *are* disclosed**, per rarity, with the pity counter, in the
+  client's own summon rules. That is the live half of **Q4** reduced to one
+  screen's worth of reading, and it is `PUBLISHER_DISCLOSURE` rather than a
+  sample. Phase 5 needs it.
+- **The `Fixed`/`Common`/`Possible` grade is itself a first-hand fact.** It is
+  free, it exists for all 595 pairs before a single run is farmed, and it is
+  enough to order drops within a stage and to reject an estimate that
+  contradicts it — a `Fixed` reported at 40% is wrong on its face. **The model
+  has nowhere to put it, and this session deliberately did not build one.** It
+  costs a bundle field, a parser, a writer, a migration and a JDBC round trip,
+  and its only consumer is Phase 6. That is exactly the reasoning that deferred
+  N20 and N18, and the discipline is worth more than the field.
+
+#### N27 was two jobs, and one of them is not a session's to do
+
+The next action read "author the first self-sourced bundle, and give a fact its
+provenance". Working on it surfaced that those are not one task.
+
+**The authoring cannot be delegated to a session, and the reason is ADR 0015
+itself.** A fact enters because someone *read it in the game or in the
+publisher's disclosure*. An aggregator, a web search and an AI session are the
+same disqualified thing: none of them can reach a game screen, and all three can
+only surface what somebody else already wrote down. Producing a plausible-looking
+R1999 bundle here would have been laundering with extra steps — the precise
+failure 0015 was written to prevent, committed by the tooling built to prevent
+it. **So the honest output is that N27 is now the maintainer's**, with the loop
+written down in
+[authoring a first-hand bundle](../game-facts/authoring-a-first-hand-bundle.md)
+so that the reading is the only thing left.
+
+#### The half a session could do, and why it was the important half
+
+**ADR 0015 had a hole in it that no amount of prose could close.** A number read
+off a stage screen and a number copied out of Kornblume are *byte-identical once
+typed*. Nothing downstream could tell them apart; neither could the person who
+typed them, six months later. As written, 0015 was a promise about future
+behaviour with no mechanism — and this repository already knows what that is
+worth, because the adapter read a stale stage table for five sessions with two
+thirds of the game missing and every test stayed green, because nothing was
+checking the thing that was wrong.
+
+[ADR 0016](../adr/0016-provenance-is-a-property-of-the-data.md) is the
+mechanism. Four decisions in it, and the last two are the ones a future session
+would otherwise re-litigate:
+
+- **Provenance lives on the bundle, not on `Stage` or `Item`.** Sourcing is a
+  property of the act of reading, not of the game — and hanging it on a domain
+  record puts it one field access away from the solver. A solver that *can* read
+  where a number came from is one that can eventually be made to prefer numbers
+  from one place, which is a bias nobody asked for and nobody would notice.
+  `Drop.sampledRuns` stays the deliberate exception, because ADR 0011 makes the
+  solver genuinely need it.
+- **A default with per-fact overrides**, not a field on every fact. Requiring
+  2 700 identical strings produces 2 700 copy-pastes and no more truth, and the
+  pressure would be to generate them.
+- **Silence parses, and cannot publish.** A bundle declaring no provenance is
+  `UNRECORDED`, which is not first-hand. Requiring the field would put six lines
+  of ceremony on every throwaway test bundle, and ceremony under that pressure
+  gets filled in with whatever passes. Absence gets a defined, conservative
+  meaning instead — the same shape as `sampledRuns == 0` meaning *declared*.
+- **The gate is on `publish`, not `ingestDraft`, and has an explicit escape
+  hatch.** It has to: ADR 0015 keeps the Kornblume adapter as a cross-check, and
+  a cross-check must reach a published version to be diffed against one. So
+  `publish(game, sequence)` is the short call *and* the strict one;
+  `publish(game, sequence, true)` and the CLI's literal `second-hand` word are
+  what it costs to approve somebody else's data, on a command line that ends up
+  in a shell history. `KornblumeAdapter` hard-codes `THIRD_PARTY` and cannot be
+  told otherwise, so there is no call site to launder through.
+
+**Storage materialises every fact's provenance** — one row per declared fact,
+not one per override. The default is an authoring convenience and a database
+that stored it could not answer "where did this come from" without the file
+beside it. **The first-hand policy is in `Provenance.Origin` and nowhere else**:
+`V7` constrains the origin set and says nothing about which of them count, and
+the gate reads origins back as text and asks the enum, because a
+`WHERE origin <> 'THIRD_PARTY'` would be a second copy of the policy in a
+language that cannot fail to compile when the first one changes.
+
+**The one publish of real upstream data in this repository now says so in code.**
+`RealUpstreamPatchTest` passes `true`. That is the test admitting what the ADR
+says in prose, and it is the sort of thing that would have been a comment before.
+
+#### What this does not do, stated because it is tempting to overclaim
+
+**It does not make anything in this repository first-hand.** The only bundles
+that pass the gate are the synthetic fixtures, and they pass by declaring
+`AUTHORED_FIXTURE` — honest, and evidence of nothing about a real game. Every
+Reverse: 1999 number in the tracker still comes from Kornblume. The gate is what
+will stop that shipping; it is not progress on replacing it.
+
+**It does not stop a determined liar**, and is not meant to. Someone can mark a
+laundered fact `OBSERVED_IN_GAME`. What is now impossible is doing it *silently*:
+the default is honest, the exception is explicit, and both are in the file that
+was approved.
+
+**Provenance is written and never read.** The publish gate queries it; no API
+response carries it. A catalog page saying where a number came from is the
+honest end state and belongs with Phase 4's catalog screens (N25), not ahead of
+them.
+
+#### What the tests say, and the one that was wrong
+
+**257 tests, 0 failed, 0 skipped locally** with snapshots present — up from 244.
+Twelve new: `BundleProvenanceTest` (6, no database), `GameDataProvenanceTest`
+(5, real Postgres), and the CLI's second-hand walkthrough.
+
+**The gate's first real run failed the test rather than the code**, and the
+failure was worth keeping. The refusal lists the first five offending facts
+sorted and counts the rest; the assertion had picked `item:gold`, which sorts
+after `fodder:` and fell outside the five. The fix was to assert on the count as
+well — `20 fact(s)`, `banner:warden-debut (borrowed)`, `and more` — which is a
+better test than the one that was written, because "twenty facts are somebody
+else's" and "five are" are different decisions and only the count separates
+them.
+
+**CI confirmed the tree**: run `34308177004` on [PR #15](https://github.com/kietnt4412/storm_almanac/pull/15),
+green, 0 failed and 16 skipped — 8 `RealUpstreamPlanTest`, 5
+`CommunityBenchmarkTest`, 3 `RealUpstreamPatchTest`, which is exactly the
+snapshot gate and nothing else.
+
+**And a workflow fact worth not rediscovering.** The first push to `dev` ran no
+CI at all, silently. `ci.yml` fires on `pull_request` and on push to `main`, so
+**a push to `dev` with no open PR is unverified by the pipeline** — PR #14 had
+been merged between sessions, which closed the only thing that was watching the
+branch. Opening PR #15 is what produced a run.
+
+#### E1 and E4: two environment notes
+
+`-Djavax.net.ssl.trustStoreType=Windows-ROOT` was needed throughout — **E1 is
+still live**.
+
+**New, and worth recording because it cost twenty minutes:** Docker Desktop's
+GUI processes were running, its WSL distro read `Stopped`, and
+`com.docker.service` was `Stopped` too. That is *not* the "give it minutes" case
+E2's note warns about — the engine was never going to come up on its own, and
+`Start-Service` from a non-elevated session fails with `Cannot open
+com.docker.service service on computer '.'`. **The distinguishing check is
+`Get-Service com.docker.service`**: `Stopped` there means somebody has to click,
+and no amount of waiting substitutes. The maintainer restarted it and the whole
+suite ran.
+
 ### 2026-09-09 (thirteenth session) — the sync debt paid, and Phase 4 opens by being looked at
 
 **Two halves. N23 pays the piece of Phase 3's scope Phase 3 did not build; then Phase 4 opened and four minutes of actually serving the frontend found two defects that five sessions of green builds had not.**
@@ -1314,6 +1555,91 @@ every bit of that for the price of one hop; two real origins cost CORS,
 `SameSite=None; Secure` and a redirect that has to cross back. And **the free
 tier sleeps** — a cold start is tens of seconds against an optimizer that
 promises two, which is a product decision to make before five strangers meet it.
+
+#### And then the data question, which was the largest decision of the session
+
+Explaining why F2 exists turned into deciding not to send it.
+
+**The facts, re-verified rather than recited.** Kornblume: `license: null`, no
+LICENSE file in the tree, owner `windbow27`, not a fork, 90 stars, last pushed
+2026-08-24. Its README credits Huiji Wiki, 必要的记录 and ArkPlanner. All checked
+through the GitHub API that day rather than trusted from the seven-session-old
+note in prior-art.md.
+
+**The legal picture is more mixed than ADR 0009 implies, in both directions**, and
+it is worth having written down once. Raw facts are not copyrightable in the US
+(*Feist*, 1991), so a drop rate is thin ground for an aggregator to stand on —
+what can be protected is selection and arrangement, and we re-model into our own
+schema rather than copying theirs. But the EU/UK *sui generis* database right
+protects substantial extraction regardless of originality, and **the publisher's
+rights in names and text sit underneath everything and are unaffected by anything
+Kornblume could say**. So permission from windbow27 would never have been a
+complete answer, and its absence was never a complete prohibition.
+
+**None of that is why the decision went the way it did.** Presented with ask /
+launch on the synthetic title / source it first-hand, the owner chose the third.
+
+**What it costs, measured rather than guessed** — patch 3.5, counted from the
+local snapshot:
+
+| | count |
+|---|---|
+| items | 91 |
+| stages | 100 |
+| **individual drop-rate facts** | **595** |
+| recipes / material lines | 50 / 113 |
+| released arcanists | 118 |
+| insight material lines | ~972 |
+| resonance entries | ~1 502 |
+| psychubes | 37 |
+
+**~3 300 facts per patch, split ~2 700 static to 595 statistical**, and the split
+is the whole story. The static half is readable off a game screen: tedious,
+tractable, and mostly *additive* per patch once backfilled. **The 595 cannot be
+read off a screen at all** — each is an estimate over many runs.
+
+**Which produces the bootstrap problem, now the main risk in the project.** The
+optimizer cannot rank a stage without a yield → no drop data, no plan → own drop
+data needs Phase 6 → Phase 6 needs users → users need a plan. Three ways out, and
+the first would collapse the hard half entirely: **find out whether the game
+discloses its own rates** (**N26**); otherwise launch the catalog alone, which is
+public and already in Phase 4's scope; or seed thin, honest samples.
+
+**ADR 0011 turns out to be what makes this survivable, which nobody planned.** A
+yield carries the runs behind it and is discounted to a Poisson lower bound, so a
+hand-collected sample of twenty runs is *usable and honest* — the plan simply says
+how much it does not know. A model storing a bare rate would have made
+self-sourcing impossible to do truthfully.
+
+**Three things this deliberately did not do:**
+
+- **Delete the adapter.** It stays as a never-shipped cross-check. Removing it
+  first would leave the project with no real data at all and destroy the current
+  evidence before a substitute exists — and diffing the first self-sourced bundle
+  against an independent reading of the same patch is worth more as a check than
+  it ever was as a source. F2 blocked *public deployment of upstream numbers*; a
+  local test that ships nothing was never the blocked part.
+- **Keep the load-bearing claim quietly.** The nine agreements and 3 880 against
+  4 017 are computed from Kornblume-fed inputs. They are now a number to
+  **re-earn**, and the tracker says so where the claim is made. The benchmark
+  *method* survives — the guide it compares against is a separate artifact.
+- **Pretend the pipeline has to change.** It does not: schema, parser, writer,
+  CLI, diff, optimizer and statistics are game-agnostic by construction, and
+  **a hand-authored bundle needs no adapter at all** — the canonical JSON *is*
+  the authoring format and *preview, ingest, publish* already exists. Machinery
+  built to support a claim about second games turns out to cover this too.
+
+**The one thing that has to be added is provenance.** `Drop` carries
+`sampledRuns` (0 meaning *declared*); the catalog axis carries nothing
+equivalent, and without it "self-sourced" is unfalsifiable. **N27** starts with
+one stage and one character end to end rather than a backfill, because the point
+of the first bundle is to learn what authoring one costs before committing to
+2 700 of them. And the integrity rule is the whole decision: **a fact enters
+because someone read it in the game, not because they re-typed it out of an
+aggregator.** Re-typing would be laundering.
+
+Q2, Q3, F1 and F2 all close on this. Q5 dissolves for anything sourced after it —
+you know which region and patch you read, because you read it.
 
 #### What sync still does not do
 

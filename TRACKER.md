@@ -13,7 +13,7 @@ being finished with is.
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks).
   [README.md](README.md) is the public face; [CLAUDE.md](CLAUDE.md) is the
   working agreement.
-- Last updated: **2026-09-09** (thirteenth session)
+- Last updated: **2026-09-09** (fourteenth session)
 
 ---
 
@@ -35,18 +35,57 @@ being finished with is.
   **Two blockers, and they are different in kind.** *The code:* no provider is
   configured, so there is no login URL and every `/api/me` route is 401 —
   Phase 4's whole signed-in product has nothing to develop against (**N24**).
-  *The launch:* **Q3/F2 — asking the Kornblume maintainer**, which needs a human
-  and bites the moment upstream numbers are served publicly.
+  *The data:* see the next line — F2 is gone, and what replaced it is bigger.
+- **The project is going first-hand on game data**, decided 2026-09-09 —
+  [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md),
+  superseding 0009 on its conclusion and closing **Q2, Q3, F1 and F2** at once.
+  Kornblume is unlicensed, F2 was never sent, and rather than send it the owner
+  chose independence. **Nothing is deleted yet and the order matters:** the
+  adapter stays as a never-shipped cross-check until a replacement exists, because
+  removing it first leaves the project with no real data at all.
+  **The cost, measured on patch 3.5:** ~2 700 static catalog facts (91 items, 100
+  stages, 50 recipes, 118 arcanists carrying ~972 insight lines and ~1 502
+  resonance entries, 37 psychubes) and **595 drop-rate facts**. The first half is
+  typing and is mostly additive per patch. **The second half is the problem** —
+  see the bootstrap below.
+- **The bootstrap problem is the main risk in the project, and N26 confirmed the
+  cheap way out is not there.** The optimizer cannot rank a stage without a
+  yield, so no drop data means no plan; own drop data means Phase 6, which means
+  users, which means a working plan. **The publisher does not disclose stage drop
+  rates** — the stage screen grades a reward `Fixed`, `Common` or `Possible` and
+  prices only the first, and every published percentage for the other two is
+  somebody's crowdsourced sample. Measured on the pinned snapshot: **15 of 779
+  drop facts are declared, 764 sampled** — ~2% free. Two real consolations:
+  **gacha rates *are* disclosed** (half of **Q4**, one screen's reading), and
+  **the `Fixed`/`Common`/`Possible` grade is itself a free first-hand fact** for
+  all 595 pairs, with nowhere in the model to live until Phase 6 consumes it.
+  [The drop disclosure note](docs/game-facts/reverse-1999-drop-disclosure.md).
+- **A fact now carries where it came from, and `publish` enforces it** —
+  [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md), the
+  mechanism half of N27, because ADR 0015 had a hole prose could not close: a
+  number read off a game screen and one copied out of an aggregator are
+  byte-identical once typed. A version whose facts are not ours to publish is
+  **refused by name**, and the exception is a word the operator types.
+  `KornblumeAdapter` hard-codes `THIRD_PARTY`. Silence is `UNRECORDED`, which
+  parses and cannot publish. **The other half of N27 no session can do**: the
+  first self-sourced bundle needs somebody to *read the game*, and 0015's
+  integrity rule disqualifies an aggregator, a web search and an AI session
+  alike. **The machinery is finished and the reading is not** —
+  [the loop](docs/game-facts/authoring-a-first-hand-bundle.md).
 - **Phase 0 stays closed by exception** — deploy deferred by D1 — and its box
   stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
 - **The remote, checked 2026-09-09 — re-check it, do not trust it.** `main` is
-  `2864c95` (PR #13 merged, run `34217574439`). `dev` is `6376b33` as
-  [PR #14](https://github.com/kietnt4412/storm_almanac/pull/14), carrying N23 and
-  the Phase 4 opening — green, run `34298619283`, 0 failed and 16 skipped and
-  they are exactly the three snapshot-gated classes. This is a fact here rather
-  than a next action because four sessions running opened on a "merge PR #n" the
-  maintainer had already clicked between sessions.
+  `3f6ec02` (PR #14 merged, which happened *during* the previous session's write-up
+  and is why its Status line was already stale). `dev` is `1206f62` as
+  [PR #15](https://github.com/kietnt4412/storm_almanac/pull/15), carrying ADR 0015's
+  own commit plus N26 and ADR 0016 — **green, run `34308177004`**, 0 failed and
+  16 skipped, and they are exactly the three snapshot-gated classes (8 + 5 + 3).
+  This is a fact here rather than a next action because five sessions running
+  opened on a "merge PR #n" the maintainer had already clicked between sessions.
+  **A note the next session needs:** CI fires on `pull_request` and on push to
+  `main` only, so **a push to `dev` with no open PR runs nothing.** That happened
+  this session and is why PR #15 exists.
 - **The optimizer has been asked a question by something other than a test.**
   What has *not* happened is a real OAuth exchange: no provider is configured and
   no client secret exists, so login is installed only when one is.
@@ -60,7 +99,7 @@ being finished with is.
    data is fetched and never committed
    ([ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md)), so
    `RealUpstreamPatchTest`, `RealUpstreamPlanTest` and `CommunityBenchmarkTest`
-   skip on the runner — 16 of the 245 tests. **Every performance number and every
+   skip on the runner — 16 of the 257 tests. **Every performance number and every
    comparison with an outside answer in this file comes from a test the pipeline
    does not run.** Run `backend/tools/fetch-upstream.sh` before trusting a green
    build to mean the pipeline handles real data.
@@ -112,17 +151,24 @@ else's, two of that account's devices that can edit what it owns without deletin
 each other's work, and — since this session — a browser that has actually loaded
 a page of it.
 
-**The load-bearing claim:** on **nine** benchmark materials the cheapest stage
-this project computes is the stage a published community guide tells players to
-farm, and the optimizer's plan for a real goal set is cheaper than following that
-guide — **3 880 Activity against 4 017**, and the 4 017 does not cover the whole
-demand. Seventeen of the guide's twenty quoted drop rates land within three
-percentage points of a sample this project had never seen. Nine and not five
-because a yield carries how many runs it was observed over and the solver uses
-the conservative end of a 95% interval on it
-([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)) —
-7% dearer and better agreement at once. See
-[the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
+**The load-bearing claim — and it is now a number to re-earn.** On **nine**
+benchmark materials the cheapest stage this project computes is the stage a
+published community guide tells players to farm, and the optimizer's plan for a
+real goal set is cheaper than following that guide — **3 880 Activity against
+4 017**, with the 4 017 not covering the whole demand. Seventeen of the guide's
+twenty quoted rates land within three percentage points of a sample this project
+had never seen. Nine and not five because a yield carries how many runs it was
+observed over and the solver uses the conservative end of a 95% interval on it
+([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)).
+See [the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
+
+**Every one of those numbers is computed from Kornblume-fed inputs**, and
+[ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md) says the
+product will not ship that data. Until a self-sourced bundle reproduces them they
+are evidence about somebody else's numbers run through our solver. **The
+benchmark method survives untouched** — the guide it compares against is a
+separate published artifact — so this is a claim to re-earn, not a test to
+delete.
 
 Still true from earlier phases: **the solver says how much it does not know**
 ([ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md)), **the
@@ -134,10 +180,11 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **245 tests**, 0 failed, 0 skipped locally with snapshots present. **229 on CI**, because the same 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
+| Backend build | **Green** | **257 tests**, 0 failed, 0 skipped locally with snapshots present. **241 on CI**, because the same 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
 | CI workflow | **Green on `main`** | Run `34217574439` (`2864c95`, PR #13 merged): 0 failed, **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. Action deprecations pending — **N5** |
 | Game data pipeline (Phase 1) | **Closed and stable** | Model, schema, ingest, diff and CLI, [described in full in the archive](docs/history/tracker-archive.md#closed-phases-in-full). `V2`–`V4`, 28 tables, seven invariants in `GameDataSchemaTest` proven on two real R1999 patches; parser and writer pinned to each other by a round trip (ADR 0008); onboarding a title is *adapt, preview, ingest, publish* and publishing is a human approval, not a flag. `Drop` carries `sampledRuns`, where 0 means *declared* |
-| Parser adapters | **One, reading what the upstream reads** | `:adapters:reverse-1999`, 25 tests. Newest `stages<major>_<minor>_greedy.json`, counts divided by the sampled run count and **that count carried onto every `Drop`**; `count: 1` converts as declared, because here it marks a fixed-reward stage |
+| Parser adapters | **One — and demoted to a cross-check by [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md), now in code** | Still reads what the upstream reads and **its output is no longer what the product will ship**. Since ADR 0016 it **hard-codes `THIRD_PARTY` provenance and cannot be told otherwise**, so what it produces fails a plain `publish` — there is no call site to launder data through. Kept, not deleted: diffing the first self-sourced bundle against an independent reading of the same patch is worth more as a check than it ever was as a source. `:adapters:reverse-1999`, 25 tests. Newest `stages<major>_<minor>_greedy.json`, counts divided by the sampled run count and **that count carried onto every `Drop`**; `count: 1` converts as declared, because here it marks a fixed-reward stage |
+| Provenance | **Done — written, enforced, not yet read back out** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). A bundle declares `Provenance` records, defaults every fact to one (`sourcedBy`) and overrides per `FactRef` (`kind:slug`); `V7` materialises **one row per declared fact**, because a default is an authoring convenience and a database that stored it could not answer the question alone. **`publish` refuses a version that is not first-hand and names the facts**; `publish(…, true)` and the CLI's `second-hand` word are the explicit exception. The first-hand policy lives in `Provenance.Origin` and nowhere else — the migration constrains the set and says nothing about which count. **Silence parses and cannot publish** (`UNRECORDED`). Nothing serves it yet: that is N25's catalog page |
 | Game data API | **Served and verified** | Five game-data routes plus health, version-pinnable, every response carrying its version and attribution. 10 HTTP tests plus a hand check against `docker compose up` |
 | Demand resolution | **Done** | Goals + roster + upgrade graph → a demand vector, walking the DAG backwards. Refuses by name rather than guessing: unreachable states, unknown entities, probabilistic goals, ambiguous routes |
 | The MIP (`EnergyMip`) | **Done for stages, crafts and rewards** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. **No shops and no fodder**; items sourced only from those are refused by name |
@@ -249,6 +296,15 @@ works". It does not mean that:
   let the phase board imply otherwise.
 - **The pipeline has met one upstream, not two.** The second game is Phase 11 and
   is where the abstraction is actually tested.
+- **No fact in this repository has ever been sourced first-hand**, and ADR 0016
+  did not change that. The only bundles that pass its gate are the synthetic
+  fixtures, passing by declaring `AUTHORED_FIXTURE` — honest, and evidence of
+  nothing about a real game. **Every Reverse: 1999 number in this file still
+  comes from Kornblume.** The gate is what will stop that shipping; it is not
+  progress on replacing it (**N27**).
+- **Provenance is written and never read.** The publish gate queries it; no API
+  response carries it. It becomes the honesty claim the moment a catalog page
+  exists — **N25**.
 - **`gacha` has no behaviour.** Every port in it is an interface with nothing
   behind it.
 
@@ -259,6 +315,23 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
+- [ ] **N27 — Read the game, and author the first self-sourced bundle.**
+      **This one is the maintainer's and cannot be delegated to a session** — that
+      is not a scheduling fact, it is ADR 0015's integrity rule: a fact enters
+      because someone *read it in the game or in the publisher's disclosure*, and
+      an aggregator, a web search and an AI session are all the same
+      disqualified thing. Everything a session could build is built: the canonical
+      JSON is the authoring format, `gamedata-cli` does *preview, ingest, publish*,
+      and provenance is a field the publish gate enforces
+      ([ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md)).
+      **Start with one stage and one character end to end**, not with a backfill:
+      the point of the first bundle is to find out what authoring one costs before
+      committing to ~2 700 of them, so **write down how long it took** — that
+      number is the input to every decision after it. The loop, the origins and
+      the two temptations are in
+      [authoring a first-hand bundle](docs/game-facts/authoring-a-first-hand-bundle.md).
+      **Cheapest first read: the summon rules screen**, which closes the live half
+      of **Q4** and is `PUBLISHER_DISCLOSURE` rather than a sample.
 - [ ] **N24 — Make a signed-in page developable.** Phase 4's product is all
       behind `/api/me` and **nothing can sign in**: no provider configured, so no
       `oauth2Login`, no login URL, 401 everywhere. Two ways out, not equivalent.
@@ -393,39 +466,23 @@ is still worth building.
 ### Track B — substrate
 
 Scope for each is in [plan.html](plan.html); what matters here is the criterion
-that says it is finished. **None of these may start before the gate opens.**
+that says it is finished, and the one architectural note that shapes the phase.
+**None of these may start before the gate opens**, which is why they are a table
+rather than the paragraphs the live phases get.
 
-- [ ] **Phase 7 · almanac-store (LSM storage engine)** — 3 weeks. Wired behind
-      `DropReportStore` alongside the Postgres one.
-      **Exit:** crash-consistency fuzzing passes 10k randomized kills; benchmark
-      vs Postgres published — including if Postgres wins.
-- [ ] **Phase 8 · almanac-raft (consensus)** — 3 weeks. Exposed first as a
-      replicated KV, so it is testable before anything depends on it.
-      **Exit:** 5-node cluster survives repeated leader kills and partitions with
-      no divergent log.
-- [ ] **Phase 9 · Solver cluster** — 2 weeks. Replicated job log, leased work,
-      idempotent completion, results over WebSocket.
-      **Exit:** kill any node mid-solve — no lost solves, no duplicated solves,
-      throughput recorded.
-- [ ] **Phase 10 · Chaos and verification harness** — 1.5 weeks. Partitions,
-      pauses, kills, disk corruption; linearizability checking; nightly runs with
-      failing seeds saved as regression tests.
-      **Exit:** nightly suite green for 7 consecutive nights, and one real bug
-      found and written up.
+| | Phase | Shape | **Exit** |
+|---|---|---|---|
+| [ ] | **7 · almanac-store** (LSM), 3w | Behind `DropReportStore`, alongside the Postgres one | Crash-consistency fuzzing survives 10k randomized kills; benchmark vs Postgres published — **including if Postgres wins** |
+| [ ] | **8 · almanac-raft** (consensus), 3w | Exposed first as a replicated KV, so it is testable before anything depends on it | 5-node cluster survives repeated leader kills and partitions with no divergent log |
+| [ ] | **9 · Solver cluster**, 2w | Replicated job log, leased work, idempotent completion, results over WebSocket | Kill any node mid-solve — no lost solves, no duplicated solves, throughput recorded |
+| [ ] | **10 · Chaos harness**, 1.5w | Partitions, pauses, kills, disk corruption; linearizability checking; failing seeds saved as regression tests | Nightly suite green for 7 consecutive nights, **and one real bug found and written up** |
 
 ### Track A — closing
 
-- [ ] **Phase 11 · Punishing: Gray Raven** — 2 weeks. Data adapter, banner model,
-      fodder economics, probabilistic goals. Whatever has to generalise,
-      generalise in the model.
-      **Exit:** PGR live with zero game-specific code in `planner`, `gacha` or
-      `stats` — and the diff to prove it.
-- [ ] **Phase 12 · Hardening and the writeups** — 1 week. Tracing, alerting, a
-      backup actually restored from, a load test with published numbers,
-      pre-rendered catalog pages.
-      **Exit:** restore drill completed from a real backup; catalog pages
-      indexed; three writeups published — the storage benchmark, the consensus
-      verification, the multi-game diff.
+| | Phase | Shape | **Exit** |
+|---|---|---|---|
+| [ ] | **11 · Punishing: Gray Raven**, 2w | Data adapter, banner model, fodder economics, probabilistic goals. Whatever has to generalise, generalise in the model. **Now also costs first-hand sourcing** (ADR 0015), and **N20** lands here | PGR live with **zero game-specific code** in `planner`, `gacha` or `stats` — and the diff to prove it |
+| [ ] | **12 · Hardening and the writeups**, 1w | Tracing, alerting, a backup actually restored from, a load test with published numbers, pre-rendered catalog pages | Restore drill completed from a real backup; catalog pages indexed; three writeups published — the storage benchmark, the consensus verification, the multi-game diff |
 
 ---
 
@@ -484,12 +541,10 @@ and a free tier accepted. **Vercel for the frontend, Render for the backend.**
 Still no money, so the premise stands; what changed is that a free tier is
 acceptable. [The entry in full is in the archive](docs/history/tracker-archive.md#d1--the-deferral-in-full).
 
-**What the deferral cost is what the next sessions have to buy back**, and it is
-why this stays here rather than being deleted: **Phase 0's box is still unticked**
-(no URL has answered 200), **the Track B gate has no meaning** until there is real
-traffic to shape `almanac-store` against, and **deploy problems really were
-discovered late** — Phase 0 put the deploy first precisely because that is when
-it is cheapest to fix, and nothing has tested it since.
+**What the deferral cost is what the next sessions have to buy back:** Phase 0's
+box is still unticked, the Track B gate has no meaning without real traffic, and
+deploy problems really were discovered late — which is why Phase 0 put the deploy
+first, and nothing has tested it since.
 
 **Nothing is deployed yet.** The decision is made, the wiring is not — **B5**.
 Two consequences of the split to settle before writing any of it:
@@ -530,15 +585,26 @@ and modifies nothing. Not committed to `gradle.properties`, because
 
 ### E2 · Docker Engine 29 refuses Testcontainers' API version
 
-**Fixed, committed, and only worth knowing if it comes back.**
-`backend/build.gradle.kts` sets `systemProperty("api.version", "1.44")` on every
-`Test` task — on the *task*, not an environment variable, and the distinction is
-the whole fix. Why, and why the obvious alternatives do nothing:
+**Fixed and committed** — `systemProperty("api.version", "1.44")` on every `Test`
+task in `backend/build.gradle.kts`, on the *task* and not as an environment
+variable, which is the whole fix. Only worth reading if it comes back:
 [the archive](docs/history/tracker-archive.md#e2--the-full-account).
 
-**Also:** Docker Desktop takes minutes to start on this machine and `docker info`
-hangs rather than failing while it does. Give it time instead of concluding it is
-broken.
+### E4 · A dead Docker engine looks exactly like a slow one
+
+Docker Desktop takes minutes to start here and `docker info` hangs rather than
+failing while it does — **but waiting is only sometimes the answer**, and on
+2026-09-09 it was not: the GUI processes were up and the engine was never coming.
+**One command tells the two apart:**
+
+```bash
+powershell -NoProfile -Command "wsl -l -v; Get-Service com.docker.service"
+```
+
+`com.docker.service` = `Stopped` means somebody has to start Docker Desktop by
+hand and accept the elevation prompt. A session cannot — `Start-Service` from a
+non-elevated shell fails with *Cannot open com.docker.service service on
+computer '.'* — so **ask rather than keep waiting.**
 
 ---
 
@@ -548,49 +614,26 @@ Carry these forward until answered; strike through with the answer when resolved
 then move the entry to
 [the archive](docs/history/tracker-archive.md#answered-questions).
 
-- **Q2 — Where the drop data should come from.** *Narrowed twice, still open.*
-  Kornblume is not canonical — it is a presentation layer over Huiji Wiki
-  (characters), 必要的记录 (drop data) and ArkPlanner (algorithm). But the
-  sampling itself is in the repository, in `stages<major>_<minor>_greedy.json`:
-  raw drop counts and the number of runs behind them, which the adapter now reads
-  and carries. So **F1** in [docs/prior-art.md](docs/prior-art.md) — go to
-  必要的记录 directly — changes shape: what it buys is *fresher and more*
-  sampling, not different numbers, against the cost of a second upstream to
-  adapt.
-  **This is now the fix for the two surviving benchmark disagreements** (Milled
-  Magnesia at 105 runs, Liquefied Terror at 113). ADR 0011 discounts a thin
-  sample honestly; only more sampling makes it thick. Weigh it against Phase 6,
-  where our own drop reports would do the same job with data we own.
-  **It also owns everything the time axis cannot exercise.** After N14 the model
-  prices rewards, weekday rotation and (in a dozen lines it does not have)
-  shops — and this upstream publishes none of the three. A second source is now
-  the only thing standing between a working calendar and a calendar that has met
-  real data. See [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md).
-- **Q5 — Is our "3.5" the same 3.5 anyone else means?** *New 2026-09-08, and the
-  same shape as the mistake that cost five sessions.* `fetch-upstream.sh` pins
-  `8b40541a9c42`, message `update 3.5`, dated **2026-03-17** — confirmed through
-  the GitHub API, not assumed. Global 3.5 ran **2026-05-28 to 2026-07-02**. Two
-  and a half months apart, most likely because Kornblume tracks **CN**, which
-  runs ahead. If so, everything here called "3.5" is CN 3.5. **This does not
-  invalidate the nine agreements** — the guide was already known to be written
-  for 2.7 against a 3.3 sample — but the version labels may not mean what a
-  reader assumes. Resolve by checking content that differs between the two
-  releases; until then do not write "3.5" publicly without saying which.
-- **Q3 — Seed data provenance.** *Answered operationally, open on one point.*
-  Kornblume has **no `LICENSE` file**, so it is all rights reserved by default —
-  absence of a licence is not permission. Enforced since 2026-09-06 by
-  [ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md): fetched
-  at need, never committed, real-data tests skip when it is absent, and the
-  committed fixtures are the synthetic `proving-ground` title.
-  **What stays open:** the owner's scope is personal and portfolio use, and
-  **F2 — ask the maintainer directly — becomes a release blocker the moment this
-  is deployed publicly.** It needs a human to send a message; a session cannot.
-  **Phase 4 is that moment**, so this is now a blocker on the next phase rather
-  than a distant one. Nothing in this entry authorises a public deployment
-  carrying upstream numbers.
+- **Q5 — Is our "3.5" the same 3.5 anyone else means?** *Open for the existing
+  data; **dissolved for everything after ADR 0015**.* `fetch-upstream.sh` pins a
+  commit dated **2026-03-17** while Global 3.5 ran **2026-05-28 to 2026-07-02** —
+  two and a half months apart, most likely because Kornblume tracks **CN**. So
+  everything here labelled "3.5" is probably CN 3.5, and the labels may not mean
+  what a reader assumes. It does not invalidate the nine agreements (that guide
+  was already known to be 2.7 against a 3.3 sample). **Self-sourcing ends the
+  ambiguity by construction** — you know which region and patch you read, because
+  you read it — so this is a caveat on the old numbers rather than a question
+  about the new ones. Until then do not write "3.5" publicly without saying which.
 - **Q4 — Rate verification.** The pity numbers in `PityRuleTest` come from the
   secondary sources the plan cites. They must be checked against in-game
-  disclosure before the simulator ships (Phase 5).
+  disclosure before the simulator ships (Phase 5). **Half-answered 2026-09-09 by
+  N26:** the disclosure exists — Bluepoch states per-rarity summon rates and the
+  pity counter in the client's own rules screen — so this is one screen's worth
+  of reading rather than an open research question, and there is now somewhere in
+  the data to record that somebody did it (`PUBLISHER_DISCLOSURE`, ADR 0016).
+  **What stays open is that nobody has read it yet.** The same question about
+  *drop* rates is closed and the answer was no; that half moved to
+  [the drop disclosure note](docs/game-facts/reverse-1999-drop-disclosure.md).
 
 ---
 
@@ -601,7 +644,8 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-09 | thirteenth | N23 pays Phase 3's sync debt — a per-key `PATCH` merged last-write-wins (ADR 0014), a clock that outlives its value, a watermark a failing test found. Then Phase 4 opened: the frontend was served for the first time and four minutes of looking at it found a 401 where a 404 belonged and an app with no colours. 245 tests, and D1 reversed on Vercel + Render |
+| 2026-09-09 | fourteenth | N26 answered and the answer was no — the game grades a drop `Fixed`/`Common`/`Possible` and prices only the first, so 764 of 779 drop facts still have to be counted; gacha rates *are* disclosed, which is half of Q4. Then N27 split in two: the authoring is the maintainer's by ADR 0015's own integrity rule, so the session built the mechanism instead — **[ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md), provenance is a field and `publish` enforces it**. 257 tests, 0 failed, 0 skipped locally |
+| 2026-09-09 | thirteenth | N23 pays Phase 3's sync debt (ADR 0014: last-write-wins per key, a clock that outlives its value, a watermark a failing test found). Phase 4 opened — the frontend served for the first time, which found a 401 where a 404 belonged. Then the largest decision of the session: **go first-hand on game data** (ADR 0015), closing Q2, Q3, F1 and F2 — ~3 300 facts a patch, and a bootstrap problem to solve |
 | 2026-09-08 | twelfth | Phase 3 opened and closed: V5 gives identity and player their schemas with four decisions in its header, sign-in creates the account while the principal is built, and a plan is computed from goals nobody handed the optimizer — 228 tests, and sync is the piece of the scope that was not built (N23) |
 | 2026-09-08 | eleventh | N14: the plan gets a calendar — the horizon as a scalar rather than an index (ADR 0013), p95 held at 1 807 ms, the two objectives finally disagree (0 energy / 28 days against 370 / 2) — then the maintainer supplied what the game actually does, and two of the answers were corrections |
 | 2026-09-08 | tenth | N15: a solve is cached on its key (1 806 ms → 2 ms on the real patch) and a queue runs it once, CI-confirmed on `3fdc277`; and the read that took shops out of N14 |

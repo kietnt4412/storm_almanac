@@ -8,6 +8,7 @@ import io.stormalmanac.gamedata.Craft;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
 import io.stormalmanac.gamedata.Sink;
@@ -21,8 +22,10 @@ import io.stormalmanac.gamedata.catalog.StatCurve;
 import io.stormalmanac.gamedata.catalog.Talent;
 import io.stormalmanac.gamedata.ingest.GameDataBundle;
 import io.stormalmanac.gamedata.ingest.GameDataIngestRepository;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -77,12 +80,22 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
         writeSources(version, bundle.sources(), items);
         writeSinks(version, bundle.sinks(), items, entities);
         writeBanners(version, bundle.banners());
+        writeProvenance(version, bundle);
         return version;
     }
 
     @Override
     @Transactional
     public GameDataVersion publish(GameId game, long sequence) {
+        return publish(game, sequence, false);
+    }
+
+    @Override
+    @Transactional
+    public GameDataVersion publish(GameId game, long sequence, boolean acceptingSecondHandData) {
+        if (!acceptingSecondHandData) {
+            refuseSecondHandData(game, sequence);
+        }
         // Stamped by the database's clock, not the caller's: it is the one clock
         // every row in this table shares, and two application instances ordering
         // approvals by their own clocks is a bug that waits for a second replica.
@@ -123,6 +136,119 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
                         rs.getString("attribution"),
                         Timestamps.instant(rs, "ingested_at")),
                 game.value());
+    }
+
+    // ── Provenance ──────────────────────────────────────────────────────────
+
+    /**
+     * The sourcing records, and one row per declared fact pointing at one.
+     *
+     * <p>Every fact, not only the ones that overrode the bundle's default. The
+     * default is an authoring convenience — nobody types the same string 2 700
+     * times — and storing it as one would make "where did this fact come from"
+     * a question the database cannot answer without the bundle beside it. See
+     * the header of {@code V7__facts_carry_their_provenance.sql}.
+     */
+    private void writeProvenance(long version, GameDataBundle bundle) {
+        Map<String, Long> ids = new LinkedHashMap<>();
+        for (Provenance provenance : bundle.provenance()) {
+            ids.put(provenance.id(), jdbc.queryForObject(
+                    """
+                    INSERT INTO gamedata.provenance (version_id, slug, origin, detail, observed_on)
+                    VALUES (?, ?, ?, ?, ?)
+                    RETURNING id
+                    """,
+                    Long.class,
+                    version, provenance.id(), provenance.origin().name(),
+                    provenance.detail(), Date.valueOf(provenance.observedOn())));
+        }
+
+        List<String> refs = bundle.factRefs();
+        jdbc.batchUpdate(
+                """
+                INSERT INTO gamedata.fact_provenance (version_id, fact_ref, provenance_id)
+                VALUES (?, ?, ?)
+                """,
+                refs,
+                refs.size(),
+                (statement, ref) -> {
+                    statement.setLong(1, version);
+                    statement.setString(2, ref);
+                    statement.setLong(3, ids.get(bundle.provenanceOf(ref).id()));
+                });
+    }
+
+    /**
+     * Refuses to approve a draft carrying facts this project did not source.
+     *
+     * <p>Reads the origins back out of the database rather than trusting the
+     * bundle that produced them, because {@code publish} is a separate call from
+     * {@code ingestDraft} — often a separate process, days later — and the file
+     * is not in front of it. The origin arrives here as text and becomes a
+     * {@link Provenance.Origin} before anything asks whether it is first-hand,
+     * so the policy is answered in the one place that defines it rather than by
+     * a {@code WHERE origin <> 'THIRD_PARTY'} that would be a second copy of it.
+     */
+    private void refuseSecondHandData(GameId game, long sequence) {
+        List<String> secondHand = jdbc.query(
+                """
+                SELECT fp.fact_ref, p.slug, p.origin
+                  FROM gamedata.fact_provenance fp
+                  JOIN gamedata.provenance p
+                    ON p.version_id = fp.version_id AND p.id = fp.provenance_id
+                  JOIN gamedata.game_data_version v
+                    ON v.id = fp.version_id
+                 WHERE v.game_id = ? AND v.sequence = ? AND v.status = 'DRAFT'
+                 ORDER BY fp.fact_ref
+                """,
+                (rs, row) -> new SourcedFact(
+                        rs.getString("fact_ref"), rs.getString("slug"), rs.getString("origin")),
+                game.value(), sequence).stream()
+                .filter(fact -> !fact.origin().isFirstHand())
+                .map(fact -> fact.factRef() + " (" + fact.provenanceSlug() + ")")
+                .toList();
+
+        if (secondHand.isEmpty()) {
+            return;
+        }
+        // Truncated for the message, counted in full. A whole second-hand
+        // catalogue is thousands of facts, and an exception that lists all of
+        // them is not more useful than one that lists five.
+        String examples = String.join(", ", secondHand.subList(0, Math.min(5, secondHand.size())));
+        throw new SecondHandDataException(
+                secondHand.size() + " fact(s) in " + game.value() + " " + sequence
+                        + " are not this project's to publish: " + examples
+                        + (secondHand.size() > 5 ? ", and more" : "")
+                        + ". ADR 0015 says the shipped product carries only first-hand data."
+                        + " Publish it anyway only if it is not being shipped:"
+                        + " publish(game, sequence, true), or the CLI's 'second-hand' argument.");
+    }
+
+    /**
+     * One fact's sourcing as the database holds it, before the policy is applied.
+     *
+     * <p>The origin arrives as text and is turned into a
+     * {@link Provenance.Origin} here rather than being filtered in SQL, so that
+     * "which origins are ours to publish" is answered in the one place that
+     * defines it. A {@code WHERE origin <> 'THIRD_PARTY'} would be a second copy
+     * of that policy, in a language that cannot be made to fail to compile when
+     * the first one changes.
+     *
+     * @param origin an unknown value cannot come from a bundle — the parser
+     *               rejects one and a CHECK constraint rejects one — so reaching
+     *               that case means the constraint and the enum have drifted
+     *               apart, and the safe reading of a value nobody has classified
+     *               is that it is not ours to publish
+     */
+    private record SourcedFact(String factRef, String provenanceSlug, String originName) {
+
+        Provenance.Origin origin() {
+            try {
+                return Provenance.Origin.valueOf(originName);
+            } catch (IllegalArgumentException unclassified) {
+                return Provenance.Origin.THIRD_PARTY;
+            }
+        }
     }
 
     // ── Versions ────────────────────────────────────────────────────────────
