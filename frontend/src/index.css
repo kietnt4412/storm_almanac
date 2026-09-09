@@ -1,3 +1,43 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * The app declared no colours at all until it was first served, which is a
+ * thing you cannot find by typechecking it: Tailwind's preflight sets no
+ * background and no foreground, so the page inherited both from the browser and
+ * rendered near-black text on the near-black ground of a dark system theme. It
+ * was legible on the machine it was written on and invisible on a phone in dark
+ * mode, which is most of them.
+ *
+ * So both colours are stated, and stated for both schemes. `color-scheme` is
+ * what makes the browser's own furniture — scrollbars, form controls, the canvas
+ * behind the page — follow along; without it a dark palette gets a white
+ * scrollbar and white autofill.
+ *
+ * The palette is the one the PWA manifest already committed to in
+ * vite.config.ts, so the splash screen and the first paint agree.
+ */
+:root {
+  color-scheme: light dark;
+  --ground: #f7faf9;
+  --ink: #10201f;
+  --brand: #0d6f68;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ground: #0e1a19;
+    --ink: #e6f0ef;
+    --brand: #4fd1c5;
+  }
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+}
+
+a {
+  color: var(--brand);
+}

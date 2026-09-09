@@ -21,3 +21,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0011](0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md) | A yield is a mean per run, and the solver uses what its sample supports | Accepted |
 | [0012](0012-the-solve-cache-is-in-process-until-there-is-a-second-node.md) | The solve cache is in-process until there is a second node | Accepted |
 | [0013](0013-the-horizon-is-a-scalar-not-an-index.md) | The planning horizon is a scalar, not an index | Accepted |
+| [0014](0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md) | Sync is last-write-wins per key, against a clock that outlives the value | Accepted |

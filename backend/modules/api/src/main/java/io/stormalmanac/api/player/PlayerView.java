@@ -1,7 +1,10 @@
 package io.stormalmanac.api.player;
 
+import io.stormalmanac.common.id.EntityId;
+import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.Goal;
 import io.stormalmanac.identity.Account;
+import io.stormalmanac.player.MergeOutcome;
 import io.stormalmanac.planner.Objective;
 import io.stormalmanac.planner.Plan;
 import io.stormalmanac.planner.SolveRequest;
@@ -77,6 +80,51 @@ public final class PlayerView {
 
     public record InventoryRequest(Map<String, Integer> items) {}
 
+    /**
+     * A patch: only the keys a device actually changed, each carrying when it
+     * changed.
+     *
+     * <p><b>The timestamp is per key and not per request, and that is the whole
+     * design.</b> A device that spent an hour offline did not make its edits at
+     * one instant — it changed one item at 09:00 and another at 11:00 — and a
+     * single batch stamp would have to lie about one of them. The lie is not
+     * cosmetic: it decides which device wins for that key, so a batch stamp
+     * would make some merges come out wrong, silently, in a way no test written
+     * against a single clock would show. Three hundred copies of the same
+     * timestamp on a bulk upload is the price, and it is cheap.
+     */
+    public record InventoryPatchRequest(Map<String, InventoryEditView> items) {}
+
+    /**
+     * @param quantity how many the player now has. Required; zero means "none
+     *                 left" and removes the key, which is a normal edit rather
+     *                 than an error
+     * @param at       when the client made this edit, in its own clock. Required
+     *                 — a client that cannot say when has no business on this
+     *                 route and should PUT the whole aggregate instead. It is
+     *                 clamped server-side, so it can be old but never future
+     */
+    public record InventoryEditView(Integer quantity, Instant at) {}
+
+    /**
+     * @param items    the merged inventory as the server now holds it, so a
+     *                 client never has to guess what the merge decided
+     * @param rejected the keys whose edits lost for being older than what was
+     *                 stored. A client that ignores this list keeps showing
+     *                 values the server does not have
+     */
+    public record InventoryPatchResponse(
+            String profile, Map<String, Integer> items, List<String> applied, List<String> rejected) {
+
+        public static InventoryPatchResponse of(Inventory merged, MergeOutcome<ItemId> outcome) {
+            return new InventoryPatchResponse(
+                    merged.profile().value(),
+                    InventoryResponse.of(merged).items(),
+                    outcome.applied().stream().map(ItemId::value).sorted().toList(),
+                    outcome.rejected().stream().map(ItemId::value).sorted().toList());
+        }
+    }
+
     public record RosterResponse(String profile, Map<String, String> entities) {
 
         public static RosterResponse of(Roster roster) {
@@ -89,6 +137,30 @@ public final class PlayerView {
     }
 
     public record RosterRequest(Map<String, String> entities) {}
+
+    /** A roster patch, on the same terms as {@link InventoryPatchRequest}. */
+    public record RosterPatchRequest(Map<String, RosterEditView> entities) {}
+
+    /**
+     * @param state the entity's current upgrade state, or {@code null} to say it
+     *              is no longer on the roster. An omitted {@code state} member
+     *              reads as null and therefore as a removal — JSON cannot tell
+     *              absent from null, and inventing a third spelling for it would
+     *              be a worse trade than saying so here
+     */
+    public record RosterEditView(String state, Instant at) {}
+
+    public record RosterPatchResponse(
+            String profile, Map<String, String> entities, List<String> applied, List<String> rejected) {
+
+        public static RosterPatchResponse of(Roster merged, MergeOutcome<EntityId> outcome) {
+            return new RosterPatchResponse(
+                    merged.profile().value(),
+                    RosterResponse.of(merged).entities(),
+                    outcome.applied().stream().map(EntityId::value).sorted().toList(),
+                    outcome.rejected().stream().map(EntityId::value).sorted().toList());
+        }
+    }
 
     public record GoalsResponse(String profile, List<GoalView> goals) {
 

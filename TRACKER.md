@@ -13,44 +13,46 @@ being finished with is.
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks).
   [README.md](README.md) is the public face; [CLAUDE.md](CLAUDE.md) is the
   working agreement.
-- Last updated: **2026-09-08** (twelfth session)
+- Last updated: **2026-09-09** (thirteenth session)
 
 ---
 
 ## Status
 
-- **Phase 3 — Identity and player state — is CLOSED**, 2026-09-08, criterion met.
-  A plan is computed end-to-end from stored state on a real account: a person
-  signs in, the sign-in creates the account, the profile is given an inventory, a
-  roster and goals over HTTP, and the plan route reads all three back out of
-  Postgres. **Read [what the tick does not cover](#what-is-still-unverified)
-  before treating Phase 3's scope as finished — sync is in its scope and was not
-  built.**
+- **Phase 3 — Identity and player state — is CLOSED**, 2026-09-08, criterion met,
+  and **its scope is now closed too**: N23 built the sync the phase named and did
+  not deliver. A plan is computed end-to-end from stored state on a real account,
+  and two devices editing that state merge per key rather than overwriting each
+  other. Read [what is still unverified](#what-is-still-unverified) before
+  treating any of it as proven in production.
 - **Phase 2 stays closed, criterion and scope both.** Nothing this session touched
-  the model, the solver or the yields, and `RealUpstreamPlanTest` passed unchanged
-  — which includes its p95 assertion.
-- **Phase 4 — Frontend v1 and launch — is the next phase to open**, and it is the
-  one that reverses [D1](#d1--deployment-deferred-2026-09-02) by its own terms.
+  the model, the solver or the yields.
+- **Phase 4 — Frontend v1 and launch — is OPEN**, 2026-09-09.
+  **[D1 is reversed](#d1--deployment-deferred-2026-09-02)** — Vercel and Render,
+  free tier, still no money — and **the frontend has been served and has spoken
+  to the API**, which had never happened. Nothing is deployed: the decision is
+  made, the wiring is **B5**.
+  **Two blockers, and they are different in kind.** *The code:* no provider is
+  configured, so there is no login URL and every `/api/me` route is 401 —
+  Phase 4's whole signed-in product has nothing to develop against (**N24**).
+  *The launch:* **Q3/F2 — asking the Kornblume maintainer**, which needs a human
+  and bites the moment upstream numbers are served publicly.
 - **Phase 0 stays closed by exception** — deploy deferred by D1 — and its box
   stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
-- **Open right now:** [PR #13](https://github.com/kietnt4412/storm_almanac/pull/13),
-  carrying N21 and N22. **Green and unmerged** — run `34208848060` on `5ad2462`,
-  0 failed, 16 skipped and they are exactly the three snapshot-gated classes.
-  `main` is at `eb2894a`. Merging it is the first action next session, and
-  **write that line with the push rather than after it** — three sessions running
-  have opened on a next action the remote had already done.
-- **The optimizer has now been asked a question by something other than a test**,
-  which had been true of nothing in this repository until today. What has *not*
-  happened is a real OAuth exchange: no provider is configured and no client
-  secret exists, so login is installed only when one is.
-- **The time axis still has no real data to eat**, checked rather than assumed;
-  N14 is proven on the fixture alone. The reason is better than "the upstream is
-  silent" — **R1999 has no weekday rotation at all**, so `Availability.ALWAYS` is
-  *correct* rather than a gap, and its daily income **is conditional on spending
-  Activity**, so entering it as a `Reward` would make every plan systematically
-  too cheap. Read [the economy facts](docs/game-facts/reverse-1999-economy.md)
-  before treating either as an omission.
+- **The remote, checked 2026-09-09 — re-check it, do not trust it.** `main` is
+  `2864c95` (PR #13 merged, run `34217574439`). `dev` is `6376b33` as
+  [PR #14](https://github.com/kietnt4412/storm_almanac/pull/14), carrying N23 and
+  the Phase 4 opening — green, run `34298619283`, 0 failed and 16 skipped and
+  they are exactly the three snapshot-gated classes. This is a fact here rather
+  than a next action because four sessions running opened on a "merge PR #n" the
+  maintainer had already clicked between sessions.
+- **The optimizer has been asked a question by something other than a test.**
+  What has *not* happened is a real OAuth exchange: no provider is configured and
+  no client secret exists, so login is installed only when one is.
+- **The time axis still has no real data to eat**, checked rather than assumed —
+  and the reason is better than "the upstream is silent". See
+  [the unverified list](#what-is-still-unverified) before treating it as a gap.
 
 ### Two standing caveats, read them every session
 
@@ -58,7 +60,7 @@ being finished with is.
    data is fetched and never committed
    ([ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md)), so
    `RealUpstreamPatchTest`, `RealUpstreamPlanTest` and `CommunityBenchmarkTest`
-   skip on the runner — 16 of the 228 tests. **Every performance number and every
+   skip on the runner — 16 of the 245 tests. **Every performance number and every
    comparison with an outside answer in this file comes from a test the pipeline
    does not run.** Run `backend/tools/fetch-upstream.sh` before trusting a green
    build to mean the pipeline handles real data.
@@ -75,10 +77,10 @@ being finished with is.
 1. **At session start:** read *Status*, *Current state*, *Next actions* and
    *Open questions*. Do not re-derive them from the code.
 2. **During the session:** tick boxes as work lands, not when it is planned, and
-   push before writing the entry that describes the push — but **write the
-   tracker line in the same breath as the push.** Three sessions running have
-   opened on a next action the remote had already done, because the session that
-   pushed ran out of room before it wrote the line.
+   write the tracker line in the same breath as the push. **Never write "merge
+   PR #n" as a next action** — merging is a click that happens between sessions,
+   so the line is stale before it is read. Four sessions running opened on one.
+   The state of the remote goes in *Status*, checked rather than trusted.
 3. **At session end:** update *Last updated* and *Current state*, prune *Next
    actions*, and **append the session entry to
    [the archive](docs/history/tracker-archive.md#session-log)** — then add one
@@ -105,21 +107,22 @@ Rules that keep this file honest:
 **What exists:** the repo skeleton, the domain model, a green backend build, a
 game data pipeline that works end to end, an API that serves it, a real game's
 data going through all of it, an optimizer that turns that data into a plan, a
-reason to believe the plan, and — since this session — an account that can own
-one, ask for it over HTTP, and be refused when it asks for somebody else's.
+reason to believe the plan, an account that can own one and be refused somebody
+else's, two of that account's devices that can edit what it owns without deleting
+each other's work, and — since this session — a browser that has actually loaded
+a page of it.
 
 **The load-bearing claim:** on **nine** benchmark materials the cheapest stage
 this project computes is the stage a published community guide tells players to
 farm, and the optimizer's plan for a real goal set is cheaper than following that
 guide — **3 880 Activity against 4 017**, and the 4 017 does not cover the whole
 demand. Seventeen of the guide's twenty quoted drop rates land within three
-percentage points of a sample this project had never seen. See
-[the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
-
-Nine and not five because a drop yield carries how many runs it was observed over
-and the solver uses the conservative end of a 95% interval on it
+percentage points of a sample this project had never seen. Nine and not five
+because a yield carries how many runs it was observed over and the solver uses
+the conservative end of a 95% interval on it
 ([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)) —
-7% dearer and better agreement at once.
+7% dearer and better agreement at once. See
+[the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
 
 Still true from earlier phases: **the solver says how much it does not know**
 ([ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md)), **the
@@ -131,13 +134,9 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **228 tests**, 0 failed, 0 skipped locally with snapshots present. **212 on CI**, because the same 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
-| CI workflow | **Green on `dev`** | Run `34208848060` (PR #13, `5ad2462`): 0 failed, **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. `main` is `eb2894a`. Action deprecations pending — **N5** |
-| Domain model (`gamedata`) | **Persisted and round-tripped** | Record equality across the whole graph. `Drop` carries `sampledRuns`, where 0 means *declared*; equipment is an `Entity` (ADR 0007) |
-| `gamedata` schema | **Applied, populated, round-tripped** | `V2` (28 tables), `V3` (a version is deletable), `V4` (`stage_drop.sampled_runs`). Seven invariants in `GameDataSchemaTest`, proven on the fixture and on two real R1999 patches |
-| Ingest, write, read | **Done** | `CanonicalBundleParser` (14 tests, mostly refusal messages), `CanonicalBundleWriter` pinned to it by a round trip, JDBC both directions (ADR 0008) |
-| Patch diff (`VersionDiff`) | **Done** | Three axes, subjects before fields, so a removed stage is one line. A drop reads as `0.21 over 105 runs` |
-| `gamedata-cli` | **Done** | Onboarding a title is *adapt, preview, ingest, publish* — and publishing is a human approval, not a flag |
+| Backend build | **Green** | **245 tests**, 0 failed, 0 skipped locally with snapshots present. **229 on CI**, because the same 16 snapshot-gated ones skip. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
+| CI workflow | **Green on `main`** | Run `34217574439` (`2864c95`, PR #13 merged): 0 failed, **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. Action deprecations pending — **N5** |
+| Game data pipeline (Phase 1) | **Closed and stable** | Model, schema, ingest, diff and CLI, [described in full in the archive](docs/history/tracker-archive.md#closed-phases-in-full). `V2`–`V4`, 28 tables, seven invariants in `GameDataSchemaTest` proven on two real R1999 patches; parser and writer pinned to each other by a round trip (ADR 0008); onboarding a title is *adapt, preview, ingest, publish* and publishing is a human approval, not a flag. `Drop` carries `sampledRuns`, where 0 means *declared* |
 | Parser adapters | **One, reading what the upstream reads** | `:adapters:reverse-1999`, 25 tests. Newest `stages<major>_<minor>_greedy.json`, counts divided by the sampled run count and **that count carried onto every `Drop`**; `count: 1` converts as declared, because here it marks a fixed-reward stage |
 | Game data API | **Served and verified** | Five game-data routes plus health, version-pinnable, every response carrying its version and attribution. 10 HTTP tests plus a hand check against `docker compose up` |
 | Demand resolution | **Done** | Goals + roster + upgrade graph → a demand vector, walking the DAG backwards. Refuses by name rather than guessing: unreachable states, unknown entities, probabilistic goals, ambiguous routes |
@@ -150,14 +149,15 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | `SolveCoordinator` | **Single-node, done** | One execution per idempotency key however submits interleave; a ticket to poll; an honest queue depth. **Does not survive a restart, deliberately** — making it durable here would answer the question Phase 9 exists to ask |
 | Community benchmark | **Done, and now ADR 0011's regression test** | Twenty published claims against what this model computes, ranked on the yields the **solver** uses with the raw ranking printed beside them |
 | Statistics primitives | **Done** | `WilsonInterval` (6 tests) for "did it drop", `PoissonRateInterval` (7) for "how many dropped", `PityRule` (9) against both games' published rates |
-| `identity` / `player` schema | **Applied and round-tripped** | `V5` (6 tables). Four decisions in its header: **no FK crosses a schema**, nothing points into `gamedata` (version-scoped rows, an inventory outlives a patch), an identity is `(provider, subject)` and **never an email**, and absent means zero with a `CHECK` to keep the two representations from diverging |
+| `identity` / `player` schema | **Applied and round-tripped** | `V5` (6 tables). Four decisions in its header: **no FK crosses a schema**, nothing points into `gamedata` (version-scoped rows, an inventory outlives a patch), an identity is `(provider, subject)` and **never an email**, and absent means zero with a `CHECK` to keep the two representations from diverging. `V6` adds the two sync tables |
 | Sign-in | **Done, never exchanged a token** | Account created while the principal is built, not in a success handler. Everything provider-specific is `SignIn.from` — a pure function; OIDC says `sub`, Discord says `id`. **`oauth2Login` installs only when a provider is configured**, because no client secret exists (D1) and a blank client id fails a `ClientRegistration` outright. The deny is not conditional |
-| Player API | **Served and authorized** | Everything under `/api/me`, so **no route takes an account id** and none's authorization can be forgotten. `OwnedProfiles.require` is the one check; another account's profile is **404, not 403**, so an id is not an enumeration oracle. PUT replaces a whole aggregate — there is no patch route, and no sync |
+| Player API | **Served and authorized** | Everything under `/api/me`, so **no route takes an account id** and none's authorization can be forgotten. `OwnedProfiles.require` is the one check; another account's profile is **404, not 403**, so an id is not an enumeration oracle. PUT replaces a whole aggregate; PATCH merges per key |
+| Offline sync | **Done — inventory and roster** | `PATCH`, last-write-wins per key ([ADR 0014](docs/adr/0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md)). The clock is a **table, not a column**, because a removal deletes its row and a tombstone cannot live on the row it outlives; a `PUT` also writes a whole-aggregate **watermark**, because a full save speaks for keys that have never existed and no per-key row can say that. Client timestamps, clamped to the server's clock. The response names the keys that lost. **Goals have no PATCH** — an ordered list has no per-key merge |
 | Plan route | **Done — Phase 3's criterion** | `POST /api/me/profiles/{id}/plan`, synchronous because a two-second budget is a promise the optimizer can keep. Goals, inventory and roster come from Postgres; the body carries only `energyPerDay` and `horizonDays`. `?version=N` pins the patch |
 | Bean wiring | **`Optimizer` and `SolveCache` are beans; `SolveCoordinator` is not** | Registered now because they finally sit on a path a real request takes — which is what N15's refusal was waiting for. The coordinator hands back a ticket for a solve that does not fit the synchronous budget, and there is no asynchronous surface for a ticket to be useful on |
 | Architecture tests | **Passing** | `ModuleBoundaryTest` (Track B layers optional until they exist) and `GameAgnosticismTest` (source scan over planner/gacha/stats) |
 | Docker Compose | **Verified** | `up --build` from cold: image builds, all three services healthy |
-| Frontend | **Green locally, never served** | Typecheck and `vite build` pass, PWA SW generated. No page has been loaded in a browser |
+| Frontend | **Served, and still the Phase 0 shell** | 108 lines, one page, one call — it renders `/api/health` from a live backend and nothing else. `npm run dev --prefix frontend` (`.claude/launch.json`) proxies `/api` to `localhost:8080`, so local is same-origin. **Serving it found the two defects five sessions of green builds had not** — see [unverified](#what-is-still-unverified) |
 | `gacha`, Track B | **Empty** | Interfaces and package docs. Track B is [gated](#the-gate) |
 
 ### What is still unverified
@@ -184,10 +184,15 @@ works". It does not mean that:
   be minted over one without an authorization server to redirect to. The filter
   chain, dispatcher, Jackson and database are exercised; **the servlet container
   is not, and that is the layer that caught Phase 0's 401.**
-- **There is no sync, and it is in Phase 3's scope.** PUT replaces a whole
-  aggregate: two devices do not merge, the second wins entirely, and a row the
-  first added is gone. **Do not read Phase 3's tick as covering it** — the work
-  is **N23**.
+- **No two real devices have ever synced.** N23's every scenario is one MockMvc
+  request following another inside one JVM. The concurrency the merge SQL is
+  shaped for — two requests interleaving on the same key — is argued for and not
+  measured, and **the client half does not exist at all**: no queue, no retry, no
+  offline store. That is Phase 4's PWA, and it has never been served.
+- **A merge publishes nothing.** Nothing downstream can react to a synced edit,
+  so a cached plan is not invalidated when the inventory under it moves. Harmless
+  today because nothing caches on player state across requests; **read this
+  before Phase 6 makes anything depend on an inventory being current.**
 - **`SolveCoordinator` is still not wired to anything**, deliberately; see the
   table row above.
 - **Nothing has measured whether the cache is worth having in production**, only
@@ -206,27 +211,33 @@ works". It does not mean that:
   fix is more sampling — see **Q2**.
 - **Nothing is deployed.** By decision — [D1](#d1--deployment-deferred-2026-09-02).
   The `deploy` job is `if: false` and there is no URL to smoke.
-- **The frontend has never been served**, only typechecked and built. No page has
-  been loaded in a browser and it has never spoken to the API.
+- **The frontend is served and is still the Phase 0 shell.** One page, one call.
+  That the plumbing works is not that there is a product. *(The old "never
+  served" entry, and the two defects retiring it turned up, are in
+  [the session log](docs/history/tracker-archive.md#session-log).)*
+- **No authenticated page has ever been rendered, and cannot be yet.** With no
+  provider configured there is no login URL and every `/api/me` route is 401, so
+  the whole signed-in half of the frontend has nothing to develop against —
+  **N24**.
 - **Nothing has ever called the API under load.** Every request loads a whole
   version — fifteen queries — a deliberate deferral written into
   `GameDataReadModel`'s javadoc. The number to beat does not exist yet.
 - **The time axis has never met real data, and on this game it never will.**
-  Rewards, rotation and shops are modelled or refused on the strength of the
-  synthetic fixture alone, and on the real 3.5 patch the whole of N14 reduces to
-  one energy row. **Do not read "the optimizer has a calendar" as "the optimizer
-  schedules real weeks."** The rotation machinery waits for a game that rotates —
-  Phase 11 is the next chance. See
+  Rewards, rotation and shops are modelled or refused on the synthetic fixture
+  alone, and on the real 3.5 patch the whole of N14 reduces to one energy row.
+  **Do not read "the optimizer has a calendar" as "the optimizer schedules real
+  weeks."** This is not the upstream being silent: **R1999 has no weekday
+  rotation at all**, so `Availability.ALWAYS` is *correct*, and its daily income
+  **is conditional on spending Activity**, so entering it as a `Reward` would make
+  every plan systematically too cheap. The rotation machinery waits for a game
+  that rotates — Phase 11 is the next chance. See
   [the economy facts](docs/game-facts/reverse-1999-economy.md).
-- **Three shapes the model cannot express**, each of which would be a *silent*
-  wrong answer if faked. Not defects in what shipped —
-  [details and provenance](docs/game-facts/reverse-1999-economy.md):
-  **(a) an item that restores energy** (Picrasma Candy, 60 Activity) — `Stage` is
-  the only source touching the energy budget and only ever consumes;
-  **(b) a reward conditional on spending energy** — R1999's Activeness is a rebate
-  on farming, not income, which is why leaving it out is correct;
-  **(c) a lifetime purchase limit** — `Shop` caps at "n per `Period`"; permanent
-  stock is "five, ever".
+- **Three shapes the model cannot express**, each a *silent* wrong answer if
+  faked, none a defect in what shipped: **an item that restores energy**
+  (`Stage` is the only source touching the budget and only ever consumes),
+  **a reward conditional on spending energy**, and **a lifetime purchase limit**
+  (`Shop` caps at "n per `Period`", not "five, ever"). Examples and provenance in
+  [the economy facts](docs/game-facts/reverse-1999-economy.md).
 - **The adapter converts less than the upstream publishes** — no shop offers, no
   alternative resonance-pattern costs, no unreleased content — each with a reason
   in `KornblumeAdapter`'s javadoc. That sentence is only reassuring when somebody
@@ -248,26 +259,23 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **Merge [PR #13](https://github.com/kietnt4412/storm_almanac/pull/13).**
-      Green on `acd3efb` and CI-confirmed, unmerged, so `main` is a session
-      behind. Do this first, and confirm the `main` push run goes green too.
-- [ ] **N23 — Offline sync: the per-key patch Phase 3 owes.** Phase 3's scope
-      names sync and Phase 3 did not build it, so this is a debt against a ticked
-      box rather than a new idea. `PUT /inventory` replaces the whole map, which
-      is correct for its signature and wrong for two devices: the second save
-      wins entirely. What it needs is a second route with a different method
-      (`PATCH`, per key), the `updated_at` column `V5` deliberately left out, and
-      a merge that resolves per key rather than per aggregate. **The column and
-      the merge go in together** — a timestamp nobody reads is a feature that
-      only looks implemented, which is the reasoning that kept it out.
-      Do it before Phase 4's offline PWA depends on it, not after.
-- [ ] **Open Phase 4 — Frontend v1, and launch.** The frontend has been built and
-      typechecked and **never served**; no page has been loaded in a browser and
-      it has never spoken to the API. Phase 4 is also where
-      [D1](#d1--deployment-deferred-2026-09-02) reverses by its own terms, so
-      hosting is decided here rather than deferred again — and until there is a
-      URL, **no OAuth provider can be registered**, which means the sign-in path
-      stays unexercised end to end. Those two are the same task, not two.
+- [ ] **N24 — Make a signed-in page developable.** Phase 4's product is all
+      behind `/api/me` and **nothing can sign in**: no provider configured, so no
+      `oauth2Login`, no login URL, 401 everywhere. Two ways out, not equivalent.
+      **A real provider** needs the deployed URL, so it lands with **B5** and
+      finally runs the exchange that never has. **A development-only sign-in**
+      unblocks the UI now and is the more dangerous: it must be impossible to
+      enable in production *by construction*, not by configuration, and it proves
+      nothing about the exchange. **The second is not an excuse to skip the
+      first.**
+- [ ] **N25 — Build Phase 4's screens.** Inventory editor for fast bulk entry,
+      goal picker, plan view with the per-stage breakdown, catalog browse and
+      search with the personalized overlay on every character page — **the
+      overlay is the whole argument for having a catalog**, so it ships with it.
+      Blocked on **N24** for everything signed-in; the catalog half is public.
+      **The client half of N23 is here too:** the merge exists on the server and
+      nothing queues, retries or stores an edit offline, which is the difference
+      between a PWA that is offline and one that is merely installable.
 - [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
       `EnergyMip.matchingDays` reads weekdays in **UTC** — a game assumption in a
       game-agnostic module. R1999 Global rolls over at **05:00 UTC−5, weekly
@@ -304,9 +312,15 @@ Ordered. Completed ones move to
       **`setup-java@v4` is deprecated outright** — migrate to `@v5`. Do it as a
       standalone PR while the pipeline is quiet: six action bumps at once want
       their own green run to attribute a failure to.
-- [ ] **B5 — Wire the real deploy.** Deferred to Phase 4 by
-      [D1](#d1--deployment-deferred-2026-09-02). The `deploy` job stays
-      `if: false` until there is a real URL to smoke.
+- [ ] **B5 — Wire the real deploy: Vercel and Render.** No longer deferred —
+      [D1 is reversed](#d1--deployment-deferred-2026-09-02) and the hosts are chosen. The
+      `deploy` job is still `if: false` and stays that way until there is a real
+      URL to smoke, which is what this action produces. **Settle the two-origin
+      question first**, in D1's reversal note: a Vercel rewrite of `/api/*` to
+      Render keeps the same-origin session, CSRF and OAuth redirect the backend
+      was built around; two real origins do not. **This is also what unblocks the
+      OAuth exchange** — a provider registration needs a redirect URI, and a
+      redirect URI needs this. Ties to **N24**.
 
 ---
 
@@ -331,12 +345,18 @@ a session would be wrong not to read.
 - [x] **Phase 2 · Optimizer core** — **closed 2026-09-08, criterion and scope.**
       Nine agreements, p95 1 807 ms. **The search is stopped by its budget, not
       finished by it**, and says so with the size of the doubt (2.30%, ADR 0010).
-- [x] **Phase 3 · Identity and player state** — **closed 2026-09-08.** A plan
-      computed from stored state on a real account.
-      **Sync is in its scope line and was not built** — **N23**. Two further
-      qualifications in [the unverified list](#what-is-still-unverified).
+- [x] **Phase 3 · Identity and player state** — **closed 2026-09-08, criterion;
+      scope completed 2026-09-09.** A plan computed from stored state on a real
+      account, and since N23 a per-key merge so two devices do not overwrite each
+      other ([ADR 0014](docs/adr/0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md)).
+      Qualifications in [the unverified list](#what-is-still-unverified) — the
+      OAuth exchange has never run, and no two real devices have ever synced.
 
-- [ ] **Phase 4 · Frontend v1 — and launch** — 2.5 weeks
+- [ ] **Phase 4 · Frontend v1 — and launch** — 2.5 weeks — **OPEN 2026-09-09.**
+      Landed so far: the app is served, a page has been loaded in a browser and
+      it speaks to a live API, and hosting is decided (Vercel + Render, D1
+      reversed). Nothing is deployed and nothing signed-in can be built yet —
+      **N24**.
       Inventory editor built for fast bulk entry, goal picker, plan view with
       per-stage breakdown, offline PWA. Plus catalog browse and search with the
       personalized overlay on every character page — that overlay is the whole
@@ -456,31 +476,33 @@ reasoning later — including you, in month six.
 
 ### D1 · Deployment deferred (2026-09-02)
 
-**Decision:** no money will be spent on this project, so no hosting is
-provisioned. The `deploy` job in `ci.yml` is `if: false`.
+**REVERSED 2026-09-09.** Heading kept verbatim so every link to it still lands.
 
-**What this costs, stated plainly:**
+**Was:** no money spent, so no hosting; the `deploy` job is `if: false`.
+**Now:** both halves of its own reversal trigger fired at once — Phase 4 reached,
+and a free tier accepted. **Vercel for the frontend, Render for the backend.**
+Still no money, so the premise stands; what changed is that a free tier is
+acceptable. [The entry in full is in the archive](docs/history/tracker-archive.md#d1--the-deferral-in-full).
 
-- **Phase 0 cannot meet its exit criterion.** "A green pipeline deploying a
-  health endpoint to a real URL" is not achievable without a URL. Phase 0 is
-  closed *with this exception noted*, not met. Do not tick it.
-- **The Track B gate loses its meaning.** The gate exists so `almanac-store` and
-  `almanac-raft` are shaped by real write volume, real read patterns and real
-  failure modes. With nothing deployed there is no traffic to observe, and the
-  plan is explicit that infrastructure built against imagined requirements is a
-  toy.
-- **The headline CV claim weakens.** "I run a live tool for two games with real
-  users" is the sentence this project is arranged to earn.
-- **Deploy problems get discovered late.** Phase 0 puts the deploy first
-  precisely because that is when it is cheapest to fix.
+**What the deferral cost is what the next sessions have to buy back**, and it is
+why this stays here rather than being deleted: **Phase 0's box is still unticked**
+(no URL has answered 200), **the Track B gate has no meaning** until there is real
+traffic to shape `almanac-store` against, and **deploy problems really were
+discovered late** — Phase 0 put the deploy first precisely because that is when
+it is cheapest to fix, and nothing has tested it since.
 
-**Mitigation, agreed:** revisit hosting at **Phase 4**, not at the end. Phases
-1–3 need no server, so nothing is blocked between now and then.
+**Nothing is deployed yet.** The decision is made, the wiring is not — **B5**.
+Two consequences of the split to settle before writing any of it:
 
-**Reversal trigger:** the moment any free-tier host is acceptable, or the moment
-Phase 4 is reached — whichever is sooner. Before starting Phase 7, re-read this
-and decide consciously whether Track B is still worth doing on synthetic
-workloads. It may be; that is a decision to make with open eyes, not by default.
+- **Two origins or one.** The backend's session model is same-origin throughout:
+  a cookie session, CSRF in a cookie the page reads, an OAuth redirect landing
+  back where it started. A Vercel rewrite of `/api/*` to Render preserves all of
+  it for one extra hop; two real origins cost CORS, `SameSite=None; Secure`, and
+  a redirect that has to cross back. **The rewrite is cheaper and should be taken
+  deliberately** — that hop sits on the path of a two-second solve promise.
+- **The free tier sleeps.** A cold start is tens of seconds against an optimizer
+  budgeted at two. Warm-up ping, an honest loading state, or accept it — decide
+  before five strangers meet it.
 
 ---
 
@@ -517,22 +539,6 @@ the whole fix. Why, and why the obvious alternatives do nothing:
 **Also:** Docker Desktop takes minutes to start on this machine and `docker info`
 hangs rather than failing while it does. Give it time instead of concluding it is
 broken.
-
-### E3 · Git prompted for an account on every push
-
-**Fixed 2026-09-08.** Windows Credential Manager held two GitHub logins —
-`git:https://tuankiet4412@github.com` alongside `git:https://github.com`
-(`kietnt4412`) — and Git Credential Manager shows an account picker whenever
-there is more than one. Neither `git config` nor `gh auth` had a second identity,
-so looking there finds nothing; the second credential is only visible to
-`cmdkey /list`. The stray one was deleted and the surviving username pinned:
-
-```bash
-git config --global credential.https://github.com.username kietnt4412
-```
-
-The pin is what stops it coming back the next time a second account touches this
-machine.
 
 ---
 
@@ -595,6 +601,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-09 | thirteenth | N23 pays Phase 3's sync debt — a per-key `PATCH` merged last-write-wins (ADR 0014), a clock that outlives its value, a watermark a failing test found. Then Phase 4 opened: the frontend was served for the first time and four minutes of looking at it found a 401 where a 404 belonged and an app with no colours. 245 tests, and D1 reversed on Vercel + Render |
 | 2026-09-08 | twelfth | Phase 3 opened and closed: V5 gives identity and player their schemas with four decisions in its header, sign-in creates the account while the principal is built, and a plan is computed from goals nobody handed the optimizer — 228 tests, and sync is the piece of the scope that was not built (N23) |
 | 2026-09-08 | eleventh | N14: the plan gets a calendar — the horizon as a scalar rather than an index (ADR 0013), p95 held at 1 807 ms, the two objectives finally disagree (0 energy / 28 days against 370 / 2) — then the maintainer supplied what the game actually does, and two of the answers were corrections |
 | 2026-09-08 | tenth | N15: a solve is cached on its key (1 806 ms → 2 ms on the real patch) and a queue runs it once, CI-confirmed on `3fdc277`; and the read that took shops out of N14 |

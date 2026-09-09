@@ -748,6 +748,39 @@ entry was met, not that the code exists.
       takes. `SolveCoordinator` is still not one, on the same reasoning — there is
       no asynchronous surface for a ticket to be useful on.
 
+### Done 2026-09-09 (thirteenth session) — PR #13 and N23
+
+- [x] ~~**Merge PR #13.**~~ **Already merged** when the session opened — `main`
+      is `2864c95`, run `34217574439` green. **Fourth session running.** The
+      previous entry diagnosed this correctly and the fix it named did not take:
+      the twelfth session did write its tracker line with its push, and the *PR
+      merge* still happened on the remote afterwards. So the residue is not
+      caused by running out of room; it is that merging a PR is a click that
+      happens outside the session, and a next action of the form "merge PR #n"
+      is stale the moment the maintainer opens GitHub. **Stop writing it as a
+      next action.** Check the remote at session start and record what it says —
+      which is what the *Status* line now asks for.
+
+- [x] ~~**N23 — Offline sync: the per-key patch Phase 3 owes.**~~ **Done**,
+      2026-09-09, in one commit. `PATCH` on inventory and roster, merged
+      last-write-wins per key; `PUT` keeps its replace-everything contract.
+      [ADR 0014](../adr/0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md)
+      carries the argument. Three things worth keeping here:
+      **the timestamp is a table and not a column**, because V5's fourth
+      decision makes clearing an item delete its row and a clock on that row
+      dies with it — after which a device offline since before the delete
+      re-adds the item, finds nothing to lose against, and the item comes back
+      with nobody told;
+      **a full save needed a watermark of its own**, which a failing test found
+      rather than the design — a `PUT` claims something about every slug in the
+      game including the ones the player has none of, and no per-key table has a
+      row to write that on, so without it a stale patch loses for a key the save
+      mentioned and wins for one it did not;
+      **and the timestamp is per key rather than per request**, because a device
+      that spent an hour offline changed one item at 09:00 and another at 11:00
+      and one batch stamp would have to lie about one of them.
+      16 new tests, **244 total**, 0 failed and 0 skipped locally.
+
 ---
 
 ## Closed phases, in full
@@ -1039,6 +1072,61 @@ either: the core is shaded into the Testcontainers jar.
 
 ---
 
+## D1 — the deferral, in full
+
+*Moved out of the tracker 2026-09-09, when it was reversed. The live file keeps
+the reversal and what the deferral still costs to buy back; this is the entry as
+it stood for seven sessions.*
+
+
+**Decision:** no money will be spent on this project, so no hosting is
+provisioned. The `deploy` job in `ci.yml` is `if: false`.
+
+**What this costs, stated plainly:**
+
+- **Phase 0 cannot meet its exit criterion.** "A green pipeline deploying a
+  health endpoint to a real URL" is not achievable without a URL. Phase 0 is
+  closed *with this exception noted*, not met. Do not tick it.
+- **The Track B gate loses its meaning.** The gate exists so `almanac-store` and
+  `almanac-raft` are shaped by real write volume, real read patterns and real
+  failure modes. With nothing deployed there is no traffic to observe, and the
+  plan is explicit that infrastructure built against imagined requirements is a
+  toy.
+- **The headline CV claim weakens.** "I run a live tool for two games with real
+  users" is the sentence this project is arranged to earn.
+- **Deploy problems get discovered late.** Phase 0 puts the deploy first
+  precisely because that is when it is cheapest to fix.
+
+**Mitigation, agreed:** revisit hosting at **Phase 4**, not at the end. Phases
+1–3 need no server, so nothing is blocked between now and then.
+
+**Reversal trigger:** the moment any free-tier host is acceptable, or the moment
+Phase 4 is reached — whichever is sooner. Before starting Phase 7, re-read this
+and decide consciously whether Track B is still worth doing on synthetic
+workloads. It may be; that is a decision to make with open eyes, not by default.
+
+---
+
+## E3 — Git prompted for an account on every push
+
+*Moved out of the tracker 2026-09-09: fixed, pinned, and finished with.*
+
+**Fixed 2026-09-08.** Windows Credential Manager held two GitHub logins —
+`git:https://tuankiet4412@github.com` alongside `git:https://github.com`
+(`kietnt4412`) — and Git Credential Manager shows an account picker whenever
+there is more than one. Neither `git config` nor `gh auth` had a second identity,
+so looking there finds nothing; the second credential is only visible to
+`cmdkey /list`. The stray one was deleted and the surviving username pinned:
+
+```bash
+git config --global credential.https://github.com.username kietnt4412
+```
+
+The pin is what stops it coming back the next time a second account touches this
+machine.
+
+---
+
 ## Session log
 
 **Append one entry per session, newest first, here — not in the tracker.** The
@@ -1049,6 +1137,195 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+### 2026-09-09 (thirteenth session) — the sync debt paid, and Phase 4 opens by being looked at
+
+**Two halves. N23 pays the piece of Phase 3's scope Phase 3 did not build; then Phase 4 opened and four minutes of actually serving the frontend found two defects that five sessions of green builds had not.**
+Phase 3 was closed on its exit criterion — a plan computed from stored state —
+while its scope line also said sync, and the twelfth session wrote that down
+honestly rather than quietly. This session paid it.
+
+#### The next action was stale again, for a new reason
+
+"Merge PR #13" was the first action. It was merged before the session opened,
+`main` at `2864c95`, run `34217574439` green. That is **four sessions running**.
+
+The eleventh and twelfth entries both diagnosed this as a session running out of
+room to write its tracker line after pushing, and prescribed writing the line
+*with* the push. The twelfth session did that. It happened anyway — which means
+the diagnosis was wrong. **Merging a PR is a click on GitHub that happens between
+sessions, so a next action of the form "merge PR #n" is stale as soon as the
+maintainer opens the browser.** It is not a next action at all; it is a fact
+about the remote, and facts about the remote belong in *Status*, checked at
+session start. That is the change made here, and it is the fourth attempt at
+this particular lesson.
+
+#### What sync had to decide, and why each rule earns its place
+
+`PUT /inventory` takes a complete map and stores it, and the implementation
+matches the signature exactly: delete every row, insert the body. A phone that
+was offline for an hour then saves, and every row a browser added meanwhile is
+gone — not merged, not flagged, gone.
+
+Three families of answer were weighed and two rejected in
+[ADR 0014](../adr/0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md).
+A **CRDT** is correct by construction and merges the wrong thing here: two
+devices that each read 40 in the game did not observe 80, and a counter is not
+an integer, so it costs the schema, the API and the client at once. A **revision
+token** turns every concurrent edit into "reload and type it again", which is the
+behaviour that makes people stop using a companion tool. **Last-write-wins per
+key** is what `Inventory`'s javadoc has promised since Phase 3 and what V5 left
+the timestamp column out for, saying it would arrive with the merge.
+
+Four rules decide a key. Each is here because its absence is a *silent* wrong
+answer:
+
+1. **The client says when it edited, per key.** A server stamp makes an edit win
+   for having arrived late, which is the bug rather than the fix. Per key and not
+   per request, because a device offline for an hour changed one item at 09:00
+   and another at 11:00 and one batch stamp would have to lie about one of them.
+2. **No edit may claim the future.** This is the bill for trusting a client
+   clock, and it is cheap: without the clamp a device set a year fast pins every
+   key it touches against every later edit from anywhere, permanently, with
+   nothing in the system able to correct it.
+3. **A removal is remembered after its value is gone.** The one that shaped the
+   schema. V5's decision 4 makes absent the only representation of zero, so
+   clearing an item deletes the row — and a timestamp on that row dies with it.
+   A device offline since before the delete re-adds the item, finds nothing to
+   lose against, and five thousand gold comes back from the dead. **A clock that
+   outlives its value cannot be a column on the row it outlives**, so V6 is a
+   table and V5's decision 4 is untouched.
+4. **A full save speaks for the keys it left out.** **This one was found by a
+   failing test, not by the design.** The first cut had `saveInventory` stamp
+   every key it wrote, which passes every obvious test and leaves a gap: a `PUT`
+   claims something about every slug in the game *including the ones the player
+   has none of*, and there is no row on which to record that and no way to
+   enumerate the keys it would need. So a stale patch lost for a key the save
+   mentioned and won for one it did not. `player.sync_watermark` is the fix — one
+   row per profile per aggregate — and finding it this way is the argument for
+   writing the adversarial test before believing the design.
+
+All four are decided in **one SQL statement** rather than in Java around a
+select. Read-then-write across two statements is a lost update waiting for a
+scheduler to find it, and two devices syncing at once is precisely the case the
+route exists for. The row count is the answer: 1 means the edit won and its value
+is written, 0 means it lost.
+
+#### What the response says, and what has no route
+
+The merge hands back **the keys that lost**. A merge that silently drops the
+losing half leaves the client showing a value the server does not hold, and the
+player then edits from a screen that is quietly wrong until something makes them
+reload.
+
+**Goals get no PATCH.** An inventory and a roster are maps, so a key is a merge
+unit. Goals are an ordered list whose *order* is what the player is editing, and
+two devices that reordered it have no per-key answer; inventing one would mean a
+plan computed against priorities nobody chose. The `CHECK` on both new tables
+names `inventory` and `roster` and nothing else, so the decision is enforced
+rather than merely documented.
+
+#### The three fakes throw
+
+Three `PlayerStateRepository` fakes exist in tests — two in `app`, one in
+`planner` — and all three now throw `UnsupportedOperationException` on the merge
+methods rather than implementing them. A fake that answered would be a second
+copy of the merge rules, drifting from the real one until a test passed against a
+merge nothing ships.
+
+#### Numbers
+
+**244 tests, 0 failed, 0 skipped locally** (228 before; the snapshot is present
+on this machine, so the 16 snapshot-gated ones ran). 16 new, all in
+`OfflineSyncTest`, and every one of them is a way the merge could be wrong
+without saying so.
+
+#### Then Phase 4 opened, and serving the thing found two bugs immediately
+
+The tracker had said "the frontend has never been served" for five sessions. It
+took about four minutes to stop being true — `docker compose up -d postgres`,
+`bootRun`, `npm run dev`, load `localhost:5173` — and the page rendered
+`Backend: ok (dev)` from a live API on the first try.
+
+It also rendered it in near-black on near-black. **The app declares no colours at
+all**: Tailwind's preflight sets neither, so both were inherited from the browser
+and the page was legible on the machine it was written on and invisible under a
+dark system theme, which is most phones. `vite.config.ts` had committed the PWA
+manifest to a palette since Phase 0 and the stylesheet had never used it.
+
+The second one was worse. Probing the routes a client would really ask for:
+
+```
+/api/games/reverse-1999/versions   200
+/api/games/reverse-1999            401   <- should be 404
+/api/games                         401   <- should be 404
+/api/nonsense                      401   <- correct
+```
+
+**Boot renders a 404 by forwarding to `/error`, and `/error` was not on the
+public list**, so the forward hit `anyRequest().authenticated()` and the caller
+got 401. A stale catalog link would therefore tell a client its session was dead,
+and a client acts on that by sending the reader to a login page — on a public
+catalog whose entire purpose is that a stranger from a search engine reads it
+without an account.
+
+**Every one of the 244 tests passed with this in place**, because every one of
+them asked for a path that exists. That is the same shape as Phase 0's 401 on
+`/api/health` and the same shape as the stale stage table: a class of defect that
+is structurally invisible to the tests being written, and visible in the first
+minute of using the thing.
+
+`/api/nonsense` staying 401 is *not* the same bug surviving — a path outside the
+public list is refused without confirming whether it exists, which is the design.
+The fix is one matcher (`/error`, permitted; the `DispatcherType.ERROR` form
+needs the servlet API and `identity` deliberately has no web starter) plus a test
+that asks for paths that do not exist.
+
+**One existing assertion had to change, and it was the bug talking.** An
+anonymous `POST` to a public game-data route asserted 401; it is now 403. CSRF
+runs before authorization, so the POST is refused for having no token — that 403
+was being forwarded to an error page that itself demanded an account, and the 401
+everyone saw was the *second* refusal. Same denial either way; the test had been
+pinning the wrong reason for it.
+
+#### The wall the signed-in half runs into
+
+`/oauth2/authorization/google` answers 401, because `oauth2Login` is installed
+only when a provider is configured and none is. So **there is no way to sign in
+at all locally**, and Phase 4's whole product — inventory editor, goal picker,
+plan view, the personalized overlay — lives behind `/api/me`. That is **N24**,
+and the two ways out are not equivalent: a real provider needs the deployed URL
+(so it lands with **B5** and finally runs the exchange that has never run), while
+a development-only sign-in unblocks the UI now and proves nothing about the
+exchange. If the second is taken it has to be impossible to enable in production
+by construction rather than by configuration.
+
+#### Hosting, decided
+
+**Vercel for the frontend, Render for the backend, both free tier.** D1's
+reversal trigger fired on both halves at once — Phase 4 reached, and a free tier
+accepted — and no money is spent, so D1's premise stands.
+
+Two consequences to settle before writing any deploy config, both recorded under
+D1's reversal note. **The backend's session model is same-origin throughout**: a
+cookie session, a CSRF token in a cookie the page reads, an OAuth redirect
+landing back where it started. A Vercel rewrite of `/api/*` to Render preserves
+every bit of that for the price of one hop; two real origins cost CORS,
+`SameSite=None; Secure` and a redirect that has to cross back. And **the free
+tier sleeps** — a cold start is tens of seconds against an optimizer that
+promises two, which is a product decision to make before five strangers meet it.
+
+#### What sync still does not do
+
+- **No two real devices have ever synced.** Every scenario above is one MockMvc
+  request following another inside one JVM. The concurrency the SQL is shaped for
+  — two requests interleaving on the same key — is argued for and not measured.
+- **A merge publishes nothing.** Nothing downstream can react to a synced edit,
+  so a cached plan is not invalidated when an inventory moves under it. Not
+  needed until something wants it; worth knowing before Phase 6 caches anything
+  keyed on player state.
+- **The client half does not exist.** There is no queue, no retry, no offline
+  store — the PWA that would use this is Phase 4, and it has never been served.
 
 ### 2026-09-08 (twelfth session) — Phase 3 opens and closes: the optimizer finally meets a real account
 

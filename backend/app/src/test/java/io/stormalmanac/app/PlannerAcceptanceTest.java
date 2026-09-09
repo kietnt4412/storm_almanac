@@ -22,15 +22,19 @@ import io.stormalmanac.planner.RewardClaim;
 import io.stormalmanac.planner.SolveRequest;
 import io.stormalmanac.player.Goals;
 import io.stormalmanac.player.Inventory;
+import io.stormalmanac.player.InventoryEdit;
+import io.stormalmanac.player.MergeOutcome;
 import io.stormalmanac.player.PlayerProfile;
 import io.stormalmanac.player.PlayerStateRepository;
 import io.stormalmanac.player.Roster;
+import io.stormalmanac.player.RosterEdit;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -304,6 +308,19 @@ class PlannerAcceptanceTest {
 
         @Override
         public void saveGoals(Goals value) {
+            throw new UnsupportedOperationException();
+        }
+
+        // Sync has nothing to do with solving. A fake that answered these would
+        // be a second implementation of the merge rules, drifting from the real
+        // one until a test passed against a merge nothing ships.
+        @Override
+        public MergeOutcome<ItemId> mergeInventory(ProfileId profile, Collection<InventoryEdit> edits) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public MergeOutcome<EntityId> mergeRoster(ProfileId profile, Collection<RosterEdit> edits) {
             throw new UnsupportedOperationException();
         }
     }
