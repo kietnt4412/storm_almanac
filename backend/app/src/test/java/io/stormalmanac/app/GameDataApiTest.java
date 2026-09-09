@@ -237,8 +237,16 @@ class GameDataApiTest extends SharedDatabaseTest {
 
         // Only GET is public. Publishing is a human approval through the CLI and
         // has no endpoint, so this is denied rather than merely unmapped.
+        //
+        // 403 and not 401, and the change is a correction rather than a
+        // regression: CSRF runs before authorization, so an unauthenticated POST
+        // is refused for having no token and never reaches the matcher. This
+        // assertion read 401 until /error was permitted — the 403 was being
+        // forwarded to an error page that itself demanded an account, and the
+        // 401 anyone saw was the second refusal rather than the first. What
+        // matters either way is that it is a denial and not a 405 or a 200.
         assertThat(http.postForEntity("/api/games/proving-ground/versions", "{}", String.class).getStatusCode())
-                .isEqualTo(HttpStatus.UNAUTHORIZED);
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     // ── Fixtures ────────────────────────────────────────────────────────────
@@ -256,6 +264,37 @@ class GameDataApiTest extends SharedDatabaseTest {
         } catch (IOException e) {
             throw new IllegalStateException("could not read " + fixture, e);
         }
+    }
+
+    @Test
+    @DisplayName("a missing page inside the public catalog is not found, not unauthorized")
+    void aMissingPublicPathIsNotAnAuthenticationProblem() {
+        // Boot renders a 404 by forwarding to /error, and until that path was
+        // permitted the forward hit anyRequest().authenticated() and came back
+        // 401. Every test in this suite passed anyway, because every one of them
+        // asked for a path that exists — it took serving the frontend and
+        // probing the routes a client would really ask for.
+        //
+        // The cost is not cosmetic: a client reads 401 as a dead session and
+        // acts on it by sending the reader to a login page, so a catalog link
+        // that has gone stale would log people out instead of 404ing.
+        assertThat(http.getForEntity("/api/games", String.class).getStatusCode())
+                .isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(http.getForEntity("/api/games/no-such-game", String.class).getStatusCode())
+                .isEqualTo(HttpStatus.NOT_FOUND);
+
+        // Outside the public list the answer stays 401, and that is the design
+        // rather than the same bug surviving: the matcher is the list of things
+        // this application will answer to a stranger, so a path that is not on it
+        // is refused without saying whether it exists.
+        assertThat(http.getForEntity("/api/nonsense", String.class).getStatusCode())
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
+
+        // And permitting the error page does not make a real route public: one
+        // that needs an account still answers 401, because that status is written
+        // by the entry point rather than forwarded through /error.
+        assertThat(http.getForEntity("/api/me", String.class).getStatusCode())
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     private static <T> T ok(ResponseEntity<T> response) {

@@ -87,7 +87,32 @@ public class SecurityConfig {
             ObjectProvider<OAuth2UserService<OAuth2UserRequest, OAuth2User>> oauth2Users)
             throws Exception {
 
-        http.authorizeHttpRequests(auth -> auth.requestMatchers(HttpMethod.GET, "/api/games/**")
+        http.authorizeHttpRequests(auth -> auth
+                        // Boot renders every unhandled status by forwarding to
+                        // /error, and until that path was permitted the forward
+                        // hit anyRequest().authenticated() and came back 401. So
+                        // an anonymous caller who mistyped a public URL was told
+                        // "unauthorized" — which a client reasonably reads as a
+                        // dead session, and acts on by sending the reader to a
+                        // login page. Found by serving the frontend and probing
+                        // the routes a client would actually ask for; every test
+                        // in the suite passed without it, because every test
+                        // asked for a path that exists.
+                        //
+                        // Permitting it leaks nothing. The status and body of an
+                        // error forward come from the original request, which was
+                        // authorized on its own terms, so a 401 stays a 401 — and
+                        // a request that asks for /error directly gets Boot's
+                        // generic body with nothing in it.
+                        //
+                        // The precise form of this is a DispatcherType.ERROR
+                        // matcher, which needs the servlet API on the compile
+                        // path. This module has security and no web starter, and
+                        // pulling one in for one enum is a worse trade than
+                        // naming the path.
+                        .requestMatchers("/error")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/games/**")
                         .permitAll()
                         .requestMatchers("/api/health", actuatorHealth)
                         .permitAll()

@@ -1103,9 +1103,9 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
-### 2026-09-09 (thirteenth session) — the debt against a ticked box: sync
+### 2026-09-09 (thirteenth session) — the sync debt paid, and Phase 4 opens by being looked at
 
-**One item, N23, and it is the piece of Phase 3's scope Phase 3 did not build.**
+**Two halves. N23 pays the piece of Phase 3's scope Phase 3 did not build; then Phase 4 opened and four minutes of actually serving the frontend found two defects that five sessions of green builds had not.**
 Phase 3 was closed on its exit criterion — a plan computed from stored state —
 while its scope line also said sync, and the twelfth session wrote that down
 honestly rather than quietly. This session paid it.
@@ -1204,6 +1204,81 @@ merge nothing ships.
 on this machine, so the 16 snapshot-gated ones ran). 16 new, all in
 `OfflineSyncTest`, and every one of them is a way the merge could be wrong
 without saying so.
+
+#### Then Phase 4 opened, and serving the thing found two bugs immediately
+
+The tracker had said "the frontend has never been served" for five sessions. It
+took about four minutes to stop being true — `docker compose up -d postgres`,
+`bootRun`, `npm run dev`, load `localhost:5173` — and the page rendered
+`Backend: ok (dev)` from a live API on the first try.
+
+It also rendered it in near-black on near-black. **The app declares no colours at
+all**: Tailwind's preflight sets neither, so both were inherited from the browser
+and the page was legible on the machine it was written on and invisible under a
+dark system theme, which is most phones. `vite.config.ts` had committed the PWA
+manifest to a palette since Phase 0 and the stylesheet had never used it.
+
+The second one was worse. Probing the routes a client would really ask for:
+
+```
+/api/games/reverse-1999/versions   200
+/api/games/reverse-1999            401   <- should be 404
+/api/games                         401   <- should be 404
+/api/nonsense                      401   <- correct
+```
+
+**Boot renders a 404 by forwarding to `/error`, and `/error` was not on the
+public list**, so the forward hit `anyRequest().authenticated()` and the caller
+got 401. A stale catalog link would therefore tell a client its session was dead,
+and a client acts on that by sending the reader to a login page — on a public
+catalog whose entire purpose is that a stranger from a search engine reads it
+without an account.
+
+**Every one of the 244 tests passed with this in place**, because every one of
+them asked for a path that exists. That is the same shape as Phase 0's 401 on
+`/api/health` and the same shape as the stale stage table: a class of defect that
+is structurally invisible to the tests being written, and visible in the first
+minute of using the thing.
+
+`/api/nonsense` staying 401 is *not* the same bug surviving — a path outside the
+public list is refused without confirming whether it exists, which is the design.
+The fix is one matcher (`/error`, permitted; the `DispatcherType.ERROR` form
+needs the servlet API and `identity` deliberately has no web starter) plus a test
+that asks for paths that do not exist.
+
+**One existing assertion had to change, and it was the bug talking.** An
+anonymous `POST` to a public game-data route asserted 401; it is now 403. CSRF
+runs before authorization, so the POST is refused for having no token — that 403
+was being forwarded to an error page that itself demanded an account, and the 401
+everyone saw was the *second* refusal. Same denial either way; the test had been
+pinning the wrong reason for it.
+
+#### The wall the signed-in half runs into
+
+`/oauth2/authorization/google` answers 401, because `oauth2Login` is installed
+only when a provider is configured and none is. So **there is no way to sign in
+at all locally**, and Phase 4's whole product — inventory editor, goal picker,
+plan view, the personalized overlay — lives behind `/api/me`. That is **N24**,
+and the two ways out are not equivalent: a real provider needs the deployed URL
+(so it lands with **B5** and finally runs the exchange that has never run), while
+a development-only sign-in unblocks the UI now and proves nothing about the
+exchange. If the second is taken it has to be impossible to enable in production
+by construction rather than by configuration.
+
+#### Hosting, decided
+
+**Vercel for the frontend, Render for the backend, both free tier.** D1's
+reversal trigger fired on both halves at once — Phase 4 reached, and a free tier
+accepted — and no money is spent, so D1's premise stands.
+
+Two consequences to settle before writing any deploy config, both recorded under
+D1's reversal note. **The backend's session model is same-origin throughout**: a
+cookie session, a CSRF token in a cookie the page reads, an OAuth redirect
+landing back where it started. A Vercel rewrite of `/api/*` to Render preserves
+every bit of that for the price of one hop; two real origins cost CORS,
+`SameSite=None; Secure` and a redirect that has to cross back. And **the free
+tier sleeps** — a cold start is tens of seconds against an optimizer that
+promises two, which is a product decision to make before five strangers meet it.
 
 #### What sync still does not do
 
