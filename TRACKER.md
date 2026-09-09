@@ -81,21 +81,22 @@ being finished with is.
 - **Phase 0 stays closed by exception** — deploy deferred by D1 — and its box
   stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
-- **The remote, checked 2026-09-09 — re-check it, do not trust it.** `main` is
-  `d76d9ea` (PR #15 merged between sessions, which is why the push below found no
-  open PR). `dev` is `0de2e50` as
-  [PR #16](https://github.com/kietnt4412/storm_almanac/pull/16), carrying
-  `164be5a` the Dockerfile fix, `d03d03e` N24 and ADR 0017, and the tracker
-  commit — **green, run `34327487736`**, 0 failed and 16 skipped, exactly the
-  three snapshot-gated classes (8 + 5 + 3). This is a fact here rather than a
-  next action because five sessions running opened on a "merge PR #n" the
-  maintainer had already clicked between sessions.
+- **The remote, checked 2026-09-09 — re-check it, do not trust it.** **`main` is
+  `19197d3` and N24 is on it**: PR #16 merged and CI is green there on the push
+  itself, run `34327808367`. The same tree was green as run `34327487736` on the
+  PR — 0 failed, 16 skipped, exactly the three snapshot-gated classes (8 + 5 + 3).
+  `dev` is one tracker commit ahead. This is a fact here rather than a next action
+  because six sessions running have now opened on a "merge PR #n" the maintainer
+  had already clicked.
   **`DeployableJarTest` passed on the runner**, so the development sign-in's
-  absence is proven against a jar CI built rather than only one this machine did.
-  **The trap fired again and was caught.** CI fires on `pull_request` and on push
-  to `main` only, so **a push to `dev` with no open PR runs nothing** — PR #15
-  had been merged, the push ran nothing, and PR #16 exists because somebody
-  looked. Open the PR *before* trusting a push to `dev`.
+  absence is proven against a jar CI built from a clean checkout rather than only
+  one this machine did. The guard travels with the pipeline.
+  **The trap fired twice in one session.** CI runs on `pull_request` and on push
+  to `main` only, so **a push to `dev` with no open PR runs nothing, silently.**
+  PR #15 had been merged before the first push, and PR #16 was merged during the
+  second. Both were caught by looking, not by anything failing. **Open the PR
+  before trusting a push to `dev`, and check `gh pr list` rather than assuming
+  last session's PR is still open.**
 - **The optimizer has been asked a question by something other than a test.**
   What has *not* happened is a real OAuth exchange: no provider is configured and
   no client secret exists, so login is installed only when one is. The

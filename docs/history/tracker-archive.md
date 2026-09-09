@@ -1411,14 +1411,22 @@ Desktop runs on WSL2. `docker info` is the test; the service is a hint at best.
 
 The previous session recorded that CI fires on `pull_request` and on push to
 `main` only, so **a push to `dev` with no open PR runs nothing, silently**. It
-happened again: PR #15 had been merged between sessions, so this session's push
-to `dev` was watched by nothing at all. Caught by looking rather than by
-anything failing. **PR #16** exists for that reason, and the rule for next time
-is to open the PR before trusting the push.
+fired twice more here. PR #15 had been merged between sessions, so the first
+push to `dev` was watched by nothing at all — **PR #16** exists because somebody
+looked. Then PR #16 was merged *during* the write-up, so the tracker commit that
+followed it was unwatched too, and the Status line describing #16 as open was
+stale within minutes of being written.
+
+Both were caught by looking rather than by anything failing, which is the point:
+there is no failure mode here, only silence. The rule that survives is **open
+the PR before trusting the push, and run `gh pr list` rather than assuming last
+session's PR is still open.**
 
 Run `34327487736` on `0de2e50` is **green: 0 failed, 16 skipped**, and the skips
 are exactly the three snapshot-gated classes (8 + 5 + 3) — a pass there would
-mean a snapshot had been committed by accident.
+mean a snapshot had been committed by accident. **`main` is green on the merge
+too**, run `34327808367` on `19197d3`, which is the first time N24's tree has
+been verified on the branch that would be deployed.
 
 **One thing that is stronger than it was recorded as.** `DeployableJarTest`
 passed on the runner, which means the development sign-in's absence from
