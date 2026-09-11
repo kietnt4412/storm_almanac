@@ -113,10 +113,17 @@ being finished with is.
   anything already published.**
 - **The remote, checked 2026-09-11 (seventeenth session) — re-check it, do not
   trust it.** **PR #17 is merged and `main` is `92c29cf`**, which carries N25's
-  screens and last session's tracker. **`gh pr list` was empty at the start of
-  this session**, which is the dangerous state rather than the clean one: see the
-  trap two sentences down. N25 was green on that PR as run `34593442639` — 0
-  failed, 16 skipped, the three snapshot-gated classes again.
+  screens and the sixteenth session's tracker. **`gh pr list` was empty at the
+  start of this session**, which is the dangerous state rather than the clean
+  one: see the trap two sentences down. This session's work is
+  [PR #18](https://github.com/kietnt4412/storm_almanac/pull/18), **open and green
+  — run `34597211345`**, both jobs passing, `deploy` skipped. **0 failed, 16
+  skipped, and the 16 were verified to be exactly the three snapshot-gated
+  classes** (`RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5,
+  `RealUpstreamPatchTest` 3), which is how 261-on-CI is known rather than
+  assumed. **The 15 frontend tests ran on the runner** — checked in the log, not
+  inferred from a green job. N25 was green on the previous PR as run
+  `34593442639`.
   **Counting PASSED lines in a CI log undercounts**, and it caught a session out
   here: `:modules:identity:test` came back `FROM-CACHE` and printed nothing, so
   `SignInTest`'s 7 results are in the green and not in the log.
@@ -720,7 +727,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-11 | seventeenth | **N25's three debts paid, so it closes.** Provenance is read back out through a *second* port — the solver still cannot see it — and both catalog pages now say where their numbers were read, which on today's data reads "invented for this project" or "nobody recorded it", and that is the feature working. The PWA was loaded with **the origin server killed** rather than with a flag flipped. The frontend gets 15 tests and a written argument for what they are and are not for. A browser found one more defect on the way: a new bundle reading an old API's response **blanked the whole page**, which is B5's two-host deploy window in miniature. 277 backend tests, 15 frontend |
+| 2026-09-11 | seventeenth | **N25's three debts paid, so it closes.** Provenance is read back out through a *second* port — the solver still cannot see it — and both catalog pages now say where their numbers were read, which on today's data reads "invented for this project" or "nobody recorded it", and that is the feature working. The PWA was loaded with **the origin server killed** rather than with a flag flipped. The frontend gets 15 tests and a written argument for what they are and are not for. A browser found one more defect on the way: a new bundle reading an old API's response **blanked the whole page**, which is B5's two-host deploy window in miniature. 277 backend tests, 15 frontend, CI-confirmed on run `34597211345` ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18)) |
 | 2026-09-11 | sixteenth | N25: the five screens exist and a browser has driven all of them — and **a logged-in character page now says what that reader is short of**, which is half of Phase 4's exit. The offline outbox gives N23's merge a second real clock: a stale edit lost on purpose and the interface named the key. Three routes were missing underneath (`/api/games`, `/items`, `/shortfall`) and four defects turned up that only a browser could find. Owed: provenance read-back, an offline *load*, and any frontend test at all. 274 tests |
 | 2026-09-09 | fifteenth | N24: a browser signs in, reads its account, creates a profile and signs out. The way in is a Gradle module the deployable jar does not contain — **[ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md)**, absence rather than configuration, with `DeployableJarTest` reading the artifact to prove it. On its first run it found a defect two phases old: **the CSRF cookie was never issued**, so any browser's first write would have been refused. Also the first authenticated request over a socket, and a Dockerfile broken since Phase 1. 264 tests locally, CI-confirmed on run `34327487736` |
 | 2026-09-09 | fourteenth | N26 answered and the answer was no — the game grades a drop `Fixed`/`Common`/`Possible` and prices only the first, so 764 of 779 drop facts still have to be counted; gacha rates *are* disclosed, which is half of Q4. Then N27 split in two: the authoring is the maintainer's by ADR 0015's own integrity rule, so the session built the mechanism instead — **[ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md), provenance is a field and `publish` enforces it**. 257 tests, 0 failed, 0 skipped locally |

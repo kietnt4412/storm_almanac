@@ -1486,6 +1486,16 @@ snapshots present; 15 frontend tests. `main` was `92c29cf` and `gh pr list` was
 **empty** at the start of the session — the third time the no-open-PR trap has
 been found rather than triggered.
 
+**CI-confirmed on run `34597211345`** ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18)),
+both jobs green and `deploy` skipped. Two things were checked in the log rather
+than inferred from a green tick, because this file has been wrong about both
+before: the **15 frontend tests really ran on the runner** (a new step can pass
+by doing nothing), and the **16 skips are exactly the three snapshot-gated
+classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5,
+`RealUpstreamPatchTest` 3 — which is what makes 261-on-CI a count rather than an
+assumption. A pass in any of those three would mean a snapshot had been
+committed by accident.
+
 ### 2026-09-11 (sixteenth session) — the screens, and the first edit that survived a tunnel
 
 **N25 is most of the way in: the five screens Phase 4 is about exist, a browser
