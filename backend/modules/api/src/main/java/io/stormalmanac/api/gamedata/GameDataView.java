@@ -1,6 +1,7 @@
 package io.stormalmanac.api.gamedata;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,40 @@ public final class GameDataView {
      * the whole versioning model exists to prevent.
      */
     public record VersionView(long sequence, String label, Instant publishedAt, String attribution) {}
+
+    /**
+     * One sourcing record: how a reader could go and check a number themselves.
+     *
+     * <p><b>{@code firstHand} is on the wire on purpose.</b> It is derivable from
+     * {@code origin}, and a client deriving it would be a second copy of
+     * {@code Provenance.Origin.isFirstHand()} — in TypeScript, where nothing can
+     * be made to fail to compile when the Java one gains a member. The policy is
+     * answered once, in the place that defines it, and travels as an answer.
+     *
+     * <p>{@code origin} travels beside it rather than being collapsed into the
+     * boolean, because "somebody counted 300 runs" and "the publisher's rules
+     * screen says so" are both ours and are not equally strong, and a reader
+     * deciding whether to trust a number wants the difference.
+     */
+    public record ProvenanceView(
+            String id, String origin, boolean firstHand, String detail, LocalDate observedOn) {}
+
+    /**
+     * Where this response's numbers were read — ADR 0016, served.
+     *
+     * <p>The records once and the references beside the facts, because the
+     * realistic bundle is one sitting, one screen, one reader: a page's hundred
+     * facts point at a handful of records, and repeating each record per fact
+     * would be mostly duplication on a payload a phone fetches.
+     *
+     * @param sources every distinct record behind this response, in the order
+     *                first met
+     * @param facts   {@code kind:slug} to the {@code id} of the record it was
+     *                read under. A fact missing from this map is one nobody
+     *                sourced: it reads as {@code UNRECORDED}, which is the
+     *                defined meaning of silence rather than an omission
+     */
+    public record SourcingView(List<ProvenanceView> sources, Map<String, String> facts) {}
 
     /** Rarity keeps both halves: the label the game writes, and the ordering. */
     public record RarityView(String label, int rank) {}
@@ -113,11 +148,14 @@ public final class GameDataView {
 
     public record VersionsResponse(String game, List<VersionView> versions) {}
 
-    public record EntitiesResponse(String game, VersionView version, List<EntitySummaryView> entities) {}
+    public record EntitiesResponse(
+            String game, VersionView version, List<EntitySummaryView> entities, SourcingView sourcing) {}
 
-    public record ItemsResponse(String game, VersionView version, List<ItemView> items) {}
+    public record ItemsResponse(
+            String game, VersionView version, List<ItemView> items, SourcingView sourcing) {}
 
-    public record EntityResponse(String game, VersionView version, EntityView entity) {}
+    public record EntityResponse(
+            String game, VersionView version, EntityView entity, SourcingView sourcing) {}
 
     /**
      * @param entity      the entity these steps belong to, so a client that
@@ -133,7 +171,8 @@ public final class GameDataView {
             VersionView version,
             EntitySummaryView entity,
             List<UpgradeStepView> steps,
-            List<CostView> totalCost) {}
+            List<CostView> totalCost,
+            SourcingView sourcing) {}
 
     public record DiffResponse(
             String game, VersionView from, VersionView to, List<ChangeView> changes) {}

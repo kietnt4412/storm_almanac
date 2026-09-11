@@ -13,9 +13,11 @@ import io.stormalmanac.api.gamedata.GameDataView.GameSummaryView;
 import io.stormalmanac.api.gamedata.GameDataView.GamesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.ItemView;
 import io.stormalmanac.api.gamedata.GameDataView.ItemsResponse;
+import io.stormalmanac.api.gamedata.GameDataView.ProvenanceView;
 import io.stormalmanac.api.gamedata.GameDataView.RankView;
 import io.stormalmanac.api.gamedata.GameDataView.RarityView;
 import io.stormalmanac.api.gamedata.GameDataView.SkillView;
+import io.stormalmanac.api.gamedata.GameDataView.SourcingView;
 import io.stormalmanac.api.gamedata.GameDataView.StatCurveView;
 import io.stormalmanac.api.gamedata.GameDataView.TalentView;
 import io.stormalmanac.api.gamedata.GameDataView.UpgradeStepView;
@@ -26,10 +28,13 @@ import io.stormalmanac.common.GameDataVersion;
 import io.stormalmanac.common.id.EntityId;
 import io.stormalmanac.common.id.GameId;
 import io.stormalmanac.common.id.ItemId;
+import io.stormalmanac.gamedata.FactRef;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.GameDefinitionRepository;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.ProvenanceRepository;
+import io.stormalmanac.gamedata.ProvenanceRepository.Sourcing;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Upgrade;
 import io.stormalmanac.gamedata.catalog.Entity;
@@ -37,6 +42,7 @@ import io.stormalmanac.gamedata.catalog.Skill;
 import io.stormalmanac.gamedata.catalog.StatCurve;
 import io.stormalmanac.gamedata.catalog.Talent;
 import io.stormalmanac.gamedata.diff.VersionDiff;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,9 +76,11 @@ import org.springframework.stereotype.Service;
 public class GameDataReadModel {
 
     private final GameDefinitionRepository definitions;
+    private final ProvenanceRepository provenance;
 
-    public GameDataReadModel(GameDefinitionRepository definitions) {
+    public GameDataReadModel(GameDefinitionRepository definitions, ProvenanceRepository provenance) {
         this.definitions = definitions;
+        this.provenance = provenance;
     }
 
     /**
@@ -115,7 +123,8 @@ public class GameDataReadModel {
         return new EntitiesResponse(
                 game.value(),
                 version(data.version()),
-                data.entities().stream().map(GameDataReadModel::summary).toList());
+                data.entities().stream().map(GameDataReadModel::summary).toList(),
+                sourcing(data, data.entities().stream().map(FactRef::of).toList()));
     }
 
     /**
@@ -130,22 +139,29 @@ public class GameDataReadModel {
      */
     public ItemsResponse items(GameId game, Long sequence) {
         GameDefinition data = load(game, sequence);
+        List<Item> sorted = data.items().stream()
+                // Rarest first, then by name. An inventory screen is read
+                // top-down and the expensive materials are the ones a player is
+                // actually counting.
+                .sorted(Comparator.comparingInt((Item item) -> item.rarity().rank())
+                        .reversed()
+                        .thenComparing(Item::displayName))
+                .toList();
+
         return new ItemsResponse(
                 game.value(),
                 version(data.version()),
-                data.items().stream()
-                        // Rarest first, then by name. An inventory screen is read
-                        // top-down and the expensive materials are the ones a
-                        // player is actually counting.
-                        .sorted(Comparator.comparingInt((Item item) -> item.rarity().rank())
-                                .reversed()
-                                .thenComparing(Item::displayName))
+                sorted.stream()
                         .map(item -> new ItemView(
                                 item.id().value(),
                                 item.displayName(),
                                 rarity(item.rarity()),
                                 item.category()))
-                        .toList());
+                        .toList(),
+                // In the order the list is rendered, not the order the bundle
+                // declared them, so a reader scanning the two together is
+                // scanning one order.
+                sourcing(data, sorted.stream().map(FactRef::of).toList()));
     }
 
     /** One catalog page: stat curves, skills and their ranks, talents. */
@@ -163,7 +179,14 @@ public class GameDataReadModel {
                 found.tags(),
                 found.statCurves().stream().map(GameDataReadModel::curve).toList(),
                 found.skills().stream().map(skill -> skill(skill, items)).toList(),
-                found.talents().stream().map(GameDataReadModel::talent).toList()));
+                found.talents().stream().map(GameDataReadModel::talent).toList()),
+                // One fact. Everything on this page — the curve, every rank of
+                // every skill, the talents — is the entity record, read in one
+                // sitting off one set of screens. The items named inside a skill's
+                // upgrade cost are not this page's claim: their quantities belong
+                // to the entity and their display names are the item's own fact,
+                // sourced on the route that serves items.
+                sourcing(data, List.of(FactRef.of(found))));
     }
 
     /** What it costs to advance one entity: the upgrade graph with names resolved. */
@@ -182,8 +205,22 @@ public class GameDataReadModel {
                         upgrade.id(), upgrade.fromState(), upgrade.toState(), costs(upgrade.costs(), items)))
                 .toList();
 
+        // The entity, because the response carries its summary, and then every
+        // step whose cost is on the page. These genuinely can differ: an
+        // upgrade table read off a levelling screen is not the same reading as
+        // the character's own page, and per-fact provenance exists so that the
+        // two do not have to be claimed together.
+        List<String> facts = new ArrayList<>();
+        facts.add(FactRef.of(found));
+        upgrades.forEach(upgrade -> facts.add(FactRef.of(upgrade)));
+
         return new UpgradesResponse(
-                game.value(), version(data.version()), summary(found), steps, total(upgrades, items));
+                game.value(),
+                version(data.version()),
+                summary(found),
+                steps,
+                total(upgrades, items),
+                sourcing(data, facts));
     }
 
     /**
@@ -234,6 +271,40 @@ public class GameDataReadModel {
                             + " " + data.version().label());
         }
         return found;
+    }
+
+    // ── Sourcing ────────────────────────────────────────────────────────────
+
+    /**
+     * Where the facts this response answered with were read.
+     *
+     * <p>Asked of the version that actually answered rather than of the sequence
+     * the request named, which is the same rule every other read here follows: a
+     * page whose numbers came from the latest snapshot and whose sourcing came
+     * from one the caller happened to mention would be the one kind of wrong
+     * answer this whole feature exists to prevent.
+     *
+     * <p>A fact with no row is absent from {@code facts} rather than present with
+     * a fabricated {@code unrecorded} record. Absence is what the client renders
+     * as "nobody said", and inventing an id for it would put a record in
+     * {@code sources} that nobody authored.
+     */
+    private SourcingView sourcing(GameDefinition data, List<String> factRefs) {
+        Sourcing found = provenance.of(data.game().id(), data.version().sequence(), factRefs);
+
+        Map<String, String> facts = new LinkedHashMap<>();
+        found.byFact().forEach((ref, record) -> facts.put(ref, record.id()));
+
+        return new SourcingView(
+                found.distinct().stream()
+                        .map(record -> new ProvenanceView(
+                                record.id(),
+                                record.origin().name(),
+                                record.isFirstHand(),
+                                record.detail(),
+                                record.observedOn()))
+                        .toList(),
+                facts);
     }
 
     // ── Mapping ─────────────────────────────────────────────────────────────

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { getEntities, getGames } from '../api/client';
+import { Sourcing } from '../catalog/Sourcing';
 import { useSelectedProfile } from '../profile';
 
 /**
@@ -109,7 +110,9 @@ function Browser({ game }: { game: string }) {
         </ul>
       )}
 
-      <p className="text-xs muted">{entities.data?.version.attribution}</p>
+      {entities.data && (
+        <Sourcing sourcing={entities.data.sourcing} attribution={entities.data.version.attribution} />
+      )}
     </div>
   );
 }

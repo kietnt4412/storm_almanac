@@ -1,4 +1,7 @@
-import { defineConfig } from 'vite';
+// `vitest/config` rather than `vite` — it is a superset, and one config is one
+// fewer thing to keep in sync than a vite.config.ts and a vitest.config.ts that
+// have to agree about aliases and plugins forever.
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -44,6 +47,35 @@ export default defineConfig({
       },
     }),
   ],
+  // What the pipeline is allowed to assert about a screen, decided rather than
+  // left to the next session — see TRACKER.md's N25.
+  //
+  // Component tests in jsdom, and deliberately not a headless browser. The
+  // argument is the four defects a session found by driving a real browser:
+  // a store selector that re-rendered forever, a focus order that was not the
+  // order rows are drawn in, a goal screen that could not express the base of a
+  // track, and `display: block` folding every table header into a column. The
+  // first three are behaviour and a component test catches all three. The
+  // fourth is layout, and **nothing short of a real browser will ever catch it**
+  // — jsdom computes no layout, so a test asserting on it would assert on the
+  // stylesheet's text rather than on what a reader sees.
+  //
+  // So the honest split is: behaviour is the pipeline's, appearance is a
+  // person's. This does not replace driving the app before shipping a screen;
+  // it stops the behavioural half of that work from having to be redone by hand
+  // on every change.
+  test: {
+    environment: 'jsdom',
+    // No `globals: true`. Every test imports `describe`/`it`/`expect` from
+    // vitest by name, which keeps tsconfig's `types` list the small closed set
+    // it is rather than needing an ambient entry to typecheck a test file —
+    // and a half-configured global is how a suite ends up compiling in the
+    // editor and not in the build.
+    setupFiles: ['./src/test/setup.ts'],
+    // Excluded because the same glob otherwise sweeps up the dependencies'
+    // own suites once node_modules holds a testing library.
+    include: ['src/**/*.test.{ts,tsx}'],
+  },
   server: {
     port: 5173,
     proxy: {

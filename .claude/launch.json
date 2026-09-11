@@ -8,6 +8,13 @@
       "port": 5173
     },
     {
+      "comment": "The built bundle, served as a static site the way a host serves it. The dev server has no service worker worth the name, so this is the only configuration in which the PWA's offline claim can be tested at all.",
+      "name": "web-built",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "--prefix", "frontend", "--", "--port", "4173", "--strictPort"],
+      "port": 4173
+    },
+    {
       "name": "api",
       "runtimeExecutable": "backend\\gradlew.bat",
       "runtimeArgs": ["-p", "backend", ":app:bootRun", "--console=plain"],

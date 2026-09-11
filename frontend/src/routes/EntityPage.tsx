@@ -11,6 +11,7 @@ import {
   signInUrl,
   type Shortfall,
 } from '../api/client';
+import { Sourcing, merge } from '../catalog/Sourcing';
 import { useSelectedProfile } from '../profile';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 
@@ -151,7 +152,16 @@ export function EntityPage() {
         </section>
       )}
 
-      <p className="text-xs muted">{detail.data.version.attribution}</p>
+      {/*
+        Under the numbers rather than over them, and a section rather than the
+        one grey line this used to be. The line said who to credit; it could not
+        say who read it, off what, on what day — which is the difference between
+        ADR 0015 as a sentence in a README and as something the reader can check.
+      */}
+      <Sourcing
+        sourcing={merge(detail.data.sourcing, upgrades.data?.sourcing)}
+        attribution={detail.data.version.attribution}
+      />
     </div>
   );
 }
