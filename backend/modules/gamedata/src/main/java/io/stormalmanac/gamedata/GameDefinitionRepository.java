@@ -29,4 +29,26 @@ public interface GameDefinitionRepository {
     Optional<GameDefinition> find(GameId game, long sequence);
 
     List<GameDataVersion> versions(GameId game);
+
+    /**
+     * Every game with something published, with its newest published version.
+     *
+     * <p>Added for phase 4, and the reason is worth stating: until something had
+     * to <em>navigate</em> the catalog, every read started from a game slug the
+     * caller already had — a test, a CLI argument, a player's profile. A reader
+     * arriving with no account and no slug had nowhere to start, which made the
+     * public half of the catalog unreachable except by guessing a URL.
+     *
+     * <p>A game with only drafts does not appear. That is the same rule as every
+     * other method here: a draft has been fetched, not approved, and listing one
+     * would advertise data nobody has agreed to publish.
+     */
+    List<PublishedGame> publishedGames();
+
+    /**
+     * @param version the newest published snapshot, which is what a reader lands
+     *                on. It carries its own attribution, so an index can credit
+     *                a source without a second round trip per game
+     */
+    record PublishedGame(Game game, GameDataVersion version) {}
 }

@@ -19,12 +19,26 @@ export default defineConfig({
         theme_color: '#0D6F68',
       },
       workbox: {
-        // Catalog pages are cache-first; anything player-specific is not cached.
+        // Published game data is cached; anything player-specific is not.
+        //
+        // Two things were wrong with this rule until the screens that depend on
+        // it existed. It named `/api/catalog/`, which is not a route this API
+        // has ever served — the catalog lives under `/api/games/`. And it was
+        // anchored with `^`, which cannot match: workbox tests the pattern
+        // against the full request URL, so an anchored path matches nothing at
+        // all. Both were invisible because nothing was reading from the cache.
+        //
+        // Safe to cache because a published version is immutable: the only way
+        // a response under this prefix changes is a new patch, which is a
+        // different `?version=`. Nothing under `/api/me` is here, and that is
+        // the line that matters — a stale inventory served from a service
+        // worker is a plan computed against numbers the player has moved on
+        // from.
         runtimeCaching: [
           {
-            urlPattern: /^\/api\/catalog\//,
+            urlPattern: /\/api\/games\//,
             handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'catalog' },
+            options: { cacheName: 'game-data' },
           },
         ],
       },
