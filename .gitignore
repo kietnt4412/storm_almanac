@@ -40,3 +40,7 @@ Thumbs.db
 # src/test/resources/upstream/. A broad ignore rule fails by omission and the
 # omission does not show up until CI cannot compile.
 upstream-snapshots/
+
+# TypeScript incremental build cache: derived, machine-specific, and it changes
+# on every build. It was tracked by accident.
+tsconfig.tsbuildinfo

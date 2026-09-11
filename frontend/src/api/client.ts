@@ -19,6 +19,190 @@ export interface Me {
   profiles: Profile[];
 }
 
+// ── Catalog ────────────────────────────────────────────────────────────────
+//
+// Public and anonymous: these are the routes a stranger arriving from a search
+// reads. Everything below the divider after them needs an account.
+
+export interface Rarity {
+  label: string;
+  rank: number;
+}
+
+export interface Version {
+  sequence: number;
+  label: string;
+  publishedAt: string;
+  attribution: string;
+}
+
+export interface GameSummary {
+  id: string;
+  displayName: string;
+  /** The game's own word for energy — Activity, Serum, Vigour. */
+  energyUnit: string;
+  latest: Version;
+}
+
+export interface GamesResponse {
+  games: GameSummary[];
+}
+
+export interface Item {
+  id: string;
+  displayName: string;
+  rarity: Rarity;
+  category: string;
+}
+
+export interface ItemsResponse {
+  game: string;
+  version: Version;
+  items: Item[];
+}
+
+export interface EntitySummary {
+  id: string;
+  displayName: string;
+  kind: string;
+  rarity: Rarity;
+  element: string | null;
+  tags: string[];
+}
+
+export interface EntitiesResponse {
+  game: string;
+  version: Version;
+  entities: EntitySummary[];
+}
+
+export interface Cost {
+  item: string;
+  displayName: string;
+  quantity: number;
+}
+
+export interface SkillRank {
+  rank: number;
+  description: string;
+  values: Record<string, number>;
+  upgradeCost: Cost[];
+}
+
+export interface EntityDetail extends EntitySummary {
+  statCurves: { stat: string; breakpoints: { ascensionTier: number; level: number; value: number }[] }[];
+  skills: { id: string; displayName: string; ranks: SkillRank[] }[];
+  talents: { id: string; displayName: string; unlockCondition: string; effect: string }[];
+}
+
+export interface EntityResponse {
+  game: string;
+  version: Version;
+  entity: EntityDetail;
+}
+
+export interface UpgradeStep {
+  id: string;
+  fromState: string;
+  toState: string;
+  costs: Cost[];
+}
+
+export interface UpgradesResponse {
+  game: string;
+  version: Version;
+  entity: EntitySummary;
+  steps: UpgradeStep[];
+  totalCost: Cost[];
+}
+
+// ── Player state ───────────────────────────────────────────────────────────
+
+export interface InventoryResponse {
+  profile: string;
+  items: Record<string, number>;
+}
+
+export interface RosterResponse {
+  profile: string;
+  entities: Record<string, string>;
+}
+
+export interface Goal {
+  entity: string;
+  targetState: string;
+  satisfiability?: string;
+  priority?: number;
+}
+
+export interface GoalsResponse {
+  profile: string;
+  goals: Goal[];
+}
+
+/** One item's edit, with the client clock that decides a tie. */
+export interface InventoryEdit {
+  quantity: number;
+  at: string;
+}
+
+export interface InventoryPatchResponse {
+  profile: string;
+  items: Record<string, number>;
+  applied: string[];
+  /** The keys whose edits lost the merge. Never silently dropped. */
+  rejected: string[];
+}
+
+export interface RosterPatchResponse {
+  profile: string;
+  entities: Record<string, string>;
+  applied: string[];
+  rejected: string[];
+}
+
+export interface Plan {
+  id: string;
+  profile: string;
+  game: string;
+  version: number;
+  versionLabel: string;
+  attribution: string;
+  objective: string;
+  stages: { stage: string; runs: number; energyCost: number; totalEnergy: number }[];
+  conversions: { step: string; times: number }[];
+  rewards: { reward: string; times: number }[];
+  totalEnergy: number;
+  etaDays: number;
+  shadowPrice: Record<string, number>;
+  bindingStages: string[];
+  notes: string[];
+  computedAt: string;
+}
+
+export interface ShortfallLine {
+  item: string;
+  displayName: string;
+  required: number;
+  owned: number;
+  missing: number;
+}
+
+export interface Shortfall {
+  profile: string;
+  game: string;
+  version: number;
+  versionLabel: string;
+  attribution: string;
+  entity: string;
+  currentState: string | null;
+  targetState: string;
+  alreadyMet: boolean;
+  steps: string[];
+  items: ShortfallLine[];
+  complete: boolean;
+}
+
 const BASE = import.meta.env.VITE_API_BASE ?? '';
 
 /**
@@ -45,9 +229,26 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     credentials: 'include',
   });
   if (!response.ok) {
-    throw new ApiError(path, response.status);
+    throw new ApiError(path, response.status, await detailOf(response));
   }
   return response.json() as Promise<T>;
+}
+
+/**
+ * The sentence the server wrote about its own refusal.
+ *
+ * Every refusal on this API is an RFC 9457 problem document whose `detail` was
+ * written to be acted on — "no upgrades for entity X in proving-ground 1.0"
+ * rather than a bare 422. Throwing that away and rendering the status code
+ * would undo the whole reason ApiExceptionHandler exists.
+ */
+async function detailOf(response: Response): Promise<string | undefined> {
+  try {
+    const problem = await response.clone().json();
+    return typeof problem?.detail === 'string' ? problem.detail : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
@@ -58,14 +259,22 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
  * error it reports. Everything else is a genuine failure.
  */
 export class ApiError extends Error {
-  constructor(readonly path: string, readonly status: number) {
-    super(`${path} responded ${status}`);
+  constructor(readonly path: string, readonly status: number, readonly detail?: string) {
+    super(detail ?? `${path} responded ${status}`);
   }
 
   get isSignedOut(): boolean {
     return this.status === 401;
   }
+
+  /** The goal is understood and has no answer — an unreachable state, an unsourceable item. */
+  get isUnanswerable(): boolean {
+    return this.status === 422;
+  }
 }
+
+const versioned = (path: string, version?: number) =>
+  version === undefined ? path : `${path}${path.includes('?') ? '&' : '?'}version=${version}`;
 
 export const getHealth = () => request<Health>('/api/health');
 
@@ -76,6 +285,79 @@ export const createProfile = (game: string, region: string, displayName: string)
     method: 'POST',
     body: JSON.stringify({ game, region, displayName }),
   });
+
+export const getGames = () => request<GamesResponse>('/api/games');
+
+export const getItems = (game: string, version?: number) =>
+  request<ItemsResponse>(versioned(`/api/games/${game}/items`, version));
+
+export const getEntities = (game: string, version?: number) =>
+  request<EntitiesResponse>(versioned(`/api/games/${game}/entities`, version));
+
+export const getEntity = (game: string, entity: string, version?: number) =>
+  request<EntityResponse>(versioned(`/api/games/${game}/entities/${entity}`, version));
+
+export const getUpgrades = (game: string, entity: string, version?: number) =>
+  request<UpgradesResponse>(versioned(`/api/games/${game}/entities/${entity}/upgrades`, version));
+
+export const getInventory = (profile: string) =>
+  request<InventoryResponse>(`/api/me/profiles/${profile}/inventory`);
+
+/**
+ * Merge this device's edits, key by key.
+ *
+ * PATCH and never PUT, and that is the difference between a phone that was
+ * offline for an hour and one that silently deletes what a browser added in the
+ * meantime. The timestamps are the client's own and are required: a
+ * server-stamped edit would win for having arrived late, which is the bug the
+ * route exists to fix.
+ */
+export const patchInventory = (profile: string, items: Record<string, InventoryEdit>) =>
+  request<InventoryPatchResponse>(`/api/me/profiles/${profile}/inventory`, {
+    method: 'PATCH',
+    body: JSON.stringify({ items }),
+  });
+
+export const getRoster = (profile: string) =>
+  request<RosterResponse>(`/api/me/profiles/${profile}/roster`);
+
+export const patchRoster = (profile: string, entities: Record<string, { state: string | null; at: string }>) =>
+  request<RosterPatchResponse>(`/api/me/profiles/${profile}/roster`, {
+    method: 'PATCH',
+    body: JSON.stringify({ entities }),
+  });
+
+export const getGoals = (profile: string) => request<GoalsResponse>(`/api/me/profiles/${profile}/goals`);
+
+/**
+ * Goals are replaced whole, because they are an ordered list and an order has
+ * no per-key merge. The server has no PATCH here and that is a decision rather
+ * than a gap — see PlayerController.
+ */
+export const saveGoals = (profile: string, goals: Goal[]) =>
+  request<GoalsResponse>(`/api/me/profiles/${profile}/goals`, {
+    method: 'PUT',
+    body: JSON.stringify({ goals }),
+  });
+
+export const solve = (
+  profile: string,
+  body: { energyPerDay: number; horizonDays?: number; objective?: string },
+  version?: number,
+) =>
+  request<Plan>(versioned(`/api/me/profiles/${profile}/plan`, version), {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+/** What this reader is still short of for one entity at one target state. */
+export const getShortfall = (profile: string, entity: string, target: string, version?: number) =>
+  request<Shortfall>(
+    versioned(
+      `/api/me/profiles/${profile}/shortfall?entity=${encodeURIComponent(entity)}&target=${encodeURIComponent(target)}`,
+      version,
+    ),
+  );
 
 /**
  * Where the sign-in button goes.

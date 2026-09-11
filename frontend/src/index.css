@@ -21,23 +21,101 @@
 :root {
   color-scheme: light dark;
   --ground: #f7faf9;
+  --surface: #ffffff;
   --ink: #10201f;
+  --muted: #5b6f6d;
+  --line: #d9e3e1;
   --brand: #0d6f68;
+  --signal: #9c6414;
+  --short: #a33a2a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --ground: #0e1a19;
+    --surface: #142523;
     --ink: #e6f0ef;
+    --muted: #9ab3b0;
+    --line: #24403d;
     --brand: #4fd1c5;
+    --signal: #e0a95c;
+    --short: #f08a72;
   }
 }
 
 body {
   background: var(--ground);
   color: var(--ink);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
 a {
   color: var(--brand);
+}
+
+/*
+ * A handful of component classes rather than the same ten utilities repeated at
+ * every call site. The screens below are dense — an inventory row, a plan line,
+ * a shortfall line — and the point of naming these is that a reader of the JSX
+ * sees what a thing *is* instead of what it looks like.
+ */
+@layer components {
+  .card {
+    @apply rounded-lg border p-4;
+    background: var(--surface);
+    border-color: var(--line);
+  }
+
+  .btn {
+    @apply rounded-md px-3 py-1.5 text-sm font-medium transition-opacity;
+    background: var(--brand);
+    color: var(--ground);
+  }
+
+  .btn:disabled {
+    @apply opacity-50;
+  }
+
+  .btn-quiet {
+    @apply rounded-md border px-3 py-1.5 text-sm font-medium;
+    border-color: var(--line);
+    color: var(--ink);
+    background: transparent;
+  }
+
+  .input {
+    @apply rounded-md border px-2 py-1 text-sm;
+    background: var(--surface);
+    border-color: var(--line);
+    color: var(--ink);
+  }
+
+  .input:focus {
+    outline: 2px solid var(--brand);
+    outline-offset: 1px;
+  }
+
+  .muted {
+    color: var(--muted);
+  }
+
+  .label {
+    @apply block text-xs font-medium uppercase tracking-wide;
+    color: var(--muted);
+  }
+
+  /*
+   * The same small voice over a column, but a table heading has to stay a table
+   * cell. `block` is right for a form label, which wants the field under it, and
+   * it silently folds a header row into a vertical stack — which is exactly what
+   * it did to the shortfall and plan tables until a browser showed it.
+   */
+  th.label {
+    display: table-cell;
+  }
+
+  /* A number that is read in a column: tabular so the digits line up. */
+  .count {
+    font-variant-numeric: tabular-nums;
+  }
 }
