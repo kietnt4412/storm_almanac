@@ -108,7 +108,12 @@ being finished with is.
   still `19197d3`**, which is N24: nothing has merged since, and
   [PR #17](https://github.com/kietnt4412/storm_almanac/pull/17) — last session's
   tracker commits — **was still open at the start of this session**, so N25 is
-  stacked on top of it on the same `dev` branch and the same PR carries both.
+  stacked on top of it on the same `dev` branch and the same PR carries both; its
+  title and body were rewritten to say so. **N25 is green there: run
+  `34593442639`**, 0 failed, 16 skipped — the three snapshot-gated classes again.
+  **Counting PASSED lines in a CI log undercounts**, and it caught a session out
+  here: `:modules:identity:test` came back `FROM-CACHE` and printed nothing, so
+  `SignInTest`'s 7 results are in the green and not in the log.
   N24's tree was green on the push to `main` as run `34327808367`, and as run
   `34327487736` on the PR — 0 failed, 16 skipped, exactly the three
   snapshot-gated classes (8 + 5 + 3). Phrased without a commit count on purpose,
