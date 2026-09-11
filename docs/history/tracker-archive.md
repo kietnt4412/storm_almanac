@@ -882,6 +882,52 @@ entry was met, not that the code exists.
       the redirect. And a `@Bean` method named after its `@Configuration` class
       collides with it: `BeanDefinitionOverrideException`, not an obvious message.
 
+### Done 2026-09-11 (sixteenth and seventeenth sessions) — N25
+
+- [x] ~~**N25 — Phase 4's screens.**~~ **Done 2026-09-11.** The five screens
+      landed on the sixteenth session — inventory editor, goal picker, plan view,
+      catalog browse and search, and the character page with the personalized
+      overlay, which is **Phase 4's second exit clause served** — along with the
+      client half of N23's offline outbox. The box stayed unticked for three
+      named debts, and the seventeenth session paid them:
+
+      1. **Provenance is read back out.** ADR 0016 wrote it at ingest and enforced
+         it at publish, and nobody the promise was made to could ask for it.
+         `ProvenanceRepository` is deliberately a **second port** rather than a
+         field on `GameDefinition`: `Provenance`'s own javadoc says a solver that
+         can read where a number came from can eventually be made to prefer one,
+         so serving it to a reader must not put it on the path `planner` loads.
+         Four responses carry a `sourcing` block — the records once, the fact
+         references beside them, because a page's hundred facts point at a
+         handful of readings. `firstHand` travels as an answer rather than being
+         re-derived in TypeScript, which would be a second copy of
+         `Provenance.Origin.isFirstHand()` in a language that cannot be made to
+         fail to compile when the Java one gains a member.
+         **Three new HTTP tests**, and the interesting one is the refusal again:
+         a fact whose row is deleted — which is what a version published before
+         ADR 0016 looks like — is *absent* from the sourcing rather than given a
+         fabricated record, and the page still serves its numbers.
+      2. **The PWA has been loaded offline**, and the method is the evidence: the
+         built bundle served on 4173, the service worker allowed to precache, and
+         then **the origin server killed** — `curl` refusing the connection — and
+         a *deep* route reloaded. The shell rendered through the navigation
+         fallback and the catalog list rendered out of the `game-data` runtime
+         cache. A CDP offline flag would have proved less.
+      3. **The frontend has tests, and a decision about them.** Vitest and
+         Testing Library in jsdom, 15 tests, wired into CI. The argument is
+         written beside the config in `vite.config.ts` and rests on the four
+         defects a browser found on the sixteenth session: three were behaviour
+         and are catchable — the re-rendering store selector is now pinned by a
+         test **verified to fail**, with React's own "Maximum update depth
+         exceeded", when the defect is reintroduced — and the fourth,
+         `display: block` folding a table header into a column, is layout, which
+         **jsdom will never catch because it computes no layout**. So behaviour
+         is the pipeline's and appearance is a person's, stated rather than left
+         to the next session to infer.
+
+      **The exit criterion was never this action's to meet:** five strangers
+      completing a plan needs a deployment, which is **B5**.
+
 ---
 
 ## Closed phases, in full
@@ -1051,6 +1097,58 @@ was written when each closed.
       (D1); and the end-to-end test goes through **MockMvc rather than a socket**,
       because an authenticated session cannot be minted over one without an
       authorization server to redirect to.
+
+### Qualifications moved out of the live tracker, 2026-09-11 (seventeenth session)
+
+Verbatim, and still true. They left *What is still unverified* because they
+qualify phases that are closed and because none of them bears on a next action —
+which is the tracker's own criterion for moving something: being finished with
+it, not its age. The tracker had reached 759 lines against a 550-line budget and
+the sixteenth session's own note named these as the candidates.
+
+Read them when you re-open Phase 1, Phase 2 or Phase 11. **The one with live
+teeth is the time axis**, and its warning is restated in one line on the live
+Phase 11 row rather than being left only here.
+
+- **The benchmark is one guide.** Written for patch 2.7 against a 3.3 sample, and
+  it answers "which stage for this material" rather than "what should I do this
+  week". A second independent source would turn "agrees with the community" from
+  a claim into a measurement. The agreement is also on the stage *ranking*, which
+  is arithmetic on the data — **the search itself is still checked only against
+  itself.**
+- **Two large disagreements with the community survive the sample-size fix**, on
+  105 and 113 runs. A 95% bound discounts a thin sample in proportion; it does
+  not rescue you from one. Those belong to the evidence, not the model, and the
+  fix is more sampling.
+- **The time axis has never met real data, and on this game it never will.**
+  Rewards, rotation and shops are modelled or refused on the synthetic fixture
+  alone, and on the real 3.5 patch the whole of N14 reduces to one energy row.
+  **Do not read "the optimizer has a calendar" as "the optimizer schedules real
+  weeks."** This is not the upstream being silent: **R1999 has no weekday
+  rotation at all**, so `Availability.ALWAYS` is *correct*, and its daily income
+  **is conditional on spending Activity**, so entering it as a `Reward` would make
+  every plan systematically too cheap. The rotation machinery waits for a game
+  that rotates — Phase 11 is the next chance. See
+  [the economy facts](../game-facts/reverse-1999-economy.md).
+- **Three shapes the model cannot express**, each a *silent* wrong answer if
+  faked, none a defect in what shipped: **an item that restores energy**
+  (`Stage` is the only source touching the budget and only ever consumes),
+  **a reward conditional on spending energy**, and **a lifetime purchase limit**
+  (`Shop` caps at "n per `Period`", not "five, ever"). Examples and provenance in
+  [the economy facts](../game-facts/reverse-1999-economy.md).
+- **The adapter converts less than the upstream publishes** — no shop offers, no
+  alternative resonance-pattern costs, no unreleased content — each with a reason
+  in `KornblumeAdapter`'s javadoc. That sentence is only reassuring when somebody
+  has checked what it converts against what the upstream actually *reads*; the
+  last time nobody had, two thirds of the game was missing.
+- **No skills or talents have ever been ingested from a real upstream.** The
+  catalog axis is proven end to end on the synthetic fixture only, because
+  Kornblume publishes no skill text. An upstream gap, not a defect — but do not
+  let the phase board imply otherwise.
+- **The pipeline has met one upstream, not two.** The second game is Phase 11 and
+  is where the abstraction is actually tested.
+- **`gacha` has no behaviour.** Every port in it is an interface with nothing
+  behind it. (Phase 5's own row says the same thing.)
 
 ## Answered questions
 
@@ -1275,6 +1373,118 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+### 2026-09-11 (seventeenth session) — the numbers say where they came from, and the answer is "nobody knows"
+
+**N25's three debts are paid and the action closes.** Nothing new was started:
+the session took the top item a session is *allowed* to take — N27 is the
+maintainer's by ADR 0015's integrity rule and cannot be delegated — and finished
+it.
+
+**1. Provenance is read back out, and the architecture of that is the whole
+decision.** ADR 0016 had written provenance at ingest and enforced it at publish,
+and neither of those reaches a reader; for two phases the gate could ask the
+question and nobody else could. The obvious implementation is a field on
+`GameDefinition`, and it is the wrong one: `Provenance`'s own javadoc already
+says that a solver which can read where a number came from is a solver that can
+eventually be made to prefer one, and nobody would notice. So the read travels on
+a **second port**, `ProvenanceRepository`, which `planner` does not know exists.
+`api` may reach `gamedata` and does; `planner` loads a `GameDefinition` and still
+cannot see an origin.
+
+Two shape decisions worth keeping:
+
+- **The lookup takes the facts, not the version.** Asking for a whole version's
+  sourcing would be one simpler query and would let a caller render sourcing for
+  facts that are not on the page. Taking the refs makes the response's claim
+  narrow by construction: what comes back is the sourcing of the numbers this
+  request actually answered with.
+- **`firstHand` goes on the wire.** It is derivable from `origin`, and a client
+  deriving it would be a second copy of `Provenance.Origin.isFirstHand()` in
+  TypeScript, where nothing can be made to fail to compile when the Java enum
+  gains a member. The policy is answered once and travels as an answer.
+
+**The JDBC adapter uses named parameters and it is worth saying why**, because
+the package next door does the opposite: `Availabilities` writes a Postgres array
+*literal* and argues it is safe because `DayOfWeek` is seven names with no
+quoting to escape. Fact refs are slugs out of a bundle, so that argument does not
+survive being copied; `IN (:refs)` expands to one placeholder per ref and every
+value stays a bind parameter.
+
+**What the feature says on today's data is the uncomfortable part, and it is
+supposed to be.** The fixture reads *"Invented for this project — not any real
+game"*. A version published before ADR 0016 reads *"Nobody recorded where these
+numbers were read. They may be right; nothing here says so."* That is the feature
+working — **there is still no first-hand fact in this repository** — and it is why
+the empty case is rendered loudly rather than as a blank space. A component that
+showed nothing when it knew nothing would read as approval.
+
+**2. The PWA has been loaded offline, and the method is the evidence.** The claim
+owed was not "offline editing" — the sixteenth session proved that against a
+refusing network — but "the app shell renders with no server at all". So: build
+the bundle, serve it on 4173 (`web-built` in `.claude/launch.json`; the dev
+server has no worker worth the name), let the service worker precache, then
+**stop the server** and confirm `curl` is refused, then reload a *deep* route.
+`/catalog/proving-ground` rendered: the navigation fallback resolved it to the
+precached `index.html`, and the catalog list came out of the `game-data` runtime
+cache — the cache whose rule the previous session had repaired and which nothing
+had yet read from. A CDP offline toggle would have proved strictly less, because
+the server would still have been there.
+
+**3. The frontend has 15 tests and, more importantly, a written decision about
+what they are for.** The question the tracker asked was to choose deliberately
+between component tests, a smoke test against the built bundle, or explicitly
+neither. The answer comes from the four defects the previous session found by
+driving a browser:
+
+| Defect | Catchable in jsdom? |
+|---|---|
+| Store selector re-rendering forever | **Yes** — React throws rather than hanging |
+| Focus order not the order rows are drawn | **Yes** |
+| Goal screen could not express the base of a track | **Yes** — it is logic over fixture data |
+| `display: block` folding every table header | **No, and never** — jsdom computes no layout |
+
+So: **behaviour is the pipeline's, appearance is a person's.** Driving a browser
+before shipping a screen is still required; what it no longer has to do is
+re-check the behavioural half by hand on every change. The re-rendering selector
+is pinned by a test that was **verified to fail** — the defect was reintroduced
+and both assertions broke, one on referential identity and one with React's own
+*"Maximum update depth exceeded"*, which is the symptom that blanked the
+inventory screen. A regression test nobody has watched fail is decoration.
+
+`globals: true` was set and then removed: every test imports `describe`/`it`/
+`expect` by name, which keeps `tsconfig`'s `types` the small closed list it is.
+A half-configured global is how a suite ends up compiling in the editor and not
+in the build.
+
+**A browser found one more defect, and it is the most valuable thing here.** The
+first time the built bundle was served, **the whole page rendered as nothing** —
+`Cannot destructure property 'sources' of undefined`. The cause was not a bug in
+the component: Vite's `preview.proxy` defaults to `server.proxy`, so the page
+reached a backend from another session that had been built *before* `sourcing`
+existed, and reading through an absent object throws before React paints
+anything.
+
+**That is B5's problem in miniature.** Vercel and Render are separate hosts and do
+not deploy at the same instant, so every release has a window in which a new page
+is talking to an old API. The fix is two-part and both parts matter: the
+component treats an absent record as silence — which is its own thesis, not
+defensiveness — and the **wire types now mark the field optional**, so the
+compiler points at every call site that has to cope rather than leaving it to the
+next person to remember. The general lesson is wider than one field: *a client
+that treats a new response field as guaranteed is a client that blanks its own
+page on every deploy.*
+
+**The tracker paid its size debt before adding to itself**, which is its own
+rule and had been deferred once. Eight qualifications of closed phases moved to
+this file — 759 lines down to 740 while closing an action and shipping a feature.
+The one with live teeth, the time axis never having met real data, was restated
+in one line on the Phase 11 row rather than being left only here.
+
+**Numbers:** 277 backend tests (274 + 3), 0 failed, 0 skipped locally with
+snapshots present; 15 frontend tests. `main` was `92c29cf` and `gh pr list` was
+**empty** at the start of the session — the third time the no-open-PR trap has
+been found rather than triggered.
 
 ### 2026-09-11 (sixteenth session) — the screens, and the first edit that survived a tunnel
 

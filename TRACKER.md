@@ -13,7 +13,7 @@ being finished with is.
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks).
   [README.md](README.md) is the public face; [CLAUDE.md](CLAUDE.md) is the
   working agreement.
-- Last updated: **2026-09-11** (sixteenth session)
+- Last updated: **2026-09-11** (seventeenth session)
 
 ---
 
@@ -26,18 +26,27 @@ being finished with is.
   **[D1 is reversed](#d1--deployment-deferred-2026-09-02)** — Vercel and Render,
   free tier, still no money. Nothing is deployed: the decision is made, the
   wiring is **B5**.
-  **The screens exist as of 2026-09-11.** N25 built all five — inventory editor,
-  goal picker, plan view, catalog browse and search, and the character page with
-  the personalized overlay — and a browser has driven every one of them against
-  a real database. **Phase 4's second exit clause is served**: a logged-in
+  **The screens exist as of 2026-09-11, and N25 is closed as of the same day.**
+  All five — inventory editor, goal picker, plan view, catalog browse and search,
+  and the character page with the personalized overlay — driven in a browser
+  against a real database. **Phase 4's second exit clause is served**: a logged-in
   character page says what that reader is short of, from where their roster
   actually stands. **The first clause is not and cannot be until B5**: five
   strangers cannot complete a plan against something that is not deployed.
-  **Three things N25 still owes** are on [its line](#next-actions): provenance is
-  still written and never read, the PWA's offline *loading* is unproven (its
-  offline *editing* is not), and there is not one frontend test.
+  **N25's three debts are paid** — provenance is read back and rendered, the PWA
+  has been loaded with its origin server killed, and the frontend has tests and a
+  written-down decision about what they are for.
   *The data blocker stands:* see the next line — F2 is gone, and what replaced it
   is bigger.
+- **A number on a page now says where it was read, and what it says is
+  uncomfortable.** ADR 0016's other half landed 2026-09-11: `ProvenanceRepository`
+  is a **second port** rather than a field on `GameDefinition`, so `planner` still
+  cannot see a fact's origin and cannot be made to prefer one. Four catalog
+  responses carry a `sourcing` block; both catalog pages render it; `firstHand`
+  travels as an answer so the policy is not re-implemented in TypeScript. **On
+  today's data it reads "Invented for this project — not any real game" or
+  "Nobody recorded where these numbers were read", and that is the feature
+  working** — there is still no first-hand fact in this repository (**N27**).
 - **An edit made in a tunnel has now survived one, and lost a merge on purpose.**
   The offline outbox is the client half of N23: an edit is stamped when the
   player types, held per profile and per key, and flushed with **PATCH and never
@@ -48,12 +57,10 @@ being finished with is.
   lost to a newer one and **said which key lost**. That is
   [ADR 0014](docs/adr/0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md)'s
   tiebreak with real clocks on both sides for the first time.
-- **CSRF is `SecurityConfig.browserCsrf` — resolved eagerly, shared by both
-  filter chains — and it must stay that way.** The deferred default issues no
-  cookie, so every browser write was refused for two phases while every test
-  passed: MockMvc's `csrf()` supplied the thing that was missing.
-  [The full account](docs/history/tracker-archive.md#session-log) is in the
-  fifteenth session.
+- **CSRF is `SecurityConfig.browserCsrf`, resolved eagerly and shared by both
+  filter chains — do not change it back.** Why, and the two phases of green
+  builds it hid behind, are in
+  [the fifteenth session](docs/history/tracker-archive.md#session-log).
 - **The project is going first-hand on game data**, decided 2026-09-09 —
   [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md),
   superseding 0009 on its conclusion and closing **Q2, Q3, F1 and F2** at once.
@@ -104,31 +111,29 @@ being finished with is.
   [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md) says
   that data will not ship. **Read this before Phase 6 tightens a rule over
   anything already published.**
-- **The remote, checked 2026-09-11 — re-check it, do not trust it.** **`main` is
-  still `19197d3`**, which is N24: nothing has merged since, and
-  [PR #17](https://github.com/kietnt4412/storm_almanac/pull/17) — last session's
-  tracker commits — **was still open at the start of this session**, so N25 is
-  stacked on top of it on the same `dev` branch and the same PR carries both; its
-  title and body were rewritten to say so. **N25 is green there: run
-  `34593442639`**, 0 failed, 16 skipped — the three snapshot-gated classes again.
+- **The remote, checked 2026-09-11 (seventeenth session) — re-check it, do not
+  trust it.** **PR #17 is merged and `main` is `92c29cf`**, which carries N25's
+  screens and last session's tracker. **`gh pr list` was empty at the start of
+  this session**, which is the dangerous state rather than the clean one: see the
+  trap two sentences down. N25 was green on that PR as run `34593442639` — 0
+  failed, 16 skipped, the three snapshot-gated classes again.
   **Counting PASSED lines in a CI log undercounts**, and it caught a session out
   here: `:modules:identity:test` came back `FROM-CACHE` and printed nothing, so
   `SignInTest`'s 7 results are in the green and not in the log.
-  N24's tree was green on the push to `main` as run `34327808367`, and as run
-  `34327487736` on the PR — 0 failed, 16 skipped, exactly the three
-  snapshot-gated classes (8 + 5 + 3). Phrased without a commit count on purpose,
-  because a line that names the commit describing it is stale the moment it is
-  written, which happened twice on 2026-09-09. This is a fact here rather than a next action because six sessions
+  Phrased without a commit count on purpose, because a line that names the commit
+  describing it is stale the moment it is written, which happened twice on
+  2026-09-09. This is a fact here rather than a next action because six sessions
   running have now opened on a "merge PR #n" the maintainer had already clicked.
   **`DeployableJarTest` passed on the runner**, so the development sign-in's
   absence is proven against a jar CI built from a clean checkout rather than only
   one this machine did. The guard travels with the pipeline.
-  **The trap fired twice in one session.** CI runs on `pull_request` and on push
+  **The trap has now fired three times.** CI runs on `pull_request` and on push
   to `main` only, so **a push to `dev` with no open PR runs nothing, silently.**
-  PR #15 had been merged before the first push, and PR #16 was merged during the
-  second. Both were caught by looking, not by anything failing. **Open the PR
-  before trusting a push to `dev`, and check `gh pr list` rather than assuming
-  last session's PR is still open.**
+  PR #15 had been merged before one push, PR #16 during another, and **PR #17
+  before this session started** — every time leaving `dev` with no open PR and
+  therefore no pipeline. All three were caught by looking, not by anything
+  failing. **Open the PR before trusting a push to `dev`, and check
+  `gh pr list` rather than assuming last session's PR is still open.**
 - **The optimizer has been asked a question by something other than a test.**
   What has *not* happened is a real OAuth exchange: no provider is configured and
   no client secret exists, so login is installed only when one is. The
@@ -190,13 +195,15 @@ Rules that keep this file honest:
   document. **Keep it under about 550 lines** — roughly what a session can read
   before starting work. If a session adds more than it removes, it has moved the
   problem rather than done the work.
-  **It is over that now: ~750 lines as of 2026-09-11, and the sixteenth session
-  is why.** Two Status bullets and two table rows were compressed against it and
-  that was not enough to pay for what N25 added. **The next session to touch this
-  file should move something out before it adds anything**, and the best
-  candidates are in [what is still unverified](#what-is-still-unverified): several
-  entries there qualify work that finished phases ago and belong beside their
-  phase in the archive.
+  **Still well over: 759 → 740 on 2026-09-11.** The seventeenth session moved
+  eight closed-phase qualifications out — the candidates the sixteenth named —
+  before adding anything, which is the rule, and it removed more than it added
+  while closing an action and shipping a feature. **It is a down payment and not
+  a fix**, and saying so beats rounding it down.
+  **The debt is not paid.** The next candidates are the *Current state* table,
+  whose rows for closed phases have grown into paragraphs, and the Status bullets
+  about CSRF and about the unreadable published version — both are lessons rather
+  than live state, and a lesson belongs in the archive with its session.
 
 ---
 
@@ -207,8 +214,9 @@ game data pipeline that works end to end, an API that serves it, a real game's
 data going through all of it, an optimizer that turns that data into a plan, a
 reason to believe the plan, an account that can own one and be refused somebody
 else's, two of that account's devices that can edit what it owns without deleting
-each other's work, and — since this session — a browser that has actually loaded
-a page of it.
+each other's work, a browser that has actually loaded a page of it, and — since
+this session — a page that says where its numbers were read, a suite that tests
+the screens, and an app that still renders with its server switched off.
 
 **The load-bearing claim — and it is now a number to re-earn.** On **nine**
 benchmark materials the cheapest stage this project computes is the stage a
@@ -239,12 +247,12 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **274 tests**, 0 failed, 0 skipped locally with snapshots present. **258 on CI**, because the same 16 snapshot-gated ones skip. `:app:test` now depends on `:app:bootJar` — `DeployableJarTest` reads the artifact. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
+| Backend build | **Green** | **277 tests**, 0 failed, 0 skipped locally with snapshots present. **261 on CI**, because the same 16 snapshot-gated ones skip. `:app:test` now depends on `:app:bootJar` — `DeployableJarTest` reads the artifact. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
 | CI workflow | **Green** | Latest is run `34327487736` on `dev` (PR #16); see *Status* for the remote, checked rather than trusted. **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. Action deprecations pending — **N5** |
 | Game data pipeline (Phase 1) | **Closed and stable** | Model, schema, ingest, diff and CLI, [in full in the archive](docs/history/tracker-archive.md#closed-phases-in-full). `V2`–`V4`, 28 tables, seven invariants proven on two real R1999 patches; parser and writer pinned by a round trip (ADR 0008); publishing is a human approval, not a flag. `Drop` carries `sampledRuns`, where 0 means *declared* |
 | Parser adapters | **One — and demoted to a cross-check by [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md), now in code** | `:adapters:reverse-1999`, 25 tests. **Its output is no longer what the product will ship**, and since ADR 0016 it hard-codes `THIRD_PARTY` provenance and cannot be told otherwise, so it fails a plain `publish` — there is no call site to launder data through. Kept, not deleted: diffing the first self-sourced bundle against an independent reading of the same patch is worth more as a check than it ever was as a source |
-| Provenance | **Done — written, enforced, not yet read back out** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). A bundle declares `Provenance` records, defaults every fact to one (`sourcedBy`) and overrides per `FactRef` (`kind:slug`); `V7` materialises **one row per declared fact**, because a default is an authoring convenience and a database that stored it could not answer the question alone. **`publish` refuses a version that is not first-hand and names the facts**; `publish(…, true)` and the CLI's `second-hand` word are the explicit exception. The first-hand policy lives in `Provenance.Origin` and nowhere else — the migration constrains the set and says nothing about which count. **Silence parses and cannot publish** (`UNRECORDED`). **Still nothing serves it** — N25 built the catalog page and did not do this half, so it stays owed |
-| Game data API | **Served and verified** | **Seven** game-data routes plus health, version-pinnable, every response carrying its version and attribution. 12 HTTP tests plus a hand check against `docker compose up`. Two arrived with N25 and both existed because every read before them started from a slug the caller already had: `GET /api/games` is the **index** — without it a reader with no account and no slug could reach the public catalog only by guessing a URL — and `GET /api/games/{game}/items` is **the vocabulary an inventory is written in**, which reached a client only as resolved names inside a cost until something had to render a few hundred quantities |
+| Provenance | **Done — written, enforced, and now read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). A bundle declares `Provenance` records, defaults every fact to one (`sourcedBy`) and overrides per `FactRef` (`kind:slug`); `V7` materialises **one row per declared fact**, because a default is an authoring convenience and a database that stored it could not answer the question alone. **`publish` refuses a version that is not first-hand and names the facts**; `publish(…, true)` and the CLI's `second-hand` word are the explicit exception. The first-hand policy lives in `Provenance.Origin` and nowhere else — the migration constrains the set and says nothing about which count. **Silence parses and cannot publish** (`UNRECORDED`). **Served since 2026-09-11**: `ProvenanceRepository` is a *second* port, not a field on `GameDefinition`, so the solver still cannot see where a number came from and be made to prefer one. Four responses carry `sourcing`, and `firstHand` travels as an answer rather than being re-derived in TypeScript |
+| Game data API | **Served and verified** | **Seven** game-data routes plus health, version-pinnable, every response carrying its version and attribution — and, since 2026-09-11, the four that carry facts also carry **where each fact was read**. 15 HTTP tests plus a hand check against `docker compose up`. Two arrived with N25 and both existed because every read before them started from a slug the caller already had: `GET /api/games` is the **index** — without it a reader with no account and no slug could reach the public catalog only by guessing a URL — and `GET /api/games/{game}/items` is **the vocabulary an inventory is written in**, which reached a client only as resolved names inside a cost until something had to render a few hundred quantities |
 | Demand resolution | **Done** | Goals + roster + upgrade graph → a demand vector, walking the DAG backwards. Refuses by name rather than guessing: unreachable states, unknown entities, probabilistic goals, ambiguous routes |
 | The MIP (`EnergyMip`) | **Done for stages, crafts and rewards** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. **No shops and no fodder**; items sourced only from those are refused by name |
 | The time axis | **Done — as a scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). An energy cap, cadence counts, and rotation as a capacity shared over *subsets* of distinct weekday restrictions. **No variable is indexed by day**, which is why the p95 survived: 1 805 → **1 807 ms**. Proven on the fixture; the real upstream declares nothing time-varying |
@@ -264,7 +272,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Architecture tests | **Passing** | `ModuleBoundaryTest` (Track B layers optional until they exist) and `GameAgnosticismTest` (source scan over planner/gacha/stats) |
 | Docker Compose | **Repaired 2026-09-09, and no image has ever been built end to end** | The Dockerfile had never learned about `adapters/`; the fixed tree builds the jar locally and that jar contains no development sign-in. **The image itself is still unproven** — the in-container Gradle download was abandoned at 10% after twenty minutes, so `up --build` has not completed. See the COPY-list warning in *Status* |
 | Development sign-in | **Done, and absent from the artifact** | [ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md). `:modules:identity-dev` is `testAndDevelopmentOnly` on `:app` — on `bootRun` and the test classpath, **excluded from `bootJar`**, so no property or profile can reach it. `GET /dev/sign-in?as=<name>` mints an ordinary `AuthenticatedAccount` through the same `upsertFromOidc` the OAuth services use; its filter chain lives in that module, so `SecurityConfig` has no hook for it. `DeployableJarTest` opens the jar and proves the absence on every build. The frontend picks its sign-in URL behind `import.meta.env.DEV`, and the production bundle was checked for the string: **zero occurrences** |
-| Frontend | **Five screens, driven in a browser** | Inventory editor (bulk entry: filtered, grouped by the game's own categories, Enter walks the column, **no save button** — a typed number is a queued edit), goal picker (ordered, targets read off the upgrade graph, roster edited where the goal is), plan view (stages, crafts, claims, shadow prices and **every one of the solver's notes**, because a plan rendered without them is a confident number hiding a gap), catalog browse and search, and the character page with the **personalized overlay**. Routing is react-router; the game is in the URL for the catalog and nowhere else, because a catalog page is the one thing here somebody sends a link to. **Not one frontend test exists** — everything was verified by driving a browser, which is how four defects were found and is also evidence CI will never have. `npm run dev --prefix frontend` (`.claude/launch.json`, which now also carries `api`) proxies `/api` **and `/dev`** to `localhost:8080`, so local is same-origin. The sign-in URL is chosen behind `import.meta.env.DEV`, so the development one is not in a production bundle |
+| Frontend | **Five screens, driven in a browser, and 15 tests** | Inventory editor (bulk entry: filtered, grouped by the game's own categories, Enter walks the column, **no save button** — a typed number is a queued edit), goal picker (ordered, targets read off the upgrade graph, roster edited where the goal is), plan view (stages, crafts, claims, shadow prices and **every one of the solver's notes**, because a plan rendered without them is a confident number hiding a gap), catalog browse and search, and the character page with the **personalized overlay**. Routing is react-router; the game is in the URL for the catalog and nowhere else, because a catalog page is the one thing here somebody sends a link to. Both catalog pages now end in **where their numbers were read** rather than one grey credit line. **15 vitest/jsdom tests run in CI** — see the unverified list for what they deliberately do not cover. `npm run dev --prefix frontend` (`.claude/launch.json`, which now also carries `api` and **`web-built`**, the built bundle on 4173 that the offline test needs) proxies `/api` **and `/dev`** to `localhost:8080`, so local is same-origin. The sign-in URL is chosen behind `import.meta.env.DEV`, so the development one is not in a production bundle |
 | `gacha`, Track B | **Empty** | Interfaces and package docs. Track B is [gated](#the-gate) |
 
 ### What is still unverified
@@ -313,35 +321,42 @@ works". It does not mean that:
   that a hit is 900× cheaper than a solve. Hit *rate* depends on whether two
   players ever ask the same question, which needs users. The counters are there
   so that this stays a measurement rather than a belief.
-- **The benchmark is one guide.** Written for patch 2.7 against a 3.3 sample, and
-  it answers "which stage for this material" rather than "what should I do this
-  week". A second independent source would turn "agrees with the community" from
-  a claim into a measurement. The agreement is also on the stage *ranking*, which
-  is arithmetic on the data — **the search itself is still checked only against
-  itself.**
-- **Two large disagreements with the community survive the sample-size fix**, on
-  105 and 113 runs. A 95% bound discounts a thin sample in proportion; it does
-  not rescue you from one. Those belong to the evidence, not the model, and the
-  fix is more sampling — see **Q2**.
 - **Nothing is deployed.** By decision — [D1](#d1--deployment-deferred-2026-09-02).
   The `deploy` job is `if: false` and there is no URL to smoke.
-- **The PWA is installable and has never been loaded offline.** N25 proved
-  offline *editing* — the outbox survives a network that refuses — which is a
-  different claim from the app shell rendering with no server at all. The service
-  worker's runtime-caching rule was also repaired this session: it named
-  `/api/catalog/`, a prefix this API has never served, and anchored it with `^`,
-  which cannot match a full request URL. It was invisible because nothing read
-  from the cache, and it is still unproven because nothing has read from it yet.
-- **The frontend has five screens and no tests.** Every claim about them comes
-  from a session driving a real browser — which found four defects a typecheck
-  could not (a store selector that re-rendered forever, a focus order that was
-  not the order rows are drawn in, a goal screen that could not express the base
-  of a track, and `display: block` folding every table header into a column) and
-  is exactly the kind of evidence that does not survive into CI. **Nothing in the
-  pipeline renders a component.** *(The earlier "never served", "no authenticated
-  page" and "one page that signs in" entries, and the defects retiring each of
-  them turned up, are in
+- ~~**The PWA is installable and has never been loaded offline.**~~ **Loaded
+  offline 2026-09-11**, and the way it was tested is the reason to believe it:
+  the built bundle was served, the service worker allowed to precache, and then
+  **the origin server was killed** — `curl` refused — and a *deep* route
+  reloaded. The shell rendered, the navigation fallback resolved
+  `/catalog/proving-ground` to the precached `index.html`, and the catalog list
+  rendered from the `game-data` runtime cache. Not a CDP offline flag: the server
+  was actually gone. **It needs the built bundle** (`preview_start` on the
+  `web-built` config, port 4173), because the dev server has no worker worth the
+  name. **What is still unproven is an offline *write path* end to end** — the
+  outbox was proven against a refusing network, not against a dead origin on a
+  cold start.
+- **The frontend has 15 tests, and one class of defect they will never catch.**
+  Vitest and Testing Library in jsdom, wired into CI — the decision N25 asked for,
+  argued beside the config in `vite.config.ts`. The argument is the four defects
+  a browser found: three were behaviour and a component test catches them (the
+  re-rendering store selector is now pinned by a test **verified to fail** with
+  React's own "Maximum update depth exceeded" when the defect is put back), and
+  the fourth was `display: block` folding a table header, which **jsdom will
+  never catch because it computes no layout**. So: behaviour is the pipeline's,
+  appearance is a person's. **Driving a browser before shipping a screen is still
+  required**; what it no longer has to do is re-check the behavioural half by
+  hand. *(The earlier "never served", "no authenticated page" and "one page that
+  signs in" entries, and the defects retiring each of them turned up, are in
   [the session log](docs/history/tracker-archive.md#session-log).)*
+- **A new page and an old API do not deploy at the same instant, and the first
+  time that happened the page rendered as nothing.** Found by a browser on
+  2026-09-11: the freshly built bundle read a response from a backend that
+  predated `sourcing` and threw before React painted anything. Fixed, and the
+  wire types now mark the field optional so the compiler points at every call
+  site that has to cope. **This is B5's problem in miniature** — Vercel and Render
+  are separate hosts and every release has a window like it — and the lesson is
+  wider than one field: a client that treats a new response field as guaranteed
+  is a client that blanks its own page on every deploy.
 - **Nothing has ever run against a jar built from a Dockerfile that works.** The
   image build was repaired this session and the compose stack has not been stood
   up end to end since. The **absence** of the development sign-in from that jar
@@ -349,47 +364,26 @@ works". It does not mean that:
 - **Nothing has ever called the API under load.** Every request loads a whole
   version — fifteen queries — a deliberate deferral written into
   `GameDataReadModel`'s javadoc. The number to beat does not exist yet.
-- **The time axis has never met real data, and on this game it never will.**
-  Rewards, rotation and shops are modelled or refused on the synthetic fixture
-  alone, and on the real 3.5 patch the whole of N14 reduces to one energy row.
-  **Do not read "the optimizer has a calendar" as "the optimizer schedules real
-  weeks."** This is not the upstream being silent: **R1999 has no weekday
-  rotation at all**, so `Availability.ALWAYS` is *correct*, and its daily income
-  **is conditional on spending Activity**, so entering it as a `Reward` would make
-  every plan systematically too cheap. The rotation machinery waits for a game
-  that rotates — Phase 11 is the next chance. See
-  [the economy facts](docs/game-facts/reverse-1999-economy.md).
-- **Three shapes the model cannot express**, each a *silent* wrong answer if
-  faked, none a defect in what shipped: **an item that restores energy**
-  (`Stage` is the only source touching the budget and only ever consumes),
-  **a reward conditional on spending energy**, and **a lifetime purchase limit**
-  (`Shop` caps at "n per `Period`", not "five, ever"). Examples and provenance in
-  [the economy facts](docs/game-facts/reverse-1999-economy.md).
-- **The adapter converts less than the upstream publishes** — no shop offers, no
-  alternative resonance-pattern costs, no unreleased content — each with a reason
-  in `KornblumeAdapter`'s javadoc. That sentence is only reassuring when somebody
-  has checked what it converts against what the upstream actually *reads*; the
-  last time nobody had, two thirds of the game was missing.
-- **No skills or talents have ever been ingested from a real upstream.** The
-  catalog axis is proven end to end on the synthetic fixture only, because
-  Kornblume publishes no skill text. An upstream gap, not a defect — but do not
-  let the phase board imply otherwise.
-- **The pipeline has met one upstream, not two.** The second game is Phase 11 and
-  is where the abstraction is actually tested.
+- **Eight qualifications of the closed phases moved to
+  [the archive](docs/history/tracker-archive.md#qualifications-moved-out-of-the-live-tracker-2026-09-11-seventeenth-session)
+  on 2026-09-11** — the benchmark being one guide, the two large community
+  disagreements, the three shapes the model cannot express, what the adapter does
+  not convert, the never-ingested skill text, one upstream rather than two, and
+  `gacha` having no behaviour. All still true; none of them bears on a next
+  action. **Read them before re-opening Phase 1, 2 or 11.**
 - **No fact in this repository has ever been sourced first-hand**, and ADR 0016
   did not change that. The only bundles that pass its gate are the synthetic
   fixtures, passing by declaring `AUTHORED_FIXTURE` — honest, and evidence of
   nothing about a real game. **Every Reverse: 1999 number in this file still
   comes from Kornblume.** The gate is what will stop that shipping; it is not
   progress on replacing it (**N27**).
-- **Provenance is written and never read, and the excuse for that has expired.**
-  The publish gate queries it; no API response carries it. It was waiting on a
-  catalog page to be a claim a reader could check — **and the catalog page exists
-  now** (N25, 2026-09-11) with the numbers on it and nothing saying where they
-  came from. Still owed on [N25's line](#next-actions).
-- **`gacha` has no behaviour.** Every port in it is an interface with nothing
-  behind it.
-
+- ~~**Provenance is written and never read.**~~ **Read back 2026-09-11.** Four
+  catalog responses carry a `sourcing` block and both catalog pages render it.
+  **What it says today is the uncomfortable part and it is supposed to be:** on
+  the fixture it reads *"Invented for this project — not any real game"*, and on
+  a version published before ADR 0016 it reads *"Nobody recorded where these
+  numbers were read"*. That is the feature working. It becomes a claim worth
+  making only when **N27** puts a real reading behind it.
 ---
 
 ## Next actions
@@ -414,25 +408,10 @@ Ordered. Completed ones move to
       [authoring a first-hand bundle](docs/game-facts/authoring-a-first-hand-bundle.md).
       **Cheapest first read: the summon rules screen**, which closes the live half
       of **Q4** and is `PUBLISHER_DISCLOSURE` rather than a sample.
-- [ ] **N25 — Phase 4's screens. Mostly landed 2026-09-11; three named pieces
-      are not.** The five screens exist and a browser has driven all of them —
-      inventory editor, goal picker, plan view, catalog browse and search, and
-      the character page with the personalized overlay, which is **Phase 4's
-      second exit clause served**. The client half of N23 landed with them. What
-      it still owes, and the reason the box is unticked:
-      1. **Provenance is still written and never read.** No response carries it
-         and no page shows it (ADR 0016). It belongs on the catalog page, beside
-         the numbers it is a claim about, and it is the difference between "our
-         data" as a README sentence and as something a reader can check.
-      2. **The PWA has never been loaded offline.** Offline *editing* is proven;
-         the app shell rendering against no server is not, and needs the built
-         bundle served rather than the dev server.
-      3. **There is not one frontend test.** Four defects this session were found
-         by driving a browser and would not have been found by anything CI runs.
-         Decide deliberately what the pipeline should assert about a screen — a
-         component test, a smoke test against the built bundle, or explicitly
-         neither — rather than leaving it to the next session's judgement.
-      **The exit criterion is not N25's to meet:** five strangers completing a
+- [x] **N25 — Phase 4's screens. Closed 2026-09-11** (screens on the sixteenth
+      session, the three named debts on the seventeenth).
+      [In full in the archive](docs/history/tracker-archive.md#completed-next-actions).
+      **The exit criterion was never N25's to meet:** five strangers completing a
       plan needs a deployment, which is **B5**.
 - [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
       `EnergyMip.matchingDays` reads weekdays in **UTC** — a game assumption in a
@@ -519,11 +498,12 @@ a session would be wrong not to read.
 
 - [ ] **Phase 4 · Frontend v1 — and launch** — 2.5 weeks — **OPEN 2026-09-09.**
       Landed so far: the app is served, hosting is decided (Vercel + Render, D1
-      reversed), a browser has signed in (N24, ADR 0017), and **the five screens
-      exist and have been driven in one** (N25, 2026-09-11) — including the
-      overlay, which is the second half of the exit below. Nothing is deployed,
-      so the first half is untouched; three pieces of N25 are still owed and are
-      named on [its line](#next-actions).
+      reversed), a browser has signed in (N24, ADR 0017), and **N25 is closed** —
+      the five screens driven in a browser including the overlay, which is the
+      second half of the exit below; provenance read back onto the page; the PWA
+      loaded with its server killed; and a frontend test suite in CI. **Nothing
+      is deployed, so the first half of the exit is untouched, and B5 is now the
+      only thing between this phase and its criterion.**
       Inventory editor built for fast bulk entry, goal picker, plan view with
       per-stage breakdown, offline PWA. Plus catalog browse and search with the
       personalized overlay on every character page — that overlay is the whole
@@ -575,7 +555,7 @@ rather than the paragraphs the live phases get.
 
 | | Phase | Shape | **Exit** |
 |---|---|---|---|
-| [ ] | **11 · Punishing: Gray Raven**, 2w | Data adapter, banner model, fodder economics, probabilistic goals. Whatever has to generalise, generalise in the model. **Now also costs first-hand sourcing** (ADR 0015), and **N20** lands here | PGR live with **zero game-specific code** in `planner`, `gacha` or `stats` — and the diff to prove it |
+| [ ] | **11 · Punishing: Gray Raven**, 2w | Data adapter, banner model, fodder economics, probabilistic goals. Whatever has to generalise, generalise in the model. **Now also costs first-hand sourcing** (ADR 0015), and **N20** lands here. **The time axis has never met real data and on R1999 never will** — do not read "the optimizer has a calendar" as "it schedules real weeks"; this is the first game that could rotate ([why](docs/history/tracker-archive.md#qualifications-moved-out-of-the-live-tracker-2026-09-11-seventeenth-session)) | PGR live with **zero game-specific code** in `planner`, `gacha` or `stats` — and the diff to prove it |
 | [ ] | **12 · Hardening and the writeups**, 1w | Tracing, alerting, a backup actually restored from, a load test with published numbers, pre-rendered catalog pages | Restore drill completed from a real backup; catalog pages indexed; three writeups published — the storage benchmark, the consensus verification, the multi-game diff |
 
 ---
@@ -740,6 +720,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-11 | seventeenth | **N25's three debts paid, so it closes.** Provenance is read back out through a *second* port — the solver still cannot see it — and both catalog pages now say where their numbers were read, which on today's data reads "invented for this project" or "nobody recorded it", and that is the feature working. The PWA was loaded with **the origin server killed** rather than with a flag flipped. The frontend gets 15 tests and a written argument for what they are and are not for. A browser found one more defect on the way: a new bundle reading an old API's response **blanked the whole page**, which is B5's two-host deploy window in miniature. 277 backend tests, 15 frontend |
 | 2026-09-11 | sixteenth | N25: the five screens exist and a browser has driven all of them — and **a logged-in character page now says what that reader is short of**, which is half of Phase 4's exit. The offline outbox gives N23's merge a second real clock: a stale edit lost on purpose and the interface named the key. Three routes were missing underneath (`/api/games`, `/items`, `/shortfall`) and four defects turned up that only a browser could find. Owed: provenance read-back, an offline *load*, and any frontend test at all. 274 tests |
 | 2026-09-09 | fifteenth | N24: a browser signs in, reads its account, creates a profile and signs out. The way in is a Gradle module the deployable jar does not contain — **[ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md)**, absence rather than configuration, with `DeployableJarTest` reading the artifact to prove it. On its first run it found a defect two phases old: **the CSRF cookie was never issued**, so any browser's first write would have been refused. Also the first authenticated request over a socket, and a Dockerfile broken since Phase 1. 264 tests locally, CI-confirmed on run `34327487736` |
 | 2026-09-09 | fourteenth | N26 answered and the answer was no — the game grades a drop `Fixed`/`Common`/`Possible` and prices only the first, so 764 of 779 drop facts still have to be counted; gacha rates *are* disclosed, which is half of Q4. Then N27 split in two: the authoring is the maintainer's by ADR 0015's own integrity rule, so the session built the mechanism instead — **[ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md), provenance is a field and `publish` enforces it**. 257 tests, 0 failed, 0 skipped locally |
