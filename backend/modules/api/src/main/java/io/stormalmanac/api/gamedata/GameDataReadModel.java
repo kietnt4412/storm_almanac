@@ -9,6 +9,10 @@ import io.stormalmanac.api.gamedata.GameDataView.EntitiesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntityResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntitySummaryView;
 import io.stormalmanac.api.gamedata.GameDataView.EntityView;
+import io.stormalmanac.api.gamedata.GameDataView.GameSummaryView;
+import io.stormalmanac.api.gamedata.GameDataView.GamesResponse;
+import io.stormalmanac.api.gamedata.GameDataView.ItemView;
+import io.stormalmanac.api.gamedata.GameDataView.ItemsResponse;
 import io.stormalmanac.api.gamedata.GameDataView.RankView;
 import io.stormalmanac.api.gamedata.GameDataView.RarityView;
 import io.stormalmanac.api.gamedata.GameDataView.SkillView;
@@ -33,6 +37,7 @@ import io.stormalmanac.gamedata.catalog.Skill;
 import io.stormalmanac.gamedata.catalog.StatCurve;
 import io.stormalmanac.gamedata.catalog.Talent;
 import io.stormalmanac.gamedata.diff.VersionDiff;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +76,24 @@ public class GameDataReadModel {
     }
 
     /**
+     * Every game this installation has published something for.
+     *
+     * <p>The one route here that is not about a game, and the only way into the
+     * catalog for a reader who does not already know a slug. An empty list is a
+     * 200: "this installation has published nothing yet" is a true answer about
+     * something that exists, unlike a request for a game nobody has heard of.
+     */
+    public GamesResponse games() {
+        return new GamesResponse(definitions.publishedGames().stream()
+                .map(published -> new GameSummaryView(
+                        published.game().id().value(),
+                        published.game().displayName(),
+                        published.game().energyUnit(),
+                        version(published.version())))
+                .toList());
+    }
+
+    /**
      * Every published version of a game, newest first.
      *
      * <p>A game with nothing published is a 404 rather than an empty list. The
@@ -93,6 +116,36 @@ public class GameDataReadModel {
                 game.value(),
                 version(data.version()),
                 data.entities().stream().map(GameDataReadModel::summary).toList());
+    }
+
+    /**
+     * Every item in one version: the vocabulary an inventory is written in.
+     *
+     * <p>Added with phase 4's inventory editor and not before it, which is the
+     * honest order — until something had to render a few hundred quantities,
+     * items appeared on the wire only as the resolved names inside a cost, and a
+     * route returning a list nobody listed would have been a guess about what a
+     * client wanted. A bulk editor is the client that wants it: it needs the
+     * whole list, sorted, before the player has typed anything.
+     */
+    public ItemsResponse items(GameId game, Long sequence) {
+        GameDefinition data = load(game, sequence);
+        return new ItemsResponse(
+                game.value(),
+                version(data.version()),
+                data.items().stream()
+                        // Rarest first, then by name. An inventory screen is read
+                        // top-down and the expensive materials are the ones a
+                        // player is actually counting.
+                        .sorted(Comparator.comparingInt((Item item) -> item.rarity().rank())
+                                .reversed()
+                                .thenComparing(Item::displayName))
+                        .map(item -> new ItemView(
+                                item.id().value(),
+                                item.displayName(),
+                                rarity(item.rarity()),
+                                item.category()))
+                        .toList());
     }
 
     /** One catalog page: stat curves, skills and their ranks, talents. */

@@ -6,6 +6,8 @@ import io.stormalmanac.api.gamedata.GameDataView.CostView;
 import io.stormalmanac.api.gamedata.GameDataView.DiffResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntitiesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntityResponse;
+import io.stormalmanac.api.gamedata.GameDataView.GamesResponse;
+import io.stormalmanac.api.gamedata.GameDataView.ItemsResponse;
 import io.stormalmanac.api.gamedata.GameDataView.RankView;
 import io.stormalmanac.api.gamedata.GameDataView.UpgradeStepView;
 import io.stormalmanac.api.gamedata.GameDataView.UpgradesResponse;
@@ -119,6 +121,62 @@ class GameDataApiTest extends SharedDatabaseTest {
         assertThat(catalog.version().publishedAt()).isNotNull();
         assertThat(catalog.entities()).extracting("id").containsExactly("warden", "amulet-ember");
         assertThat(catalog.entities()).extracting("kind").containsExactly("character", "equipment");
+    }
+
+    @Test
+    @DisplayName("a reader with no slug and no account can still find a game to read")
+    void listsTheGamesWithSomethingPublished() {
+        // The way in. Every read before phase 4 started from a slug the caller
+        // already had, so a stranger arriving from a search had to guess a URL —
+        // which is not a thing five strangers completing a plan would survive.
+        publish("proving-ground-1.0.json");
+        publish("proving-ground-1.1.json");
+
+        GamesResponse games = ok(http.getForEntity("/api/games", GamesResponse.class));
+
+        assertThat(games.games()).singleElement().satisfies(game -> {
+            assertThat(game.id()).isEqualTo("proving-ground");
+            assertThat(game.displayName()).isEqualTo("The Proving Ground");
+            // The game's own word for energy, so a form can ask for it in the
+            // noun the player reads on their own screen.
+            assertThat(game.energyUnit()).isEqualTo("Vigour");
+            // The version a reader lands on is the newest published one, not the
+            // first, and it is attributed like every other answer.
+            assertThat(game.latest().label()).isEqualTo("1.1");
+            assertThat(game.latest().attribution()).isNotBlank();
+        });
+    }
+
+    @Test
+    @DisplayName("a game with nothing published is not on the index")
+    void draftsAreNotAnIndexEntry() {
+        // Same rule as every other read here: a draft has been fetched, not
+        // approved, and an index that listed one would advertise data nobody
+        // agreed to publish.
+        ingest.ingestDraft(bundle("proving-ground-1.0.json"));
+
+        assertThat(ok(http.getForEntity("/api/games", GamesResponse.class)).games()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("the item list is served rarest first, which is the order an inventory is counted in")
+    void servesTheVocabularyAnInventoryIsWrittenIn() {
+        // An inventory is a map of item slugs, and until phase 4 nothing served
+        // the list those slugs come from: items reached a reader only as the
+        // resolved name inside a cost. A bulk editor cannot be built on that.
+        publish("proving-ground-1.0.json");
+
+        ItemsResponse items = ok(http.getForEntity("/api/games/proving-ground/items", ItemsResponse.class));
+
+        assertThat(items.version().label()).isEqualTo("1.0");
+        // Rarest first, and inside a rarity by the name that is rendered rather
+        // than the slug that is stored — "Ember Shard", "Lesser Sigil",
+        // "Refined Ore" — because the order is for the eye reading the column.
+        assertThat(items.items()).extracting("id")
+                .containsExactly("sigil-greater", "shard", "sigil-lesser", "ore-refined", "ore-rough", "gold");
+        assertThat(items.items().get(0).displayName()).isEqualTo("Greater Sigil");
+        assertThat(items.items().get(0).rarity().rank()).isEqualTo(4);
+        assertThat(items.items().get(0).category()).isEqualTo("insight");
     }
 
     @Test
@@ -278,7 +336,12 @@ class GameDataApiTest extends SharedDatabaseTest {
         // The cost is not cosmetic: a client reads 401 as a dead session and
         // acts on it by sending the reader to a login page, so a catalog link
         // that has gone stale would log people out instead of 404ing.
-        assertThat(http.getForEntity("/api/games", String.class).getStatusCode())
+        //
+        // This asked for /api/games until phase 4, when that became the game
+        // index and started answering 200. The example moved rather than the
+        // assertion: what is under test is the forward to /error from inside the
+        // public prefix, and any path in it that nothing serves proves it.
+        assertThat(http.getForEntity("/api/games/proving-ground/nothing-here", String.class).getStatusCode())
                 .isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(http.getForEntity("/api/games/no-such-game", String.class).getStatusCode())
                 .isEqualTo(HttpStatus.NOT_FOUND);

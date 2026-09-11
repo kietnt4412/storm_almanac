@@ -3,6 +3,7 @@ package io.stormalmanac.api.gamedata;
 import io.stormalmanac.api.gamedata.GameDataView.DiffResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntitiesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntityResponse;
+import io.stormalmanac.api.gamedata.GameDataView.ItemsResponse;
 import io.stormalmanac.api.gamedata.GameDataView.UpgradesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.VersionsResponse;
 import io.stormalmanac.common.id.EntityId;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <pre>
  * GET /api/games/{game}/versions
  * GET /api/games/{game}/entities                    [?version=N]
+ * GET /api/games/{game}/items                       [?version=N]
  * GET /api/games/{game}/entities/{entity}           [?version=N]
  * GET /api/games/{game}/entities/{entity}/upgrades  [?version=N]
  * GET /api/games/{game}/diff?from=N&amp;to=M
@@ -61,6 +63,12 @@ public class GameDataController {
     @GetMapping("/entities")
     public EntitiesResponse entities(@PathVariable String game, @RequestParam(required = false) Long version) {
         return readModel.entities(new GameId(game), version);
+    }
+
+    /** "What is in the bag?" — the list an inventory is entered against. */
+    @GetMapping("/items")
+    public ItemsResponse items(@PathVariable String game, @RequestParam(required = false) Long version) {
+        return readModel.items(new GameId(game), version);
     }
 
     /** "What does her S2 do at rank 3?" — one half of the phase's exit criterion. */

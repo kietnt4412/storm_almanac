@@ -8,6 +8,7 @@ import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.GameDefinitionRepository;
+import io.stormalmanac.gamedata.GameDefinitionRepository.PublishedGame;
 import io.stormalmanac.gamedata.ingest.CanonicalBundleParser;
 import io.stormalmanac.gamedata.ingest.CanonicalBundleWriter;
 import io.stormalmanac.gamedata.ingest.GameDataBundle;
@@ -122,6 +123,11 @@ final class RealUpstream {
         @Override
         public List<GameDataVersion> versions(GameId game) {
             return List.of(definition.version());
+        }
+
+        @Override
+        public List<PublishedGame> publishedGames() {
+            return List.of(new PublishedGame(definition.game(), definition.version()));
         }
     }
 

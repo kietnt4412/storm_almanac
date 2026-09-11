@@ -113,6 +113,37 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
                 game.value());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<PublishedGame> publishedGames() {
+        // DISTINCT ON rather than a group-by with a second lookup: one row per
+        // game, and the row is the newest published version of it. Postgres
+        // orders inside the group, so the "newest" here is the same definition
+        // of newest that findLatest uses rather than a second one that could
+        // drift from it.
+        return jdbc.query(
+                """
+                SELECT DISTINCT ON (v.game_id)
+                       v.game_id, v.sequence, v.label, v.published_at, v.attribution,
+                       g.display_name AS game_name, g.energy_unit
+                  FROM gamedata.game_data_version v
+                  JOIN gamedata.game g ON g.id = v.game_id
+                 WHERE v.status = 'PUBLISHED'
+                 ORDER BY v.game_id, v.sequence DESC
+                """,
+                (rs, row) -> {
+                    GameId id = new GameId(rs.getString("game_id"));
+                    return new PublishedGame(
+                            new Game(id, rs.getString("game_name"), rs.getString("energy_unit")),
+                            new GameDataVersion(
+                                    id,
+                                    rs.getLong("sequence"),
+                                    rs.getString("label"),
+                                    Timestamps.instant(rs, "published_at"),
+                                    rs.getString("attribution")));
+                });
+    }
+
     private Optional<GameDefinition> versionRow(String sql, Object... args) {
         List<Header> headers = jdbc.query(sql, (rs, row) -> new Header(
                 rs.getLong("id"),

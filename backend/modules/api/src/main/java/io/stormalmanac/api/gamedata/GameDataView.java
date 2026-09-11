@@ -48,6 +48,16 @@ public final class GameDataView {
     /** One line of a cost, with the item's name resolved so a client need not join. */
     public record CostView(String item, String displayName, int quantity) {}
 
+    /**
+     * One item of the catalog, which is the vocabulary an inventory is written in.
+     *
+     * <p>Rarity and category travel with it because that is how an inventory is
+     * read rather than how it is stored: a player entering a few hundred
+     * quantities goes down a list ordered the way the game's own bag is, and a
+     * client that had only slugs would have to invent an order of its own.
+     */
+    public record ItemView(String id, String displayName, RarityView rarity, String category) {}
+
     /** Enough of an entity to list it; the catalog index does not need its skills. */
     public record EntitySummaryView(
             String id, String displayName, String kind, RarityView rarity, String element, List<String> tags) {}
@@ -89,9 +99,23 @@ public final class GameDataView {
 
     // ── Responses ───────────────────────────────────────────────────────────
 
+    /**
+     * One game on the index, with the version a reader would land on.
+     *
+     * <p>{@code energyUnit} travels because it is the word the product uses to
+     * talk to a player — Activity, Serum, Vigour — and a screen that asks "how
+     * much energy a day?" in a game's own noun is the difference between a tool
+     * that knows the game and a form.
+     */
+    public record GameSummaryView(String id, String displayName, String energyUnit, VersionView latest) {}
+
+    public record GamesResponse(List<GameSummaryView> games) {}
+
     public record VersionsResponse(String game, List<VersionView> versions) {}
 
     public record EntitiesResponse(String game, VersionView version, List<EntitySummaryView> entities) {}
+
+    public record ItemsResponse(String game, VersionView version, List<ItemView> items) {}
 
     public record EntityResponse(String game, VersionView version, EntityView entity) {}
 
