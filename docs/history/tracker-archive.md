@@ -1276,6 +1276,113 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+### 2026-09-11 (sixteenth session) — the screens, and the first edit that survived a tunnel
+
+**N25 is most of the way in: the five screens Phase 4 is about exist, a browser
+has driven all of them, and the offline half of the sync finally has a client.
+What is not in is named at the bottom — the exit criterion is unmet and the
+catalog still does not read provenance back out.**
+
+#### What was built, and the three routes it turned out to need
+
+The screens are the inventory editor, the goal picker, the plan view, catalog
+browse and search, and the character page with the personalized overlay. Three
+server routes were missing under them, and each one was missing for the same
+reason: **every read before this session started from a slug the caller already
+had.**
+
+- **`GET /api/games`** — the index. A reader arriving with no account and no
+  slug had nowhere to start, which made the public half of the catalog
+  unreachable except by guessing a URL. It carries each game's newest published
+  version and its `energyUnit`, so the plan form can ask for "Vigour a day" in
+  the game's own noun rather than "energy".
+- **`GET /api/games/{game}/items`** — the vocabulary an inventory is written in.
+  Items reached a client only as resolved names inside a cost until now; a bulk
+  editor cannot be built on that. Sorted rarest first, then by display name,
+  which is the order a bag is counted in.
+- **`GET /api/me/profiles/{p}/shortfall?entity=&target=`** — the overlay's
+  engine, and **Phase 4's second exit clause served**. It asks `DemandResolver`
+  rather than letting the page chain the upgrade steps it already has on screen:
+  the rules about what a chain *means* — a state nothing reaches, a state
+  already behind the player, a probabilistic target with no scalar cost — live in
+  the resolver, and a second copy of them in TypeScript is a copy nothing tests.
+  Three numbers travel per line (`required`, `owned`, `missing`) rather than the
+  subtraction alone, because a reader who disputes a shortfall needs to see
+  which half they disagree with. 7 tests.
+
+#### The offline outbox is the client half of N23, and what makes it that is not the retry
+
+N23 shipped a per-key merge whose every scenario was one MockMvc request
+following another inside one JVM. The piece that was missing was never the
+queue; it is that **an edit keeps the time it was made**. The store stamps an
+edit when the player types, holds it per profile and per key, and flushes it
+with PATCH — never PUT, because a PUT from a phone that has been offline
+overwrites every key another device touched in the meantime, which is the exact
+failure the merge exists to prevent, reintroduced in the client where no server
+test would see it.
+
+Measured in a browser rather than argued: edits made with the network refusing
+stayed queued with the banner saying so; reconnecting flushed them in one
+request; and **a deliberately stale edit — an hour old, against a value another
+device had just written — lost, and the interface said which key lost rather
+than showing a number the server does not hold.** That is ADR 0014's tiebreak
+with real clocks on both sides for the first time.
+
+#### Four defects the browser found that a typecheck could not
+
+1. **The store's empty-outbox selector built a fresh object every call.** zustand
+   reads through `useSyncExternalStore`, which compares against the last value, so
+   every render scheduled another one. The page rendered nothing at all. It is a
+   frozen constant now.
+2. **Enter walked the wrong column.** The rows are sorted by rarity and *drawn*
+   grouped by category, and the focus order was built from the flat list — so
+   Enter on the second Sigil jumped a section. The order the hand moves through
+   has to be the order the eye is reading, and that order only exists after the
+   grouping.
+3. **The goal screen could not say where a player actually stood.** Target states
+   and current states were one list of every `toState`. The base of a track is a
+   `fromState` and never a `toState`, so a player sitting on it had no way to
+   select it. They are two lists now: you may only *aim* at a state something
+   arrives at, and you may *be* at one nothing does.
+4. **`.label` is `display: block`, which folds a table header row into a
+   vertical stack.** It was right for a form label and silently wrong on every
+   `th` in the shortfall and plan tables.
+
+Also repaired: the service worker's runtime-caching rule named `/api/catalog/`,
+a prefix this API has never served, and anchored it with `^`, which cannot match
+a full request URL anyway. It was invisible because nothing read from the cache.
+
+#### A published version in the local database cannot be read back
+
+Found while pointing the screens at real data. **Every catalog route on the
+locally published Reverse: 1999 3.5 answers 400**: a `craft` row exists with zero
+`craft_input` rows, and `Craft`'s constructor refuses to build one — "consumes
+nothing, which is unbounded free supply rather than a conversion". The row
+predates the invariant, so this is a write made before a rule that came later
+rather than a live defect in today's code. **The shape of it is what matters: a
+version is immutable and the rules for reading one are not, so a published
+snapshot can stop being loadable without anything having changed it.** Nothing
+here is worth repairing — ADR 0015 says that data will not ship — but the same
+hazard applies to anything published before Phase 6 tightens a rule. Recorded in
+*[what is still unverified](#what-is-still-unverified)*; no action opened,
+deliberately.
+
+#### What N25 still owes
+
+- **The exit criterion is untouched**: five strangers cannot complete a plan
+  against a thing that is not deployed. That is **B5**.
+- **Provenance is still written and never read.** It was named as part of N25's
+  catalog half and is not done: no response carries it and no page shows it.
+- **The PWA is installable and its offline *editing* is proven; its offline
+  *loading* is not.** The outbox was exercised against a refusing network, which
+  is a different thing from loading the app shell with no server at all — that
+  needs the built bundle served, and was not done.
+- **There is not one frontend test.** Every claim above was verified by driving
+  a real browser, which is how four of the defects were found and is also
+  exactly the evidence that does not survive into CI.
+
+274 tests locally, 0 failed, 0 skipped.
+
 ### 2026-09-09 (fifteenth session) — a page that knows who is reading it, and the write that would have been refused
 
 **N24 was the blocker on all of Phase 4's product, and it is gone: a browser has signed in, read its account, created a profile and signed out. The way in is a module the deployable jar does not contain — and building it found a defect in the product that two phases of green builds had not.**
