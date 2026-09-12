@@ -1699,7 +1699,7 @@ is the only thing that has ever caught this.
 longer.** The *Current state* rows for Phase 1, the parser adapter and provenance
 had each grown into a session-log entry inside a table cell; they are one line each
 now and their detail is below, along with the Status bullets for the offline outbox
-and N4 that a table row already carried. Ten blocks cut in all — **and 742 → 746
+and N4 that a table row already carried. Ten blocks cut in all — **and 742 → 749
 anyway**, because closing a phase, opening a deviation and adding an action cost
 more than the cutting saved. By the tracker's own rule that is moving the problem
 rather than doing the work, and the flat number is recorded rather than rounded,
