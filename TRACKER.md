@@ -13,7 +13,7 @@ being finished with is.
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks).
   [README.md](README.md) is the public face; [CLAUDE.md](CLAUDE.md) is the
   working agreement.
-- Last updated: **2026-09-12** (eighteenth session)
+- Last updated: **2026-09-12** (nineteenth session)
 
 ---
 
@@ -22,53 +22,50 @@ being finished with is.
 - **Phases 1, 2 and 3 stay closed, criterion and scope.** One line each on the
   [phase board](#track-a--product); the qualifications that matter are in
   [what is still unverified](#what-is-still-unverified).
+- **Phase 5 — Gacha engine — is CLOSED on its criterion, 2026-09-12, and it was
+  entered out of order on purpose ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)).**
+  Both halves measured: over **84 questions on all seven published banners the two
+  engines' worst gap is 0.110 percentage points against a criterion of 0.300, at
+  1.84 standard errors**, and both games' published rates come back out of
+  `BannerModel` alone. **One finding about the plan:** its 100 000 trials and its
+  0.3% tolerance do not fit together — at that count 0.3 points is under two
+  standard errors, the cross-check duly failed on its first run with both engines
+  correct, and the trial count now follows from the tolerance at 500 000. The
+  criterion did not move. Four design decisions in
+  [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md).
+  **Scope incomplete, with reasons:** the income model is still an interface
+  (**N28**) and **nothing calls either engine** — no bean, no route, no screen.
+  **The rates are all still second-hand (Q4):** what the fixtures prove is that
+  the model reproduces the figures it was given.
 - **Phase 4 — Frontend v1 and launch — is OPEN**, 2026-09-09.
   **[D1 is reversed](#d1--deployment-deferred-2026-09-02)** — Vercel and Render,
   free tier, still no money. Nothing is deployed: the decision is made, the
   wiring is **B5**.
-  **The screens exist as of 2026-09-11, and N25 is closed as of the same day.**
-  All five — inventory editor, goal picker, plan view, catalog browse and search,
-  and the character page with the personalized overlay — driven in a browser
-  against a real database. **Phase 4's second exit clause is served**: a logged-in
-  character page says what that reader is short of, from where their roster
-  actually stands. **The first clause is not and cannot be until B5**: five
-  strangers cannot complete a plan against something that is not deployed.
-  **N25's three debts are paid** — provenance is read back and rendered, the PWA
-  has been loaded with its origin server killed, and the frontend has tests and a
-  written-down decision about what they are for.
-  *The data blocker stands:* see the next line — F2 is gone, and what replaced it
-  is bigger.
-- **A number on a page now says where it was read, and what it says is
-  uncomfortable.** ADR 0016's other half landed 2026-09-11: `ProvenanceRepository`
-  is a **second port** rather than a field on `GameDefinition`, so `planner` still
-  cannot see a fact's origin and cannot be made to prefer one. Four catalog
-  responses carry a `sourcing` block; both catalog pages render it; `firstHand`
-  travels as an answer so the policy is not re-implemented in TypeScript. **On
-  today's data it reads "Invented for this project — not any real game" or
-  "Nobody recorded where these numbers were read", and that is the feature
-  working** — there is still no first-hand fact in this repository (**N27**).
-- **An edit made in a tunnel has now survived one, and lost a merge on purpose.**
-  The offline outbox is the client half of N23: an edit is stamped when the
-  player types, held per profile and per key, and flushed with **PATCH and never
-  PUT** — a PUT from a phone that was offline overwrites every key another device
-  touched, which is the failure the per-key merge exists to prevent,
-  reintroduced in the client where no server test would see it. Verified in a
-  browser against a refusing network, and against a deliberately stale edit that
-  lost to a newer one and **said which key lost**. That is
-  [ADR 0014](docs/adr/0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md)'s
-  tiebreak with real clocks on both sides for the first time.
+  **All five screens exist and N25 is closed, 2026-09-11**, driven in a browser
+  against a real database; its three debts are paid. **Phase 4's second exit clause
+  is served**: a logged-in character page says what that reader is short of, from
+  where their roster actually stands. **The first clause is not and cannot be until
+  B5** — five strangers cannot complete a plan against something that is not
+  deployed. *The data blocker stands:* see the bootstrap bullet below.
+- **Provenance is written, enforced and read, and what it says is uncomfortable.**
+  [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md), in full in the
+  Provenance row above. **On today's data the catalog pages read "Invented for this
+  project — not any real game" or "Nobody recorded where these numbers were read",
+  and that is the feature working** — there is still no first-hand fact in this
+  repository. **The machinery is finished and the reading is not (N27)**: the first
+  self-sourced bundle needs somebody to *read the game*, and ADR 0015's integrity
+  rule disqualifies an aggregator, a web search and an AI session alike.
+  [The loop](docs/game-facts/authoring-a-first-hand-bundle.md).
 - **The project is going first-hand on game data**, decided 2026-09-09 —
   [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md),
   superseding 0009 on its conclusion and closing **Q2, Q3, F1 and F2** at once.
-  Kornblume is unlicensed, F2 was never sent, and rather than send it the owner
-  chose independence. **Nothing is deleted yet and the order matters:** the
+  Kornblume is unlicensed. **Nothing is deleted yet and the order matters:** the
   adapter stays as a never-shipped cross-check until a replacement exists, because
   removing it first leaves the project with no real data at all.
   **The cost, measured on patch 3.5:** ~2 700 static catalog facts (91 items, 100
-  stages, 50 recipes, 118 arcanists carrying ~972 insight lines and ~1 502
-  resonance entries, 37 psychubes) and **595 drop-rate facts**. The first half is
-  typing and is mostly additive per patch. **The second half is the problem** —
-  see the bootstrap below.
+  stages, 50 recipes, 118 arcanists, 37 psychubes) and **595 drop-rate facts**. The
+  first half is typing and is mostly additive per patch. **The second half is the
+  problem** — see the bootstrap below.
 - **The bootstrap problem is the main risk in the project, and N26 confirmed the
   cheap way out is not there.** The optimizer cannot rank a stage without a
   yield, so no drop data means no plan; own drop data means Phase 6, which means
@@ -77,65 +74,36 @@ being finished with is.
   prices only the first, and every published percentage for the other two is
   somebody's crowdsourced sample. Measured on the pinned snapshot: **15 of 779
   drop facts are declared, 764 sampled** — ~2% free. Two real consolations:
-  **gacha rates *are* disclosed** (half of **Q4**, one screen's reading), and
-  **the `Fixed`/`Common`/`Possible` grade is itself a free first-hand fact** for
-  all 595 pairs, with nowhere in the model to live until Phase 6 consumes it.
+  **gacha rates *are* disclosed** (half of **Q4**, one screen's reading, and Phase 5
+  closing has raised what it is worth), and **the `Fixed`/`Common`/`Possible` grade
+  is itself a free first-hand fact** for all 595 pairs, with nowhere in the model to
+  live until Phase 6 consumes it.
   [The drop disclosure note](docs/game-facts/reverse-1999-drop-disclosure.md).
-- **A fact now carries where it came from, and `publish` enforces it** —
-  [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md), the
-  mechanism half of N27, because ADR 0015 had a hole prose could not close: a
-  number read off a game screen and one copied out of an aggregator are
-  byte-identical once typed. A version whose facts are not ours to publish is
-  **refused by name**, and the exception is a word the operator types.
-  `KornblumeAdapter` hard-codes `THIRD_PARTY`. Silence is `UNRECORDED`, which
-  parses and cannot publish. **The other half of N27 no session can do**: the
-  first self-sourced bundle needs somebody to *read the game*, and 0015's
-  integrity rule disqualifies an aggregator, a web search and an AI session
-  alike. **The machinery is finished and the reading is not** —
-  [the loop](docs/game-facts/authoring-a-first-hand-bundle.md).
-- **ADR 0007's open gap is a failing build as of 2026-09-12 (N4).**
-  `EntityKindBoundaryTest` allows a read of `Entity.kind` in `gamedata`, `api`
-  and `adapters` and denies it everywhere else — an allowlist rather than the ban
-  on `planner`, `gacha` and `stats` the ADR names, because a denylist of three
-  would pass vacuously again the day `player` or the CLI grew one. **Verified by
-  putting the defect back in both spellings a reader would write**, `e.kind()`
-  and `.map(Entity::kind)`. It is the third architecture test and the first that
-  guards a *field* rather than a dependency. **ADR 0007 is not edited** — it is
-  accepted, its decision has not changed, and only its account of what is
-  enforced has; that is a tracker fact.
 - **Phase 0 stays closed by exception** — deploy deferred by D1 — and its box
   stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
-- **The remote, checked 2026-09-12 (eighteenth session) — re-check it, do not
-  trust it.** **`main` is still `92c29cf`** and **[PR #18](https://github.com/kietnt4412/storm_almanac/pull/18)
-  is still open** — the maintainer has not merged it, so N25's close is on `dev`
-  and not on `main`. **This session's N4 went onto the same PR**, which is not
-  tidy and was the honest option: the alternative was a second branch off a `dev`
-  that is itself unmerged. **The PR's title still names N25 only** — read its
-  commits, not its title. It was **green on `261d1cd`, run `34691539392`**, both
-  jobs passing, `deploy` skipped; **0 failed, 16 skipped**, the same three
-  snapshot-gated classes (`RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5,
-  `RealUpstreamPatchTest` 3), which is how **262 on CI** is known rather than
-  assumed. The seventeenth session's tree was green as run `34597211345`.
-  **Counting PASSED lines in a CI log undercounts**, and it caught a session out
-  here: `:modules:identity:test` came back `FROM-CACHE` and printed nothing, so
-  `SignInTest`'s 7 results are in the green and not in the log.
-  Phrased without a commit count on purpose, because a line that names the commit
-  describing it is stale the moment it is written, which happened twice on
-  2026-09-09. This is a fact here rather than a next action because six sessions
-  running have now opened on a "merge PR #n" the maintainer had already clicked.
+- **The remote, checked 2026-09-12 (nineteenth session) — re-check it, do not
+  trust it.** **[PR #18](https://github.com/kietnt4412/storm_almanac/pull/18) is
+  MERGED and `main` is now `39bd72d`**, which carries N25 *and* N4;
+  `git rev-list --count origin/main..origin/dev` was **0** at session start. The
+  eighteenth session's entry here said #18 was open and `main` was `92c29cf`, and
+  both were wrong by the time it was read — **which is what this bullet is for.**
+  **[PR #19](https://github.com/kietnt4412/storm_almanac/pull/19) was opened for
+  this session's Phase 5 work and is green on `330c02f`, run `34695206362`** —
+  both jobs passing, `deploy` skipped, 16 skipped counted off the log.
   **`DeployableJarTest` passed on the runner**, so the development sign-in's
   absence is proven against a jar CI built from a clean checkout rather than only
   one this machine did. The guard travels with the pipeline.
-  **The trap has now fired three times.** CI runs on `pull_request` and on push
-  to `main` only, so **a push to `dev` with no open PR runs nothing, silently.**
-  PR #15 had been merged before one push, PR #16 during another, and PR #17
-  before the seventeenth session started — every time leaving `dev` with no open
-  PR and therefore no pipeline. All three were caught by looking, not by anything
-  failing. **It did not fire on the eighteenth**, and the reason is the rule
-  itself: `gh pr list` was checked first, PR #18 was open, and the push ran a
-  pipeline. **Open the PR before trusting a push to `dev`, and check
-  `gh pr list` rather than assuming last session's PR is still open.**
+  **Counting PASSED lines in a CI log undercounts**: a cached test task prints
+  nothing while its results are still in the green. Read the totals, not the log.
+  **The trap is armed again, for the fourth time.** CI runs on `pull_request` and
+  on push to `main` only, so **a push to `dev` with no open PR runs nothing,
+  silently.** It has now happened after #15, #16, #17 and #18 — every merge leaves
+  `dev` with no open PR. Every single one was caught by looking, never by anything
+  failing. **Open the PR before trusting a push to `dev`, and check `gh pr list`
+  rather than assuming last session's PR is still open.** This is a fact here
+  rather than a next action because seven sessions running would have opened on a
+  "merge PR #n" the maintainer had already clicked.
 - **The optimizer has been asked a question by something other than a test.**
   What has *not* happened is a real OAuth exchange: no provider is configured and
   no client secret exists, so login is installed only when one is. The
@@ -197,54 +165,48 @@ Rules that keep this file honest:
   document. **Keep it under about 550 lines** — roughly what a session can read
   before starting work. If a session adds more than it removes, it has moved the
   problem rather than done the work.
-  **Still well over: 747 on 2026-09-11 → 742 on 2026-09-12**, measured. The
-  seventeenth session recorded 740 for a file `wc -l` puts at 747, and its 759
-  was not re-measured here, so **count it rather than carrying the last number
-  forward** — the drift runs in the flattering direction. Two sessions
-  running have now removed more than they added while also closing an action,
-  which is the rule working; it is a **third down payment on a debt of 192
-  lines**, and saying so beats rounding it down. The eighteenth moved the two
-  Status bullets the seventeenth had named — CSRF and the unreadable published
-  version — keeping only the latter's one sentence with teeth, moved to the
-  **Phase 6 row** where somebody about to tighten a rule will be looking; and it
-  archived the two entries the seventeenth had **struck through in place**, which
-  this file's own rule forbids.
-  **The debt is not paid**, and the next candidate is the one three sessions have
-  now flinched from: the *Current state* table, whose rows for closed phases have
-  grown into paragraphs. Phase 1's row, the parser-adapter row and the provenance
-  row are each a session-log entry in a table cell.
+  **Measure it with `wc -l` rather than carrying the last number forward** — the
+  drift has twice run in the flattering direction, by seven lines once.
+  **Still well over: 747 on 2026-09-11 → 742 on 2026-09-12 (eighteenth) → 749 on
+  2026-09-12 (nineteenth), measured.** The nineteenth cut ten blocks — the
+  *Current state* rows for Phase 1, the parser adapter and provenance that three
+  sessions had flinched from, the Status bullets for the offline outbox and N4 that
+  a table row already carried, two closed next actions, the benchmark
+  re-argument, D1's restatement and E4's
+  ([the five largest are in the archive](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-12-nineteenth-session)) —
+  **and still ended seven lines up, because it closed a phase, opened a deviation and
+  added an action in the same session.** By this file's own rule that is moving the
+  problem, and the flat number is the only honest way to say so. **The debt is not
+  paid and was not reduced.** The next candidate is the *Phase board*: Phases 0 to 3
+  and 5 are closed and their five entries here still run to five lines each, where
+  one and a link would do.
 
 ---
 
 ## Current state
 
-**What exists:** the repo skeleton, the domain model, a green backend build, a
-game data pipeline that works end to end, an API that serves it, a real game's
-data going through all of it, an optimizer that turns that data into a plan, a
-reason to believe the plan, an account that can own one and be refused somebody
-else's, two of that account's devices that can edit what it owns without deleting
-each other's work, a browser that has actually loaded a page of it, and — since
-this session — a page that says where its numbers were read, a suite that tests
-the screens, and an app that still renders with its server switched off.
+**What exists:** a game data pipeline that works end to end, an API that serves it,
+a real game's data going through all of it, an optimizer that turns that data into
+a plan and a reason to believe the plan, an account that can own one and be refused
+somebody else's, two of that account's devices that can edit what it owns without
+deleting each other's work, five screens a browser has driven, a page that says
+where its numbers were read, an app that still renders with its server switched
+off — and, since this session, two gacha engines that agree with each other about
+both published games.
 
-**The load-bearing claim — and it is now a number to re-earn.** On **nine**
-benchmark materials the cheapest stage this project computes is the stage a
-published community guide tells players to farm, and the optimizer's plan for a
-real goal set is cheaper than following that guide — **3 880 Activity against
-4 017**, with the 4 017 not covering the whole demand. Seventeen of the guide's
-twenty quoted rates land within three percentage points of a sample this project
-had never seen. Nine and not five because a yield carries how many runs it was
-observed over and the solver uses the conservative end of a 95% interval on it
+**The load-bearing claim — and it is a number to re-earn.** On **nine** benchmark
+materials the cheapest stage this project computes is the one a published community
+guide tells players to farm, and the optimizer's plan for a real goal set costs
+**3 880 Activity against the guide's 4 017** — which does not even cover the whole
+demand. Nine and not five because a yield carries its sample size
 ([ADR 0011](docs/adr/0011-a-yield-is-a-mean-per-run-with-a-sample-behind-it.md)).
-See [the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
-
-**Every one of those numbers is computed from Kornblume-fed inputs**, and
+**Every one of those numbers is computed from Kornblume-fed inputs**, which
 [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md) says the
-product will not ship that data. Until a self-sourced bundle reproduces them they
-are evidence about somebody else's numbers run through our solver. **The
-benchmark method survives untouched** — the guide it compares against is a
-separate published artifact — so this is a claim to re-earn, not a test to
-delete.
+product will not ship — so until a self-sourced bundle reproduces them they are
+evidence about somebody else's numbers run through our solver. **The method
+survives untouched**, because the guide it compares against is a separate published
+artifact: a claim to re-earn, not a test to delete.
+See [the benchmark](docs/benchmarks/reverse-1999-community-answers.md).
 
 Still true from earlier phases: **the solver says how much it does not know**
 ([ADR 0010](docs/adr/0010-a-plan-is-the-best-provable-in-the-budget.md)), **the
@@ -256,11 +218,11 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **278 tests**, 0 failed, 0 skipped locally with snapshots present. **262 on CI**, because the same 16 snapshot-gated ones skip. `:app:test` now depends on `:app:bootJar` — `DeployableJarTest` reads the artifact. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
-| CI workflow | **Green** | Latest is run `34691539392` on `dev` (PR #18); see *Status* for the remote, checked rather than trusted. **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3. A pass there would mean a snapshot had been committed by accident. Action deprecations pending — **N5** |
-| Game data pipeline (Phase 1) | **Closed and stable** | Model, schema, ingest, diff and CLI, [in full in the archive](docs/history/tracker-archive.md#closed-phases-in-full). `V2`–`V4`, 28 tables, seven invariants proven on two real R1999 patches; parser and writer pinned by a round trip (ADR 0008); publishing is a human approval, not a flag. `Drop` carries `sampledRuns`, where 0 means *declared* |
-| Parser adapters | **One — and demoted to a cross-check by [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md), now in code** | `:adapters:reverse-1999`, 25 tests. **Its output is no longer what the product will ship**, and since ADR 0016 it hard-codes `THIRD_PARTY` provenance and cannot be told otherwise, so it fails a plain `publish` — there is no call site to launder data through. Kept, not deleted: diffing the first self-sourced bundle against an independent reading of the same patch is worth more as a check than it ever was as a source |
-| Provenance | **Done — written, enforced, and now read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). A bundle declares `Provenance` records, defaults every fact to one (`sourcedBy`) and overrides per `FactRef` (`kind:slug`); `V7` materialises **one row per declared fact**, because a default is an authoring convenience and a database that stored it could not answer the question alone. **`publish` refuses a version that is not first-hand and names the facts**; `publish(…, true)` and the CLI's `second-hand` word are the explicit exception. The first-hand policy lives in `Provenance.Origin` and nowhere else — the migration constrains the set and says nothing about which count. **Silence parses and cannot publish** (`UNRECORDED`). **Served since 2026-09-11**: `ProvenanceRepository` is a *second* port, not a field on `GameDefinition`, so the solver still cannot see where a number came from and be made to prefer one. Four responses carry `sourcing`, and `firstHand` travels as an answer rather than being re-derived in TypeScript |
+| Backend build | **Green** | **324 tests**, 0 failed, 0 skipped locally with snapshots present; **308 on CI**, because the same 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar` — `DeployableJarTest` reads the artifact. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
+| CI workflow | **Green on this tree** | Run `34695206362` on `330c02f` ([PR #19](https://github.com/kietnt4412/storm_almanac/pull/19)), both jobs passing, `deploy` skipped. **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3, counted off the log rather than assumed. A pass there would mean a snapshot had been committed by accident. Action deprecations warned again — **N5** |
+| Game data pipeline (Phase 1) | **Closed and stable** | `V2`–`V4`, 28 tables, seven invariants on two real patches, a round trip pinning parser against writer (ADR 0008), publishing as a human approval. `Drop` carries `sampledRuns`, where 0 means *declared*. [In full in the archive](docs/history/tracker-archive.md#closed-phases-in-full) |
+| Parser adapters | **One, and demoted to a cross-check by [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)** | `:adapters:reverse-1999`, 25 tests. **It hard-codes `THIRD_PARTY` and so fails a plain `publish`** — there is no call site to launder data through. Kept rather than deleted because diffing the first self-sourced bundle against it is worth more than it ever was as a source. [The prose it used to carry](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-12-nineteenth-session) |
+| Provenance | **Done — written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per *declared* fact; `publish` refuses a version that is not first-hand and names the facts, and the exception is a word the operator types. **`ProvenanceRepository` is a second port, not a field on `GameDefinition`** — so the solver cannot see where a number came from and cannot be made to prefer one. Silence is `UNRECORDED`, which parses and cannot publish. [The prose it used to carry](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-12-nineteenth-session) |
 | Game data API | **Served and verified** | **Seven** game-data routes plus health, version-pinnable, every response carrying its version and attribution — and, since 2026-09-11, the four that carry facts also carry **where each fact was read**. 15 HTTP tests plus a hand check against `docker compose up`. Two arrived with N25 and both existed because every read before them started from a slug the caller already had: `GET /api/games` is the **index** — without it a reader with no account and no slug could reach the public catalog only by guessing a URL — and `GET /api/games/{game}/items` is **the vocabulary an inventory is written in**, which reached a client only as resolved names inside a cost until something had to render a few hundred quantities |
 | Demand resolution | **Done** | Goals + roster + upgrade graph → a demand vector, walking the DAG backwards. Refuses by name rather than guessing: unreachable states, unknown entities, probabilistic goals, ambiguous routes |
 | The MIP (`EnergyMip`) | **Done for stages, crafts and rewards** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. **No shops and no fodder**; items sourced only from those are refused by name |
@@ -282,7 +244,9 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Docker Compose | **Repaired 2026-09-09, and no image has ever been built end to end** | The Dockerfile had never learned about `adapters/`; the fixed tree builds the jar locally and that jar contains no development sign-in. **The image itself is still unproven** — the in-container Gradle download was abandoned at 10% after twenty minutes, so `up --build` has not completed. See the COPY-list warning in *Status* |
 | Development sign-in | **Done, and absent from the artifact** | [ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md). `:modules:identity-dev` is `testAndDevelopmentOnly` on `:app` — on `bootRun` and the test classpath, **excluded from `bootJar`**, so no property or profile can reach it. `GET /dev/sign-in?as=<name>` mints an ordinary `AuthenticatedAccount` through the same `upsertFromOidc` the OAuth services use; its filter chain lives in that module, so `SecurityConfig` has no hook for it. `DeployableJarTest` opens the jar and proves the absence on every build. The frontend picks its sign-in URL behind `import.meta.env.DEV`, and the production bundle was checked for the string: **zero occurrences** |
 | Frontend | **Five screens, driven in a browser, and 15 tests** | Inventory editor (bulk entry: filtered, grouped by the game's own categories, Enter walks the column, **no save button** — a typed number is a queued edit), goal picker (ordered, targets read off the upgrade graph, roster edited where the goal is), plan view (stages, crafts, claims, shadow prices and **every one of the solver's notes**, because a plan rendered without them is a confident number hiding a gap), catalog browse and search, and the character page with the **personalized overlay**. Routing is react-router; the game is in the URL for the catalog and nowhere else, because a catalog page is the one thing here somebody sends a link to. Both catalog pages now end in **where their numbers were read** rather than one grey credit line. **15 vitest/jsdom tests run in CI** — see the unverified list for what they deliberately do not cover. `npm run dev --prefix frontend` (`.claude/launch.json`, which now also carries `api` and **`web-built`**, the built bundle on 4173 that the offline test needs) proxies `/api` **and `/dev`** to `localhost:8080`, so local is same-origin. The sign-in URL is chosen behind `import.meta.env.DEV`, so the development one is not in a production bundle |
-| `gacha`, Track B | **Empty** | Interfaces and package docs. Track B is [gated](#the-gate) |
+| `gacha` — the two engines | **Done — Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). `MarkovBannerEngine` is an exact forward chain over `(pulls since hit, losses carried, copies held)` reading the mass that **never arrived**, so a wall is exactly 1.0 rather than 0.9999999999999895; `MonteCarloBannerEngine` is 500 000 seeded trials on virtual threads, deterministic because the generators are split before any task starts and counts are summed as integers in chunk order. `PullModel` is the validated slice both share, so they refuse the same banners for the same reasons. **46 tests. Worst gap 0.110 points over 84 questions, at 1.84 standard errors.** Only the headline rarity is modelled, and `PullResult` carries no `Rarity` — the model pins no other rate while pity is active, so one would be invented per game |
+| `gacha` — the income model | **Interface only, and it cannot be written yet** | `projectedPulls` needs to know which item is pull currency and what a pull costs in it. **Neither `BannerModel` nor the `banner` table declares either**, so the question has nothing to compute from — **N28** |
+| Track B | **Empty** | Package docs. Track B is [gated](#the-gate) |
 
 ### What is still unverified
 
@@ -326,6 +290,21 @@ works". It does not mean that:
   before Phase 6 makes anything depend on an inventory being current.**
 - **`SolveCoordinator` is still not wired to anything**, deliberately; see the
   table row above.
+- **Nothing has ever asked the gacha engines a question on behalf of a player.**
+  Phase 5's criterion is a proof about a model — two methods agreeing, and both
+  reproducing published figures — and it is met. What no test can tell you is
+  whether the answer is the one a player wants: there is no route, no screen and no
+  bean, and the `PityState` a real reader would be asked for is not stored anywhere
+  (`player` has an inventory, a roster and goals, and no pity counters). **So
+  "probability of guaranteeing her" is computable and unanswerable**, and the gap
+  is a schema and a screen rather than an engine.
+- **Every rate the gacha engines reproduce is second-hand (Q4).** The figures come
+  from the sources the plan cites, not from either publisher's disclosure. The
+  acceptance fixtures prove the model reproduces the figures it was *given* —
+  nothing in this repository is evidence about whether those figures are what
+  Bluepoch states. N26 established the disclosure exists; nobody has read it. This
+  is the same hole ADR 0015 opened on the catalog side, on the one part of the data
+  where the free first-hand reading is **one screen**.
 - **Nothing has measured whether the cache is worth having in production**, only
   that a hit is 900× cheaper than a solve. Hit *rate* depends on whether two
   players ever ask the same question, which needs users. The counters are there
@@ -339,27 +318,20 @@ works". It does not mean that:
   reproducing it needs the **built** bundle (`web-built`, port 4173), because the
   dev server has no worker worth the name.
 - **The frontend has 15 tests, and one class of defect they will never catch.**
-  Vitest and Testing Library in jsdom, wired into CI — the decision N25 asked for,
-  argued beside the config in `vite.config.ts`. The argument is the four defects
-  a browser found: three were behaviour and a component test catches them (the
-  re-rendering store selector is now pinned by a test **verified to fail** with
-  React's own "Maximum update depth exceeded" when the defect is put back), and
-  the fourth was `display: block` folding a table header, which **jsdom will
-  never catch because it computes no layout**. So: behaviour is the pipeline's,
-  appearance is a person's. **Driving a browser before shipping a screen is still
-  required**; what it no longer has to do is re-check the behavioural half by
-  hand. *(The earlier "never served", "no authenticated page" and "one page that
-  signs in" entries, and the defects retiring each of them turned up, are in
-  [the session log](docs/history/tracker-archive.md#session-log).)*
+  Vitest and Testing Library in jsdom, in CI, argued beside the config in
+  `vite.config.ts`. Of the four defects a browser found, three were behaviour and a
+  component test catches them; the fourth was `display: block` folding a table
+  header, which **jsdom will never catch because it computes no layout**. So:
+  behaviour is the pipeline's, appearance is a person's, and **driving a browser
+  before shipping a screen is still required**.
 - **A new page and an old API do not deploy at the same instant, and the first
-  time that happened the page rendered as nothing.** Found by a browser on
-  2026-09-11: the freshly built bundle read a response from a backend that
-  predated `sourcing` and threw before React painted anything. Fixed, and the
-  wire types now mark the field optional so the compiler points at every call
-  site that has to cope. **This is B5's problem in miniature** — Vercel and Render
-  are separate hosts and every release has a window like it — and the lesson is
-  wider than one field: a client that treats a new response field as guaranteed
-  is a client that blanks its own page on every deploy.
+  time that happened the page rendered as nothing.** A freshly built bundle read a
+  response from a backend that predated `sourcing` and threw before React painted
+  anything (2026-09-11). Fixed, and the wire types now mark the field optional so
+  the compiler points at every call site that has to cope. **This is B5's problem
+  in miniature** — Vercel and Render are separate hosts and every release has a
+  window like it — and the lesson is wider than one field: a client that treats a
+  new response field as guaranteed blanks its own page on every deploy.
 - **Nothing has ever run against a jar built from a Dockerfile that works.** The
   image build was repaired this session and the compose stack has not been stood
   up end to end since. The **absence** of the development sign-in from that jar
@@ -367,13 +339,12 @@ works". It does not mean that:
 - **Nothing has ever called the API under load.** Every request loads a whole
   version — fifteen queries — a deliberate deferral written into
   `GameDataReadModel`'s javadoc. The number to beat does not exist yet.
-- **Eight qualifications of the closed phases moved to
-  [the archive](docs/history/tracker-archive.md#qualifications-moved-out-of-the-live-tracker-2026-09-11-seventeenth-session)
-  on 2026-09-11** — the benchmark being one guide, the two large community
-  disagreements, the three shapes the model cannot express, what the adapter does
-  not convert, the never-ingested skill text, one upstream rather than two, and
-  `gacha` having no behaviour. All still true; none of them bears on a next
-  action. **Read them before re-opening Phase 1, 2 or 11.**
+- **Eight qualifications of the closed phases are
+  [in the archive](docs/history/tracker-archive.md#qualifications-moved-out-of-the-live-tracker-2026-09-11-seventeenth-session)**
+  — the benchmark being one guide, the two large community disagreements, the three
+  shapes the model cannot express, what the adapter does not convert, and the rest.
+  All still true. **Read them before re-opening Phase 1, 2 or 11.** (One has
+  expired: `gacha` had no behaviour, and now does.)
 - **No fact in this repository has ever been sourced first-hand**, and ADR 0016
   did not change that. The only bundles that pass its gate are the synthetic
   fixtures, passing by declaring `AUTHORED_FIXTURE` — honest, and evidence of
@@ -408,11 +379,19 @@ Ordered. Completed ones move to
       [authoring a first-hand bundle](docs/game-facts/authoring-a-first-hand-bundle.md).
       **Cheapest first read: the summon rules screen**, which closes the live half
       of **Q4** and is `PUBLISHER_DISCLOSURE` rather than a sample.
-- [x] **N25 — Phase 4's screens. Closed 2026-09-11** (screens on the sixteenth
-      session, the three named debts on the seventeenth).
-      [In full in the archive](docs/history/tracker-archive.md#completed-next-actions).
-      **The exit criterion was never N25's to meet:** five strangers completing a
-      plan needs a deployment, which is **B5**.
+- [ ] **N28 — Give a banner a pull currency and a price, and then write
+      `IncomeModel`.** Phase 5's unbuilt scope, and it is a schema change rather
+      than a decision: `projectedPulls(profile, date)` has to know which item is
+      pull currency and what a pull costs in it, and **neither `BannerModel` nor
+      `gamedata.banner` declares either**. So "she arrives in 40 days, can I
+      guarantee her" — the feature the plan calls the one nobody ships well — has
+      nothing to compute from, and no amount of engine work changes that. Costs a
+      bundle field, parser, writer, a migration and the JDBC round trip, exactly
+      like **N20**. **Do it with a game whose income sources are actually
+      ingested**: the accrual side reads `Reward` cadences, and nothing ingested
+      has ever been checked for them. The engines themselves are finished
+      ([ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md));
+      this is the half that needs data.
 - [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
       `EnergyMip.matchingDays` reads weekdays in **UTC** — a game assumption in a
       game-agnostic module. R1999 Global rolls over at **05:00 UTC−5, weekly
@@ -433,10 +412,6 @@ Ordered. Completed ones move to
       regardless of node count: a replicated cache measured against an in-process
       map is measuring the network, and ADR 0003 forbids a comparison shaped to
       flatter the hand-built side.
-- [x] **N4 — Enforce that `Entity.kind` is never read outside the catalog.
-      Done 2026-09-12.** `EntityKindBoundaryTest`, and the defect put back in
-      both spellings to watch it fail.
-      [In full in the archive](docs/history/tracker-archive.md#completed-next-actions).
 - [ ] **N5 — Upgrade the CI actions before they break.** Green but warning twice,
       both on a clock: **Node 20 is deprecated** and six actions are already being
       forced onto Node 24 by the runner (`checkout@v4`, `setup-java@v4`,
@@ -508,11 +483,12 @@ a session would be wrong not to read.
       **Exit:** five strangers complete a plan without asking for help, and a
       logged-in character page shows what that reader is short of.
 
-- [ ] **Phase 5 · Gacha engine** — 1.5 weeks
-      Generic `BannerModel`, Markov and Monte Carlo engines, income model, the
-      "can I guarantee her" answer.
-      **Exit:** both engines agree within 0.3% and reproduce published R1999 and
-      PGR rates.
+- [x] **Phase 5 · Gacha engine** — **closed 2026-09-12 on its criterion; scope
+      incomplete, and entered out of order ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)).**
+      Worst gap **0.110 points against 0.300** over 84 questions, and both games'
+      published rates out of `BannerModel` alone. Two qualifications a session
+      would be wrong not to read: **the rates are second-hand (Q4)**, and the
+      income model is **N28**. [In full in the archive](docs/history/tracker-archive.md#closed-phases-in-full).
 
 - [ ] **Phase 6 · Drop statistics on Postgres** — 1.5 weeks
       Report submission, Wilson intervals, provenance, abuse controls, estimates
@@ -606,6 +582,34 @@ proves nothing.
 Record every departure here with its cost, so nobody has to reconstruct the
 reasoning later — including you, in month six.
 
+### D2 · Phase 5 entered before Phase 4 closed (2026-09-12)
+
+**The rule broken is this file's own:** do not start a phase until the previous
+one's criterion is met. Phase 4's criterion needs five strangers completing a plan
+against a deployment, which is **B5**, whose last step needs accounts and an OAuth
+registration no session has. **N27** above it is the maintainer's by ADR 0015's
+integrity rule. So the choice was put to the maintainer — Phase 5, B5's wiring, or
+**N5** — and Phase 5 was chosen deliberately, knowing the order.
+
+**What it cost:** Phase 4 is still open and B5 is still the only thing between it
+and its criterion, so this bought no progress on the launch. The gate is
+untouched. **What it bought:** the one large piece of Track A a session can finish
+alone and verify without a browser, a provider or a person reading a game screen.
+
+**What to watch.** The risk in taking a phase early is building against imagined
+requirements, which is the whole argument for the Track B gate — so note what this
+phase did *not* get: no bean, no route, no screen, and an income model left
+unwritten rather than guessed at (**N28**). The engines answer questions a test
+asks. **Nothing has asked them on behalf of a player**, and that is the same
+qualification `SolveCoordinator` has carried since Phase 2.
+
+**Reversal trigger:** none — a phase cannot be un-entered. The trigger that
+matters is the one on the *next* phase: **do not take Phase 6 early on this
+precedent.** Phase 6 feeds estimates into the optimizer and needs users, so
+starting it without them is exactly the mistake the gate exists to prevent, and
+Phase 5 was safe to take early only because its exit criterion is a proof about a
+model rather than a measurement of real traffic.
+
 ### D1 · Deployment deferred (2026-09-02)
 
 **REVERSED 2026-09-09.** Heading kept verbatim so every link to it still lands.
@@ -616,19 +620,18 @@ and a free tier accepted. **Vercel for the frontend, Render for the backend.**
 Still no money, so the premise stands; what changed is that a free tier is
 acceptable. [The entry in full is in the archive](docs/history/tracker-archive.md#d1--the-deferral-in-full).
 
-**What the deferral cost is what the next sessions have to buy back:** Phase 0's
-box is still unticked, the Track B gate has no meaning without real traffic, and
-deploy problems really were discovered late — which is why Phase 0 put the deploy
-first. The Dockerfile being broken since Phase 1 and nobody noticing is that cost
-arriving.
+**What it cost is what the next sessions buy back:** Phase 0's box is unticked, the
+Track B gate has no meaning without real traffic, and deploy problems really were
+discovered late — the Dockerfile broken since Phase 1 with nobody noticing is that
+cost arriving.
 
 **Nothing is deployed yet.** The decision is made, the wiring is not — **B5**,
-which carries the two consequences to settle before writing any of it: **one
-origin or two** (a Vercel rewrite of `/api/*` preserves the same-origin cookie,
-CSRF and redirect the backend is built around; two real origins do not, and the
-hop sits on a two-second solve promise), and **the free tier sleeps** (a cold
-start is tens of seconds against a budget of two — warm-up ping, honest loading
-state, or accept it, decided before five strangers meet it).
+which carries two consequences to settle before writing any of it: **one origin or
+two** (a Vercel rewrite of `/api/*` preserves the same-origin cookie, CSRF and
+redirect the backend is built around; two real origins do not, and the hop sits on
+a two-second solve promise), and **the free tier sleeps** (a cold start is tens of
+seconds against a budget of two — warm-up ping, honest loading state, or accept
+it, decided before five strangers meet it).
 
 ---
 
@@ -664,15 +667,10 @@ variable, which is the whole fix. Only worth reading if it comes back:
 ### E4 · A dead Docker engine looks exactly like a slow one
 
 Docker Desktop takes minutes to start here and `docker info` hangs rather than
-failing while it does — **but waiting is only sometimes the answer**, and on
-2026-09-09 it was not: the GUI processes were up and the engine was never coming.
-
-**Corrected 2026-09-09 (fifteenth session): `com.docker.service` is not the
-test.** The earlier note said `Stopped` means somebody has to start Docker
-Desktop by hand. That session read `Stopped` **and the engine answered anyway** —
-`docker info` returned server version 29.7.2 and Testcontainers ran all session.
-On the WSL2 backend the Windows service is not the engine, so `Stopped` is a hint
-at best and a false alarm at worst. **Ask the engine:**
+failing while it does — **but waiting is only sometimes the answer**. **Do not use
+`com.docker.service` as the test** (corrected 2026-09-09): on the WSL2 backend the
+Windows service is not the engine, and a session has read `Stopped` while the
+engine answered and Testcontainers ran all day. **Ask the engine:**
 
 ```bash
 docker info --format '{{.ServerVersion}}'
@@ -711,6 +709,14 @@ then move the entry to
   **What stays open is that nobody has read it yet.** The same question about
   *drop* rates is closed and the answer was no; that half moved to
   [the drop disclosure note](docs/game-facts/reverse-1999-drop-disclosure.md).
+  **Phase 5 closing did not narrow this by one inch, and raised the stakes.** The
+  simulator now ships a number to four decimals off these rates — a 42.39-pull
+  average, a 0.7110 at the wall — which is a far more specific claim than a rate
+  table sitting in a fixture. **The engines are not wrong if the rates are**; they
+  would faithfully reproduce the wrong game. This is the cheapest unclosed
+  first-hand reading in the project: **one screen**, `PUBLISHER_DISCLOSURE`, and it
+  would turn the acceptance fixtures from "reproduces the figures it was given"
+  into evidence.
 
 ---
 
@@ -721,6 +727,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-12 | nineteenth | **Phase 5 closes on its criterion, out of order and on purpose (D2).** Two engines sharing three branches and nothing else: an exact chain and 500 000 seeded trials, **worst gap 0.110 percentage points over 84 questions against a criterion of 0.300, at 1.84 standard errors** — and both games' published rates out of `BannerModel` alone. **The plan's own two numbers do not fit together:** at its 100 000 trials, 0.3 points is under two standard errors, and the cross-check failed on its first run with both engines correct, so the trial count now follows from the tolerance. Four decisions in [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md) — `PullResult` can carry no `Rarity`, a floor reaching the headline is refused rather than ignored, `PityState` counts losses instead of flagging one, and the chain reads the mass that never arrived so a wall is exactly 1.0. Two of the first failures were **in the tests**: a 30-pull wall is 0.7030 and not certainty, because a wall guarantees the rarity and not her. 324 tests locally and 308 on CI, **green on run `34695206362`** ([PR #19](https://github.com/kietnt4412/storm_almanac/pull/19)). **PR #18 was already merged and `dev` had no open PR — the fourth time, caught by looking** |
 | 2026-09-12 | eighteenth | **N4: ADR 0007's own open gap becomes a failing build.** `EntityKindBoundaryTest` allows a read of `Entity.kind` in `gamedata`, `api` and `adapters` and denies it everywhere else — an allowlist, because the denylist of three modules the ADR names is what would pass vacuously again. Bytecode rather than a source scan, because a grep cannot tell `entity.kind()` from `change.kind()`. Verified by putting the defect back in both spellings. **A condition for method references was written, measured, and deleted** — `accessTargetWhere` already catches them, and the measurement is in the javadoc so nobody adds it back. ADR 0007 not edited: the decision did not change, only the account of what enforces it. Two lessons moved to the archive and two struck-through entries closed out, 747 → 742 lines (and the previous session's count was seven short — measure it). 278 tests, CI-confirmed on run `34691539392` ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18), which now carries N25 *and* N4) |
 | 2026-09-11 | seventeenth | **N25's three debts paid, so it closes.** Provenance is read back out through a *second* port — the solver still cannot see it — and both catalog pages now say where their numbers were read, which on today's data reads "invented for this project" or "nobody recorded it", and that is the feature working. The PWA was loaded with **the origin server killed** rather than with a flag flipped. The frontend gets 15 tests and a written argument for what they are and are not for. A browser found one more defect on the way: a new bundle reading an old API's response **blanked the whole page**, which is B5's two-host deploy window in miniature. 277 backend tests, 15 frontend, CI-confirmed on run `34597211345` ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18)) |
 | 2026-09-11 | sixteenth | N25: the five screens exist and a browser has driven all of them — and **a logged-in character page now says what that reader is short of**, which is half of Phase 4's exit. The offline outbox gives N23's merge a second real clock: a stale edit lost on purpose and the interface named the key. Three routes were missing underneath (`/api/games`, `/items`, `/shortfall`) and four defects turned up that only a browser could find. Owed: provenance read-back, an offline *load*, and any frontend test at all. 274 tests |

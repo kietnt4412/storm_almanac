@@ -930,6 +930,83 @@ entry was met, not that the code exists.
 
 ---
 
+### Done 2026-09-12 (nineteenth session) — Phase 5 and N29
+
+- [x] ~~**N29 — Phase 5's two engines.**~~ **Done 2026-09-12.** Opened and closed
+      in the same session, because the work was one criterion with two halves and
+      neither half is useful alone. Entered out of order at the maintainer's
+      direction — see **D2**.
+
+      **Both halves of the exit criterion, measured.** `MarkovBannerEngine` walks
+      the distribution forward over `(pulls since hit, losses carried, copies
+      held)` and reads the answer off the mass that never arrived;
+      `MonteCarloBannerEngine` runs 500 000 seeded trials across virtual threads.
+      Over **84 questions on all seven published banners, every gap is inside
+      0.110 percentage points against a criterion of 0.300, worst case 1.84
+      standard errors.** Both games' published rates come back out of
+      `BannerModel` alone: the 70-pull wall, the curve biting at pull 61 rather
+      than 60, the 42.39-pull average, the 120-pull worst case, and 30 / 40 / 80
+      for the weapon, beginner and floating-guarantee variants.
+
+      **The plan's 100 000 trials and its 0.3% tolerance do not fit together**, and
+      one run of the cross-check was enough to show it — the debut banner over
+      thirty pulls, exact 0.139616 against simulated 0.136550, 0.31 points at 2.80
+      standard errors, both engines correct. The trial count now follows from the
+      tolerance rather than from a round number. The criterion is unchanged.
+
+      Four design decisions, all in
+      [ADR 0018](../adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md):
+      `PullResult` carries no `Rarity` because the model does not pin one while
+      pity is active; a floor below the headline rarity is ignored and one that
+      reaches it is refused by name; `PityState` carries a loss count rather than
+      a flag, with the three transitions on the record so both engines share them;
+      and the exact chain reads the complement so that a wall is exactly 1.0.
+
+      **Deliberately not done:** no bean, no route, no screen — the reasoning that
+      kept `SolveCoordinator` unwired through Phase 2. And `IncomeModel` stays an
+      interface, because `BannerModel` and the `banner` table declare neither a
+      pull currency nor a price, so the question has nothing to compute from.
+      That is **N28**.
+
+---
+
+### Rows compressed out of *Current state*, 2026-09-12 (nineteenth session)
+
+The live tracker's table had three cells that were each a session-log entry. The
+rows are one line each now; what they said is here. All of it is still true.
+
+**Game data pipeline (Phase 1)** — *was:* "Model, schema, ingest, diff and CLI,
+in full in the archive. `V2`–`V4`, 28 tables, seven invariants proven on two real
+R1999 patches; parser and writer pinned by a round trip (ADR 0008); publishing is
+a human approval, not a flag. `Drop` carries `sampledRuns`, where 0 means
+*declared*."
+
+**Parser adapters** — *was:* "One — and demoted to a cross-check by ADR 0015, now
+in code. `:adapters:reverse-1999`, 25 tests. **Its output is no longer what the
+product will ship**, and since ADR 0016 it hard-codes `THIRD_PARTY` provenance
+and cannot be told otherwise, so it fails a plain `publish` — there is no call
+site to launder data through. Kept, not deleted: diffing the first self-sourced
+bundle against an independent reading of the same patch is worth more as a check
+than it ever was as a source."
+
+**Provenance** — *was:* "Done — written, enforced, and now read. ADR 0016. A
+bundle declares `Provenance` records, defaults every fact to one (`sourcedBy`)
+and overrides per `FactRef` (`kind:slug`); `V7` materialises **one row per
+declared fact**, because a default is an authoring convenience and a database
+that stored it could not answer the question alone. **`publish` refuses a version
+that is not first-hand and names the facts**; `publish(…, true)` and the CLI's
+`second-hand` word are the explicit exception. The first-hand policy lives in
+`Provenance.Origin` and nowhere else — the migration constrains the set and says
+nothing about which count. **Silence parses and cannot publish** (`UNRECORDED`).
+**Served since 2026-09-11**: `ProvenanceRepository` is a *second* port, not a
+field on `GameDefinition`, so the solver still cannot see where a number came
+from and be made to prefer one. Four responses carry `sourcing`, and `firstHand`
+travels as an answer rather than being re-derived in TypeScript."
+
+The two facts from these three cells that a session still acts on are kept in the
+live tracker: the adapter cannot publish, and provenance is a second port the
+solver cannot reach.
+
 ### Done 2026-09-12 (eighteenth session) — N4
 
 - [x] ~~**N4 — Enforce that `Entity.kind` is never read outside the catalog.**~~
@@ -1143,6 +1220,41 @@ was written when each closed.
       (D1); and the end-to-end test goes through **MockMvc rather than a socket**,
       because an authenticated session cannot be minted over one without an
       authorization server to redirect to.
+
+- [x] **Phase 5 · Gacha engine** — 1.5 weeks — **closed 2026-09-12 on its
+      criterion; scope incomplete, and entered out of order (D2)**
+      Generic `BannerModel`, Markov and Monte Carlo engines, income model, the
+      "can I guarantee her" answer.
+      **Exit:** both engines agree within 0.3% and reproduce published R1999 and
+      PGR rates.
+      **Landed:** `MarkovBannerEngine`, an exact forward chain over `(pulls since
+      hit, losses carried, copies held)`; `MonteCarloBannerEngine`, 500 000 seeded
+      trials across virtual threads, deterministic under parallelism because the
+      generators are split sequentially before any task starts and the counts are
+      summed as integers in chunk order; `PullModel`, the validated slice of a
+      banner both engines share, so they refuse the same banners for the same
+      reasons. 46 tests, 324 in the suite, 0 failed and 0 skipped locally.
+      **Both halves of the criterion, measured:** over **84 questions on all seven
+      published banners, every gap is inside 0.110 percentage points against 0.300,
+      worst case 1.84 standard errors**; and both games' published rates come back
+      out of `BannerModel` alone — the 70-pull wall, the curve biting at pull 61
+      rather than 60, the 42.39-pull average, the 120-pull worst case, 30 / 40 / 80
+      for the weapon, beginner and floating variants, and 0.7030 at the 30-pull
+      weapon wall because a wall guarantees the rarity and not the unit.
+      Four decisions in
+      [ADR 0018](../adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md),
+      and one finding about the plan: **its 100 000 trials and its 0.3% tolerance
+      do not fit together**, so the trial count now follows from the tolerance.
+      **Two pieces of the scope were not built, both with reasons rather than
+      excuses.** The **income model** is still an interface: `projectedPulls` needs
+      a pull currency and a price, and neither `BannerModel` nor the `banner` table
+      declares either — **N28**. And **nothing calls either engine** — no bean, no
+      route, no screen — on the reasoning that kept `SolveCoordinator` unwired
+      through Phase 2.
+      **The qualification that travels with this phase:** every rate it reproduces
+      is **second-hand**, from the sources the plan cites rather than either
+      publisher's disclosure (**Q4**). What the acceptance fixtures prove is that
+      the model reproduces the figures it was given.
 
 ### Qualifications moved out of the live tracker, 2026-09-11 (seventeenth session)
 
@@ -1481,6 +1593,118 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+### 2026-09-12 (nineteenth session) — Phase 5: two engines, one question, and a criterion that did not fit its own sample size
+
+**Phase 5 closed on its criterion, out of order and on purpose.** Phase 4 is open
+and its remaining half is a deployment (**B5**), whose last step needs accounts
+and an OAuth registration that no session has. N27 above it is the maintainer's by
+ADR 0015's integrity rule. So the maintainer was asked which of three things this
+session should do — Phase 5, B5's wiring, or N5 — and chose Phase 5 knowing it
+breaks this file's own "do not start a phase until the previous criterion is met".
+That is recorded as **D2**, with the cost, rather than quietly done.
+
+**The exit criterion is met, both halves, and the headroom is the number worth
+keeping.** 84 questions across all seven published banners, asked of an exact
+Markov chain and of 500 000 simulated trials: **every gap inside 0.110 percentage
+points against a criterion of 0.300, worst case 1.84 standard errors.** Both games'
+published rates reproduced from `BannerModel` alone — the 70-pull wall, the rising
+curve biting at pull 61 and not 60, the 42.39-pull average, the 120-pull worst
+case, 30/40/80 for weapons, beginner and the floating variant. 46 new tests, 324
+in the suite, 0 failed and 0 skipped locally.
+
+**The criterion and the trial count the plan quotes do not fit together, and the
+cross-check said so on its first run.** The plan asks for 100 000 trials *and*
+agreement within 0.3%. At a hundred thousand trials the standard error of a
+mid-range probability is about 0.16 points, so 0.3 points is under two of them — a
+gap that size is ordinary sampling noise. Over 84 questions one duly turned up:
+the debut banner over thirty pulls, **exact 0.139616 against simulated 0.136550, a
+gap of 0.31 points at 2.80 standard errors, with nothing wrong with either
+engine.** A test that fails one run in a few hundred for no reason is worse than
+no test, because the failure arrives attached to an innocent commit. So the trial
+count now follows from the tolerance: 500 000 puts the standard error at 0.07
+points and makes the plan's 0.3 a four-sigma bound. **The criterion did not move;
+the sample size did** — and the agreement is asserted twice, the second time
+against three standard errors of the simulation, which is the assertion that
+survives re-seeding.
+
+**Three of the four design questions only became visible once something had to
+compile**, and all four are [ADR 0018](../adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md):
+
+- **`PullResult` could not carry a `Rarity`**, so it no longer does. `BannerModel`
+  pins the headline rate at every pity count and says nothing about the rest of the
+  table while pity is active — when the curve reaches 9%, the published numbers do
+  not say which rarity gave up the other 7.5 points, and every game will have given
+  it up differently. A `Rarity` there is an invented answer invented per game,
+  which is the one thing `gacha` may not do. It reports the two facts the model
+  determines: did it hit the rarity, and was the hit featured.
+- **A floor below the headline is ignored and one that reaches it is refused by
+  name.** A floor guarantees *at least* its minimum, so it raises low outcomes and
+  never caps high ones, leaving the headline rate where the rate table put it.
+  Sound, with a cliff: a floor whose minimum *is* the headline rarity is a second
+  pity rule on a different period, and ignoring it would silently understate every
+  answer. Both games' published floors are ignored, correctly.
+- **`PityState.guaranteedFeatured` was a boolean and could not carry the state.**
+  A flag is exactly right for a guarantee after one loss — both shipped games — and
+  cannot describe a player one loss into a guarantee after two, which
+  `FeaturedRule.guaranteeAfterLoss` permits. It is now `consecutiveLosses`, and the
+  three transitions live on the record so both engines advance state through the
+  same three lines. A mistake there is a mistake both engines make identically and
+  the cross-check would agree enthusiastically about it, so the transitions are
+  pinned separately against a generator handing out chosen numbers.
+- **The exact chain reads the mass that never arrived, not the mass that did.**
+  Accumulating arrivals over seventy steps left a residual near 1e-13: a wall the
+  game guarantees came back as 0.9999999999999895, and one answer came back *above*
+  1.0, which is not a number to put in front of a player. Every path out of the
+  chain leaves the remaining mass exactly zero at certainty, so read it there —
+  certainty is exactly 1.0, impossibility exactly 0.0, and the residual lands in
+  between where it is 1e-16 against a number nobody reads past four decimals.
+
+**`expectedPullsToFeatured` needs no linear solve, which is worth writing down
+because reaching for one is the obvious move.** Hard pity makes the expected wait
+to the next hit solvable backwards from the wall, because a miss can only move the
+counter forwards; pity then resets on every hit, so the chain is cyclic with a
+single entry point, and the unrolled sum over lost splits is geometric. The whole
+answer is two scalars and a `Math.pow`. A game with no hard pity would not have
+this property — and would also have an infinite worst case, which is the larger
+problem.
+
+**Two of the first eleven failures were in the tests, which is the cheap
+direction.** Asserting that the 30-pull weapon wall was certainty failed at
+**0.7030** — the wall guarantees the *rarity*, and only the guarantee after a loss
+guarantees *her*; the rotational banner's version of the same claim had been
+written correctly ten lines earlier. And the floating variant's ten-pull
+probability is **0.1010**, not the 0.0982 that "one hit times the 70% split"
+predicts, because losing the split early leaves room to hit again inside the same
+ten pulls. Both are now pinned against a chain written separately, in awk, purely
+to check this one — so a shared mistake has to be made twice in two languages.
+
+**Nothing calls either engine, deliberately.** No bean, no route, no screen, on
+the same reasoning that kept `SolveCoordinator` unwired through Phase 2. And
+`IncomeModel` is still an interface for a harder reason: `projectedPulls` needs to
+know which item is pull currency and what a pull costs in it, and **neither
+`BannerModel` nor the `banner` table declares either**, so "how much will she have
+accrued by Friday" has nothing to compute from. That is **N28**, and it is a bundle
+field, a parser, a writer, a migration and a JDBC round trip — worth doing with a
+game whose income sources are actually ingested rather than speculatively.
+
+**The CI trap was armed for the fourth time and caught by looking, as the rule
+says.** The tracker opened claiming `main` was `92c29cf` and PR #18 still open.
+`gh pr list` returned nothing: **#18 merged, `main` is now `39bd72d`, and
+`git rev-list --count origin/main..origin/dev` is 0** — so `dev` had no open PR and
+a push to it would have run no pipeline at all. Checked rather than trusted, which
+is the only thing that has ever caught this.
+
+**The tracker took the cut three sessions had flinched from, and still got
+longer.** The *Current state* rows for Phase 1, the parser adapter and provenance
+had each grown into a session-log entry inside a table cell; they are one line each
+now and their detail is below, along with the Status bullets for the offline outbox
+and N4 that a table row already carried. Ten blocks cut in all — **and 742 → 749
+anyway**, because closing a phase, opening a deviation and adding an action cost
+more than the cutting saved. By the tracker's own rule that is moving the problem
+rather than doing the work, and the flat number is recorded rather than rounded,
+because **the drift has twice run in the flattering direction** when a session
+carried a figure forward instead of measuring it.
 
 ### 2026-09-12 (eighteenth session) — the field nobody may read, and a condition written then deleted
 

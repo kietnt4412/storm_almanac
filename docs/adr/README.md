@@ -25,3 +25,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0015](0015-game-data-is-sourced-first-hand-not-adapted.md) | Game data is sourced first-hand, not adapted from a community aggregator | Accepted |
 | [0016](0016-provenance-is-a-property-of-the-data.md) | Provenance is a property of the data, and publishing enforces it | Accepted |
 | [0017](0017-the-development-sign-in-is-absent-from-the-artifact.md) | The development sign-in is absent from the artifact, not disabled in it | Accepted |
+| [0018](0018-the-gacha-engines-answer-one-question-about-one-rarity.md) | The gacha engines answer one question about one rarity, and the trial count follows from the tolerance | Accepted |
