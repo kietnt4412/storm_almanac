@@ -52,6 +52,13 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run typecheck
+      # Component tests in jsdom. What they are for, and the one class of defect
+      # they will never catch, is argued in vite.config.ts beside the config —
+      # briefly: behaviour is the pipeline's and appearance is a person's,
+      # because jsdom computes no layout. Until this line the pipeline rendered
+      # nothing, and four defects found by driving a browser were four defects
+      # CI could not have found.
+      - run: npm test
       - run: npm run build
 
   # Phase 0's exit criterion: a green pipeline deploying a health endpoint to a

@@ -48,6 +48,46 @@ export interface GamesResponse {
   games: GameSummary[];
 }
 
+/**
+ * One sourcing record: how a reader could go and check a number themselves.
+ *
+ * `firstHand` arrives from the server rather than being derived here from
+ * `origin`. Deriving it would be a second copy of the policy that lives in
+ * `Provenance.Origin` — in a language that cannot be made to fail to compile
+ * when the Java one gains a member, which is the whole reason it is one field
+ * in one place.
+ */
+export interface Provenance {
+  id: string;
+  origin: string;
+  firstHand: boolean;
+  detail: string;
+  observedOn: string;
+}
+
+/**
+ * Where this response's numbers were read.
+ *
+ * `facts` maps `kind:slug` to the id of the record it was read under. A fact
+ * that is not in the map is one nobody sourced — silence, which is the defined
+ * meaning of an absent record rather than an omission to paper over.
+ */
+export interface Sourcing {
+  sources: Provenance[];
+  facts: Record<string, string>;
+}
+
+/*
+ * Every response below marks `sourcing` optional, and today's server always
+ * sends it. The optionality is not about the server being unsure — it is about
+ * *which* server. The frontend and the backend are separate hosts (D1) and do
+ * not deploy at the same instant, so every release has a window in which this
+ * bundle is talking to an API that predates the field. A browser found that the
+ * first time this shipped: the page rendered as nothing at all, because reading
+ * through an absent object throws before React paints. Optional here is what
+ * makes the compiler point at every place that has to cope.
+ */
+
 export interface Item {
   id: string;
   displayName: string;
@@ -59,6 +99,7 @@ export interface ItemsResponse {
   game: string;
   version: Version;
   items: Item[];
+  sourcing?: Sourcing;
 }
 
 export interface EntitySummary {
@@ -74,6 +115,7 @@ export interface EntitiesResponse {
   game: string;
   version: Version;
   entities: EntitySummary[];
+  sourcing?: Sourcing;
 }
 
 export interface Cost {
@@ -99,6 +141,7 @@ export interface EntityResponse {
   game: string;
   version: Version;
   entity: EntityDetail;
+  sourcing?: Sourcing;
 }
 
 export interface UpgradeStep {
@@ -114,6 +157,7 @@ export interface UpgradesResponse {
   entity: EntitySummary;
   steps: UpgradeStep[];
   totalCost: Cost[];
+  sourcing?: Sourcing;
 }
 
 // ── Player state ───────────────────────────────────────────────────────────

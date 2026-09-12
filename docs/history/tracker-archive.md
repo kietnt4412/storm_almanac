@@ -882,6 +882,98 @@ entry was met, not that the code exists.
       the redirect. And a `@Bean` method named after its `@Configuration` class
       collides with it: `BeanDefinitionOverrideException`, not an obvious message.
 
+### Done 2026-09-11 (sixteenth and seventeenth sessions) — N25
+
+- [x] ~~**N25 — Phase 4's screens.**~~ **Done 2026-09-11.** The five screens
+      landed on the sixteenth session — inventory editor, goal picker, plan view,
+      catalog browse and search, and the character page with the personalized
+      overlay, which is **Phase 4's second exit clause served** — along with the
+      client half of N23's offline outbox. The box stayed unticked for three
+      named debts, and the seventeenth session paid them:
+
+      1. **Provenance is read back out.** ADR 0016 wrote it at ingest and enforced
+         it at publish, and nobody the promise was made to could ask for it.
+         `ProvenanceRepository` is deliberately a **second port** rather than a
+         field on `GameDefinition`: `Provenance`'s own javadoc says a solver that
+         can read where a number came from can eventually be made to prefer one,
+         so serving it to a reader must not put it on the path `planner` loads.
+         Four responses carry a `sourcing` block — the records once, the fact
+         references beside them, because a page's hundred facts point at a
+         handful of readings. `firstHand` travels as an answer rather than being
+         re-derived in TypeScript, which would be a second copy of
+         `Provenance.Origin.isFirstHand()` in a language that cannot be made to
+         fail to compile when the Java one gains a member.
+         **Three new HTTP tests**, and the interesting one is the refusal again:
+         a fact whose row is deleted — which is what a version published before
+         ADR 0016 looks like — is *absent* from the sourcing rather than given a
+         fabricated record, and the page still serves its numbers.
+      2. **The PWA has been loaded offline**, and the method is the evidence: the
+         built bundle served on 4173, the service worker allowed to precache, and
+         then **the origin server killed** — `curl` refusing the connection — and
+         a *deep* route reloaded. The shell rendered through the navigation
+         fallback and the catalog list rendered out of the `game-data` runtime
+         cache. A CDP offline flag would have proved less.
+      3. **The frontend has tests, and a decision about them.** Vitest and
+         Testing Library in jsdom, 15 tests, wired into CI. The argument is
+         written beside the config in `vite.config.ts` and rests on the four
+         defects a browser found on the sixteenth session: three were behaviour
+         and are catchable — the re-rendering store selector is now pinned by a
+         test **verified to fail**, with React's own "Maximum update depth
+         exceeded", when the defect is reintroduced — and the fourth,
+         `display: block` folding a table header into a column, is layout, which
+         **jsdom will never catch because it computes no layout**. So behaviour
+         is the pipeline's and appearance is a person's, stated rather than left
+         to the next session to infer.
+
+      **The exit criterion was never this action's to meet:** five strangers
+      completing a plan needs a deployment, which is **B5**.
+
+---
+
+### Done 2026-09-12 (eighteenth session) — N4
+
+- [x] ~~**N4 — Enforce that `Entity.kind` is never read outside the catalog.**~~
+      **Done 2026-09-12.** `EntityKindBoundaryTest`, an ArchUnit rule beside
+      `ModuleBoundaryTest`, which is where ADR 0007 itself said the rule belonged
+      when it recorded the gap against its own decision.
+
+      **The deferral had expired rather than been forgotten.** ADR 0007 gave the
+      reason for waiting — the guarded modules were empty, so the rule would pass
+      vacuously — and that reason stopped being true somewhere around Phase 2.
+      `planner` is ~2 000 lines across a resolver, a MIP and an optimizer, all of
+      which take a `GameDefinition` and could reach an `Entity` in one hop.
+
+      Three decisions inside a twenty-line test:
+
+      1. **Bytecode, not an extension of `GameAgnosticismTest`'s source scan.**
+         A grep for `kind()` cannot tell `entity.kind()` from `change.kind()` —
+         `gamedata.diff` has one and `GameDataReadModel` reads both within a
+         hundred lines of each other — so a scan either misses the read or fails
+         on a sibling. ArchUnit resolves the declaring type, which is the
+         question.
+      2. **An allowlist, not a ban on the three modules ADR 0007 names.** The
+         ADR's normative sentence names `planner`, `gacha` and `stats`, but its
+         decision says the field exists "for the catalog surface and for ingest
+         validation, nowhere else" — so the rule permits `gamedata`, `api` and
+         `adapters` and denies everything else. A denylist of three would pass
+         vacuously again the day `player` or the CLI grows a read. The allowlist
+         is by module because the module is the boundary enforced everywhere else
+         here, and because "the catalog surface" is not a line the package
+         structure draws finely enough to guess at.
+      3. **Verified by putting the defect back**, in both spellings a reader
+         would write: `e.kind()` and `.map(Entity::kind)`. The rule failed on
+         each and named the file and the line. **The method reference did not
+         need a condition of its own** — it was written, and then deleted when
+         the measurement said `accessTargetWhere` already catches it, because
+         ArchUnit 1.3's `getAccessesFromSelf` carries references as well as
+         calls. The test's javadoc says so, so the next reader does not add back
+         the condition this one removed.
+
+      **ADR 0007 was not edited.** It is accepted, and the convention is that an
+      accepted ADR is superseded rather than corrected. Its "Open gap" paragraph
+      is now historical: the gap is closed, the decision it recorded is unchanged,
+      and a reader who wants to know when belongs here rather than in the ADR.
+
 ---
 
 ## Closed phases, in full
@@ -1051,6 +1143,120 @@ was written when each closed.
       (D1); and the end-to-end test goes through **MockMvc rather than a socket**,
       because an authenticated session cannot be minted over one without an
       authorization server to redirect to.
+
+### Qualifications moved out of the live tracker, 2026-09-11 (seventeenth session)
+
+Verbatim, and still true. They left *What is still unverified* because they
+qualify phases that are closed and because none of them bears on a next action —
+which is the tracker's own criterion for moving something: being finished with
+it, not its age. The tracker had reached 759 lines against a 550-line budget and
+the sixteenth session's own note named these as the candidates.
+
+Read them when you re-open Phase 1, Phase 2 or Phase 11. **The one with live
+teeth is the time axis**, and its warning is restated in one line on the live
+Phase 11 row rather than being left only here.
+
+- **The benchmark is one guide.** Written for patch 2.7 against a 3.3 sample, and
+  it answers "which stage for this material" rather than "what should I do this
+  week". A second independent source would turn "agrees with the community" from
+  a claim into a measurement. The agreement is also on the stage *ranking*, which
+  is arithmetic on the data — **the search itself is still checked only against
+  itself.**
+- **Two large disagreements with the community survive the sample-size fix**, on
+  105 and 113 runs. A 95% bound discounts a thin sample in proportion; it does
+  not rescue you from one. Those belong to the evidence, not the model, and the
+  fix is more sampling.
+- **The time axis has never met real data, and on this game it never will.**
+  Rewards, rotation and shops are modelled or refused on the synthetic fixture
+  alone, and on the real 3.5 patch the whole of N14 reduces to one energy row.
+  **Do not read "the optimizer has a calendar" as "the optimizer schedules real
+  weeks."** This is not the upstream being silent: **R1999 has no weekday
+  rotation at all**, so `Availability.ALWAYS` is *correct*, and its daily income
+  **is conditional on spending Activity**, so entering it as a `Reward` would make
+  every plan systematically too cheap. The rotation machinery waits for a game
+  that rotates — Phase 11 is the next chance. See
+  [the economy facts](../game-facts/reverse-1999-economy.md).
+- **Three shapes the model cannot express**, each a *silent* wrong answer if
+  faked, none a defect in what shipped: **an item that restores energy**
+  (`Stage` is the only source touching the budget and only ever consumes),
+  **a reward conditional on spending energy**, and **a lifetime purchase limit**
+  (`Shop` caps at "n per `Period`", not "five, ever"). Examples and provenance in
+  [the economy facts](../game-facts/reverse-1999-economy.md).
+- **The adapter converts less than the upstream publishes** — no shop offers, no
+  alternative resonance-pattern costs, no unreleased content — each with a reason
+  in `KornblumeAdapter`'s javadoc. That sentence is only reassuring when somebody
+  has checked what it converts against what the upstream actually *reads*; the
+  last time nobody had, two thirds of the game was missing.
+- **No skills or talents have ever been ingested from a real upstream.** The
+  catalog axis is proven end to end on the synthetic fixture only, because
+  Kornblume publishes no skill text. An upstream gap, not a defect — but do not
+  let the phase board imply otherwise.
+- **The pipeline has met one upstream, not two.** The second game is Phase 11 and
+  is where the abstraction is actually tested.
+- **`gacha` has no behaviour.** Every port in it is an interface with nothing
+  behind it. (Phase 5's own row says the same thing.)
+
+### Closed out of *what is still unverified*, 2026-09-12 (eighteenth session)
+
+Both had been struck through in place on the seventeenth session, which the
+tracker's own rule forbids: an item that closes moves here rather than staying as
+a corpse with a line through it. Verbatim, minus the strikethrough.
+
+- **The PWA is installable and has never been loaded offline.** **Loaded offline
+  2026-09-11**, and the way it was tested is the reason to believe it: the built
+  bundle was served, the service worker allowed to precache, and then **the
+  origin server was killed** — `curl` refused — and a *deep* route reloaded. The
+  shell rendered, the navigation fallback resolved `/catalog/proving-ground` to
+  the precached `index.html`, and the catalog list rendered from the `game-data`
+  runtime cache. Not a CDP offline flag: the server was actually gone. **It needs
+  the built bundle** (`preview_start` on the `web-built` config, port 4173),
+  because the dev server has no worker worth the name. **What is still unproven
+  is an offline *write path* end to end** — the outbox was proven against a
+  refusing network, not against a dead origin on a cold start. *That half stays
+  in the live tracker.*
+- **Provenance is written and never read.** **Read back 2026-09-11.** Four
+  catalog responses carry a `sourcing` block and both catalog pages render it.
+  **What it says today is the uncomfortable part and it is supposed to be:** on
+  the fixture it reads *"Invented for this project — not any real game"*, and on
+  a version published before ADR 0016 it reads *"Nobody recorded where these
+  numbers were read"*. That is the feature working. It becomes a claim worth
+  making only when **N27** puts a real reading behind it.
+
+### Lessons moved out of the live tracker, 2026-09-12 (eighteenth session)
+
+Verbatim, both of them *Status* bullets, and both still true. They left because
+they are lessons rather than live state, which is what the seventeenth session's
+own size note named as the next candidates. The tracker stood at 747 lines
+against a 550-line budget.
+
+#### CSRF is `SecurityConfig.browserCsrf`, and it is not to be changed back
+
+> **CSRF is `SecurityConfig.browserCsrf`, resolved eagerly and shared by both
+> filter chains — do not change it back.** Why, and the two phases of green
+> builds it hid behind, are in
+> [the fifteenth session](#2026-09-09-fifteenth-session--a-page-that-knows-who-is-reading-it-and-the-write-that-would-have-been-refused).
+
+The imperative survives the move and is the reason this heading exists rather
+than a plain deletion: the deferred `CsrfTokenRequestAttributeHandler` is
+Spring's default, so "restore the default" looks like tidying and is the defect.
+The account of how it was found is in that session's entry.
+
+#### A published version that stopped being readable
+
+> **A published version in the local database cannot be read back, and the shape
+> of that is worth more than the row.** Every catalog route on the locally
+> published Reverse: 1999 3.5 answers **400**: a `craft` row has zero
+> `craft_input` rows and `Craft`'s constructor refuses to build one. The row
+> predates the invariant, so it is a write made before a rule that came later
+> rather than a defect in today's code — but **a version is immutable and the
+> rules for reading one are not**, so a published snapshot can stop being
+> loadable without anything having touched it. Not repaired and no action opened:
+> [ADR 0015](../adr/0015-game-data-is-sourced-first-hand-not-adapted.md) says
+> that data will not ship.
+
+The live tracker keeps the one sentence with teeth — **read this before Phase 6
+tightens a rule over anything already published** — on the Phase 6 row, which is
+where somebody about to do it will be looking.
 
 ## Answered questions
 
@@ -1275,6 +1481,246 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+### 2026-09-12 (eighteenth session) — the field nobody may read, and a condition written then deleted
+
+**A short session with one action in it: N4.** It was the top item a session is
+*allowed* to take, and that is worth saying plainly rather than treating as
+scheduling. N27 sits above it and is the maintainer's by ADR 0015's integrity
+rule — a fact enters because somebody read it in the game, and an AI session is
+one of the three things that rule disqualifies by name. N20, N18 and N19 sit
+between, each deferred on a trigger that has not fired: a game that rotates, a
+published drop estimate, a second node. N4 was next and was owed.
+
+#### What ADR 0007 had actually recorded against itself
+
+ADR 0007 made equipment an `Entity` rather than a third top-level concept, and
+paid one opaque, game-supplied string for it. Its own words: `planner`, `gacha`
+and `stats` **must never read** `kind`, because the moment behaviour depends on
+the distinction, the distinction was real and the ADR was wrong. That is the
+reversal trigger, not a style note.
+
+Then it did something better than most ADRs do — it recorded that the constraint
+was asserted and **not enforced**, named the natural home (an ArchUnit rule beside
+`ModuleBoundaryTest`), and gave the reason for waiting: the guarded modules were
+empty and the rule would pass vacuously. That reason expired somewhere around
+Phase 2 and nobody noticed for six sessions. `planner` is now a resolver, a MIP
+and an optimizer, all of which take a `GameDefinition` and are one hop from an
+`Entity`.
+
+#### Three decisions in twenty lines of test
+
+**Bytecode rather than a source scan.** The obvious move was to extend
+`GameAgnosticismTest`, which already reads source and already guards those three
+modules. It does not work here: a grep for `kind()` cannot tell `entity.kind()`
+from `change.kind()`. `gamedata.diff` has one of the latter, and
+`GameDataReadModel` reads both within a hundred lines of each other, so the scan
+either misses the read or fails on a sibling. ArchUnit resolves the declaring
+type, which is the entire question being asked. The two tests are not
+interchangeable and the new one's javadoc says why, because the next person to
+touch either will be tempted to merge them.
+
+**An allowlist rather than a ban on the three named modules.** ADR 0007's
+normative sentence names `planner`, `gacha` and `stats`; its decision paragraph
+says the field exists "for the catalog surface and for ingest validation,
+nowhere else". Those are different rules and the second is the one worth
+enforcing. A denylist of three modules would pass vacuously *again* the first
+time `player`, the CLI or a future module grew a read — the same failure mode
+that let this gap sit open. So: `gamedata`, `api` and `adapters` may read it and
+nothing else may. The allowlist is by module because the module is the boundary
+this project enforces everywhere else, and because "the catalog surface" is not a
+line the package structure draws finely enough to guess at. It is also the first
+architecture test here that guards a **field** rather than a dependency.
+
+**Verified by putting the defect back.** A rule that has never failed is a rule
+nobody has checked. A throwaway class went into `planner` reading `kind` in both
+spellings a person would actually write — `e.kind()` and `.map(Entity::kind)` —
+and the rule failed on each, naming the file and the line.
+
+#### The condition that was written, measured, and deleted
+
+The method reference looked like a hole. ArchUnit files `Entity::kind` as a
+`JavaMethodReference`, which is not a `JavaMethodCall`, and `JavaClass` exposes
+`getMethodReferencesFromSelf()` separately from `getMethodCallsFromSelf()` — so
+the reasonable inference is that `accessTargetWhere` misses it, and a custom
+`ArchCondition` was written to cover it.
+
+Then the inference was checked instead of trusted: the extra condition was
+commented out and the run repeated. **Two violations, not one** — ArchUnit 1.3's
+`getAccessesFromSelf()`, which `accessTargetWhere` walks, carries code-unit
+references as well as calls. The condition was deleted and the measurement is in
+the test's javadoc, so the next reader does not add back the twenty lines this
+one removed. Worth recording as a habit rather than a fact about one library:
+the cost of checking was one four-second build.
+
+#### ADR 0007 was not edited
+
+Its "Open gap" paragraph now describes a gap that is closed. The convention here
+is that an accepted ADR is superseded, never corrected, and this is not a
+decision that changed — the decision is identical and only the account of what
+enforces it has moved on. Where a reader finds out *when* is the tracker, which
+is what the tracker is for. Superseding 0007 to change one paragraph about
+tooling would put a false claim in the record: that the equipment question was
+re-decided.
+
+#### Housekeeping, and the size debt
+
+Two *Status* bullets moved to the archive — the CSRF one and the unreadable
+published version — which the seventeenth session had named as the next
+candidates. Both are lessons rather than live state. The published-version one
+keeps its single sentence with teeth, moved from *Status* to the **Phase 6 row**,
+because "read this before tightening a rule over data already published" wants to
+be where somebody about to do that is looking. Two entries the seventeenth
+session had **struck through in place** were archived as well — the offline PWA
+load and provenance being write-only — which the live file's own rule asks for
+and which it had just broken.
+
+**747 → 742 lines**, and the interesting part is the first number: the
+seventeenth session recorded 740, and `wc -l` says the file was 747 both then and
+at the start of this one. A line count carried forward from the last session's
+prose rather than measured drifts, and it drifts in the flattering direction. The
+budget is 550, so the debt is **192 lines** and not 178. Count it.
+
+#### The numbers, and the trap that did not fire
+
+**278 tests locally**, 0 failed, 0 skipped with snapshots present. CI green on
+`261d1cd` as run `34691539392` — `backend` and `frontend` both passing, `deploy`
+skipped, **16 skipped and verified to be exactly** `RealUpstreamPlanTest` 8,
+`CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3, which makes it **262 on
+CI**. `EntityKindBoundaryTest` was read in the runner's log rather than inferred
+from a green job, and so were the 15 frontend tests. The PASSED-line count was
+255 against 262 actually run, which is the log undercount the seventeenth session
+warned about, arriving again.
+
+**The push-to-`dev` trap did not fire, for the first time in four sessions**, and
+the reason is that the rule was followed rather than that the situation improved:
+`gh pr list` was checked first, PR #18 was still open, and the push therefore ran
+a pipeline. The cost of it still being open is that **N4 is on the same PR as
+N25** and that PR's title names only N25. Not tidy; the alternative was branching
+off a `dev` that is itself unmerged, which trades a misleading title for a
+misleading history.
+
+### 2026-09-11 (seventeenth session) — the numbers say where they came from, and the answer is "nobody knows"
+
+**N25's three debts are paid and the action closes.** Nothing new was started:
+the session took the top item a session is *allowed* to take — N27 is the
+maintainer's by ADR 0015's integrity rule and cannot be delegated — and finished
+it.
+
+**1. Provenance is read back out, and the architecture of that is the whole
+decision.** ADR 0016 had written provenance at ingest and enforced it at publish,
+and neither of those reaches a reader; for two phases the gate could ask the
+question and nobody else could. The obvious implementation is a field on
+`GameDefinition`, and it is the wrong one: `Provenance`'s own javadoc already
+says that a solver which can read where a number came from is a solver that can
+eventually be made to prefer one, and nobody would notice. So the read travels on
+a **second port**, `ProvenanceRepository`, which `planner` does not know exists.
+`api` may reach `gamedata` and does; `planner` loads a `GameDefinition` and still
+cannot see an origin.
+
+Two shape decisions worth keeping:
+
+- **The lookup takes the facts, not the version.** Asking for a whole version's
+  sourcing would be one simpler query and would let a caller render sourcing for
+  facts that are not on the page. Taking the refs makes the response's claim
+  narrow by construction: what comes back is the sourcing of the numbers this
+  request actually answered with.
+- **`firstHand` goes on the wire.** It is derivable from `origin`, and a client
+  deriving it would be a second copy of `Provenance.Origin.isFirstHand()` in
+  TypeScript, where nothing can be made to fail to compile when the Java enum
+  gains a member. The policy is answered once and travels as an answer.
+
+**The JDBC adapter uses named parameters and it is worth saying why**, because
+the package next door does the opposite: `Availabilities` writes a Postgres array
+*literal* and argues it is safe because `DayOfWeek` is seven names with no
+quoting to escape. Fact refs are slugs out of a bundle, so that argument does not
+survive being copied; `IN (:refs)` expands to one placeholder per ref and every
+value stays a bind parameter.
+
+**What the feature says on today's data is the uncomfortable part, and it is
+supposed to be.** The fixture reads *"Invented for this project — not any real
+game"*. A version published before ADR 0016 reads *"Nobody recorded where these
+numbers were read. They may be right; nothing here says so."* That is the feature
+working — **there is still no first-hand fact in this repository** — and it is why
+the empty case is rendered loudly rather than as a blank space. A component that
+showed nothing when it knew nothing would read as approval.
+
+**2. The PWA has been loaded offline, and the method is the evidence.** The claim
+owed was not "offline editing" — the sixteenth session proved that against a
+refusing network — but "the app shell renders with no server at all". So: build
+the bundle, serve it on 4173 (`web-built` in `.claude/launch.json`; the dev
+server has no worker worth the name), let the service worker precache, then
+**stop the server** and confirm `curl` is refused, then reload a *deep* route.
+`/catalog/proving-ground` rendered: the navigation fallback resolved it to the
+precached `index.html`, and the catalog list came out of the `game-data` runtime
+cache — the cache whose rule the previous session had repaired and which nothing
+had yet read from. A CDP offline toggle would have proved strictly less, because
+the server would still have been there.
+
+**3. The frontend has 15 tests and, more importantly, a written decision about
+what they are for.** The question the tracker asked was to choose deliberately
+between component tests, a smoke test against the built bundle, or explicitly
+neither. The answer comes from the four defects the previous session found by
+driving a browser:
+
+| Defect | Catchable in jsdom? |
+|---|---|
+| Store selector re-rendering forever | **Yes** — React throws rather than hanging |
+| Focus order not the order rows are drawn | **Yes** |
+| Goal screen could not express the base of a track | **Yes** — it is logic over fixture data |
+| `display: block` folding every table header | **No, and never** — jsdom computes no layout |
+
+So: **behaviour is the pipeline's, appearance is a person's.** Driving a browser
+before shipping a screen is still required; what it no longer has to do is
+re-check the behavioural half by hand on every change. The re-rendering selector
+is pinned by a test that was **verified to fail** — the defect was reintroduced
+and both assertions broke, one on referential identity and one with React's own
+*"Maximum update depth exceeded"*, which is the symptom that blanked the
+inventory screen. A regression test nobody has watched fail is decoration.
+
+`globals: true` was set and then removed: every test imports `describe`/`it`/
+`expect` by name, which keeps `tsconfig`'s `types` the small closed list it is.
+A half-configured global is how a suite ends up compiling in the editor and not
+in the build.
+
+**A browser found one more defect, and it is the most valuable thing here.** The
+first time the built bundle was served, **the whole page rendered as nothing** —
+`Cannot destructure property 'sources' of undefined`. The cause was not a bug in
+the component: Vite's `preview.proxy` defaults to `server.proxy`, so the page
+reached a backend from another session that had been built *before* `sourcing`
+existed, and reading through an absent object throws before React paints
+anything.
+
+**That is B5's problem in miniature.** Vercel and Render are separate hosts and do
+not deploy at the same instant, so every release has a window in which a new page
+is talking to an old API. The fix is two-part and both parts matter: the
+component treats an absent record as silence — which is its own thesis, not
+defensiveness — and the **wire types now mark the field optional**, so the
+compiler points at every call site that has to cope rather than leaving it to the
+next person to remember. The general lesson is wider than one field: *a client
+that treats a new response field as guaranteed is a client that blanks its own
+page on every deploy.*
+
+**The tracker paid its size debt before adding to itself**, which is its own
+rule and had been deferred once. Eight qualifications of closed phases moved to
+this file — 759 lines down to 740 while closing an action and shipping a feature.
+The one with live teeth, the time axis never having met real data, was restated
+in one line on the Phase 11 row rather than being left only here.
+
+**Numbers:** 277 backend tests (274 + 3), 0 failed, 0 skipped locally with
+snapshots present; 15 frontend tests. `main` was `92c29cf` and `gh pr list` was
+**empty** at the start of the session — the third time the no-open-PR trap has
+been found rather than triggered.
+
+**CI-confirmed on run `34597211345`** ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18)),
+both jobs green and `deploy` skipped. Two things were checked in the log rather
+than inferred from a green tick, because this file has been wrong about both
+before: the **15 frontend tests really ran on the runner** (a new step can pass
+by doing nothing), and the **16 skips are exactly the three snapshot-gated
+classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5,
+`RealUpstreamPatchTest` 3 — which is what makes 261-on-CI a count rather than an
+assumption. A pass in any of those three would mean a snapshot had been
+committed by accident.
 
 ### 2026-09-11 (sixteenth session) — the screens, and the first edit that survived a tunnel
 

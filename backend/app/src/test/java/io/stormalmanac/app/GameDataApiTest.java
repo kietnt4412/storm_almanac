@@ -1,6 +1,7 @@
 package io.stormalmanac.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 import io.stormalmanac.api.gamedata.GameDataView.CostView;
 import io.stormalmanac.api.gamedata.GameDataView.DiffResponse;
@@ -13,11 +14,15 @@ import io.stormalmanac.api.gamedata.GameDataView.UpgradeStepView;
 import io.stormalmanac.api.gamedata.GameDataView.UpgradesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.VersionsResponse;
 import io.stormalmanac.common.id.GameId;
+import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.ingest.CanonicalBundleParser;
 import io.stormalmanac.gamedata.ingest.GameDataBundle;
 import io.stormalmanac.gamedata.ingest.GameDataIngestRepository;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -307,7 +312,119 @@ class GameDataApiTest extends SharedDatabaseTest {
                 .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
+    @Test
+    @DisplayName("a catalog page says where its numbers were read, and not merely who to credit")
+    void carriesTheSourcingOfItsNumbers() {
+        // ADR 0016 made a fact carry its provenance and made publish refuse a
+        // version that is not ours. Both happen behind the maintainer's back, so
+        // for two phases the sourcing was written and no reader could ask for
+        // it. Attribution is not the same claim: it is one credit line per
+        // version, and it cannot say that a banner's rates came from the
+        // publisher's rules screen while the stage beside it came from somebody
+        // counting runs.
+        publish("proving-ground-1.0.json");
+
+        EntityResponse warden = ok(http.getForEntity(
+                "/api/games/proving-ground/entities/warden", EntityResponse.class));
+
+        assertThat(warden.sourcing().facts())
+                .as("the page's one fact, pointing at the record it was read under")
+                .containsExactly(entry("entity:warden", "invented"));
+        assertThat(warden.sourcing().sources()).singleElement().satisfies(source -> {
+            assertThat(source.id()).isEqualTo("invented");
+            assertThat(source.origin()).isEqualTo("AUTHORED_FIXTURE");
+            // Derivable from the origin, and derived once. A client computing it
+            // would be a second copy of Provenance.Origin.isFirstHand() in a
+            // language that cannot be made to fail to compile when this one
+            // gains a member.
+            assertThat(source.firstHand()).isTrue();
+            assertThat(source.detail()).contains("Written by hand for this repository");
+            assertThat(source.observedOn()).isEqualTo(LocalDate.of(2026, 9, 5));
+        });
+
+        // The upgrade table is a different reading from the character page —
+        // a levelling screen rather than a profile — so the response names both
+        // facts rather than claiming the whole page at once. They happen to
+        // share a record here because the fixture was written in one sitting.
+        UpgradesResponse upgrades = ok(http.getForEntity(
+                "/api/games/proving-ground/entities/warden/upgrades", UpgradesResponse.class));
+
+        assertThat(upgrades.sourcing().facts())
+                .containsKeys("entity:warden", "upgrade:warden-insight-1", "upgrade:warden-insight-2");
+        assertThat(upgrades.sourcing().sources()).extracting("id").containsExactly("invented");
+
+        // And the list an inventory is written in, which is where a reader
+        // checking a quantity would look for it.
+        ItemsResponse items = ok(http.getForEntity(
+                "/api/games/proving-ground/items", ItemsResponse.class));
+        assertThat(items.sourcing().facts()).containsKey("item:gold").hasSize(items.items().size());
+    }
+
+    @Test
+    @DisplayName("a number this project did not source says so to the reader, in the same breath as the number")
+    void namesDataThatIsNotOurs() {
+        // The escape hatch exists so a cross-check can reach a published version
+        // to be diffed against one (ADR 0015 forbids shipping somebody else's
+        // data, not handling it). What it must not do is make the resulting page
+        // indistinguishable from one carrying our own reading — which, before
+        // this, it did: the gate refused at publish and said nothing afterwards.
+        GameDataBundle borrowed = secondHand(bundle("proving-ground-1.0.json"));
+        ingest.ingestDraft(borrowed);
+        ingest.publish(PROVING_GROUND, borrowed.sequence(), true);
+
+        EntityResponse warden = ok(http.getForEntity(
+                "/api/games/proving-ground/entities/warden", EntityResponse.class));
+
+        assertThat(warden.sourcing().sources()).singleElement().satisfies(source -> {
+            assertThat(source.origin()).isEqualTo("THIRD_PARTY");
+            assertThat(source.firstHand()).isFalse();
+            assertThat(source.detail()).contains("Somebody else's numbers");
+        });
+    }
+
+    @Test
+    @DisplayName("a fact nobody sourced is absent from the sourcing rather than given an invented record")
+    void silenceStaysSilent() {
+        // Not a hypothetical. Every fact of a bundle ingested since V7 gets a
+        // row, so the only way to reach this state is to have been published
+        // before the rule existed — and TRACKER.md records a locally published
+        // version in exactly that position. A version is immutable and the rules
+        // for reading one are not, so a page has to survive meeting one.
+        //
+        // Deleting the row here is that older version, reproduced: the fact is
+        // served, and nothing claims to know where it came from.
+        publish("proving-ground-1.0.json");
+        jdbc.update("DELETE FROM gamedata.fact_provenance WHERE fact_ref = 'entity:warden'");
+
+        EntityResponse warden = ok(http.getForEntity(
+                "/api/games/proving-ground/entities/warden", EntityResponse.class));
+
+        assertThat(warden.entity().displayName())
+                .as("the numbers are still served — an unsourced fact is not a broken page")
+                .isEqualTo("The Warden");
+        assertThat(warden.sourcing().facts())
+                .as("absent, not present with a fabricated record: inventing an id would put a"
+                        + " source in the list that nobody authored")
+                .isEmpty();
+        assertThat(warden.sourcing().sources()).isEmpty();
+    }
+
     // ── Fixtures ────────────────────────────────────────────────────────────
+
+    /** The same facts, sourced from somebody else. */
+    private static GameDataBundle secondHand(GameDataBundle bundle) {
+        return new GameDataBundle(
+                bundle.game(), bundle.sequence(), bundle.label(), bundle.attribution(),
+                List.of(new Provenance(
+                        "borrowed",
+                        Provenance.Origin.THIRD_PARTY,
+                        "Somebody else's numbers, retyped. Which is the thing ADR 0015 is about.",
+                        LocalDate.of(2026, 9, 9))),
+                "borrowed",
+                Map.of(),
+                bundle.items(), bundle.sources(), bundle.sinks(),
+                bundle.banners(), bundle.entities());
+    }
 
     private void publish(String fixture) {
         GameDataBundle bundle = bundle(fixture);
