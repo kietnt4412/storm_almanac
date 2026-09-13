@@ -1705,8 +1705,20 @@ engines' single-copy answers are exact. **For several copies it does**, because
 the two roads add up: 2 copies drop from 280 pulls to 200, and 3 from 420 to 280.
 From 4 copies up the answer depends on a purchase limit the screenshot does not
 show. The test's claim was narrowed to one copy, with the price written beside
-the 140 it beats. **Still open:** the purchase limit, whether "guarantee count"
-covers a guarantee earned by missing the 50/50, and every other banner.
+the 140 it beats.
+
+**Then the limit, and a cap underneath it.** The maintainer reported from the game
+that she can be bought without limit until Portrait 5, and sent her Portrait screen
+as support. The screen shows portrait levels to Lv. 5, at one portrait item each.
+The limit itself is not on a screenshot, so it is recorded as the maintainer's
+in-game observation. **The portrait screen agrees with the duplicate table read
+earlier from a different screen**: copies 2–6 give an Artifice, and copy 7 gives
+none. So six copies is the most that changes anything, and a shop limited
+exactly there never binds on a goal that means anything. With the shop, the
+worst case for six copies is **560 pulls against 840** from the pulls alone. N28
+now also carries capping `copies`, which both engines only require to be at least
+1. **Still open:** whether "guarantee count" covers a guarantee earned by missing
+the 50/50, and every other banner.
 
 ### 2026-09-12 (nineteenth session) — Phase 5: two engines, one question, and a criterion that did not fit its own sample size
 

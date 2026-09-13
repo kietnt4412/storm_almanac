@@ -49,7 +49,15 @@ expire when the shop closes.
 **The Limited Shop**, from a second screenshot the same day: **Rhiannon costs 200
 Cassettes of the Lost.** Three growth items (Clawed Pendulum, Goose Neck, Golden
 Beetle) cost 12 each. Every entry showed "11d left" on 2026-09-13. **No purchase
-limit is shown on that view**, so none is recorded.
+limit is shown on that view.** The maintainer reports from the game that she can
+be bought **without limit until she reaches Portrait 5**. That is recorded as
+their in-game observation. It is not on a screenshot.
+
+**Portraits**, from a screenshot of her Portrait screen the same day: the portrait
+levels run to **Lv. 5**, and raising one costs one of her portrait items (shown as
+0/1). That agrees with the duplicate rule above, where copies 2–6 each give one
+Artifice and copy 7 onwards gives none. So **six copies is the most that changes
+anything**: the original, then five portraits.
 
 **Duplicates**, whatever the source. The 2nd to 6th copy converts to one of the
 character's Artifice plus a fixed amount of currency. The 7th copy onwards converts
@@ -89,20 +97,23 @@ with luck. One cassette per summon means cassettes never outnumber pulls, and he
 price is 200 against a no-shop worst case of 140, **so for one copy the pulls
 always deliver her before the shop could**. The engines' one-copy answers are exact
 as they stand. **For two or more copies the shop does bind**, because the two roads
-add up. The smallest pull count that guarantees *k* copies in the worst case:
+add up. The smallest pull count that guarantees *k* copies in the worst case,
+using the most pull copies that many pulls can be kept from delivering, plus one
+purchase per 200 cassettes:
 
-| Copies | Pulls alone | With the shop, one purchase | With the shop, no limit |
+| Copies | Portrait reached | Pulls alone | With the shop |
 |---|---|---|---|
-| 1 | 140 | 140 | 140 |
-| 2 | 280 | **200** | **200** |
-| 3 | 420 | **280** | **280** |
-| 4 | 560 | **420** | **400** |
-| 5 | 700 | **560** | **420** |
-| 6 | 840 | **700** | **560** |
+| 1 | P0 | 140 | 140 |
+| 2 | P1 | 280 | **200** |
+| 3 | P2 | 420 | **280** |
+| 4 | P3 | 560 | **400** |
+| 5 | P4 | 700 | **420** |
+| 6 | P5 | 840 | **560** |
 
-So any multi-copy "can I guarantee her" answer from the engines is too
-pessimistic, by 80 pulls at two copies. The purchase limit only changes the table
-from four copies up. This is
+The shop column assumes no purchase limit, and the maintainer's report is that
+there is none until Portrait 5, which is exactly where the table stops. So the
+column holds for every goal that means anything. **At six copies the engines
+alone say 840 pulls and the truth is 560.** This is
 [ADR 0018](../adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md)'s
 scope meeting the game. Nothing in `BannerModel` can express it yet, and it
 belongs with **N28**, which is already about what a pull costs and what it is
@@ -114,8 +125,8 @@ changes no answer the engines give, and the fixture leaves it out instead of
 writing it as a recurring rule.
 
 **Left open:**
-- **The shop's purchase limit for her**, which matters from four copies up. It
-  may show when her entry is tapped.
+- **A screenshot of the purchase limit**, if the game shows one anywhere, to
+  move it from a report to a reading. It changes no number in the table.
 - **Whether "guarantee count" includes a guarantee earned by missing the 50/50,**
   or only the pull count. The screen's wording does not say.
 - **Every other banner.** The beginner banner and both Gray Raven games remain
