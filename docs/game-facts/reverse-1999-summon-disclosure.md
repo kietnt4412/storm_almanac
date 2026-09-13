@@ -40,7 +40,12 @@ higher. Every 10 summons guarantee at least one 4★ or higher.
 
 **Scope.** The banner's guarantee count is independent: it is not shared with
 other banners of its kind, and it is cleared when the event ends rather than
-carried over.
+carried over. The screen does not say whether that includes the guarantee earned
+by missing the 50/50. **The maintainer reports from the game that it does: that
+guarantee does not carry over either, and is reset.** That is recorded as their
+observation, not a screen reading. So every limited banner starts a player at
+zero pulls and zero losses, which is `PityState.fresh` under `PityScope.BANNER`,
+exactly what the fixture already uses.
 
 **Cassettes of the Lost.** Every summon grants one, so a ten-pull grants ten. They
 are exchanged in the Limited Shop for Rhiannon and for growth materials, and they
@@ -127,7 +132,5 @@ writing it as a recurring rule.
 **Left open:**
 - **A screenshot of the purchase limit**, if the game shows one anywhere, to
   move it from a report to a reading. It changes no number in the table.
-- **Whether "guarantee count" includes a guarantee earned by missing the 50/50,**
-  or only the pull count. The screen's wording does not say.
 - **Every other banner.** The beginner banner and both Gray Raven games remain
   second-hand.

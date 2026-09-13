@@ -1716,9 +1716,14 @@ earlier from a different screen**: copies 2–6 give an Artifice, and copy 7 giv
 none. So six copies is the most that changes anything, and a shop limited
 exactly there never binds on a goal that means anything. With the shop, the
 worst case for six copies is **560 pulls against 840** from the pulls alone. N28
-now also carries capping `copies`, which both engines only require to be at least
-1. **Still open:** whether "guarantee count" covers a guarantee earned by missing
-the 50/50, and every other banner.
+now also carries capping `copies`, which both engines accept at any value from one
+upwards.
+
+**Last, the carry-over.** The screen does not say whether a guarantee earned by
+missing the 50/50 survives the event. The maintainer reports from the game that it
+does not: it is reset, like the pull count. So a limited banner always starts from
+`PityState.fresh`, which the fixture already assumed, and no code changed. **Still
+open for Q4:** every other banner.
 
 ### 2026-09-12 (nineteenth session) — Phase 5: two engines, one question, and a criterion that did not fit its own sample size
 
