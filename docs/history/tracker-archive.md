@@ -970,6 +970,37 @@ entry was met, not that the code exists.
 
 ---
 
+### Done 2026-09-13 (twentieth session) — N5
+
+- [x] ~~**N5 — Upgrade the CI actions before they break.**~~ **Done 2026-09-13**,
+      [PR #20](https://github.com/kietnt4412/storm_almanac/pull/20), green on
+      `ef51844`, run `34731880389`, **with no annotations** — the Node 20 and
+      `setup-java@v4` deprecation warnings are gone.
+
+      The action as written asked for `setup-java@v5`. By the time it was done
+      every action had moved two or three majors: checkout **v7**, setup-java
+      **v6**, setup-node **v7**, upload-artifact **v7** — all taken, after reading
+      the breaking notes of every major in between, none of which touches this
+      pipeline. Both workflows, including the dormant `nightly-chaos.yml`.
+
+      **`gradle/actions` stopped at v5, not v6, and that is a decision left open
+      rather than taken.** v6 extracted setup-gradle's caching into a proprietary
+      component, and upgrading accepts Gradle's Terms of Use. That is a licence
+      question for the maintainer, not a version bump. v5 runs on Node 24, which
+      is all N5 needed — **but v5's last release was 2026-02-23, so it is frozen
+      rather than maintained.** A comment in `ci.yml` says why, so it is not bumped
+      by reflex.
+
+      **The green run executed no tests, and says so here so nobody reads it as
+      more.** A YAML-only change leaves every Gradle input identical to PR #19's,
+      so all seven test tasks came back `FROM-CACHE` (50 tasks, 22 executed, 28
+      from cache). What the run proves is the *mechanics* under the new actions:
+      checkout, JDK install, wrapper validation, cache restore, artifact upload,
+      Node. The first PR that changes source is the first run of the suite under
+      them.
+
+---
+
 ### Rows compressed out of *Current state*, 2026-09-12 (nineteenth session)
 
 The live tracker's table had three cells that were each a session-log entry. The
@@ -1593,6 +1624,38 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+### 2026-09-13 (twentieth session) — six action bumps, one licence left unaccepted, and a green run that ran no tests
+
+**The remote had moved again, as the tracker said it would.** PR #19 was merged,
+`origin/main` and `origin/dev` were equal, and **`dev` had no open PR** — the fifth
+time the trap has been armed, caught by looking. There was also an unlogged
+uncommitted change in the working tree: a duplicated
+`import java.util.function.ToLongFunction;` in `MonteCarloBannerEngine.java`.
+Legal Java — the JLS ignores an identical duplicate single-type import — and not
+this session's; left out of every commit and reported rather than reverted.
+
+**N27 was handed to the maintainer as a form, not a pointer.** What to read off
+the summon rules screen (per-rarity rates, where the curve starts and how it
+climbs, the wall, the ten-pull floor, the featured chance and what a loss carries,
+pity scope, dates) and off one stage, one item and one character, with a timer on
+the second half. **Deliberately without the fixture values**: the authoring note
+forbids opening Kornblume while reading because it makes the later diff
+non-independent, and showing a reader the numbers `Banners.java` already assumes
+does exactly the same thing. Read blind, then diff.
+
+**N5 done** — [in full above](#done-2026-09-13-twentieth-session--n5). The tracker's
+line asked for `setup-java@v5`; the latest was v6, and every other action had moved
+as far. **The one thing worth carrying forward is `gradle/actions@v6`'s licence
+change**: the caching moved into a proprietary component under Gradle's Terms of
+Use, so accepting it is the maintainer's choice, and v5 is frozen at 2026-02-23 in
+the meantime. **And the run was green on cached test results only** — 28 of 50
+tasks from cache, every test task among them — which is correct Gradle behaviour
+for a YAML-only change and still means the suite has not yet run under the new
+actions.
+
+**Tracker length:** N5's action came out and the Phase board's closed entries were
+cut to one line each, which the nineteenth session named as the next candidate.
 
 ### 2026-09-12 (nineteenth session) — Phase 5: two engines, one question, and a criterion that did not fit its own sample size
 

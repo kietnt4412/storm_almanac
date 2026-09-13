@@ -13,7 +13,7 @@ being finished with is.
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks).
   [README.md](README.md) is the public face; [CLAUDE.md](CLAUDE.md) is the
   working agreement.
-- Last updated: **2026-09-12** (nineteenth session)
+- Last updated: **2026-09-13** (twentieth session)
 
 ---
 
@@ -82,28 +82,19 @@ being finished with is.
 - **Phase 0 stays closed by exception** — deploy deferred by D1 — and its box
   stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
-- **The remote, checked 2026-09-12 (nineteenth session) — re-check it, do not
-  trust it.** **[PR #18](https://github.com/kietnt4412/storm_almanac/pull/18) is
-  MERGED and `main` is now `39bd72d`**, which carries N25 *and* N4;
-  `git rev-list --count origin/main..origin/dev` was **0** at session start. The
-  eighteenth session's entry here said #18 was open and `main` was `92c29cf`, and
-  both were wrong by the time it was read — **which is what this bullet is for.**
-  **[PR #19](https://github.com/kietnt4412/storm_almanac/pull/19) was opened for
-  this session's Phase 5 work and is green on `330c02f`, run `34695206362`** —
-  both jobs passing, `deploy` skipped, 16 skipped counted off the log.
-  **`DeployableJarTest` passed on the runner**, so the development sign-in's
-  absence is proven against a jar CI built from a clean checkout rather than only
-  one this machine did. The guard travels with the pipeline.
-  **Counting PASSED lines in a CI log undercounts**: a cached test task prints
-  nothing while its results are still in the green. Read the totals, not the log.
-  **The trap is armed again, for the fourth time.** CI runs on `pull_request` and
-  on push to `main` only, so **a push to `dev` with no open PR runs nothing,
-  silently.** It has now happened after #15, #16, #17 and #18 — every merge leaves
-  `dev` with no open PR. Every single one was caught by looking, never by anything
-  failing. **Open the PR before trusting a push to `dev`, and check `gh pr list`
-  rather than assuming last session's PR is still open.** This is a fact here
-  rather than a next action because seven sessions running would have opened on a
-  "merge PR #n" the maintainer had already clicked.
+- **The remote, checked 2026-09-13 (twentieth session) — re-check it, do not
+  trust it.** At session start **PR #19 was MERGED** (Phase 5 is on `main`),
+  `origin/main` and `origin/dev` were equal, and `dev` had no open PR.
+  **[PR #20](https://github.com/kietnt4412/storm_almanac/pull/20) (N5) was then
+  opened and is green on `ef51844`, run `34731880389`** — and **every test task in
+  that run was `FROM-CACHE`**, correctly, because only YAML changed. It proves the
+  new actions' mechanics, not the suite under them; the next source change does.
+  **Counting PASSED lines in a CI log undercounts** — read the task outcomes and
+  the totals. **The trap:** CI runs on `pull_request` and on push to `main` only,
+  so **a push to `dev` with no open PR runs nothing, silently.** Every merge re-arms
+  it; five times now, each caught by looking. **Check `gh pr list` and open the PR
+  before trusting a push to `dev`.** It is a fact here rather than a next action
+  because a "merge PR #n" line is stale before it is read.
 - **The optimizer has been asked a question by something other than a test.**
   What has *not* happened is a real OAuth exchange: no provider is configured and
   no client secret exists, so login is installed only when one is. The
@@ -176,10 +167,12 @@ Rules that keep this file honest:
   ([the five largest are in the archive](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-12-nineteenth-session)) —
   **and still ended seven lines up, because it closed a phase, opened a deviation and
   added an action in the same session.** By this file's own rule that is moving the
-  problem, and the flat number is the only honest way to say so. **The debt is not
-  paid and was not reduced.** The next candidate is the *Phase board*: Phases 0 to 3
-  and 5 are closed and their five entries here still run to five lines each, where
-  one and a link would do.
+  problem, and the flat number is the only honest way to say so.
+  **→ 721 on 2026-09-13 (twentieth), measured after this entry was written** — N5 out, the Phase board's closed
+  entries cut to one line each, the remote bullet halved. **Still ~170 over.** The
+  next candidates are *What is still unverified* (its closed-phase items could
+  become one line and a link, as its last bullet already does for eight of them)
+  and the *Game data API* and *Frontend* rows of *Current state*.
 
 ---
 
@@ -219,7 +212,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
 | Backend build | **Green** | **324 tests**, 0 failed, 0 skipped locally with snapshots present; **308 on CI**, because the same 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar` — `DeployableJarTest` reads the artifact. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
-| CI workflow | **Green on this tree** | Run `34695206362` on `330c02f` ([PR #19](https://github.com/kietnt4412/storm_almanac/pull/19)), both jobs passing, `deploy` skipped. **16 skipped and they are exactly the three snapshot-gated classes** — `RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3, counted off the log rather than assumed. A pass there would mean a snapshot had been committed by accident. Action deprecations warned again — **N5** |
+| CI workflow | **Green, no warnings, on Node 24** | Run `34731880389` on `ef51844` ([PR #20](https://github.com/kietnt4412/storm_almanac/pull/20), N5): zero annotations. **Test results cached from #19's run `34695206362`**, where the suite last *executed*: 16 skipped, exactly the three snapshot-gated classes (`RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3) — a pass there would mean a snapshot had been committed by accident. **`gradle/actions` is held at v5**: v6 needs Gradle's Terms of Use accepted, which is the maintainer's call, and v5 has been frozen since 2026-02-23 |
 | Game data pipeline (Phase 1) | **Closed and stable** | `V2`–`V4`, 28 tables, seven invariants on two real patches, a round trip pinning parser against writer (ADR 0008), publishing as a human approval. `Drop` carries `sampledRuns`, where 0 means *declared*. [In full in the archive](docs/history/tracker-archive.md#closed-phases-in-full) |
 | Parser adapters | **One, and demoted to a cross-check by [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)** | `:adapters:reverse-1999`, 25 tests. **It hard-codes `THIRD_PARTY` and so fails a plain `publish`** — there is no call site to launder data through. Kept rather than deleted because diffing the first self-sourced bundle against it is worth more than it ever was as a source. [The prose it used to carry](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-12-nineteenth-session) |
 | Provenance | **Done — written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per *declared* fact; `publish` refuses a version that is not first-hand and names the facts, and the exception is a word the operator types. **`ProvenanceRepository` is a second port, not a field on `GameDefinition`** — so the solver cannot see where a number came from and cannot be made to prefer one. Silence is `UNRECORDED`, which parses and cannot publish. [The prose it used to carry](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-12-nineteenth-session) |
@@ -412,14 +405,6 @@ Ordered. Completed ones move to
       regardless of node count: a replicated cache measured against an in-process
       map is measuring the network, and ADR 0003 forbids a comparison shaped to
       flatter the hand-built side.
-- [ ] **N5 — Upgrade the CI actions before they break.** Green but warning twice,
-      both on a clock: **Node 20 is deprecated** and six actions are already being
-      forced onto Node 24 by the runner (`checkout@v4`, `setup-java@v4`,
-      `upload-artifact@v4`, `gradle/actions/setup-gradle@v4`,
-      `gradle/actions/wrapper-validation@v4`, `setup-node@v4`), and
-      **`setup-java@v4` is deprecated outright** — migrate to `@v5`. Do it as a
-      standalone PR while the pipeline is quiet: six action bumps at once want
-      their own green run to attribute a failure to.
 - [ ] **B5 — Wire the real deploy: Vercel and Render.** No longer deferred —
       [D1 is reversed](#d1--deployment-deferred-2026-09-02) and the hosts are chosen. The
       `deploy` job is still `if: false` and stays that way until there is a real
@@ -454,18 +439,9 @@ a session would be wrong not to read.
       unticked.** Everything landed except the deploy.
       **Not met as written** — [D1](#d1--deployment-deferred-2026-09-02). The box
       gets ticked when, and only when, a real URL answers 200.
-- [x] **Phase 1 · Game data foundation** — **closed 2026-09-06.** Both halves
-      met, CI-confirmed (N10). Two qualifications, both in
-      [the unverified list](#what-is-still-unverified).
-- [x] **Phase 2 · Optimizer core** — **closed 2026-09-08, criterion and scope.**
-      Nine agreements, p95 1 807 ms. **The search is stopped by its budget, not
-      finished by it**, and says so with the size of the doubt (2.30%, ADR 0010).
-- [x] **Phase 3 · Identity and player state** — **closed 2026-09-08, criterion;
-      scope completed 2026-09-09.** A plan computed from stored state on a real
-      account, and since N23 a per-key merge so two devices do not overwrite each
-      other ([ADR 0014](docs/adr/0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md)).
-      Qualifications in [the unverified list](#what-is-still-unverified) — the
-      OAuth exchange has never run, and no two real devices have ever synced.
+- [x] **Phase 1 · Game data foundation** — closed 2026-09-06, CI-confirmed (N10).
+- [x] **Phase 2 · Optimizer core** — closed 2026-09-08. **Stopped by its budget, not finished by it** (ADR 0010).
+- [x] **Phase 3 · Identity and player state** — closed 2026-09-08; OAuth never exchanged, no two real devices synced.
 
 - [ ] **Phase 4 · Frontend v1 — and launch** — 2.5 weeks — **OPEN 2026-09-09.**
       Landed so far: the app is served, hosting is decided (Vercel + Render, D1
@@ -483,12 +459,7 @@ a session would be wrong not to read.
       **Exit:** five strangers complete a plan without asking for help, and a
       logged-in character page shows what that reader is short of.
 
-- [x] **Phase 5 · Gacha engine** — **closed 2026-09-12 on its criterion; scope
-      incomplete, and entered out of order ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)).**
-      Worst gap **0.110 points against 0.300** over 84 questions, and both games'
-      published rates out of `BannerModel` alone. Two qualifications a session
-      would be wrong not to read: **the rates are second-hand (Q4)**, and the
-      income model is **N28**. [In full in the archive](docs/history/tracker-archive.md#closed-phases-in-full).
+- [x] **Phase 5 · Gacha engine** — closed 2026-09-12 out of order ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)); **rates second-hand (Q4)**, income model is **N28**.
 
 - [ ] **Phase 6 · Drop statistics on Postgres** — 1.5 weeks
       Report submission, Wilson intervals, provenance, abuse controls, estimates
@@ -727,6 +698,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-13 | twentieth | **N5: every CI action onto Node 24, zero annotations, green on run `34731880389`** ([PR #20](https://github.com/kietnt4412/storm_almanac/pull/20)). Taken to the latest majors (checkout v7, setup-java v6, setup-node v7, upload-artifact v7) — **except `gradle/actions`, held at v5** because v6 needs Gradle's Terms of Use accepted, which is the maintainer's call, and v5 has been frozen since February. **The green run executed no tests**: a YAML-only change leaves every Gradle input identical, so all seven test tasks came from cache. N27 handed to the maintainer as a reading form, deliberately without the fixture values so the reading stays blind. PR #19 already merged and `dev` had no open PR — the fifth time. 749 → 721 lines |
 | 2026-09-12 | nineteenth | **Phase 5 closes on its criterion, out of order and on purpose (D2).** Two engines sharing three branches and nothing else: an exact chain and 500 000 seeded trials, **worst gap 0.110 percentage points over 84 questions against a criterion of 0.300, at 1.84 standard errors** — and both games' published rates out of `BannerModel` alone. **The plan's own two numbers do not fit together:** at its 100 000 trials, 0.3 points is under two standard errors, and the cross-check failed on its first run with both engines correct, so the trial count now follows from the tolerance. Four decisions in [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md) — `PullResult` can carry no `Rarity`, a floor reaching the headline is refused rather than ignored, `PityState` counts losses instead of flagging one, and the chain reads the mass that never arrived so a wall is exactly 1.0. Two of the first failures were **in the tests**: a 30-pull wall is 0.7030 and not certainty, because a wall guarantees the rarity and not her. 324 tests locally and 308 on CI, **green on run `34695206362`** ([PR #19](https://github.com/kietnt4412/storm_almanac/pull/19)). **PR #18 was already merged and `dev` had no open PR — the fourth time, caught by looking** |
 | 2026-09-12 | eighteenth | **N4: ADR 0007's own open gap becomes a failing build.** `EntityKindBoundaryTest` allows a read of `Entity.kind` in `gamedata`, `api` and `adapters` and denies it everywhere else — an allowlist, because the denylist of three modules the ADR names is what would pass vacuously again. Bytecode rather than a source scan, because a grep cannot tell `entity.kind()` from `change.kind()`. Verified by putting the defect back in both spellings. **A condition for method references was written, measured, and deleted** — `accessTargetWhere` already catches them, and the measurement is in the javadoc so nobody adds it back. ADR 0007 not edited: the decision did not change, only the account of what enforces it. Two lessons moved to the archive and two struck-through entries closed out, 747 → 742 lines (and the previous session's count was seven short — measure it). 278 tests, CI-confirmed on run `34691539392` ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18), which now carries N25 *and* N4) |
 | 2026-09-11 | seventeenth | **N25's three debts paid, so it closes.** Provenance is read back out through a *second* port — the solver still cannot see it — and both catalog pages now say where their numbers were read, which on today's data reads "invented for this project" or "nobody recorded it", and that is the feature working. The PWA was loaded with **the origin server killed** rather than with a flag flipped. The frontend gets 15 tests and a written argument for what they are and are not for. A browser found one more defect on the way: a new bundle reading an old API's response **blanked the whole page**, which is B5's two-host deploy window in miniature. 277 backend tests, 15 frontend, CI-confirmed on run `34597211345` ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18)) |
