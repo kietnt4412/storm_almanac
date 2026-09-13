@@ -1693,9 +1693,20 @@ change a headline answer anyway.
 stated rate table, and five tests in `PublishedRatesTest.Disclosed`.
 `reverseDebut`'s javadoc now says it is contradicted. The gacha module has 51
 tests, all green. The cross-check now asks **96 questions over eight banners:
-worst gap still 0.110 points, worst 2.22 standard errors** (was 1.84). **Still
-open:** her shop price, whether "guarantee count" covers a guarantee earned by
-missing the 50/50, and every other banner.
+worst gap still 0.110 points, worst 2.22 standard errors** (was 1.84). CI
+confirmed it on run `34746241622` (`85d0538`), and this time `:modules:gacha:test`
+**executed**, so the suite has now run under N5's actions.
+
+**The shop price came next, from one more screenshot: 200 cassettes.** The
+question it answers turned out narrower than expected. A summon grants exactly one
+cassette, so the shop cannot open before pull 200, and by then the 50/50 guarantee
+has already delivered her at 140. **For one copy the shop never binds**, so the
+engines' single-copy answers are exact. **For several copies it does**, because
+the two roads add up: 2 copies drop from 280 pulls to 200, and 3 from 420 to 280.
+From 4 copies up the answer depends on a purchase limit the screenshot does not
+show. The test's claim was narrowed to one copy, with the price written beside
+the 140 it beats. **Still open:** the purchase limit, whether "guarantee count"
+covers a guarantee earned by missing the 50/50, and every other banner.
 
 ### 2026-09-12 (nineteenth session) — Phase 5: two engines, one question, and a criterion that did not fit its own sample size
 

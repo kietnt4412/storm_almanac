@@ -88,11 +88,15 @@ class PublishedRatesTest {
         }
 
         @Test
-        @DisplayName("without the shop she is certain at 140 and not at 139")
-        void worstCaseWithoutTheShop() {
-            // Not the true worst case: Cassettes of the Lost buy her in the Limited
-            // Shop, and no engine models that road. Its price is not on this screen.
-            assertThat(PullModel.of(banner).worstCasePulls()).isEqualTo(140L);
+        @DisplayName("she is certain at 140 and not at 139, and the 200-cassette shop cannot beat that")
+        void worstCaseForOneCopy() {
+            // Cassettes of the Lost buy her in the Limited Shop, and no engine models
+            // that road. For one copy it does not need to: a summon grants one
+            // cassette, so the shop opens at pull 200, after the pulls have already
+            // guaranteed her. For two copies it does bind (200, not 280), which is
+            // why this claim is about one copy and nothing more.
+            long shopPrice = 200;
+            assertThat(PullModel.of(banner).worstCasePulls()).isEqualTo(140L).isLessThan(shopPrice);
             assertThat(exact.probabilityOfFeatured(banner, fresh, 140, 1)).isEqualTo(1.0);
             assertThat(exact.probabilityOfFeatured(banner, fresh, 139, 1))
                     .isCloseTo(0.9948695074, within(1e-9));

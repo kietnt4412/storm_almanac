@@ -88,7 +88,7 @@ being finished with is.
   **[PR #20](https://github.com/kietnt4412/storm_almanac/pull/20) (N5) was then
   opened and is green on `ef51844`, run `34731880389`** — and **every test task in
   that run was `FROM-CACHE`**, correctly, because only YAML changed. It proves the
-  new actions' mechanics, not the suite under them; the next source change does.
+  new actions' mechanics, not the suite under them. **Run `34746241622` on `85d0538` did execute `:modules:gacha:test`**, green.
   **Counting PASSED lines in a CI log undercounts** — read the task outcomes and
   the totals. **The trap:** CI runs on `pull_request` and on push to `main` only,
   so **a push to `dev` with no open PR runs nothing, silently.** Every merge re-arms
@@ -168,7 +168,7 @@ Rules that keep this file honest:
   **and still ended seven lines up, because it closed a phase, opened a deviation and
   added an action in the same session.** By this file's own rule that is moving the
   problem, and the flat number is the only honest way to say so.
-  **→ 720 on 2026-09-13 (twentieth), measured after this entry was written** — N5 out, the Phase board's closed
+  **→ 724 on 2026-09-13 (twentieth), measured after this entry was written** — N5 out, the Phase board's closed
   entries cut to one line each, the remote bullet halved. **Still ~170 over.** The
   next candidates are *What is still unverified* (its closed-phase items could
   become one line and a link, as its last bullet already does for eight of them)
@@ -293,9 +293,10 @@ works". It does not mean that:
   is a schema and a screen rather than an engine.
 - **One gacha banner is first-hand and six are not (Q4).** `PublishedRatesTest.Disclosed`
   is evidence about the game. Every other fixture proves only that the model
-  reproduces the figures it was *given*. **Every "can I guarantee her" worst case is
-  the worst case without the shop**, because Cassettes of the Lost buy her outright
-  and nothing models that — see **N28**.
+  reproduces the figures it was *given*. **Multi-copy "can I guarantee her" answers
+  are too pessimistic**, because 200 Cassettes of the Lost buy a copy and nothing
+  models that. At two copies the engines say 280 pulls and the truth is 200; one
+  copy is unaffected — see **N28**.
 - **Nothing has measured whether the cache is worth having in production**, only
   that a hit is 900× cheaper than a solve. Hit *rate* depends on whether two
   players ever ask the same question, which needs users. The counters are there
@@ -369,8 +370,8 @@ Ordered. Completed ones move to
       [authoring a first-hand bundle](docs/game-facts/authoring-a-first-hand-bundle.md).
       **The summon rules screen was read 2026-09-13** (Q4, via the maintainer's
       screenshots). **What remains is the timed stage-and-character pass**, and the
-      next cheap reading is **Rhiannon's price in Cassettes of the Lost** in the
-      Limited Shop. **Learned the same day:** a relayed web-search or AI answer and a
+      next cheap reading is **the shop's purchase limit on her** (her price, 200,
+      was read the same day). **Learned the same day:** a relayed web-search or AI answer and a
       screen reading look identical in chat, so ask how each value was read before
       recording it.
 - [ ] **N28 — Give a banner a pull currency and a price, and then write
@@ -384,11 +385,12 @@ Ordered. Completed ones move to
       like **N20**. **Do it with a game whose income sources are actually
       ingested**: the accrual side reads `Reward` cadences, and nothing ingested
       has ever been checked for them. **A second road to her arrived 2026-09-13:**
-      every R1999 limited summon grants a Cassette of the Lost, which buys her in the
-      Limited Shop. That is a guaranteed exchange with its own price, and it caps the
-      engines' 140-pull worst case if the price is lower. It is the same kind of
-      field, a currency and a price, so **design it in this change** rather than
-      after it. The engines are otherwise finished
+      every R1999 limited summon grants a Cassette of the Lost, and **200 buy her** in
+      the Limited Shop. That is past the one-copy worst case of 140, but it cuts two
+      copies from 280 pulls to 200, and the purchase limit decides from four copies
+      up ([the table](docs/game-facts/reverse-1999-summon-disclosure.md)). It is the
+      same kind of field, a currency and a price, so **design it in this change**
+      rather than after it. The engines are otherwise finished
       ([ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md)).
 - [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
       `EnergyMip.matchingDays` reads weekdays in **UTC** — a game assumption in a
@@ -683,7 +685,9 @@ then move the entry to
   2.3592%.** A curve one pull early or late would print 2.38% or 2.34%.
   **They contradict the featured rule**: 50/50 with a guarantee, where
   `reverseDebut` hands her over outright. **They also found a Limited Shop exchange
-  (Cassettes of the Lost) that no engine models**, whose price is the next reading.
+  that no engine models**: one Cassette of the Lost per summon, 200 for her. That
+  is past the 140-pull worst case, so it never binds for one copy, but it cuts
+  **two copies from 280 pulls to 200**.
   Still second-hand: the beginner banner and all of Gray Raven. Drop rates are a
   separate question, closed with the answer no, in
   [the drop disclosure note](docs/game-facts/reverse-1999-drop-disclosure.md).
@@ -697,7 +701,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-13 | twentieth | **Q4 answered for one banner, off the client itself:** the maintainer's screenshots of the rules screen confirm the pity curve twice — stated word for word, and an overall 6★ rate of **2.36% the curve reproduces as 2.3592%**, a check a curve one pull off would fail — **contradict the featured rule** (50/50 with a guarantee, not outright), and **find a Limited Shop exchange no engine models**. First first-hand fixture and five tests; 96 questions, worst gap still 0.110. An AI web-search answer was offered first and not recorded. **N5: every CI action onto Node 24, zero annotations, green on run `34731880389`** ([PR #20](https://github.com/kietnt4412/storm_almanac/pull/20)). Taken to the latest majors (checkout v7, setup-java v6, setup-node v7, upload-artifact v7) — **except `gradle/actions`, held at v5** because v6 needs Gradle's Terms of Use accepted, which is the maintainer's call, and v5 has been frozen since February. **The green run executed no tests**: a YAML-only change leaves every Gradle input identical, so all seven test tasks came from cache. N27 handed to the maintainer as a reading form, deliberately without the fixture values so the reading stays blind. PR #19 already merged and `dev` had no open PR — the fifth time. 749 → 720 lines |
+| 2026-09-13 | twentieth | **Q4 answered for one banner, off the client itself:** the maintainer's screenshots of the rules screen confirm the pity curve twice — stated word for word, and an overall 6★ rate of **2.36% the curve reproduces as 2.3592%**, a check a curve one pull off would fail — **contradict the featured rule** (50/50 with a guarantee, not outright), and **find a Limited Shop exchange no engine models**. First first-hand fixture and five tests; 96 questions, worst gap still 0.110. An AI web-search answer was offered first and not recorded. **N5: every CI action onto Node 24, zero annotations, green on run `34731880389`** ([PR #20](https://github.com/kietnt4412/storm_almanac/pull/20)). Taken to the latest majors (checkout v7, setup-java v6, setup-node v7, upload-artifact v7) — **except `gradle/actions`, held at v5** because v6 needs Gradle's Terms of Use accepted, which is the maintainer's call, and v5 has been frozen since February. **The green run executed no tests**: a YAML-only change leaves every Gradle input identical, so all seven test tasks came from cache. N27 handed to the maintainer as a reading form, deliberately without the fixture values so the reading stays blind. PR #19 already merged and `dev` had no open PR — the fifth time. 749 → 724 lines |
 | 2026-09-12 | nineteenth | **Phase 5 closes on its criterion, out of order and on purpose (D2).** Two engines sharing three branches and nothing else: an exact chain and 500 000 seeded trials, **worst gap 0.110 percentage points over 84 questions against a criterion of 0.300, at 1.84 standard errors** — and both games' published rates out of `BannerModel` alone. **The plan's own two numbers do not fit together:** at its 100 000 trials, 0.3 points is under two standard errors, and the cross-check failed on its first run with both engines correct, so the trial count now follows from the tolerance. Four decisions in [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md) — `PullResult` can carry no `Rarity`, a floor reaching the headline is refused rather than ignored, `PityState` counts losses instead of flagging one, and the chain reads the mass that never arrived so a wall is exactly 1.0. Two of the first failures were **in the tests**: a 30-pull wall is 0.7030 and not certainty, because a wall guarantees the rarity and not her. 324 tests locally and 308 on CI, **green on run `34695206362`** ([PR #19](https://github.com/kietnt4412/storm_almanac/pull/19)). **PR #18 was already merged and `dev` had no open PR — the fourth time, caught by looking** |
 | 2026-09-12 | eighteenth | **N4: ADR 0007's own open gap becomes a failing build.** `EntityKindBoundaryTest` allows a read of `Entity.kind` in `gamedata`, `api` and `adapters` and denies it everywhere else — an allowlist, because the denylist of three modules the ADR names is what would pass vacuously again. Bytecode rather than a source scan, because a grep cannot tell `entity.kind()` from `change.kind()`. Verified by putting the defect back in both spellings. **A condition for method references was written, measured, and deleted** — `accessTargetWhere` already catches them, and the measurement is in the javadoc so nobody adds it back. ADR 0007 not edited: the decision did not change, only the account of what enforces it. Two lessons moved to the archive and two struck-through entries closed out, 747 → 742 lines (and the previous session's count was seven short — measure it). 278 tests, CI-confirmed on run `34691539392` ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18), which now carries N25 *and* N4) |
 | 2026-09-11 | seventeenth | **N25's three debts paid, so it closes.** Provenance is read back out through a *second* port — the solver still cannot see it — and both catalog pages now say where their numbers were read, which on today's data reads "invented for this project" or "nobody recorded it", and that is the feature working. The PWA was loaded with **the origin server killed** rather than with a flag flipped. The frontend gets 15 tests and a written argument for what they are and are not for. A browser found one more defect on the way: a new bundle reading an old API's response **blanked the whole page**, which is B5's two-host deploy window in miniature. 277 backend tests, 15 frontend, CI-confirmed on run `34597211345` ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18)) |

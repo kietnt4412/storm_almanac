@@ -48,9 +48,10 @@ final class Banners {
      * guarantee at least one 5-star" happens once, and {@link Floor} can only say
      * <em>every</em> N — writing it as one would invent a rule; being below the
      * headline, it could not move an answer either way. And each summon grants a
-     * Cassette of the Lost, exchangeable for her in the Limited Shop. That is a
-     * second road to her that no engine models, so every worst case asserted
-     * against this banner is the worst case <em>without the shop</em>. Source note:
+     * Cassette of the Lost, and 200 of them buy her in the Limited Shop. No engine
+     * models that road. For one copy it cannot matter, since 200 is past the
+     * 140-pull worst case. For two or more copies it does, so multi-copy worst
+     * cases here are <em>without the shop</em>. Source note:
      * {@code docs/game-facts/reverse-1999-summon-disclosure.md}.
      */
     static BannerModel reverseAnniversaryLimited() {

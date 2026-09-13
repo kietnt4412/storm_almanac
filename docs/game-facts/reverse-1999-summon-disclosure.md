@@ -44,7 +44,12 @@ carried over.
 
 **Cassettes of the Lost.** Every summon grants one, so a ten-pull grants ten. They
 are exchanged in the Limited Shop for Rhiannon and for growth materials, and they
-expire when the shop closes. **Her price in cassettes is not on this screen.**
+expire when the shop closes.
+
+**The Limited Shop**, from a second screenshot the same day: **Rhiannon costs 200
+Cassettes of the Lost.** Three growth items (Clawed Pendulum, Goose Neck, Golden
+Beetle) cost 12 each. Every entry showed "11d left" on 2026-09-13. **No purchase
+limit is shown on that view**, so none is recorded.
 
 **Duplicates**, whatever the source. The 2nd to 6th copy converts to one of the
 character's Artifice plus a fixed amount of currency. The 7th copy onwards converts
@@ -78,10 +83,26 @@ the average wait for her is 63.58 pulls. `reverseDebut` is kept, and its
 javadoc now says it is contradicted. No first-hand reading of a banner that
 hands her over outright exists.
 
-**Found: a second way to get her, which no engine models.** The cassettes are a
-guaranteed exchange that has nothing to do with luck. If her shop price is under
-140 cassettes, the real worst case is that price, not 140, and every "can I
-guarantee her" answer the engines give is too pessimistic. This is
+**Found: a second way to get her, which no engine models, and it does not bind
+for one copy.** The cassettes are a guaranteed exchange that has nothing to do
+with luck. One cassette per summon means cassettes never outnumber pulls, and her
+price is 200 against a no-shop worst case of 140, **so for one copy the pulls
+always deliver her before the shop could**. The engines' one-copy answers are exact
+as they stand. **For two or more copies the shop does bind**, because the two roads
+add up. The smallest pull count that guarantees *k* copies in the worst case:
+
+| Copies | Pulls alone | With the shop, one purchase | With the shop, no limit |
+|---|---|---|---|
+| 1 | 140 | 140 | 140 |
+| 2 | 280 | **200** | **200** |
+| 3 | 420 | **280** | **280** |
+| 4 | 560 | **420** | **400** |
+| 5 | 700 | **560** | **420** |
+| 6 | 840 | **700** | **560** |
+
+So any multi-copy "can I guarantee her" answer from the engines is too
+pessimistic, by 80 pulls at two copies. The purchase limit only changes the table
+from four copies up. This is
 [ADR 0018](../adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md)'s
 scope meeting the game. Nothing in `BannerModel` can express it yet, and it
 belongs with **N28**, which is already about what a pull costs and what it is
@@ -93,7 +114,8 @@ changes no answer the engines give, and the fixture leaves it out instead of
 writing it as a recurring rule.
 
 **Left open:**
-- **Her Limited Shop price in cassettes.** That is the next reading.
+- **The shop's purchase limit for her**, which matters from four copies up. It
+  may show when her entry is tapped.
 - **Whether "guarantee count" includes a guarantee earned by missing the 50/50,**
   or only the pull count. The screen's wording does not say.
 - **Every other banner.** The beginner banner and both Gray Raven games remain
