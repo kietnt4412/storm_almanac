@@ -35,8 +35,9 @@ being finished with is.
   [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md).
   **Scope incomplete, with reasons:** the income model is still an interface
   (**N28**) and **nothing calls either engine** — no bean, no route, no screen.
-  **The rates are all still second-hand (Q4):** what the fixtures prove is that
-  the model reproduces the figures it was given.
+  **One banner's rates are now first-hand (Q4, 2026-09-13)** and confirm the curve;
+  the same reading contradicts the second-hand featured rule and found a shop
+  exchange nothing models.
 - **Phase 4 — Frontend v1 and launch — is OPEN**, 2026-09-09.
   **[D1 is reversed](#d1--deployment-deferred-2026-09-02)** — Vercel and Render,
   free tier, still no money. Nothing is deployed: the decision is made, the
@@ -51,8 +52,7 @@ being finished with is.
   [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md), in full in the
   Provenance row above. **On today's data the catalog pages read "Invented for this
   project — not any real game" or "Nobody recorded where these numbers were read",
-  and that is the feature working** — there is still no first-hand fact in this
-  repository. **The machinery is finished and the reading is not (N27)**: the first
+  and that is the feature working** — no bundle carries a first-hand fact yet. **The machinery is finished and the reading is not (N27)**: the first
   self-sourced bundle needs somebody to *read the game*, and ADR 0015's integrity
   rule disqualifies an aggregator, a web search and an AI session alike.
   [The loop](docs/game-facts/authoring-a-first-hand-bundle.md).
@@ -168,7 +168,7 @@ Rules that keep this file honest:
   **and still ended seven lines up, because it closed a phase, opened a deviation and
   added an action in the same session.** By this file's own rule that is moving the
   problem, and the flat number is the only honest way to say so.
-  **→ 721 on 2026-09-13 (twentieth), measured after this entry was written** — N5 out, the Phase board's closed
+  **→ 720 on 2026-09-13 (twentieth), measured after this entry was written** — N5 out, the Phase board's closed
   entries cut to one line each, the remote bullet halved. **Still ~170 over.** The
   next candidates are *What is still unverified* (its closed-phase items could
   become one line and a link, as its last bullet already does for eight of them)
@@ -211,7 +211,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **324 tests**, 0 failed, 0 skipped locally with snapshots present; **308 on CI**, because the same 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar` — `DeployableJarTest` reads the artifact. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
+| Backend build | **Green** | **329 tests** (324 last run in full, plus five in `gacha` run 2026-09-13), 0 skipped locally with snapshots present; **313 on CI**, because the same 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar` — `DeployableJarTest` reads the artifact. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
 | CI workflow | **Green, no warnings, on Node 24** | Run `34731880389` on `ef51844` ([PR #20](https://github.com/kietnt4412/storm_almanac/pull/20), N5): zero annotations. **Test results cached from #19's run `34695206362`**, where the suite last *executed*: 16 skipped, exactly the three snapshot-gated classes (`RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3) — a pass there would mean a snapshot had been committed by accident. **`gradle/actions` is held at v5**: v6 needs Gradle's Terms of Use accepted, which is the maintainer's call, and v5 has been frozen since 2026-02-23 |
 | Game data pipeline (Phase 1) | **Closed and stable** | `V2`–`V4`, 28 tables, seven invariants on two real patches, a round trip pinning parser against writer (ADR 0008), publishing as a human approval. `Drop` carries `sampledRuns`, where 0 means *declared*. [In full in the archive](docs/history/tracker-archive.md#closed-phases-in-full) |
 | Parser adapters | **One, and demoted to a cross-check by [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)** | `:adapters:reverse-1999`, 25 tests. **It hard-codes `THIRD_PARTY` and so fails a plain `publish`** — there is no call site to launder data through. Kept rather than deleted because diffing the first self-sourced bundle against it is worth more than it ever was as a source. [The prose it used to carry](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-12-nineteenth-session) |
@@ -237,7 +237,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Docker Compose | **Repaired 2026-09-09, and no image has ever been built end to end** | The Dockerfile had never learned about `adapters/`; the fixed tree builds the jar locally and that jar contains no development sign-in. **The image itself is still unproven** — the in-container Gradle download was abandoned at 10% after twenty minutes, so `up --build` has not completed. See the COPY-list warning in *Status* |
 | Development sign-in | **Done, and absent from the artifact** | [ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md). `:modules:identity-dev` is `testAndDevelopmentOnly` on `:app` — on `bootRun` and the test classpath, **excluded from `bootJar`**, so no property or profile can reach it. `GET /dev/sign-in?as=<name>` mints an ordinary `AuthenticatedAccount` through the same `upsertFromOidc` the OAuth services use; its filter chain lives in that module, so `SecurityConfig` has no hook for it. `DeployableJarTest` opens the jar and proves the absence on every build. The frontend picks its sign-in URL behind `import.meta.env.DEV`, and the production bundle was checked for the string: **zero occurrences** |
 | Frontend | **Five screens, driven in a browser, and 15 tests** | Inventory editor (bulk entry: filtered, grouped by the game's own categories, Enter walks the column, **no save button** — a typed number is a queued edit), goal picker (ordered, targets read off the upgrade graph, roster edited where the goal is), plan view (stages, crafts, claims, shadow prices and **every one of the solver's notes**, because a plan rendered without them is a confident number hiding a gap), catalog browse and search, and the character page with the **personalized overlay**. Routing is react-router; the game is in the URL for the catalog and nowhere else, because a catalog page is the one thing here somebody sends a link to. Both catalog pages now end in **where their numbers were read** rather than one grey credit line. **15 vitest/jsdom tests run in CI** — see the unverified list for what they deliberately do not cover. `npm run dev --prefix frontend` (`.claude/launch.json`, which now also carries `api` and **`web-built`**, the built bundle on 4173 that the offline test needs) proxies `/api` **and `/dev`** to `localhost:8080`, so local is same-origin. The sign-in URL is chosen behind `import.meta.env.DEV`, so the development one is not in a production bundle |
-| `gacha` — the two engines | **Done — Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). `MarkovBannerEngine` is an exact forward chain over `(pulls since hit, losses carried, copies held)` reading the mass that **never arrived**, so a wall is exactly 1.0 rather than 0.9999999999999895; `MonteCarloBannerEngine` is 500 000 seeded trials on virtual threads, deterministic because the generators are split before any task starts and counts are summed as integers in chunk order. `PullModel` is the validated slice both share, so they refuse the same banners for the same reasons. **46 tests. Worst gap 0.110 points over 84 questions, at 1.84 standard errors.** Only the headline rarity is modelled, and `PullResult` carries no `Rarity` — the model pins no other rate while pity is active, so one would be invented per game |
+| `gacha` — the two engines | **Done — Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). `MarkovBannerEngine` is an exact forward chain over `(pulls since hit, losses carried, copies held)` reading the mass that **never arrived**, so a wall is exactly 1.0 rather than 0.9999999999999895; `MonteCarloBannerEngine` is 500 000 seeded trials on virtual threads, deterministic because the generators are split before any task starts and counts are summed as integers in chunk order. `PullModel` is the validated slice both share, so they refuse the same banners for the same reasons. **51 tests. Worst gap 0.110 points over 96 questions (eight banners since the first-hand one joined), at 2.22 standard errors** — was 84 and 1.84 at closing. Only the headline rarity is modelled, and `PullResult` carries no `Rarity` — the model pins no other rate while pity is active, so one would be invented per game |
 | `gacha` — the income model | **Interface only, and it cannot be written yet** | `projectedPulls` needs to know which item is pull currency and what a pull costs in it. **Neither `BannerModel` nor the `banner` table declares either**, so the question has nothing to compute from — **N28** |
 | Track B | **Empty** | Package docs. Track B is [gated](#the-gate) |
 
@@ -291,13 +291,11 @@ works". It does not mean that:
   (`player` has an inventory, a roster and goals, and no pity counters). **So
   "probability of guaranteeing her" is computable and unanswerable**, and the gap
   is a schema and a screen rather than an engine.
-- **Every rate the gacha engines reproduce is second-hand (Q4).** The figures come
-  from the sources the plan cites, not from either publisher's disclosure. The
-  acceptance fixtures prove the model reproduces the figures it was *given* —
-  nothing in this repository is evidence about whether those figures are what
-  Bluepoch states. N26 established the disclosure exists; nobody has read it. This
-  is the same hole ADR 0015 opened on the catalog side, on the one part of the data
-  where the free first-hand reading is **one screen**.
+- **One gacha banner is first-hand and six are not (Q4).** `PublishedRatesTest.Disclosed`
+  is evidence about the game. Every other fixture proves only that the model
+  reproduces the figures it was *given*. **Every "can I guarantee her" worst case is
+  the worst case without the shop**, because Cassettes of the Lost buy her outright
+  and nothing models that — see **N28**.
 - **Nothing has measured whether the cache is worth having in production**, only
   that a hit is 900× cheaper than a solve. Hit *rate* depends on whether two
   players ever ask the same question, which needs users. The counters are there
@@ -338,12 +336,11 @@ works". It does not mean that:
   shapes the model cannot express, what the adapter does not convert, and the rest.
   All still true. **Read them before re-opening Phase 1, 2 or 11.** (One has
   expired: `gacha` had no behaviour, and now does.)
-- **No fact in this repository has ever been sourced first-hand**, and ADR 0016
-  did not change that. The only bundles that pass its gate are the synthetic
-  fixtures, passing by declaring `AUTHORED_FIXTURE` — honest, and evidence of
-  nothing about a real game. **Every Reverse: 1999 number in this file still
-  comes from Kornblume.** The gate is what will stop that shipping; it is not
-  progress on replacing it (**N27**).
+- **No bundle carries a first-hand fact yet.** The first first-hand reading, the
+  summon rules on 2026-09-13, is a test fixture and a note, not bundle data. The
+  only bundles that pass ADR 0016's gate are the synthetic fixtures, which pass by
+  declaring `AUTHORED_FIXTURE`. **Every Reverse: 1999 catalog and drop number in
+  this file still comes from Kornblume** (**N27**).
   (Provenance stopped being write-only on 2026-09-11;
   [what it says and why that is the feature working](docs/history/tracker-archive.md#closed-out-of-what-is-still-unverified-2026-09-12-eighteenth-session)
   is in the archive. It becomes a claim worth making when **N27** puts a real
@@ -370,8 +367,12 @@ Ordered. Completed ones move to
       number is the input to every decision after it. The loop, the origins and
       the two temptations are in
       [authoring a first-hand bundle](docs/game-facts/authoring-a-first-hand-bundle.md).
-      **Cheapest first read: the summon rules screen**, which closes the live half
-      of **Q4** and is `PUBLISHER_DISCLOSURE` rather than a sample.
+      **The summon rules screen was read 2026-09-13** (Q4, via the maintainer's
+      screenshots). **What remains is the timed stage-and-character pass**, and the
+      next cheap reading is **Rhiannon's price in Cassettes of the Lost** in the
+      Limited Shop. **Learned the same day:** a relayed web-search or AI answer and a
+      screen reading look identical in chat, so ask how each value was read before
+      recording it.
 - [ ] **N28 — Give a banner a pull currency and a price, and then write
       `IncomeModel`.** Phase 5's unbuilt scope, and it is a schema change rather
       than a decision: `projectedPulls(profile, date)` has to know which item is
@@ -382,9 +383,13 @@ Ordered. Completed ones move to
       bundle field, parser, writer, a migration and the JDBC round trip, exactly
       like **N20**. **Do it with a game whose income sources are actually
       ingested**: the accrual side reads `Reward` cadences, and nothing ingested
-      has ever been checked for them. The engines themselves are finished
-      ([ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md));
-      this is the half that needs data.
+      has ever been checked for them. **A second road to her arrived 2026-09-13:**
+      every R1999 limited summon grants a Cassette of the Lost, which buys her in the
+      Limited Shop. That is a guaranteed exchange with its own price, and it caps the
+      engines' 140-pull worst case if the price is lower. It is the same kind of
+      field, a currency and a price, so **design it in this change** rather than
+      after it. The engines are otherwise finished
+      ([ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md)).
 - [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
       `EnergyMip.matchingDays` reads weekdays in **UTC** — a game assumption in a
       game-agnostic module. R1999 Global rolls over at **05:00 UTC−5, weekly
@@ -459,7 +464,7 @@ a session would be wrong not to read.
       **Exit:** five strangers complete a plan without asking for help, and a
       logged-in character page shows what that reader is short of.
 
-- [x] **Phase 5 · Gacha engine** — closed 2026-09-12 out of order ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)); **rates second-hand (Q4)**, income model is **N28**.
+- [x] **Phase 5 · Gacha engine** — closed 2026-09-12 out of order ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)); **one banner first-hand (Q4)**, income model and shop exchange are **N28**.
 
 - [ ] **Phase 6 · Drop statistics on Postgres** — 1.5 weeks
       Report submission, Wilson intervals, provenance, abuse controls, estimates
@@ -670,24 +675,18 @@ then move the entry to
   ambiguity by construction** — you know which region and patch you read, because
   you read it — so this is a caveat on the old numbers rather than a question
   about the new ones. Until then do not write "3.5" publicly without saying which.
-- **Q4 — Rate verification.** The pity numbers in `PityRuleTest` come from the
-  secondary sources the plan cites. They must be checked against in-game
-  disclosure before the simulator ships (Phase 5). **Half-answered 2026-09-09 by
-  N26:** the disclosure exists — Bluepoch states per-rarity summon rates and the
-  pity counter in the client's own rules screen — so this is one screen's worth
-  of reading rather than an open research question, and there is now somewhere in
-  the data to record that somebody did it (`PUBLISHER_DISCLOSURE`, ADR 0016).
-  **What stays open is that nobody has read it yet.** The same question about
-  *drop* rates is closed and the answer was no; that half moved to
+- **Q4 — Rate verification.** *Answered for one R1999 banner, 2026-09-13; open for
+  the rest.* The maintainer's screenshots of the Global client's rules screen for
+  *A Newly Hatched Chapter* ([the note](docs/game-facts/reverse-1999-summon-disclosure.md))
+  **confirm the pity curve twice.** The screen states it word for word, and it
+  also prints **an overall 6★ rate of 2.36%, which the curve reproduces as
+  2.3592%.** A curve one pull early or late would print 2.38% or 2.34%.
+  **They contradict the featured rule**: 50/50 with a guarantee, where
+  `reverseDebut` hands her over outright. **They also found a Limited Shop exchange
+  (Cassettes of the Lost) that no engine models**, whose price is the next reading.
+  Still second-hand: the beginner banner and all of Gray Raven. Drop rates are a
+  separate question, closed with the answer no, in
   [the drop disclosure note](docs/game-facts/reverse-1999-drop-disclosure.md).
-  **Phase 5 closing did not narrow this by one inch, and raised the stakes.** The
-  simulator now ships a number to four decimals off these rates — a 42.39-pull
-  average, a 0.7110 at the wall — which is a far more specific claim than a rate
-  table sitting in a fixture. **The engines are not wrong if the rates are**; they
-  would faithfully reproduce the wrong game. This is the cheapest unclosed
-  first-hand reading in the project: **one screen**, `PUBLISHER_DISCLOSURE`, and it
-  would turn the acceptance fixtures from "reproduces the figures it was given"
-  into evidence.
 
 ---
 
@@ -698,7 +697,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-13 | twentieth | **N5: every CI action onto Node 24, zero annotations, green on run `34731880389`** ([PR #20](https://github.com/kietnt4412/storm_almanac/pull/20)). Taken to the latest majors (checkout v7, setup-java v6, setup-node v7, upload-artifact v7) — **except `gradle/actions`, held at v5** because v6 needs Gradle's Terms of Use accepted, which is the maintainer's call, and v5 has been frozen since February. **The green run executed no tests**: a YAML-only change leaves every Gradle input identical, so all seven test tasks came from cache. N27 handed to the maintainer as a reading form, deliberately without the fixture values so the reading stays blind. PR #19 already merged and `dev` had no open PR — the fifth time. 749 → 721 lines |
+| 2026-09-13 | twentieth | **Q4 answered for one banner, off the client itself:** the maintainer's screenshots of the rules screen confirm the pity curve twice — stated word for word, and an overall 6★ rate of **2.36% the curve reproduces as 2.3592%**, a check a curve one pull off would fail — **contradict the featured rule** (50/50 with a guarantee, not outright), and **find a Limited Shop exchange no engine models**. First first-hand fixture and five tests; 96 questions, worst gap still 0.110. An AI web-search answer was offered first and not recorded. **N5: every CI action onto Node 24, zero annotations, green on run `34731880389`** ([PR #20](https://github.com/kietnt4412/storm_almanac/pull/20)). Taken to the latest majors (checkout v7, setup-java v6, setup-node v7, upload-artifact v7) — **except `gradle/actions`, held at v5** because v6 needs Gradle's Terms of Use accepted, which is the maintainer's call, and v5 has been frozen since February. **The green run executed no tests**: a YAML-only change leaves every Gradle input identical, so all seven test tasks came from cache. N27 handed to the maintainer as a reading form, deliberately without the fixture values so the reading stays blind. PR #19 already merged and `dev` had no open PR — the fifth time. 749 → 720 lines |
 | 2026-09-12 | nineteenth | **Phase 5 closes on its criterion, out of order and on purpose (D2).** Two engines sharing three branches and nothing else: an exact chain and 500 000 seeded trials, **worst gap 0.110 percentage points over 84 questions against a criterion of 0.300, at 1.84 standard errors** — and both games' published rates out of `BannerModel` alone. **The plan's own two numbers do not fit together:** at its 100 000 trials, 0.3 points is under two standard errors, and the cross-check failed on its first run with both engines correct, so the trial count now follows from the tolerance. Four decisions in [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md) — `PullResult` can carry no `Rarity`, a floor reaching the headline is refused rather than ignored, `PityState` counts losses instead of flagging one, and the chain reads the mass that never arrived so a wall is exactly 1.0. Two of the first failures were **in the tests**: a 30-pull wall is 0.7030 and not certainty, because a wall guarantees the rarity and not her. 324 tests locally and 308 on CI, **green on run `34695206362`** ([PR #19](https://github.com/kietnt4412/storm_almanac/pull/19)). **PR #18 was already merged and `dev` had no open PR — the fourth time, caught by looking** |
 | 2026-09-12 | eighteenth | **N4: ADR 0007's own open gap becomes a failing build.** `EntityKindBoundaryTest` allows a read of `Entity.kind` in `gamedata`, `api` and `adapters` and denies it everywhere else — an allowlist, because the denylist of three modules the ADR names is what would pass vacuously again. Bytecode rather than a source scan, because a grep cannot tell `entity.kind()` from `change.kind()`. Verified by putting the defect back in both spellings. **A condition for method references was written, measured, and deleted** — `accessTargetWhere` already catches them, and the measurement is in the javadoc so nobody adds it back. ADR 0007 not edited: the decision did not change, only the account of what enforces it. Two lessons moved to the archive and two struck-through entries closed out, 747 → 742 lines (and the previous session's count was seven short — measure it). 278 tests, CI-confirmed on run `34691539392` ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18), which now carries N25 *and* N4) |
 | 2026-09-11 | seventeenth | **N25's three debts paid, so it closes.** Provenance is read back out through a *second* port — the solver still cannot see it — and both catalog pages now say where their numbers were read, which on today's data reads "invented for this project" or "nobody recorded it", and that is the feature working. The PWA was loaded with **the origin server killed** rather than with a flag flipped. The frontend gets 15 tests and a written argument for what they are and are not for. A browser found one more defect on the way: a new bundle reading an old API's response **blanked the whole page**, which is B5's two-host deploy window in miniature. 277 backend tests, 15 frontend, CI-confirmed on run `34597211345` ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18)) |

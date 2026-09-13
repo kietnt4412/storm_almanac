@@ -4,7 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
 import io.stormalmanac.gamedata.banner.BannerModel;
+import io.stormalmanac.gamedata.banner.FeaturedRule;
+import io.stormalmanac.gamedata.banner.PityRule;
 import io.stormalmanac.gamedata.banner.PityScope;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,19 +25,90 @@ import org.junit.jupiter.api.Test;
  * can verify for themselves, so it is the part an engine has no excuse to be
  * approximately right about.
  *
- * <p><b>These rates are still second-hand.</b> They come from the sources the
- * plan cites, not from the games' own disclosure, which is open question Q4 and
- * is nobody's to close but a person with the client open. What this test proves
- * is that the model reproduces the figures it was given. Whether those figures
- * are what the publisher states is a different question, and this test is not
- * evidence about it.
+ * <p><b>One banner here is first-hand, and the rest are still second-hand.</b>
+ * {@link Disclosed} is read off the client's own rules screen (Q4, 2026-09-13), and
+ * it is the only nested class that is evidence about the game rather than about
+ * the model. Everything else comes from the sources the plan cites and proves only
+ * that the model reproduces the figures it was given.
  */
 class PublishedRatesTest {
 
     private final BannerEngine exact = new MarkovBannerEngine();
 
     @Nested
-    @DisplayName("Reverse: 1999 — soft pity, curve-shaped")
+    @DisplayName("Reverse: 1999 — read off the client's rules screen, not a guide")
+    class Disclosed {
+
+        private final BannerModel banner = Banners.reverseAnniversaryLimited();
+        private final PityState fresh = Banners.freshFor(banner);
+
+        /** The same banner with the split removed, so the featured wait is the 6-star wait. */
+        private BannerModel anySixStar(PityRule curve) {
+            return new BannerModel(banner.id(), banner.displayName(), banner.bannerType(),
+                    banner.baseRates(), Map.of(Banners.SIX_STAR, curve), banner.floors(),
+                    FeaturedRule.ALWAYS, banner.pityScope(), banner.window());
+        }
+
+        private static double consolidatedPercent(double expectedPulls) {
+            return Math.round(10_000.0 / expectedPulls) / 100.0;
+        }
+
+        @Test
+        @DisplayName("the screen's own 2.36% overall rate falls out of the curve the screen states")
+        void theOverallRateIsTheCurve() {
+            // The publisher's "overall rate (including Guarantee)" is one 6-star per
+            // expected wait. It is the only number on the screen the curve was not
+            // written from, so it is the one that checks the curve.
+            PityRule stated = banner.pityRules().get(Banners.SIX_STAR);
+            double wait = exact.expectedPullsToFeatured(anySixStar(stated), fresh);
+            assertThat(wait).isCloseTo(42.3868867154, within(1e-9));
+            assertThat(consolidatedPercent(wait)).isEqualTo(2.36);
+        }
+
+        @Test
+        @DisplayName("and it would catch a curve that started one pull early or late")
+        void theOverallRateHasTeeth() {
+            // A check every plausible curve passes is not a check. These are the
+            // near misses: each prints a different two-decimal rate from 2.36%.
+            assertThat(consolidatedPercent(exact.expectedPullsToFeatured(
+                    anySixStar(new PityRule(70, 59, 0.04, 0.025)), fresh))).isEqualTo(2.38);
+            assertThat(consolidatedPercent(exact.expectedPullsToFeatured(
+                    anySixStar(new PityRule(70, 61, 0.04, 0.025)), fresh))).isEqualTo(2.34);
+            assertThat(consolidatedPercent(exact.expectedPullsToFeatured(
+                    anySixStar(PityRule.hard(70)), fresh))).isEqualTo(2.30);
+        }
+
+        @Test
+        @DisplayName("70 pulls guarantees a 6-star and only 66% of the time guarantees her")
+        void theWallGuaranteesTheRarityAndNotHer() {
+            assertThat(exact.probabilityOfFeatured(anySixStar(banner.pityRules().get(Banners.SIX_STAR)), fresh, 70, 1))
+                    .isEqualTo(1.0);
+            assertThat(exact.probabilityOfFeatured(banner, fresh, 70, 1))
+                    .isCloseTo(0.6578297188, within(1e-9));
+        }
+
+        @Test
+        @DisplayName("without the shop she is certain at 140 and not at 139")
+        void worstCaseWithoutTheShop() {
+            // Not the true worst case: Cassettes of the Lost buy her in the Limited
+            // Shop, and no engine models that road. Its price is not on this screen.
+            assertThat(PullModel.of(banner).worstCasePulls()).isEqualTo(140L);
+            assertThat(exact.probabilityOfFeatured(banner, fresh, 140, 1)).isEqualTo(1.0);
+            assertThat(exact.probabilityOfFeatured(banner, fresh, 139, 1))
+                    .isCloseTo(0.9948695074, within(1e-9));
+        }
+
+        @Test
+        @DisplayName("an average of 63.58 pulls to her, which is the 6-star wait times 1.5")
+        void expectedPullsToHer() {
+            assertThat(exact.expectedPullsToFeatured(banner, fresh))
+                    .isCloseTo(63.5803300731, within(1e-9))
+                    .isCloseTo(42.3868867154 * 1.5, within(1e-9));
+        }
+    }
+
+    @Nested
+    @DisplayName("Reverse: 1999 — soft pity, curve-shaped (second-hand, no split)")
     class ReverseNineteenNinetyNine {
 
         private final BannerModel banner = Banners.reverseDebut();

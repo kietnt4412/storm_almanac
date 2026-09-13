@@ -30,12 +30,52 @@ final class Banners {
     static final Rarity SIX_STAR = new Rarity("6*", 6);
     static final Rarity FIVE_STAR = new Rarity("5*", 5);
     static final Rarity FOUR_STAR = new Rarity("4*", 4);
+    static final Rarity THREE_STAR = new Rarity("3*", 3);
+    static final Rarity TWO_STAR = new Rarity("2*", 2);
 
     static final Rarity S_RANK = new Rarity("S", 3);
 
     private Banners() {}
 
-    /** Reverse: 1999 debut banner — base 1.5%, soft pity from 60 to 4% then +2.5%/pull, hard 70. */
+    /**
+     * Reverse: 1999 anniversary limited banner "A Newly Hatched Chapter" — <b>the
+     * only fixture here read first-hand</b>, off the English (Global) client's own
+     * Details panel on 2026-09-13: screenshots taken by the maintainer, transcribed
+     * in a Claude Code session. Every number is on that screen, and so is the full
+     * rate table, which is why this one carries all five rarities.
+     *
+     * <p>Two rules on the screen are deliberately absent. "The first 10 summons
+     * guarantee at least one 5-star" happens once, and {@link Floor} can only say
+     * <em>every</em> N — writing it as one would invent a rule; being below the
+     * headline, it could not move an answer either way. And each summon grants a
+     * Cassette of the Lost, exchangeable for her in the Limited Shop. That is a
+     * second road to her that no engine models, so every worst case asserted
+     * against this banner is the worst case <em>without the shop</em>. Source note:
+     * {@code docs/game-facts/reverse-1999-summon-disclosure.md}.
+     */
+    static BannerModel reverseAnniversaryLimited() {
+        return new BannerModel(
+                BannerId.of("r1999-a-newly-hatched-chapter"),
+                "A Newly Hatched Chapter",
+                "character",
+                Map.of(SIX_STAR, 0.015, FIVE_STAR, 0.085, FOUR_STAR, 0.40, THREE_STAR, 0.45, TWO_STAR, 0.05),
+                Map.of(SIX_STAR, new PityRule(70, 60, 0.04, 0.025)),
+                List.of(new Floor(10, FOUR_STAR)),
+                new FeaturedRule(0.50, 1),
+                PityScope.BANNER,
+                Availability.ALWAYS);
+    }
+
+    /**
+     * Reverse: 1999 debut banner — base 1.5%, soft pity from 60 to 4% then +2.5%/pull, hard 70.
+     *
+     * <p><b>Second-hand, and its featured rule is contradicted by the one banner read
+     * first-hand.</b> The curve is confirmed — the client's rules screen states it
+     * word for word, see {@link #reverseAnniversaryLimited()} — but that screen splits
+     * a 6-star 50/50, where this record hands her over outright. No first-hand
+     * reading of a banner that does has been made. Kept because the chain tests want
+     * the curve without a split; do not read it as how a limited banner behaves.
+     */
     static BannerModel reverseDebut() {
         return new BannerModel(
                 BannerId.of("r1999-debut"),
@@ -109,7 +149,7 @@ final class Banners {
     /** Every banner above, for the tests that make one claim about all of them. */
     static List<BannerModel> all() {
         return List.of(
-                reverseDebut(), reverseBeginner(),
+                reverseAnniversaryLimited(), reverseDebut(), reverseBeginner(),
                 grayRavenRotational(), grayRavenDebut(), grayRavenWeapon(),
                 grayRavenBeginner(), grayRavenFloating());
     }

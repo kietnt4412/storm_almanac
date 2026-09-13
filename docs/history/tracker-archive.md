@@ -1657,6 +1657,46 @@ actions.
 **Tracker length:** N5's action came out and the Phase board's closed entries were
 cut to one line each, which the nineteenth session named as the next candidate.
 
+**Then Q4 was answered for one banner, and it took three attempts to get a reading
+that counts.** The first reply filled in the form cleanly, but one bracketed line
+read like a tool's output. Asked how the text got from the screen to the message,
+the second reply was another AI assistant's web-search answer, citations
+included. It said so itself: it had not read the screen. Nothing from it was
+recorded. The third reply was **eight screenshots of the Global client's Details
+panel** for *A Newly Hatched Chapter*. That is `PUBLISHER_DISCLOSURE`, and the
+[note](../game-facts/reverse-1999-summon-disclosure.md) records that a session
+transcribed them. **Two things claimed in the first reply were not on the screen**:
+the open and close dates, and "3.7". Neither is recorded, and the reply that had
+called the 04:59 close a confirmation of N20's day boundary was withdrawn.
+
+**What the screen confirmed.** The pity curve, stated word for word, and **a
+number it was not written from**: an overall 6★ rate of 2.36%, which the curve's
+42.3869-pull wait reproduces as 2.3592%. It has teeth, too. A curve one pull early
+prints 2.38%, one pull late prints 2.34%, and a bare wall at 70 prints 2.30%, so
+the check rules out the near misses. It also shows "+2.5%" is percentage points.
+
+**What it contradicted.** `reverseDebut` hands her over with every 6★. The screen
+splits a 6★ 50/50, with a guarantee after a miss. On the disclosed banner, 70 pulls
+is certain to give a 6★ but gives her only 0.6578 of the time, the no-shop worst
+case is 140, and the average wait for her is 63.58 pulls. **Every number was
+computed first by an independent awk chain.** That chain was validated by
+reproducing the existing pinned 42.3868867154 before any new value was trusted.
+
+**What it found.** Each summon grants a Cassette of the Lost, which buys her in the
+Limited Shop. That is a guaranteed second road to her that neither engine models,
+so every worst case is *without the shop*. It joins **N28**, since it is the same
+kind of field, a currency and a price. There is also a one-off "first ten summons
+give a 5★ or higher" floor, which `Floor` cannot express, and which could not
+change a headline answer anyway.
+
+**Landed:** `Banners.reverseAnniversaryLimited()`, the one fixture with the full
+stated rate table, and five tests in `PublishedRatesTest.Disclosed`.
+`reverseDebut`'s javadoc now says it is contradicted. The gacha module has 51
+tests, all green. The cross-check now asks **96 questions over eight banners:
+worst gap still 0.110 points, worst 2.22 standard errors** (was 1.84). **Still
+open:** her shop price, whether "guarantee count" covers a guarantee earned by
+missing the 50/50, and every other banner.
+
 ### 2026-09-12 (nineteenth session) — Phase 5: two engines, one question, and a criterion that did not fit its own sample size
 
 **Phase 5 closed on its criterion, out of order and on purpose.** Phase 4 is open
