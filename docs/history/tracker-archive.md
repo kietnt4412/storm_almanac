@@ -1725,6 +1725,40 @@ does not: it is reset, like the pull count. So a limited banner always starts fr
 `PityState.fresh`, which the fixture already assumed, and no code changed. **Still
 open for Q4:** every other banner.
 
+**Then the question that turned the session: "is this another clone of
+Kornblume?"** Answering it meant reading Kornblume's source rather than its data.
+`docs/prior-art.md` §1 had said, "confirmed by inspection", that Kornblume
+"structurally cannot" solve per player, because its `public/data/` holds
+`stages<patch>_greedy.json` files. **`src/composables/glpkSolver.ts` says
+otherwise, and has since 2024-03-05.** It builds a linear program from the
+reader's warehouse store and minimises Activity with `glpk.js`, in the browser.
+Crafts are integer and stage runs are not. `tesseract.js` imports an inventory from
+a screenshot, and `vue3-google-signin` syncs it. **The 2026-09-02 note inferred the
+planner from its data files without opening `src/`**, and the README's opening
+paragraph had been built on that inference ever since. So the honest answer was
+**yes**: on R1999 the built product overlaps a deployed tool almost feature for
+feature. What differs is either invisible to a player (integer runs, shadow prices,
+sample-discounted yields, provenance) or unbuilt (a second game, crowdsourced
+drops).
+
+**The maintainer's answer was to swap the titles, recorded as
+[D3](../../TRACKER.md#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13).**
+A GitHub search for PGR planners turned up an automation bot, a 2020 data dump and
+a private server, and nothing that plans. The maintainer plays PGR on Global, and
+without that the swap would have died on ADR 0015. R1999 is not deleted and
+becomes Phase 11's proof. **Cost, stated so it is not discovered later:** PGR
+starts with no data in the repository, and fodder, probabilistic goals and the
+first real calendar move from Phase 11 to before launch. New action **N30** puts
+fodder in the solver. **N27** was retargeted to PGR, in a deliberate order: a
+banner, then the feeding screens, then a timed stage-and-character pass.
+
+**Corrected the same day, and nowhere deleted:** the README opening, the README's
+Kornblume credit and "bet" paragraph, `plan.html`'s title facts, Kornblume card,
+§11 callout and Phase 11 heading, and `prior-art.md` §1, struck through with the
+correction and how the mistake happened. The tracker grew by the D3 entry and
+N30, and the Status bullet for Phase 5 and N28's cassette detail were cut to pay
+for part of it.
+
 ### 2026-09-12 (nineteenth session) — Phase 5: two engines, one question, and a criterion that did not fit its own sample size
 
 **Phase 5 closed on its criterion, out of order and on purpose.** Phase 4 is open

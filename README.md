@@ -3,20 +3,23 @@
 **Storm Almanac tells you what to farm next, and why.** You enter what you own
 and who you want to raise; it solves an integer program against your actual
 inventory and hands back the stages, the run counts, and the constraint that put
-each one on the list. The tools that exist today have pieces of this and not the
-whole. Reverse: 1999's community planner ships one greedy route per patch,
-precomputed for nobody in particular, because a static site has nothing to solve
-against. Arknights' ArkPlanner has a real solver, but it keeps its reasoning to
-itself and covers one game. Storm Almanac solves per player, against
-crowdsourced drop rates that carry their own confidence intervals, shows its
-working, and does all of it behind a model with no game-specific code in it —
-Punishing: Gray Raven runs on the same optimizer as Reverse: 1999, which is the
-only real proof that the first game was modelled rather than hardcoded.
+each one on the list.
+
+It launches on **Punishing: Gray Raven**, where we found no open planner of this
+kind. Reverse: 1999 follows on the same optimizer, and a second game with no
+game-specific code is the only real proof that the first was modelled rather
+than hardcoded. Reverse: 1999 already has a good planner: Kornblume solves a
+linear program against the player's own warehouse, in the browser. What Storm
+Almanac adds there is narrower, and worth stating exactly: whole runs instead of
+fractional ones, the reason each stage is on the list, drop rates discounted by
+how thin their sample is, and where every number was read. Arknights' ArkPlanner
+has a real solver too, but it keeps its reasoning to itself and covers one game.
 
 It runs on a storage engine and a consensus layer written from scratch — one
 product to be used, one substrate to be understood.
 
-- **Launch title:** Reverse: 1999 · **Second title:** Punishing: Gray Raven
+- **Launch title:** Punishing: Gray Raven · **Second title:** Reverse: 1999
+  (swapped 2026-09-13; everything built so far was built against Reverse: 1999)
 - **Stack:** Java 21 · Spring Boot 3 · React 19 · Postgres · Redis
 - **Plan:** [plan.html](plan.html) — 13 phases, two tracks
 - **Progress:** [TRACKER.md](TRACKER.md) — current phase, what is done, what is next
@@ -259,14 +262,20 @@ Kuro Games.
 ## Prior art, credited
 
 [Kornblume](https://github.com/windbow27/kornblume) — Reverse: 1999 planner, a
-static site with no server, whose farming routes are precomputed per patch.
+static site with no server that nonetheless **solves per player**: it builds a
+linear program from the reader's warehouse and solves it in the browser with
+GLPK. Crafts are integer there and stage runs are not. It also imports an
+inventory from a screenshot and syncs through Google. This line used to say its
+routes were precomputed per patch. That was wrong, and
+[docs/prior-art.md](docs/prior-art.md) says how the mistake happened.
 [Penguin Statistics](https://penguin-stats.io) — crowdsourced Arknights drop
 rates with a real backend, plus [ArkPlanner](https://github.com/penguin-statistics/ArkPlanner)'s
 LP farming solver. Both are worth reading closely, and both are one game by
 design.
 
-Storm Almanac's bet is server-side integer optimization over crowdsourced
-estimates with a domain model that is game-agnostic by construction — all three
-at once. Read [docs/prior-art.md](docs/prior-art.md) for what each of them
+Storm Almanac's bet is integer optimization that explains itself, over estimates
+that carry their sample size, with a domain model that is game-agnostic by
+construction, all three at once. Solving per player on its own is not a
+difference: Kornblume already does it. Read [docs/prior-art.md](docs/prior-art.md) for what each of them
 actually does, where this differs deliberately, and the one place their real
 data proved our first model wrong.

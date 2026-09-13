@@ -1,7 +1,8 @@
 # Prior art
 
 Notes from reading Kornblume, Penguin Statistics and ArkPlanner, as Phase 0
-instructs. Written 2026-09-02.
+instructs. Written 2026-09-02. **§1's central claim about Kornblume was wrong and
+is corrected in place, 2026-09-13**: Kornblume does solve per player.
 
 This exists to answer two blocking questions — **Q2** (which upstream data
 source is canonical) and **Q3** (whether seed data is redistributable) — and it
@@ -56,11 +57,26 @@ Everything lives in `public/data/` as flat JSON, shipped with the site:
 
 ### What this tells us
 
-- **There is no server-side solving.** The `stages<patch>_greedy.json` files are
+- ~~**There is no server-side solving.** The `stages<patch>_greedy.json` files are
   *precomputed* routes baked per patch, and the algorithm is greedy, borrowed
   from ArkPlanner. This is the wedge, confirmed by inspection rather than
   assumption: a real MIP solved per player against their own inventory is
-  something Kornblume structurally cannot do from a static host.
+  something Kornblume structurally cannot do from a static host.~~
+  **Wrong, corrected 2026-09-13 (twentieth session).** Kornblume solves per
+  player, in the browser. `src/composables/glpkSolver.ts` builds a linear program
+  from the reader's warehouse store, with drops as stage variables, crafts as
+  variables and inventory subtracted from demand. It minimises Activity with
+  `glpk.js`, and the file dates from **2024-03-05**, eighteen months before this
+  note. **Crafts are declared integer and stage runs are not**, and a second small
+  integer program handles Sharpodonty and Dust. The site also imports an
+  inventory with OCR (`tesseract.js`) and syncs through Google sign-in.
+  **How the mistake happened:** this note read the `public/data/` directory,
+  saw the `_greedy` files, and inferred the planner from its data without
+  opening `src/`. "Confirmed by inspection" was true of the data and false of
+  the claim. **What is left of the wedge is narrower**: whole runs, a plan that
+  says why each stage is on it, yields discounted by their sample size,
+  provenance on the page, and one model across two games. The last is why the
+  launch title moved to Punishing: Gray Raven the same day.
 - **Patch versioning is unavoidable.** Kornblume encodes it crudely, in
   filenames — `stages1_4`, `stages2_8`, `stages3_3`. Our `GameDataVersion` is
   the same insight done properly, and the presence of eight patch-stamped files

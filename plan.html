@@ -191,8 +191,8 @@
     <h1>Storm Almanac</h1>
     <p class="thesis">A progression optimizer for live-service games, running on a storage engine and a consensus layer you wrote yourself — one product to be used, one substrate to be understood.</p>
     <dl class="facts">
-      <div class="fact"><dt>Launch title</dt><dd>Reverse: 1999</dd></div>
-      <div class="fact"><dt>Second title</dt><dd>Punishing: Gray Raven</dd></div>
+      <div class="fact"><dt>Launch title</dt><dd>Punishing: Gray Raven <small>(swapped 2026-09-13)</small></dd></div>
+      <div class="fact"><dt>Second title</dt><dd>Reverse: 1999</dd></div>
       <div class="fact"><dt>Stack</dt><dd>Java 21 · Spring Boot 3 · React</dd></div>
       <div class="fact"><dt>Phases</dt><dd>13, ~23 weeks</dd></div>
       <div class="fact"><dt>Public launch</dt><dd>End of Phase 4</dd></div>
@@ -253,8 +253,8 @@
       <div class="compare">
         <div class="card">
           <h4>Kornblume</h4>
-          <p>Reverse: 1999 planner. Vue + TypeScript, static site on GitHub Pages, no server. Resource planner, summon tracker, databases.</p>
-          <p class="verdict">Gap: no server-side solving, no crowdsourced data, one game.</p>
+          <p>Reverse: 1999 planner. Vue + TypeScript, static site on GitHub Pages, no server. Resource planner that solves a linear program against the player's warehouse in the browser (GLPK), summon tracker, databases, screenshot inventory import, Google sync.</p>
+          <p class="verdict">Gap: stage runs are not integer, no explanation of the plan, no sample sizes on drop rates, one game. <em>Corrected 2026-09-13: this card used to say "no server-side solving", which was wrong. It solves per player, client-side.</em></p>
         </div>
         <div class="card">
           <h4>Penguin Statistics</h4>
@@ -508,7 +508,11 @@
 
     <section id="pgr">
       <span class="num">11</span>
-      <h2>Second game: Punishing: Gray Raven</h2>
+      <h2>Second game: Punishing: Gray Raven <small>(now the launch title, 2026-09-13)</small></h2>
+      <div class="callout">
+        <span class="tag">Order swapped 2026-09-13</span>
+        <p>Punishing: Gray Raven is now the <strong>launch</strong> title and Reverse: 1999 the second. Reverse: 1999 already has a planner that solves per player (Kornblume); no open planner of this kind was found for PGR. The argument below still holds with the roles reversed. Fodder and probabilistic goals now arrive before launch instead of at Phase 11, and the acceptance test becomes Reverse: 1999 going live with zero new lines in <code>planner</code>, <code>gacha</code> or <code>stats</code>. Cost and reasoning: D3 in TRACKER.md.</p>
+      </div>
       <p>Chosen because it is structurally different, not merely different. Each item below stresses a distinct part of the abstraction:</p>
       <ul>
         <li><strong>Pity shape.</strong> Hard pity with a featured/off-featured split, variable thresholds per banner variant, and pity scoped to banner type — versus R1999's rising soft-pity curve.</li>
@@ -661,7 +665,7 @@
         <li class="phase">
           <div class="when"><b>Phase 11</b><em>2 weeks</em></div>
           <div>
-            <h3>Punishing: Gray Raven</h3>
+            <h3>Second game: Reverse: 1999 <small>(was Punishing: Gray Raven, swapped 2026-09-13; see D3 in TRACKER.md)</small></h3>
             <p>Data adapter, banner model configuration, fodder economics, probabilistic goals. Whatever the model has to generalise, generalise <em>in the model</em>.</p>
             <span class="exit"><b>Exit</b> · PGR live with zero game-specific code in planner, gacha or stats — and the diff to prove it</span>
           </div>

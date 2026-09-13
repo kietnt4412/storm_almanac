@@ -19,25 +19,22 @@ being finished with is.
 
 ## Status
 
+- **The launch title is now Punishing: Gray Raven, 2026-09-13 ([D3](#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13)).**
+  Reverse: 1999 moves to second. The reason: Kornblume turned out to solve per
+  player, so on R1999 this product overlapped a deployed tool almost feature for
+  feature, and `prior-art.md` had said otherwise. **PGR has no data here yet**, and
+  its fodder shape is not in the solver, so the next actions are **N27** (read
+  PGR) and **N30** (fodder). Everything below this bullet that says "R1999" was
+  true when written and still is. It is just no longer the launch.
 - **Phases 1, 2 and 3 stay closed, criterion and scope.** One line each on the
   [phase board](#track-a--product); the qualifications that matter are in
   [what is still unverified](#what-is-still-unverified).
-- **Phase 5 — Gacha engine — is CLOSED on its criterion, 2026-09-12, and it was
-  entered out of order on purpose ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)).**
-  Both halves measured: over **84 questions on all seven published banners the two
-  engines' worst gap is 0.110 percentage points against a criterion of 0.300, at
-  1.84 standard errors**, and both games' published rates come back out of
-  `BannerModel` alone. **One finding about the plan:** its 100 000 trials and its
-  0.3% tolerance do not fit together — at that count 0.3 points is under two
-  standard errors, the cross-check duly failed on its first run with both engines
-  correct, and the trial count now follows from the tolerance at 500 000. The
-  criterion did not move. Four design decisions in
+- **Phase 5 — Gacha engine — is CLOSED on its criterion, 2026-09-12, out of order
+  on purpose ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)).**
+  Numbers in the `gacha` row below, and decisions in
   [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md).
-  **Scope incomplete, with reasons:** the income model is still an interface
-  (**N28**) and **nothing calls either engine** — no bean, no route, no screen.
-  **One banner's rates are now first-hand (Q4, 2026-09-13)** and confirm the curve;
-  the same reading contradicts the second-hand featured rule and found a shop
-  exchange nothing models.
+  **Nothing calls either engine**, and the income model is **N28**. One R1999 banner
+  is first-hand (Q4); PGR's are not.
 - **Phase 4 — Frontend v1 and launch — is OPEN**, 2026-09-09.
   **[D1 is reversed](#d1--deployment-deferred-2026-09-02)** — Vercel and Render,
   free tier, still no money. Nothing is deployed: the decision is made, the
@@ -168,7 +165,7 @@ Rules that keep this file honest:
   **and still ended seven lines up, because it closed a phase, opened a deviation and
   added an action in the same session.** By this file's own rule that is moving the
   problem, and the flat number is the only honest way to say so.
-  **→ 725 on 2026-09-13 (twentieth), measured after this entry was written** — N5 out, the Phase board's closed
+  **→ 764 on 2026-09-13 (twentieth), measured after this entry was written** — N5 out, the Phase board's closed
   entries cut to one line each, the remote bullet halved. **Still ~170 over.** The
   next candidates are *What is still unverified* (its closed-phase items could
   become one line and a link, as its last bullet already does for eight of them)
@@ -353,26 +350,32 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **N27 — Read the game, and author the first self-sourced bundle.**
-      **This one is the maintainer's and cannot be delegated to a session** — that
-      is not a scheduling fact, it is ADR 0015's integrity rule: a fact enters
-      because someone *read it in the game or in the publisher's disclosure*, and
-      an aggregator, a web search and an AI session are all the same
-      disqualified thing. Everything a session could build is built: the canonical
-      JSON is the authoring format, `gamedata-cli` does *preview, ingest, publish*,
-      and provenance is a field the publish gate enforces
-      ([ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md)).
-      **Start with one stage and one character end to end**, not with a backfill:
-      the point of the first bundle is to find out what authoring one costs before
-      committing to ~2 700 of them, so **write down how long it took** — that
-      number is the input to every decision after it. The loop, the origins and
-      the two temptations are in
-      [authoring a first-hand bundle](docs/game-facts/authoring-a-first-hand-bundle.md).
-      **The summon rules screen was read 2026-09-13** (Q4, via the maintainer's
-      screenshots), and so were her shop price (200) and the Portrait 5 cap. **What
-      remains is the timed stage-and-character pass.** **Learned the same day:** a relayed web-search or AI answer and a
-      screen reading look identical in chat, so ask how each value was read before
-      recording it.
+- [ ] **N27 — Read Punishing: Gray Raven, and author the first self-sourced bundle
+      — now for the launch title ([D3](#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13)).**
+      **The maintainer's, and it cannot be delegated to a session**: ADR 0015
+      admits a fact because someone *read it in the game or the publisher's
+      disclosure*. The maintainer plays **Global**. Everything a session can build
+      is built: the canonical JSON is the authoring format, `gamedata-cli` does
+      *preview, ingest, publish*, and the publish gate enforces provenance
+      ([the loop](docs/game-facts/authoring-a-first-hand-bundle.md)). PGR has **no
+      data in the repository at all**, so read in this order:
+      **(1)** one banner's rules screen, since all five PGR gacha fixtures are
+      second-hand; **(2)** **how feeding works on screen**: what raising a Memory, a
+      weapon and a character's level consumes, how much progress each item gives,
+      and what happens to overflow, because **N30** is designed from this and not
+      from a guide; **(3)** one stage, one item and one character's first
+      ascension, **timed**, since that number decides whether first-hand sourcing
+      is feasible at all. **Ask how each value was read before recording it**: a
+      relayed web-search answer and a screen reading look identical in chat. R1999's
+      summon rules, shop and portrait cap, read 2026-09-13, stay recorded; its
+      stage-and-character pass moves to Phase 11.
+- [ ] **N30 — Put fodder into the solver, before launch instead of at Phase 11
+      (D3).** `Fodder` is in the domain model and not in `EnergyMip`, and feeding is
+      how Punishing: Gray Raven progresses, so a PGR plan without it is refused or
+      wrong. **Design it against N27's reading of the feeding screens**, not the
+      plan's secondary sources. Probabilistic goals (Resonance) are PGR's other new
+      shape: demand resolution already refuses them by name, so decide whether
+      launch needs them rather than building them by default.
 - [ ] **N28 — Give a banner a pull currency and a price, and then write
       `IncomeModel`.** Phase 5's unbuilt scope, and it is a schema change rather
       than a decision: `projectedPulls(profile, date)` has to know which item is
@@ -383,23 +386,20 @@ Ordered. Completed ones move to
       bundle field, parser, writer, a migration and the JDBC round trip, exactly
       like **N20**. **Do it with a game whose income sources are actually
       ingested**: the accrual side reads `Reward` cadences, and nothing ingested
-      has ever been checked for them. **A second road to her arrived 2026-09-13:**
-      every R1999 limited summon grants a Cassette of the Lost, and **200 buy her** in
-      the Limited Shop, with no limit until Portrait 5 (the maintainer's report). That
-      is past the one-copy worst case of 140, but it cuts a full six copies from 840
-      pulls to 560 ([the table](docs/game-facts/reverse-1999-summon-disclosure.md)). A
-      goal past six copies changes nothing in the game, so **cap copies at the
-      portrait maximum in the same change** — `copies` is unbounded today. It is the
-      same kind of field, a currency and a price, so **design it in this change**
-      rather than after it. The engines are otherwise finished
-      ([ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md)).
+      has ever been checked for them. **Two more fields belong in the same change**,
+      both found on R1999 2026-09-13 ([the note](docs/game-facts/reverse-1999-summon-disclosure.md)):
+      a **shop exchange for the featured unit**, since cassettes cut six copies from
+      840 pulls to 560, and a **cap on copies** at the most that changes anything,
+      since `copies` is unbounded today. **Read whether PGR has either before
+      designing them**, now that PGR launches first.
 - [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
       `EnergyMip.matchingDays` reads weekdays in **UTC** — a game assumption in a
       game-agnostic module. R1999 Global rolls over at **05:00 UTC−5, weekly
       Monday**. Inert today because nothing ingested rotates, so it is deferred on
-      the same reasoning that kept unused beans out of N15, and it **stops being
-      inert at Phase 11**. Costs a bundle field, parser, writer, a migration and
-      the JDBC round trip — do it *with* that game, not speculatively.
+      the same reasoning that kept unused beans out of N15. **It stops being inert
+      with the first game that rotates, which is PGR and so now the launch** (D3),
+      not Phase 11. Costs a bundle field, parser, writer, a migration and the JDBC
+      round trip — do it *with* that game, not speculatively.
 - [ ] **N18 — Put drop estimates into `SolveKey` in the same change that first
       publishes one.** Left out because nothing publishes any. The moment Phase 6
       does, a plan cached against yesterday's rates is served as today's — the one
@@ -457,8 +457,12 @@ a session would be wrong not to read.
       the five screens driven in a browser including the overlay, which is the
       second half of the exit below; provenance read back onto the page; the PWA
       loaded with its server killed; and a frontend test suite in CI. **Nothing
-      is deployed, so the first half of the exit is untouched, and B5 is now the
-      only thing between this phase and its criterion.**
+      is deployed, so the first half of the exit is untouched.**
+      **Since 2026-09-13 the launch title is Punishing: Gray Raven ([D3](#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13))**,
+      so B5 is no longer the only thing in the way. Strangers cannot plan PGR
+      without a PGR bundle (**N27**) and fodder in the solver (**N30**). Every
+      screen above was built and driven against R1999 data and has never rendered
+      PGR.
       Inventory editor built for fast bulk entry, goal picker, plan view with
       per-stage breakdown, offline PWA. Plus catalog browse and search with the
       personalized overlay on every character page — that overlay is the whole
@@ -511,7 +515,7 @@ rather than the paragraphs the live phases get.
 
 | | Phase | Shape | **Exit** |
 |---|---|---|---|
-| [ ] | **11 · Punishing: Gray Raven**, 2w | Data adapter, banner model, fodder economics, probabilistic goals. Whatever has to generalise, generalise in the model. **Now also costs first-hand sourcing** (ADR 0015), and **N20** lands here. **The time axis has never met real data and on R1999 never will** — do not read "the optimizer has a calendar" as "it schedules real weeks"; this is the first game that could rotate ([why](docs/history/tracker-archive.md#qualifications-moved-out-of-the-live-tracker-2026-09-11-seventeenth-session)) | PGR live with **zero game-specific code** in `planner`, `gacha` or `stats` — and the diff to prove it |
+| [ ] | **11 · Reverse: 1999 as the second title**, 2w — *was Punishing: Gray Raven until [D3](#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13)* | R1999 already has most of what Phase 11 used to cost PGR: an adapter kept as a cross-check, two imported patches, the community benchmark, and one first-hand banner. What it still costs is **first-hand sourcing of the catalog** (ADR 0015) and its own day boundary. Fodder, probabilistic goals and **the time axis's first real data** all moved to the launch with PGR ([why the time axis](docs/history/tracker-archive.md#qualifications-moved-out-of-the-live-tracker-2026-09-11-seventeenth-session)) | R1999 live with **zero game-specific code** in `planner`, `gacha` or `stats` added after PGR launched — and the diff to prove it |
 | [ ] | **12 · Hardening and the writeups**, 1w | Tracing, alerting, a backup actually restored from, a load test with published numbers, pre-rendered catalog pages | Restore drill completed from a real backup; catalog pages indexed; three writeups published — the storage benchmark, the consensus verification, the multi-game diff |
 
 ---
@@ -560,6 +564,41 @@ proves nothing.
 
 Record every departure here with its cost, so nobody has to reconstruct the
 reasoning later — including you, in month six.
+
+### D3 · Launch title swapped to Punishing: Gray Raven (2026-09-13)
+
+**The plan launched on Reverse: 1999 and brought in Punishing: Gray Raven at Phase 11
+as proof the model is game-agnostic. The maintainer swapped them.** The trigger
+was a question: is this a clone of Kornblume? Checking Kornblume's source to
+answer it showed that **`docs/prior-art.md`'s central claim was wrong**. Kornblume
+*does* solve per player, with a linear program in the browser (GLPK, since
+2024-03). It also imports inventories by OCR and syncs through Google. So on R1999
+the product overlaps an established, deployed tool almost feature for feature, and
+the wedge that is left is narrower: whole runs, explanations, sample-size-aware
+yields, provenance, and two games on one model. A GitHub search found **no open
+PGR planner of this kind**. That is not proof none exists, since closed sites and
+spreadsheets would not show up. The maintainer plays PGR on Global, which is what
+makes first-hand sourcing possible at all.
+
+**What it cost.** Everything built so far was built and verified against R1999:
+the adapter, two imported patches, the nine-agreement benchmark, the first-hand
+banner, and every screen. **PGR starts with no data in the repository**, no
+benchmark to compare against, and gacha fixtures that are all second-hand.
+**Fodder, probabilistic goals and the first real calendar** move from Phase 11 to
+before launch (**N30**, **N20**). So the launch gets further away, not closer, and
+Phase 4's exit now waits on **N27** and **N30** as well as **B5**. The README
+opening, `plan.html`'s title facts and wedge card, and `prior-art.md` §1 were
+corrected the same day.
+
+**What it bought.** A launch that is not a second copy of a tool players already
+use. It also makes the abstraction's hardest shapes load-bearing from day one, not
+bolted on at the end. Phase 11's proof survives with the roles reversed: R1999
+has to go live with no game-specific code added after PGR.
+
+**Reversal trigger:** the timed PGR reading in **N27** shows first-hand sourcing
+of PGR is not feasible for one maintainer, or an established PGR planner that
+solves per player turns up. Either one puts R1999 back on top, with the Kornblume
+overlap stated honestly.
 
 ### D2 · Phase 5 entered before Phase 4 closed (2026-09-12)
 
@@ -702,7 +741,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-13 | twentieth | **Q4 answered for one banner, off the client itself:** the maintainer's screenshots of the rules screen confirm the pity curve twice — stated word for word, and an overall 6★ rate of **2.36% the curve reproduces as 2.3592%**, a check a curve one pull off would fail — **contradict the featured rule** (50/50 with a guarantee, not outright), and **find a Limited Shop exchange no engine models**. First first-hand fixture and five tests; 96 questions, worst gap still 0.110. An AI web-search answer was offered first and not recorded. **N5: every CI action onto Node 24, zero annotations, green on run `34731880389`** ([PR #20](https://github.com/kietnt4412/storm_almanac/pull/20)). Taken to the latest majors (checkout v7, setup-java v6, setup-node v7, upload-artifact v7) — **except `gradle/actions`, held at v5** because v6 needs Gradle's Terms of Use accepted, which is the maintainer's call, and v5 has been frozen since February. **The green run executed no tests**: a YAML-only change leaves every Gradle input identical, so all seven test tasks came from cache. N27 handed to the maintainer as a reading form, deliberately without the fixture values so the reading stays blind. PR #19 already merged and `dev` had no open PR — the fifth time. 749 → 725 lines |
+| 2026-09-13 | twentieth | **The launch title swapped to Punishing: Gray Raven ([D3](#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13))**, because asking "is this a Kornblume clone?" found `prior-art.md` wrong: **Kornblume solves per player with GLPK in the browser**, and has since 2024. README, plan and prior-art corrected; N27 retargeted to PGR; **N30** puts fodder in the solver. Before that, **Q4 answered for one banner, off the client itself:** the maintainer's screenshots of the rules screen confirm the pity curve twice — stated word for word, and an overall 6★ rate of **2.36% the curve reproduces as 2.3592%**, a check a curve one pull off would fail — **contradict the featured rule** (50/50 with a guarantee, not outright), and **find a Limited Shop exchange no engine models**. First first-hand fixture and five tests; 96 questions, worst gap still 0.110. An AI web-search answer was offered first and not recorded. **N5: every CI action onto Node 24, zero annotations, green on run `34731880389`** ([PR #20](https://github.com/kietnt4412/storm_almanac/pull/20)). Taken to the latest majors (checkout v7, setup-java v6, setup-node v7, upload-artifact v7) — **except `gradle/actions`, held at v5** because v6 needs Gradle's Terms of Use accepted, which is the maintainer's call, and v5 has been frozen since February. **The green run executed no tests**: a YAML-only change leaves every Gradle input identical, so all seven test tasks came from cache. N27 handed to the maintainer as a reading form, deliberately without the fixture values so the reading stays blind. PR #19 already merged and `dev` had no open PR — the fifth time. 749 → 764 lines |
 | 2026-09-12 | nineteenth | **Phase 5 closes on its criterion, out of order and on purpose (D2).** Two engines sharing three branches and nothing else: an exact chain and 500 000 seeded trials, **worst gap 0.110 percentage points over 84 questions against a criterion of 0.300, at 1.84 standard errors** — and both games' published rates out of `BannerModel` alone. **The plan's own two numbers do not fit together:** at its 100 000 trials, 0.3 points is under two standard errors, and the cross-check failed on its first run with both engines correct, so the trial count now follows from the tolerance. Four decisions in [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md) — `PullResult` can carry no `Rarity`, a floor reaching the headline is refused rather than ignored, `PityState` counts losses instead of flagging one, and the chain reads the mass that never arrived so a wall is exactly 1.0. Two of the first failures were **in the tests**: a 30-pull wall is 0.7030 and not certainty, because a wall guarantees the rarity and not her. 324 tests locally and 308 on CI, **green on run `34695206362`** ([PR #19](https://github.com/kietnt4412/storm_almanac/pull/19)). **PR #18 was already merged and `dev` had no open PR — the fourth time, caught by looking** |
 | 2026-09-12 | eighteenth | **N4: ADR 0007's own open gap becomes a failing build.** `EntityKindBoundaryTest` allows a read of `Entity.kind` in `gamedata`, `api` and `adapters` and denies it everywhere else — an allowlist, because the denylist of three modules the ADR names is what would pass vacuously again. Bytecode rather than a source scan, because a grep cannot tell `entity.kind()` from `change.kind()`. Verified by putting the defect back in both spellings. **A condition for method references was written, measured, and deleted** — `accessTargetWhere` already catches them, and the measurement is in the javadoc so nobody adds it back. ADR 0007 not edited: the decision did not change, only the account of what enforces it. Two lessons moved to the archive and two struck-through entries closed out, 747 → 742 lines (and the previous session's count was seven short — measure it). 278 tests, CI-confirmed on run `34691539392` ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18), which now carries N25 *and* N4) |
 | 2026-09-11 | seventeenth | **N25's three debts paid, so it closes.** Provenance is read back out through a *second* port — the solver still cannot see it — and both catalog pages now say where their numbers were read, which on today's data reads "invented for this project" or "nobody recorded it", and that is the feature working. The PWA was loaded with **the origin server killed** rather than with a flag flipped. The frontend gets 15 tests and a written argument for what they are and are not for. A browser found one more defect on the way: a new bundle reading an old API's response **blanked the whole page**, which is B5's two-host deploy window in miniature. 277 backend tests, 15 frontend, CI-confirmed on run `34597211345` ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18)) |
