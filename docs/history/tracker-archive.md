@@ -970,6 +970,37 @@ entry was met, not that the code exists.
 
 ---
 
+### Done 2026-09-13 (twentieth session) — N5
+
+- [x] ~~**N5 — Upgrade the CI actions before they break.**~~ **Done 2026-09-13**,
+      [PR #20](https://github.com/kietnt4412/storm_almanac/pull/20), green on
+      `ef51844`, run `34731880389`, **with no annotations** — the Node 20 and
+      `setup-java@v4` deprecation warnings are gone.
+
+      The action as written asked for `setup-java@v5`. By the time it was done
+      every action had moved two or three majors: checkout **v7**, setup-java
+      **v6**, setup-node **v7**, upload-artifact **v7** — all taken, after reading
+      the breaking notes of every major in between, none of which touches this
+      pipeline. Both workflows, including the dormant `nightly-chaos.yml`.
+
+      **`gradle/actions` stopped at v5, not v6, and that is a decision left open
+      rather than taken.** v6 extracted setup-gradle's caching into a proprietary
+      component, and upgrading accepts Gradle's Terms of Use. That is a licence
+      question for the maintainer, not a version bump. v5 runs on Node 24, which
+      is all N5 needed — **but v5's last release was 2026-02-23, so it is frozen
+      rather than maintained.** A comment in `ci.yml` says why, so it is not bumped
+      by reflex.
+
+      **The green run executed no tests, and says so here so nobody reads it as
+      more.** A YAML-only change leaves every Gradle input identical to PR #19's,
+      so all seven test tasks came back `FROM-CACHE` (50 tasks, 22 executed, 28
+      from cache). What the run proves is the *mechanics* under the new actions:
+      checkout, JDK install, wrapper validation, cache restore, artifact upload,
+      Node. The first PR that changes source is the first run of the suite under
+      them.
+
+---
+
 ### Rows compressed out of *Current state*, 2026-09-12 (nineteenth session)
 
 The live tracker's table had three cells that were each a session-log entry. The
@@ -1593,6 +1624,106 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+### 2026-09-13 (twentieth session) — six action bumps, one licence left unaccepted, and a green run that ran no tests
+
+**The remote had moved again, as the tracker said it would.** PR #19 was merged,
+`origin/main` and `origin/dev` were equal, and **`dev` had no open PR** — the fifth
+time the trap has been armed, caught by looking. There was also an unlogged
+uncommitted change in the working tree: a duplicated
+`import java.util.function.ToLongFunction;` in `MonteCarloBannerEngine.java`.
+Legal Java — the JLS ignores an identical duplicate single-type import — and not
+this session's; left out of every commit and reported rather than reverted.
+
+**N27 was handed to the maintainer as a form, not a pointer.** What to read off
+the summon rules screen (per-rarity rates, where the curve starts and how it
+climbs, the wall, the ten-pull floor, the featured chance and what a loss carries,
+pity scope, dates) and off one stage, one item and one character, with a timer on
+the second half. **Deliberately without the fixture values**: the authoring note
+forbids opening Kornblume while reading because it makes the later diff
+non-independent, and showing a reader the numbers `Banners.java` already assumes
+does exactly the same thing. Read blind, then diff.
+
+**N5 done** — [in full above](#done-2026-09-13-twentieth-session--n5). The tracker's
+line asked for `setup-java@v5`; the latest was v6, and every other action had moved
+as far. **The one thing worth carrying forward is `gradle/actions@v6`'s licence
+change**: the caching moved into a proprietary component under Gradle's Terms of
+Use, so accepting it is the maintainer's choice, and v5 is frozen at 2026-02-23 in
+the meantime. **And the run was green on cached test results only** — 28 of 50
+tasks from cache, every test task among them — which is correct Gradle behaviour
+for a YAML-only change and still means the suite has not yet run under the new
+actions.
+
+**Tracker length:** N5's action came out and the Phase board's closed entries were
+cut to one line each, which the nineteenth session named as the next candidate.
+
+**Then Q4 was answered for one banner, and it took three attempts to get a reading
+that counts.** The first reply filled in the form cleanly, but one bracketed line
+read like a tool's output. Asked how the text got from the screen to the message,
+the second reply was another AI assistant's web-search answer, citations
+included. It said so itself: it had not read the screen. Nothing from it was
+recorded. The third reply was **eight screenshots of the Global client's Details
+panel** for *A Newly Hatched Chapter*. That is `PUBLISHER_DISCLOSURE`, and the
+[note](../game-facts/reverse-1999-summon-disclosure.md) records that a session
+transcribed them. **Two things claimed in the first reply were not on the screen**:
+the open and close dates, and "3.7". Neither is recorded, and the reply that had
+called the 04:59 close a confirmation of N20's day boundary was withdrawn.
+
+**What the screen confirmed.** The pity curve, stated word for word, and **a
+number it was not written from**: an overall 6★ rate of 2.36%, which the curve's
+42.3869-pull wait reproduces as 2.3592%. It has teeth, too. A curve one pull early
+prints 2.38%, one pull late prints 2.34%, and a bare wall at 70 prints 2.30%, so
+the check rules out the near misses. It also shows "+2.5%" is percentage points.
+
+**What it contradicted.** `reverseDebut` hands her over with every 6★. The screen
+splits a 6★ 50/50, with a guarantee after a miss. On the disclosed banner, 70 pulls
+is certain to give a 6★ but gives her only 0.6578 of the time, the no-shop worst
+case is 140, and the average wait for her is 63.58 pulls. **Every number was
+computed first by an independent awk chain.** That chain was validated by
+reproducing the existing pinned 42.3868867154 before any new value was trusted.
+
+**What it found.** Each summon grants a Cassette of the Lost, which buys her in the
+Limited Shop. That is a guaranteed second road to her that neither engine models,
+so every worst case is *without the shop*. It joins **N28**, since it is the same
+kind of field, a currency and a price. There is also a one-off "first ten summons
+give a 5★ or higher" floor, which `Floor` cannot express, and which could not
+change a headline answer anyway.
+
+**Landed:** `Banners.reverseAnniversaryLimited()`, the one fixture with the full
+stated rate table, and five tests in `PublishedRatesTest.Disclosed`.
+`reverseDebut`'s javadoc now says it is contradicted. The gacha module has 51
+tests, all green. The cross-check now asks **96 questions over eight banners:
+worst gap still 0.110 points, worst 2.22 standard errors** (was 1.84). CI
+confirmed it on run `34746241622` (`85d0538`), and this time `:modules:gacha:test`
+**executed**, so the suite has now run under N5's actions.
+
+**The shop price came next, from one more screenshot: 200 cassettes.** The
+question it answers turned out narrower than expected. A summon grants exactly one
+cassette, so the shop cannot open before pull 200, and by then the 50/50 guarantee
+has already delivered her at 140. **For one copy the shop never binds**, so the
+engines' single-copy answers are exact. **For several copies it does**, because
+the two roads add up: 2 copies drop from 280 pulls to 200, and 3 from 420 to 280.
+From 4 copies up the answer depends on a purchase limit the screenshot does not
+show. The test's claim was narrowed to one copy, with the price written beside
+the 140 it beats.
+
+**Then the limit, and a cap underneath it.** The maintainer reported from the game
+that she can be bought without limit until Portrait 5, and sent her Portrait screen
+as support. The screen shows portrait levels to Lv. 5, at one portrait item each.
+The limit itself is not on a screenshot, so it is recorded as the maintainer's
+in-game observation. **The portrait screen agrees with the duplicate table read
+earlier from a different screen**: copies 2–6 give an Artifice, and copy 7 gives
+none. So six copies is the most that changes anything, and a shop limited
+exactly there never binds on a goal that means anything. With the shop, the
+worst case for six copies is **560 pulls against 840** from the pulls alone. N28
+now also carries capping `copies`, which both engines accept at any value from one
+upwards.
+
+**Last, the carry-over.** The screen does not say whether a guarantee earned by
+missing the 50/50 survives the event. The maintainer reports from the game that it
+does not: it is reset, like the pull count. So a limited banner always starts from
+`PityState.fresh`, which the fixture already assumed, and no code changed. **Still
+open for Q4:** every other banner.
 
 ### 2026-09-12 (nineteenth session) — Phase 5: two engines, one question, and a criterion that did not fit its own sample size
 
