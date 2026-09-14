@@ -278,3 +278,38 @@ operationally necessary rather than merely polite.
   [ADR 0007](adr/0007-equipment-is-an-entity.md). §4.3's option (1) won, though
   on a different argument than §4.3 gives — see the ADR. Phase 1 ingestion is
   unblocked.
+
+---
+
+## 7. Punishing: Gray Raven — surveyed 2026-09-14
+
+Done when the launch title swapped (D3), and done differently from §1: **every
+tool below was opened or its source read**, not judged from a search snippet or a
+data directory.
+
+| Tool | What it actually does | Plans farming from an inventory? |
+|------|-----------------------|------|
+| [mcgalih/PGR-Calculator](https://github.com/mcgalih/PGR-Calculator) ([site](https://pgr-calculator.vercel.app)) | Totals the cogs, EXP pods and Memory enhancers a build costs. 0 stars, last pushed **2024-01-22** | No |
+| [ravenkougu.github.io](https://ravenkougu.github.io/) | A serum refill timer. The other features are listed as planned. Last pushed **2021-07-23** | No |
+| [pitycalculator.com — PGR](https://pitycalculator.com/punishing-gray-raven/pity-calculator) | Probability from current pity and available pulls. **Hard pity only**: no featured split, no copies, no income over time | No |
+| Community spreadsheets (a "Resource Calculator V2" on the GRAY RAVENS wiki's guides page, and Rexlent's sheet) | Not opened: the wiki returned 403 to a fetch, and the sheets are only linked. **Unverified**, so neither is claimed to lack anything | Unknown |
+| Guides and videos ([GRAY RAVENS beginner's guide](https://grayravens.com/wiki/Guides/Beginner's_Guide) and others) | Advice, not tools. The consistent message: from level 40, **farm event stages and spend their currency in event shops**, and fall back to resource stages between events | — |
+| GitHub search ("punishing gray raven", "pgr planner", …) | An automation bot, a 2020 data dump, a private server | No |
+
+**Not searched exhaustively:** Discord servers, Bilibili, and closed
+Chinese-language sites. A Chinese-language web search found material-cost
+write-ups and guides, not a planner. The fair summary is **nothing found plans PGR
+farming from a player's inventory**, not "nothing exists".
+
+### What it changes for the model, before any PGR data is read
+
+- **Shops in the solver move up.** If the guides are right that event stages
+  feed event shops, a PGR plan that cannot buy is the wrong plan. Today
+  `EnergyMip` refuses an item sourced only from a shop. That is honest, but for
+  PGR it refuses most of the answer.
+- **Event windows stop being theoretical.** `Availability` already has
+  `opensAt`/`closesAt`, and it has never met a real event.
+- **Second-hand sources already disagree about PGR's featured guarantee.** One
+  says a loss carries a guarantee, one says it does not, and the fixtures assume
+  it does. That is the same reason Q4 was read off the R1999 client, and PGR's
+  banner screen is first in N27 for it.

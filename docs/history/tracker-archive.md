@@ -1759,6 +1759,24 @@ correction and how the mistake happened. The tracker grew by the D3 entry and
 N30, and the Status bullet for Phase 5 and N28's cassette detail were cut to pay
 for part of it.
 
+**2026-09-14 — the survey D3 was missing, and the plan's wedge rewritten from it.**
+The GitHub search behind D3 could not see closed sites or spreadsheets, so the
+open web was searched too, and **every tool found was opened** rather than judged
+from its snippet. That is the lesson of prior-art §1. There are two material-total
+calculators (the newer last pushed 2024-01), a serum timer from 2021, and a pity
+calculator that models hard pity only. Two community spreadsheets could not be
+opened (the wiki returns 403 to a fetch) and are recorded as unverified, not as
+lacking anything. **Nothing found plans PGR farming from an inventory**, with
+Discord, Bilibili and closed CN sites named as not searched. **The finding with
+teeth was in the guides, not the tools:** PGR is farmed through event stages whose
+currency buys materials in event shops, and `EnergyMip` refuses an item only a
+shop sells. So N30 became *fodder and shops*, and N27 gained an event reading.
+`plan.html`'s wedge section was rewritten rather than patched. PGR's tools card
+comes first, Kornblume's card says plainly that it solves per player, and a
+callout names the four things the bet costs before launch. `prior-art.md` gained
+§7 with the table. **Not rewritten:** the rest of the plan. Its architecture,
+tracks and phases did not change, and D1–D3 carry the departures.
+
 ### 2026-09-12 (nineteenth session) — Phase 5: two engines, one question, and a criterion that did not fit its own sample size
 
 **Phase 5 closed on its criterion, out of order and on purpose.** Phase 4 is open

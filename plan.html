@@ -143,6 +143,7 @@
   @media (min-width:700px){.compare{grid-template-columns:repeat(3,1fr);}}
   .compare.two{grid-template-columns:1fr;}
   @media (min-width:700px){.compare.two{grid-template-columns:repeat(2,1fr);}}
+  @media (min-width:700px){.compare.four{grid-template-columns:repeat(2,1fr);}}
   .card{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:17px 18px;
         box-shadow:var(--shadow);display:flex;flex-direction:column;gap:7px;}
   .card h4{margin:0;font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;
@@ -249,12 +250,17 @@
     <section id="wedge">
       <span class="num">01</span>
       <h2>The wedge</h2>
-      <p>Companion tools for these games exist. None combine the three things below, and that combination is the product thesis.</p>
-      <div class="compare">
+      <p><em>Rewritten 2026-09-14.</em> The first version of this section rested on a claim about Kornblume that was wrong, and it led with Reverse: 1999. The claim is corrected below, and the launch title is now Punishing: Gray Raven (D3 in TRACKER.md). What follows is what a survey of GitHub and the open web actually found. It is not a proof that nothing else exists: Discord servers, Bilibili and closed Chinese-language sites were not searched exhaustively.</p>
+      <div class="compare four">
         <div class="card">
-          <h4>Kornblume</h4>
-          <p>Reverse: 1999 planner. Vue + TypeScript, static site on GitHub Pages, no server. Resource planner that solves a linear program against the player's warehouse in the browser (GLPK), summon tracker, databases, screenshot inventory import, Google sync.</p>
-          <p class="verdict">Gap: stage runs are not integer, no explanation of the plan, no sample sizes on drop rates, one game. <em>Corrected 2026-09-13: this card used to say "no server-side solving", which was wrong. It solves per player, client-side.</em></p>
+          <h4>Punishing: Gray Raven tools · the launch title</h4>
+          <p>Material-total calculators, which sum what a build costs and were last updated in 2024. A serum refill timer. A pity calculator that models hard pity only. Community spreadsheets. And farming advice in guides and videos, whose consistent message is <em>farm event stages, spend the currency in event shops</em>.</p>
+          <p class="verdict">Gap: nothing found starts from the player's inventory and says what to farm, and nothing found models the featured split together with pulls earned before a banner date.</p>
+        </div>
+        <div class="card">
+          <h4>Kornblume · the second title</h4>
+          <p>Reverse: 1999 planner. Static site, no server, and it <strong>does solve per player</strong>: a linear program over the reader's warehouse, solved in the browser with GLPK. It also has a summon tracker, databases, screenshot inventory import and Google sync. Deployed, and used.</p>
+          <p class="verdict">Gap: stage runs are not integer, the plan does not explain itself, drop rates carry no sample size, one game. Narrow, and honest about it. <em>This card used to say "no server-side solving". That was wrong.</em></p>
         </div>
         <div class="card">
           <h4>Penguin Statistics</h4>
@@ -263,9 +269,13 @@
         </div>
         <div class="card">
           <h4>Storm Almanac</h4>
-          <p>Server-side integer optimizer over crowdsourced drop estimates, with a domain model that is game-agnostic by construction.</p>
-          <p class="verdict">All three at once. That's the bet.</p>
+          <p>For a PGR player: a plan from their own inventory that says which stages to run, how many whole runs, and why each is there, plus whether they can guarantee a unit by her banner date. Then the same engine, unchanged, for Reverse: 1999.</p>
+          <p class="verdict">The bet: be the PGR planner nobody has built, on a model that already runs a second game.</p>
         </div>
+      </div>
+      <div class="callout">
+        <span class="tag">What that bet costs before launch</span>
+        <p>If the guides are right that PGR is farmed through event stages and event shops, then <strong>a PGR plan without shops in the solver is the wrong plan</strong>, and today the solver refuses any item that only a shop sells. The other costs are <strong>fodder</strong> (feeding items into Memories, weapons and levels), <strong>event windows</strong>, and <strong>the game's own day boundary</strong>. All four have to be confirmed on the game's own screens before they are built, because the guides are second-hand and have already disagreed with each other about PGR's featured guarantee.</p>
       </div>
     </section>
 
