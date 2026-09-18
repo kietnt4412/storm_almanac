@@ -2535,7 +2535,7 @@ them and linking here removed ~2 700 characters and zero lines. Bytes fell
 **826 on 2026-09-18 (twenty-third), and then 550.** The session added ~80 lines
 of findings against ~50 moved out, which is the sixth miss in a row; the
 maintainer then asked for the file itself and it was **rewritten rather than
-trimmed a seventh time** — 826 → **550 lines, 74 604 → 39 281 bytes**. What the
+trimmed a seventh time** — 826 → **549 lines, 74 604 → 39 981 bytes**. What the
 rewrite actually did is in that session's log entry below, and the file it
 replaced is [here](#the-tracker-as-it-stood-before-the-2026-09-18-compression),
 verbatim. **The ledger's conclusion, after six failures and one success:
@@ -2635,10 +2635,21 @@ but it can start the application** — `Start-Process 'C:\Program Files\Docker\D
 from PowerShell brought the engine up, and `docker info --format '{{.ServerVersion}}'`
 answered `29.7.2` within the minute. Nothing needed elevation.
 
-**The remote:** `gh pr list` empty, `dev` clean against `origin/dev`. **Sixth time
-a push to `dev` will run no CI** unless a PR is opened; nothing in this session
-touches Java, so there is no suite to run either way.
-
+**The remote.** At session start `gh pr list` was empty and `dev` clean — the
+sixth time a push would have run no CI. It was then pushed and
+**[PR #22](https://github.com/kietnt4412/storm_almanac/pull/22) opened and merged
+green on `ba68d1f`, run `35353122893`.** Two things worth keeping from that run.
+**`:app:test` executed rather than coming from cache**, which is the `data/bundles`
+input declaration doing its job on a runner as well as locally, and
+`AuthoredBundlesTest` passed there; every other module's test task was
+`FROM-CACHE`, correctly, since no module source changed, and the three
+snapshot-gated classes skipped as they always do. And **the PR was merged about
+twenty seconds after it opened, before CI had finished** — so green here is a
+fact about the merged commit rather than a gate anyone waited on. Also noticed
+while checking: **`dev` sits 12 commits behind `main` with identical trees**,
+the gap being merge commits from PRs #15–#22 that never come back down. Harmless,
+and not a reason to rebase — but it means "behind by N" says nothing about content
+on this repository.
 **Lines: 790 → 826 by the session's own additions, then → 550 by rewriting the
 file.** The first number is the one worth reading: trimming and moving two blocks
 out (the line-count ledger itself, and D2's full account) took ~50 lines, while
@@ -2648,7 +2659,7 @@ wrong way, and it is not laziness** — a session that finds something has to wr
 it down, and a tracker that is a handoff cannot also be a fixed-size document.
 
 **So the maintainer asked for the file itself, and the answer was a rewrite rather
-than a seventh trim.** 826 → **550 lines, 74 604 → 39 281 bytes**, measured:
+than a seventh trim.** 826 → **549 lines, 74 604 → 39 981 bytes**, measured:
 
 - ***Current state* stopped repeating the notes it links to.** The thirty-row
   component table became **twelve rows for what the next work touches** and a

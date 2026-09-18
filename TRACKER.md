@@ -48,29 +48,25 @@ being finished with is.
   banner (`PityRule.hardAt` is an `int`), the weapon's Overclock and Harmony
   recipes (an `Upgrade` names an entity, and **the weapon was never named**), and
   **every currency** (`Item.rarity` is required, and no screen read grades one).
-  **R1999 never contradicted any of those assumptions; PGR contradicted all three
-  on day one.**
+  **R1999 never contradicted any of those assumptions; PGR contradicted all three on day one.**
 - **Going first-hand on game data**, 2026-09-09
   ([ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)),
   superseding 0009 and closing Q2, Q3, F1 and F2. Kornblume is unlicensed.
   **Nothing is deleted yet and the order matters:** the adapter stays as a
   never-shipped cross-check until a replacement exists, because removing it first
   leaves the project with no real data at all. **The cost on patch 3.5:** ~2 700
-  catalog facts (typing, mostly additive) and **595 drop-rate facts** — the
-  bootstrap below.
+  catalog facts — typing, mostly additive — and **595 drop-rate facts**, which is
+  the bootstrap problem.
 - **The bootstrap problem is the main risk in the project, and the cheap way out
   is not there** (N26). No yield means no ranking means no plan; own drop data
   means Phase 6, which means users, which means a working plan. **The publisher
   does not disclose stage drop rates** — the screen grades a reward `Fixed`,
   `Common` or `Possible` and prices only the first, so **15 of 779 drop facts are
   declared and 764 sampled**, ~2% free. Two consolations: **gacha rates *are*
-  disclosed**, and the grade is itself a free first-hand fact for all 595 pairs,
-  with nowhere to live until Phase 6.
-  [The note](docs/game-facts/reverse-1999-drop-disclosure.md).
-- **Phases 0–3 and 5 are closed; Phase 4 is open; Track B is gated.** Phase 0
-  closed *by exception*, box unticked, because nothing is deployed; Phase 5 closed
-  **out of order on purpose** ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12))
-  and **nothing calls either gacha engine**. [The board](#track-a--product).
+  disclosed**, and the grade is itself a free first-hand fact for all 595 pairs
+  with nowhere to live until Phase 6
+  ([the note](docs/game-facts/reverse-1999-drop-disclosure.md)).
+- **Phases 0–3 and 5 are closed; Phase 4 is open; Track B is gated.** Phase 0 closed *by exception*, box unticked, because nothing is deployed; Phase 5 closed **out of order on purpose** ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)) and **nothing calls either gacha engine**. [The board](#track-a--product).
 - **Nothing is deployed, and [D1 is reversed](#d1--deployment-deferred-2026-09-02)** —
   Vercel and Render, free tier, still no money. The wiring is **B5**, the only
   thing that can unblock a real OAuth exchange. **`backend/Dockerfile`'s COPY list
@@ -79,10 +75,18 @@ being finished with is.
   verified, so **anything added beside `modules`, `adapters`, `substrate`, `app`
   needs a line there**.
 - **The remote, checked 2026-09-18 — re-check it, do not trust it.**
-  `gh pr list` is **empty** and `dev` tracks `origin/dev`. **The trap:** CI runs on
-  `pull_request` and on push to `main` only, so **a push to `dev` with no open PR
-  runs nothing, silently**. Every merge re-arms it; six times now, each caught by
-  looking. **Run `gh pr list` and open the PR before trusting a push to `dev`.**
+  **[PR #22](https://github.com/kietnt4412/storm_almanac/pull/22) is MERGED and
+  green on `ba68d1f`, run `35353122893`**, where **`:app:test` executed rather
+  than coming from cache** — the declared `data/bundles` input working on a runner
+  too — with every other module's test task `FROM-CACHE` and the three
+  snapshot-gated classes skipped. **It merged about twenty seconds after opening,
+  before CI finished**, so green is a fact about the merged commit rather than a
+  gate anyone waited on. **`dev` sits 12 commits behind `main` with identical
+  trees** — merge commits from PRs #15–#22 that never come back down; harmless,
+  and *not* a reason to rebase. **The trap stands:** CI runs on `pull_request` and
+  on push to `main` only, so **a push to `dev` with no open PR runs nothing,
+  silently**. Every merge re-arms it; six times now, each caught by looking.
+  **Run `gh pr list` and open the PR before trusting a push to `dev`.**
 
 ### Two standing caveats, read them every session
 
@@ -453,12 +457,7 @@ where Phase 5's criterion was a proof about a model.
 
 ### D1 · Deployment deferred (2026-09-02)
 
-**REVERSED 2026-09-09.** Heading kept verbatim so every link still lands. Both
-halves of its own trigger fired at once — Phase 4 reached, a free tier accepted —
-so **Vercel for the frontend, Render for the backend**, still no money.
-[In full](docs/history/tracker-archive.md#d1--the-deferral-in-full). **What it
-cost is what B5 buys back:** Phase 0's box is unticked, the gate has no meaning
-without real traffic, and deploy problems really were found late.
+**REVERSED 2026-09-09.** Heading kept verbatim so every link still lands. Both halves of its own trigger fired at once — Phase 4 reached, a free tier accepted — so **Vercel for the frontend, Render for the backend**, still no money ([in full](docs/history/tracker-archive.md#d1--the-deferral-in-full)). **What it cost is what B5 buys back:** Phase 0's box is unticked, the gate has no meaning without real traffic, and deploy problems really were found late.
 
 ---
 
@@ -532,7 +531,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-18 | twenty-third | The first first-hand bundle — draft 0, nine facts — and the three *required* fields the format refused. `AuthoredBundlesTest` and the Gradle input hole it found. This file rewritten: 826 → 550 lines, 74 604 → 39 281 bytes, with the old one kept verbatim in the archive |
+| 2026-09-18 | twenty-third | The first first-hand bundle — draft 0, nine facts — and the three *required* fields the format refused. `AuthoredBundlesTest` and the Gradle input hole it found. This file rewritten: 826 → 549 lines, 74 604 → 39 981 bytes, with the old one kept verbatim in the archive |
 | 2026-09-18 | twenty-second | PGR read off the client, and the guides wrong twice: a per-banner featured rate, and events with no shops. N28 unblocked, N30 rescoped, N31's cause found |
 | 2026-09-14 | twenty-first | The PGR survey D3 was missing. Nothing found plans PGR farming from an inventory; its one finding with teeth came from guides and was false |
 | 2026-09-13 | twentieth | Launch title swapped to PGR (D3) — Kornblume solves per player. Q4 answered for one banner off the client. N5: every CI action onto Node 24 |
