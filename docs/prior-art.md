@@ -1,7 +1,8 @@
 # Prior art
 
 Notes from reading Kornblume, Penguin Statistics and ArkPlanner, as Phase 0
-instructs. Written 2026-09-02.
+instructs. Written 2026-09-02. **§1's central claim about Kornblume was wrong and
+is corrected in place, 2026-09-13**: Kornblume does solve per player.
 
 This exists to answer two blocking questions — **Q2** (which upstream data
 source is canonical) and **Q3** (whether seed data is redistributable) — and it
@@ -56,11 +57,26 @@ Everything lives in `public/data/` as flat JSON, shipped with the site:
 
 ### What this tells us
 
-- **There is no server-side solving.** The `stages<patch>_greedy.json` files are
+- ~~**There is no server-side solving.** The `stages<patch>_greedy.json` files are
   *precomputed* routes baked per patch, and the algorithm is greedy, borrowed
   from ArkPlanner. This is the wedge, confirmed by inspection rather than
   assumption: a real MIP solved per player against their own inventory is
-  something Kornblume structurally cannot do from a static host.
+  something Kornblume structurally cannot do from a static host.~~
+  **Wrong, corrected 2026-09-13 (twentieth session).** Kornblume solves per
+  player, in the browser. `src/composables/glpkSolver.ts` builds a linear program
+  from the reader's warehouse store, with drops as stage variables, crafts as
+  variables and inventory subtracted from demand. It minimises Activity with
+  `glpk.js`, and the file dates from **2024-03-05**, eighteen months before this
+  note. **Crafts are declared integer and stage runs are not**, and a second small
+  integer program handles Sharpodonty and Dust. The site also imports an
+  inventory with OCR (`tesseract.js`) and syncs through Google sign-in.
+  **How the mistake happened:** this note read the `public/data/` directory,
+  saw the `_greedy` files, and inferred the planner from its data without
+  opening `src/`. "Confirmed by inspection" was true of the data and false of
+  the claim. **What is left of the wedge is narrower**: whole runs, a plan that
+  says why each stage is on it, yields discounted by their sample size,
+  provenance on the page, and one model across two games. The last is why the
+  launch title moved to Punishing: Gray Raven the same day.
 - **Patch versioning is unavoidable.** Kornblume encodes it crudely, in
   filenames — `stages1_4`, `stages2_8`, `stages3_3`. Our `GameDataVersion` is
   the same insight done properly, and the presence of eight patch-stamped files
@@ -262,3 +278,38 @@ operationally necessary rather than merely polite.
   [ADR 0007](adr/0007-equipment-is-an-entity.md). §4.3's option (1) won, though
   on a different argument than §4.3 gives — see the ADR. Phase 1 ingestion is
   unblocked.
+
+---
+
+## 7. Punishing: Gray Raven — surveyed 2026-09-14
+
+Done when the launch title swapped (D3), and done differently from §1: **every
+tool below was opened or its source read**, not judged from a search snippet or a
+data directory.
+
+| Tool | What it actually does | Plans farming from an inventory? |
+|------|-----------------------|------|
+| [mcgalih/PGR-Calculator](https://github.com/mcgalih/PGR-Calculator) ([site](https://pgr-calculator.vercel.app)) | Totals the cogs, EXP pods and Memory enhancers a build costs. 0 stars, last pushed **2024-01-22** | No |
+| [ravenkougu.github.io](https://ravenkougu.github.io/) | A serum refill timer. The other features are listed as planned. Last pushed **2021-07-23** | No |
+| [pitycalculator.com — PGR](https://pitycalculator.com/punishing-gray-raven/pity-calculator) | Probability from current pity and available pulls. **Hard pity only**: no featured split, no copies, no income over time | No |
+| Community spreadsheets (a "Resource Calculator V2" on the GRAY RAVENS wiki's guides page, and Rexlent's sheet) | Not opened: the wiki returned 403 to a fetch, and the sheets are only linked. **Unverified**, so neither is claimed to lack anything | Unknown |
+| Guides and videos ([GRAY RAVENS beginner's guide](https://grayravens.com/wiki/Guides/Beginner's_Guide) and others) | Advice, not tools. The consistent message: from level 40, **farm event stages and spend their currency in event shops**, and fall back to resource stages between events | — |
+| GitHub search ("punishing gray raven", "pgr planner", …) | An automation bot, a 2020 data dump, a private server | No |
+
+**Not searched exhaustively:** Discord servers, Bilibili, and closed
+Chinese-language sites. A Chinese-language web search found material-cost
+write-ups and guides, not a planner. The fair summary is **nothing found plans PGR
+farming from a player's inventory**, not "nothing exists".
+
+### What it changes for the model, before any PGR data is read
+
+- **Shops in the solver move up.** If the guides are right that event stages
+  feed event shops, a PGR plan that cannot buy is the wrong plan. Today
+  `EnergyMip` refuses an item sourced only from a shop. That is honest, but for
+  PGR it refuses most of the answer.
+- **Event windows stop being theoretical.** `Availability` already has
+  `opensAt`/`closesAt`, and it has never met a real event.
+- **Second-hand sources already disagree about PGR's featured guarantee.** One
+  says a loss carries a guarantee, one says it does not, and the fixtures assume
+  it does. That is the same reason Q4 was read off the R1999 client, and PGR's
+  banner screen is first in N27 for it.

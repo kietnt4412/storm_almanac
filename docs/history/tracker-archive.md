@@ -1625,6 +1625,71 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-18 (twenty-second) — PGR was read, and the client contradicted the
+guides twice.** N27's blocks 1 to 3, off the Global client, patch **"Steering By
+Light"** — PGR names patches rather than numbering them. All of it is in
+[the PGR note](../game-facts/punishing-gray-raven-research-disclosure.md). The
+maintainer read; a session transcribed; no screenshot is committed.
+
+**Both banner archetypes are complete and paired.** *Arrival Construct* — 0.50%
+base, hard guarantee at 60, **70%** featured. *Themed Construct* — 1.50% base, a
+**Floating Guarantee drawn uniformly 80–100 and resampled on every hit**, **100%**
+featured. The two axes pair rather than varying independently, settled by reading
+all three numbers off one banner, so there are **two shapes to model, not four**.
+
+**The first correction: the featured rule is per-banner, and it was over-generalised
+mid-reading.** The first banner seen was 100%, written up as "PGR guarantees the
+featured unit"; the second was 70%, which made it a per-banner value. Below 100%
+the recovery is published and named — **the Calibration System**, guaranteeing the
+target on the next S-Rank after a miss — and the inheritance rule says
+**"(Calibration included)"**, so a pending loss survives the pool ending.
+**R1999 clears at event end and PGR inherits**, so the two published games now
+disagree on exactly the question `PityScope` exists to answer — the best argument
+yet that it deserved to be data.
+
+**The second correction, and the bigger one: PGR events are not farms.** Read on
+*Blazing Rhapsody*. The stages **cost no Serum**, pay **fixed one-time mission
+grants** behind capability gates inside a four-day window, and the event currency
+(Soundwave Coin) buys **event-local combat buffs, not materials**. **PGR events
+have no shops — every event, not just this one.** `EnergyMip`'s "run stage N times
+at cost C for yield Y" has no term that applies, and `LEAST_ENERGY` is not the
+question; `FEWEST_DAYS` against `closesAt` is. **N30's entire shop half rested on
+guide evidence and is dropped**; so are probabilistic goals, because **Resonance is
+picked, not rolled**.
+
+**What reproduces and what does not.** R1999's 2.36% came back out of its own curve
+as 2.3592%. **PGR's does not**: both pools advertise **1.90%** overall, but 0.50%
+with a hard 60 computes to **1.925%** and 1.50% with a floating 80–100 to
+**2.021%**. The non-S rows sum to 98.10 and 98.10 + 1.90 = exactly 100.00, so the
+table is normalised on the advertised figure and is a long-run outcome share rather
+than a per-pull vector. Recorded as an open question against the engines — the
+per-10 A-Rank floor is the untested term — not as the publisher being wrong.
+
+**N28 is unblocked.** 1 pull = **250** Event Construct R&D Tickets (2500 for ten,
+no discount), 1 Black Card = 1 ticket, 1 Rainbow = **10** Black, 119 Rainbow =
+$19.99 — about **$4.20 a pull**. **Energy is pinned too:** Serum, cap **240 ml**,
+**+1 per 6 minutes** printed as a countdown, no overflow — and the cap is *exactly*
+one day of regeneration, so `energyPerDay` is 240 **for a daily player and less for
+anyone else**. **Feeding:** a 4★ unit is **300 EXP** whether it is a material or a
+weapon, so one rule covers both; weapons are simultaneously entities and fodder,
+which the model has no precedent for.
+
+**The provenance check caught a real error on its first live use.** The maintainer
+reported the Rainbow→Black exchange as 1:1; the screen read 10:1 on all seven
+tiers; asking rather than choosing the cheaper number found that the 1:1 belonged
+to a different exchange. The price arithmetic agreed with the screen — at 1:1 a
+ten-pull would cost about $420.
+
+**Cut by the maintainer: block 4, the timed authoring pass.** N27 asked for three
+readings taken against a stopwatch, because ~2 700 facts a patch times an unmeasured
+per-fact cost is the project's largest unquantified risk. It will not be measured.
+**So no claim that a patch is affordable to source has anything behind it.**
+
+**Still unread:** the Memory system entirely, and the costs behind the character's
+four axes (Train, Evolve, Awaken, Phylotree). **Nothing was authored into a bundle
+yet** — N27's typing half remains. A stray duplicate import left in
+`MonteCarloBannerEngine` before the session was reverted.
+
 ### 2026-09-13 (twentieth session) — six action bumps, one licence left unaccepted, and a green run that ran no tests
 
 **The remote had moved again, as the tracker said it would.** PR #19 was merged,
@@ -1724,6 +1789,58 @@ missing the 50/50 survives the event. The maintainer reports from the game that 
 does not: it is reset, like the pull count. So a limited banner always starts from
 `PityState.fresh`, which the fixture already assumed, and no code changed. **Still
 open for Q4:** every other banner.
+
+**Then the question that turned the session: "is this another clone of
+Kornblume?"** Answering it meant reading Kornblume's source rather than its data.
+`docs/prior-art.md` §1 had said, "confirmed by inspection", that Kornblume
+"structurally cannot" solve per player, because its `public/data/` holds
+`stages<patch>_greedy.json` files. **`src/composables/glpkSolver.ts` says
+otherwise, and has since 2024-03-05.** It builds a linear program from the
+reader's warehouse store and minimises Activity with `glpk.js`, in the browser.
+Crafts are integer and stage runs are not. `tesseract.js` imports an inventory from
+a screenshot, and `vue3-google-signin` syncs it. **The 2026-09-02 note inferred the
+planner from its data files without opening `src/`**, and the README's opening
+paragraph had been built on that inference ever since. So the honest answer was
+**yes**: on R1999 the built product overlaps a deployed tool almost feature for
+feature. What differs is either invisible to a player (integer runs, shadow prices,
+sample-discounted yields, provenance) or unbuilt (a second game, crowdsourced
+drops).
+
+**The maintainer's answer was to swap the titles, recorded as
+[D3](../../TRACKER.md#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13).**
+A GitHub search for PGR planners turned up an automation bot, a 2020 data dump and
+a private server, and nothing that plans. The maintainer plays PGR on Global, and
+without that the swap would have died on ADR 0015. R1999 is not deleted and
+becomes Phase 11's proof. **Cost, stated so it is not discovered later:** PGR
+starts with no data in the repository, and fodder, probabilistic goals and the
+first real calendar move from Phase 11 to before launch. New action **N30** puts
+fodder in the solver. **N27** was retargeted to PGR, in a deliberate order: a
+banner, then the feeding screens, then a timed stage-and-character pass.
+
+**Corrected the same day, and nowhere deleted:** the README opening, the README's
+Kornblume credit and "bet" paragraph, `plan.html`'s title facts, Kornblume card,
+§11 callout and Phase 11 heading, and `prior-art.md` §1, struck through with the
+correction and how the mistake happened. The tracker grew by the D3 entry and
+N30, and the Status bullet for Phase 5 and N28's cassette detail were cut to pay
+for part of it.
+
+**2026-09-14 — the survey D3 was missing, and the plan's wedge rewritten from it.**
+The GitHub search behind D3 could not see closed sites or spreadsheets, so the
+open web was searched too, and **every tool found was opened** rather than judged
+from its snippet. That is the lesson of prior-art §1. There are two material-total
+calculators (the newer last pushed 2024-01), a serum timer from 2021, and a pity
+calculator that models hard pity only. Two community spreadsheets could not be
+opened (the wiki returns 403 to a fetch) and are recorded as unverified, not as
+lacking anything. **Nothing found plans PGR farming from an inventory**, with
+Discord, Bilibili and closed CN sites named as not searched. **The finding with
+teeth was in the guides, not the tools:** PGR is farmed through event stages whose
+currency buys materials in event shops, and `EnergyMip` refuses an item only a
+shop sells. So N30 became *fodder and shops*, and N27 gained an event reading.
+`plan.html`'s wedge section was rewritten rather than patched. PGR's tools card
+comes first, Kornblume's card says plainly that it solves per player, and a
+callout names the four things the bet costs before launch. `prior-art.md` gained
+§7 with the table. **Not rewritten:** the rest of the plan. Its architecture,
+tracks and phases did not change, and D1–D3 carry the departures.
 
 ### 2026-09-12 (nineteenth session) — Phase 5: two engines, one question, and a criterion that did not fit its own sample size
 
@@ -4222,3 +4339,38 @@ green locally, compose stack verified and left running.
   running. Every "written, unverified" row above is genuinely unverified.
 - Left the Gradle wrapper ungenerated (it needs a Gradle install to produce the
   binary `gradle-wrapper.jar`). Documented the one-time bootstrap in the README.
+
+### Rows compressed out of *Current state* (2026-09-18, twenty-second session)
+
+Moved here to pay for the PGR reading's additions, per the tracker's own rule that
+a session which adds more than it removes has moved the problem rather than done
+the work. Nothing below changed; it stopped being the first thing a session needs.
+
+**Game data API — served and verified.** Seven game-data routes plus health,
+version-pinnable, every response carrying its version and attribution — and, since
+2026-09-11, the four that carry facts also carry **where each fact was read**. 15
+HTTP tests plus a hand check against `docker compose up`. Two arrived with N25 and
+both existed because every read before them started from a slug the caller already
+had: `GET /api/games` is the **index** — without it a reader with no account and no
+slug could reach the public catalog only by guessing a URL — and
+`GET /api/games/{game}/items` is **the vocabulary an inventory is written in**,
+which reached a client only as resolved names inside a cost until something had to
+render a few hundred quantities.
+
+**Frontend — five screens, driven in a browser, and 15 tests.** Inventory editor
+(bulk entry: filtered, grouped by the game's own categories, Enter walks the
+column, **no save button** — a typed number is a queued edit), goal picker
+(ordered, targets read off the upgrade graph, roster edited where the goal is),
+plan view (stages, crafts, claims, shadow prices and **every one of the solver's
+notes**, because a plan rendered without them is a confident number hiding a gap),
+catalog browse and search, and the character page with the **personalized
+overlay**. Routing is react-router; the game is in the URL for the catalog and
+nowhere else, because a catalog page is the one thing here somebody sends a link
+to. Both catalog pages end in **where their numbers were read** rather than one
+grey credit line. **15 vitest/jsdom tests run in CI** — see the tracker's
+unverified list for what they deliberately do not cover.
+`npm run dev --prefix frontend` (`.claude/launch.json`, which also carries `api`
+and **`web-built`**, the built bundle on 4173 that the offline test needs) proxies
+`/api` **and `/dev`** to `localhost:8080`, so local is same-origin. The sign-in URL
+is chosen behind `import.meta.env.DEV`, so the development one is not in a
+production bundle.
