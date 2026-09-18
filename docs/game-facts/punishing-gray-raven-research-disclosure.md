@@ -2,8 +2,10 @@
 
 **Working note.** Block 1 of [N27](../../TRACKER.md#next-actions) — the banner
 reading — is **complete**, and block 2 (feeding) is done for the weapon. Block 3
-(an event with its shop) is not started. **Block 4, the timed authoring pass, was
-cut by the maintainer on 2026-09-18** — see *the cut* at the end. Read 2026-09-18.
+(an event) is done too, and found that PGR events have no shop to read —
+*the event* below. **Block 4, the timed authoring pass, was cut by the maintainer
+on 2026-09-18** — see *the cut*. Read 2026-09-18. **Authored into a bundle the
+same day** — *authored, and the format refused three things*, at the end.
 
 This is the launch title's first first-hand data
 ([D3](../../TRACKER.md#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13)).
@@ -543,3 +545,71 @@ first-hand authoring remains unknown**, and any later claim that a patch is
 affordable to source is an estimate with nothing behind it. The three readings
 themselves are still worth having as ordinary facts; it is only the stopwatch that
 is dropped.
+
+---
+
+## Authored — and the format refused three things
+
+**2026-09-18, same session.** The reading above was turned into
+[`data/bundles/punishing-gray-raven-steering-by-light.json`](../../data/bundles/punishing-gray-raven-steering-by-light.json)
+and taken through *validate, preview, ingest*. **It is the first bundle in this
+repository whose every fact is first-hand** — nine facts, `3 PUBLISHER_DISCLOSURE`
+and `6 OBSERVED_IN_GAME`, and the provenance breakdown prints no
+`<- NOT ours to publish` line for the first time on anything that is not a
+synthetic fixture.
+
+What landed: five Overclock and Harmony materials with their read rarities, two
+S-Rank Omniframes, **the Arrival Construct banner archetype in full**, and the
+weapon EXP fodder rule at 300 per 4★ unit.
+
+**Nine facts out of a reading this long is the finding.** Three things were read
+clearly and could not be written down, and each names a specific gap:
+
+1. **The Themed Construct banner.** `PityRule.hardAt` is an `int`; PGR draws the
+   threshold uniformly 80–100 per cycle and redraws it on every S-Rank. There is
+   no number to put there that is not an invention, so the banner is absent from
+   the bundle rather than approximated. **This is the floating-guarantee cost,
+   now paid in data rather than argued in prose.**
+2. **The weapon's Overclock recipe (16/16/20/28) and its Harmony Lv 1 cost (25
+   Harmony Accelerator).** An `Upgrade` must name the entity it advances, and the
+   weapon these were read off was at 45/45 with its **name not recorded**. The
+   numbers are here in this note and are one screenshot away from being
+   authorable. *Cheapest thing to fix in the next reading.*
+3. **Every currency** — Cog, Black Card, Rainbow Card, Event Construct R&D
+   Ticket, Soundwave Coin. `Item.rarity` is required and **no screen that was
+   read grades a currency**. That is not a gap in the reading; it is the format
+   asserting that everything in an inventory has a rarity, which a currency may
+   simply not have. Worth deciding deliberately before **N28**, which needs the
+   ticket to exist as an item.
+
+Two smaller shapes were bent rather than broken, and both are recorded in the
+bundle's own comments:
+
+- **The fodder band is carried by `consumesCategory`, not by `minimumRarity`.**
+  `Fodder` has no upper bound, so `minimumRarity: 4★` would claim that 5★ fodder
+  also gives 300 — and the 5★/4★/1-3★ filter buttons are evidence it does not.
+  The category `weapon-exp-fodder-4-star` is the band. **The rule is inert**: no
+  item carries that category, because the fodder stack's own item name was not
+  recorded either.
+- **No availability window on the banner.** The dates 09/17 – 10/01 06:59 were
+  read; the **zone they are in was not**, and `Availability` takes instants.
+  Writing UTC would be inventing a day boundary — which is exactly
+  [N20](../../TRACKER.md#next-actions).
+
+**Not published.** Ingest is a draft; `--gamedata=publish` is a human approval by
+design, and the approval for the first first-hand version of a title belongs to
+whoever did the reading.
+
+```bash
+java -jar backend/app/build/libs/storm-almanac.jar --gamedata=publish punishing-gray-raven 0
+```
+
+### One second-hand fixture the reading contradicts
+
+`Banners.grayRavenFloating()` in the gacha tests is the "floating guarantee"
+variant — 1.5% base, wall at 80, **featured 0.70**. The first-hand reading pairs
+that 1.50% base with a **100%** featured rate, not 70%: the two axes pair, and
+they were read off the same screen. The fixture is second-hand and is not wrong
+about any rate it was given, but it describes a banner PGR does not appear to
+run. **Left alone here** — correcting a gacha acceptance fixture is Phase 5 work
+and moves a published-rates test, not an authoring step.
