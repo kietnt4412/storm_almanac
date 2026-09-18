@@ -1,0 +1,181 @@
+{
+  "_comment": [
+    "The first bundle in this repository whose every fact was read first-hand.",
+    "ADR 0015 says a fact enters a published bundle because somebody read it in",
+    "the game or in the publisher's own disclosure; ADR 0016 makes that",
+    "falsifiable. Until this file, no bundle here carried a first-hand fact —",
+    "the only publishable ones were synthetic fixtures declaring AUTHORED_FIXTURE.",
+    "",
+    "Every number below is transcribed from",
+    "docs/game-facts/punishing-gray-raven-research-disclosure.md, which is the",
+    "reading itself. Nothing here was checked against a guide, a wiki or an",
+    "aggregator, deliberately: the cross-check is only worth something if it",
+    "happens after the authoring rather than during it.",
+    "",
+    "It is small, and the smallness is the finding. What was read and could not",
+    "be written down is listed under 'what is missing and why' in the note; the",
+    "three that cost the most are the Themed Construct pool (PityRule.hardAt is",
+    "an int and PGR draws it uniformly 80-100 per cycle), the weapon Overclock",
+    "and Harmony recipes (read off a weapon whose name was not recorded, and an",
+    "Upgrade must name its entity), and the currencies (Item.rarity is required",
+    "and a currency is not graded on any screen that was read).",
+    "",
+    "PGR records patches by name rather than number, so the label is a name."
+  ],
+
+  "game": {
+    "id": "punishing-gray-raven",
+    "displayName": "Punishing: Gray Raven",
+    "energyUnit": "Serum"
+  },
+  "sequence": 0,
+  "label": "Steering By Light",
+  "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client, patch \"Steering By Light\", on 2026-09-18. Numbers and text only; no game assets.",
+
+  "provenance": [
+    {
+      "id": "research-pool-panels",
+      "origin": "PUBLISHER_DISCLOSURE",
+      "detail": "The research pool's own Basic Rules, Details, Switch and Drop Details panels, Punishing: Gray Raven Global (English) client, patch \"Steering By Light\", Commandant level 105, on the Selena: Pianissimo (Arrival Construct, 09/17-10/01) and Karenina: Effulgence (Themed Construct, 08/19-09/23) banners. Screenshots taken by the maintainer on 2026-09-18 and transcribed in a Claude Code session; no screenshot is committed, because game assets are not allowed in this repository.",
+      "observedOn": "2026-09-18"
+    },
+    {
+      "id": "weapon-upgrade-screens",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "The weapon Enhancement, Overclock and Harmony screens and the item detail cards behind them, same client, same patch, same account, same sitting. The Enhancement Cost picker was read with exactly one unit of fodder selected, which is where 'Obtained EXP 300' comes from.",
+      "observedOn": "2026-09-18"
+    }
+  ],
+  "sourcedBy": "weapon-upgrade-screens",
+  "factProvenance": {
+    "entity:selena-pianissimo": "research-pool-panels",
+    "entity:karenina-effulgence": "research-pool-panels",
+    "banner:pgr-selena-pianissimo": "research-pool-panels"
+  },
+
+  "items": [
+    {
+      "id": "major-overclock-alloy",
+      "displayName": "Major Overclock Alloy",
+      "rarity": { "label": "4*", "rank": 4 },
+      "category": "overclock-material"
+    },
+    {
+      "id": "weapon-overclock-core-ii",
+      "displayName": "Weapon Overclock Core II",
+      "rarity": { "label": "4*", "rank": 4 },
+      "category": "overclock-material"
+    },
+    {
+      "id": "minor-overclock-alloy",
+      "displayName": "Minor Overclock Alloy",
+      "rarity": { "label": "3*", "rank": 3 },
+      "category": "overclock-material"
+    },
+    {
+      "id": "weapon-overclock-core-i",
+      "displayName": "Weapon Overclock Core I",
+      "rarity": { "label": "3*", "rank": 3 },
+      "category": "overclock-material"
+    },
+    {
+      "id": "harmony-accelerator",
+      "displayName": "Harmony Accelerator",
+      "rarity": { "label": "6*", "rank": 6 },
+      "category": "harmony-material"
+    }
+  ],
+
+  "entities": [
+    {
+      "_comment": "S-Rank because each is the selected target of an S-Rank pool, which the Switch panel states. Ranks follow the gacha fixtures' convention, B=1 < A=2 < S=3; SS is reached by Evolve rather than pulled, so it is not a pull rarity and is not written here.",
+      "id": "selena-pianissimo",
+      "displayName": "Selena: Pianissimo",
+      "kind": "character",
+      "rarity": { "label": "S", "rank": 3 }
+    },
+    {
+      "id": "karenina-effulgence",
+      "displayName": "Karenina: Effulgence",
+      "kind": "character",
+      "rarity": { "label": "S", "rank": 3 }
+    }
+  ],
+
+  "banners": [
+    {
+      "_comment": [
+        "The Arrival Construct archetype, read on Selena: Pianissimo. Its sibling,",
+        "the Themed Construct archetype read on Karenina: Effulgence, is NOT here:",
+        "its guarantee is a value drawn uniformly between 80 and 100 and redrawn",
+        "on every S-Rank, and PityRule.hardAt is an int. Writing any one number",
+        "there would be inventing a rule the screen does not state.",
+        "",
+        "Two further things on the same screen that the model has nowhere to put:",
+        "the guarantee is inherited by the next pool of the same type with a",
+        "pending Calibration included, where PityScope.BANNER_TYPE says only that",
+        "the bucket is the type; and the per-10 A-Rank-or-above floor is here but",
+        "both engines ignore floors below the headline by design.",
+        "",
+        "No availability window: the dates 09/17 - 10/01 06:59 were read, the zone",
+        "they are in was not, and Availability takes instants. That is N20.",
+        "",
+        "The stated overall S-Rank rate including the guarantee is 1.90%, which",
+        "does not reproduce from 0.50% and a wall at 60 (it computes 1.925%). The",
+        "note argues the 1.90% is a long-run outcome share rather than a per-pull",
+        "probability, which is why only the row the screen calls 'Base Drop' is",
+        "written as a base rate here."
+      ],
+      "id": "pgr-selena-pianissimo",
+      "displayName": "Selena: Pianissimo — Arrival Construct",
+      "bannerType": "arrival-construct",
+      "pityScope": "BANNER_TYPE",
+      "baseRates": [
+        { "rarity": { "label": "S", "rank": 3 }, "rate": 0.005 }
+      ],
+      "pityRules": [
+        { "rarity": { "label": "S", "rank": 3 }, "hardAt": 60 }
+      ],
+      "floors": [
+        { "everyN": 10, "minimumRarity": { "label": "A", "rank": 2 } }
+      ],
+      "featured": { "chanceAtHit": 0.70, "guaranteeAfterLoss": 1 }
+    }
+  ],
+
+  "fodder": [
+    {
+      "_comment": [
+        "One 4-star unit of weapon EXP fodder closes 300 EXP, read off the",
+        "Enhancement Cost picker with one unit selected. It reads 300 whether the",
+        "unit is an EXP material or a 4-star weapon, which is the single largest",
+        "simplification the reading produced: progressPerUnit is a function of the",
+        "fodder's rarity band alone.",
+        "",
+        "The band is carried by consumesCategory rather than by minimumRarity,",
+        "because Fodder has no upper bound and the 5* / 4* / 1-3* filter buttons",
+        "on that screen imply the value moves with the band. Only the 4* figure",
+        "was read, so saying 'four stars and above give 300' would over-claim.",
+        "",
+        "No item in this bundle carries that category yet, so the rule is inert.",
+        "That is also read rather than decided: the fodder stack's own item name",
+        "was not recorded, and inventing one to hang the rule on would be the",
+        "laundering ADR 0015 exists to stop.",
+        "",
+        "costs is empty: the 340 000 Cogs on that screen was the side cost of the",
+        "whole 45-level enhancement, not a per-unit price."
+      ],
+      "id": "weapon-exp-4-star",
+      "consumesCategory": "weapon-exp-fodder-4-star",
+      "minimumRarity": { "label": "4*", "rank": 4 },
+      "progressPerUnit": 300,
+      "costs": []
+    }
+  ],
+
+  "stages": [],
+  "crafts": [],
+  "shops": [],
+  "rewards": [],
+  "upgrades": []
+}

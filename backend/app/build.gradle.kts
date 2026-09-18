@@ -69,4 +69,13 @@ tasks.named<Test>("test") {
     val deployable = tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar")
     dependsOn(deployable)
     systemProperty("storm-almanac.deployable-jar", deployable.get().archiveFile.get().asFile.absolutePath)
+
+    // AuthoredBundlesTest reads the hand-typed game data under data/bundles, which
+    // is outside every source set and so is not an input to anything. Without this
+    // the task is FROM-CACHE after a bundle changes — measured, not feared: a
+    // deliberately second-hand bundle was dropped in and the build stayed green
+    // until --rerun-tasks. Declaring the directory is what makes the guard real.
+    inputs.dir(layout.projectDirectory.dir("../../data/bundles"))
+        .withPropertyName("authoredBundles")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
 }

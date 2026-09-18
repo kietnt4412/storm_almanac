@@ -13,7 +13,7 @@ being finished with is.
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks).
   [README.md](README.md) is the public face; [CLAUDE.md](CLAUDE.md) is the
   working agreement.
-- Last updated: **2026-09-18** (twenty-second session)
+- Last updated: **2026-09-18** (twenty-third session)
 
 ---
 
@@ -60,14 +60,19 @@ being finished with is.
   where their roster actually stands. **The first clause is not and cannot be until
   B5** — five strangers cannot complete a plan against something that is not
   deployed. *The data blocker stands:* see the bootstrap bullet below.
-- **Provenance is written, enforced and read, and what it says is uncomfortable.**
-  [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md), in full in the
-  Provenance row above. **On today's data the catalog pages read "Invented for this
-  project — not any real game" or "Nobody recorded where these numbers were read",
-  and that is the feature working** — no bundle carries a first-hand fact yet. **The machinery is finished and the reading is not (N27)**: the first
-  self-sourced bundle needs somebody to *read the game*, and ADR 0015's integrity
-  rule disqualifies an aggregator, a web search and an AI session alike.
-  [The loop](docs/game-facts/authoring-a-first-hand-bundle.md).
+- **The first self-sourced bundle exists — and what the format would not take is
+  worth more than what it took.** 2026-09-18,
+  [`data/bundles/punishing-gray-raven-steering-by-light.json`](data/bundles/punishing-gray-raven-steering-by-light.json),
+  ingested as **draft 0 with nine first-hand facts** and **not published** — the
+  approval is the maintainer's by design. Of a reading that filled 545 lines,
+  **three blocks were read clearly and could not be written down**: the Themed
+  Construct banner, because `PityRule.hardAt` is an `int` and PGR draws it
+  (**N31**); the weapon's Overclock and Harmony recipes, because an `Upgrade`
+  names an entity and **the weapon's own name was not recorded**; and **every
+  currency**, because `Item.rarity` is required and nothing read grades one
+  (**N28**). Until it publishes, the catalog pages still read "Invented for this
+  project" or "Nobody recorded where these numbers were read", **and that is the
+  feature working**. [The loop](docs/game-facts/authoring-a-first-hand-bundle.md).
 - **The project is going first-hand on game data**, decided 2026-09-09 —
   [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md),
   superseding 0009 on its conclusion and closing **Q2, Q3, F1 and F2** at once.
@@ -94,8 +99,11 @@ being finished with is.
 - **Phase 0 stays closed by exception** — deploy deferred by D1 — and its box
   stays unticked, because nothing is deployed.
 - **Track B: not started, and gated.** See [the gate](#the-gate).
-- **The remote, checked 2026-09-13 (twentieth session) — re-check it, do not
-  trust it.** At session start **PR #19 was MERGED** (Phase 5 is on `main`),
+- **The remote, checked 2026-09-18 (twenty-third session) — re-check it, do not
+  trust it.** `gh pr list` is **empty** and `dev` tracks `origin/dev` clean, so
+  **the sixth push to `dev` with no open PR is the one this session makes**;
+  whatever lands here runs no CI until a PR exists. Earlier: at the twentieth
+  session's start **PR #19 was MERGED** (Phase 5 is on `main`),
   `origin/main` and `origin/dev` were equal, and `dev` had no open PR.
   **[PR #20](https://github.com/kietnt4412/storm_almanac/pull/20) (N5) was then
   opened and is green on `ef51844`, run `34731880389`** — and **every test task in
@@ -169,29 +177,20 @@ Rules that keep this file honest:
   before starting work. If a session adds more than it removes, it has moved the
   problem rather than done the work.
   **Measure it with `wc -l` rather than carrying the last number forward** — the
-  drift has twice run in the flattering direction, by seven lines once.
-  **Still well over: 747 on 2026-09-11 → 742 on 2026-09-12 (eighteenth) → 749 on
-  2026-09-12 (nineteenth), measured.** The nineteenth cut ten blocks — the
-  *Current state* rows for Phase 1, the parser adapter and provenance that three
-  sessions had flinched from, the Status bullets for the offline outbox and N4 that
-  a table row already carried, two closed next actions, the benchmark
-  re-argument, D1's restatement and E4's
-  ([the five largest are in the archive](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-12-nineteenth-session)) —
-  **and still ended seven lines up, because it closed a phase, opened a deviation and
-  added an action in the same session.** By this file's own rule that is moving the
-  problem, and the flat number is the only honest way to say so.
-  **→ 769 on 2026-09-13 (twentieth), measured after this entry was written** — N5 out, the Phase board's closed
-  entries cut to one line each, the remote bullet halved. **Still ~170 over.**
-  **→ 790 on 2026-09-18 (twenty-second), measured.** Up 21, and the compression
-  this session bought did not show: the *Game data API* and *Frontend* rows — the
-  candidates the line above named — **were each a single very long line**, so
-  cutting them to a summary and an archive link removed ~2 700 characters and
-  **zero lines**. **The metric is not measuring the thing.** A row nobody can read
-  in one breath costs a session as much as twenty short ones, and `wc -l` cannot
-  see it; bytes fell 71 045 → 70 369 while lines held. Keep measuring lines, but
-  **read the long rows as their own debt** — the remaining ones are in
-  *What is still unverified*, whose closed-phase items could become one line and a
-  link, as its last bullet already does for eight of them.
+  drift has twice run in the flattering direction, by seven lines once. **Six
+  sessions have now tried and the file has gone down once, by five lines**:
+  747 → 742 → 749 → 769 → 790 → 826, measured each time
+  ([what each cut, and why it did not show](docs/history/tracker-archive.md#the-line-count-ledger)).
+  **That is a pattern, not six failures of will**: a session that finds something
+  has to write it down, and a handoff document cannot also be a fixed-size one.
+  **Settle it rather than reporting the miss a seventh time** — either the 550
+  is wrong, or *Current state* stops carrying prose that belongs in the notes it
+  already links to.
+  **The metric is not measuring the thing.** The twenty-second session removed
+  ~2 700 characters and **zero lines**, because the rows it compressed were each
+  one very long line. A row nobody can read in one breath costs a session as much
+  as twenty short ones. So: keep measuring lines, **and read the long rows as
+  their own debt** — the remaining ones are in *What is still unverified*.
 
 ---
 
@@ -230,7 +229,8 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **329 tests** (324 last run in full, plus five in `gacha` run 2026-09-13), 0 skipped locally with snapshots present; **313 on CI**, because the same 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar` — `DeployableJarTest` reads the artifact. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
+| Backend build | **Green** | **330 tests**, run in full 2026-09-18, 0 skipped locally with snapshots present; **314 on CI**, because 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar` — `DeployableJarTest` reads the artifact — and, since 2026-09-18, declares `data/bundles` as an input: without it `AuthoredBundlesTest` was `FROM-CACHE` after a bundle changed, **measured by dropping a second-hand bundle in and watching the build stay green**. Test tasks set `api.version=1.44` — [E2](#e2--docker-engine-29-refuses-testcontainers-api-version) |
+| Authored game data | **One bundle, draft, first-hand** | `data/bundles/punishing-gray-raven-steering-by-light.json` — nine facts off the PGR client, ingested at sequence 0 and **not published**. `AuthoredBundlesTest` parses every file there and fails on any fact the project is not entitled to publish; it fails on an **empty** directory too, because a scan with nothing to scan is the vacuous pass this repository has already been bitten by. Nothing else in the build reads that directory |
 | CI workflow | **Green, no warnings, on Node 24** | Run `34731880389` on `ef51844` ([PR #20](https://github.com/kietnt4412/storm_almanac/pull/20), N5): zero annotations. **Test results cached from #19's run `34695206362`**, where the suite last *executed*: 16 skipped, exactly the three snapshot-gated classes (`RealUpstreamPlanTest` 8, `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3) — a pass there would mean a snapshot had been committed by accident. **`gradle/actions` is held at v5**: v6 needs Gradle's Terms of Use accepted, which is the maintainer's call, and v5 has been frozen since 2026-02-23 |
 | Game data pipeline (Phase 1) | **Closed and stable** | `V2`–`V4`, 28 tables, seven invariants on two real patches, a round trip pinning parser against writer (ADR 0008), publishing as a human approval. `Drop` carries `sampledRuns`, where 0 means *declared*. [In full in the archive](docs/history/tracker-archive.md#closed-phases-in-full) |
 | Parser adapters | **One, and demoted to a cross-check by [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)** | `:adapters:reverse-1999`, 25 tests. **It hard-codes `THIRD_PARTY` and so fails a plain `publish`** — there is no call site to launder data through. Kept rather than deleted because diffing the first self-sourced bundle against it is worth more than it ever was as a source. [The prose it used to carry](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-12-nineteenth-session) |
@@ -356,15 +356,19 @@ works". It does not mean that:
   shapes the model cannot express, what the adapter does not convert, and the rest.
   All still true. **Read them before re-opening Phase 1, 2 or 11.** (One has
   expired: `gacha` had no behaviour, and now does.)
-- **No bundle carries a first-hand fact yet.** The first first-hand reading, the
-  summon rules on 2026-09-13, is a test fixture and a note, not bundle data. The
-  only bundles that pass ADR 0016's gate are the synthetic fixtures, which pass by
-  declaring `AUTHORED_FIXTURE`. **Every Reverse: 1999 catalog and drop number in
-  this file still comes from Kornblume** (**N27**).
+- **One bundle carries first-hand facts, it is a draft, and it is nine facts
+  wide.** `punishing-gray-raven` draft 0, 2026-09-18 — five materials, two
+  Omniframes, one banner archetype and one fodder rule, `3 PUBLISHER_DISCLOSURE`
+  and `6 OBSERVED_IN_GAME`, the first provenance breakdown outside a synthetic
+  fixture with no *NOT ours to publish* line. **Nothing is published**, so ADR
+  0016's gate is still only ever passed by `AUTHORED_FIXTURE`, and **every
+  Reverse: 1999 catalog and drop number in this file still comes from
+  Kornblume**. **Nine facts is not a catalog** — no stage, no craft, no reward,
+  no upgrade — so nothing can be planned from it and the frontend has still
+  never rendered PGR.
   (Provenance stopped being write-only on 2026-09-11;
   [what it says and why that is the feature working](docs/history/tracker-archive.md#closed-out-of-what-is-still-unverified-2026-09-12-eighteenth-session)
-  is in the archive. It becomes a claim worth making when **N27** puts a real
-  reading behind it.)
+  is in the archive.)
 ---
 
 ## Next actions
@@ -372,21 +376,39 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **N27 — Author the first PGR bundle. The reading is done; the typing is not.**
-      Blocks 1–3 landed 2026-09-18, off the Global client, and are in
-      [the PGR note](docs/game-facts/punishing-gray-raven-research-disclosure.md):
-      **both banner archetypes in full** (base rate, guarantee, counter, featured
-      rate, inheritance), the **weapon's feeding numbers**, and the **event
-      economy**. **Block 4, the timed authoring pass, was cut by the maintainer** —
-      so the cost of sourcing a patch stays unmeasured, and any later claim that a
+- [ ] **N27 — Finish the first PGR bundle. It is authored, ingested and awaiting
+      the approval; what it could not hold is the next reading order.**
+      [`data/bundles/punishing-gray-raven-steering-by-light.json`](data/bundles/punishing-gray-raven-steering-by-light.json)
+      is **draft 0, nine facts, all first-hand** — the first in this repository
+      that is not a synthetic fixture. **Publishing is one command and is the
+      maintainer's**, so it is a fact here rather than an action:
+      `--gamedata=publish punishing-gray-raven 0`.
+      **Nine facts out of that reading is the finding.** Three things were read
+      clearly and the format refused them
+      ([the account](docs/game-facts/punishing-gray-raven-research-disclosure.md)):
+      the **Themed Construct banner** (**N31**); the **Overclock recipe
+      16/16/20/28 and Harmony Lv 1's 25 Accelerators**, because an `Upgrade` names
+      an entity and the weapon they were read off **was not named** — *the
+      cheapest thing in this list to fix*; and **every currency**, because
+      `Item.rarity` is required and no screen read grades one (**N28**).
+      **Still unread:** the **Memory** system entirely, the costs behind the
+      character's four axes (Train, Evolve, Awaken, Phylotree), and the
+      **fodder item's own name**, which is what makes the authored fodder rule
+      inert. **Block 4, the timed authoring pass, was cut by the maintainer** — so
+      the cost of sourcing a patch stays unmeasured, and any later claim that a
       patch is affordable to source is an estimate with nothing behind it.
-      **Still unread:** the **Memory** system entirely, and the costs behind the
-      character's four axes (Train, Evolve, Awaken, Phylotree).
-      **Still to do:** turn the note into canonical JSON and run *preview, ingest,
-      publish* ([the loop](docs/game-facts/authoring-a-first-hand-bundle.md)).
       **Ask how each value was read before recording it** — a relayed web-search
-      answer and a screen reading look identical in chat; it caught one error this
-      session. R1999's pass moves to Phase 11.
+      answer and a screen reading look identical in chat. R1999's pass is Phase 11.
+- [ ] **N31 — Give `PityRule` a guarantee that is drawn, not fixed.** PGR's Themed
+      Construct pool draws its wall **uniformly 80–100 and redraws it on every
+      S-Rank**; `hardAt` is an `int`, so **the archetype is absent from the first
+      bundle rather than approximated** — a gap in published data, now, and not an
+      argument in a note. Both engines are affected asymmetrically
+      ([ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md)):
+      Monte Carlo needs one extra draw, the exact chain needs the drawn threshold
+      in its state or 21 mixed chains. **Do it with the fixture correction it
+      implies** — `Banners.grayRavenFloating()` pairs the 1.50% base with a 70%
+      featured rate, and the client pairs 1.50% with **100%**.
 - [ ] **N30 — Put fodder and the event shape into the solver (D3). Shops are out.**
       **Rescoped 2026-09-18 against N27's reading, and it moved both ways.**
       **Dropped — the shop half**, whose premise was guide-derived and is false:
@@ -415,7 +437,10 @@ Ordered. Completed ones move to
       guarantee her" — the feature the plan calls the one nobody ships well — has
       nothing to compute from, and no amount of engine work changes that. Costs a
       bundle field, parser, writer, a migration and the JDBC round trip, exactly
-      like **N20**. **Do it with a game whose income sources are actually
+      like **N20** — **plus a decision the first bundle forced**: the ticket has to
+      exist as an `Item`, `Item.rarity` is required, and **no screen that was read
+      grades a currency at all**. Decide whether a rarity is optional or whether a
+      currency is simply given one, rather than discovering it mid-migration. **Do it with a game whose income sources are actually
       ingested**: the accrual side reads `Reward` cadences, and nothing ingested
       has ever been checked for them. **Two more fields belong in the same change**,
       both found on R1999 2026-09-13 ([the note](docs/game-facts/reverse-1999-summon-disclosure.md)):
@@ -626,38 +651,30 @@ use. It also makes the abstraction's hardest shapes load-bearing from day one, n
 bolted on at the end. Phase 11's proof survives with the roles reversed: R1999
 has to go live with no game-specific code added after PGR.
 
-**Reversal trigger:** the timed PGR reading in **N27** shows first-hand sourcing
-of PGR is not feasible for one maintainer, or an established PGR planner that
-solves per player turns up. Either one puts R1999 back on top, with the Kornblume
-overlap stated honestly.
+**Reversal trigger — and half of it can no longer fire** (2026-09-18). It was:
+the *timed* PGR reading in **N27** shows first-hand sourcing is not feasible for
+one maintainer, or an established PGR planner that solves per player turns up.
+**The timed pass was cut by the maintainer**, so the feasibility half has no
+measurement behind it and cannot trip on evidence — only on somebody's judgment
+that the authoring has stalled. The second half stands unchanged. Either one puts
+R1999 back on top, with the Kornblume overlap stated honestly.
 
 ### D2 · Phase 5 entered before Phase 4 closed (2026-09-12)
 
 **The rule broken is this file's own:** do not start a phase until the previous
-one's criterion is met. Phase 4's criterion needs five strangers completing a plan
-against a deployment, which is **B5**, whose last step needs accounts and an OAuth
-registration no session has. **N27** above it is the maintainer's by ADR 0015's
-integrity rule. So the choice was put to the maintainer — Phase 5, B5's wiring, or
-**N5** — and Phase 5 was chosen deliberately, knowing the order.
+one's criterion is met. Phase 4's needs a deployment (**B5**) and **N27** is the
+maintainer's, so the choice was put to them and Phase 5 taken knowingly.
+[In full in the archive](docs/history/tracker-archive.md#d2--the-full-account).
 
-**What it cost:** Phase 4 is still open and B5 is still the only thing between it
-and its criterion, so this bought no progress on the launch. The gate is
-untouched. **What it bought:** the one large piece of Track A a session can finish
-alone and verify without a browser, a provider or a person reading a game screen.
+**It bought** the one large piece of Track A a session can finish alone; **it cost
+nothing on the launch**, which B5 still blocks. Phase 5 got **no bean, no route,
+no screen** and an income model left unwritten rather than guessed (**N28**).
 
-**What to watch.** The risk in taking a phase early is building against imagined
-requirements, which is the whole argument for the Track B gate — so note what this
-phase did *not* get: no bean, no route, no screen, and an income model left
-unwritten rather than guessed at (**N28**). The engines answer questions a test
-asks. **Nothing has asked them on behalf of a player**, and that is the same
-qualification `SolveCoordinator` has carried since Phase 2.
-
-**Reversal trigger:** none — a phase cannot be un-entered. The trigger that
-matters is the one on the *next* phase: **do not take Phase 6 early on this
-precedent.** Phase 6 feeds estimates into the optimizer and needs users, so
-starting it without them is exactly the mistake the gate exists to prevent, and
-Phase 5 was safe to take early only because its exit criterion is a proof about a
-model rather than a measurement of real traffic.
+**Reversal trigger:** none — a phase cannot be un-entered. The one that matters
+is on the *next* phase: **do not take Phase 6 early on this precedent.** Phase 6
+feeds estimates into the optimizer and needs users; Phase 5 was safe to take
+early only because its criterion is a proof about a model rather than a
+measurement of real traffic.
 
 ### D1 · Deployment deferred (2026-09-02)
 
@@ -730,6 +747,17 @@ A version means it is up, whatever the service says. If that hangs or errors,
 a session cannot start it — `Start-Service` from a non-elevated shell fails with
 *Cannot open com.docker.service service on computer '.'*.
 
+**But a session can start the *application*, and that is enough** (2026-09-18).
+The engine was down, the API pipe did not exist, and this brought it up without
+elevation and without a human — running in well under a minute:
+
+```powershell
+Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
+```
+
+So the escalation is: ask the engine, and if it is dead, start Docker Desktop and
+ask again. Only then is it a human's problem.
+
 ---
 
 ## Open questions
@@ -772,6 +800,7 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-18 | twenty-third | **The first first-hand bundle exists — draft 0, nine facts, not published.** The 545-line PGR reading became `data/bundles/punishing-gray-raven-steering-by-light.json` and went through *validate, preview, ingest*; the provenance breakdown prints no *NOT ours to publish* line for the first time outside a synthetic fixture. **Nine facts is the finding: three blocks were read clearly and the format refused them**, and all three are *required* fields the reading could not fill — the Themed Construct banner (`PityRule.hardAt` is an `int`, PGR draws it 80–100: **N31**), the weapon's Overclock and Harmony recipes (an `Upgrade` names an entity and **the weapon was never named**), and **every currency** (`Item.rarity` is required and nothing read grades one: **N28**). R1999 never contradicted any of those assumptions; PGR contradicted all three on day one. Fodder authored with the band on `consumesCategory` and **inert**, because the fodder item's name was not recorded. **E4 gains a way out:** a session cannot start `com.docker.service`, but `Start-Process 'Docker Desktop.exe'` brings the engine up unelevated. **790 → 826 lines, up 36 and the sixth session running** — decide whether the 550-line rule is wrong or whether *Current state* must stop carrying prose that belongs in the notes it links to |
 | 2026-09-18 | twenty-second | **PGR was read (N27 blocks 1–3), and the client contradicted the guides twice.** Both banner archetypes complete and paired; the featured rule is **per-banner**, and below 100% the recovery is published as the **Calibration System**, inherited across pools — **R1999 clears where PGR inherits**, so the two games now disagree on what `PityScope` is for. **PGR events are not farms and have no shops**, so **N30 loses its shop half and probabilistic goals and gains an event shape `EnergyMip` cannot express**. **PGR's advertised 1.90% does not reproduce** from its own numbers, unlike R1999's 2.36%. **N28 unblocked**; Serum pinned at 240 ml, +1/6 min, cap = exactly one day. **Block 4 cut by the maintainer.** Nothing authored into a bundle yet |
 | 2026-09-14 | twenty-first | **The PGR survey D3 was missing, and the plan's wedge rewritten from it.** Every tool found was opened rather than judged from a snippet; nothing found plans PGR farming from an inventory. The finding with teeth was in the *guides* — that PGR is farmed through event stages whose currency buys materials in event shops — which **N30 was scoped from and which the twenty-second session found false against the client** |
 | 2026-09-13 | twentieth | **The launch title swapped to Punishing: Gray Raven ([D3](#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13))**, because asking "is this a Kornblume clone?" found `prior-art.md` wrong: **Kornblume solves per player with GLPK in the browser**, and has since 2024. README, plan and prior-art corrected; N27 retargeted to PGR; **N30** puts fodder in the solver. Before that, **Q4 answered for one banner, off the client itself:** the maintainer's screenshots of the rules screen confirm the pity curve twice — stated word for word, and an overall 6★ rate of **2.36% the curve reproduces as 2.3592%**, a check a curve one pull off would fail — **contradict the featured rule** (50/50 with a guarantee, not outright), and **find a Limited Shop exchange no engine models**. First first-hand fixture and five tests; 96 questions, worst gap still 0.110. An AI web-search answer was offered first and not recorded. **N5: every CI action onto Node 24, zero annotations, green on run `34731880389`** ([PR #20](https://github.com/kietnt4412/storm_almanac/pull/20)). Taken to the latest majors (checkout v7, setup-java v6, setup-node v7, upload-artifact v7) — **except `gradle/actions`, held at v5** because v6 needs Gradle's Terms of Use accepted, which is the maintainer's call, and v5 has been frozen since February. **The green run executed no tests**: a YAML-only change leaves every Gradle input identical, so all seven test tasks came from cache. N27 handed to the maintainer as a reading form, deliberately without the fixture values so the reading stays blind. PR #19 already merged and `dev` had no open PR — the fifth time. 749 → 769 lines |

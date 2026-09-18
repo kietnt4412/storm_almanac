@@ -1614,6 +1614,75 @@ machine.
 
 ---
 
+## D2 — the full account
+
+Compressed out of the live tracker on 2026-09-18 (twenty-third session); the
+operative half — the trigger on Phase 6 — stays there.
+
+### D2 · Phase 5 entered before Phase 4 closed (2026-09-12)
+
+**The rule broken is this file's own:** do not start a phase until the previous
+one's criterion is met. Phase 4's criterion needs five strangers completing a plan
+against a deployment, which is **B5**, whose last step needs accounts and an OAuth
+registration no session has. **N27** above it is the maintainer's by ADR 0015's
+integrity rule. So the choice was put to the maintainer — Phase 5, B5's wiring, or
+**N5** — and Phase 5 was chosen deliberately, knowing the order.
+
+**What it cost:** Phase 4 is still open and B5 is still the only thing between it
+and its criterion, so this bought no progress on the launch. The gate is
+untouched. **What it bought:** the one large piece of Track A a session can finish
+alone and verify without a browser, a provider or a person reading a game screen.
+
+**What to watch.** The risk in taking a phase early is building against imagined
+requirements, which is the whole argument for the Track B gate — so note what this
+phase did *not* get: no bean, no route, no screen, and an income model left
+unwritten rather than guessed at (**N28**). The engines answer questions a test
+asks. **Nothing has asked them on behalf of a player**, and that is the same
+qualification `SolveCoordinator` has carried since Phase 2.
+
+**Reversal trigger:** none — a phase cannot be un-entered. The trigger that
+matters is the one on the *next* phase: **do not take Phase 6 early on this
+precedent.** Phase 6 feeds estimates into the optimizer and needs users, so
+starting it without them is exactly the mistake the gate exists to prevent, and
+Phase 5 was safe to take early only because its exit criterion is a proof about a
+model rather than a measurement of real traffic.
+
+---
+
+## The line-count ledger
+
+Moved out of the tracker's *How to use this file* on 2026-09-18 (twenty-third
+session), where it had grown into five sessions of self-accounting about a rule
+that fits in three lines. The rule stays there; this is what each attempt
+actually did.
+
+**747 on 2026-09-11 (seventeenth).** The first measurement after the split.
+
+**742 on 2026-09-12 (eighteenth).** Two lessons moved here, two struck-through
+entries closed out — and the previous session's carried-forward number was seven
+short, which is why the rule now says to run `wc -l`.
+
+**749 on 2026-09-12 (nineteenth).** Ten blocks cut: the *Current state* rows for
+Phase 1, the parser adapter and provenance that three sessions had flinched from,
+the Status bullets for the offline outbox and N4 that a table row already
+carried, two closed next actions, the benchmark re-argument, D1's restatement and
+E4's ([the five largest](#rows-compressed-out-of-current-state-2026-09-12-nineteenth-session)).
+**It still ended seven lines up**, because it closed a phase, opened a deviation
+and added an action in the same session. By the file's own rule that is moving
+the problem, and the flat number is the only honest way to say so.
+
+**769 on 2026-09-13 (twentieth).** N5 out, the Phase board's closed entries cut
+to one line each, the remote bullet halved. Still ~170 over.
+
+**790 on 2026-09-18 (twenty-second).** Up 21. The compression it bought **did not
+show at all**: the *Game data API* and *Frontend* rows — the candidates the
+previous entry had named — were each a **single very long line**, so summarising
+them and linking here removed ~2 700 characters and zero lines. Bytes fell
+71 045 → 70 369 while the line count held. That is the observation that survives:
+`wc -l` cannot see the row nobody can read in one breath.
+
+---
+
 ## Session log
 
 **Append one entry per session, newest first, here — not in the tracker.** The
@@ -1624,6 +1693,104 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-18 (twenty-third) — the first first-hand bundle exists, and it is nine
+facts wide.** N27's other half: the 545-line PGR reading turned into
+[`data/bundles/punishing-gray-raven-steering-by-light.json`](../../data/bundles/punishing-gray-raven-steering-by-light.json)
+and taken through *validate, preview, ingest*. **Draft 0, nine facts, every one
+first-hand** — `3 PUBLISHER_DISCLOSURE` (the research pool panels) and
+`6 OBSERVED_IN_GAME` (the weapon upgrade screens). It is the first provenance
+breakdown outside a synthetic fixture that prints no *NOT ours to publish* line.
+**Not published**: the approval is a command the maintainer types, and publishing
+an immutable version of data they had not read would be exactly the rubber stamp
+`GameDataCli` is shaped to prevent.
+
+**What landed:** five Overclock and Harmony materials with their read rarities,
+two S-Rank Omniframes, the **Arrival Construct banner archetype in full**
+(0.50% base, wall at 60, per-10 A-Rank floor, featured 0.70 with the Calibration
+guarantee as `guaranteeAfterLoss: 1`, scope `BANNER_TYPE` on `arrival-construct`),
+and the weapon EXP fodder rule at **300 per 4★ unit**.
+
+**Nine facts out of that reading is the finding, and it is three refusals rather
+than three omissions.**
+
+1. **The Themed Construct banner is absent.** `PityRule.hardAt` is an `int`; PGR
+   draws the wall uniformly 80–100 and redraws it on every S-Rank. Any single
+   number there would be an invention. **The floating guarantee has stopped being
+   an argument in a note and become a hole in published data** — opened as
+   **N31**, together with the fixture it contradicts: `Banners.grayRavenFloating()`
+   pairs the 1.50% base with a **70%** featured rate and the client pairs it
+   with **100%**.
+2. **The Overclock recipe (16/16/20/28) and Harmony Lv 1 (25 Accelerators) are
+   absent**, because an `Upgrade` must name the entity it advances and **the
+   weapon they were read off was never named**. The numbers are in the note. This
+   is the cheapest gap in the project to close and it needs one screen.
+3. **Every currency is absent** — Cog, Black Card, Rainbow Card, Event Construct
+   R&D Ticket, Soundwave Coin — because `Item.rarity` is required and **no screen
+   that was read grades a currency**. That is the format asserting something about
+   the world rather than the reading falling short, and **N28 hits it first**,
+   since the pull-currency work needs the ticket to exist as an item.
+
+Two shapes were bent rather than broken, both recorded in the bundle's own
+comments. **The fodder band is carried by `consumesCategory`, not
+`minimumRarity`** — `Fodder` has no upper bound, so `minimumRarity: 4★` would
+claim 5★ fodder also gives 300, and the 5★/4★/1-3★ filter buttons are evidence it
+does not; the rule is **inert**, because the fodder stack's own item name was not
+recorded either and no item carries the category. And **the banner carries no
+availability window**: the dates 09/17 – 10/01 06:59 were read and **the zone was
+not**, and `Availability` takes instants — which is N20, arriving as data rather
+than as a deferral.
+
+**A general lesson about the format, worth more than the bundle.** Every one of
+the three refusals is a *required* field the reading could not fill, not an
+optional one it skipped. A canonical format tuned on one game asserts that
+everything has a rarity, that every upgrade belongs to a named thing, and that a
+guarantee is a constant. Reverse: 1999 never contradicted any of those. PGR
+contradicted all three on the first day of authoring.
+
+**The bundle is now guarded, and guarding it found a hole in the build.**
+`AuthoredBundlesTest` parses every file under `data/bundles` and fails on any
+fact the project is not entitled to publish — verified by dropping a deliberately
+`THIRD_PARTY` bundle in and watching it go red. It also **fails on an empty
+directory**, because a scan with nothing to scan is the vacuous pass this
+repository already learned about from `EntityKindBoundaryTest`'s denylist.
+
+The hole: `data/bundles` is outside every source set, so **nothing made it an
+input to anything**. The first run of the defect check stayed *green* — the task
+came back `FROM-CACHE` — and only `--rerun-tasks` showed the failure. A guard
+that does not re-run when the thing it guards changes is not a guard.
+`backend/app/build.gradle.kts` now declares the directory with
+`inputs.dir(...).withPathSensitivity(RELATIVE)`, and the defect check goes red
+without any flag. **Worth generalising:** any future test that reads repository
+data from outside a source set has this problem silently.
+
+**330 tests, run in full, 0 failed and 0 skipped locally** (the snapshots are
+present on this machine, so the three snapshot-gated classes executed). 4m 13s.
+
+**Environment, and it corrects E4 in a useful direction.** Docker was down at
+session start (`failed to connect to the docker API`, and the Windows service is
+not the engine on the WSL2 backend). **A session cannot start `com.docker.service`
+but it can start the application** — `Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'`
+from PowerShell brought the engine up, and `docker info --format '{{.ServerVersion}}'`
+answered `29.7.2` within the minute. Nothing needed elevation.
+
+**The remote:** `gh pr list` empty, `dev` clean against `origin/dev`. **Sixth time
+a push to `dev` will run no CI** unless a PR is opened; nothing in this session
+touches Java, so there is no suite to run either way.
+
+**Lines: 790 → 826, measured. Up 36, and the sixth session running to move the
+number the wrong way.** Two blocks went out — the line-count ledger itself, five
+sessions of self-accounting about a three-line rule ([here](#the-line-count-ledger)),
+and D2's full account ([here](#d2--the-full-account)) — about 50 lines between
+them. Roughly 80 went in: N27 rewritten, **N31 opened**, two Status bullets
+replaced, E4 given its way out, and D3's reversal trigger corrected because the
+timed reading it depends on was cut. Bytes 70 369 → 74 604, so this is not the
+long-line illusion the previous entry found; the file genuinely grew. **The
+pattern is now unmistakable and it is not laziness:** every session that produces
+a finding must write the finding down, and a tracker that is a handoff cannot
+also be a fixed-size document. Either the 550-line rule is wrong or *Current
+state* has to stop carrying prose that belongs in the notes it links to. **Decide
+which, rather than reporting the miss a seventh time.**
 
 **2026-09-18 (twenty-second) — PGR was read, and the client contradicted the
 guides twice.** N27's blocks 1 to 3, off the Global client, patch **"Steering By
