@@ -13,7 +13,7 @@ being finished with is.
 - Source of the plan: [plan.html](plan.html) (13 phases, two tracks).
   [README.md](README.md) is the public face; [CLAUDE.md](CLAUDE.md) is the
   working agreement.
-- Last updated: **2026-09-13** (twentieth session)
+- Last updated: **2026-09-18** (twenty-second session)
 
 ---
 
@@ -26,6 +26,21 @@ being finished with is.
   its fodder shape is not in the solver, so the next actions are **N27** (read
   PGR) and **N30** (fodder). Everything below this bullet that says "R1999" was
   true when written and still is. It is just no longer the launch.
+- **PGR has been read, and it corrected the plan twice** — 2026-09-18,
+  [the note](docs/game-facts/punishing-gray-raven-research-disclosure.md). **Both
+  banner archetypes are first-hand and complete**, the weapon's feeding numbers are
+  read, and **N28's pull-currency chain exists at last**. Two things the *guides*
+  said turned out false against the client: PGR's featured rule is a **per-banner
+  rate** (70% with a published Calibration guarantee, or 100% with none), not a
+  constant; and **PGR events have no shops**, are **not energy-priced**, and pay
+  **one-time mission grants** rather than farmable yields. **N30 shrank by two
+  features and grew by one**, and the new one does not fit `EnergyMip`. Three engine
+  costs fall out: a **floating `hardAt`** drawn per cycle, a **`PityScope` for pool
+  type that carries Calibration across pool boundaries** — R1999 clears at event
+  end and PGR inherits, so the two published games now disagree on the one question
+  that enum exists to answer — and `featured` finally carrying weight. **Block 4,
+  the timed authoring pass, was cut by the maintainer**, so the cost of sourcing a
+  patch is still unmeasured.
 - **Phases 1, 2 and 3 stay closed, criterion and scope.** One line each on the
   [phase board](#track-a--product); the qualifications that matter are in
   [what is still unverified](#what-is-still-unverified).
@@ -166,10 +181,17 @@ Rules that keep this file honest:
   added an action in the same session.** By this file's own rule that is moving the
   problem, and the flat number is the only honest way to say so.
   **→ 769 on 2026-09-13 (twentieth), measured after this entry was written** — N5 out, the Phase board's closed
-  entries cut to one line each, the remote bullet halved. **Still ~170 over.** The
-  next candidates are *What is still unverified* (its closed-phase items could
-  become one line and a link, as its last bullet already does for eight of them)
-  and the *Game data API* and *Frontend* rows of *Current state*.
+  entries cut to one line each, the remote bullet halved. **Still ~170 over.**
+  **→ 790 on 2026-09-18 (twenty-second), measured.** Up 21, and the compression
+  this session bought did not show: the *Game data API* and *Frontend* rows — the
+  candidates the line above named — **were each a single very long line**, so
+  cutting them to a summary and an archive link removed ~2 700 characters and
+  **zero lines**. **The metric is not measuring the thing.** A row nobody can read
+  in one breath costs a session as much as twenty short ones, and `wc -l` cannot
+  see it; bytes fell 71 045 → 70 369 while lines held. Keep measuring lines, but
+  **read the long rows as their own debt** — the remaining ones are in
+  *What is still unverified*, whose closed-phase items could become one line and a
+  link, as its last bullet already does for eight of them.
 
 ---
 
@@ -213,7 +235,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Game data pipeline (Phase 1) | **Closed and stable** | `V2`–`V4`, 28 tables, seven invariants on two real patches, a round trip pinning parser against writer (ADR 0008), publishing as a human approval. `Drop` carries `sampledRuns`, where 0 means *declared*. [In full in the archive](docs/history/tracker-archive.md#closed-phases-in-full) |
 | Parser adapters | **One, and demoted to a cross-check by [ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)** | `:adapters:reverse-1999`, 25 tests. **It hard-codes `THIRD_PARTY` and so fails a plain `publish`** — there is no call site to launder data through. Kept rather than deleted because diffing the first self-sourced bundle against it is worth more than it ever was as a source. [The prose it used to carry](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-12-nineteenth-session) |
 | Provenance | **Done — written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per *declared* fact; `publish` refuses a version that is not first-hand and names the facts, and the exception is a word the operator types. **`ProvenanceRepository` is a second port, not a field on `GameDefinition`** — so the solver cannot see where a number came from and cannot be made to prefer one. Silence is `UNRECORDED`, which parses and cannot publish. [The prose it used to carry](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-12-nineteenth-session) |
-| Game data API | **Served and verified** | **Seven** game-data routes plus health, version-pinnable, every response carrying its version and attribution — and, since 2026-09-11, the four that carry facts also carry **where each fact was read**. 15 HTTP tests plus a hand check against `docker compose up`. Two arrived with N25 and both existed because every read before them started from a slug the caller already had: `GET /api/games` is the **index** — without it a reader with no account and no slug could reach the public catalog only by guessing a URL — and `GET /api/games/{game}/items` is **the vocabulary an inventory is written in**, which reached a client only as resolved names inside a cost until something had to render a few hundred quantities |
+| Game data API | **Served and verified** | Seven game-data routes plus health, version-pinnable, every response carrying its version, attribution and — on the four that carry facts — **where each fact was read**. 15 HTTP tests plus a hand check against `docker compose up`. [In full in the archive](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-18-twenty-second-session) |
 | Demand resolution | **Done** | Goals + roster + upgrade graph → a demand vector, walking the DAG backwards. Refuses by name rather than guessing: unreachable states, unknown entities, probabilistic goals, ambiguous routes |
 | The MIP (`EnergyMip`) | **Done for stages, crafts and rewards** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. **No shops and no fodder**; items sourced only from those are refused by name |
 | The time axis | **Done — as a scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). An energy cap, cadence counts, and rotation as a capacity shared over *subsets* of distinct weekday restrictions. **No variable is indexed by day**, which is why the p95 survived: 1 805 → **1 807 ms**. Proven on the fixture; the real upstream declares nothing time-varying |
@@ -233,7 +255,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Architecture tests | **Passing — three of them** | `ModuleBoundaryTest` (Track B layers optional until they exist), `GameAgnosticismTest` (source scan over planner/gacha/stats) and, since 2026-09-12, `EntityKindBoundaryTest` — ADR 0007's own open gap, closed: `Entity.kind` may be read in `gamedata`, `api` and `adapters` and nowhere else. Bytecode rather than a source scan because a grep cannot tell `entity.kind()` from `change.kind()`, and an allowlist rather than a ban on three modules because a denylist passes vacuously the moment a fourth module grows a read |
 | Docker Compose | **Repaired 2026-09-09, and no image has ever been built end to end** | The Dockerfile had never learned about `adapters/`; the fixed tree builds the jar locally and that jar contains no development sign-in. **The image itself is still unproven** — the in-container Gradle download was abandoned at 10% after twenty minutes, so `up --build` has not completed. See the COPY-list warning in *Status* |
 | Development sign-in | **Done, and absent from the artifact** | [ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md). `:modules:identity-dev` is `testAndDevelopmentOnly` on `:app` — on `bootRun` and the test classpath, **excluded from `bootJar`**, so no property or profile can reach it. `GET /dev/sign-in?as=<name>` mints an ordinary `AuthenticatedAccount` through the same `upsertFromOidc` the OAuth services use; its filter chain lives in that module, so `SecurityConfig` has no hook for it. `DeployableJarTest` opens the jar and proves the absence on every build. The frontend picks its sign-in URL behind `import.meta.env.DEV`, and the production bundle was checked for the string: **zero occurrences** |
-| Frontend | **Five screens, driven in a browser, and 15 tests** | Inventory editor (bulk entry: filtered, grouped by the game's own categories, Enter walks the column, **no save button** — a typed number is a queued edit), goal picker (ordered, targets read off the upgrade graph, roster edited where the goal is), plan view (stages, crafts, claims, shadow prices and **every one of the solver's notes**, because a plan rendered without them is a confident number hiding a gap), catalog browse and search, and the character page with the **personalized overlay**. Routing is react-router; the game is in the URL for the catalog and nowhere else, because a catalog page is the one thing here somebody sends a link to. Both catalog pages now end in **where their numbers were read** rather than one grey credit line. **15 vitest/jsdom tests run in CI** — see the unverified list for what they deliberately do not cover. `npm run dev --prefix frontend` (`.claude/launch.json`, which now also carries `api` and **`web-built`**, the built bundle on 4173 that the offline test needs) proxies `/api` **and `/dev`** to `localhost:8080`, so local is same-origin. The sign-in URL is chosen behind `import.meta.env.DEV`, so the development one is not in a production bundle |
+| Frontend | **Five screens, driven in a browser, and 15 tests** | Inventory editor, goal picker, plan view (with **every one of the solver's notes**), catalog browse and search, and the character page with the **personalized overlay**. Local is same-origin via the Vite proxy; the development sign-in URL is behind `import.meta.env.DEV` and absent from a production bundle. **Never rendered PGR** — every screen was built against R1999. [In full in the archive](docs/history/tracker-archive.md#rows-compressed-out-of-current-state-2026-09-18-twenty-second-session) |
 | `gacha` — the two engines | **Done — Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). `MarkovBannerEngine` is an exact forward chain over `(pulls since hit, losses carried, copies held)` reading the mass that **never arrived**, so a wall is exactly 1.0 rather than 0.9999999999999895; `MonteCarloBannerEngine` is 500 000 seeded trials on virtual threads, deterministic because the generators are split before any task starts and counts are summed as integers in chunk order. `PullModel` is the validated slice both share, so they refuse the same banners for the same reasons. **51 tests. Worst gap 0.110 points over 96 questions (eight banners since the first-hand one joined), at 2.22 standard errors** — was 84 and 1.84 at closing. Only the headline rarity is modelled, and `PullResult` carries no `Rarity` — the model pins no other rate while pity is active, so one would be invented per game |
 | `gacha` — the income model | **Interface only, and it cannot be written yet** | `projectedPulls` needs to know which item is pull currency and what a pull costs in it. **Neither `BannerModel` nor the `banner` table declares either**, so the question has nothing to compute from — **N28** |
 | Track B | **Empty** | Package docs. Track B is [gated](#the-gate) |
@@ -350,39 +372,43 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **N27 — Read Punishing: Gray Raven, and author the first self-sourced bundle
-      — now for the launch title ([D3](#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13)).**
-      **The maintainer's, and it cannot be delegated to a session**: ADR 0015
-      admits a fact because someone *read it in the game or the publisher's
-      disclosure*. The maintainer plays **Global**. Everything a session can build
-      is built: the canonical JSON is the authoring format, `gamedata-cli` does
-      *preview, ingest, publish*, and the publish gate enforces provenance
-      ([the loop](docs/game-facts/authoring-a-first-hand-bundle.md)). PGR has **no
-      data in the repository at all**, so read in this order:
-      **(1)** one banner's rules screen, since all five PGR gacha fixtures are
-      second-hand; **(2)** **how feeding works on screen**: what raising a Memory, a
-      weapon and a character's level consumes, how much progress each item gives,
-      and what happens to overflow, because **N30** is designed from this and not
-      from a guide; **(3)** **one event**: its farming stage, the currency it drops,
-      and its shop with prices and purchase limits; **(4)** one stage, one item and
-      one character's first ascension, **timed**, since that number decides whether first-hand sourcing
-      is feasible at all. **Ask how each value was read before recording it**: a
-      relayed web-search answer and a screen reading look identical in chat. R1999's
-      summon rules, shop and portrait cap, read 2026-09-13, stay recorded; its
-      stage-and-character pass moves to Phase 11.
-- [ ] **N30 — Put fodder and shops into the solver, before launch instead of at
-      Phase 11 (D3).** `Fodder` is in the domain model and not in `EnergyMip`, and
-      feeding is how Punishing: Gray Raven progresses. **Shops are the same story**:
-      the 2026-09-14 survey ([prior-art §7](docs/prior-art.md#7-punishing-gray-raven--surveyed-2026-09-14))
-      found every guide saying PGR is farmed through **event stages whose currency
-      buys materials in event shops**, and today `EnergyMip` refuses an item that
-      only a shop sells. That is honest, but for PGR it refuses most of the answer.
-      **Design both against N27's readings**, not against guides, which already
-      disagree with each other about PGR's featured guarantee. Probabilistic goals (Resonance) are PGR's other new
-      shape: demand resolution already refuses them by name, so decide whether
-      launch needs them rather than building them by default.
+- [ ] **N27 — Author the first PGR bundle. The reading is done; the typing is not.**
+      Blocks 1–3 landed 2026-09-18, off the Global client, and are in
+      [the PGR note](docs/game-facts/punishing-gray-raven-research-disclosure.md):
+      **both banner archetypes in full** (base rate, guarantee, counter, featured
+      rate, inheritance), the **weapon's feeding numbers**, and the **event
+      economy**. **Block 4, the timed authoring pass, was cut by the maintainer** —
+      so the cost of sourcing a patch stays unmeasured, and any later claim that a
+      patch is affordable to source is an estimate with nothing behind it.
+      **Still unread:** the **Memory** system entirely, and the costs behind the
+      character's four axes (Train, Evolve, Awaken, Phylotree).
+      **Still to do:** turn the note into canonical JSON and run *preview, ingest,
+      publish* ([the loop](docs/game-facts/authoring-a-first-hand-bundle.md)).
+      **Ask how each value was read before recording it** — a relayed web-search
+      answer and a screen reading look identical in chat; it caught one error this
+      session. R1999's pass moves to Phase 11.
+- [ ] **N30 — Put fodder and the event shape into the solver (D3). Shops are out.**
+      **Rescoped 2026-09-18 against N27's reading, and it moved both ways.**
+      **Dropped — the shop half**, whose premise was guide-derived and is false:
+      **PGR events have no shops at all**, on every event and not just the one read,
+      so what `EnergyMip` refuses today it can go on refusing. Also dropped,
+      **probabilistic goals**: Resonance is **picked, not rolled**.
+      **Confirmed — `Fodder`**, and it now has numbers: a 4★ unit is **300 EXP**
+      whether it is a material *or a weapon*, so one rule covers both.
+      **Added, and it is the larger job:** a PGR event is **a one-time grant behind
+      a capability gate inside a closing window** — no energy cost, no repetition,
+      no yield. `EnergyMip`'s "run stage N times for yield Y" cannot express it and
+      `Reward`'s cadence cannot either, and **`LEAST_ENERGY` is not even the right
+      question — `FEWEST_DAYS` against `Availability.closesAt` is.** Decide
+      deliberately that *"can this player clear stage N"* is an input the reader
+      supplies, not something the solver derives.
 - [ ] **N28 — Give a banner a pull currency and a price, and then write
-      `IncomeModel`.** Phase 5's unbuilt scope, and it is a schema change rather
+      `IncomeModel`. Unblocked 2026-09-18 — the numbers exist now.** PGR's chain was
+      read off the client: **1 pull = 250 Event Construct R&D Tickets** (2500 for
+      ten, no discount), **1 Black Card = 1 ticket**, **1 Rainbow Card = 10 Black**,
+      **119 Rainbow = $19.99** — about $4.20 a pull
+      ([the note](docs/game-facts/punishing-gray-raven-research-disclosure.md)).
+      Phase 5's unbuilt scope, and it is a schema change rather
       than a decision: `projectedPulls(profile, date)` has to know which item is
       pull currency and what a pull costs in it, and **neither `BannerModel` nor
       `gamedata.banner` declares either**. So "she arrives in 40 days, can I
@@ -746,6 +772,8 @@ newest first. **Write the entry there; add its line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-18 | twenty-second | **PGR was read (N27 blocks 1–3), and the client contradicted the guides twice.** Both banner archetypes complete and paired; the featured rule is **per-banner**, and below 100% the recovery is published as the **Calibration System**, inherited across pools — **R1999 clears where PGR inherits**, so the two games now disagree on what `PityScope` is for. **PGR events are not farms and have no shops**, so **N30 loses its shop half and probabilistic goals and gains an event shape `EnergyMip` cannot express**. **PGR's advertised 1.90% does not reproduce** from its own numbers, unlike R1999's 2.36%. **N28 unblocked**; Serum pinned at 240 ml, +1/6 min, cap = exactly one day. **Block 4 cut by the maintainer.** Nothing authored into a bundle yet |
+| 2026-09-14 | twenty-first | **The PGR survey D3 was missing, and the plan's wedge rewritten from it.** Every tool found was opened rather than judged from a snippet; nothing found plans PGR farming from an inventory. The finding with teeth was in the *guides* — that PGR is farmed through event stages whose currency buys materials in event shops — which **N30 was scoped from and which the twenty-second session found false against the client** |
 | 2026-09-13 | twentieth | **The launch title swapped to Punishing: Gray Raven ([D3](#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13))**, because asking "is this a Kornblume clone?" found `prior-art.md` wrong: **Kornblume solves per player with GLPK in the browser**, and has since 2024. README, plan and prior-art corrected; N27 retargeted to PGR; **N30** puts fodder in the solver. Before that, **Q4 answered for one banner, off the client itself:** the maintainer's screenshots of the rules screen confirm the pity curve twice — stated word for word, and an overall 6★ rate of **2.36% the curve reproduces as 2.3592%**, a check a curve one pull off would fail — **contradict the featured rule** (50/50 with a guarantee, not outright), and **find a Limited Shop exchange no engine models**. First first-hand fixture and five tests; 96 questions, worst gap still 0.110. An AI web-search answer was offered first and not recorded. **N5: every CI action onto Node 24, zero annotations, green on run `34731880389`** ([PR #20](https://github.com/kietnt4412/storm_almanac/pull/20)). Taken to the latest majors (checkout v7, setup-java v6, setup-node v7, upload-artifact v7) — **except `gradle/actions`, held at v5** because v6 needs Gradle's Terms of Use accepted, which is the maintainer's call, and v5 has been frozen since February. **The green run executed no tests**: a YAML-only change leaves every Gradle input identical, so all seven test tasks came from cache. N27 handed to the maintainer as a reading form, deliberately without the fixture values so the reading stays blind. PR #19 already merged and `dev` had no open PR — the fifth time. 749 → 769 lines |
 | 2026-09-12 | nineteenth | **Phase 5 closes on its criterion, out of order and on purpose (D2).** Two engines sharing three branches and nothing else: an exact chain and 500 000 seeded trials, **worst gap 0.110 percentage points over 84 questions against a criterion of 0.300, at 1.84 standard errors** — and both games' published rates out of `BannerModel` alone. **The plan's own two numbers do not fit together:** at its 100 000 trials, 0.3 points is under two standard errors, and the cross-check failed on its first run with both engines correct, so the trial count now follows from the tolerance. Four decisions in [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md) — `PullResult` can carry no `Rarity`, a floor reaching the headline is refused rather than ignored, `PityState` counts losses instead of flagging one, and the chain reads the mass that never arrived so a wall is exactly 1.0. Two of the first failures were **in the tests**: a 30-pull wall is 0.7030 and not certainty, because a wall guarantees the rarity and not her. 324 tests locally and 308 on CI, **green on run `34695206362`** ([PR #19](https://github.com/kietnt4412/storm_almanac/pull/19)). **PR #18 was already merged and `dev` had no open PR — the fourth time, caught by looking** |
 | 2026-09-12 | eighteenth | **N4: ADR 0007's own open gap becomes a failing build.** `EntityKindBoundaryTest` allows a read of `Entity.kind` in `gamedata`, `api` and `adapters` and denies it everywhere else — an allowlist, because the denylist of three modules the ADR names is what would pass vacuously again. Bytecode rather than a source scan, because a grep cannot tell `entity.kind()` from `change.kind()`. Verified by putting the defect back in both spellings. **A condition for method references was written, measured, and deleted** — `accessTargetWhere` already catches them, and the measurement is in the javadoc so nobody adds it back. ADR 0007 not edited: the decision did not change, only the account of what enforces it. Two lessons moved to the archive and two struck-through entries closed out, 747 → 742 lines (and the previous session's count was seven short — measure it). 278 tests, CI-confirmed on run `34691539392` ([PR #18](https://github.com/kietnt4412/storm_almanac/pull/18), which now carries N25 *and* N4) |
