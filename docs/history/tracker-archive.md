@@ -2625,10 +2625,15 @@ not hold. [ADR 0019](../adr/0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-
   it every reader reads "EXP owned 0" however many Pods they hold. Tested on the
   arithmetic (`ShortfallProgressTest`), **not driven in a browser**, and the
   frontend has never rendered a `progress:` line or shadow price.
-- **Not done, and on purpose:** the sequence 1 bundle is **not previewed,
-  ingested or published**. `V8` has only ever run on an empty Testcontainers
-  database; the first time it meets the maintainer's database it meets the
-  published sequence 0, and the preview is what proves that version still reads.
+- **Previewed at the maintainer's request, not ingested or published.** The
+  local database was at V7 holding PGR sequence 0 (published 01:40:38Z). The
+  jar's startup applied `V8` in 45 ms, then the preview read sequence 0 back
+  through the new schema and diffed sequence 1 against it: **exactly nine
+  changes** — five fodder kinds, two Overclock EXP costs, the promote-13 gate,
+  one new upgrade — and 88 facts over four provenances, all first-hand, with no
+  *NOT ours to publish* line. So a database holding a published version before
+  `V8` still reads it after. Ingest and publish remain the maintainer's
+  decision. PR [#26](https://github.com/kietnt4412/storm_almanac/pull/26) opened.
 - 358 backend tests (+15), 0 skipped locally.
 
 **2026-09-19 (twenty-fifth) — Shops are in the solver, and the first-hand
