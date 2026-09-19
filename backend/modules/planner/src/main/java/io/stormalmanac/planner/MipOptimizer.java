@@ -267,9 +267,10 @@ public final class MipOptimizer implements Optimizer {
             long startedAtNanos) {
 
         List<String> notes = new ArrayList<>();
-        notes.add("Minimised energy over %d stage(s), %d craft(s) and %d reward(s), against %d item"
+        notes.add(("Minimised energy over %d stage(s), %d craft(s), %d shop offer(s) and %d"
+                + " reward(s), against %d item")
                 .formatted(outcome.stageVariables(), outcome.craftVariables(),
-                        outcome.rewardVariables(), outcome.constraints())
+                        outcome.shopVariables(), outcome.rewardVariables(), outcome.constraints())
                 + " constraint(s), inside a %d-day horizon at %d energy a day."
                         .formatted(outcome.horizonUsed(), request.energyPerDay()));
         if (!outcome.provenOptimal()) {

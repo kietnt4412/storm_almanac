@@ -172,19 +172,109 @@ class EnergyMipTest {
                 .hasMessageContaining("closed or unreleased");
     }
 
+    /** 500 gold buys one relic, three times a week. */
+    private static Shop weeklyRelic() {
+        return new Shop("weekly-relic", GOLD, 500, new ItemStack(RELIC, 1),
+                3, Period.ofDays(7), Availability.ALWAYS);
+    }
+
     @Test
-    @DisplayName("an item sold only in a shop is refused by name, not costed at zero")
-    void shopOnlyItemIsRefusedRatherThanFree() {
+    @DisplayName("a shop is priced in the energy its currency costs, and beats a dearer stage")
+    void aPurchaseIsPricedThroughItsCurrency() {
+        // One relic two ways:
+        //   farm it: s-relic, 30 energy for 1.0 relic = 30.
+        //   buy it:  500 gold is 5 runs of s-gold at 5 = 25.
+        // The shop costs no energy itself; its currency does, and the solver
+        // prices that through the gold row without being told the route exists.
         GameDefinition definition = TestGame.builder()
                 .stage(GOLD_STAGE, 5, GOLD, 100.0)
-                .source(new Shop("weekly-relic", GOLD, 500, new ItemStack(RELIC, 1),
-                        3, Period.ofDays(7), Availability.ALWAYS))
+                .stage(RELIC_STAGE, 30, RELIC, 1.0)
+                .source(weeklyRelic())
+                .build();
+
+        EnergyMip.Outcome outcome = solve(definition, Map.of(), Map.of(RELIC, 1));
+
+        assertThat(outcome.totalEnergy()).isEqualTo(25);
+        assertThat(outcome.conversions()).containsExactly(new Conversion("weekly-relic", 1));
+        assertThat(outcome.stageRuns()).singleElement()
+                .satisfies(run -> assertThat(run.stage()).isEqualTo(GOLD_STAGE));
+        assertThat(outcome.shopVariables()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("a shop's limit is per period, and the horizon decides how many periods there are")
+    void theLimitIsTheCap() {
+        // Fourteen days is two whole weeks: 2 * 3 = 6 relics, at 3 000 gold,
+        // which is 30 runs of s-gold = 150 energy. A seventh does not exist,
+        // however much gold there is.
+        GameDefinition definition = TestGame.builder()
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .source(weeklyRelic())
+                .build();
+
+        EnergyMip.Outcome six = solve(
+                definition, Map.of(), Map.of(RELIC, 6), Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, 14);
+        assertThat(six.totalEnergy()).isEqualTo(150);
+        assertThat(six.conversions()).containsExactly(new Conversion("weekly-relic", 6));
+
+        assertThatThrownBy(() -> solve(
+                definition, Map.of(), Map.of(RELIC, 7), Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, 14))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("1 shop offer(s)")
+                .hasMessageContaining("within 14 day(s)");
+    }
+
+    @Test
+    @DisplayName("a shop that does not reset inside the horizon is refused by name, with the reason")
+    void aShopTooSlowForTheHorizonIsNotASource() {
+        // Only whole periods count, because nothing says how much of this week's
+        // allowance is already spent. Five days holds no whole week.
+        GameDefinition definition = TestGame.builder()
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .source(weeklyRelic())
+                .build();
+
+        assertThatThrownBy(() -> solve(definition, Map.of(), Map.of(RELIC, 1),
+                Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, 5))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("weekly-relic")
+                .hasMessageContaining("does not reset inside a 5-day horizon");
+    }
+
+    @Test
+    @DisplayName("a shop whose currency nothing supplies is refused, and the currency is named")
+    void aShopWithNoCurrencySourceNamesTheCurrency() {
+        // The relic is on sale; the ingots to pay for it come from nowhere. The
+        // useful sentence names the ingot, because that is what the reader has
+        // to go and find a source for.
+        GameDefinition definition = TestGame.builder()
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .source(new Shop("ingot-exchange", INGOT, 2, new ItemStack(RELIC, 1),
+                        0, Period.ofDays(1), Availability.ALWAYS))
                 .build();
 
         assertThatThrownBy(() -> solve(definition, Map.of(), Map.of(RELIC, 1)))
                 .isInstanceOf(Optimizer.InfeasibleGoalException.class)
-                .hasMessageContaining("weekly-relic")
-                .hasMessageContaining("no price or reset period");
+                .hasMessageContaining("ingot-exchange")
+                .hasMessageContaining("currency \"ingot\"");
+    }
+
+    @Test
+    @DisplayName("the price buys the whole stack, so a purchase is rounded up in stacks, not units")
+    void anUnlimitedOfferIsBoughtInWholeStacks() {
+        // 262 gold buys ten relics, no limit. Twenty-five relics is three
+        // stacks — two leave five short — so 786 gold, which is 8 runs of s-gold
+        // (800 gold) = 40 energy.
+        GameDefinition definition = TestGame.builder()
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .source(new Shop("relic-crate", GOLD, 262, new ItemStack(RELIC, 10),
+                        0, Period.ofDays(1), Availability.ALWAYS))
+                .build();
+
+        EnergyMip.Outcome outcome = solve(definition, Map.of(), Map.of(RELIC, 25));
+
+        assertThat(outcome.conversions()).containsExactly(new Conversion("relic-crate", 3));
+        assertThat(outcome.totalEnergy()).isEqualTo(40);
     }
 
     @Test

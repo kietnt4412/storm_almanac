@@ -54,6 +54,10 @@ public record GameDefinition(
         return sources.stream().filter(Craft.class::isInstance).map(Craft.class::cast).toList();
     }
 
+    public List<Shop> shops() {
+        return sources.stream().filter(Shop.class::isInstance).map(Shop.class::cast).toList();
+    }
+
     public List<Reward> rewards() {
         return sources.stream().filter(Reward.class::isInstance).map(Reward.class::cast).toList();
     }

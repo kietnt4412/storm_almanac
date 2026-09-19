@@ -2585,6 +2585,51 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-19 (twenty-fifth) — Shops are in the solver, and the first-hand
+bundle plans.** This is N30's shop half. The twenty-fourth session found that
+nothing in the PGR bundle could be planned without shops, because Simulated
+Battlefield pays a currency and everything else is bought with it. So shops
+came before N32's gates and EXP, against the order N32's own text gives. Gates
+and EXP make a plan more complete. Shops are what make a plan possible at all.
+
+- **A purchase is a conversion, and only its cap is new.** Inside `EnergyMip`,
+  crafts and shop offers are both `Exchange`s: consume something, make
+  something, spend no energy. A purchase spends `price` of the currency on the
+  whole offered stack. Its variable is capped at `periodLimit` × *whole*
+  periods in the horizon (or until the shop closes). That rounds against the
+  player, as reward cadences do: nothing says how much of this week's
+  allowance is already spent, and a month counts as 31 days. **So a weekly shop
+  gives nothing to a horizon under seven days.** That is conservative on
+  purpose, and the refusal names the shop and says so. It may prove too
+  conservative once a real weekly shop is ingested.
+- **`Shop` now validates itself.** A free *and* unlimited offer is refused as
+  unbounded supply, the same rule `Craft` applies to an empty recipe. A free
+  offer with a limit (a daily pack) is kept, and gets the tie-break weight so
+  a plan does not report a pack it never needed.
+- **The first plans ever made from first-hand data, each worked out by hand
+  first, and each matched the solver on the first run.** Helentine's Seeker
+  System 1 → 18 is 172 Cog purchases, 3 Skill Point purchases and 5 runs:
+  **150 Serum**. Samantha's Overclock goes stage → shop → box → open: 217 Cog
+  purchases, 2 β and 2 α box purchases and opens, 8 runs: **240 Serum**.
+  Hear the Bell's is refused, naming `weapon-overclock-core-i`. These are
+  `AuthoredBundlePlanTest`. It reads the published bundle, so **a data
+  correction now shows up in a plan**, and the test's arithmetic has to be
+  redone whenever the bundle changes.
+- **Those plans are cheaper than the truth, and the tests say so.**
+  Samantha's 18 000 EXP and every Promote level gate are missing (N32 (1),
+  (2)). The goals were picked from the ones the bundle can express in full.
+- **The fixture's warden-insight-2 went from refused to 450 energy**
+  (6 purchases, 8 crafts, 45 runs, all 30 logins and 4 quests; worked out
+  in the test).
+- **Decided without an ADR: purchases are reported as `Conversion`s under the
+  shop's id**, not as a new `Plan` field, so the API and the page are unchanged
+  apart from one heading ("What to craft and buy"). Reverse this if a reader
+  needs to tell a purchase from a craft on the page. **Not driven in a
+  browser:** the plan page has still never rendered PGR.
+- 343 backend tests (+13), 0 skipped locally; frontend 15, typecheck clean.
+  The repository fakes moved out of `PlannerAcceptanceTest` into
+  `InMemoryPlanning` so both planner tests share them.
+
 **2026-09-19 (twenty-fourth) — N27 done: PGR is farmed through a shop, and the
 bundle grew from nine facts to a character.** The maintainer read the client
 screen by screen for one sitting, and every value was asked after — screen or

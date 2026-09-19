@@ -3,15 +3,10 @@ package io.stormalmanac.app;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.stormalmanac.common.GameDataVersion;
-import io.stormalmanac.common.id.AccountId;
 import io.stormalmanac.common.id.EntityId;
-import io.stormalmanac.common.id.GameId;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.gamedata.GameDefinition;
-import io.stormalmanac.gamedata.GameDefinitionRepository;
-import io.stormalmanac.gamedata.GameDefinitionRepository.PublishedGame;
 import io.stormalmanac.gamedata.Goal;
 import io.stormalmanac.gamedata.ingest.CanonicalBundleParser;
 import io.stormalmanac.planner.Conversion;
@@ -21,24 +16,17 @@ import io.stormalmanac.planner.Optimizer;
 import io.stormalmanac.planner.Plan;
 import io.stormalmanac.planner.RewardClaim;
 import io.stormalmanac.planner.SolveRequest;
-import io.stormalmanac.player.Goals;
 import io.stormalmanac.player.Inventory;
-import io.stormalmanac.player.InventoryEdit;
-import io.stormalmanac.player.MergeOutcome;
-import io.stormalmanac.player.PlayerProfile;
 import io.stormalmanac.player.PlayerStateRepository;
 import io.stormalmanac.player.Roster;
-import io.stormalmanac.player.RosterEdit;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -165,23 +153,51 @@ class PlannerAcceptanceTest {
     }
 
     @Test
-    @DisplayName("a goal whose only source is the shop is still refused by name, and the reason has changed")
-    void theShopGapIsSaidOutLoud() {
-        // warden-insight-2 costs 6 sigil-greater, and the only source of one in
-        // this bundle is the weekly shop. The reason this is a refusal is no
-        // longer that the model has nowhere to put a per-period cap — it has one
-        // now, next to the reward cadences. It is that the one upstream this
-        // project reads publishes a shop table with no currency, no price and no
-        // reset period, so there is nothing to put in the cap. A refusal naming
-        // the gap beats a plan that pretends the item is free.
+    @DisplayName("an item only a shop sells is bought, and the currency to buy it is farmed")
+    void theShopIsASource() {
+        // warden-insight-2 costs 6 sigil-greater, 8 ore-refined and 20 000 gold,
+        // and the only source of a greater sigil is the weekly shop: 500 gold
+        // each, 3 a week, so 12 in thirty days and the limit does not bind.
+        //   6 purchases       3 000 gold
+        //   8 refine-ore        800 gold and 24 ore-rough
+        //   the goal itself  20 000 gold
+        // 23 800 gold, of which the horizon gives away 13 000 — thirty daily
+        // logins at 300 and four weekly quests at 1 000. The other 10 800 is
+        // exactly 45 runs of pg-1-1 at 240, and those 45 runs drop 63 ore-rough
+        // against the 24 wanted, so nothing else is farmed: 450 energy.
+        //
+        // Until shops were priced this goal was refused, naming the shop. The
+        // sigils cost nothing in energy themselves; what they cost is the gold
+        // row, and the solver finds that through the currency.
+        Plan plan = solve(
+                goal(WARDEN, "insight-2"),
+                Inventory.empty(PROFILE),
+                Map.of(WARDEN, "insight-1"));
+
+        assertThat(plan.totalEnergy()).isEqualTo(450);
+        assertThat(plan.conversions()).containsExactly(
+                new Conversion("refine-ore", 8), new Conversion("weekly-sigil", 6));
+        assertThat(plan.stageRuns()).singleElement()
+                .satisfies(run -> assertThat(run.stage().value()).isEqualTo("pg-1-1"));
+        assertThat(plan.explanation().notes()).anySatisfy(note ->
+                assertThat(note).contains("1 shop offer(s)"));
+    }
+
+    @Test
+    @DisplayName("a shop's weekly limit is a real bound: a horizon with no whole week buys nothing")
+    void theShopLimitBinds() {
+        // Six days holds no whole week, and nothing says how much of this week's
+        // allowance the player has already spent, so the shop is not a source
+        // inside it — and the refusal says which shop and why.
         assertThatThrownBy(() -> solve(
                 goal(WARDEN, "insight-2"),
                 Inventory.empty(PROFILE),
-                Map.of(WARDEN, "insight-1")))
+                Map.of(WARDEN, "insight-1"),
+                Objective.LEAST_ENERGY, 6))
                 .isInstanceOf(Optimizer.InfeasibleGoalException.class)
                 .hasMessageContaining("sigil-greater")
                 .hasMessageContaining("weekly-sigil")
-                .hasMessageContaining("no price or reset period");
+                .hasMessageContaining("does not reset inside a 6-day horizon");
     }
 
     @Test
@@ -217,8 +233,9 @@ class PlannerAcceptanceTest {
             int horizonDays) {
 
         MipOptimizer optimizer = new MipOptimizer(
-                new OneVersion(provingGround),
-                new FixedPlayer(provingGround.game().id(), inventory, new Roster(PROFILE, roster)),
+                new InMemoryPlanning.OneVersion(provingGround),
+                new InMemoryPlanning.FixedPlayer(
+                        PROFILE, provingGround.game().id(), inventory, new Roster(PROFILE, roster)),
                 null,
                 Clock.fixed(NOW, ZoneOffset.UTC),
                 Duration.ofSeconds(2));
@@ -238,96 +255,6 @@ class PlannerAcceptanceTest {
             return new CanonicalBundleParser().parse(in).definitionApprovedAt(Instant.EPOCH);
         } catch (IOException e) {
             throw new IllegalStateException("could not read " + fixture, e);
-        }
-    }
-
-    private record OneVersion(GameDefinition definition) implements GameDefinitionRepository {
-        @Override
-        public Optional<GameDefinition> findLatest(GameId game) {
-            return find(game, definition.version().sequence());
-        }
-
-        @Override
-        public Optional<GameDefinition> find(GameId game, long sequence) {
-            return game.equals(definition.game().id()) && sequence == definition.version().sequence()
-                    ? Optional.of(definition)
-                    : Optional.empty();
-        }
-
-        @Override
-        public List<GameDataVersion> versions(GameId game) {
-            return List.of(definition.version());
-        }
-
-        @Override
-        public List<PublishedGame> publishedGames() {
-            return List.of(new PublishedGame(definition.game(), definition.version()));
-        }
-    }
-
-    private record FixedPlayer(GameId game, Inventory inventory, Roster roster)
-            implements PlayerStateRepository {
-
-        @Override
-        public List<PlayerProfile> profilesOf(AccountId account) {
-            return List.of(profile());
-        }
-
-        @Override
-        public Optional<PlayerProfile> findProfile(ProfileId id) {
-            return Optional.of(profile());
-        }
-
-        private PlayerProfile profile() {
-            return new PlayerProfile(PROFILE, new AccountId("acceptance"), game, "Tester", "global");
-        }
-
-        @Override
-        public Inventory inventoryOf(ProfileId profile) {
-            return inventory;
-        }
-
-        @Override
-        public Roster rosterOf(ProfileId profile) {
-            return roster;
-        }
-
-        @Override
-        public Goals goalsOf(ProfileId profile) {
-            return new Goals(profile, List.of());
-        }
-
-        @Override
-        public void saveProfile(PlayerProfile value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void saveInventory(Inventory value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void saveRoster(Roster value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void saveGoals(Goals value) {
-            throw new UnsupportedOperationException();
-        }
-
-        // Sync has nothing to do with solving. A fake that answered these would
-        // be a second implementation of the merge rules, drifting from the real
-        // one until a test passed against a merge nothing ships.
-        @Override
-        public MergeOutcome<ItemId> mergeInventory(ProfileId profile, Collection<InventoryEdit> edits) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public MergeOutcome<EntityId> mergeRoster(ProfileId profile, Collection<RosterEdit> edits) {
-            throw new UnsupportedOperationException();
         }
     }
 }

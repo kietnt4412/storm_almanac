@@ -43,9 +43,14 @@ import org.ojalgo.type.context.NumberContext;
  *             + sum_r z_r * grant[r,i]                     &gt;=  demand_i - inventory_i
  *             for every set of stages sharing a weekday restriction:
  *               sum_s x_s * energy_s                       &lt;=  days it is open * energyPerDay
+ *             y_c                                          &lt;=  purchases c's reset allows, for a shop
  *             z_r                                          &lt;=  occurrences of r's cadence
  *             x_s, y_c, z_r integer and &gt;= 0
  * </pre>
+ *
+ * <p>{@code c} ranges over crafts <em>and</em> shop offers. A purchase is a
+ * conversion: it takes currency and gives the offer, and it costs no energy.
+ * Only its cap is different. See {@link Exchange}.
  *
  * <p>No repositories, no clock, no Spring: inputs in, an answer or a refusal
  * out. That is what makes the shadow-price re-solves affordable and what makes
@@ -90,13 +95,12 @@ import org.ojalgo.type.context.NumberContext;
  *
  * <h2>What this model still does not contain</h2>
  * <ul>
- *   <li><b>Shops.</b> A {@link Shop} is the one {@link Source} that is still not
- *       a variable. The cap it needs — "n per period" — now has somewhere honest
- *       to live, and the reason it stays out is data rather than modelling: the
- *       one upstream this project reads publishes a shop table with no currency,
- *       no price and no reset period, so there is nothing to put in the cap. An
- *       item whose only source is a shop is still reported as unreachable
- *       <em>by name</em> rather than quietly costed at zero.
+ *   <li><b>Shop limits that are shared, or never reset.</b> Every shop offer
+ *       has its own cap: {@code periodLimit} times the number of whole periods
+ *       in the horizon. Two limits in this model cannot be written. One is a
+ *       stock that never refills, where 30 in total is not 30 a week. The other
+ *       is a price that changes partway through a limit. Both are bundle-format
+ *       gaps before they are solver gaps.
  *   <li><b>Expiry within the horizon, as a shared capacity.</b> A stage that
  *       closes in three days is bounded by what three days of energy could buy
  *       (see {@link #closingCap}), which is a real bound and not a joint one: two
@@ -178,6 +182,7 @@ final class EnergyMip {
      *                        search settled on rather than the one asked for
      * @param stageVariables  how many stages survived pruning and became variables
      * @param craftVariables  how many crafts did
+     * @param shopVariables   how many shop offers did
      * @param rewardVariables how many rewards did
      * @param constraints     how many item balance rows the model carried
      * @param provenOptimal   false when the search stopped on its time budget, so
@@ -201,6 +206,7 @@ final class EnergyMip {
             int horizonUsed,
             int stageVariables,
             int craftVariables,
+            int shopVariables,
             int rewardVariables,
             int constraints,
             boolean provenOptimal,
@@ -344,26 +350,26 @@ final class EnergyMip {
     }
 
     private static Outcome empty(int horizon) {
-        return new Outcome(List.of(), List.of(), List.of(), 0, 0, horizon, 0, 0, 0, 0, true, 0.0, true);
+        return new Outcome(List.of(), List.of(), List.of(), 0, 0, horizon, 0, 0, 0, 0, 0, true, 0.0, true);
     }
 
     private static Outcome solveAt(Inputs in, int horizonDays) {
         if (in.demand().isEmpty()) return empty(horizonDays);
 
         List<Stage> stages = open(in.definition().stages(), Stage::availability, in.at());
-        List<Craft> crafts = open(in.definition().crafts(), Craft::availability, in.at());
+        List<Exchange> exchanges = exchanges(in, horizonDays);
         List<Reward> rewards = claimable(
                 open(in.definition().rewards(), Reward::availability, in.at()), in.at(), horizonDays);
-        Set<ItemId> relevant = relevantItems(in.demand().keySet(), crafts);
+        Set<ItemId> relevant = relevantItems(in.demand().keySet(), exchanges);
 
-        requireReachable(in, stages, crafts, rewards, relevant, horizonDays);
+        requireReachable(in, stages, exchanges, rewards, relevant, horizonDays);
 
         // Prune: a stage dropping nothing anybody needs is a variable the
         // branch-and-bound tree pays for and never uses.
         List<Stage> useful = stages.stream()
                 .filter(s -> relevant.stream().anyMatch(i -> in.yields().yield(s.stageId(), i) > 0))
                 .toList();
-        List<Craft> usefulCrafts = crafts.stream()
+        List<Exchange> usefulExchanges = exchanges.stream()
                 .filter(c -> c.produces().stream().anyMatch(p -> relevant.contains(p.item())))
                 .toList();
         List<Reward> usefulRewards = rewards.stream()
@@ -374,7 +380,7 @@ final class EnergyMip {
         model.options.time_abort = in.budgetMillis();
         model.options.integer(IntegerStrategy.DEFAULT.withGapTolerance(GAP));
 
-        Map<ItemId, Long> ceiling = requirementCeiling(in, usefulCrafts, relevant);
+        Map<ItemId, Long> ceiling = requirementCeiling(in, usefulExchanges, relevant);
 
         List<Variable> runs = new ArrayList<>(useful.size());
         for (Stage stage : useful) {
@@ -385,12 +391,18 @@ final class EnergyMip {
                     closingCap(stage, in, horizonDays)));
             runs.add(variable);
         }
-        double conversionWeight = hasCycle(usefulCrafts) ? TIE_BREAK : 0.0;
-        List<Variable> made = new ArrayList<>(usefulCrafts.size());
-        for (Craft craft : usefulCrafts) {
-            Variable variable = model.newVariable("craft:" + craft.id())
+        // A free offer is the other place a conversion can be made for nothing:
+        // a limited daily pack at no price ties with not taking it, and would be
+        // reported as something the plan wants done.
+        double conversionWeight =
+                hasCycle(usefulExchanges) || usefulExchanges.stream().anyMatch(e -> e.consumes().isEmpty())
+                        ? TIE_BREAK
+                        : 0.0;
+        List<Variable> made = new ArrayList<>(usefulExchanges.size());
+        for (Exchange exchange : usefulExchanges) {
+            Variable variable = model.newVariable(exchange.variableName())
                     .lower(0).integer(true).weight(conversionWeight);
-            capRuns(variable, cap(craft, relevant, ceiling));
+            capRuns(variable, cap(exchange, relevant, ceiling));
             made.add(variable);
         }
         // Free income is free, so nothing in the objective distinguishes a plan
@@ -414,8 +426,8 @@ final class EnergyMip {
                 double yield = in.yields().yield(useful.get(i).stageId(), item);
                 if (yield > 0) balance.set(runs.get(i), yield);
             }
-            for (int c = 0; c < usefulCrafts.size(); c++) {
-                int net = net(usefulCrafts.get(c), item);
+            for (int c = 0; c < usefulExchanges.size(); c++) {
+                int net = net(usefulExchanges.get(c), item);
                 if (net != 0) balance.set(made.get(c), net);
             }
             for (int r = 0; r < usefulRewards.size(); r++) {
@@ -440,13 +452,14 @@ final class EnergyMip {
             throw new IllegalStateException(
                     "the solver failed on " + in.definition().game().id() + " "
                             + in.definition().version().label() + " with " + useful.size()
-                            + " stage and " + usefulCrafts.size() + " craft variables over "
+                            + " stage and " + usefulExchanges.size() + " craft or shop variables over "
                             + relevant.size() + " constraints", e);
         }
         if (!result.getState().isFeasible()) {
             throw new Optimizer.InfeasibleGoalException(
                     "no combination of the " + useful.size() + " available stage(s), "
-                            + usefulCrafts.size() + " craft(s) and " + usefulRewards.size()
+                            + count(usefulExchanges, false) + " craft(s), "
+                            + count(usefulExchanges, true) + " shop offer(s) and " + usefulRewards.size()
                             + " reward(s) meets the goal set in " + in.definition().game().id()
                             + " " + in.definition().version().label() + " within " + horizonDays
                             + " day(s) at " + in.energyPerDay() + " energy a day"
@@ -468,9 +481,9 @@ final class EnergyMip {
             }
         }
         List<Conversion> conversions = new ArrayList<>();
-        for (Craft craft : usefulCrafts) {
+        for (Exchange exchange : usefulExchanges) {
             int count = wholeUnits(result.doubleValue(index++));
-            if (count > 0) conversions.add(new Conversion(craft.id(), count));
+            if (count > 0) conversions.add(new Conversion(exchange.id(), count));
         }
         List<RewardClaim> claimed = new ArrayList<>();
         Map<Reward, Integer> claimCounts = new LinkedHashMap<>();
@@ -495,7 +508,8 @@ final class EnergyMip {
                 daysNeeded(plan, claimCounts, in, horizonDays),
                 horizonDays,
                 useful.size(),
-                usefulCrafts.size(),
+                count(usefulExchanges, false),
+                count(usefulExchanges, true),
                 usefulRewards.size(),
                 relevant.size(),
                 optimal,
@@ -640,6 +654,77 @@ final class EnergyMip {
     }
 
     /**
+     * How many times a shop offer can be bought before the horizon or the shop
+     * closes, whichever comes first. {@link Long#MAX_VALUE} when nothing limits it.
+     */
+    private static long purchases(Shop shop, Instant at, int horizonDays) {
+        Instant closes = shop.availability().closesAt();
+        int days = horizonDays;
+        if (closes != null) {
+            days = (int) Math.max(0, Math.min(horizonDays, Duration.between(at, closes).toDays()));
+        }
+        return shop.purchasesIn(days);
+    }
+
+    /**
+     * A craft or a shop offer. The model cannot tell the two apart and should
+     * not have to. Each consumes something, makes something and spends no
+     * energy.
+     *
+     * <p>The one difference is {@code limit}. A recipe can be run as often as
+     * its inputs allow. A shop offer can be bought as often as its reset allows
+     * inside the horizon, which is the bound that stops the solver buying its
+     * way out of every constraint. A purchase is reported as a
+     * {@link Conversion} under the shop's id, because to a player it is the same
+     * kind of instruction: go and do this N times.
+     *
+     * @param limit {@link Long#MAX_VALUE} for a craft and for an unlimited offer
+     */
+    private record Exchange(
+            String id,
+            boolean purchase,
+            List<ItemStack> consumes,
+            List<ItemStack> produces,
+            long limit) {
+
+        static Exchange of(Craft craft) {
+            return new Exchange(craft.id(), false, craft.consumes(), craft.produces(), Long.MAX_VALUE);
+        }
+
+        static Exchange of(Shop shop, long purchases) {
+            List<ItemStack> price = shop.price() > 0
+                    ? List.of(new ItemStack(shop.currency(), shop.price()))
+                    : List.of();
+            return new Exchange(shop.id(), true, price, List.of(shop.offer()), purchases);
+        }
+
+        String variableName() {
+            return (purchase ? "buy:" : "craft:") + id;
+        }
+    }
+
+    /**
+     * Every craft that is open, and every shop offer that is open and resets at
+     * least once inside the horizon. The rest are not sources. {@link #whyNot}
+     * says so by name.
+     */
+    private static List<Exchange> exchanges(Inputs in, int horizonDays) {
+        List<Exchange> exchanges = new ArrayList<>();
+        for (Craft craft : open(in.definition().crafts(), Craft::availability, in.at())) {
+            exchanges.add(Exchange.of(craft));
+        }
+        for (Shop shop : open(in.definition().shops(), Shop::availability, in.at())) {
+            long purchases = purchases(shop, in.at(), horizonDays);
+            if (purchases > 0) exchanges.add(Exchange.of(shop, purchases));
+        }
+        return exchanges;
+    }
+
+    private static int count(List<Exchange> exchanges, boolean purchases) {
+        return (int) exchanges.stream().filter(e -> e.purchase() == purchases).count();
+    }
+
+    /**
      * The most runs a stage that is closing could absorb before it closes.
      *
      * <p>Not a joint constraint — see the class comment — but it is the
@@ -741,18 +826,19 @@ final class EnergyMip {
 
     /**
      * Every item the model needs a constraint row for: the demanded ones, plus
-     * whatever has to be consumed to craft them, transitively.
+     * whatever has to be consumed to craft or buy them, transitively. A shop's
+     * currency is relevant exactly when something it sells is.
      *
      * <p>Items outside this set need no row. A stage that also drops something
      * nobody asked for is not thereby cheaper or dearer, and a row saying "you
      * may end up with more junk than you started with" constrains nothing.
      */
-    private static Set<ItemId> relevantItems(Set<ItemId> demanded, List<Craft> crafts) {
+    private static Set<ItemId> relevantItems(Set<ItemId> demanded, List<Exchange> crafts) {
         Set<ItemId> relevant = new LinkedHashSet<>(demanded);
         boolean grew = true;
         while (grew) {
             grew = false;
-            for (Craft craft : crafts) {
+            for (Exchange craft : crafts) {
                 if (craft.produces().stream().noneMatch(p -> relevant.contains(p.item()))) continue;
                 for (ItemStack consumed : craft.consumes()) {
                     grew |= relevant.add(consumed.item());
@@ -772,7 +858,7 @@ final class EnergyMip {
     private static void requireReachable(
             Inputs in,
             List<Stage> stages,
-            List<Craft> crafts,
+            List<Exchange> crafts,
             List<Reward> rewards,
             Set<ItemId> relevant,
             int horizonDays) {
@@ -784,11 +870,11 @@ final class EnergyMip {
         for (Reward reward : rewards) {
             for (ItemStack granted : reward.grants()) producible.add(granted.item());
         }
-        Deque<Craft> pending = new ArrayDeque<>(crafts);
+        Deque<Exchange> pending = new ArrayDeque<>(crafts);
         boolean grew = true;
         while (grew) {
             grew = false;
-            for (Craft craft : List.copyOf(pending)) {
+            for (Exchange craft : List.copyOf(pending)) {
                 boolean inputsHeld = craft.consumes().stream()
                         .allMatch(c -> producible.contains(c.item()) || in.inventoryOf(c.item()) > 0);
                 if (!inputsHeld) continue;
@@ -824,13 +910,13 @@ final class EnergyMip {
 
         List<String> closed = new ArrayList<>();
         List<String> recipes = new ArrayList<>();
-        Shop shop = null;
+        List<String> shops = new ArrayList<>();
         Reward tooSlow = null;
 
         for (Source source : definition.sources()) {
             if (source.potentialOutput().stream().noneMatch(s -> s.item().equals(item))) continue;
             if (source instanceof Shop offer) {
-                shop = offer;
+                shops.add(whyNotBuyable(offer, at, horizonDays));
             } else if (source instanceof Reward grant) {
                 // Reachable rewards are modelled now, so one reaching here either
                 // is not open or does not come round inside the horizon.
@@ -846,10 +932,8 @@ final class EnergyMip {
             return "the only stage(s) yielding it are closed or unreleased: "
                     + String.join(", ", closed);
         }
-        if (shop != null) {
-            return "its only source is the shop \"" + shop.id() + "\", and shop purchases"
-                    + " are not modelled: this game's data gives no price or reset period to cap"
-                    + " them with";
+        if (!shops.isEmpty()) {
+            return "it is sold only by " + String.join(", and by ", shops);
         }
         if (tooSlow != null) {
             return "its only source is the " + tooSlow.cadence() + " reward \"" + tooSlow.id()
@@ -860,6 +944,20 @@ final class EnergyMip {
                     + " — cannot themselves be supplied";
         }
         return "no source in this game version yields it";
+    }
+
+    /** Of the three ways a shop can fail to supply, which one this is. */
+    private static String whyNotBuyable(Shop shop, Instant at, int horizonDays) {
+        String named = "the shop \"" + shop.id() + "\"";
+        if (!isReachable(shop.availability(), at)) {
+            return named + ", which is closed or unreleased";
+        }
+        if (purchases(shop, at, horizonDays) == 0) {
+            return named + ", whose limit of " + shop.periodLimit() + " per " + shop.period()
+                    + " does not reset inside a " + horizonDays + "-day horizon";
+        }
+        return named + ", whose currency \"" + shop.currency().value()
+                + "\" nothing available can supply";
     }
 
     private static <T> List<T> open(List<T> sources, Function<T, Availability> availability, Instant at) {
@@ -902,7 +1000,7 @@ final class EnergyMip {
      * would silently cut off the answer.
      */
     private static Map<ItemId, Long> requirementCeiling(
-            Inputs in, List<Craft> crafts, Set<ItemId> relevant) {
+            Inputs in, List<Exchange> crafts, Set<ItemId> relevant) {
 
         Map<ItemId, Long> outstanding = new LinkedHashMap<>();
         for (ItemId item : relevant) {
@@ -914,7 +1012,7 @@ final class EnergyMip {
             Map<ItemId, Long> next = new LinkedHashMap<>(outstanding);
             boolean overflowed = false;
 
-            for (Craft craft : crafts) {
+            for (Exchange craft : crafts) {
                 long runs = cap(craft, relevant, ceiling);
                 if (runs == Long.MAX_VALUE) {
                     overflowed = true;
@@ -948,9 +1046,14 @@ final class EnergyMip {
         return most;
     }
 
-    /** The same question for a craft: past this it is over-producing everything it makes. */
-    private static long cap(Craft craft, Set<ItemId> relevant, Map<ItemId, Long> ceiling) {
-        if (ceiling.isEmpty()) return Long.MAX_VALUE;
+    /**
+     * The same question for a craft or an offer: past this it is over-producing
+     * everything it makes. A shop's own limit is a second bound, and the tighter
+     * one wins. It is applied even when the ceiling cannot be computed, because
+     * a shop's reset is data and not an estimate.
+     */
+    private static long cap(Exchange craft, Set<ItemId> relevant, Map<ItemId, Long> ceiling) {
+        if (ceiling.isEmpty()) return craft.limit();
 
         long most = 0;
         for (ItemStack produced : craft.produces()) {
@@ -958,7 +1061,7 @@ final class EnergyMip {
             long wanted = ceiling.getOrDefault(produced.item(), 0L);
             most = Math.max(most, -Math.floorDiv(-wanted, produced.quantity()));
         }
-        return most;
+        return Math.min(most, craft.limit());
     }
 
     private static void capRuns(Variable variable, long cap) {
@@ -979,17 +1082,17 @@ final class EnergyMip {
      * this is almost always false, and finding that out costs a depth-first
      * walk over a graph with a few dozen nodes.
      */
-    private static boolean hasCycle(List<Craft> crafts) {
+    private static boolean hasCycle(List<Exchange> crafts) {
         Map<String, List<String>> edges = new LinkedHashMap<>();
-        for (Craft from : crafts) {
+        for (Exchange from : crafts) {
             List<String> next = new ArrayList<>();
-            for (Craft to : crafts) {
+            for (Exchange to : crafts) {
                 if (from == to) continue;
                 boolean feeds = to.consumes().stream().anyMatch(consumed ->
                         from.produces().stream().anyMatch(p -> p.item().equals(consumed.item())));
-                if (feeds) next.add(to.id());
+                if (feeds) next.add(to.variableName());
             }
-            edges.put(from.id(), next);
+            edges.put(from.variableName(), next);
         }
         Set<String> done = new HashSet<>();
         Set<String> onPath = new LinkedHashSet<>();
@@ -1011,7 +1114,7 @@ final class EnergyMip {
         return false;
     }
 
-    private static int net(Craft craft, ItemId item) {
+    private static int net(Exchange craft, ItemId item) {
         return quantity(craft.produces(), item) - quantity(craft.consumes(), item);
     }
 
