@@ -67,7 +67,7 @@ class GameDataIngestTest extends SharedDatabaseTest {
     }
 
     @Test
-    @DisplayName("gates, progress costs and what a fodder rule feeds survive the schema")
+    @DisplayName("gates, progress costs, what a fodder rule feeds and a limit that never resets survive the schema")
     void gatesAndProgressRoundTrip() throws IOException {
         // The authored launch bundle rather than proving-ground, because it is
         // the one bundle that has these shapes for a reason: V8 exists for it.
@@ -92,6 +92,15 @@ class GameDataIngestTest extends SharedDatabaseTest {
         assertThat(loaded.sinks()).filteredOn(s -> s instanceof io.stormalmanac.gamedata.Fodder)
                 .extracting(s -> ((io.stormalmanac.gamedata.Fodder) s).progress())
                 .containsOnly("weapon-exp", "memory-exp", "character-exp");
+        // "never" is stored in the same text column as "P1D", with no migration,
+        // so the only proof it reads back as a null period is reading it back.
+        assertThat(loaded.shops()).filteredOn(io.stormalmanac.gamedata.Shop::neverResets)
+                .extracting(io.stormalmanac.gamedata.Shop::id, io.stormalmanac.gamedata.Shop::periodLimit)
+                .containsExactlyInAnyOrder(
+                        org.assertj.core.groups.Tuple.tuple(
+                                "phantom-pain-shop-inver-shard-lacrimosa-discounted", 10),
+                        org.assertj.core.groups.Tuple.tuple(
+                                "phantom-pain-shop-inver-shard-lacrimosa", 20));
     }
 
     private static Upgrade upgradeOf(GameDefinition definition, String id) {

@@ -467,7 +467,7 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
                 """,
                 version, shop.id(), items.get(shop.currency()), shop.price(),
                 items.get(shop.offer().item()), shop.offer().quantity(),
-                shop.periodLimit(), shop.period().toString(),
+                shop.periodLimit(), shop.periodText(),
                 Availabilities.days(shop.availability()),
                 Timestamps.at(shop.availability().opensAt()),
                 Timestamps.at(shop.availability().closesAt()));

@@ -100,12 +100,14 @@ import org.ojalgo.type.context.NumberContext;
  *
  * <h2>What this model still does not contain</h2>
  * <ul>
- *   <li><b>Shop limits that are shared, or never reset.</b> Every shop offer
- *       has its own cap: {@code periodLimit} times the number of whole periods
- *       in the horizon. Two limits in this model cannot be written. One is a
- *       stock that never refills, where 30 in total is not 30 a week. The other
- *       is a price that changes partway through a limit. Both are bundle-format
- *       gaps before they are solver gaps.
+ *   <li><b>Shop limits that are shared.</b> Every shop offer has its own cap:
+ *       {@code periodLimit} times the number of whole periods in the horizon, or
+ *       the whole allowance of a stock that {@linkplain Shop#neverResets never
+ *       refills}. A price that rises partway through a limit is two offers, the
+ *       cheap one capped at the discounted count, and needs nothing shared: a
+ *       least-cost plan exhausts the cheap one first unaided. What cannot be
+ *       written is one cap over several offers, or an order the game enforces
+ *       that cost does not.
  *   <li><b>Expiry within the horizon, as a shared capacity.</b> A stage that
  *       closes in three days is bounded by what three days of energy could buy
  *       (see {@link #closingCap}), which is a real bound and not a joint one: two
@@ -1006,8 +1008,11 @@ final class EnergyMip {
             return named + ", which is closed or unreleased";
         }
         if (purchases(shop, at, horizonDays) == 0) {
-            return named + ", whose limit of " + shop.periodLimit() + " per " + shop.period()
-                    + " does not reset inside a " + horizonDays + "-day horizon";
+            return shop.neverResets()
+                    ? named + ", whose allowance of " + shop.periodLimit() + " cannot be bought"
+                            + " inside a " + horizonDays + "-day horizon"
+                    : named + ", whose limit of " + shop.periodLimit() + " per " + shop.period()
+                            + " does not reset inside a " + horizonDays + "-day horizon";
         }
         return named + ", whose currency \"" + shop.currency().value()
                 + "\" nothing available can supply";

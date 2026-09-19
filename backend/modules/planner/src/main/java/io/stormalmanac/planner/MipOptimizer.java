@@ -7,6 +7,7 @@ import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.common.id.StageId;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.GameDefinitionRepository;
+import io.stormalmanac.gamedata.Shop;
 import io.stormalmanac.player.Inventory;
 import io.stormalmanac.player.PlayerProfile;
 import io.stormalmanac.player.PlayerStateRepository;
@@ -21,6 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The {@link Optimizer} port, wired to the real repositories.
@@ -323,6 +326,21 @@ public final class MipOptimizer implements Optimizer {
                     .map(claim -> claim.reward() + " ×" + claim.times())
                     .reduce((a, b) -> a + ", " + b).orElse("")
                     + ". Miss those and the plan costs more energy than it says.");
+        }
+        Set<String> lifetime = inputs.definition().shops().stream()
+                .filter(Shop::neverResets).map(Shop::id).collect(Collectors.toSet());
+        List<String> spendsLifetime = outcome.conversions().stream()
+                .filter(conversion -> lifetime.contains(conversion.sourceOrSinkId()))
+                .map(conversion -> conversion.sourceOrSinkId() + " ×" + conversion.times())
+                .toList();
+        if (!spendsLifetime.isEmpty()) {
+            // The same kind of assumption as the rewards above, pointing the
+            // other way: nothing a player records says how much of an allowance
+            // that never refills they have already bought, so the plan assumes
+            // none, and a reader who has bought some is the one who can tell.
+            notes.add("Buying from a limit that never resets: " + String.join(", ", spendsLifetime)
+                    + ". This assumes none of that allowance has been bought yet; whatever has been"
+                    + " must come from elsewhere.");
         }
         if (outcome.daysNeeded() > 0) {
             notes.add(("This plan cannot be finished in less than %d day(s) however much energy is"

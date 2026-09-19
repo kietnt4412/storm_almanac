@@ -367,7 +367,7 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
                         rs.getInt("price"),
                         new ItemStack(items.get(rs.getLong("offer_item_id")), rs.getInt("offer_quantity")),
                         rs.getInt("period_limit"),
-                        Period.parse(rs.getString("period_iso")),
+                        Shop.parsePeriod(rs.getString("period_iso")),
                         Availabilities.read(rs)),
                 version);
     }

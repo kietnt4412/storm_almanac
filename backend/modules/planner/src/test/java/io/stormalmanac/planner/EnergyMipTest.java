@@ -243,6 +243,50 @@ class EnergyMipTest {
                 .hasMessageContaining("does not reset inside a 5-day horizon");
     }
 
+    /**
+     * Thirty relics ever, the first ten at 100 gold and the other twenty at 200:
+     * one stock with a price that rises partway through, written as two offers
+     * that never reset.
+     */
+    private static GameDefinition tieredStock() {
+        return TestGame.builder()
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .source(new Shop("first-ten", GOLD, 100, new ItemStack(RELIC, 1),
+                        10, null, Availability.ALWAYS))
+                .source(new Shop("next-twenty", GOLD, 200, new ItemStack(RELIC, 1),
+                        20, null, Availability.ALWAYS))
+                .build();
+    }
+
+    @Test
+    @DisplayName("a stock that never resets is the whole allowance, and the cheap tier is bought out first")
+    void aLifetimeStockIsSpentCheapestFirst() {
+        // 15 relics: all ten at 100 and five at 200 is 2 000 gold, 20 runs of
+        // s-gold at 5 = 100 energy. Nothing tells the solver the order; buying
+        // the dear tier first would cost 3 000 gold and it simply is not cheapest.
+        EnergyMip.Outcome outcome = solve(tieredStock(), Map.of(), Map.of(RELIC, 15),
+                Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, 1);
+
+        assertThat(outcome.totalEnergy()).isEqualTo(100);
+        assertThat(outcome.conversions()).containsExactlyInAnyOrder(
+                new Conversion("first-ten", 10), new Conversion("next-twenty", 5));
+    }
+
+    @Test
+    @DisplayName("a stock that never resets does not grow with the horizon: thirty ever is thirty in a year")
+    void aLifetimeStockDoesNotRefill() {
+        // A weekly limit of 30 would give 30 * 52 in a year. This gives 30, and
+        // a thirty-first relic has no source however long the plan runs.
+        assertThat(solve(tieredStock(), Map.of(), Map.of(RELIC, 30),
+                Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, 1).conversions())
+                .containsExactlyInAnyOrder(
+                        new Conversion("first-ten", 10), new Conversion("next-twenty", 20));
+
+        assertThatThrownBy(() -> solve(tieredStock(), Map.of(), Map.of(RELIC, 31),
+                Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, 365))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class);
+    }
+
     @Test
     @DisplayName("a shop whose currency nothing supplies is refused, and the currency is named")
     void aShopWithNoCurrencySourceNamesTheCurrency() {

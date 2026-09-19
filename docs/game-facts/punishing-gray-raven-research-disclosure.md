@@ -988,3 +988,17 @@ run agree to the point.
 Its card's "Owned 999" is the stack cap; the picker read 1 096. **Samantha** is
 now a bundle entity with her Overclock row, and Memory Enhancer IV a fodder rule
 with a Simulation Shop row (10 for 87).
+
+## 2026-09-19 — the shard shop's second tier, and the limit that never resets
+
+**Shards 11 to 30 cost 20 Phantom Pain Scar each.** The maintainer answered
+this directly when asked, and says they read it in game on the same tile. It had
+to be asked because the tile read here says *"66% Off (was 30)"*, which suggests
+a full price of 30, not 20. So there are two prices after the discount, the tile's
+"was" and the maintainer's reading, and the bundle takes the reading: *"was 30"*
+is a list price that no purchase is charged. **It has not been checked against a
+second screen.** The first person to buy an eleventh shard should look.
+
+The limit is now writable: a shop period of `"never"` ([ADR 0020](../adr/0020-a-limit-that-never-resets-is-offered-whole.md)).
+Sequence 2 of the bundle has two rows, 10 at 10 and 20 at 20, and Evolve
+S → SS plans for a reader who holds the Scars.

@@ -291,10 +291,11 @@ public final class CanonicalBundleParser {
     private static Period period(JsonNode node, String at) {
         String iso = text(node, "period", at + ".period");
         try {
-            return Period.parse(iso);
+            return Shop.parsePeriod(iso);
         } catch (DateTimeParseException e) {
             throw new BundleFormatException(
-                    at + ".period must be an ISO-8601 period such as \"P1D\", not \"" + iso + "\"", e);
+                    at + ".period must be an ISO-8601 period such as \"P1D\", or \"" + Shop.NEVER
+                            + "\" for a limit that never resets, not \"" + iso + "\"", e);
         }
     }
 

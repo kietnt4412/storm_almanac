@@ -58,6 +58,26 @@ class ShopTest {
     }
 
     @Test
+    @DisplayName("a limit that never resets is the whole allowance in any horizon of a day or more")
+    void aLimitThatNeverResets() {
+        Shop lifetime = shop(10, 30, null);
+
+        assertThat(lifetime.neverResets()).isTrue();
+        assertThat(lifetime.purchasesIn(0)).isZero();
+        assertThat(lifetime.purchasesIn(1)).isEqualTo(30);
+        assertThat(lifetime.purchasesIn(366)).isEqualTo(30);
+    }
+
+    @Test
+    @DisplayName("a period that never ends is written \"never\", and reads back as one")
+    void neverRoundTrips() {
+        assertThat(shop(10, 30, null).periodText()).isEqualTo(Shop.NEVER);
+        assertThat(Shop.parsePeriod(Shop.NEVER)).isNull();
+        assertThat(Shop.parsePeriod("P7D")).isEqualTo(Period.ofDays(7));
+        assertThat(shop(10, 3, Period.ofDays(7)).neverResets()).isFalse();
+    }
+
+    @Test
     @DisplayName("a limit per period needs a period of at least a day to be counted in")
     void aLimitNeedsAPeriod() {
         assertThatThrownBy(() -> shop(10, 3, Period.ZERO))

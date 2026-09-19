@@ -2572,6 +2572,8 @@ Rewrite a section instead.**
 
 **549 → 551 → 549 on 2026-09-19 (twenty-fourth).** N27 left and N32 arrived at roughly the same length; one line over, closed by tightening N30 and the Phase 4 paragraph rather than dropping anything, and the index line brings it to 550. The rewrite is holding, one session in.
 
+**549 → 550 → 549 on 2026-09-19 (twenty-seventh).** N32 (3) left and its finding took the room back; the index line was paid for by tightening the PGR status bullet.
+
 ---
 
 ## Session log
@@ -2584,6 +2586,48 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-19 (twenty-seventh) — N32 (3): a shop limit that never resets, and
+Evolve S → SS plans.** [ADR 0020](../adr/0020-a-limit-that-never-resets-is-offered-whole.md).
+
+- **The remote at start:** PR #26 merged, `dev` and `main` identical trees, the
+  push-to-`main` run `35431786680` still in progress.
+- **"Never" is a `null` period**, written `"never"` in a bundle and in
+  `period_iso`. **No migration**, because the column is text and every older
+  version reads unchanged. `Shop.purchasesIn` gives the whole allowance to any
+  horizon of a day or more. That is the one place a plan rounds *for* the
+  player. Rounding against the player would give zero, and nothing records how
+  much a player has bought. So `MipOptimizer` adds a note whenever a plan buys
+  from such an offer. The maintainer's `limitPeriod` enum was not taken: a
+  `Period` already says everything the other values would.
+- **A tiered price is two offers**, the cheap one capped at the discounted count.
+  They need no shared cap, because least cost buys the cheap tier out first.
+  `EnergyMipTest` proves both points on paper: 15 relics at 100 energy, and a
+  thirty-first refused at a 365-day horizon.
+- **A reading conflict, put to the maintainer before anything was written.** The
+  tile says *"66% Off (was 30)"*; the maintainer had reported 20 each after the
+  first ten. Asked how they knew, they answered **"20 each, seen in game"**. The
+  bundle's provenance detail says the second tier is their reading of the tile,
+  not the one transcribed. The note says no second screen has checked it.
+- **Sequence 2 of the bundle:** two Phantom Pain shop rows, 10 at 10 Scars and
+  20 at 20, both `"never"`. `AuthoredBundlePlanTest`: holding 2 shards and 460
+  Scars, Evolve buys 10 + 18 and farms nothing; the note names both offers.
+- **Found: one Scar short gives the generic refusal**, *"no combination of … 2
+  shop offer(s)"*, with no item named. The per-item diagnosis looks for items
+  with *no source*, and a held stock is a source that runs out. That was true
+  before for any held currency. Here it is the usual case until the weekly Cage
+  pays Scars (N32 (5)). The test pins the behaviour as it is, not as it should
+  be.
+- **`GameDataIngestTest` already round-tripped the whole authored bundle
+  through Postgres** by record equality, so `"never"` was proven on the first
+  run. An explicit assertion on the two rows was added so the proof is visible.
+- **Previewed, then ingested and published at the maintainer's request.** The local database held sequence 1
+  as published; the preview read exactly **two changes**, the two shop rows, and
+  90 facts over four provenances, all first-hand. *Ingest* showed the same two
+  changes, then *publish*: **`punishing-gray-raven` Steering By Light, sequence
+  2, at 2026-09-19T08:40:51Z**. A second preview read *no changes*, which is the
+  read-back. The next correction is a sequence 3.
+- 364 backend tests (+6), 0 skipped locally.
 
 **2026-09-19 (twenty-sixth) — N32 (1) and (2): gates are paid and EXP is fed,
 and the first-hand plans got honest by 75% and 717%.** No new reading. The
