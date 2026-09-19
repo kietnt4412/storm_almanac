@@ -2619,10 +2619,25 @@ the solver makes.** [ADR 0021](../adr/0021-one-step-at-several-prices-is-a-choic
   234 Special Support Token and 246 Simulation Score. The chip item was read
   only by its icon ("the 5★ Memory Shard's icon"), and the Memory and Item tabs
   were never read. The row waits for the maintainer.
+- **Later the same session, the row landed.** The maintainer first described
+  "the blue one" as the farming stage's points. That would have been Simulation
+  Score, the third price, which was already named. So they were asked which
+  row they meant. They sent a screenshot of the item card: **5★ Memory Shard,
+  Owned 4300**, the same count the Resonance screen showed beside the unnamed
+  price. It is recorded under a new provenance, `memory-shard-card`
+  (OBSERVED_IN_GAME).
+- **Sequence 3 of the bundle:** two items (5★ Memory Shard, Special Support
+  Token) and three `samantha-upper-resonance-by-*` rows,
+  `upper-resonance-0 → upper-resonance-1`. No gate is written, because none was
+  read. `AuthoredBundlePlanTest`, worked out by hand first: holding nothing,
+  the only price that can be farmed is 246 Score, **exactly 3 runs, 90 Serum**.
+  Holding 150 shards, the plan pays in shards and costs 0. **Not previewed,
+  ingested or published.**
+- 375 backend tests (+11 over the session), 0 skipped locally.
 - **Not driven in a browser.** The shortfall page's `one of: …` line is tested
   on the arithmetic (`ShortfallChoiceTest`, a bundle parsed from text). No
   frontend has rendered a `choice:` line.
-- 373 backend tests (+9), 0 skipped locally.
+- 373 backend tests (+9) at the first commit.
 **2026-09-19 (twenty-seventh) — N32 (3): a shop limit that never resets, and
 Evolve S → SS plans.** [ADR 0020](../adr/0020-a-limit-that-never-resets-is-offered-whole.md).
 

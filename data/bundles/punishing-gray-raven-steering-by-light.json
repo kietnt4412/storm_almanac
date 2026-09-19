@@ -41,7 +41,13 @@
     "Sequence 1 was published on 2026-09-19. Sequence 2 adds the Phantom Pain",
     "shop's two shard rows, now that a shop limit can be one that never",
     "resets: 10 shards at 10 Scars, then 20 at 20, 30 ever. The first tier is",
-    "the tile as read; the second is the maintainer's reading of the same tile."
+    "the tile as read; the second is the maintainer's reading of the same tile.",
+    "",
+    "Sequence 2 was published on 2026-09-19. Sequence 3 adds Samantha's",
+    "Upper Resonance, now that one step can have several prices (ADR 0021):",
+    "150 5-star Memory Shard, 234 Special Support Token or 246 Simulation",
+    "Score, any one of them. The Memory Shard was read only by its icon until",
+    "the maintainer opened its item card the same day."
   ],
 
   "game": {
@@ -49,7 +55,7 @@
     "displayName": "Punishing: Gray Raven",
     "energyUnit": "Serum"
   },
-  "sequence": 2,
+  "sequence": 3,
   "label": "Steering By Light",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client, patch \"Steering By Light\", on 2026-09-18. Numbers and text only; no game assets.",
 
@@ -76,6 +82,12 @@
       "id": "character-screens",
       "origin": "OBSERVED_IN_GAME",
       "detail": "Helentine: Lacrimosa's Level Up screen at Lv 1 / 80 with one EXP Pod (M), (L) and (XL) selected in turn, her Evolution screen, and her four Awaken tiers; Liv: Limpidity's Infinitas orb-colour screen and the Ultima: Lacrimosa item card; the Memory Samantha's detail, Enhance (to 45) and Resonance screens, and the Memory Enhancement Cost picker with one Memory Enhancer IV selected; the Inver-Shard - Lacrimosa and Phantom Pain Scar cards and the Phantom Pain shop's shard tile. That shards 11 to 30 cost 20 Scars each is the maintainer's reading of that tile in game, not of the one read here, which showed the first ten's 10. Same client and account, patch \"Steering By Light\". Also her Promote tab at every step from PRIVATE to HERO and her Skill screens (the leader skill's Unlock, the core passive's Level Up). That Level Up has no Cog cost, that she was pulled at S rank, and that every skill unlock costs the same as the one read are the maintainer's reports; their report that every skill level costs the same was contradicted by the Delusional Spin screens and the 1 -> 18 upgrade prompt, and is not relied on.",
+      "observedOn": "2026-09-19"
+    },
+    {
+      "id": "memory-shard-card",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "The 5-star Memory Shard's Item Details card, opened from the inventory's Item tab: name, \"Owned 4300\", and \"Obtained from recycling 5-star Memory Chips\". The owned count is the one the Resonance screen showed beside the unnamed 5-star price, which is how the two were matched. A screenshot taken by the maintainer on 2026-09-19 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch \"Steering By Light\".",
       "observedOn": "2026-09-19"
     }
   ],
@@ -162,7 +174,12 @@
     "upgrade:helentine-lacrimosa-vestige-unlock": "character-screens",
     "upgrade:helentine-lacrimosa-level-80": "character-screens",
     "shop:phantom-pain-shop-inver-shard-lacrimosa-discounted": "character-screens",
-    "shop:phantom-pain-shop-inver-shard-lacrimosa": "character-screens"
+    "shop:phantom-pain-shop-inver-shard-lacrimosa": "character-screens",
+    "item:memory-shard-5-star": "memory-shard-card",
+    "item:special-support-token": "character-screens",
+    "upgrade:samantha-upper-resonance-by-memory-shard": "character-screens",
+    "upgrade:samantha-upper-resonance-by-special-support-token": "character-screens",
+    "upgrade:samantha-upper-resonance-by-simulation-score": "character-screens"
   },
 
   "items": [
@@ -291,6 +308,20 @@
       "displayName": "Skill Point",
       "rarity": { "label": "3*", "rank": 3 },
       "category": "skill-material"
+    },
+    {
+      "_comment": "Named on its own item card; five stars from the Resonance screen's price tile. Made by recycling 5-star Memory Chips, which nothing in this bundle models, so a plan can spend it only if the reader holds it.",
+      "id": "memory-shard-5-star",
+      "displayName": "5★ Memory Shard",
+      "rarity": { "label": "5*", "rank": 5 },
+      "category": "memory-shard"
+    },
+    {
+      "_comment": "Named and graded four stars on the Resonance screen's price tile. Its own card and its sources are unread, so a plan can spend it only if the reader holds it.",
+      "id": "special-support-token",
+      "displayName": "Special Support Token",
+      "rarity": { "label": "4*", "rank": 4 },
+      "category": "support-token"
     }
   ],
 
@@ -632,6 +663,37 @@
         { "item": "memory-overclock-circuit-i", "quantity": 10 }
       ],
       "progress": [ { "kind": "memory-exp", "quantity": 18000 } ]
+    },
+    {
+      "_comment": [
+        "Samantha's Upper Resonance, three rows for one step: the Token tab offers",
+        "any one of three prices, and the solver pays whichever is cheapest for the",
+        "reader (ADR 0021). Held when read: 4 300, 7 716 and 366 401.",
+        "",
+        "The skill Resonance gives is random (the maintainer's report), so the",
+        "state is reaching a Resonance, not any particular skill. The Memory and",
+        "Item tabs, the other ways to pay, were not read, and nor was any gate:",
+        "whether Resonance needs her Overclock first is not recorded here."
+      ],
+      "id": "samantha-upper-resonance-by-memory-shard",
+      "entity": "samantha",
+      "fromState": "upper-resonance-0",
+      "toState": "upper-resonance-1",
+      "costs": [ { "item": "memory-shard-5-star", "quantity": 150 } ]
+    },
+    {
+      "id": "samantha-upper-resonance-by-special-support-token",
+      "entity": "samantha",
+      "fromState": "upper-resonance-0",
+      "toState": "upper-resonance-1",
+      "costs": [ { "item": "special-support-token", "quantity": 234 } ]
+    },
+    {
+      "id": "samantha-upper-resonance-by-simulation-score",
+      "entity": "samantha",
+      "fromState": "upper-resonance-0",
+      "toState": "upper-resonance-1",
+      "costs": [ { "item": "simulation-score", "quantity": 246 } ]
     },
     {
       "_comment": "Harmony Lv 1 only. Levels 2 and 3 show 'Not available' and hide their cost, so they are absent rather than guessed.",

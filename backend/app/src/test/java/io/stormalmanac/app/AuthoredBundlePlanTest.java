@@ -191,6 +191,29 @@ class AuthoredBundlePlanTest {
     }
 
     @Test
+    @DisplayName("Resonance holding nothing pays the one price that can be farmed: 246 Score, 90 Serum")
+    void resonanceFarmsTheScorePrice() {
+        // Three prices, and only Simulation Score has a source in the bundle.
+        // 246 Score at 82 a run is exactly 3 runs = 90 Serum.
+        Plan plan = solve(Goal.deterministic(SAMANTHA, "upper-resonance-1"));
+
+        assertThat(plan.totalEnergy()).isEqualTo(90);
+        assertThat(plan.conversions()).containsExactly(
+                new Conversion("samantha-upper-resonance-by-simulation-score", 1));
+    }
+
+    @Test
+    @DisplayName("Resonance holding 150 Memory Shards pays in shards, and farms nothing")
+    void resonancePaysAHeldPrice() {
+        Plan plan = solve(Goal.deterministic(SAMANTHA, "upper-resonance-1"),
+                Inventory.empty(PROFILE).with(new ItemId("memory-shard-5-star"), 150));
+
+        assertThat(plan.totalEnergy()).isZero();
+        assertThat(plan.conversions()).containsExactly(
+                new Conversion("samantha-upper-resonance-by-memory-shard", 1));
+    }
+
+    @Test
     @DisplayName("a weapon Overclock is refused, naming the one material nothing read supplies")
     void theWeaponsGapIsNamed() {
         // Hear the Bell wants 28 Weapon Overclock Core I, and the alpha box that
