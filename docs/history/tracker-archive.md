@@ -2641,6 +2641,10 @@ the solver makes.** [ADR 0021](../adr/0021-one-step-at-several-prices-is-a-choic
   at 2026-09-19T09:18:31Z**. A second preview read *no changes*, which is the
   read-back. So a database holding versions published before V9 still reads
   them after it. The next correction is a sequence 4.
+- **No gate, confirmed afterwards.** The maintainer reports that Resonance
+  requires neither Overclock nor level. That is a report from playing, not a
+  screen reading. The published rows have no gate, so nothing changes, and 90
+  Serum stands as the whole price.
 - 375 backend tests (+11 over the session), 0 skipped locally.
 - **Not driven in a browser.** The shortfall page's `one of: …` line is tested
   on the arithmetic (`ShortfallChoiceTest`, a bundle parsed from text). No

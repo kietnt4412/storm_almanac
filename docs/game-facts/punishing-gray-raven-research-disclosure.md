@@ -992,6 +992,11 @@ matched. It first looked like it might be the farming stage's points. It is not:
 those are Simulation Score, the third price, held 366 401. **Resonance is
 sequence 3's three rows.**
 
+*(Maintainer, same day:)* Resonance **requires neither Overclock nor level**.
+This is a report from playing, not a screen reading. It matches the bundle,
+which writes no gate on the Resonance rows. So the 90 Serum plan is not too
+cheap for want of a gate.
+
 **Cross-check:** Simulation Score read 366 425, then 366 401 — +164 for one
 doubled run, −150 for a β stack, −38 for an α stack. The shop prices and the
 run agree to the point.
