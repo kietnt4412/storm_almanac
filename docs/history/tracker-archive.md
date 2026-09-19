@@ -2621,10 +2621,12 @@ Evolve S → SS plans.** [ADR 0020](../adr/0020-a-limit-that-never-resets-is-off
 - **`GameDataIngestTest` already round-tripped the whole authored bundle
   through Postgres** by record equality, so `"never"` was proven on the first
   run. An explicit assertion on the two rows was added so the proof is visible.
-- **Previewed, not ingested or published.** The local database holds sequence 1
+- **Previewed, then ingested and published at the maintainer's request.** The local database held sequence 1
   as published; the preview read exactly **two changes**, the two shop rows, and
-  90 facts over four provenances, all first-hand. Publishing is the maintainer's
-  step.
+  90 facts over four provenances, all first-hand. *Ingest* showed the same two
+  changes, then *publish*: **`punishing-gray-raven` Steering By Light, sequence
+  2, at 2026-09-19T08:40:51Z**. A second preview read *no changes*, which is the
+  read-back. The next correction is a sequence 3.
 - 364 backend tests (+6), 0 skipped locally.
 
 **2026-09-19 (twenty-sixth) — N32 (1) and (2): gates are paid and EXP is fed,
