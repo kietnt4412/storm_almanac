@@ -2627,10 +2627,16 @@ matters for the next session is below.
   provenance mappings went in — `AuthoredBundlesTest` failed on mappings naming
   no fact, which is a check nobody had written down it made; and two edits left
   a placeholder id and a duplicate entity in the file, removed by reading back.
-- **Not verified:** `--gamedata=preview` needs Postgres, which was not up; the
-  bundle is proven parseable and publishable by `AuthoredBundlesTest`, not
-  previewed or re-ingested. Block 4 stays cut, so this sitting is **not** a
-  measurement of what sourcing a patch costs, though it is the nearest thing.
+- **Published, at the maintainer's explicit request, after PR #24 merged green:**
+  Postgres started through `docker compose up -d postgres redis`, then
+  *preview* (19 items, 5 entities, 87 facts over four provenances, no
+  *NOT ours to publish* line), *ingest* (replacing the stale draft 0), and
+  *publish* — **`punishing-gray-raven` Steering By Light, sequence 0, at
+  2026-09-19T01:40:38Z**. A second preview then read *no changes* against the
+  published version, which is the read-back. **The first published version in
+  this repository whose every fact was read first-hand.** From here a
+  correction is a sequence 1, never an edit. Block 4 stays cut, so this sitting
+  is **not** a measurement of what sourcing a patch costs.
 
 **2026-09-18 (twenty-third) — the first first-hand bundle exists, and it is nine
 facts wide.** N27's other half: the 545-line PGR reading turned into

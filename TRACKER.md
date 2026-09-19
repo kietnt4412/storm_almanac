@@ -42,8 +42,8 @@ being finished with is.
 - **N27 is done: the first PGR bundle holds one character, one weapon, one
   Memory and the farm that feeds them, all first-hand — and nothing can plan
   from it yet.** [The bundle](data/bundles/punishing-gray-raven-steering-by-light.json)
-  (sequence 0, **changed since it was ingested**, not published — re-ingest,
-  then the approval is the maintainer's). **PGR's farm is a shop:** one Serum
+  (**published 2026-09-19T01:40:38Z as sequence 0**, on the maintainer's
+  explicit request, after preview and re-ingest). **PGR's farm is a shop:** one Serum
   stage, Simulated Battlefield, pays a currency that buys every character and
   Memory material — so **N30 needs shops after all**. What the format refused is
   now a list, **N32**. [The reading](docs/game-facts/punishing-gray-raven-research-disclosure.md).
@@ -78,8 +78,8 @@ being finished with is.
   where **`:app:test` executed rather than coming from cache**, so the grown
   bundle went through `AuthoredBundlesTest` on a runner, with the snapshot-gated
   classes skipped as ever. It merged at 01:38:06Z, **after** the run finished.
-  **This status line itself was committed after the merge and not pushed** — the
-  next session finds `dev` one commit ahead of `origin/dev`. **`dev` sits behind
+  **This line and the publish record were committed after the merge and not
+  pushed** — the next session finds `dev` two commits ahead of `origin/dev`. **`dev` sits behind
   `main` with identical trees** — merge commits that never come back down;
   harmless, and *not* a reason to rebase. **The trap stands:** CI runs on `pull_request` and
   on push to `main` only, so **a push to `dev` with no open PR runs nothing,
@@ -164,7 +164,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
 | Backend build | **Green** | **330 tests** in full 2026-09-18, 0 skipped locally; **314 on CI**, where the 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
-| Authored game data | **One bundle, draft, first-hand** | Helentine: Lacrimosa (level, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha, one stage, 9 shop rows, 2 box crafts, 5 fodder rules — **not published**. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. Nothing else in the build reads it |
+| Authored game data | **One bundle, published, first-hand** | Helentine: Lacrimosa (level, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha, one stage, 9 shop rows, 2 box crafts, 5 fodder rules — **published as sequence 0, 87 facts, all first-hand**; a correction is now a sequence 1, never an edit. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. Nothing else in the build reads it |
 | CI workflow | **Green, no warnings, Node 24** | Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
