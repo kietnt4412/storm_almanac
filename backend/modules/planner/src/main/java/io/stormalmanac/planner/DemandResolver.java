@@ -109,7 +109,8 @@ public final class DemandResolver {
         }
 
         void payUpTo(String state, boolean mustBeReachable) {
-            for (Upgrade step : pathTo(goal, state, mustBeReachable, edges, achieved, definition)) {
+            for (List<Upgrade> prices : pathTo(goal, state, mustBeReachable, edges, achieved, definition)) {
+                Upgrade step = prices.get(0);
                 if (counted.contains(step.id())) continue;
                 if (!gating.add(step.id())) {
                     throw new Optimizer.InfeasibleGoalException(
@@ -121,6 +122,15 @@ public final class DemandResolver {
                 }
                 gating.remove(step.id());
 
+                if (prices.size() > 1) {
+                    // One step, several prices: owe the step, and let the solver
+                    // pick the price. Charging all of them would be a plan for
+                    // doing the same thing three times.
+                    prices.forEach(price -> counted.add(price.id()));
+                    steps.add(String.join(" or ", prices.stream().map(Upgrade::id).toList()));
+                    totals.merge(Demand.choiceItem(step), 1, Math::addExact);
+                    continue;
+                }
                 counted.add(step.id());
                 steps.add(step.id());
                 for (ItemStack cost : step.costs()) {
@@ -172,13 +182,14 @@ public final class DemandResolver {
 
     /**
      * The upgrades between {@code achieved} and {@code target}, in the order they
-     * are performed.
+     * are performed. Each element is one step: a single upgrade, or several that
+     * make the same move at different prices.
      *
      * @param mustBeReachable true for the goal itself, which has to be reached by
      *                        something; false for a gate, which may be the start
      *                        of its track and so already met by owning the entity
      */
-    private static List<Upgrade> pathTo(
+    private static List<List<Upgrade>> pathTo(
             Goal goal,
             String target,
             boolean mustBeReachable,
@@ -186,7 +197,7 @@ public final class DemandResolver {
             Set<String> achieved,
             GameDefinition definition) {
 
-        List<Upgrade> reversed = new ArrayList<>();
+        List<List<Upgrade>> reversed = new ArrayList<>();
         Set<String> visited = new HashSet<>();
         Deque<String> queue = new ArrayDeque<>();
         queue.add(target);
@@ -205,19 +216,21 @@ public final class DemandResolver {
                 }
                 continue; // the start of a track: nothing precedes it, and nothing is owed for it
             }
-            if (parents.size() > 1) {
-                // Alternative routes to one state are a choice, and a choice
-                // belongs in the solver rather than in a traversal that would
-                // silently charge for all of them. No published bundle has one
-                // yet; the day one does, this becomes a variable, not a throw.
+            Upgrade first = parents.get(0);
+            boolean onePath = parents.stream().allMatch(p ->
+                    p.fromState().equals(first.fromState()) && p.requires().equals(first.requires()));
+            if (!onePath) {
+                // Several prices for one step are a choice the solver makes
+                // (see Demand#choiceItem). Several *routes* are not: which
+                // states are passed through, and so which gates are paid, would
+                // change with the choice, and a demand vector cannot branch.
                 throw new UnsupportedOperationException(
                         "state \"" + state + "\" for " + goal.entity() + " is reachable by "
-                                + parents.size() + " different upgrades, and choosing between"
-                                + " them is the solver's job, not the resolver's");
+                                + parents.size() + " upgrades from different states or behind"
+                                + " different gates, and a choice of route is not modelled");
             }
-            Upgrade only = parents.get(0);
-            reversed.add(only);
-            queue.add(only.fromState());
+            reversed.add(List.copyOf(parents));
+            queue.add(first.fromState());
         }
         return reversed.reversed();
     }

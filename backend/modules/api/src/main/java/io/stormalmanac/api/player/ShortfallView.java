@@ -6,6 +6,7 @@ import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.Sink;
+import io.stormalmanac.gamedata.Upgrade;
 import io.stormalmanac.planner.Demand;
 import io.stormalmanac.player.Inventory;
 import java.util.ArrayList;
@@ -79,6 +80,17 @@ public final class ShortfallView {
             Map<ItemId, Item> items = definition.itemsById();
             List<ShortfallLine> lines = new ArrayList<>();
             demand.quantities().forEach((item, required) -> {
+                if (Demand.isChoiceItem(item)) {
+                    List<Upgrade> prices = pricesOf(definition, item);
+                    int owned = prices.stream().anyMatch(price -> covers(definition, price, inventory)) ? required : 0;
+                    lines.add(new ShortfallLine(
+                            item.value(),
+                            "one of: " + String.join(", ", prices.stream().map(Upgrade::id).toList()),
+                            required,
+                            owned,
+                            required - owned));
+                    return;
+                }
                 boolean progress = Demand.isProgressItem(item);
                 int owned = progress
                         ? progressHeld(definition, Demand.progressKind(item), inventory)
@@ -137,6 +149,27 @@ public final class ShortfallView {
             }
         }
         return (int) Math.min(Integer.MAX_VALUE, held);
+    }
+
+    /** The upgrades that are the several prices of one step. */
+    private static List<Upgrade> pricesOf(GameDefinition definition, ItemId choice) {
+        return definition.sinks().stream()
+                .filter(sink -> sink instanceof Upgrade upgrade && Demand.choiceItem(upgrade).equals(choice))
+                .map(Upgrade.class::cast)
+                .toList();
+    }
+
+    /**
+     * Whether the reader could pay this price today. A step with several prices
+     * is held when any one of them is, which is the only honest "owned" for a
+     * line that stands for a choice: the line is one step, not three bills.
+     * What a price is short of is not itemised here; the plan says which price
+     * it chose and what that one costs to farm.
+     */
+    private static boolean covers(GameDefinition definition, Upgrade price, Inventory inventory) {
+        return price.costs().stream().allMatch(cost -> inventory.quantityOf(cost.item()) >= cost.quantity())
+                && price.progress().stream()
+                        .allMatch(p -> progressHeld(definition, p.kind(), inventory) >= p.quantity());
     }
 
     /** One item's line of the answer: what it costs, what is held, what is left. */

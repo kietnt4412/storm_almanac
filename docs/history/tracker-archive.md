@@ -2574,6 +2574,8 @@ Rewrite a section instead.**
 
 **549 → 550 → 549 on 2026-09-19 (twenty-seventh).** N32 (3) left and its finding took the room back; the index line was paid for by tightening the PGR status bullet.
 
+**549 → 550 → 549 on 2026-09-19 (twenty-eighth).** N32 (4) closed; the index line was paid for by rewriting N32's own entry one line shorter.
+
 ---
 
 ## Session log
@@ -2587,6 +2589,40 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-19 (twenty-eighth) — N32 (4): one step at several prices is a choice
+the solver makes.** [ADR 0021](../adr/0021-one-step-at-several-prices-is-a-choice-the-solver-makes.md). No new reading.
+
+- **The remote at start:** PR #27 merged with its PR run green (`35432700666`);
+  the push-to-`main` run `35432960832` still in progress.
+- **Parallel upgrades, not a new shape.** Two upgrades with the same entity,
+  from-state and to-state are one step at two prices. So the record, the bundle
+  format and the writer are unchanged. The one thing refusing it was V2's
+  `upgrade_edge_unique`, which **`V9` drops**. Its comment ("a second row
+  would be a duplicate cost") had been true of every game read until PGR.
+- **The choice is demanded as an item**, as EXP is in ADR 0019:
+  `choice:<entity>/<from>/<to>`, one unit, which `EnergyMip` makes from any one
+  price. A price paid in EXP pulls fodder in the usual way. The plan's
+  conversions name the upgrade paid, and the steps list reads `a or b`.
+- **A route is still refused.** Several upgrades into one state from
+  *different* states, or behind *different* gates, would change which gates get
+  paid, and a demand vector cannot branch.
+- **Two database tests asserted the old rule.** `GameDataSchemaTest` now proves
+  a second price is stored. `GameDataIngestTest`'s all-or-nothing case needed
+  a different constraint that the parser cannot see; it uses
+  `upgrade_states_differ`, an upgrade from a state to itself. **The parser
+  does not refuse that**, and only the schema does.
+- **Worked out by hand before running, and matched on the first run:** a step
+  priced as 3 ingots or 1 relic costs 40 energy through the relic, against 60
+  through the ingots. Holding 3 ingots, it costs 0. A price in EXP beats 2 000
+  gold, at 60 against 100.
+- **Not in the bundle.** Resonance's three prices are 150 of a 5★ chip item,
+  234 Special Support Token and 246 Simulation Score. The chip item was read
+  only by its icon ("the 5★ Memory Shard's icon"), and the Memory and Item tabs
+  were never read. The row waits for the maintainer.
+- **Not driven in a browser.** The shortfall page's `one of: …` line is tested
+  on the arithmetic (`ShortfallChoiceTest`, a bundle parsed from text). No
+  frontend has rendered a `choice:` line.
+- 373 backend tests (+9), 0 skipped locally.
 **2026-09-19 (twenty-seventh) — N32 (3): a shop limit that never resets, and
 Evolve S → SS plans.** [ADR 0020](../adr/0020-a-limit-that-never-resets-is-offered-whole.md).
 

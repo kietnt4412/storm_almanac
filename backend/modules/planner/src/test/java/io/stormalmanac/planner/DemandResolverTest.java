@@ -130,18 +130,71 @@ class DemandResolverTest {
                 .hasMessageContaining("distribution");
     }
 
+    /** Resonance, as the game offers it: one move, paid in either of two things. */
+    private static GameDefinition twoPrices() {
+        return TestGame.builder()
+                .upgrade("i1", HERO, "insight-0", "insight-1", List.of(stack(ORE, 4)))
+                .upgrade("by-ore", HERO, "insight-1", "resonance", List.of(stack(ORE, 9)))
+                .upgrade("by-gold", HERO, "insight-1", "resonance", List.of(stack(GOLD, 900)))
+                .build();
+    }
+
     @Test
-    @DisplayName("a state reachable two ways is refused, because choosing is the solver's job")
-    void ambiguousRouteIsRefused() {
+    @DisplayName("one step at two prices is owed once, and which price is paid is left to the solver")
+    void severalPricesAreOneChoice() {
+        Demand demand = resolver.resolve(twoPrices(), at(null), List.of(Goal.deterministic(HERO, "resonance")));
+
+        Upgrade byOre = new Upgrade("by-ore", HERO, "insight-1", "resonance", List.of(stack(ORE, 9)));
+        assertThat(demand.quantities()).containsOnly(
+                Map.entry(ORE, 4), Map.entry(Demand.choiceItem(byOre), 1));
+        assertThat(demand.steps()).containsExactly("i1", "by-ore or by-gold");
+    }
+
+    @Test
+    @DisplayName("a step with several prices shared by two goals is still owed once")
+    void severalPricesAreNotDoubleCounted() {
+        GameDefinition beyond = TestGame.builder()
+                .upgrade("by-ore", HERO, "start", "resonance", List.of(stack(ORE, 9)))
+                .upgrade("by-gold", HERO, "start", "resonance", List.of(stack(GOLD, 900)))
+                .upgrade("after", HERO, "resonance", "resonance-2", List.of(stack(INGOT, 1)))
+                .build();
+
+        Demand demand = resolver.resolve(beyond, at("start"), List.of(
+                Goal.deterministic(HERO, "resonance"),
+                Goal.deterministic(HERO, "resonance-2")));
+
+        assertThat(demand.steps()).containsExactly("by-ore or by-gold", "after");
+        assertThat(demand.quantities().values()).containsExactlyInAnyOrder(1, 1);
+    }
+
+    @Test
+    @DisplayName("a state reachable from two different states is refused, because a route is not a price")
+    void twoRoutesAreRefused() {
         GameDefinition forked = TestGame.builder()
                 .upgrade("a", HERO, "start", "goal", List.of(stack(ORE, 1)))
-                .upgrade("b", HERO, "start", "goal", List.of(stack(GOLD, 1)))
+                .upgrade("b", HERO, "elsewhere", "goal", List.of(stack(GOLD, 1)))
                 .build();
 
         assertThatThrownBy(() -> resolver.resolve(
                 forked, at("start"), List.of(Goal.deterministic(HERO, "goal"))))
                 .isInstanceOf(UnsupportedOperationException.class)
-                .hasMessageContaining("solver's job");
+                .hasMessageContaining("different states or behind different gates");
+    }
+
+    @Test
+    @DisplayName("two prices behind different gates are refused, because the gate paid would depend on the choice")
+    void differentlyGatedPricesAreRefused() {
+        GameDefinition gatedApart = TestGame.builder()
+                .upgrade("l1", HERO, "level-1", "level-20", List.of(stack(GOLD, 50)))
+                .upgrade("a", HERO, "start", "goal", List.of(stack(ORE, 1)))
+                .sink(new Upgrade("b", HERO, "start", "goal", List.of(stack(GOLD, 1)),
+                        List.of("level-20"), List.of()))
+                .build();
+
+        assertThatThrownBy(() -> resolver.resolve(
+                gatedApart, at("start"), List.of(Goal.deterministic(HERO, "goal"))))
+                .isInstanceOf(UnsupportedOperationException.class)
+                .hasMessageContaining("goal");
     }
 
     /** Insight 2 is gated on level 20, and the level is paid in EXP rather than items. */

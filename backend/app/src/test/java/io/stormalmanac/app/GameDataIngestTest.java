@@ -261,12 +261,12 @@ class GameDataIngestTest extends SharedDatabaseTest {
     @Test
     @DisplayName("an ingest the database refuses leaves nothing behind, not even the version row")
     void ingestIsAllOrNothing() {
-        // Two upgrades with different slugs describing the same edge. The parser
-        // cannot object — the slugs are unique and every reference resolves — and
-        // the schema's upgrade_edge_unique refuses it, because a second row is a
-        // duplicate cost the planner would pay twice. The version row and the
-        // items are written *before* the upgrades, so if the transaction is not
-        // doing its job they survive.
+        // An upgrade from a state to itself. The parser cannot object — the
+        // slug is unique and every reference resolves — and the schema's
+        // upgrade_states_differ refuses it. (This test used two upgrades making
+        // the same move until V9, when that became one step at two prices.) The
+        // version row and the items are written *before* the upgrades, so if
+        // the transaction is not doing its job they survive.
         GameDataBundle contradictory = new CanonicalBundleParser().parse(
                 """
                 {
@@ -284,16 +284,14 @@ class GameDataIngestTest extends SharedDatabaseTest {
                       "rarity": { "label": "5*", "rank": 5 } }
                   ],
                   "upgrades": [
-                    { "id": "u-one", "entity": "warden", "fromState": "a", "toState": "b",
-                      "costs": [ { "item": "gold", "quantity": 100 } ] },
-                    { "id": "u-two", "entity": "warden", "fromState": "a", "toState": "b",
-                      "costs": [ { "item": "gold", "quantity": 200 } ] }
+                    { "id": "u-loop", "entity": "warden", "fromState": "a", "toState": "a",
+                      "costs": [ { "item": "gold", "quantity": 100 } ] }
                   ]
                 }
                 """);
 
         assertThatThrownBy(() -> ingest.ingestDraft(contradictory))
-                .hasMessageContaining("upgrade_edge_unique");
+                .hasMessageContaining("upgrade_states_differ");
 
         assertThat(rows("gamedata.game_data_version")).isZero();
         assertThat(rows("gamedata.item")).isZero();
