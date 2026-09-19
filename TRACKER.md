@@ -71,7 +71,7 @@ being finished with is.
 - **The remote, checked 2026-09-19 — re-check it, do not trust it.**
   **[PR #27](https://github.com/kietnt4412/storm_almanac/pull/27) is MERGED**,
   its PR run green; the push-to-`main` run `35432960832` was in progress when
-  checked. The twenty-eighth session's work is on `dev` — **look for its PR**.
+  checked. **[PR #28](https://github.com/kietnt4412/storm_almanac/pull/28) is OPEN**, the twenty-eighth session's work.
   PR #25 merged *before its own run finished*, green by luck
   (archive, twenty-sixth). **Wait for the run before merging.** **`dev` sits behind
   `main` with identical trees** — merge commits that never come back down;
