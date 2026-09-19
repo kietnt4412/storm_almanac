@@ -72,16 +72,16 @@ being finished with is.
   2026-09-09, every image build failing in six seconds while this file called it
   verified, so **anything added beside `modules`, `adapters`, `substrate`, `app`
   needs a line there**.
-- **The remote, checked 2026-09-18 — re-check it, do not trust it.**
-  **[PR #22](https://github.com/kietnt4412/storm_almanac/pull/22) is MERGED and
-  green on `ba68d1f`, run `35353122893`**, where **`:app:test` executed rather
-  than coming from cache** — the declared `data/bundles` input working on a runner
-  too — with every other module's test task `FROM-CACHE` and the three
-  snapshot-gated classes skipped. **It merged about twenty seconds after opening,
-  before CI finished**, so green is a fact about the merged commit rather than a
-  gate anyone waited on. **`dev` sits 12 commits behind `main` with identical
-  trees** — merge commits from PRs #15–#22 that never come back down; harmless,
-  and *not* a reason to rebase. **The trap stands:** CI runs on `pull_request` and
+- **The remote, checked 2026-09-19 — re-check it, do not trust it.**
+  **[PR #24](https://github.com/kietnt4412/storm_almanac/pull/24) is MERGED and
+  green on `ee9448f`, run `35413172254`** (backend, frontend; deploy skipped),
+  where **`:app:test` executed rather than coming from cache**, so the grown
+  bundle went through `AuthoredBundlesTest` on a runner, with the snapshot-gated
+  classes skipped as ever. It merged at 01:38:06Z, **after** the run finished.
+  **This status line itself was committed after the merge and not pushed** — the
+  next session finds `dev` one commit ahead of `origin/dev`. **`dev` sits behind
+  `main` with identical trees** — merge commits that never come back down;
+  harmless, and *not* a reason to rebase. **The trap stands:** CI runs on `pull_request` and
   on push to `main` only, so **a push to `dev` with no open PR runs nothing,
   silently**. Every merge re-arms it; six times now, each caught by looking.
   **Run `gh pr list` and open the PR before trusting a push to `dev`.**
