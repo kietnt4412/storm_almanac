@@ -202,8 +202,8 @@ class GameDataSchemaTest {
     }
 
     @Test
-    @DisplayName("an upgrade graph rejects a duplicate edge between the same two states")
-    void upgradeEdgesAreUnique() throws SQLException {
+    @DisplayName("an upgrade graph holds two prices for the same move, and refuses a move to the same state")
+    void oneStepMayHaveSeveralPrices() throws SQLException {
         try (Connection db = open()) {
             String game = game(db, "upgrades");
             long version = version(db, game, 0);
@@ -214,14 +214,19 @@ class GameDataSchemaTest {
                             + " VALUES (?, 'insight-1', ?, 'insight-0', 'insight-1')",
                     version, entity);
 
-            // Two rows for the same edge would be two costs for one advance, and
-            // the planner would have no way to choose between them.
+            // A second row for the same move is the same step at another price
+            // (V9): the planner pays one of them, chosen by the solver.
+            exec(db,
+                    "INSERT INTO gamedata.upgrade (version_id, slug, entity_id, from_state, to_state)"
+                            + " VALUES (?, 'insight-1-by-token', ?, 'insight-0', 'insight-1')",
+                    version, entity);
+
             assertThatThrownBy(() -> exec(db,
                     "INSERT INTO gamedata.upgrade (version_id, slug, entity_id, from_state, to_state)"
-                            + " VALUES (?, 'insight-1-again', ?, 'insight-0', 'insight-1')",
+                            + " VALUES (?, 'insight-1-loop', ?, 'insight-1', 'insight-1')",
                     version, entity))
                     .isInstanceOf(SQLException.class)
-                    .hasMessageContaining("upgrade_edge_unique");
+                    .hasMessageContaining("upgrade_states_differ");
         }
     }
 

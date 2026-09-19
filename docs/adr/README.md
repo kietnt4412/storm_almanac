@@ -28,3 +28,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0018](0018-the-gacha-engines-answer-one-question-about-one-rarity.md) | The gacha engines answer one question about one rarity, and the trial count follows from the tolerance | Accepted |
 | [0019](0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-demanded-as-an-item.md) | A gate is a goal inside a goal, and progress is demanded as an item | Accepted |
 | [0020](0020-a-limit-that-never-resets-is-offered-whole.md) | A limit that never resets is offered whole, and the plan says so | Accepted |
+| [0021](0021-one-step-at-several-prices-is-a-choice-the-solver-makes.md) | One step at several prices is a choice the solver makes | Accepted |

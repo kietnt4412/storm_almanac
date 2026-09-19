@@ -1,0 +1,13 @@
+-- Two upgrades may now make the same move: the same entity, from the same state,
+-- to the same state. They are one step offered at two prices, and the planner
+-- pays exactly one of them, chosen by the solver.
+--
+-- FOUND BY: the first first-hand Punishing: Gray Raven bundle (N32 (4) in
+-- TRACKER.md). A Memory's Resonance is paid with any one of three currencies,
+-- read side by side on one screen. V2 refused the second row with the comment
+-- "a second row would be a duplicate cost", which was true of every game read
+-- until then and is not true of this one.
+--
+-- Loosening, not tightening: every version published before this reads the same
+-- afterwards, because none of them can hold two such rows.
+ALTER TABLE gamedata.upgrade DROP CONSTRAINT upgrade_edge_unique;

@@ -12,12 +12,14 @@ import io.stormalmanac.gamedata.Shop;
 import io.stormalmanac.gamedata.Sink;
 import io.stormalmanac.gamedata.Source;
 import io.stormalmanac.gamedata.Stage;
+import io.stormalmanac.gamedata.Upgrade;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.EnumSet;
@@ -723,6 +725,19 @@ final class EnergyMip {
                     Long.MAX_VALUE);
         }
 
+        /**
+         * Paying one of a step's several prices, which makes the one
+         * {@link Demand#choiceItem} the step is owed as. The price is the
+         * upgrade's items and its progress, so a price paid partly in EXP
+         * pulls fodder in the same way a single-priced step does.
+         */
+        static Exchange of(Upgrade price) {
+            List<ItemStack> consumes = new ArrayList<>(price.costs());
+            price.progress().forEach(p -> consumes.add(new ItemStack(Demand.progressItem(p.kind()), p.quantity())));
+            return new Exchange(price.id(), false, consumes,
+                    List.of(new ItemStack(Demand.choiceItem(price), 1)), Long.MAX_VALUE);
+        }
+
         static Exchange of(Shop shop, long purchases) {
             List<ItemStack> price = shop.price() > 0
                     ? List.of(new ItemStack(shop.currency(), shop.price()))
@@ -749,6 +764,9 @@ final class EnergyMip {
             long purchases = purchases(shop, in.at(), horizonDays);
             if (purchases > 0) exchanges.add(Exchange.of(shop, purchases));
         }
+        for (List<Upgrade> prices : severalPrices(in.definition())) {
+            prices.forEach(price -> exchanges.add(Exchange.of(price)));
+        }
         for (Sink sink : in.definition().sinks()) {
             if (!(sink instanceof Fodder rule) || rule.progress() == null) continue;
             List<Item> eligible = in.definition().items().stream()
@@ -761,6 +779,21 @@ final class EnergyMip {
             }
         }
         return exchanges;
+    }
+
+    /**
+     * Every step the game offers at more than one price: upgrades sharing an
+     * entity, a from-state and a to-state. A step with one price is paid in the
+     * demand vector and never reaches the model.
+     */
+    private static Collection<List<Upgrade>> severalPrices(GameDefinition definition) {
+        Map<ItemId, List<Upgrade>> byStep = new LinkedHashMap<>();
+        for (Sink sink : definition.sinks()) {
+            if (sink instanceof Upgrade upgrade) {
+                byStep.computeIfAbsent(Demand.choiceItem(upgrade), k -> new ArrayList<>()).add(upgrade);
+            }
+        }
+        return byStep.values().stream().filter(prices -> prices.size() > 1).toList();
     }
 
     private static int count(List<Exchange> exchanges, boolean purchases) {
@@ -951,6 +984,14 @@ final class EnergyMip {
     private static String whyNot(
             GameDefinition definition, ItemId item, Instant at, int horizonDays) {
 
+        if (Demand.isChoiceItem(item)) {
+            List<String> prices = severalPrices(definition).stream()
+                    .filter(p -> Demand.choiceItem(p.get(0)).equals(item))
+                    .flatMap(p -> p.stream().map(Upgrade::id))
+                    .toList();
+            return "it can be paid by any one of " + String.join(", ", prices)
+                    + ", and nothing available supplies any of those prices";
+        }
         if (Demand.isProgressItem(item)) {
             List<String> feeding = definition.sinks().stream()
                     .filter(s -> s instanceof Fodder f && f.progress() != null

@@ -2,6 +2,7 @@ package io.stormalmanac.planner;
 
 import static io.stormalmanac.planner.TestGame.GOLD;
 import static io.stormalmanac.planner.TestGame.GOLD_STAGE;
+import static io.stormalmanac.planner.TestGame.HERO;
 import static io.stormalmanac.planner.TestGame.INGOT;
 import static io.stormalmanac.planner.TestGame.ORE;
 import static io.stormalmanac.planner.TestGame.ORE_STAGE;
@@ -16,9 +17,12 @@ import io.stormalmanac.gamedata.Availability;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Progress;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
+import io.stormalmanac.gamedata.Sink;
+import io.stormalmanac.gamedata.Upgrade;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.Period;
@@ -46,13 +50,14 @@ class EnergyMipTest {
      * smelt   · 3 ore + 50 gold -> 1 ingot
      * forge   · 2 ingot + 100 gold -> 1 relic
      */
-    private static GameDefinition workshop() {
-        return TestGame.builder()
+    private static GameDefinition workshop(Sink... sinks) {
+        TestGame game = TestGame.builder()
                 .stage(ORE_STAGE, 10, ORE, 2.0)
                 .stage(GOLD_STAGE, 5, GOLD, 100.0)
                 .craft("smelt", List.of(stack(ORE, 3), stack(GOLD, 50)), List.of(stack(INGOT, 1)))
-                .craft("forge", List.of(stack(INGOT, 2), stack(GOLD, 100)), List.of(stack(RELIC, 1)))
-                .build();
+                .craft("forge", List.of(stack(INGOT, 2), stack(GOLD, 100)), List.of(stack(RELIC, 1)));
+        for (Sink sink : sinks) game.sink(sink);
+        return game.build();
     }
 
     /**
@@ -381,15 +386,16 @@ class EnergyMipTest {
     private static final ItemId HERO_EXP = Demand.progressItem("hero-exp");
 
     /** The workshop, plus one rule: any 3★-or-better material is worth 100 hero EXP, for 10 gold. */
-    private static GameDefinition workshopWithFodder() {
-        return TestGame.builder()
+    private static GameDefinition workshopWithFodder(Sink... sinks) {
+        TestGame game = TestGame.builder()
                 .stage(ORE_STAGE, 10, ORE, 2.0)
                 .stage(GOLD_STAGE, 5, GOLD, 100.0)
                 .craft("smelt", List.of(stack(ORE, 3), stack(GOLD, 50)), List.of(stack(INGOT, 1)))
                 .craft("forge", List.of(stack(INGOT, 2), stack(GOLD, 100)), List.of(stack(RELIC, 1)))
                 .sink(new Fodder("feed-material", "material", new Rarity("3*", 3), "hero-exp", 100,
-                        List.of(stack(GOLD, 10))))
-                .build();
+                        List.of(stack(GOLD, 10))));
+        for (Sink sink : sinks) game.sink(sink);
+        return game.build();
     }
 
     @Test
@@ -433,6 +439,66 @@ class EnergyMipTest {
                 .hasMessageContaining("no fodder rule in this game version pays it");
     }
 
+    /** One move at two prices, over the workshop: three ingots, or one relic. */
+    private static final Upgrade BY_INGOT =
+            new Upgrade("by-ingot", HERO, "start", "resonance", List.of(stack(INGOT, 3)));
+    private static final Upgrade BY_RELIC =
+            new Upgrade("by-relic", HERO, "start", "resonance", List.of(stack(RELIC, 1)));
+    private static final ItemId RESONANCE = Demand.choiceItem(BY_INGOT);
+
+    @Test
+    @DisplayName("of a step's several prices, the one cheapest to farm is paid, and the plan names it")
+    void theCheapestPriceIsPaid() {
+        // By ingot: 3 ingots = 9 ore + 150 gold = 5 + 2 runs = 60 energy.
+        // By relic: 2 ingots + 100 gold = 6 ore + 200 gold = 3 + 2 runs = 40.
+        GameDefinition game = workshop(BY_INGOT, BY_RELIC);
+
+        EnergyMip.Outcome outcome = solve(game, Map.of(), Map.of(RESONANCE, 1));
+
+        assertThat(outcome.totalEnergy()).isEqualTo(40);
+        assertThat(outcome.conversions()).containsExactly(
+                new Conversion("by-relic", 1), new Conversion("forge", 1), new Conversion("smelt", 2));
+    }
+
+    @Test
+    @DisplayName("a price the player already holds is paid before anything is farmed for a cheaper one")
+    void aHeldPriceIsPaid() {
+        GameDefinition game = workshop(BY_INGOT, BY_RELIC);
+
+        EnergyMip.Outcome outcome = solve(game, Map.of(INGOT, 3), Map.of(RESONANCE, 1));
+
+        assertThat(outcome.totalEnergy()).isZero();
+        assertThat(outcome.conversions()).containsExactly(new Conversion("by-ingot", 1));
+    }
+
+    @Test
+    @DisplayName("a price paid in EXP pulls fodder in, the same as a step with one price")
+    void aPriceInProgressIsFed() {
+        // By gold: 2 000 gold = 20 runs = 100 energy. By EXP: 250 EXP = 3 ingots
+        // fed, which progressIsPaidByFodder prices at 60.
+        Upgrade byGold = new Upgrade("by-gold", HERO, "start", "resonance", List.of(stack(GOLD, 2000)));
+        Upgrade byExp = new Upgrade("by-exp", HERO, "start", "resonance", List.of(),
+                List.of(), List.of(new Progress("hero-exp", 250)));
+        GameDefinition game = workshopWithFodder(byGold, byExp);
+
+        EnergyMip.Outcome outcome = solve(game, Map.of(), Map.of(Demand.choiceItem(byGold), 1));
+
+        assertThat(outcome.totalEnergy()).isEqualTo(60);
+        assertThat(outcome.conversions()).containsExactly(
+                new Conversion("by-exp", 1), new Conversion("feed-material:ingot", 3), new Conversion("smelt", 3));
+    }
+
+    @Test
+    @DisplayName("a step none of whose prices can be supplied is refused, naming every price")
+    void noPayablePriceIsRefused() {
+        Upgrade a = new Upgrade("by-moonstone", HERO, "start", "resonance", List.of(stack(ItemId.of("moonstone"), 1)));
+        Upgrade b = new Upgrade("by-sunstone", HERO, "start", "resonance", List.of(stack(ItemId.of("sunstone"), 1)));
+        GameDefinition game = workshop(a, b);
+
+        assertThatThrownBy(() -> solve(game, Map.of(), Map.of(Demand.choiceItem(a), 1)))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("any one of by-moonstone, by-sunstone");
+    }
     @Test
     @DisplayName("an item nothing in the game yields is refused, and says exactly that")
     void unknownItemIsRefused() {

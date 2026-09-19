@@ -2,6 +2,7 @@ package io.stormalmanac.planner;
 
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.Goal;
+import io.stormalmanac.gamedata.Upgrade;
 import java.util.List;
 import java.util.Map;
 
@@ -69,5 +70,27 @@ public record Demand(
     /** The kind a progress item stands for; only meaningful when {@link #isProgressItem} is true. */
     public static String progressKind(ItemId item) {
         return item.value().substring(PROGRESS_PREFIX.length());
+    }
+
+    private static final String CHOICE_PREFIX = "choice:";
+
+    /**
+     * The item a step with several prices is demanded as: one of it, made by
+     * paying any one of the prices.
+     *
+     * <p>Two upgrades that take an entity from the same state to the same state
+     * are the same step offered at two prices, and which to pay depends on what
+     * the reader holds and what is cheapest to farm — the solver's question, not
+     * the resolver's. So the resolver demands one of this item and
+     * {@link EnergyMip} turns each price into a conversion that makes it, which
+     * is how progress already works. Like a progress item, <b>it is not a catalog
+     * item; ask {@link #isChoiceItem} before looking one up.</b>
+     */
+    public static ItemId choiceItem(Upgrade step) {
+        return new ItemId(CHOICE_PREFIX + step.entity().value() + "/" + step.fromState() + "/" + step.toState());
+    }
+
+    public static boolean isChoiceItem(ItemId item) {
+        return item.value().startsWith(CHOICE_PREFIX);
     }
 }

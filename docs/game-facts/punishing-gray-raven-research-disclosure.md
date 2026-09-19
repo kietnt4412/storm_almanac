@@ -979,6 +979,24 @@ needs *"Equip 6★ Resonance Skills ×12"*, presumably **six Memories × upper a
 lower** (an inference from "Upper Resonance", not read) — at 246 Score each, about **2 950 Score, or 36 runs** of Simulated
 Battlefield, if any skill counts.
 
+*(2026-09-19, twenty-eighth session:)* the first reason no longer holds.
+[ADR 0021](../adr/0021-one-step-at-several-prices-is-a-choice-the-solver-makes.md)
+lets a step have several prices and has the solver pick one. The row still waits
+for the 5★ chip item to be named, since it was read only by its icon.
+
+**The chip item is the 5★ Memory Shard** (same day). The maintainer opened its
+Item Details card from the inventory's Item tab: *"5★ Memory Shard"*, **Owned
+4300**, *"Obtained from recycling 5★ Memory Chips"*. The owned count is the one
+the Resonance screen showed beside the unnamed price, which is how the two were
+matched. It first looked like it might be the farming stage's points. It is not:
+those are Simulation Score, the third price, held 366 401. **Resonance is
+sequence 3's three rows.**
+
+*(Maintainer, same day:)* Resonance **requires neither Overclock nor level**.
+This is a report from playing, not a screen reading. It matches the bundle,
+which writes no gate on the Resonance rows. So the 90 Serum plan is not too
+cheap for want of a gate.
+
 **Cross-check:** Simulation Score read 366 425, then 366 401 — +164 for one
 doubled run, −150 for a β stack, −38 for an α stack. The shop prices and the
 run agree to the point.
