@@ -613,3 +613,378 @@ they were read off the same screen. The fixture is second-hand and is not wrong
 about any rate it was given, but it describes a banner PGR does not appear to
 run. **Left alone here** — correcting a gacha acceptance fixture is Phase 5 work
 and moves a published-rates test, not an authoring step.
+
+## 2026-09-19 — the weapon named, and the first farm route
+
+Read off the same client and account, patch "Steering By Light". Screen readings
+unless marked *(maintainer)*.
+
+**The weapon is Hear the Bell**, 6★, base ATK 50 / CRIT 25 — the base stats the
+Enhance screen showed on 2026-09-18, and confirmed by the maintainer as the weapon
+the Overclock and Harmony screens were read on. **Overclock is one step** that
+takes its level range to the maximum, 45 *(maintainer)*. Both recipes are now
+bundle rows.
+
+**The EXP fodder is Weapon Enhancer IV**, 4★ (graded on its shop tile; the card
+shows none). The card's "Owned 999" is a per-stack display cap *(maintainer)*,
+which reconciles it with the 1679 the picker read.
+
+**Simulated Battlefield — PGR's first farm stage, and it is shop-shaped.**
+
+| | |
+|---|---|
+| Serum cost | **30** a run, Auto Clear the same *(maintainer)* |
+| Open | "Open all day"; no daily run cap *(maintainer)* |
+| Yield | **164 Simulation Score** on one run, tile marked **Double** → **82** base |
+| Bonus | "Daily 2x Reward Attempts 2/10" — a limited event, 10 doubled runs a day *(maintainer)* |
+| Authority Level | 25, "Max Level Reached" — **whether it scales the score is unread** |
+
+**Simulation Score** is graded **4★** on the Battle Results tile — the first
+currency a screen has graded, so the first one the bundle can carry.
+
+**Simulation Shop**, prices per stack, **no purchase limits** on the Material
+tab *(maintainer)*:
+
+| Item | Grade | Stack | Price |
+|---|---|---|---|
+| 6★ Memory Shard | 6★ | ×10 | 46 |
+| 5★ Memory Shard | 5★ | ×25 | 41 |
+| Overclock Material Box (α) | 3★ | ×10 | 38 |
+| Overclock Material Box (β) | 4★ | ×10 | 150 |
+| Memory Enhancer IV | 4★ | ×10 | 87 |
+| Special Support Token | 4★ | ×100 | 136 |
+| Weapon Enhancer IV | 4★ | ×10 | 262 |
+
+The Memory tab sells 6★ Memory pieces one at a time (Catherine, Patton, slots
+01–06) at **613** each. The Version Limited tab, *"Time Left for Limited Item
+Redemption: 4 day(s)"*, sells the current themed character's Memory (Santiago
+01–06, 6★, **539** each), Prototype Engine (5★, **49**, *Available: 20*) and dorm
+furniture (**196**, *Available: 0*). So that tab **does** have limits;
+*(maintainer)* it usually carries the themed rate-up character's Memory, dorm
+items and affinity gifts.
+
+**Overclock Material Box (β)** — one stack of ten opened into **3 + 3 + 4** of
+three different 4★ materials, names not read; (α) is the 3★ equivalent
+*(maintainer)*. **Ten boxes gave ten items across three kinds**, which looks like
+one random material per box — unconfirmed, and it would make the box a
+probabilistic source rather than an exchange.
+
+### This corrects N30
+
+N30 dropped shops because PGR's *event* shops did not exist. **This one is
+standing, paid for in a currency a Serum stage yields**, so the route to weapon
+EXP is **30 Serum → 82 Score, and 262 Score → 10 Weapon Enhancer IV →
+3 000 EXP**. The solver needs shops for PGR after all — and it has no shops today.
+
+### The day boundary, half read
+
+The home clock shows **server time** *(maintainer)*: **00:04, Saturday 09/19**,
+while the Resources menu counted down **"Reset Time: 04:58:18"** — so the **daily
+reset is 05:00 server time**, inferred from two screens taken minutes apart.
+**The server's UTC offset is still unread**, which is what N20 needs.
+
+### Settled the same day
+
+- **The server clock is UTC**, and the **daily reset is 05:00 UTC** — 12:00 in
+  the maintainer's UTC+7 *(maintainer)*. It also checks: the home clock read
+  00:04 server time, and the session's own machine clock read 07:14 UTC+7 ten
+  minutes later. **This is N20's missing number.** Presumably the banner's
+  "10/01 06:59" is UTC as well; its *opening* time was never read, so the banner
+  still has no window.
+- **The Simulated Battlefield score is fixed** — the maintainer runs it daily —
+  and **Authority Level does not move it**: its panel lists damage buffs and
+  Super Armor per level at EXP 55 / 80 / 105 / 130 / 155 / 180 / 200 for levels
+  1–7, and *(maintainer)* affects only buffs and EXP gained. The yield is now a
+  declared one.
+- **Overclock Material Box (β) opens into a fixed split** *(maintainer)*: one
+  purchase of ten gave **4 Major Overclock Alloy, 3 Weapon Overclock Core II and
+  3 Memory Overclock Circuit II** (4★, read on the reward tile), and the tracked
+  stacks moved 644 → 648 and 379 → 382 between readings, which agrees. Written as
+  a craft over the stack of ten. The (α) box's contents are unread.
+
+## 2026-09-19 — the character, and the two upgrade axes the model cannot hold
+
+Read on **Helentine: Lacrimosa** (TBA-04) unless stated. Her menu has **Level
+Up, Promote and Skill** tabs, plus Awaken and Phylotree elsewhere.
+
+### Train (Level Up) — fodder, no side cost
+
+Lv **1 / 80**, EXP 0/20. Each Pod selected alone from Lv 1:
+
+| Pod | Grade | Owned | EXP | Estimated result |
+|---|---|---|---|---|
+| EXP Pod (M) | 3★ | 129 | **+1 000** | Lv 10 |
+| EXP Pod (L) | 4★ | 398 | **+3 000** | Lv 17 |
+| EXP Pod (XL) | 4★ | 30 | **+20 000** | Lv 37 |
+
+**No Cog cost** (maintainer; none on screen). Three `Fodder` rows, **one category
+per Pod**: L and XL share a grade and differ five-fold, so unlike weapon EXP the
+value is *not* a function of the rarity band. The three estimates are the only
+points on the level curve, so **a level goal cannot yet become an EXP demand**.
+
+### Evolve — shards, and a shop with tiered prices
+
+The Evolution screen ranks **S → SS → SSS → SSS+**, with sub-nodes inside a rank
+(SS1, SS2; one shown granting *"Phase 3 DEF +5.00, Styx Reflection Lv1"*) and an
+**Activate** button over **"Consume 2 / 9"** of her shard — so one node costs
+**9 shards** and she holds 2. *(Maintainer:)* the cost is **the character's own
+shards only**, obtained from **duplicates** or the **Phantom Pain shop**, which
+sells **30 shards per character** for **500 Phantom Pain currency in total: the
+first 10 for 100, the next 20 for 400** — 10 each, then 20 each — enough to
+reach SS.
+
+The tiered price **is** expressible: two `Shop` rows, a 10-unit cap at 10 and a
+20-unit cap at 20, and a least-cost solver buys the cheap tier first unaided.
+**What is not expressible is the cap's period** — a limit that never resets has
+no `java.time.Period`. Duplicates are a gacha outcome, so shard supply is the
+first place the gacha engines and the planner meet.
+
+### Awaken — gates, not costs
+
+Four tiers, each **Awaken Method** a set of *conditions*, not a price:
+
+| Tier | Level | BP | Also | Reward |
+|---|---|---|---|---|
+| Elementary | 35 | 1 800 | — | coating (2★) |
+| Advanced | 50 | 3 500 | — | coating (2★) |
+| Ultimate | 65 | 5 000 | **Equip 6★ Resonance Skills ×12** | portrait (4★) + **Ultima: Lacrimosa** (5★: 3 Signal Orbs at battle start) |
+| Infinitas | 80 | 6 500 | **Equip Hypertuned Resonance Skill ×12** | Halo upgrade: choose the orb colour, station in Sequence Pact (read on Liv: Limpidity) |
+
+*(Maintainer:)* the first two are cosmetic. **`Upgrade` has costs and no
+preconditions**, so none of this is a row. The real price of Ultimate is the
+twelve Resonance skills, **paid on the equipment, not the character**: a goal on
+one entity whose cost is spent on others. **BP is a derived combat stat**, which
+no planner should try to model, so an Awaken goal can at best be *"meet the
+item-denominated conditions"*.
+
+### Phylotree
+
+*(Maintainer:)* a codex, not an upgrade. Out of scope.
+
+### Settled later the same day
+
+**The level curve, bounded.** From Lv 1, **MAX on EXP Pod (XL) selects 25 —
++500 000 EXP — and reaches Lv 80 / 80.** MAX picks the fewest Pods that reach the
+cap, so **the EXP from 1 to 80 is more than 480 000 and at most 500 000**. Not
+exact yet; a level-80 goal written as 500 000 over-states it by at most 20 000.
+
+**Promote is a separate axis from Evolve** *(maintainer)*: a rank ladder, read at
+its first step — rank **PRIVATE**, one of four stars lit, preview HP +43 / ATK +8
+/ DEF +6 / CRIT +3, **gated on "Member reaches Lv.2"**, **Consume 5 000 Cogs**.
+A cost *and* a gate, like Awaken without the BP. The rest of the ladder is unread.
+
+**Skill** — the leader skill *Leader – Fading Fern*, locked, Total Level 0:
+**Unlock costs 3 Skill Points + 25 000 Cogs**. One node of a tree; the rest are
+unread.
+
+**Evolve, S → SS: 30 shards** *(maintainer)* — exactly the Phantom Pain shop's
+lifetime allowance. The node read at "Consume 2 / 9" is one of the steps inside.
+
+**Phantom Pain Scar** — the Phantom Pain shop's currency, 1 121 owned, *"Obtained
+from Phantom Pain Cage"*, **a weekly mode** that paid **56** this week
+*(maintainer)*. Not a bundle item yet: its card shows no grade.
+
+**The Simulation Shop's Material tab, second page** — no tile shows *"Available"*,
+which is how a limit displays elsewhere:
+
+| Item | Grade | Stack | Price |
+|---|---|---|---|
+| Aura Chip | 4★ | ×10 | 123 |
+| Aura Basic Unit | 4★ | ×10 | 123 |
+| **EXP Pod (L)** | 4★ | ×5 | **103** |
+| Cog Pack (XL) | 4★ | ×1 | 82 |
+| **Skill Point** | 3★ | ×15 | **69** |
+| **Cogs** | 3★ | ×1 200 | **1** |
+| Support Skill Com… (cut off) | — | — | 107 |
+| Support Overclock Bundle (S) | — | — | 67 |
+
+**Cogs are graded 3★ on their tile**, so the project's most-used currency can be a
+bundle item. With the stage, **every cost read on the character so far —
+Level Up, Promote's first step, a skill unlock — is purchasable with Simulation
+Score**, so one Serum stage and one shop cover the whole character except Evolve.
+
+### The character rows, and one number the screen and the report disagree on
+
+**Helentine: Lacrimosa was pulled at S rank** *(maintainer)*, so she is now a
+bundle entity, with three upgrade rows: Promote step 1 (5 000 Cogs), the leader
+skill unlock (3 SP + 25 000 Cogs), and one skill level — *Astral Armament*
+[Core Passive] Lv 1 → 2, **1 Skill Point + 2 000 Cogs**, read on its button.
+*(Maintainer:)* every skill level costs 1 SP + 2 000 and every unlock 3 + 25 000.
+The skill level cap is unread — another node on the same screen stands at
+**Lv 18** — so the ladder is one row, not a guessed sequence.
+
+**The EXP to Lv 80 — the screen and the report disagree.** MAX on **EXP Pod (L)**
+from Lv 1 selects **166 — +498 000 — and shows Lv 80 / 80**. MAX picks the fewest
+Pods that reach the cap, so the total is **more than 495 000 and at most
+498 000**; with the XL reading, the interval is **(495 000, 498 000]**. The
+maintainer reports **exactly 500 000**, which the L reading rules out: at
+500 000, 498 000 would not reach 80. **Recorded as the interval, not 500 000**,
+until a reading pins it (165 L, then MAX on M, bounds it to 1 000).
+
+**Phantom Pain Cage — Weekly Reward**, *"Resets weekly. Reach enough progress to
+claim."* Reward tiles grade the **Scar 3★**, which its item card does not:
+
+| Progress | Scar | Also |
+|---|---|---|
+| 30 000 | 4 | Skill Point ×3, EXP Pod (M) ×1, Cogs ×6 000 |
+| 90 000 | 5 | Major Overclock Alloy ×1, EXP Pod (M) ×1, Cogs ×6 000 |
+| 120 000 | 6 | Memory Overclock Circuit II ×1, EXP Pod (M) ×1, Cogs ×8 000 |
+| 360 000 | 8 | Weapon Overclock Core II ×1, EXP Pod (M) ×1, Cogs ×18 000 |
+| 500 000 | 10 | gold 5★ card ×10, chip 4★ ×5, Skill Point ×2 |
+| 700 000 | 3 | a character-portrait 4★ item ×1, EXP Pod (L) ×1, Cogs ×30 000 |
+| 900 000 | 5 | Cogs ×40 000 |
+| 1 000 000 | 6 | gold 5★ card ×15, chip 4★ ×5, Skill Point ×2 |
+| 1 100 000 | 9 | Cogs ×50 000 |
+
+**The Scars sum to 56, the maximum the maintainer reports**, so no tier is
+missing between the screenshots. The gold card looks like the Black Card and
+the chip like the shop's "Support Skill Com…"; neither was opened.
+
+**Not a bundle row, deliberately.** A weekly grant sized by the player's own
+score is the same shape as the event missions: **a grant behind a capability
+gate**, which `Reward` cannot express, and writing the 56-Scar maximum would
+promise every reader the top tier. This belongs to N30's *"can this player clear
+stage N is an input"* decision, and it is now the case that forces it: **the
+Evolve route to SS is 30 shards, costing 500 Scars, which is at least nine weeks
+of a perfect Cage.**
+
+**Pinned, the same sitting:** 165 EXP Pod (L) plus MAX on EXP Pod (M) selects
+**2 M — +497 000 — and reaches Lv 80 / 80**, so 165 L + 1 M (496 000) does not.
+**The EXP from Lv 1 to 80 is in (496 000, 497 000].** Every Pod is a multiple of
+1 000, so **no combination of Pods can deliver less than 497 000 and still reach
+80**: as a demand in Pods, **497 000 is exact**, whatever the curve's last
+digits are. The maintainer's 500 000 is most likely the XL reading (25 × 20 000) —
+an upper bound, not the requirement; that is an inference, not their account.
+
+**The Promote ladder, whole.** Read one Rank Up screen at a time, PRIVATE to
+**HERO — "Max Level Reached"**:
+
+| Step | From rank | Gate | Cogs |
+|---|---|---|---|
+| 1 | Private | Lv 2 | 5 000 |
+| 2–3 | Sergeant | Lv 10, 20 | 10 000, 15 000 |
+| 4–6 | Elite | Lv 30, 40, 45 | 20 000, 25 000, 30 000 |
+| 7–9 | Task Force | Lv 50, 55, 60 | 35 000, 42 500, 50 000 |
+| 10–13 | Ace | Lv 65, 70, 75, 80 | 60 000, 70 000, 80 000, 100 000 |
+
+**Thirteen steps, Cogs only, 542 500 in total** — 453 Simulation Score at
+1 200 Cogs a point, about **six runs of Simulated Battlefield**. Step 11's gate
+was read through the weapon model overlapping it; Lv 70 fits the sequence. The
+previews also give the stat gained per step (HP 0 → 1 444 at HERO, ATK → 278,
+DEF → 212, CRIT → 128) — catalog data, not planner data, so not in the bundle.
+
+**Every gate is a level, and every level gate is below the level cap** —
+so for Promote the missing precondition costs nothing *if the plan levels the
+character first*, which a plan that reaches the goal must do anyway. The gate
+only matters for a partial plan.
+
+**Skill levels — the report corrected by the screens.** The maintainer reported
+every skill level at 1 SP + 2 000 Cogs. Three readings say otherwise:
+
+| Skill | Step | Skill Points | Cogs |
+|---|---|---|---|
+| Astral Armament [Core Passive] | 1 → 2 | 1 | 2 000 |
+| Delusional Spin [Red Orb] | 2 → 3 | 1 | 3 000 |
+| Delusional Spin [Red Orb] | 3 → 4 | 1 | 4 000 |
+| a skill at Lv 1, via the upgrade-all prompt | **1 → 18 (Max)** | **44** | **206 000** |
+
+**The skill cap is 18.** Cogs climb 1 000 a level at the bottom, but that cannot
+continue: a straight climb to 18 totals 170 000 Cogs and 17 SP, against the
+prompt's 206 000 and 44, so **both costs steepen somewhere above Lv 4**, and
+the per-level curve is unread. The rows written are the three steps read one at
+a time. The 1 → 18 total is not written as a row until it is known **which
+skill** the prompt was for and whether every skill shares one curve.
+
+**Settled: one skill curve.** The level-to-max prompt on **Seeker System** at
+Lv 1 also reads **1 → 18 for 44 SP and 206 000 Cogs**, and 1 → 2 reads 1 SP +
+2 000 on Astral Armament, Seeker System, Withering Spiral and Amplifier alike.
+*(Maintainer:)* every basic, special and common-effect skill shares the curve;
+**Evolution Effect skills differ** and sit behind Evolve — *Vestige* [SS Rank
+Passive] unlocks for **2 SP + 20 000 Cogs**, its Lv 1 "Unlocked at S5 Rank",
+Lv 2 "at SS Rank". (Delusional Spin now shows Lv 18, so the account has since
+paid the curve once.)
+
+Written as **one chain per named skill**: 1→2, 2→3, 3→4 as read, then **4→18
+derived as the remainder — 41 SP and 197 000 Cogs**. Not a 1 → 18 shortcut
+beside the single steps: `DemandResolver` throws when two upgrades reach one
+state, so a shortcut would have made every goal on that skill unanswerable. Her
+blue-orb skill and a fourth basic skill were seen but not named, so they have no
+rows.
+
+**The last two skills named.** *Blight Excision* [Blue Orb] and *Link
+Dissolution* [Basic Attack], both Lv 1, both 1 SP + 2 000 for 1 → 2 — so all
+seven of her levelled skills now carry the curve. The leader skill is an unlock
+row only.
+
+**The shard is named: Inver-Shard – Lacrimosa**, 2 owned, *"Collect a sufficient
+amount to link with the Construct"*; its flavour text says **Construct Memory
+recycles into Inver-Shards**, which is the duplicate route. **Its card shows no
+grade**, so it is not a bundle item yet, and Evolve stays out with it.
+
+**Overclock Material Box (α)** — one stack of ten opened into **5 + 5 of two
+3★ items**, names not read. Two kinds where (β) gave three. By icon, one is a
+silver ore like Major Overclock Alloy's and the other a crossed pair of rods like
+Memory Overclock Circuit II's, **which would make it Minor Overclock Alloy and a
+Memory Overclock Circuit I — and no Weapon Overclock Core I**. That is a guess
+from pictures, so it is not written.
+
+**Settled — the α box, the shard's grade, the Scar's grade.** The α box's two
+items are **Minor Overclock Alloy and Memory Overclock Circuit I** — guessed from
+the icons, **confirmed by the maintainer**, not read off cards. So **nothing in
+the Simulation Shop yields Weapon Overclock Core I**, and Hear the Bell's 28 have
+no source in the bundle. The Phantom Pain shop tile grades **Inver-Shard –
+Lacrimosa 5★**: *"Available: 30"*, **10 Scars each at "66% Off" (was 30)**,
+which agrees with the maintainer's first-10-for-100. The **Scar is 3★** (blue),
+on its owned-count panel and the Cage's reward tiles. Evolve S → SS is now one
+row, 30 shards; the shop that sells them is not, because its limit never
+resets.
+
+## 2026-09-19 — Memory, read on one 6★ Memory
+
+Read on **Samantha**, a **5★** Memory (Lv 1 / 25 before Overclock) — first taken for 6★ from its frame colour, corrected by its own detail screen. *(Maintainer:)* the
+figures are the same for every Memory of its grade, and Memory takes **the same
+four Overclock materials as a weapon**.
+
+**Enhance to 45, slider on Highest** — HP 134 → 1 208, CRIT 5 → 51:
+
+| | |
+|---|---|
+| Enhancement Cost | **EXP 18 000** (fodder filters 5★ greyed / 4★ / 1-3★ / Item Material) |
+| Overclock Cost | Major Overclock Alloy **6**, Memory Overclock Circuit II **6**, Minor Overclock Alloy **7**, Memory Overclock Circuit I **10** |
+| Consume | **260 000 Cogs** |
+
+**Every one of those is purchasable with Simulation Score** — the α box yields
+Minor Alloy and Circuit I, the β box Major Alloy and Circuit II — so, unlike Hear
+the Bell, **a Memory's Overclock has a complete route**. The Memory EXP item's
+value per unit is unread.
+
+The weapon's 340 000 Cogs, read 2026-09-18 on the same kind of screen, now sits
+on Hear the Bell's Overclock row — the row that stands for the advance to 45.
+
+**Resonance — a choice of payment, and a random result.** *Upper Resonance*,
+*"Spend materials or Memories"*, then *Choose Skill*. The Token tab offers
+**one of** three prices:
+
+| Pay | Grade | Held / needed |
+|---|---|---|
+| a 5★ chip item (the 5★ Memory Shard's icon) | 5★ | 4 300 / **150** |
+| Special Support Token | 4★ | 7 716 / **234** |
+| **Simulation Score** | 4★ | 366 401 / **246** |
+
+with Memory and Item tabs as further alternatives. *(Maintainer:)* the skill
+received is **random**. **Not a row, for two reasons**: three prices for one
+state is exactly the choice `DemandResolver` refuses, and a random skill is the
+probabilistic-goal shape N30 dropped. **It matters anyway**: Awaken Ultimate
+needs *"Equip 6★ Resonance Skills ×12"*, presumably **six Memories × upper and
+lower** (an inference from "Upper Resonance", not read) — at 246 Score each, about **2 950 Score, or 36 runs** of Simulated
+Battlefield, if any skill counts.
+
+**Cross-check:** Simulation Score read 366 425, then 366 401 — +164 for one
+doubled run, −150 for a β stack, −38 for an α stack. The shop prices and the
+run agree to the point.
+
+**Memory EXP settled.** One **Memory Enhancer IV** (4★) reads *"Obtained EXP
+300"*, estimated Lv 9 — the weapon's figure exactly, as the maintainer said.
+Its card's "Owned 999" is the stack cap; the picker read 1 096. **Samantha** is
+now a bundle entity with her Overclock row, and Memory Enhancer IV a fodder rule
+with a Simulation Shop row (10 for 87).

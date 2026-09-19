@@ -1084,6 +1084,34 @@ solver cannot reach.
 
 ---
 
+### Done 2026-09-19 (twenty-fourth session) — N27
+
+- [x] ~~**N27 — Finish the first PGR bundle. What it could not hold is the next
+      reading order.**~~ Done 2026-09-19. The entry as it stood, verbatim:
+      Draft 0 is ingested and awaits the approval, which is one
+      command and is the maintainer's: `--gamedata=publish punishing-gray-raven 0`.
+      **Still to read:** the **weapon's name**, all that stands between the note's
+      Overclock recipe (16/16/20/28) and Harmony cost (25 Accelerators) and a
+      bundle row — *the cheapest gap in the project*; the **fodder item's name**,
+      without which the authored fodder rule is inert; the **Memory** system
+      entirely; and the costs behind the character's four axes. **Block 4, the
+      timed authoring pass, was cut**, so the cost of sourcing a patch stays
+      unmeasured and any later claim that one is affordable is an estimate with
+      nothing behind it. **Ask how each value was read before recording it** — a
+      relayed web-search answer and a screen reading look identical in chat.
+
+      **Exit met:** every item on that list was read and is a bundle row with a
+      named provenance — Hear the Bell (Overclock with its 340 000 Cogs, Harmony
+      Lv 1), Weapon Enhancer IV and Memory Enhancer IV (300 EXP each), Samantha's
+      Overclock, and Helentine: Lacrimosa's Level (three Pod fodder rules),
+      Promote (13 steps, 542 500 Cogs), seven skills to 18, the leader and
+      Vestige unlocks, and Evolve to SS (30 Inver-Shards). Plus what the list
+      did not foresee: **Simulated Battlefield and nine Simulation Shop rows**,
+      which are how PGR is farmed. **Not met by this session, by design:** the
+      publish, which is the maintainer's, and which needs a re-ingest first
+      because the file changed after draft 0 was ingested. Awaken and the
+      Phantom Pain shop were read and **refused by the format** — now **N32**.
+
 ## Closed phases, in full
 
 The live tracker keeps each phase's exit criterion, its status and the
@@ -2542,6 +2570,8 @@ verbatim. **The ledger's conclusion, after six failures and one success:
 trimming cannot beat a document that has to absorb every session's findings.
 Rewrite a section instead.**
 
+**549 → 551 → 549 on 2026-09-19 (twenty-fourth).** N27 left and N32 arrived at roughly the same length; one line over, closed by tightening N30 and the Phase 4 paragraph rather than dropping anything, and the index line brings it to 550. The rewrite is holding, one session in.
+
 ---
 
 ## Session log
@@ -2554,6 +2584,53 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-19 (twenty-fourth) — N27 done: PGR is farmed through a shop, and the
+bundle grew from nine facts to a character.** The maintainer read the client
+screen by screen for one sitting, and every value was asked after — screen or
+report — before it was written. What landed is in N27's archive entry; what
+matters for the next session is below.
+
+- **PGR's farm is a shop, which reverses half of the twenty-second session's
+  N30 rescope.** Events have no shops, but **Simulated Battlefield** (30 Serum,
+  82 Simulation Score, fixed, no daily cap; a 2× event was running and was
+  divided out) feeds a **standing Simulation Shop** that sells every Level,
+  Promote, skill and Memory material the bundle names, with no purchase limits.
+  Promote to HERO is 542 500 Cogs — about six runs. **Without shops in the
+  solver, the bundle plans nothing.**
+- **Screens overruled the maintainer twice and this session once, each caught
+  by asking rather than choosing.** Skill levels do not all cost 1 SP + 2 000
+  (they climb; 1 → 18 is 44 SP + 206 000 on the upgrade-all prompt); EXP to Lv
+  80 is not 500 000 (165 L + 2 M reaches it: **497 000 is exact in Pods**); and a
+  Memory *this session* took for 6★ from its frame is **5★** on its own screen. The maintainer
+  was right about every structural claim — Overclock is one step, Authority
+  Level does not move the score, the α and β boxes are fixed splits.
+- **Currencies can be graded after all — on tiles, not cards.** Item cards
+  show no stars; shop and reward tiles do. Cogs 3★, Simulation Score 4★,
+  Phantom Pain Scar 3★. That takes most of the sting out of N28's rarity
+  question.
+- **The day boundary is read: server time is UTC, reset 05:00 UTC.** The home
+  clock read 00:04 server time; this machine read 07:14 UTC+7 ten minutes later.
+  That is **N20**'s number.
+- **The format refused five shapes, now N32:** upgrade preconditions (every
+  Promote step, Vestige, all of Awaken), an EXP demand for a level goal, a
+  shop limit that never resets (30 shards), several prices for one state
+  (Memory Resonance — and `DemandResolver` throws on a second route, which is
+  also why skills are one chain with a derived **4 → 18 remainder** rather
+  than a 1 → 18 shortcut), and a grant sized by the player's score (the weekly
+  Cage, 0–56 Scars, which sum to exactly 56 across its tiers).
+- **A cross-check worth copying:** Simulation Score went 366 425 → 366 401,
+  which is +164 for one doubled run, −150 and −38 for the two box stacks. The
+  shop prices and the run agree to the point.
+- **Two slips of this session's own, both caught before a test ran green on
+  them:** an awk `-v` with a Windows path silently inserted no rows while their
+  provenance mappings went in — `AuthoredBundlesTest` failed on mappings naming
+  no fact, which is a check nobody had written down it made; and two edits left
+  a placeholder id and a duplicate entity in the file, removed by reading back.
+- **Not verified:** `--gamedata=preview` needs Postgres, which was not up; the
+  bundle is proven parseable and publishable by `AuthoredBundlesTest`, not
+  previewed or re-ingested. Block 4 stays cut, so this sitting is **not** a
+  measurement of what sourcing a patch costs, though it is the nearest thing.
 
 **2026-09-18 (twenty-third) — the first first-hand bundle exists, and it is nine
 facts wide.** N27's other half: the 545-line PGR reading turned into

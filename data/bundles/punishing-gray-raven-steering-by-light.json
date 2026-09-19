@@ -14,11 +14,21 @@
     "",
     "It is small, and the smallness is the finding. What was read and could not",
     "be written down is listed under 'what is missing and why' in the note; the",
-    "three that cost the most are the Themed Construct pool (PityRule.hardAt is",
+    "three that cost the most were the Themed Construct pool (PityRule.hardAt is",
     "an int and PGR draws it uniformly 80-100 per cycle), the weapon Overclock",
     "and Harmony recipes (read off a weapon whose name was not recorded, and an",
     "Upgrade must name its entity), and the currencies (Item.rarity is required",
     "and a currency is not graded on any screen that was read).",
+    "",
+    "2026-09-19: the weapon was named (Hear the Bell), so its recipes are rows;",
+    "the fodder item was named; and the first stage and shop row landed. One",
+    "currency, Simulation Score, turned out to be graded on a screen after all.",
+    "Later the same day: Cogs and Phantom Pain Scar were graded on shop and",
+    "reward tiles too, and Helentine: Lacrimosa went in whole except Awaken,",
+    "whose tiers are conditions rather than costs. Still refused: the Themed",
+    "Construct pool, every level and rank gate (Upgrade has no preconditions),",
+    "the Phantom Pain shop (a limit that never resets), score-scaled weekly",
+    "grants, and the currencies no screen has graded (Black and Rainbow Cards).",
     "",
     "PGR records patches by name rather than number, so the label is a name."
   ],
@@ -44,13 +54,101 @@
       "origin": "OBSERVED_IN_GAME",
       "detail": "The weapon Enhancement, Overclock and Harmony screens and the item detail cards behind them, same client, same patch, same account, same sitting. The Enhancement Cost picker was read with exactly one unit of fodder selected, which is where 'Obtained EXP 300' comes from.",
       "observedOn": "2026-09-18"
+    },
+    {
+      "id": "equipment-and-resource-screens",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "The Select Equipment screen naming Hear the Bell (6-star, ATK 50 / CRIT 25, the same base stats the 2026-09-18 Enhance screen showed), the Weapon Enhancer IV item card, the Resources menu, the Simulated Battlefield stage screen and one run's Battle Results, the Simulation Score item card, the Simulation Shop's Material (both pages), Memory and Version Limited tabs, the reward screen from opening one stack of Overclock Material Box (beta), the Authority Level panel, and the Major Overclock Alloy, Weapon Overclock Core II and Memory Overclock Circuit II item cards. Same client and account, patch \"Steering By Light\". The run was read during a 2x event and its score halved on the maintainer's report that the event doubles it; the result tile itself is marked 'Double'. That the score is fixed per run and unmoved by Authority Level, and that the box opens into a fixed split, are the maintainer's reports from playing daily.",
+      "observedOn": "2026-09-19"
+    },
+    {
+      "id": "character-screens",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "Helentine: Lacrimosa's Level Up screen at Lv 1 / 80 with one EXP Pod (M), (L) and (XL) selected in turn, her Evolution screen, and her four Awaken tiers; Liv: Limpidity's Infinitas orb-colour screen and the Ultima: Lacrimosa item card; the Memory Samantha's detail, Enhance (to 45) and Resonance screens, and the Memory Enhancement Cost picker with one Memory Enhancer IV selected; the Inver-Shard - Lacrimosa and Phantom Pain Scar cards and the Phantom Pain shop's shard tile. Same client and account, patch \"Steering By Light\". Also her Promote tab at every step from PRIVATE to HERO and her Skill screens (the leader skill's Unlock, the core passive's Level Up). That Level Up has no Cog cost, that she was pulled at S rank, and that every skill unlock costs the same as the one read are the maintainer's reports; their report that every skill level costs the same was contradicted by the Delusional Spin screens and the 1 -> 18 upgrade prompt, and is not relied on.",
+      "observedOn": "2026-09-19"
     }
   ],
   "sourcedBy": "weapon-upgrade-screens",
   "factProvenance": {
     "entity:selena-pianissimo": "research-pool-panels",
     "entity:karenina-effulgence": "research-pool-panels",
-    "banner:pgr-selena-pianissimo": "research-pool-panels"
+    "banner:pgr-selena-pianissimo": "research-pool-panels",
+    "entity:hear-the-bell": "equipment-and-resource-screens",
+    "item:weapon-enhancer-iv": "equipment-and-resource-screens",
+    "item:simulation-score": "equipment-and-resource-screens",
+    "stage:simulated-battlefield": "equipment-and-resource-screens",
+    "shop:simulation-shop-weapon-enhancer-iv": "equipment-and-resource-screens",
+    "item:memory-overclock-circuit-ii": "equipment-and-resource-screens",
+    "item:overclock-material-box-beta": "equipment-and-resource-screens",
+    "shop:simulation-shop-overclock-material-box-beta": "equipment-and-resource-screens",
+    "craft:open-overclock-material-box-beta": "equipment-and-resource-screens",
+    "item:exp-pod-m": "character-screens",
+    "item:exp-pod-l": "character-screens",
+    "item:exp-pod-xl": "character-screens",
+    "fodder:character-exp-pod-m": "character-screens",
+    "fodder:character-exp-pod-l": "character-screens",
+    "fodder:character-exp-pod-xl": "character-screens",
+    "item:cogs": "equipment-and-resource-screens",
+    "item:skill-point": "equipment-and-resource-screens",
+    "shop:simulation-shop-exp-pod-l": "equipment-and-resource-screens",
+    "shop:simulation-shop-cogs": "equipment-and-resource-screens",
+    "shop:simulation-shop-skill-point": "equipment-and-resource-screens",
+    "entity:helentine-lacrimosa": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-1": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-2": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-3": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-4": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-5": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-6": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-7": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-8": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-9": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-10": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-11": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-12": "character-screens",
+    "upgrade:helentine-lacrimosa-promote-13": "character-screens",
+    "upgrade:helentine-lacrimosa-leader-skill-unlock": "character-screens",
+    "upgrade:helentine-lacrimosa-astral-armament-2": "character-screens",
+    "upgrade:helentine-lacrimosa-astral-armament-3": "character-screens",
+    "upgrade:helentine-lacrimosa-astral-armament-4": "character-screens",
+    "upgrade:helentine-lacrimosa-astral-armament-18": "character-screens",
+    "upgrade:helentine-lacrimosa-seeker-system-2": "character-screens",
+    "upgrade:helentine-lacrimosa-seeker-system-3": "character-screens",
+    "upgrade:helentine-lacrimosa-seeker-system-4": "character-screens",
+    "upgrade:helentine-lacrimosa-seeker-system-18": "character-screens",
+    "upgrade:helentine-lacrimosa-delusional-spin-2": "character-screens",
+    "upgrade:helentine-lacrimosa-delusional-spin-3": "character-screens",
+    "upgrade:helentine-lacrimosa-delusional-spin-4": "character-screens",
+    "upgrade:helentine-lacrimosa-delusional-spin-18": "character-screens",
+    "upgrade:helentine-lacrimosa-withering-spiral-2": "character-screens",
+    "upgrade:helentine-lacrimosa-withering-spiral-3": "character-screens",
+    "upgrade:helentine-lacrimosa-withering-spiral-4": "character-screens",
+    "upgrade:helentine-lacrimosa-withering-spiral-18": "character-screens",
+    "upgrade:helentine-lacrimosa-amplifier-2": "character-screens",
+    "upgrade:helentine-lacrimosa-amplifier-3": "character-screens",
+    "upgrade:helentine-lacrimosa-amplifier-4": "character-screens",
+    "upgrade:helentine-lacrimosa-amplifier-18": "character-screens",
+    "upgrade:helentine-lacrimosa-blight-excision-2": "character-screens",
+    "upgrade:helentine-lacrimosa-blight-excision-3": "character-screens",
+    "upgrade:helentine-lacrimosa-blight-excision-4": "character-screens",
+    "upgrade:helentine-lacrimosa-blight-excision-18": "character-screens",
+    "upgrade:helentine-lacrimosa-link-dissolution-2": "character-screens",
+    "upgrade:helentine-lacrimosa-link-dissolution-3": "character-screens",
+    "upgrade:helentine-lacrimosa-link-dissolution-4": "character-screens",
+    "upgrade:helentine-lacrimosa-link-dissolution-18": "character-screens",
+    "item:overclock-material-box-alpha": "equipment-and-resource-screens",
+    "item:memory-overclock-circuit-i": "equipment-and-resource-screens",
+    "shop:simulation-shop-overclock-material-box-alpha": "equipment-and-resource-screens",
+    "craft:open-overclock-material-box-alpha": "equipment-and-resource-screens",
+    "item:inver-shard-lacrimosa": "character-screens",
+    "item:phantom-pain-scar": "character-screens",
+    "upgrade:helentine-lacrimosa-evolve-ss": "character-screens",
+    "item:memory-enhancer-iv": "character-screens",
+    "fodder:memory-exp-4-star": "character-screens",
+    "shop:simulation-shop-memory-enhancer-iv": "equipment-and-resource-screens",
+    "entity:samantha": "character-screens",
+    "upgrade:samantha-overclock-1": "character-screens",
+    "upgrade:helentine-lacrimosa-vestige-unlock": "character-screens"
   },
 
   "items": [
@@ -83,6 +181,102 @@
       "displayName": "Harmony Accelerator",
       "rarity": { "label": "6*", "rank": 6 },
       "category": "harmony-material"
+    },
+    {
+      "_comment": "Four stars from its Simulation Shop tile; the item card itself shows no grade. The card's 'Owned 999' is a display cap per stack, not the holding — the maintainer reports stacks split at 999, which is how the 2026-09-18 picker read 1679.",
+      "id": "weapon-enhancer-iv",
+      "displayName": "Weapon Enhancer IV",
+      "rarity": { "label": "4*", "rank": 4 },
+      "category": "weapon-exp-fodder-4-star"
+    },
+    {
+      "_comment": "The first currency this bundle can carry, because it is the first one a screen graded: four stars on the Battle Results tile. The item card itself shows no grade.",
+      "id": "simulation-score",
+      "displayName": "Simulation Score",
+      "rarity": { "label": "4*", "rank": 4 },
+      "category": "currency"
+    },
+    {
+      "_comment": "Four stars from its tile on the box-opening reward screen. Its card says 'Useful for high-rank Memory'.",
+      "id": "memory-overclock-circuit-ii",
+      "displayName": "Memory Overclock Circuit II",
+      "rarity": { "label": "4*", "rank": 4 },
+      "category": "overclock-material"
+    },
+    {
+      "_comment": "Four stars from its Simulation Shop tile. A box, not a material: nothing consumes it except the craft that opens it.",
+      "id": "overclock-material-box-beta",
+      "displayName": "Overclock Material Box (β)",
+      "rarity": { "label": "4*", "rank": 4 },
+      "category": "material-box"
+    },
+    {
+      "_comment": "Three stars from its Simulation Shop tile.",
+      "id": "overclock-material-box-alpha",
+      "displayName": "Overclock Material Box (α)",
+      "rarity": { "label": "3*", "rank": 3 },
+      "category": "material-box"
+    },
+    {
+      "_comment": "Four stars from its Simulation Shop tile and its tiles on the Memory Enhancement Cost picker. Its card's 'Owned 999' is the per-stack display cap; the picker read 1 096.",
+      "id": "memory-enhancer-iv",
+      "displayName": "Memory Enhancer IV",
+      "rarity": { "label": "4*", "rank": 4 },
+      "category": "memory-exp-fodder-4-star"
+    },
+    {
+      "_comment": "Three stars from its tile on the alpha box's reward screen. Named from its icon and confirmed by the maintainer, not read off its card.",
+      "id": "memory-overclock-circuit-i",
+      "displayName": "Memory Overclock Circuit I",
+      "rarity": { "label": "3*", "rank": 3 },
+      "category": "overclock-material"
+    },
+    {
+      "_comment": "Five stars from its Phantom Pain shop tile; the item card shows none. Its card says Construct Memory recycles into Inver-Shards, which is the duplicate route.",
+      "id": "inver-shard-lacrimosa",
+      "displayName": "Inver-Shard - Lacrimosa",
+      "rarity": { "label": "5*", "rank": 5 },
+      "category": "construct-shard"
+    },
+    {
+      "_comment": "Three stars (blue) on the Phantom Pain Cage's weekly reward tiles and on its own owned-count panel; the item card shows none. Earned from the weekly Cage, up to 56 a week by score; spent in the Phantom Pain shop, whose shard rows the format cannot hold yet.",
+      "id": "phantom-pain-scar",
+      "displayName": "Phantom Pain Scar",
+      "rarity": { "label": "3*", "rank": 3 },
+      "category": "currency"
+    },
+    {
+      "_comment": "Character EXP. Each Pod size gets a category of its own because L and XL are both four stars and worth different amounts, so for character EXP the grade does not decide the value the way it does for weapon fodder.",
+      "id": "exp-pod-m",
+      "displayName": "EXP Pod (M)",
+      "rarity": { "label": "3*", "rank": 3 },
+      "category": "character-exp-pod-m"
+    },
+    {
+      "id": "exp-pod-l",
+      "displayName": "EXP Pod (L)",
+      "rarity": { "label": "4*", "rank": 4 },
+      "category": "character-exp-pod-l"
+    },
+    {
+      "id": "exp-pod-xl",
+      "displayName": "EXP Pod (XL)",
+      "rarity": { "label": "4*", "rank": 4 },
+      "category": "character-exp-pod-xl"
+    },
+    {
+      "_comment": "Three stars from its Simulation Shop tile (x1200). The second currency a screen has graded, after Simulation Score.",
+      "id": "cogs",
+      "displayName": "Cogs",
+      "rarity": { "label": "3*", "rank": 3 },
+      "category": "currency"
+    },
+    {
+      "_comment": "Three stars from its Simulation Shop tile. Spent with Cogs to unlock a skill: 3 and 25 000 for Helentine: Lacrimosa's leader skill.",
+      "id": "skill-point",
+      "displayName": "Skill Point",
+      "rarity": { "label": "3*", "rank": 3 },
+      "category": "skill-material"
     }
   ],
 
@@ -99,6 +293,27 @@
       "displayName": "Karenina: Effulgence",
       "kind": "character",
       "rarity": { "label": "S", "rank": 3 }
+    },
+    {
+      "_comment": "The weapon the 2026-09-18 Overclock and Harmony screens were read on, named on 2026-09-19 and confirmed by the maintainer. Six stars from its equipment tile; a weapon's grade is stars, not the S / A / B of a construct.",
+      "id": "hear-the-bell",
+      "displayName": "Hear the Bell",
+      "kind": "weapon",
+      "rarity": { "label": "6*", "rank": 6 }
+    },
+    {
+      "_comment": "Pulled at S rank (maintainer). The character every Level Up, Promote, Evolve, Skill and Awaken screen in this bundle was read on.",
+      "id": "helentine-lacrimosa",
+      "displayName": "Helentine: Lacrimosa",
+      "kind": "character",
+      "rarity": { "label": "S", "rank": 3 }
+    },
+    {
+      "_comment": "A Memory, five stars on its own detail screen (Lv 1 / 25 before Overclock). Every Memory figure in this bundle was read on it; the maintainer reports the figures are the same for every Memory of its grade.",
+      "id": "samantha",
+      "displayName": "Samantha",
+      "kind": "memory",
+      "rarity": { "label": "5*", "rank": 5 }
     }
   ],
 
@@ -157,10 +372,10 @@
         "on that screen imply the value moves with the band. Only the 4* figure",
         "was read, so saying 'four stars and above give 300' would over-claim.",
         "",
-        "No item in this bundle carries that category yet, so the rule is inert.",
-        "That is also read rather than decided: the fodder stack's own item name",
-        "was not recorded, and inventing one to hang the rule on would be the",
-        "laundering ADR 0015 exists to stop.",
+        "Weapon Enhancer IV carries that category since 2026-09-19, when its",
+        "name was read; before then the rule was inert rather than hung on an",
+        "invented item. The 4-star weapons the picker also offers are not items",
+        "here, so feeding a weapon is still outside the model.",
         "",
         "costs is empty: the 340 000 Cogs on that screen was the side cost of the",
         "whole 45-level enhancement, not a per-unit price."
@@ -170,12 +385,588 @@
       "minimumRarity": { "label": "4*", "rank": 4 },
       "progressPerUnit": 300,
       "costs": []
+    },
+    {
+      "_comment": "Memory EXP: one Memory Enhancer IV reads 'Obtained EXP 300' (estimated Lv 9) on the Memory Enhancement Cost picker — the same as the weapon's 4-star fodder, as the maintainer reports. Its own category, because it only feeds Memories.",
+      "id": "memory-exp-4-star",
+      "consumesCategory": "memory-exp-fodder-4-star",
+      "minimumRarity": { "label": "4*", "rank": 4 },
+      "progressPerUnit": 300,
+      "costs": []
+    },
+    {
+      "_comment": [
+        "Character Level Up, read on Helentine: Lacrimosa at Lv 1 / 80 with one",
+        "Pod of each size selected in turn: M reads +1000 (estimated Lv 10), L",
+        "+3000 (Lv 17), XL +20000 (Lv 37). No Cog or other side cost shows, and",
+        "the maintainer confirms there is none. The level curve itself is not",
+        "read beyond those three estimates, so a level goal cannot yet be turned",
+        "into an EXP demand."
+      ],
+      "id": "character-exp-pod-m",
+      "consumesCategory": "character-exp-pod-m",
+      "minimumRarity": { "label": "3*", "rank": 3 },
+      "progressPerUnit": 1000,
+      "costs": []
+    },
+    {
+      "id": "character-exp-pod-l",
+      "consumesCategory": "character-exp-pod-l",
+      "minimumRarity": { "label": "4*", "rank": 4 },
+      "progressPerUnit": 3000,
+      "costs": []
+    },
+    {
+      "id": "character-exp-pod-xl",
+      "consumesCategory": "character-exp-pod-xl",
+      "minimumRarity": { "label": "4*", "rank": 4 },
+      "progressPerUnit": 20000,
+      "costs": []
     }
   ],
 
-  "stages": [],
-  "crafts": [],
-  "shops": [],
+  "stages": [
+    {
+      "_comment": [
+        "30 Serum a run, open all day, no daily cap on runs (maintainer). One run",
+        "read: 164 Simulation Score on a tile marked 'Double', during an event",
+        "granting 10 doubled runs a day, so 82 is the base yield.",
+        "",
+        "Declared rather than sampled, so no sampledRuns: the maintainer runs it",
+        "daily and reports the score fixed, and Authority Level (its panel read:",
+        "damage buffs and Super Armor, EXP 55 / 80 / 105 ... per level) does not",
+        "move the score per run. The doubling is an event, not the stage."
+      ],
+      "id": "simulated-battlefield",
+      "displayName": "Simulated Battlefield",
+      "energyCost": 30,
+      "drops": [
+        { "item": "simulation-score", "expectedYield": 82 }
+      ]
+    }
+  ],
+  "crafts": [
+    {
+      "_comment": [
+        "Opening a stack of ten Overclock Material Box (beta): one purchase",
+        "opened into 4 Major Overclock Alloy, 3 Weapon Overclock Core II and",
+        "3 Memory Overclock Circuit II, and the two already-tracked stacks moved",
+        "644 -> 648 and 379 -> 382 between readings, which agrees. The split is",
+        "fixed per purchase (maintainer). Written per ten because the purchase is",
+        "the unit read: per box it would be 0.4 / 0.3 / 0.3, which no one box gives."
+      ],
+      "id": "open-overclock-material-box-beta",
+      "consumes": [
+        { "item": "overclock-material-box-beta", "quantity": 10 }
+      ],
+      "produces": [
+        { "item": "major-overclock-alloy", "quantity": 4 },
+        { "item": "weapon-overclock-core-ii", "quantity": 3 },
+        { "item": "memory-overclock-circuit-ii", "quantity": 3 }
+      ]
+    },
+    {
+      "_comment": [
+        "Opening a stack of ten Overclock Material Box (alpha): 5 + 5 of two",
+        "3-star items. The reward screen shows icons only; that they are Minor",
+        "Overclock Alloy and Memory Overclock Circuit I was guessed from the",
+        "icons and confirmed by the maintainer. So the alpha box gives NO Weapon",
+        "Overclock Core I, and Hear the Bell's 28 of it have no source here."
+      ],
+      "id": "open-overclock-material-box-alpha",
+      "consumes": [
+        { "item": "overclock-material-box-alpha", "quantity": 10 }
+      ],
+      "produces": [
+        { "item": "minor-overclock-alloy", "quantity": 5 },
+        { "item": "memory-overclock-circuit-i", "quantity": 5 }
+      ]
+    }
+  ],
+  "shops": [
+    {
+      "_comment": [
+        "Material Shop tab: 10 Weapon Enhancer IV for 262 Simulation Score, the",
+        "price covering the whole stack, and no purchase limit (maintainer), so",
+        "periodLimit is 0 and the period is inert. With the stage above, the",
+        "route is 30 Serum -> 82 Score, and 262 Score -> 10 x 300 EXP.",
+        "",
+        "The shop's other rows were read and are left out on purpose: the",
+        "Overclock Material Boxes open into three unnamed 4-star materials",
+        "(3 + 3 + 4 from one stack of ten), and the Memory and Memory Shard rows",
+        "feed a system this bundle does not have yet."
+      ],
+      "id": "simulation-shop-weapon-enhancer-iv",
+      "currency": "simulation-score",
+      "price": 262,
+      "offer": { "item": "weapon-enhancer-iv", "quantity": 10 },
+      "periodLimit": 0,
+      "period": "P1D"
+    },
+    {
+      "_comment": "Material Shop tab: 10 Overclock Material Box (beta) for 150 Simulation Score, no purchase limit (maintainer). What the ten open into is the craft above. The 3-star (alpha) box, 38 for ten, is left out until one is opened.",
+      "id": "simulation-shop-overclock-material-box-beta",
+      "currency": "simulation-score",
+      "price": 150,
+      "offer": { "item": "overclock-material-box-beta", "quantity": 10 },
+      "periodLimit": 0,
+      "period": "P1D"
+    },
+    {
+      "_comment": "Material Shop tab: 10 Overclock Material Box (alpha) for 38 Simulation Score, no limit shown.",
+      "id": "simulation-shop-overclock-material-box-alpha",
+      "currency": "simulation-score",
+      "price": 38,
+      "offer": { "item": "overclock-material-box-alpha", "quantity": 10 },
+      "periodLimit": 0,
+      "period": "P1D"
+    },
+    {
+      "_comment": "Material Shop tab: 10 Memory Enhancer IV for 87 Simulation Score, no limit shown.",
+      "id": "simulation-shop-memory-enhancer-iv",
+      "currency": "simulation-score",
+      "price": 87,
+      "offer": { "item": "memory-enhancer-iv", "quantity": 10 },
+      "periodLimit": 0,
+      "period": "P1D"
+    },
+    {
+      "_comment": "Material Shop, second page: 5 EXP Pod (L) for 103 Simulation Score. No 'Available: N' on the tile, which is how that shop shows a limit, and the maintainer reports none.",
+      "id": "simulation-shop-exp-pod-l",
+      "currency": "simulation-score",
+      "price": 103,
+      "offer": { "item": "exp-pod-l", "quantity": 5 },
+      "periodLimit": 0,
+      "period": "P1D"
+    },
+    {
+      "_comment": "Material Shop, second page: 1 200 Cogs for 1 Simulation Score. No limit shown.",
+      "id": "simulation-shop-cogs",
+      "currency": "simulation-score",
+      "price": 1,
+      "offer": { "item": "cogs", "quantity": 1200 },
+      "periodLimit": 0,
+      "period": "P1D"
+    },
+    {
+      "_comment": "Material Shop, second page: 15 Skill Points for 69 Simulation Score. No limit shown.",
+      "id": "simulation-shop-skill-point",
+      "currency": "simulation-score",
+      "price": 69,
+      "offer": { "item": "skill-point", "quantity": 15 },
+      "periodLimit": 0,
+      "period": "P1D"
+    }
+  ],
   "rewards": [],
-  "upgrades": []
+  "upgrades": [
+    {
+      "_comment": "One Overclock step takes Hear the Bell's level range to its maximum of 45 (maintainer); the recipe is the one read on 2026-09-18 with the slider on Highest. The 340 000 Cogs is that screen's one Consume figure for the whole Lv 1 -> 45 advance, Enhance and Overclock together; it lands on this row because this row is the advance to 45, and Cogs had no item until 2026-09-19. The EXP half (24 000) is still not a demand anything can express. States are opaque labels for 'before' and 'after'.",
+      "id": "hear-the-bell-overclock-1",
+      "entity": "hear-the-bell",
+      "fromState": "overclock-0",
+      "toState": "overclock-1",
+      "costs": [
+        { "item": "cogs", "quantity": 340000 },
+        { "item": "major-overclock-alloy", "quantity": 16 },
+        { "item": "weapon-overclock-core-ii", "quantity": 16 },
+        { "item": "minor-overclock-alloy", "quantity": 20 },
+        { "item": "weapon-overclock-core-i", "quantity": 28 }
+      ]
+    },
+    {
+      "_comment": "Samantha's Overclock, read on her Enhance screen with the slider on Highest (to 45): 6 Major Overclock Alloy, 6 Memory Overclock Circuit II, 7 Minor Overclock Alloy, 10 Memory Overclock Circuit I, and 260 000 Cogs as the screen's one Consume figure for the whole advance, as on Hear the Bell's row. The EXP half (18 000) has no demand to live in yet. Unlike the weapon's, every material here has a Simulation Shop route.",
+      "id": "samantha-overclock-1",
+      "entity": "samantha",
+      "fromState": "overclock-0",
+      "toState": "overclock-1",
+      "costs": [
+        { "item": "cogs", "quantity": 260000 },
+        { "item": "major-overclock-alloy", "quantity": 6 },
+        { "item": "memory-overclock-circuit-ii", "quantity": 6 },
+        { "item": "minor-overclock-alloy", "quantity": 7 },
+        { "item": "memory-overclock-circuit-i", "quantity": 10 }
+      ]
+    },
+    {
+      "_comment": "Harmony Lv 1 only. Levels 2 and 3 show 'Not available' and hide their cost, so they are absent rather than guessed.",
+      "id": "hear-the-bell-harmony-1",
+      "entity": "hear-the-bell",
+      "fromState": "harmony-0",
+      "toState": "harmony-1",
+      "costs": [
+        { "item": "harmony-accelerator", "quantity": 25 }
+      ]
+    },
+    {
+      "_comment": [
+        "Promote, the whole ladder, read one Rank Up screen at a time up to HERO,",
+        "'Max Level Reached': thirteen steps, Cogs only, 542 500 in total.",
+        "States count steps; the ranks they cross are PRIVATE (step 1), SERGEANT",
+        "(2-3), ELITE (4-6), TASK FORCE (7-9) and ACE (10-13), ending at HERO.",
+        "",
+        "Every step is also gated on a level — 2, 10, 20, 30, 40, 45, 50, 55, 60,",
+        "65, 70, 75, 80 — and Upgrade has costs but no preconditions, so the gates",
+        "are here in prose only. Step 11's 'Lv.70' was read through the weapon",
+        "model overlapping the text; the sequence around it agrees."
+      ],
+      "id": "helentine-lacrimosa-promote-1",
+      "entity": "helentine-lacrimosa",
+      "fromState": "promote-0",
+      "toState": "promote-1",
+      "costs": [ { "item": "cogs", "quantity": 5000 } ]
+    },
+    { "id": "helentine-lacrimosa-promote-2", "entity": "helentine-lacrimosa", "fromState": "promote-1", "toState": "promote-2", "costs": [ { "item": "cogs", "quantity": 10000 } ] },
+    { "id": "helentine-lacrimosa-promote-3", "entity": "helentine-lacrimosa", "fromState": "promote-2", "toState": "promote-3", "costs": [ { "item": "cogs", "quantity": 15000 } ] },
+    { "id": "helentine-lacrimosa-promote-4", "entity": "helentine-lacrimosa", "fromState": "promote-3", "toState": "promote-4", "costs": [ { "item": "cogs", "quantity": 20000 } ] },
+    { "id": "helentine-lacrimosa-promote-5", "entity": "helentine-lacrimosa", "fromState": "promote-4", "toState": "promote-5", "costs": [ { "item": "cogs", "quantity": 25000 } ] },
+    { "id": "helentine-lacrimosa-promote-6", "entity": "helentine-lacrimosa", "fromState": "promote-5", "toState": "promote-6", "costs": [ { "item": "cogs", "quantity": 30000 } ] },
+    { "id": "helentine-lacrimosa-promote-7", "entity": "helentine-lacrimosa", "fromState": "promote-6", "toState": "promote-7", "costs": [ { "item": "cogs", "quantity": 35000 } ] },
+    { "id": "helentine-lacrimosa-promote-8", "entity": "helentine-lacrimosa", "fromState": "promote-7", "toState": "promote-8", "costs": [ { "item": "cogs", "quantity": 42500 } ] },
+    { "id": "helentine-lacrimosa-promote-9", "entity": "helentine-lacrimosa", "fromState": "promote-8", "toState": "promote-9", "costs": [ { "item": "cogs", "quantity": 50000 } ] },
+    { "id": "helentine-lacrimosa-promote-10", "entity": "helentine-lacrimosa", "fromState": "promote-9", "toState": "promote-10", "costs": [ { "item": "cogs", "quantity": 60000 } ] },
+    { "id": "helentine-lacrimosa-promote-11", "entity": "helentine-lacrimosa", "fromState": "promote-10", "toState": "promote-11", "costs": [ { "item": "cogs", "quantity": 70000 } ] },
+    { "id": "helentine-lacrimosa-promote-12", "entity": "helentine-lacrimosa", "fromState": "promote-11", "toState": "promote-12", "costs": [ { "item": "cogs", "quantity": 80000 } ] },
+    { "id": "helentine-lacrimosa-promote-13", "entity": "helentine-lacrimosa", "fromState": "promote-12", "toState": "promote-13", "costs": [ { "item": "cogs", "quantity": 100000 } ] },
+    {
+      "_comment": [
+        "Evolve S -> SS: 30 Inver-Shard - Lacrimosa in total (maintainer); one",
+        "node inside it was read at 'Consume 2 / 9'. One row, because the nodes",
+        "between are unread. Shards come from duplicates and from the Phantom",
+        "Pain shop: 'Available: 30', 10 Phantom Pain Scar each at '66% Off' (was",
+        "30), and 20 each for the next 20 (maintainer). That shop is NOT a row:",
+        "its limit never resets, and Shop.period has no value meaning never."
+      ],
+      "id": "helentine-lacrimosa-evolve-ss",
+      "entity": "helentine-lacrimosa",
+      "fromState": "evolve-s",
+      "toState": "evolve-ss",
+      "costs": [
+        { "item": "inver-shard-lacrimosa", "quantity": 30 }
+      ]
+    },
+    {
+      "_comment": "Unlocking the leader skill, Leader - Fading Fern: 3 Skill Points and 25 000 Cogs, read on its Unlock button. The maintainer reports every skill unlock costs the same.",
+      "id": "helentine-lacrimosa-leader-skill-unlock",
+      "entity": "helentine-lacrimosa",
+      "fromState": "leader-skill-locked",
+      "toState": "leader-skill-1",
+      "costs": [
+        { "item": "skill-point", "quantity": 3 },
+        { "item": "cogs", "quantity": 25000 }
+      ]
+    },
+    {
+      "_comment": [
+        "Skill levels: one curve, written once per named skill, cap 18. Read:",
+        "1 -> 2 is 1 Skill Point + 2 000 Cogs on four skills (Astral Armament,",
+        "Seeker System, Withering Spiral, Amplifier); 2 -> 3 and 3 -> 4 are 1 +",
+        "3 000 and 1 + 4 000 on Delusional Spin; and the level-to-max prompt on",
+        "Seeker System at Lv 1 reads 1 -> 18 (Max) for 44 Skill Points and",
+        "206 000 Cogs, the same total an earlier prompt showed.",
+        "",
+        "4 -> 18 is DERIVED, not read: the prompt's total minus the three steps",
+        "read one at a time, 41 SP and 197 000 Cogs. It is one row because the",
+        "curve between 4 and 18 is unread, and because the planner refuses a",
+        "state two routes reach, so a 1 -> 18 shortcut beside the single steps",
+        "would break every goal on the skill. That every basic, special and",
+        "common-effect skill shares this curve is the maintainer's report, which",
+        "the four 1 -> 2 readings and the two identical prompts support. An",
+        "earlier report that every level costs 1 + 2 000 was contradicted by",
+        "the screens and is not used.",
+        "",
+        "All seven of her basic, special and common-effect skills are named and",
+        "here; Blight Excision [Blue Orb] and Link Dissolution [Basic Attack] read 1 -> 2 at 1 + 2 000 too."
+      ],
+      "id": "helentine-lacrimosa-astral-armament-2",
+      "entity": "helentine-lacrimosa",
+      "fromState": "astral-armament-1",
+      "toState": "astral-armament-2",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 2000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-astral-armament-3",
+      "entity": "helentine-lacrimosa",
+      "fromState": "astral-armament-2",
+      "toState": "astral-armament-3",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 3000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-astral-armament-4",
+      "entity": "helentine-lacrimosa",
+      "fromState": "astral-armament-3",
+      "toState": "astral-armament-4",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 4000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-astral-armament-18",
+      "entity": "helentine-lacrimosa",
+      "fromState": "astral-armament-4",
+      "toState": "astral-armament-18",
+      "costs": [
+        { "item": "skill-point", "quantity": 41 },
+        { "item": "cogs", "quantity": 197000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-seeker-system-2",
+      "entity": "helentine-lacrimosa",
+      "fromState": "seeker-system-1",
+      "toState": "seeker-system-2",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 2000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-seeker-system-3",
+      "entity": "helentine-lacrimosa",
+      "fromState": "seeker-system-2",
+      "toState": "seeker-system-3",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 3000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-seeker-system-4",
+      "entity": "helentine-lacrimosa",
+      "fromState": "seeker-system-3",
+      "toState": "seeker-system-4",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 4000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-seeker-system-18",
+      "entity": "helentine-lacrimosa",
+      "fromState": "seeker-system-4",
+      "toState": "seeker-system-18",
+      "costs": [
+        { "item": "skill-point", "quantity": 41 },
+        { "item": "cogs", "quantity": 197000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-delusional-spin-2",
+      "entity": "helentine-lacrimosa",
+      "fromState": "delusional-spin-1",
+      "toState": "delusional-spin-2",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 2000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-delusional-spin-3",
+      "entity": "helentine-lacrimosa",
+      "fromState": "delusional-spin-2",
+      "toState": "delusional-spin-3",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 3000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-delusional-spin-4",
+      "entity": "helentine-lacrimosa",
+      "fromState": "delusional-spin-3",
+      "toState": "delusional-spin-4",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 4000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-delusional-spin-18",
+      "entity": "helentine-lacrimosa",
+      "fromState": "delusional-spin-4",
+      "toState": "delusional-spin-18",
+      "costs": [
+        { "item": "skill-point", "quantity": 41 },
+        { "item": "cogs", "quantity": 197000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-withering-spiral-2",
+      "entity": "helentine-lacrimosa",
+      "fromState": "withering-spiral-1",
+      "toState": "withering-spiral-2",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 2000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-withering-spiral-3",
+      "entity": "helentine-lacrimosa",
+      "fromState": "withering-spiral-2",
+      "toState": "withering-spiral-3",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 3000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-withering-spiral-4",
+      "entity": "helentine-lacrimosa",
+      "fromState": "withering-spiral-3",
+      "toState": "withering-spiral-4",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 4000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-withering-spiral-18",
+      "entity": "helentine-lacrimosa",
+      "fromState": "withering-spiral-4",
+      "toState": "withering-spiral-18",
+      "costs": [
+        { "item": "skill-point", "quantity": 41 },
+        { "item": "cogs", "quantity": 197000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-amplifier-2",
+      "entity": "helentine-lacrimosa",
+      "fromState": "amplifier-1",
+      "toState": "amplifier-2",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 2000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-amplifier-3",
+      "entity": "helentine-lacrimosa",
+      "fromState": "amplifier-2",
+      "toState": "amplifier-3",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 3000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-amplifier-4",
+      "entity": "helentine-lacrimosa",
+      "fromState": "amplifier-3",
+      "toState": "amplifier-4",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 4000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-amplifier-18",
+      "entity": "helentine-lacrimosa",
+      "fromState": "amplifier-4",
+      "toState": "amplifier-18",
+      "costs": [
+        { "item": "skill-point", "quantity": 41 },
+        { "item": "cogs", "quantity": 197000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-blight-excision-2",
+      "entity": "helentine-lacrimosa",
+      "fromState": "blight-excision-1",
+      "toState": "blight-excision-2",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 2000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-blight-excision-3",
+      "entity": "helentine-lacrimosa",
+      "fromState": "blight-excision-2",
+      "toState": "blight-excision-3",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 3000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-blight-excision-4",
+      "entity": "helentine-lacrimosa",
+      "fromState": "blight-excision-3",
+      "toState": "blight-excision-4",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 4000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-blight-excision-18",
+      "entity": "helentine-lacrimosa",
+      "fromState": "blight-excision-4",
+      "toState": "blight-excision-18",
+      "costs": [
+        { "item": "skill-point", "quantity": 41 },
+        { "item": "cogs", "quantity": 197000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-link-dissolution-2",
+      "entity": "helentine-lacrimosa",
+      "fromState": "link-dissolution-1",
+      "toState": "link-dissolution-2",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 2000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-link-dissolution-3",
+      "entity": "helentine-lacrimosa",
+      "fromState": "link-dissolution-2",
+      "toState": "link-dissolution-3",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 3000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-link-dissolution-4",
+      "entity": "helentine-lacrimosa",
+      "fromState": "link-dissolution-3",
+      "toState": "link-dissolution-4",
+      "costs": [
+        { "item": "skill-point", "quantity": 1 },
+        { "item": "cogs", "quantity": 4000 }
+      ]
+    },
+    {
+      "id": "helentine-lacrimosa-link-dissolution-18",
+      "entity": "helentine-lacrimosa",
+      "fromState": "link-dissolution-4",
+      "toState": "link-dissolution-18",
+      "costs": [
+        { "item": "skill-point", "quantity": 41 },
+        { "item": "cogs", "quantity": 197000 }
+      ]
+    },
+    {
+      "_comment": "Vestige [SS Rank Passive Skill], Evolution Effect page: Unlock costs 2 Skill Points + 20 000 Cogs, read on its button. Its Lv 1 is 'Unlocked at S5 Rank' and its Lv 2 'at SS Rank' — gates on Evolve, which Upgrade cannot express, and the maintainer cannot reach them to read what follows the unlock.",
+      "id": "helentine-lacrimosa-vestige-unlock",
+      "entity": "helentine-lacrimosa",
+      "fromState": "vestige-locked",
+      "toState": "vestige-1",
+      "costs": [
+        { "item": "skill-point", "quantity": 2 },
+        { "item": "cogs", "quantity": 20000 }
+      ]
+    }
+  ]
 }
