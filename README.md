@@ -222,9 +222,10 @@ worth stating up front:
   upstream's declared yield rather than a measurement, and the plan says that on
   every solve.
 
-Shops, free income and weekday rotation are not modelled yet; items whose only
-source is one of those are refused by name for that reason. That is also why
-"fewest days" and "least energy" are currently the same plan.
+Shops, free income and weekday rotation are modelled. A shop offer is a
+purchase capped by its reset, and it is priced by the energy its currency
+costs. Fodder, EXP and level gates are not modelled yet. A goal that needs them
+is costed without that part, and the gap is tracked rather than hidden.
 
 ## The rules the build enforces
 

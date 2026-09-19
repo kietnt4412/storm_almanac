@@ -16,7 +16,7 @@ being finished with is.
   [The 826-line version it replaces is in the archive, verbatim](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression) —
   go there for anything this file no longer carries, and decide whether it is
   still operative rather than assuming it was lost.
-- Last updated: **2026-09-19** (twenty-fourth session)
+- Last updated: **2026-09-19** (twenty-fifth session)
 
 ---
 
@@ -39,14 +39,13 @@ being finished with is.
   R1999 clears at event end and PGR inherits, so **the two published games now
   disagree on the one question that enum exists to answer**; and `featured`
   finally carrying weight.
-- **N27 is done: the first PGR bundle holds one character, one weapon, one
-  Memory and the farm that feeds them, all first-hand — and nothing can plan
-  from it yet.** [The bundle](data/bundles/punishing-gray-raven-steering-by-light.json)
-  (sequence 0, **changed since it was ingested**, not published — re-ingest,
-  then the approval is the maintainer's). **PGR's farm is a shop:** one Serum
-  stage, Simulated Battlefield, pays a currency that buys every character and
-  Memory material — so **N30 needs shops after all**. What the format refused is
-  now a list, **N32**. [The reading](docs/game-facts/punishing-gray-raven-research-disclosure.md).
+- **The first-hand PGR bundle plans, since the twenty-fifth session put shops in
+  the solver.** [The bundle](data/bundles/punishing-gray-raven-steering-by-light.json)
+  (one character, weapon and Memory, **published as sequence 0** 2026-09-19) is
+  farmed through a shop: Simulated Battlefield pays Score, and Score buys every
+  material. A skill to its cap is **150 Serum** and a Memory's Overclock is
+  **240** (`AuthoredBundlePlanTest`). **Both are cheaper than the truth**,
+  because EXP and level gates are **N32**.
 - **Going first-hand on game data**, 2026-09-09
   ([ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)),
   superseding 0009 and closing Q2, Q3, F1 and F2. Kornblume is unlicensed.
@@ -72,16 +71,16 @@ being finished with is.
   2026-09-09, every image build failing in six seconds while this file called it
   verified, so **anything added beside `modules`, `adapters`, `substrate`, `app`
   needs a line there**.
-- **The remote, checked 2026-09-18 — re-check it, do not trust it.**
-  **[PR #22](https://github.com/kietnt4412/storm_almanac/pull/22) is MERGED and
-  green on `ba68d1f`, run `35353122893`**, where **`:app:test` executed rather
-  than coming from cache** — the declared `data/bundles` input working on a runner
-  too — with every other module's test task `FROM-CACHE` and the three
-  snapshot-gated classes skipped. **It merged about twenty seconds after opening,
-  before CI finished**, so green is a fact about the merged commit rather than a
-  gate anyone waited on. **`dev` sits 12 commits behind `main` with identical
-  trees** — merge commits from PRs #15–#22 that never come back down; harmless,
-  and *not* a reason to rebase. **The trap stands:** CI runs on `pull_request` and
+- **The remote, checked 2026-09-19 — re-check it, do not trust it.**
+  **[PR #24](https://github.com/kietnt4412/storm_almanac/pull/24) is MERGED and
+  green on `ee9448f`, run `35413172254`** (backend, frontend; deploy skipped),
+  where **`:app:test` executed rather than coming from cache**, so the grown
+  bundle went through `AuthoredBundlesTest` on a runner, with the snapshot-gated
+  classes skipped as ever. It merged at 01:38:06Z, **after** the run finished.
+  **`dev` was two doc commits ahead of `origin/dev` at the twenty-fifth
+  session's start, and that session's shop work was not committed by it.** **`dev` sits behind
+  `main` with identical trees** — merge commits that never come back down;
+  harmless, and *not* a reason to rebase. **The trap stands:** CI runs on `pull_request` and
   on push to `main` only, so **a push to `dev` with no open PR runs nothing,
   silently**. Every merge re-arms it; six times now, each caught by looking.
   **Run `gh pr list` and open the PR before trusting a push to `dev`.**
@@ -143,7 +142,7 @@ refused somebody else's, two devices that edit what it owns without deleting eac
 other's work, five screens a browser has driven, a page that says where its
 numbers were read, an app that renders with its server switched off, two gacha
 engines that agree about both published games — and one hand-typed bundle of the
-launch title's own data.
+launch title's own data, which the solver now plans from, incompletely.
 
 **The load-bearing claim, and it is a number to re-earn.** On **nine** benchmark
 materials the cheapest stage this project computes is the one a published guide
@@ -163,12 +162,12 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **330 tests** in full 2026-09-18, 0 skipped locally; **314 on CI**, where the 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
-| Authored game data | **One bundle, draft, first-hand** | Helentine: Lacrimosa (level, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha, one stage, 9 shop rows, 2 box crafts, 5 fodder rules — **not published**. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. Nothing else in the build reads it |
+| Backend build | **Green** | **343 tests** in full 2026-09-19, 0 skipped locally; **327 expected on CI**, where the 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
+| Authored game data | **One bundle, published, first-hand** | Helentine: Lacrimosa (level, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha, one stage, 9 shop rows, 2 box crafts, 5 fodder rules — **published as sequence 0, 87 facts, all first-hand**; a correction is now a sequence 1, never an edit. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan |
 | CI workflow | **Green, no warnings, Node 24** | Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
-| The MIP (`EnergyMip`) | **Stages, crafts and rewards** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. **No shops and no fodder**; items sourced only from those are refused by name (**N30**) |
+| The MIP (`EnergyMip`) | **Stages, crafts, shops and rewards** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. A purchase is a conversion capped at limit × *whole* periods, reported as a `Conversion`. **No fodder, no gates** (**N30**, **N32**) |
 | The time axis | **A scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). Rotation is capacity shared over *subsets* of weekday restrictions; **no variable is indexed by day**, which is why p95 held at **1 807 ms**. Weekdays are read in **UTC** — a game assumption in a game-agnostic module (**N20**) |
 | `gacha` — engines | **Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). An exact chain and 500 000 seeded trials sharing one validated `PullModel`, so both refuse the same banners for the same reasons. **51 tests, worst gap 0.110 points over 96 questions, at 2.22 standard errors.** Only the headline rarity is modelled |
 | `gacha` — income model | **Interface only, unwritable** | `projectedPulls` needs to know which item is pull currency and what a pull costs in it. **Neither `BannerModel` nor the `banner` table declares either** — **N28**, whose numbers now exist |
@@ -225,10 +224,9 @@ works". It does not mean that:
   *given* — and **multi-copy answers are too pessimistic**, because 200 Cassettes
   of the Lost buy a copy and nothing models it: at two copies the engines say 280
   pulls and the truth is 200.
-- **One character is not a catalog, and it still cannot be planned.** Its route
-  runs through shops, which `EnergyMip` refuses (**N30**), and a level goal has
-  no EXP demand to become (**N32**). Every R1999 catalog and drop number in this
-  file still comes from Kornblume.
+- **One character is not a catalog, and its plans are partial.** A level goal
+  has no EXP demand to become and no gate is checked (**N32**). Every R1999
+  catalog and drop number in this file still comes from Kornblume.
 - **Nothing is deployed** ([D1](#d1--deployment-deferred-2026-09-02); the `deploy`
   job is `if: false`), **nothing has run against a jar from a Dockerfile that
   works**, and **nothing has called the API under load** — every request loads a
@@ -265,8 +263,8 @@ Ordered. Completed ones move to
       never resets** — 30 Inver-Shards per character; (4) **one state, several
       prices** — Memory Resonance takes any of three, and `DemandResolver`
       throws on a second route by design; (5) **a grant sized by the player's
-      score** — the weekly Phantom Pain Cage, 0–56 Scars. (1) and (2) block a
-      Helentine plan; do those first, with **N30**.
+      score** — the weekly Phantom Pain Cage, 0–56 Scars. (1) and (2) are what
+      make today's Helentine plans too cheap; do those next, with **N30**'s fodder.
 - [ ] **N31 — Give `PityRule` a guarantee that is drawn, not fixed.** PGR's Themed
       Construct pool draws its wall **uniformly 80–100, redrawn on every S-Rank**;
       `hardAt` is an `int`, so **the archetype is absent from the first bundle
@@ -275,11 +273,10 @@ Ordered. Completed ones move to
       in its state, or 21 mixed chains (ADR 0018). **Do it with the fixture
       correction it implies** — `Banners.grayRavenFloating()` pairs the 1.50% base
       with 70% featured, and the client pairs 1.50% with **100%**.
-- [ ] **N30 — Put shops, fodder and the event shape into the solver (D3).**
-      **Shops are back** (2026-09-19): events have none, but the **Simulation
-      Shop** does — 30 Serum → 82 Score, and Score buys every Level, Promote,
-      skill and Memory material the bundle names. **Without shops, nothing in
-      the bundle can be planned.** **Dropped** — **probabilistic goals**: weapon
+- [ ] **N30 — Put fodder and the event shape into the solver (D3).** **Shops
+      are done** (twenty-fifth session). **Fodder is the EXP supply side of N32
+      (2)**: the Pod rules exist and nothing consumes them. **Dropped** —
+      **probabilistic goals**: weapon
       Resonance is picked; Memory Resonance is rolled but no goal names its skill.
       **Also:** a PGR event is **a one-time grant behind a capability gate inside
       a closing window** — no energy, no repetition, no yield; `EnergyMip` and
@@ -350,8 +347,8 @@ previous one's criterion is met. The "Landed" record for closed phases is
       and **N25 is closed** — five screens driven in a browser including the
       overlay, provenance read back onto the page, the PWA loaded with its server
       killed, a frontend suite in CI. **Nothing is deployed**, and since D3 the
-      launch title is PGR: its first bundle exists, and planning it needs shops
-      and fodder in the solver (**N30**, **N32**). Launch publicly even if ugly.
+      launch title is PGR: its first bundle plans, without EXP or gates
+      (**N30**, **N32**). Launch publicly even if ugly.
       **Exit:** five strangers complete a plan without asking for help, and a
       logged-in character page shows what that reader is short of. *The second
       clause is served; the first needs **B5**.*
@@ -531,6 +528,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-19 | twenty-fifth | Shops in the solver: the first-hand bundle plans, 150 and 240 Serum, worked out by hand first. Too cheap until N32 |
 | 2026-09-19 | twenty-fourth | N27 done: one character, weapon and Memory, first-hand. PGR is farmed through a shop, so N30 needs shops; five refused shapes become N32; the reset is 05:00 UTC |
 | 2026-09-18 | twenty-third | The first first-hand bundle — draft 0, nine facts — and the three *required* fields the format refused. `AuthoredBundlesTest` and the Gradle input hole it found. This file rewritten: 826 → 549 lines, 74 604 → 39 981 bytes, with the old one kept verbatim in the archive |
 | 2026-09-18 | twenty-second | PGR read off the client, and the guides wrong twice: a per-banner featured rate, and events with no shops. N28 unblocked, N30 rescoped, N31's cause found |

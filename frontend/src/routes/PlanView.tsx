@@ -212,7 +212,7 @@ function Answer({ plan, energyUnit }: { plan: Plan; energyUnit: string }) {
 
       {plan.conversions.length > 0 && (
         <section className="card">
-          <h2 className="mb-2 font-medium">What to craft</h2>
+          <h2 className="mb-2 font-medium">What to craft and buy</h2>
           <ul className="space-y-1 text-sm">
             {plan.conversions.map((conversion) => (
               <li key={conversion.step}>
