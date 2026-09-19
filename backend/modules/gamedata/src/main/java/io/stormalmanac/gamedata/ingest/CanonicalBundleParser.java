@@ -15,6 +15,7 @@ import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Game;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Progress;
 import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
@@ -318,14 +319,26 @@ public final class CanonicalBundleParser {
                 new EntityId(text(node, "entity", at + ".entity")),
                 text(node, "fromState", at + ".fromState"),
                 text(node, "toState", at + ".toState"),
-                stacks(node, "costs", at));
+                stacks(node, "costs", at),
+                strings(node, "requires"),
+                each(node, "progress", (p, pAt) -> new Progress(
+                        text(p, "kind", pAt + ".kind"),
+                        (int) integer(p, "quantity", pAt + ".quantity")), at));
     }
 
+    /**
+     * {@code progress} is optional, and the one field in this format that is
+     * optional because of data already published rather than because the
+     * common case omits it: every fodder rule published before it existed has
+     * none. Such a rule parses and feeds nothing, which is what it did then.
+     */
     private static Fodder fodder(JsonNode node, String at) {
+        JsonNode progress = node.get("progress");
         return new Fodder(
                 text(node, "id", at + ".id"),
                 text(node, "consumesCategory", at + ".consumesCategory"),
                 rarity(required(node, "minimumRarity", at + ".minimumRarity"), at + ".minimumRarity"),
+                progress == null || progress.isNull() ? null : text(node, "progress", at + ".progress"),
                 (int) integer(node, "progressPerUnit", at + ".progressPerUnit"),
                 stacks(node, "costs", at));
     }

@@ -12,6 +12,8 @@ import io.stormalmanac.common.id.EntityId;
 import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.Goal;
+import io.stormalmanac.gamedata.Progress;
+import io.stormalmanac.gamedata.Upgrade;
 import io.stormalmanac.player.Roster;
 import java.util.List;
 import java.util.Map;
@@ -140,6 +142,65 @@ class DemandResolverTest {
                 forked, at("start"), List.of(Goal.deterministic(HERO, "goal"))))
                 .isInstanceOf(UnsupportedOperationException.class)
                 .hasMessageContaining("solver's job");
+    }
+
+    /** Insight 2 is gated on level 20, and the level is paid in EXP rather than items. */
+    private static GameDefinition gated() {
+        return TestGame.builder()
+                .upgrade("i1", HERO, "insight-0", "insight-1", List.of(stack(ORE, 4)))
+                .sink(new Upgrade("i2", HERO, "insight-1", "insight-2", List.of(stack(INGOT, 2)),
+                        List.of("level-20"), List.of()))
+                .sink(new Upgrade("l1", HERO, "level-1", "level-20", List.of(stack(GOLD, 50)),
+                        List.of(), List.of(new Progress("hero-exp", 9000))))
+                .build();
+    }
+
+    @Test
+    @DisplayName("a gated step pays for the state it is gated on first, EXP included")
+    void aGateIsPaidBeforeTheStepItGates() {
+        Demand demand = resolver.resolve(gated(), at(null), List.of(Goal.deterministic(HERO, "insight-2")));
+
+        assertThat(demand.steps()).containsExactly("i1", "l1", "i2");
+        assertThat(demand.quantities()).containsOnly(
+                Map.entry(ORE, 4), Map.entry(INGOT, 2), Map.entry(GOLD, 50),
+                Map.entry(Demand.progressItem("hero-exp"), 9000));
+    }
+
+    @Test
+    @DisplayName("a gate the player already stands on costs nothing")
+    void aMetGateIsFree() {
+        Demand demand = resolver.resolve(gated(), at("level-20"), List.of(Goal.deterministic(HERO, "insight-2")));
+
+        assertThat(demand.steps()).containsExactly("i1", "i2");
+        assertThat(demand.quantityOf(Demand.progressItem("hero-exp"))).isZero();
+    }
+
+    @Test
+    @DisplayName("a gate shared with an explicit goal is paid for once")
+    void aGateAndAGoalShareTheirSteps() {
+        Demand demand = resolver.resolve(gated(), at(null), List.of(
+                Goal.deterministic(HERO, "level-20"),
+                Goal.deterministic(HERO, "insight-2")));
+
+        assertThat(demand.steps()).containsExactly("l1", "i1", "i2");
+        assertThat(demand.quantityOf(GOLD)).isEqualTo(50);
+    }
+
+    @Test
+    @DisplayName("a step gated on a state only it leads to is refused rather than looped on")
+    void aSelfGateIsRefused() {
+        GameDefinition circular = TestGame.builder()
+                .upgrade("i1", HERO, "insight-0", "insight-1", List.of(stack(ORE, 1)))
+                .sink(new Upgrade("i2", HERO, "insight-1", "insight-2", List.of(stack(ORE, 1)),
+                        List.of("insight-3"), List.of()))
+                .upgrade("i3", HERO, "insight-2", "insight-3", List.of(stack(ORE, 1)))
+                .build();
+
+        assertThatThrownBy(() -> resolver.resolve(
+                circular, at(null), List.of(Goal.deterministic(HERO, "insight-3"))))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("i2")
+                .hasMessageContaining("itself");
     }
 
     @Test

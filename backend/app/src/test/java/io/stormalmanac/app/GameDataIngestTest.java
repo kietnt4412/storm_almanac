@@ -67,6 +67,42 @@ class GameDataIngestTest extends SharedDatabaseTest {
     }
 
     @Test
+    @DisplayName("gates, progress costs and what a fodder rule feeds survive the schema")
+    void gatesAndProgressRoundTrip() throws IOException {
+        // The authored launch bundle rather than proving-ground, because it is
+        // the one bundle that has these shapes for a reason: V8 exists for it.
+        // An absent 'progress' on a fodder rule has to come back absent too,
+        // since that is what every rule published before V8 reads as.
+        GameDataBundle bundle;
+        try (InputStream in = java.nio.file.Files.newInputStream(java.nio.file.Path.of(
+                "..", "..", "data", "bundles", "punishing-gray-raven-steering-by-light.json"))) {
+            bundle = new CanonicalBundleParser().parse(in);
+        }
+        GameId pgr = bundle.game().id();
+        ingest.ingestDraft(bundle);
+        GameDataVersion published = ingest.publish(pgr, bundle.sequence());
+
+        GameDefinition loaded = definitions.findLatest(pgr).orElseThrow();
+
+        assertThat(loaded).isEqualTo(bundle.definitionApprovedAt(published.publishedAt()));
+        Upgrade lastRank = upgradeOf(loaded, "helentine-lacrimosa-promote-13");
+        assertThat(lastRank.requires()).containsExactly("level-80");
+        assertThat(upgradeOf(loaded, "helentine-lacrimosa-level-80").progress())
+                .containsExactly(new io.stormalmanac.gamedata.Progress("character-exp", 497000));
+        assertThat(loaded.sinks()).filteredOn(s -> s instanceof io.stormalmanac.gamedata.Fodder)
+                .extracting(s -> ((io.stormalmanac.gamedata.Fodder) s).progress())
+                .containsOnly("weapon-exp", "memory-exp", "character-exp");
+    }
+
+    private static Upgrade upgradeOf(GameDefinition definition, String id) {
+        return definition.sinks().stream()
+                .filter(s -> s instanceof Upgrade u && u.id().equals(id))
+                .map(Upgrade.class::cast)
+                .findFirst()
+                .orElseThrow();
+    }
+
+    @Test
     @DisplayName("a drop's sample size survives the schema, and an absent one stays absent")
     void sampleSizesRoundTrip() {
         // 1.1 is the fixture with a measured stage in it: pg-3-1's two drops say

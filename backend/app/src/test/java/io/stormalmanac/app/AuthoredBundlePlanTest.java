@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.stormalmanac.common.id.EntityId;
+import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.Goal;
@@ -42,10 +43,12 @@ import org.junit.jupiter.api.Test;
  * the point: a correction to published data should show up in a plan.
  *
  * <p>What these plans leave out is as important as what they contain, and is
- * listed as N32 in {@code TRACKER.md}. Nothing here checks a level gate. A goal
- * whose cost is partly EXP gets the materials half of that cost and not the EXP
- * half. A plan that looks complete is not always complete. That is why the
- * goals below were chosen from the ones the bundle can express in full.
+ * listed as N32 in {@code TRACKER.md}. Since sequence 1 a gate is paid and EXP
+ * is fed, but only where the bundle has a price for them: level 80 is the one
+ * level with one, so promote-13 carries the whole level and promote-12 carries
+ * none of it, although in the game it needs level 75. A plan that looks
+ * complete is not always complete, which is why the goals below were chosen
+ * from the ones the bundle can express in full.
  */
 class AuthoredBundlePlanTest {
 
@@ -84,28 +87,68 @@ class AuthoredBundlePlanTest {
     }
 
     @Test
-    @DisplayName("a Memory's Overclock goes stage, shop, box and craft, and costs 240 Serum")
+    @DisplayName("a Memory's Overclock goes stage, shop, box and craft, feeds its EXP, and costs 420 Serum")
     void aMemoryOverclock() {
         // samantha-overclock-1: 260 000 Cogs, 6 Major Overclock Alloy, 6 Memory
         // Overclock Circuit II, 7 Minor Overclock Alloy, 10 Memory Overclock
-        // Circuit I.
+        // Circuit I, and since sequence 1 its 18 000 memory EXP.
         //   Cogs: 260 000 / 1 200 = 216.7, so 217 purchases = 217 Score
         //   beta box, ten open into 4 Major + 3 Core II + 3 Circuit II: 6 Major
         //     and 6 Circuit II both need 2 opens, so 20 boxes, 2 purchases at 150
         //     = 300 Score. The 6 Core II that come with them are surplus
         //   alpha box, ten open into 5 Minor + 5 Circuit I: 7 Minor and 10
         //     Circuit I both need 2 opens, so 2 purchases at 38 = 76 Score
-        // 593 Score at 82 a run is 7.2, so 8 runs = 240 Serum. Four layers deep,
-        // and the solver walks all of them without being told the order.
+        //   EXP: 18 000 / 300 per Memory Enhancer IV = 60 fed, bought 10 for 87,
+        //     so 6 purchases = 522 Score
+        // 1 115 Score at 82 a run is 13.6, so 14 runs = 420 Serum. It was 240
+        // before the EXP had a row to live in, which is how much the old plan
+        // was short: 43% of the goal.
         Plan plan = solve(Goal.deterministic(SAMANTHA, "overclock-1"));
 
-        assertThat(plan.totalEnergy()).isEqualTo(240);
+        assertThat(plan.totalEnergy()).isEqualTo(420);
         assertThat(plan.conversions()).containsExactly(
+                new Conversion("memory-exp-4-star", 60),
                 new Conversion("open-overclock-material-box-alpha", 2),
                 new Conversion("open-overclock-material-box-beta", 2),
                 new Conversion("simulation-shop-cogs", 217),
+                new Conversion("simulation-shop-memory-enhancer-iv", 6),
                 new Conversion("simulation-shop-overclock-material-box-alpha", 2),
                 new Conversion("simulation-shop-overclock-material-box-beta", 2));
+    }
+
+    @Test
+    @DisplayName("her last rank is gated on level 80, so it costs the level's EXP too: 1 470 Serum")
+    void aGatedRankPaysForItsGate() {
+        // promote-1 .. promote-13: 542 500 Cogs, 453 purchases at 1 200 (452.1
+        //   rounded up) = 453 Score
+        // promote-13 requires level-80, and level-1 -> level-80 is 497 000
+        //   character EXP. The only Pod the shop sells is L, 3 000 each, five
+        //   for 103: 497 000 / 3 000 = 165.7, so 166 fed, and 166 / 5 = 33.2,
+        //   so 34 purchases = 3 502 Score
+        // 3 955 Score at 82 a run is 48.2, so 49 runs = 1 470 Serum. Without
+        // the gate the same goal cost 6 runs, 180 Serum: the gate is 88% of it.
+        Plan plan = solve(Goal.deterministic(HELENTINE, "promote-13"));
+
+        assertThat(plan.totalEnergy()).isEqualTo(1470);
+        assertThat(plan.conversions()).containsExactly(
+                new Conversion("character-exp-pod-l", 166),
+                new Conversion("simulation-shop-cogs", 453),
+                new Conversion("simulation-shop-exp-pod-l", 34));
+    }
+
+    @Test
+    @DisplayName("Pods the reader holds pay the gate, so only the Cogs are farmed: 180 Serum")
+    void heldPodsPayTheGate() {
+        // 25 EXP Pod (XL) at 20 000 is 500 000 EXP, past 497 000, so nothing is
+        // bought for the level and the plan is the Cogs alone: 453 Score is 5.5
+        // runs, so 6 runs = 180 Serum.
+        Plan plan = solve(Goal.deterministic(HELENTINE, "promote-13"),
+                Inventory.empty(PROFILE).with(new ItemId("exp-pod-xl"), 25));
+
+        assertThat(plan.totalEnergy()).isEqualTo(180);
+        assertThat(plan.conversions()).containsExactly(
+                new Conversion("character-exp-pod-xl", 25),
+                new Conversion("simulation-shop-cogs", 453));
     }
 
     @Test
@@ -121,10 +164,14 @@ class AuthoredBundlePlanTest {
     }
 
     private Plan solve(Goal goal) {
+        return solve(goal, Inventory.empty(PROFILE));
+    }
+
+    private Plan solve(Goal goal, Inventory inventory) {
         MipOptimizer optimizer = new MipOptimizer(
                 new InMemoryPlanning.OneVersion(definition),
                 new InMemoryPlanning.FixedPlayer(
-                        PROFILE, definition.game().id(), Inventory.empty(PROFILE),
+                        PROFILE, definition.game().id(), inventory,
                         new Roster(PROFILE, Map.of())),
                 null,
                 Clock.fixed(NOW, ZoneOffset.UTC),

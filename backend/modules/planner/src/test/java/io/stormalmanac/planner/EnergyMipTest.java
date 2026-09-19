@@ -13,8 +13,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.Availability;
+import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
 import java.time.DayOfWeek;
@@ -330,6 +332,61 @@ class EnergyMipTest {
 
         assertThat(outcome.rewardClaims()).containsExactly(new RewardClaim("daily-login", 1));
         assertThat(outcome.daysNeeded()).isEqualTo(1);
+    }
+
+    private static final ItemId HERO_EXP = Demand.progressItem("hero-exp");
+
+    /** The workshop, plus one rule: any 3★-or-better material is worth 100 hero EXP, for 10 gold. */
+    private static GameDefinition workshopWithFodder() {
+        return TestGame.builder()
+                .stage(ORE_STAGE, 10, ORE, 2.0)
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .craft("smelt", List.of(stack(ORE, 3), stack(GOLD, 50)), List.of(stack(INGOT, 1)))
+                .craft("forge", List.of(stack(INGOT, 2), stack(GOLD, 100)), List.of(stack(RELIC, 1)))
+                .sink(new Fodder("feed-material", "material", new Rarity("3*", 3), "hero-exp", 100,
+                        List.of(stack(GOLD, 10))))
+                .build();
+    }
+
+    @Test
+    @DisplayName("EXP is made by feeding fodder, and the fodder is farmed like anything else")
+    void progressIsPaidByFodder() {
+        // 250 EXP at 100 a unit is 3 units; ore is 2★, so ingot (3★) and relic
+        // (4★) are the eligible ones, and an ingot is the cheaper to make.
+        //   3 ingots: 9 ore + 150 gold; feeding them: 30 gold
+        //   9 ore / 2.0 = 4.5, so 5 runs of s-ore = 50 energy
+        //   180 gold / 100 = 1.8, so 2 runs of s-gold = 10 energy
+        EnergyMip.Outcome outcome = solve(workshopWithFodder(), Map.of(), Map.of(HERO_EXP, 250));
+
+        assertThat(outcome.totalEnergy()).isEqualTo(60);
+        assertThat(outcome.conversions()).containsExactly(
+                new Conversion("feed-material:ingot", 3), new Conversion("smelt", 3));
+    }
+
+    @Test
+    @DisplayName("fodder the player holds is fed before anything is farmed for it")
+    void heldFodderIsFedFirst() {
+        // Three relics held are 300 EXP; feeding them costs 30 gold, one run of
+        // s-gold at 5. Making ingots instead would need ore, which is dearer.
+        EnergyMip.Outcome outcome = solve(
+                workshopWithFodder(), Map.of(RELIC, 3), Map.of(HERO_EXP, 250));
+
+        assertThat(outcome.totalEnergy()).isEqualTo(5);
+        assertThat(outcome.conversions()).containsExactly(new Conversion("feed-material:relic", 3));
+    }
+
+    @Test
+    @DisplayName("progress no fodder rule pays is refused by name, and a rule that names no progress pays none")
+    void unpaidProgressIsRefused() {
+        GameDefinition inert = TestGame.builder()
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .sink(new Fodder("read-too-early", "currency", new Rarity("1*", 1), null, 100, List.of()))
+                .build();
+
+        assertThatThrownBy(() -> solve(inert, Map.of(GOLD, 999), Map.of(HERO_EXP, 100)))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("progress:hero-exp")
+                .hasMessageContaining("no fodder rule in this game version pays it");
     }
 
     @Test
