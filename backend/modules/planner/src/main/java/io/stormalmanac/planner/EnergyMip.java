@@ -3,10 +3,13 @@ package io.stormalmanac.planner;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.Availability;
 import io.stormalmanac.gamedata.Craft;
+import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.GameDefinition;
+import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
+import io.stormalmanac.gamedata.Sink;
 import io.stormalmanac.gamedata.Source;
 import io.stormalmanac.gamedata.Stage;
 import java.time.DayOfWeek;
@@ -48,9 +51,11 @@ import org.ojalgo.type.context.NumberContext;
  *             x_s, y_c, z_r integer and &gt;= 0
  * </pre>
  *
- * <p>{@code c} ranges over crafts <em>and</em> shop offers. A purchase is a
- * conversion: it takes currency and gives the offer, and it costs no energy.
- * Only its cap is different. See {@link Exchange}.
+ * <p>{@code c} ranges over crafts, shop offers <em>and</em> fodder. A purchase
+ * is a conversion: it takes currency and gives the offer, and it costs no
+ * energy. Only its cap is different. Feeding one unit of fodder is a conversion
+ * too, into a progress item such as EXP that only fodder makes. See
+ * {@link Exchange}.
  *
  * <p>No repositories, no clock, no Spring: inputs in, an answer or a refusal
  * out. That is what makes the shadow-price re-solves affordable and what makes
@@ -107,8 +112,12 @@ import org.ojalgo.type.context.NumberContext;
  *       stages both closing on Friday are each capped, and not capped
  *       <em>together</em>. Correcting that needs the days to be an index after
  *       all, which is the trade this class exists to avoid.
- *   <li><b>Fodder.</b> Consuming a class of items for progress on another item
- *       of that class is a sink the demand vector does not yet express.
+ *   <li><b>Overshoot and fodder that is also an entity.</b> Fodder is a
+ *       conversion into a progress item (see {@link Exchange#of(Fodder, ItemId,
+ *       String)}), so EXP spilling past a cap is simply surplus, which is right
+ *       for a demand that is itself a cap. Feeding a weapon to a weapon is not
+ *       here at all: a weapon is an entity, not an item, and nothing owns a
+ *       count of them.
  * </ul>
  */
 final class EnergyMip {
@@ -691,6 +700,27 @@ final class EnergyMip {
             return new Exchange(craft.id(), false, craft.consumes(), craft.produces(), Long.MAX_VALUE);
         }
 
+        /**
+         * One unit of {@code item} fed into its progress kind. A recipe in all
+         * but name: it consumes the unit and the rule's side costs, and makes
+         * {@code progressPerUnit} of a progress item nothing else can make.
+         * So the model needs no fodder row type of its own, and a Pod bought
+         * in a shop to be fed to a level is a chain the solver walks the same
+         * way it walks a box bought to be opened.
+         *
+         * @param id the rule's id, or the rule's id and the item's when the
+         *           rule's category holds more than one item, since each is a
+         *           separate instruction to the player
+         */
+        static Exchange of(Fodder rule, ItemId item, String id) {
+            List<ItemStack> consumes = new ArrayList<>(rule.costs().size() + 1);
+            consumes.add(new ItemStack(item, 1));
+            consumes.addAll(rule.costs());
+            return new Exchange(id, false, consumes,
+                    List.of(new ItemStack(Demand.progressItem(rule.progress()), rule.progressPerUnit())),
+                    Long.MAX_VALUE);
+        }
+
         static Exchange of(Shop shop, long purchases) {
             List<ItemStack> price = shop.price() > 0
                     ? List.of(new ItemStack(shop.currency(), shop.price()))
@@ -716,6 +746,17 @@ final class EnergyMip {
         for (Shop shop : open(in.definition().shops(), Shop::availability, in.at())) {
             long purchases = purchases(shop, in.at(), horizonDays);
             if (purchases > 0) exchanges.add(Exchange.of(shop, purchases));
+        }
+        for (Sink sink : in.definition().sinks()) {
+            if (!(sink instanceof Fodder rule) || rule.progress() == null) continue;
+            List<Item> eligible = in.definition().items().stream()
+                    .filter(item -> item.category().equals(rule.consumesCategory()))
+                    .filter(item -> item.rarity().rank() >= rule.minimumRarity().rank())
+                    .toList();
+            for (Item item : eligible) {
+                String id = eligible.size() == 1 ? rule.id() : rule.id() + ":" + item.id().value();
+                exchanges.add(Exchange.of(rule, item.id(), id));
+            }
         }
         return exchanges;
     }
@@ -907,6 +948,18 @@ final class EnergyMip {
      */
     private static String whyNot(
             GameDefinition definition, ItemId item, Instant at, int horizonDays) {
+
+        if (Demand.isProgressItem(item)) {
+            List<String> feeding = definition.sinks().stream()
+                    .filter(s -> s instanceof Fodder f && f.progress() != null
+                            && Demand.progressItem(f.progress()).equals(item))
+                    .map(Sink::id)
+                    .toList();
+            return feeding.isEmpty()
+                    ? "no fodder rule in this game version pays it"
+                    : "it is paid only by feeding " + String.join(", ", feeding)
+                            + ", and nothing available supplies what that consumes";
+        }
 
         List<String> closed = new ArrayList<>();
         List<String> recipes = new ArrayList<>();

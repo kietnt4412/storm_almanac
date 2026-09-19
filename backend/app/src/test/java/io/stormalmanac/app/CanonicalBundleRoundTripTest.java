@@ -55,6 +55,21 @@ class CanonicalBundleRoundTripTest {
         assertThat(twice).isEqualTo(once);
     }
 
+    @Test
+    @DisplayName("the authored launch bundle survives the writer too, gates and progress included")
+    void theAuthoredBundleRoundTrips() throws IOException {
+        // proving-ground predates gates, progress and what a fodder rule feeds,
+        // and the one bundle carrying all three is the real one.
+        GameDataBundle original;
+        try (InputStream in = java.nio.file.Files.newInputStream(java.nio.file.Path.of(
+                "..", "..", "data", "bundles", "punishing-gray-raven-steering-by-light.json"))) {
+            original = new CanonicalBundleParser().parse(in);
+        }
+
+        assertThat(new CanonicalBundleParser().parse(new CanonicalBundleWriter().write(original)))
+                .isEqualTo(original);
+    }
+
     private static GameDataBundle read(String fixture) throws IOException {
         try (InputStream in = CanonicalBundleRoundTripTest.class
                 .getResourceAsStream("/gamedata/" + fixture)) {

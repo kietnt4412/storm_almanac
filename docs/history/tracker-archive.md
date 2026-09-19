@@ -2585,6 +2585,52 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-19 (twenty-sixth) — N32 (1) and (2): gates are paid and EXP is fed,
+and the first-hand plans got honest by 75% and 717%.** No new reading. The
+bundle becomes **sequence 1** by writing down what sequence 0 had read and could
+not hold. [ADR 0019](../adr/0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-demanded-as-an-item.md).
+
+- **PR #25 merged green, and merged before its own run finished.** The PR's
+  `backend` job completed 07:46:05Z; the merge was 07:44:47Z. The push-to-`main`
+  run `35430156822` went green afterwards, and the PR run `35430127397`
+  executed `:app:test` rather than reading it from cache. So nothing was lost —
+  but that was luck, not a check. The previous two merges had waited.
+- **A gate is a goal inside a goal.** `Upgrade.requires` names states of the
+  same entity; `DemandResolver` pays the path to each before the gated step,
+  recursively, once. A step gated on a state reachable only through itself is
+  refused by name rather than looped on. Checking a gate would say "not yet",
+  and a whole-run plan is never *yet* — what a gate changes is the price.
+- **Progress is demanded as an item.** `Upgrade.progress` is `(kind, quantity)`;
+  `Fodder.progress` names the kind it pays; the demand line is
+  `progress:<kind>`, which no kebab-case slug can collide with. Each fodder rule
+  becomes one conversion per eligible item in `EnergyMip`, so "buy Pods, feed
+  Pods" is priced exactly like "buy boxes, open boxes", and `SolveKey` covers
+  progress for free because it already covers the demand map. A rule with no
+  `progress` is **inert, not refused**: every rule in the published sequence 0
+  has none, and `V8`'s column is nullable for the same reason.
+- **Sequence 1 of the bundle:** `helentine-lacrimosa-level-80` (Lv 1 → 80,
+  497 000 character EXP, the Pods-exact figure from the reading), `requires:
+  ["level-80"]` on promote-13 only, 24 000 weapon EXP on Hear the Bell's
+  Overclock row and 18 000 memory EXP on Samantha's, and a kind on all five
+  fodder rules. **Only one of thirteen Promote gates is written**, because the
+  EXP to any level below 80 is unread and a gate is only worth writing where its
+  state has a price. So promote-12 still costs none of the level 75 it needs.
+- **The new plans, each worked out by hand first, and each matched on the first
+  run:** Samantha's Overclock **240 → 420 Serum** (60 Enhancer IV, six packs);
+  Helentine's promote-13 **180 → 1 470** (166 Pod L, 34 packs); the same holding
+  25 Pod XL, **180**, Cogs only. The old numbers were short by 43% and 88% of
+  the goal. The goals had been picked from the ones the bundle could express in
+  full, which was a way of not looking.
+- **The shortfall page's EXP line counts held fodder at face value** — without
+  it every reader reads "EXP owned 0" however many Pods they hold. Tested on the
+  arithmetic (`ShortfallProgressTest`), **not driven in a browser**, and the
+  frontend has never rendered a `progress:` line or shadow price.
+- **Not done, and on purpose:** the sequence 1 bundle is **not previewed,
+  ingested or published**. `V8` has only ever run on an empty Testcontainers
+  database; the first time it meets the maintainer's database it meets the
+  published sequence 0, and the preview is what proves that version still reads.
+- 358 backend tests (+15), 0 skipped locally.
+
 **2026-09-19 (twenty-fifth) — Shops are in the solver, and the first-hand
 bundle plans.** This is N30's shop half. The twenty-fourth session found that
 nothing in the PGR bundle could be planned without shops, because Simulated

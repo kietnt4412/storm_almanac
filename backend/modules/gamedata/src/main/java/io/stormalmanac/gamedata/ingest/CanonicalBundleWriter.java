@@ -207,12 +207,18 @@ public final class CanonicalBundleWriter {
         node.put("fromState", upgrade.fromState());
         node.put("toState", upgrade.toState());
         stacks(node, "costs", upgrade.costs());
+        strings(node, "requires", upgrade.requires());
+        array(node, "progress", upgrade.progress(), (p, progress) -> {
+            p.put("kind", progress.kind());
+            p.put("quantity", progress.quantity());
+        });
     }
 
     private void fodder(ObjectNode node, Fodder fodder) {
         node.put("id", fodder.id());
         node.put("consumesCategory", fodder.consumesCategory());
         rarity(node.putObject("minimumRarity"), fodder.minimumRarity());
+        if (fodder.progress() != null) node.put("progress", fodder.progress());
         node.put("progressPerUnit", fodder.progressPerUnit());
         stacks(node, "costs", fodder.costs());
     }

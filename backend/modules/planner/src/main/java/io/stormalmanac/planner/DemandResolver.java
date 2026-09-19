@@ -5,6 +5,7 @@ import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.Goal;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Progress;
 import io.stormalmanac.gamedata.Sink;
 import io.stormalmanac.gamedata.Upgrade;
 import io.stormalmanac.player.Roster;
@@ -76,15 +77,60 @@ public final class DemandResolver {
                 continue;
             }
 
-            for (Upgrade step : pathTo(goal, edges, achieved, definition)) {
-                if (!counted.add(step.id())) continue;
+            new Payment(goal, edges, achieved, definition, totals, steps, counted)
+                    .payUpTo(goal.targetState(), true);
+        }
+        return new Demand(totals, steps, alreadyMet);
+    }
+
+    /**
+     * One goal's walk, carrying what every step it pays has to add to.
+     *
+     * <p><b>A gate is a goal inside a goal.</b> A step that requires a state is
+     * paid for after the path to that state, which may itself contain gated
+     * steps; so a rank that needs a level pulls the level track's whole price
+     * into the plan, EXP included. That is the only reason gates are in the
+     * model at all. A plan for a character's last rank that leaves out the
+     * level the rank is gated on is cheaper than the truth by most of the goal.
+     */
+    private record Payment(
+            Goal goal,
+            Map<String, List<Upgrade>> edges,
+            Set<String> achieved,
+            GameDefinition definition,
+            Map<ItemId, Integer> totals,
+            List<String> steps,
+            Set<String> counted,
+            Set<String> gating) {
+
+        Payment(Goal goal, Map<String, List<Upgrade>> edges, Set<String> achieved, GameDefinition definition,
+                Map<ItemId, Integer> totals, List<String> steps, Set<String> counted) {
+            this(goal, edges, achieved, definition, totals, steps, counted, new HashSet<>());
+        }
+
+        void payUpTo(String state, boolean mustBeReachable) {
+            for (Upgrade step : pathTo(goal, state, mustBeReachable, edges, achieved, definition)) {
+                if (counted.contains(step.id())) continue;
+                if (!gating.add(step.id())) {
+                    throw new Optimizer.InfeasibleGoalException(
+                            "upgrade \"" + step.id() + "\" for " + goal.entity() + " is gated on a state"
+                                    + " that can only be reached through that upgrade itself");
+                }
+                for (String required : step.requires()) {
+                    if (!achieved.contains(required)) payUpTo(required, false);
+                }
+                gating.remove(step.id());
+
+                counted.add(step.id());
                 steps.add(step.id());
                 for (ItemStack cost : step.costs()) {
-                    totals.merge(cost.item(), cost.quantity(), Integer::sum);
+                    totals.merge(cost.item(), cost.quantity(), Math::addExact);
+                }
+                for (Progress progress : step.progress()) {
+                    totals.merge(Demand.progressItem(progress.kind()), progress.quantity(), Math::addExact);
                 }
             }
         }
-        return new Demand(totals, steps, alreadyMet);
     }
 
     /** {@code entity -> toState -> the upgrades that arrive at it}. */
@@ -124,9 +170,18 @@ public final class DemandResolver {
         return seen;
     }
 
-    /** The upgrades between {@code achieved} and the goal, in the order they are performed. */
+    /**
+     * The upgrades between {@code achieved} and {@code target}, in the order they
+     * are performed.
+     *
+     * @param mustBeReachable true for the goal itself, which has to be reached by
+     *                        something; false for a gate, which may be the start
+     *                        of its track and so already met by owning the entity
+     */
     private static List<Upgrade> pathTo(
             Goal goal,
+            String target,
+            boolean mustBeReachable,
             Map<String, List<Upgrade>> edges,
             Set<String> achieved,
             GameDefinition definition) {
@@ -134,7 +189,7 @@ public final class DemandResolver {
         List<Upgrade> reversed = new ArrayList<>();
         Set<String> visited = new HashSet<>();
         Deque<String> queue = new ArrayDeque<>();
-        queue.add(goal.targetState());
+        queue.add(target);
 
         while (!queue.isEmpty()) {
             String state = queue.removeFirst();
@@ -142,7 +197,7 @@ public final class DemandResolver {
 
             List<Upgrade> parents = edges.getOrDefault(state, List.of());
             if (parents.isEmpty()) {
-                if (state.equals(goal.targetState())) {
+                if (mustBeReachable && state.equals(target)) {
                     throw new Optimizer.InfeasibleGoalException(
                             "no upgrade reaches state \"" + state + "\" for " + goal.entity()
                                     + " in " + definition.game().id() + " "

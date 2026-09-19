@@ -516,20 +516,32 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
                                     + " (upgrade_id, version_id, ordinal, item_id, quantity)"
                                     + " VALUES (?, ?, ?, ?, ?)",
                             id);
+                    jdbc.batchUpdate(
+                            "INSERT INTO gamedata.upgrade_requirement (upgrade_id, version_id, state)"
+                                    + " VALUES (?, ?, ?)",
+                            upgrade.requires().stream()
+                                    .map(state -> new Object[] {id, version, state})
+                                    .toList());
+                    jdbc.batchUpdate(
+                            "INSERT INTO gamedata.upgrade_progress (upgrade_id, version_id, kind, quantity)"
+                                    + " VALUES (?, ?, ?, ?)",
+                            upgrade.progress().stream()
+                                    .map(p -> new Object[] {id, version, p.kind(), p.quantity()})
+                                    .toList());
                 }
                 case Fodder fodder -> {
                     long id = jdbc.queryForObject(
                             """
                             INSERT INTO gamedata.fodder
                                 (version_id, slug, consumes_category, min_rarity_label, min_rarity_rank,
-                                 progress_per_unit)
-                            VALUES (?, ?, ?, ?, ?, ?)
+                                 progress, progress_per_unit)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)
                             RETURNING id
                             """,
                             Long.class,
                             version, fodder.id(), fodder.consumesCategory(),
                             fodder.minimumRarity().label(), fodder.minimumRarity().rank(),
-                            fodder.progressPerUnit());
+                            fodder.progress(), fodder.progressPerUnit());
 
                     writeStacks(version, fodder.costs(), items,
                             "INSERT INTO gamedata.fodder_cost"

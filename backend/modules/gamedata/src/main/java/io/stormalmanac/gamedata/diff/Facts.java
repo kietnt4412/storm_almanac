@@ -105,11 +105,14 @@ final class Facts {
                     about.put("entity", upgrade.entity().value());
                     about.put("edge", upgrade.fromState() + " → " + upgrade.toState());
                     stacks(about, "cost", upgrade.costs());
+                    upgrade.requires().forEach(state -> about.put("requires " + state, "yes"));
+                    upgrade.progress().forEach(p -> about.put("progress " + p.kind(), String.valueOf(p.quantity())));
                 }
                 case Fodder fodder -> {
                     Map<String, String> about = subject(facts, Axis.PROGRESSION, "fodder", fodder.id());
                     about.put("consumes", fodder.consumesCategory());
                     about.put("minimum rarity", rarity(fodder.minimumRarity()));
+                    if (fodder.progress() != null) about.put("feeds", fodder.progress());
                     about.put("progress per unit", String.valueOf(fodder.progressPerUnit()));
                     stacks(about, "cost", fodder.costs());
                 }

@@ -44,4 +44,30 @@ public record Demand(
     public int quantityOf(ItemId item) {
         return quantities.getOrDefault(item, 0);
     }
+
+    private static final String PROGRESS_PREFIX = "progress:";
+
+    /**
+     * The item a {@link io.stormalmanac.gamedata.Progress} kind is demanded as.
+     *
+     * <p>Progress is not an item — nothing holds EXP — but inside a plan it
+     * behaves exactly like an intermediate one: fodder makes it and upgrades
+     * need it. Spelling it as an item keeps the demand vector, the solve cache
+     * key and the model's balance rows one shape rather than two. The colon
+     * keeps it out of every real item's namespace, since a bundle slug is a
+     * kebab-case word and has none. <b>Anything that reads a demand line as a
+     * catalog item has to ask {@link #isProgressItem} first.</b>
+     */
+    public static ItemId progressItem(String kind) {
+        return new ItemId(PROGRESS_PREFIX + kind);
+    }
+
+    public static boolean isProgressItem(ItemId item) {
+        return item.value().startsWith(PROGRESS_PREFIX);
+    }
+
+    /** The kind a progress item stands for; only meaningful when {@link #isProgressItem} is true. */
+    public static String progressKind(ItemId item) {
+        return item.value().substring(PROGRESS_PREFIX.length());
+    }
 }

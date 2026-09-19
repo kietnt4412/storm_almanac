@@ -26,11 +26,18 @@
     "Later the same day: Cogs and Phantom Pain Scar were graded on shop and",
     "reward tiles too, and Helentine: Lacrimosa went in whole except Awaken,",
     "whose tiers are conditions rather than costs. Still refused: the Themed",
-    "Construct pool, every level and rank gate (Upgrade has no preconditions),",
+    "Construct pool, every level and rank gate whose level has no price (see",
+    "sequence 1 below),",
     "the Phantom Pain shop (a limit that never resets), score-scaled weekly",
     "grants, and the currencies no screen has graded (Black and Rainbow Cards).",
     "",
-    "PGR records patches by name rather than number, so the label is a name."
+    "PGR records patches by name rather than number, so the label is a name.",
+    "",
+    "Sequence 0 was published on 2026-09-19. Sequence 1 reads nothing new: it",
+    "writes down what sequence 0 had read and could not hold, now that an",
+    "upgrade can require a state and cost progress, and a fodder rule can say",
+    "which progress it pays. Her level to 80 (497 000 EXP), the Lv 80 gate on",
+    "her last Promote step, and the EXP halves of both Overclock rows."
   ],
 
   "game": {
@@ -38,7 +45,7 @@
     "displayName": "Punishing: Gray Raven",
     "energyUnit": "Serum"
   },
-  "sequence": 0,
+  "sequence": 1,
   "label": "Steering By Light",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client, patch \"Steering By Light\", on 2026-09-18. Numbers and text only; no game assets.",
 
@@ -148,7 +155,8 @@
     "shop:simulation-shop-memory-enhancer-iv": "equipment-and-resource-screens",
     "entity:samantha": "character-screens",
     "upgrade:samantha-overclock-1": "character-screens",
-    "upgrade:helentine-lacrimosa-vestige-unlock": "character-screens"
+    "upgrade:helentine-lacrimosa-vestige-unlock": "character-screens",
+    "upgrade:helentine-lacrimosa-level-80": "character-screens"
   },
 
   "items": [
@@ -383,6 +391,7 @@
       "id": "weapon-exp-4-star",
       "consumesCategory": "weapon-exp-fodder-4-star",
       "minimumRarity": { "label": "4*", "rank": 4 },
+      "progress": "weapon-exp",
       "progressPerUnit": 300,
       "costs": []
     },
@@ -391,6 +400,7 @@
       "id": "memory-exp-4-star",
       "consumesCategory": "memory-exp-fodder-4-star",
       "minimumRarity": { "label": "4*", "rank": 4 },
+      "progress": "memory-exp",
       "progressPerUnit": 300,
       "costs": []
     },
@@ -399,13 +409,13 @@
         "Character Level Up, read on Helentine: Lacrimosa at Lv 1 / 80 with one",
         "Pod of each size selected in turn: M reads +1000 (estimated Lv 10), L",
         "+3000 (Lv 17), XL +20000 (Lv 37). No Cog or other side cost shows, and",
-        "the maintainer confirms there is none. The level curve itself is not",
-        "read beyond those three estimates, so a level goal cannot yet be turned",
-        "into an EXP demand."
+        "the maintainer confirms there is none. The curve between levels is",
+        "unread; the one level with a price is 80, whose upgrade row is below."
       ],
       "id": "character-exp-pod-m",
       "consumesCategory": "character-exp-pod-m",
       "minimumRarity": { "label": "3*", "rank": 3 },
+      "progress": "character-exp",
       "progressPerUnit": 1000,
       "costs": []
     },
@@ -413,6 +423,7 @@
       "id": "character-exp-pod-l",
       "consumesCategory": "character-exp-pod-l",
       "minimumRarity": { "label": "4*", "rank": 4 },
+      "progress": "character-exp",
       "progressPerUnit": 3000,
       "costs": []
     },
@@ -420,6 +431,7 @@
       "id": "character-exp-pod-xl",
       "consumesCategory": "character-exp-pod-xl",
       "minimumRarity": { "label": "4*", "rank": 4 },
+      "progress": "character-exp",
       "progressPerUnit": 20000,
       "costs": []
     }
@@ -561,7 +573,7 @@
   "rewards": [],
   "upgrades": [
     {
-      "_comment": "One Overclock step takes Hear the Bell's level range to its maximum of 45 (maintainer); the recipe is the one read on 2026-09-18 with the slider on Highest. The 340 000 Cogs is that screen's one Consume figure for the whole Lv 1 -> 45 advance, Enhance and Overclock together; it lands on this row because this row is the advance to 45, and Cogs had no item until 2026-09-19. The EXP half (24 000) is still not a demand anything can express. States are opaque labels for 'before' and 'after'.",
+      "_comment": "One Overclock step takes Hear the Bell's level range to its maximum of 45 (maintainer); the recipe is the one read on 2026-09-18 with the slider on Highest. The 340 000 Cogs is that screen's one Consume figure for the whole Lv 1 -> 45 advance, Enhance and Overclock together; it lands on this row because this row is the advance to 45, and Cogs had no item until 2026-09-19. The EXP half, the same screen's Enhancement Cost of 24 000, lands here for the same reason, since sequence 1. States are opaque labels for 'before' and 'after'.",
       "id": "hear-the-bell-overclock-1",
       "entity": "hear-the-bell",
       "fromState": "overclock-0",
@@ -572,10 +584,11 @@
         { "item": "weapon-overclock-core-ii", "quantity": 16 },
         { "item": "minor-overclock-alloy", "quantity": 20 },
         { "item": "weapon-overclock-core-i", "quantity": 28 }
-      ]
+      ],
+      "progress": [ { "kind": "weapon-exp", "quantity": 24000 } ]
     },
     {
-      "_comment": "Samantha's Overclock, read on her Enhance screen with the slider on Highest (to 45): 6 Major Overclock Alloy, 6 Memory Overclock Circuit II, 7 Minor Overclock Alloy, 10 Memory Overclock Circuit I, and 260 000 Cogs as the screen's one Consume figure for the whole advance, as on Hear the Bell's row. The EXP half (18 000) has no demand to live in yet. Unlike the weapon's, every material here has a Simulation Shop route.",
+      "_comment": "Samantha's Overclock, read on her Enhance screen with the slider on Highest (to 45): 6 Major Overclock Alloy, 6 Memory Overclock Circuit II, 7 Minor Overclock Alloy, 10 Memory Overclock Circuit I, and 260 000 Cogs as the screen's one Consume figure for the whole advance, as on Hear the Bell's row. The EXP half, the same screen's Enhancement Cost of 18 000, is on the row since sequence 1. Unlike the weapon's, every material here has a Simulation Shop route, EXP included.",
       "id": "samantha-overclock-1",
       "entity": "samantha",
       "fromState": "overclock-0",
@@ -586,7 +599,8 @@
         { "item": "memory-overclock-circuit-ii", "quantity": 6 },
         { "item": "minor-overclock-alloy", "quantity": 7 },
         { "item": "memory-overclock-circuit-i", "quantity": 10 }
-      ]
+      ],
+      "progress": [ { "kind": "memory-exp", "quantity": 18000 } ]
     },
     {
       "_comment": "Harmony Lv 1 only. Levels 2 and 3 show 'Not available' and hide their cost, so they are absent rather than guessed.",
@@ -606,9 +620,14 @@
         "(2-3), ELITE (4-6), TASK FORCE (7-9) and ACE (10-13), ending at HERO.",
         "",
         "Every step is also gated on a level — 2, 10, 20, 30, 40, 45, 50, 55, 60,",
-        "65, 70, 75, 80 — and Upgrade has costs but no preconditions, so the gates",
-        "are here in prose only. Step 11's 'Lv.70' was read through the weapon",
-        "model overlapping the text; the sequence around it agrees."
+        "65, 70, 75, 80. Step 11's 'Lv.70' was read through the weapon model",
+        "overlapping the text; the sequence around it agrees.",
+        "",
+        "Since sequence 1 an upgrade can require a state, and step 13 requires",
+        "level-80. The other twelve gates are still prose, because a gate is only",
+        "worth writing if the state it names has a price, and the EXP to any level",
+        "below 80 is unread. Writing level-40 as a state with no row reaching it",
+        "would be a gate every plan meets for free."
       ],
       "id": "helentine-lacrimosa-promote-1",
       "entity": "helentine-lacrimosa",
@@ -627,7 +646,25 @@
     { "id": "helentine-lacrimosa-promote-10", "entity": "helentine-lacrimosa", "fromState": "promote-9", "toState": "promote-10", "costs": [ { "item": "cogs", "quantity": 60000 } ] },
     { "id": "helentine-lacrimosa-promote-11", "entity": "helentine-lacrimosa", "fromState": "promote-10", "toState": "promote-11", "costs": [ { "item": "cogs", "quantity": 70000 } ] },
     { "id": "helentine-lacrimosa-promote-12", "entity": "helentine-lacrimosa", "fromState": "promote-11", "toState": "promote-12", "costs": [ { "item": "cogs", "quantity": 80000 } ] },
-    { "id": "helentine-lacrimosa-promote-13", "entity": "helentine-lacrimosa", "fromState": "promote-12", "toState": "promote-13", "costs": [ { "item": "cogs", "quantity": 100000 } ] },
+    { "id": "helentine-lacrimosa-promote-13", "entity": "helentine-lacrimosa", "fromState": "promote-12", "toState": "promote-13", "costs": [ { "item": "cogs", "quantity": 100000 } ], "requires": [ "level-80" ] },
+    {
+      "_comment": [
+        "Level Up, Lv 1 -> 80, in one row because the curve between is unread.",
+        "No Cog cost shows and the maintainer confirms none. The EXP is pinned",
+        "by two MAX readings from Lv 1: 165 EXP Pod (L) + 2 EXP Pod (M) is",
+        "+497 000 and reaches 80 / 80, while 165 L + 1 M (496 000) does not.",
+        "So the true figure is in (496 000, 497 000]; every Pod is a multiple of",
+        "1 000, so no Pods deliver less than 497 000 and still reach 80, which",
+        "makes 497 000 exact as a demand in Pods. The maintainer's 500 000 is",
+        "most likely the XL reading (25 x 20 000), an upper bound."
+      ],
+      "id": "helentine-lacrimosa-level-80",
+      "entity": "helentine-lacrimosa",
+      "fromState": "level-1",
+      "toState": "level-80",
+      "costs": [],
+      "progress": [ { "kind": "character-exp", "quantity": 497000 } ]
+    },
     {
       "_comment": [
         "Evolve S -> SS: 30 Inver-Shard - Lacrimosa in total (maintainer); one",

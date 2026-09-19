@@ -14,6 +14,7 @@ import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.GameDefinitionRepository;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Progress;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -390,6 +392,22 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
 
     private List<Upgrade> upgrades(long version, Map<Long, ItemId> items) {
         Map<Long, List<ItemStack>> costs = stacks(version, "upgrade_cost", "upgrade_id", items);
+        Map<Long, List<String>> requires = new HashMap<>();
+        jdbc.query(
+                "SELECT upgrade_id, state FROM gamedata.upgrade_requirement WHERE version_id = ?"
+                        + " ORDER BY upgrade_id, state",
+                (RowCallbackHandler) rs -> requires
+                        .computeIfAbsent(rs.getLong("upgrade_id"), k -> new ArrayList<>())
+                        .add(rs.getString("state")),
+                version);
+        Map<Long, List<Progress>> progress = new HashMap<>();
+        jdbc.query(
+                "SELECT upgrade_id, kind, quantity FROM gamedata.upgrade_progress WHERE version_id = ?"
+                        + " ORDER BY upgrade_id, kind",
+                (RowCallbackHandler) rs -> progress
+                        .computeIfAbsent(rs.getLong("upgrade_id"), k -> new ArrayList<>())
+                        .add(new Progress(rs.getString("kind"), rs.getInt("quantity"))),
+                version);
 
         return jdbc.query(
                 """
@@ -402,7 +420,9 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
                         rs.getString("slug"),
                         new EntityId(rs.getString("entity_slug")),
                         rs.getString("from_state"), rs.getString("to_state"),
-                        costs.getOrDefault(rs.getLong("id"), List.of())),
+                        costs.getOrDefault(rs.getLong("id"), List.of()),
+                        requires.getOrDefault(rs.getLong("id"), List.of()),
+                        progress.getOrDefault(rs.getLong("id"), List.of())),
                 version);
     }
 
@@ -411,12 +431,14 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
 
         return jdbc.query(
                 """
-                SELECT id, slug, consumes_category, min_rarity_label, min_rarity_rank, progress_per_unit
+                SELECT id, slug, consumes_category, min_rarity_label, min_rarity_rank, progress,
+                       progress_per_unit
                   FROM gamedata.fodder WHERE version_id = ? ORDER BY id
                 """,
                 (rs, row) -> new Fodder(
                         rs.getString("slug"), rs.getString("consumes_category"),
                         rarity(rs, "min_rarity_label", "min_rarity_rank"),
+                        rs.getString("progress"),
                         rs.getInt("progress_per_unit"),
                         costs.getOrDefault(rs.getLong("id"), List.of())),
                 version);

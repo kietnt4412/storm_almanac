@@ -22,6 +22,8 @@ import io.stormalmanac.gamedata.catalog.Entity;
 import io.stormalmanac.gamedata.catalog.Skill;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -328,6 +330,26 @@ public record GameDataBundle(
             requireStacks(knownItems, sink.costs(), dangling, sinkKind(sink) + " '" + sink.id() + "' costs");
             if (sink instanceof Upgrade upgrade && !knownEntities.contains(upgrade.entity())) {
                 dangling.add("upgrade '" + upgrade.id() + "' advances unknown entity '" + upgrade.entity() + "'");
+            }
+        }
+        // A gate naming a state no upgrade touches cannot be met by any plan, and
+        // would be reported at solve time as a goal nobody can reach. It is a typo
+        // in the bundle, and the bundle is where to say so.
+        Map<EntityId, Set<String>> statesOf = new HashMap<>();
+        for (Sink sink : sinks) {
+            if (sink instanceof Upgrade upgrade) {
+                Set<String> states = statesOf.computeIfAbsent(upgrade.entity(), e -> new HashSet<>());
+                states.add(upgrade.fromState());
+                states.add(upgrade.toState());
+            }
+        }
+        for (Sink sink : sinks) {
+            if (!(sink instanceof Upgrade upgrade)) continue;
+            for (String required : upgrade.requires()) {
+                if (!statesOf.getOrDefault(upgrade.entity(), Set.of()).contains(required)) {
+                    dangling.add("upgrade '" + upgrade.id() + "' requires state '" + required
+                            + "', which no upgrade of '" + upgrade.entity() + "' reaches or leaves");
+                }
             }
         }
         for (Entity entity : entities) {

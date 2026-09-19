@@ -3,7 +3,9 @@ package io.stormalmanac.api.player;
 import io.stormalmanac.common.GameDataVersion;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.GameDefinition;
+import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Item;
+import io.stormalmanac.gamedata.Sink;
 import io.stormalmanac.planner.Demand;
 import io.stormalmanac.player.Inventory;
 import java.util.ArrayList;
@@ -77,11 +79,14 @@ public final class ShortfallView {
             Map<ItemId, Item> items = definition.itemsById();
             List<ShortfallLine> lines = new ArrayList<>();
             demand.quantities().forEach((item, required) -> {
-                int owned = inventory.quantityOf(item);
+                boolean progress = Demand.isProgressItem(item);
+                int owned = progress
+                        ? progressHeld(definition, Demand.progressKind(item), inventory)
+                        : inventory.quantityOf(item);
                 Item known = items.get(item);
                 lines.add(new ShortfallLine(
                         item.value(),
-                        known == null ? item.value() : known.displayName(),
+                        progress ? Demand.progressKind(item) : known == null ? item.value() : known.displayName(),
                         required,
                         owned,
                         Math.max(0, required - owned)));
@@ -108,6 +113,30 @@ public final class ShortfallView {
                     lines,
                     lines.stream().allMatch(line -> line.missing() == 0));
         }
+    }
+
+    /**
+     * How much of a progress kind the reader could feed today: every unit of
+     * fodder they hold, at what its rule says a unit is worth.
+     *
+     * <p>Nobody holds EXP, so "owned 0" would be true of the inventory and false
+     * of the reader, who may be sitting on a thousand Pods. Counting the Pods
+     * at face value is what the game's own feed screen does. Overshoot is not
+     * subtracted: a line that says 500 000 held against 497 000 required is
+     * complete, which is the answer the reader wants.
+     */
+    private static int progressHeld(GameDefinition definition, String kind, Inventory inventory) {
+        long held = 0;
+        for (Sink sink : definition.sinks()) {
+            if (!(sink instanceof Fodder rule) || !kind.equals(rule.progress())) continue;
+            for (Item item : definition.items()) {
+                if (item.category().equals(rule.consumesCategory())
+                        && item.rarity().rank() >= rule.minimumRarity().rank()) {
+                    held += (long) inventory.quantityOf(item.id()) * rule.progressPerUnit();
+                }
+            }
+        }
+        return (int) Math.min(Integer.MAX_VALUE, held);
     }
 
     /** One item's line of the answer: what it costs, what is held, what is left. */

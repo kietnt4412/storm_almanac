@@ -16,7 +16,7 @@ being finished with is.
   [The 826-line version it replaces is in the archive, verbatim](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression) —
   go there for anything this file no longer carries, and decide whether it is
   still operative rather than assuming it was lost.
-- Last updated: **2026-09-19** (twenty-fifth session)
+- Last updated: **2026-09-19** (twenty-sixth session)
 
 ---
 
@@ -28,24 +28,21 @@ being finished with is.
   product overlapped a deployed tool almost feature for feature. **Everything
   below that says "R1999" was true when written and still is — it is just no
   longer the launch.**
-- **PGR has been read first-hand, and the client contradicted the guides twice**
-  (2026-09-18, [the note](docs/game-facts/punishing-gray-raven-research-disclosure.md)).
-  The featured rule is a **per-banner rate** — 70% with a published Calibration
-  guarantee, or 100% with none — not a constant. And **PGR events have no shops**,
-  cost no energy, and pay **one-time mission grants** rather than farmable yields,
-  which is why **N30** lost two features and gained one `EnergyMip` cannot
-  express. Three engine costs fall out: a **floating `hardAt`** (**N31**); a
-  **`PityScope` for pool type that carries Calibration across pool boundaries** —
-  R1999 clears at event end and PGR inherits, so **the two published games now
-  disagree on the one question that enum exists to answer**; and `featured`
-  finally carrying weight.
-- **The first-hand PGR bundle plans, since the twenty-fifth session put shops in
-  the solver.** [The bundle](data/bundles/punishing-gray-raven-steering-by-light.json)
-  (one character, weapon and Memory, **published as sequence 0** 2026-09-19) is
-  farmed through a shop: Simulated Battlefield pays Score, and Score buys every
-  material. A skill to its cap is **150 Serum** and a Memory's Overclock is
-  **240** (`AuthoredBundlePlanTest`). **Both are cheaper than the truth**,
-  because EXP and level gates are **N32**.
+- **PGR is read first-hand ([the note](docs/game-facts/punishing-gray-raven-research-disclosure.md)),
+  and [its bundle](data/bundles/punishing-gray-raven-steering-by-light.json)
+  plans — EXP and one gate included** since the twenty-sixth session
+  ([ADR 0019](docs/adr/0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-demanded-as-an-item.md)).
+  The farm is a shop: Simulated Battlefield pays Score, Score buys every material
+  and Pod. A skill to its cap is **150 Serum**, a Memory's Overclock **420**, her
+  last rank **1 470** (`AuthoredBundlePlanTest`). **Sequence 0 is published; the
+  file is sequence 1, not previewed or published, and `V8` has never met a
+  database holding sequence 0.** Below the top rank plans are still too cheap:
+  no level under 80 has a price, so twelve gates are prose. What the client
+  overruled in the guides: the featured rule is a **per-banner rate** (70% with
+  a Calibration guarantee, or 100%); **events have no shops** and pay one-time
+  grants (**N30**); the Themed pool's wall floats (**N31**); and its
+  **`PityScope` inherits Calibration across pools**, where R1999 clears — the two
+  published games disagree on the one question that enum exists to answer.
 - **Going first-hand on game data**, 2026-09-09
   ([ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)),
   superseding 0009 and closing Q2, Q3, F1 and F2. Kornblume is unlicensed.
@@ -72,13 +69,12 @@ being finished with is.
   verified, so **anything added beside `modules`, `adapters`, `substrate`, `app`
   needs a line there**.
 - **The remote, checked 2026-09-19 — re-check it, do not trust it.**
-  **[PR #24](https://github.com/kietnt4412/storm_almanac/pull/24) is MERGED and
-  green on `ee9448f`, run `35413172254`** (backend, frontend; deploy skipped),
-  where **`:app:test` executed rather than coming from cache**, so the grown
-  bundle went through `AuthoredBundlesTest` on a runner, with the snapshot-gated
-  classes skipped as ever. It merged at 01:38:06Z, **after** the run finished.
-  **`dev` was two doc commits ahead of `origin/dev` at the twenty-fifth
-  session's start, and that session's shop work was not committed by it.** **`dev` sits behind
+  **[PR #25](https://github.com/kietnt4412/storm_almanac/pull/25) is MERGED and
+  green on `35b8603`, run `35430127397`** (backend, frontend; deploy skipped),
+  `:app:test` executed. **It merged at 07:44:47Z, before its own backend job
+  finished at 07:46:05Z** — the push-to-`main` run `35430156822` went green
+  after, so nothing was lost, by luck. **Wait for the run before merging.**
+  **The twenty-sixth session's work is committed on `dev` and not pushed.** **`dev` sits behind
   `main` with identical trees** — merge commits that never come back down;
   harmless, and *not* a reason to rebase. **The trap stands:** CI runs on `pull_request` and
   on push to `main` only, so **a push to `dev` with no open PR runs nothing,
@@ -142,7 +138,7 @@ refused somebody else's, two devices that edit what it owns without deleting eac
 other's work, five screens a browser has driven, a page that says where its
 numbers were read, an app that renders with its server switched off, two gacha
 engines that agree about both published games — and one hand-typed bundle of the
-launch title's own data, which the solver now plans from, incompletely.
+launch title's own data, which the solver plans from, EXP and one gate included.
 
 **The load-bearing claim, and it is a number to re-earn.** On **nine** benchmark
 materials the cheapest stage this project computes is the one a published guide
@@ -162,12 +158,12 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **343 tests** in full 2026-09-19, 0 skipped locally; **327 expected on CI**, where the 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
-| Authored game data | **One bundle, published, first-hand** | Helentine: Lacrimosa (level, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha, one stage, 9 shop rows, 2 box crafts, 5 fodder rules — **published as sequence 0, 87 facts, all first-hand**; a correction is now a sequence 1, never an edit. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan |
+| Backend build | **Green** | **358 tests** in full 2026-09-19, 0 skipped locally; **342 expected on CI**, where the 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
+| Authored game data | **One bundle, sequence 0 published, sequence 1 drafted** | Helentine: Lacrimosa (level to 80, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha, one stage, 9 shop rows, 2 box crafts, 5 fodder rules — **sequence 0 published, 87 facts, all first-hand**; the file is **sequence 1** (one new fact, the level row; one gate, three EXP costs and five fodder kinds on existing ones), **not yet previewed or published**. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan |
 | CI workflow | **Green, no warnings, Node 24** | Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
-| The MIP (`EnergyMip`) | **Stages, crafts, shops and rewards** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. A purchase is a conversion capped at limit × *whole* periods, reported as a `Conversion`. **No fodder, no gates** (**N30**, **N32**) |
+| The MIP (`EnergyMip`) | **Stages, crafts, shops, rewards and fodder** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. A purchase is a conversion capped at limit × *whole* periods; feeding fodder is a conversion into a `progress:<kind>` item. Gates are not in the model: `DemandResolver` turns them into demand (ADR 0019) |
 | The time axis | **A scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). Rotation is capacity shared over *subsets* of weekday restrictions; **no variable is indexed by day**, which is why p95 held at **1 807 ms**. Weekdays are read in **UTC** — a game assumption in a game-agnostic module (**N20**) |
 | `gacha` — engines | **Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). An exact chain and 500 000 seeded trials sharing one validated `PullModel`, so both refuse the same banners for the same reasons. **51 tests, worst gap 0.110 points over 96 questions, at 2.22 standard errors.** Only the headline rarity is modelled |
 | `gacha` — income model | **Interface only, unwritable** | `projectedPulls` needs to know which item is pull currency and what a pull costs in it. **Neither `BannerModel` nor the `banner` table declares either** — **N28**, whose numbers now exist |
@@ -224,9 +220,12 @@ works". It does not mean that:
   *given* — and **multi-copy answers are too pessimistic**, because 200 Cassettes
   of the Lost buy a copy and nothing models it: at two copies the engines say 280
   pulls and the truth is 200.
-- **One character is not a catalog, and its plans are partial.** A level goal
-  has no EXP demand to become and no gate is checked (**N32**). Every R1999
-  catalog and drop number in this file still comes from Kornblume.
+- **One character is not a catalog, and its plans are partial.** Twelve of
+  thirteen Promote gates are prose, because no level below 80 has a price; and
+  the roster holds **one state per entity**, so a reader recorded at
+  `promote-12` is charged the whole level track again (ADR 0019). **No
+  `progress:` line or shadow price has ever rendered in the frontend.** Every
+  R1999 catalog and drop number in this file still comes from Kornblume.
 - **Nothing is deployed** ([D1](#d1--deployment-deferred-2026-09-02); the `deploy`
   job is `if: false`), **nothing has run against a jar from a Dockerfile that
   works**, and **nothing has called the API under load** — every request loads a
@@ -254,17 +253,18 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **N32 — Give the format the five shapes the first full bundle refused.**
-      Each is recorded where it bit, in the bundle's comments and the note:
-      (1) **upgrade preconditions** — every Promote step is gated on a level,
-      Vestige on an Evolve rank, Awaken is *only* gates; (2) **an EXP demand** —
-      a level goal (Lv 80 = 497 000 in Pods) or a weapon's 24 000 has nowhere to
-      live, so the fodder rules are supply with no sink; (3) **a shop limit that
-      never resets** — 30 Inver-Shards per character; (4) **one state, several
+- [ ] **N32 — Give the format the shapes the first full bundle refused.**
+      **(1) gates and (2) EXP are done** (twenty-sixth session, ADR 0019) and
+      sequence 1 carries them. What is left: (3) **a shop limit that never
+      resets** — 30 Inver-Shards per character; (4) **one state, several
       prices** — Memory Resonance takes any of three, and `DemandResolver`
       throws on a second route by design; (5) **a grant sized by the player's
-      score** — the weekly Phantom Pain Cage, 0–56 Scars. (1) and (2) are what
-      make today's Helentine plans too cheap; do those next, with **N30**'s fodder.
+      score** — the weekly Phantom Pain Cage, 0–56 Scars. **Also left, and a
+      reading rather than code:** the EXP to Lv 2, 10, 20 … 75, which is what
+      turns the other twelve Promote gates from prose into rows (MAX on one Pod
+      size from each level, as Lv 80 was pinned). And the roster's **one state
+      per entity** now over-charges any reader whose recorded state is on a
+      different track from the gate — read ADR 0019 before designing around it.
 - [ ] **N31 — Give `PityRule` a guarantee that is drawn, not fixed.** PGR's Themed
       Construct pool draws its wall **uniformly 80–100, redrawn on every S-Rank**;
       `hardAt` is an `int`, so **the archetype is absent from the first bundle
@@ -273,9 +273,8 @@ Ordered. Completed ones move to
       in its state, or 21 mixed chains (ADR 0018). **Do it with the fixture
       correction it implies** — `Banners.grayRavenFloating()` pairs the 1.50% base
       with 70% featured, and the client pairs 1.50% with **100%**.
-- [ ] **N30 — Put fodder and the event shape into the solver (D3).** **Shops
-      are done** (twenty-fifth session). **Fodder is the EXP supply side of N32
-      (2)**: the Pod rules exist and nothing consumes them. **Dropped** —
+- [ ] **N30 — Put the event shape into the solver (D3).** **Shops are done**
+      (twenty-fifth session) **and so is fodder** (twenty-sixth). **Dropped** —
       **probabilistic goals**: weapon
       Resonance is picked; Memory Resonance is rolled but no goal names its skill.
       **Also:** a PGR event is **a one-time grant behind a capability gate inside
@@ -347,7 +346,7 @@ previous one's criterion is met. The "Landed" record for closed phases is
       and **N25 is closed** — five screens driven in a browser including the
       overlay, provenance read back onto the page, the PWA loaded with its server
       killed, a frontend suite in CI. **Nothing is deployed**, and since D3 the
-      launch title is PGR: its first bundle plans, without EXP or gates
+      launch title is PGR: its first bundle plans, EXP and one gate included,
       (**N30**, **N32**). Launch publicly even if ugly.
       **Exit:** five strangers complete a plan without asking for help, and a
       logged-in character page shows what that reader is short of. *The second
@@ -528,6 +527,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-19 | twenty-sixth | N32 (1)+(2): gates become demand and fodder feeds EXP (ADR 0019, V8). The bundle becomes sequence 1, drafted; plans 240 → 420 and 180 → 1 470 |
 | 2026-09-19 | twenty-fifth | Shops in the solver: the first-hand bundle plans, 150 and 240 Serum, worked out by hand first. Too cheap until N32 |
 | 2026-09-19 | twenty-fourth | N27 done: one character, weapon and Memory, first-hand. PGR is farmed through a shop, so N30 needs shops; five refused shapes become N32; the reset is 05:00 UTC |
 | 2026-09-18 | twenty-third | The first first-hand bundle — draft 0, nine facts — and the three *required* fields the format refused. `AuthoredBundlesTest` and the Gradle input hole it found. This file rewritten: 826 → 549 lines, 74 604 → 39 981 bytes, with the old one kept verbatim in the archive |

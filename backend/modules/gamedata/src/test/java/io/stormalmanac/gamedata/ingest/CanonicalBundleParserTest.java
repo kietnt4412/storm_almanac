@@ -3,10 +3,18 @@ package io.stormalmanac.gamedata.ingest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.stormalmanac.common.id.EntityId;
+import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.Availability;
+import io.stormalmanac.gamedata.Fodder;
+import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Progress;
+import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Stage;
+import io.stormalmanac.gamedata.Upgrade;
 import java.time.DayOfWeek;
 import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -134,6 +142,46 @@ class CanonicalBundleParserTest {
                 """)))
                 .isInstanceOf(BundleFormatException.class)
                 .hasMessageContaining("upgrade 'u1' advances unknown entity 'ghost'");
+    }
+
+    @Test
+    @DisplayName("an upgrade can require a state and cost progress, and a fodder rule can name what it feeds")
+    void gatesAndProgressParse() {
+        GameDataBundle bundle = parser.parse(minimal("""
+                "entities": [ { "id": "hero", "displayName": "Hero", "kind": "character",
+                                "rarity": { "label": "S", "rank": 3 } } ],
+                "upgrades": [
+                  { "id": "rank-1", "entity": "hero", "fromState": "rank-0", "toState": "rank-1",
+                    "costs": [ { "item": "ore", "quantity": 1 } ], "requires": [ "level-10" ] },
+                  { "id": "level-10", "entity": "hero", "fromState": "level-1", "toState": "level-10",
+                    "costs": [], "progress": [ { "kind": "hero-exp", "quantity": 900 } ] } ],
+                "fodder": [
+                  { "id": "feed", "consumesCategory": "material", "minimumRarity": { "label": "2*", "rank": 2 },
+                    "progress": "hero-exp", "progressPerUnit": 100, "costs": [] },
+                  { "id": "older", "consumesCategory": "material", "minimumRarity": { "label": "2*", "rank": 2 },
+                    "progressPerUnit": 100, "costs": [] } ]
+                """));
+
+        assertThat(bundle.sinks()).containsExactly(
+                new Upgrade("rank-1", new EntityId("hero"), "rank-0", "rank-1",
+                        List.of(new ItemStack(new ItemId("ore"), 1)), List.of("level-10"), List.of()),
+                new Upgrade("level-10", new EntityId("hero"), "level-1", "level-10",
+                        List.of(), List.of(), List.of(new Progress("hero-exp", 900))),
+                new Fodder("feed", "material", new Rarity("2*", 2), "hero-exp", 100, List.of()),
+                new Fodder("older", "material", new Rarity("2*", 2), null, 100, List.of()));
+    }
+
+    @Test
+    @DisplayName("a gate on a state no upgrade of that entity touches is a typo, and is refused by name")
+    void danglingGateIsRefused() {
+        assertThatThrownBy(() -> parser.parse(minimal("""
+                "entities": [ { "id": "hero", "displayName": "Hero", "kind": "character",
+                                "rarity": { "label": "S", "rank": 3 } } ],
+                "upgrades": [ { "id": "rank-1", "entity": "hero", "fromState": "rank-0", "toState": "rank-1",
+                                "costs": [], "requires": [ "levle-10" ] } ]
+                """)))
+                .isInstanceOf(BundleFormatException.class)
+                .hasMessageContaining("upgrade 'rank-1' requires state 'levle-10'");
     }
 
     @Test
