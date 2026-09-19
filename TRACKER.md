@@ -34,9 +34,9 @@ being finished with is.
   ([ADR 0019](docs/adr/0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-demanded-as-an-item.md)).
   The farm is a shop: Simulated Battlefield pays Score, Score buys every material
   and Pod. A skill to its cap is **150 Serum**, a Memory's Overclock **420**, her
-  last rank **1 470** (`AuthoredBundlePlanTest`). **Sequence 0 is published; the
-  file is sequence 1, previewed and not ingested or published** — `V8` ran on
-  the local database holding sequence 0, which read back through it. Below the top rank plans are still too cheap:
+  last rank **1 470** (`AuthoredBundlePlanTest`). **Sequence 1 is published** (2026-09-19T08:13:20Z,
+  over sequence 0, read back as *no changes*) — `V8` ran on
+  the database holding sequence 0, which still reads. Below the top rank plans are still too cheap:
   no level under 80 has a price, so twelve gates are prose. What the client
   overruled in the guides: the featured rule is a **per-banner rate** (70% with
   a Calibration guarantee, or 100%); **events have no shops** and pay one-time
@@ -74,7 +74,7 @@ being finished with is.
   `:app:test` executed. **It merged at 07:44:47Z, before its own backend job
   finished at 07:46:05Z** — the push-to-`main` run `35430156822` went green
   after, so nothing was lost, by luck. **Wait for the run before merging.**
-  **The twenty-sixth session opened [PR #26](https://github.com/kietnt4412/storm_almanac/pull/26)** — check its run. **`dev` sits behind
+  **[PR #26](https://github.com/kietnt4412/storm_almanac/pull/26) is OPEN and green on `19c44f7`, run `35431309259`**, `:app:test` executed; a later doc push reruns it. **`dev` sits behind
   `main` with identical trees** — merge commits that never come back down;
   harmless, and *not* a reason to rebase. **The trap stands:** CI runs on `pull_request` and
   on push to `main` only, so **a push to `dev` with no open PR runs nothing,
@@ -159,7 +159,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
 | Backend build | **Green** | **358 tests** in full 2026-09-19, 0 skipped locally; **342 expected on CI**, where the 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
-| Authored game data | **One bundle, sequence 0 published, sequence 1 drafted** | Helentine: Lacrimosa (level to 80, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha, one stage, 9 shop rows, 2 box crafts, 5 fodder rules — **sequence 0 published, 87 facts, all first-hand**; the file is **sequence 1** (one new fact, the level row; one gate, three EXP costs and five fodder kinds on existing ones), **previewed 2026-09-19 (nine changes, as intended), not ingested or published**. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan |
+| Authored game data | **One bundle, sequence 1 published, first-hand** | Helentine: Lacrimosa (level to 80, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha, one stage, 9 shop rows, 2 box crafts, 5 fodder rules — **sequence 0 published, 87 facts, all first-hand**; the file is **sequence 1** (one new fact, the level row; one gate, three EXP costs and five fodder kinds on existing ones), **published 2026-09-19T08:13:20Z** after preview (nine changes, as intended) and ingest, read back as *no changes*; the next correction is a sequence 2. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan |
 | CI workflow | **Green, no warnings, Node 24** | Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
@@ -527,7 +527,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-19 | twenty-sixth | N32 (1)+(2): gates become demand and fodder feeds EXP (ADR 0019, V8). The bundle becomes sequence 1, drafted; plans 240 → 420 and 180 → 1 470 |
+| 2026-09-19 | twenty-sixth | N32 (1)+(2): gates become demand and fodder feeds EXP (ADR 0019, V8). Sequence 1 published; plans 240 → 420 and 180 → 1 470 |
 | 2026-09-19 | twenty-fifth | Shops in the solver: the first-hand bundle plans, 150 and 240 Serum, worked out by hand first. Too cheap until N32 |
 | 2026-09-19 | twenty-fourth | N27 done: one character, weapon and Memory, first-hand. PGR is farmed through a shop, so N30 needs shops; five refused shapes become N32; the reset is 05:00 UTC |
 | 2026-09-18 | twenty-third | The first first-hand bundle — draft 0, nine facts — and the three *required* fields the format refused. `AuthoredBundlesTest` and the Gradle input hole it found. This file rewritten: 826 → 549 lines, 74 604 → 39 981 bytes, with the old one kept verbatim in the archive |

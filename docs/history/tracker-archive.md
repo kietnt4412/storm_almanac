@@ -2632,8 +2632,14 @@ not hold. [ADR 0019](../adr/0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-
   changes** — five fodder kinds, two Overclock EXP costs, the promote-13 gate,
   one new upgrade — and 88 facts over four provenances, all first-hand, with no
   *NOT ours to publish* line. So a database holding a published version before
-  `V8` still reads it after. Ingest and publish remain the maintainer's
-  decision. PR [#26](https://github.com/kietnt4412/storm_almanac/pull/26) opened.
+  `V8` still reads it after. PR [#26](https://github.com/kietnt4412/storm_almanac/pull/26)
+  opened, and went green on `19c44f7` (run `35431309259`, `:app:test`
+  executed).
+- **Published, at the maintainer's explicit request:** *ingest* (the same nine
+  changes), then *publish* — **`punishing-gray-raven` Steering By Light,
+  sequence 1, at 2026-09-19T08:13:20Z** — then a second preview read *no
+  changes*, which is the read-back. Both sequences are `PUBLISHED`; the next
+  correction is a sequence 2.
 - 358 backend tests (+15), 0 skipped locally.
 
 **2026-09-19 (twenty-fifth) — Shops are in the solver, and the first-hand
