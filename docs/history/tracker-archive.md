@@ -2631,8 +2631,16 @@ the solver makes.** [ADR 0021](../adr/0021-one-step-at-several-prices-is-a-choic
   `upper-resonance-0 → upper-resonance-1`. No gate is written, because none was
   read. `AuthoredBundlePlanTest`, worked out by hand first: holding nothing,
   the only price that can be farmed is 246 Score, **exactly 3 runs, 90 Serum**.
-  Holding 150 shards, the plan pays in shards and costs 0. **Not previewed,
-  ingested or published.**
+  Holding 150 shards, the plan pays in shards and costs 0.
+- **Published, at the maintainer's explicit request, with PR #28 still open.**
+  The local database held sequence 2 as published at V8. The jar applied `V9`
+  on startup. *Preview* read **exactly five changes**: the two items and the
+  three rows. It showed 95 facts over five provenances, all first-hand, with no
+  *NOT ours to publish* line. *Ingest* made draft 3 with the same five changes.
+  Then came *publish*: **`punishing-gray-raven` Steering By Light, sequence 3,
+  at 2026-09-19T09:18:31Z**. A second preview read *no changes*, which is the
+  read-back. So a database holding versions published before V9 still reads
+  them after it. The next correction is a sequence 4.
 - 375 backend tests (+11 over the session), 0 skipped locally.
 - **Not driven in a browser.** The shortfall page's `one of: …` line is tested
   on the arithmetic (`ShortfallChoiceTest`, a bundle parsed from text). No
