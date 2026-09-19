@@ -190,7 +190,7 @@ public final class CanonicalBundleWriter {
         node.put("price", shop.price());
         stack(node.putObject("offer"), shop.offer());
         node.put("periodLimit", shop.periodLimit());
-        node.put("period", shop.period().toString());
+        node.put("period", shop.periodText());
         availability(node, shop.availability());
     }
 

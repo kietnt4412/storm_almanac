@@ -86,7 +86,9 @@ final class Facts {
                     about.put("currency", shop.currency().value());
                     about.put("price", String.valueOf(shop.price()));
                     about.put("offer", shop.offer().item().value() + " x" + shop.offer().quantity());
-                    about.put("limit", shop.periodLimit() + " per " + shop.period());
+                    about.put("limit", shop.neverResets()
+                            ? shop.periodLimit() + " ever"
+                            : shop.periodLimit() + " per " + shop.period());
                     about.put("availability", availability(shop.availability()));
                 }
                 case Reward reward -> {

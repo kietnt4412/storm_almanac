@@ -152,6 +152,45 @@ class AuthoredBundlePlanTest {
     }
 
     @Test
+    @DisplayName("Evolve to SS buys her shards cheapest first from a stock that never resets, and says it assumed none bought")
+    void evolveBuysTheLifetimeStock() {
+        // evolve-ss costs 30 Inver-Shards; she holds 2, so 28 are bought. The
+        // first 10 are 10 Scars each and the next 20 are 20 each, so 10 + 18:
+        // 100 + 360 = 460 Scars, exactly what the reader holds. Scars are not
+        // farmed with Serum, so the plan costs none.
+        Plan plan = solve(Goal.deterministic(HELENTINE, "evolve-ss"),
+                Inventory.empty(PROFILE)
+                        .with(new ItemId("inver-shard-lacrimosa"), 2)
+                        .with(new ItemId("phantom-pain-scar"), 460));
+
+        assertThat(plan.totalEnergy()).isZero();
+        assertThat(plan.conversions()).containsExactly(
+                new Conversion("phantom-pain-shop-inver-shard-lacrimosa", 18),
+                new Conversion("phantom-pain-shop-inver-shard-lacrimosa-discounted", 10));
+        assertThat(plan.explanation().notes()).anySatisfy(note -> assertThat(note)
+                .startsWith("Buying from a limit that never resets")
+                .contains("phantom-pain-shop-inver-shard-lacrimosa-discounted ×10")
+                .contains("assumes none of that allowance has been bought yet"));
+    }
+
+    @Test
+    @DisplayName("one Scar short and Evolve is refused, and the refusal cannot say which item ran out")
+    void evolveOneScarShortIsRefused() {
+        // 459 Scars buy the cheap ten and 17 of the rest; the 28th shard needs
+        // 20 more, and nothing in the bundle pays Scars (N32 (5)). The refusal
+        // is the generic one: the Scar has a source, the reader's own stock, so
+        // the item-by-item diagnosis finds nothing missing, and a stock that
+        // runs out is a quantity the MIP reports only as infeasible.
+        assertThatThrownBy(() -> solve(Goal.deterministic(HELENTINE, "evolve-ss"),
+                Inventory.empty(PROFILE)
+                        .with(new ItemId("inver-shard-lacrimosa"), 2)
+                        .with(new ItemId("phantom-pain-scar"), 459)))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("2 shop offer(s)")
+                .hasMessageNotContaining("phantom-pain-scar");
+    }
+
+    @Test
     @DisplayName("a weapon Overclock is refused, naming the one material nothing read supplies")
     void theWeaponsGapIsNamed() {
         // Hear the Bell wants 28 Weapon Overclock Core I, and the alpha box that

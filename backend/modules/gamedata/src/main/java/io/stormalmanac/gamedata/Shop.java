@@ -15,8 +15,16 @@ import java.util.List;
  *
  * @param price       what one purchase costs in {@code currency}; covers the
  *                    whole {@code offer} stack, not one unit of it
+ * <p><b>A limit that never resets</b> — thirty of a character's shards, ever —
+ * is a {@code periodLimit} with a {@code null} period, written {@value #NEVER}
+ * in a bundle and in storage, because ISO-8601 has no word for it. Its whole
+ * allowance is offered to any horizon of at least a day, which assumes the
+ * player has bought none of it yet: nothing a player records says how much of
+ * it they have spent, so the planner says it assumed so whenever it buys one.
+ *
  * @param periodLimit how many times per {@code period}; {@code 0} means unlimited,
  *                    and then {@code period} is inert
+ * @param period      how often the limit resets, or {@code null} for never
  */
 public record Shop(
         String id,
@@ -41,7 +49,7 @@ public record Shop(
                     "shop '" + id + "' is free and unlimited, which is unbounded free supply"
                             + " rather than a purchase");
         }
-        if (periodLimit > 0 && (period == null || periodDays(period) < 1)) {
+        if (periodLimit > 0 && period != null && periodDays(period) < 1) {
             throw new IllegalArgumentException(
                     "shop '" + id + "' has a limit per period and no period of at least one day");
         }
@@ -52,8 +60,30 @@ public record Shop(
         return List.of(offer);
     }
 
+    /** How a period that never ends is written, in a bundle and in storage. */
+    public static final String NEVER = "never";
+
     public boolean isUnlimited() {
         return periodLimit == 0;
+    }
+
+    /** A limit that is spent once and never refills. */
+    public boolean neverResets() {
+        return periodLimit > 0 && period == null;
+    }
+
+    /** The period as ISO-8601, or {@value #NEVER}. */
+    public String periodText() {
+        return period == null ? NEVER : period.toString();
+    }
+
+    /**
+     * The inverse of {@link #periodText()}.
+     *
+     * @throws java.time.format.DateTimeParseException when it is neither
+     */
+    public static Period parsePeriod(String text) {
+        return NEVER.equals(text) ? null : Period.parse(text);
     }
 
     /**
@@ -66,10 +96,15 @@ public record Shop(
      * month is 31 days and a year 366. A plan that assumes a purchase a shop may
      * not offer will come up short, and that is the costly mistake. Assuming too
      * few only makes the plan a little dearer than it has to be.
+     *
+     * <p>A limit that {@linkplain #neverResets never resets} is the exception,
+     * and a deliberate one: rounded against the player it would be zero for
+     * everybody, so it is the whole allowance, and the plan says so.
      */
     public long purchasesIn(int days) {
         if (days <= 0) return 0;
         if (isUnlimited()) return Long.MAX_VALUE;
+        if (neverResets()) return periodLimit;
         return (long) periodLimit * (days / periodDays(period));
     }
 
