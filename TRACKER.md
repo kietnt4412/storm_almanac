@@ -69,11 +69,11 @@ being finished with is.
   verified, so **anything added beside `modules`, `adapters`, `substrate`, `app`
   needs a line there**.
 - **The remote, checked 2026-09-19 — re-check it, do not trust it.**
-  **[PR #26](https://github.com/kietnt4412/storm_almanac/pull/26) is MERGED**;
-  its push-to-`main` run `35431786680` was still running at the twenty-seventh
-  session's start. PR #25 merged *before its own run finished*, green by luck
-  (archive, twenty-sixth). **Wait for the run before merging.** This session's
-  work goes up as a new PR from `dev`. **`dev` sits behind
+  **[PR #26](https://github.com/kietnt4412/storm_almanac/pull/26) is MERGED**,
+  its push-to-`main` run `35431786680` green. **[PR #27](https://github.com/kietnt4412/storm_almanac/pull/27)
+  is OPEN**, the twenty-seventh session's work; its run was in progress when
+  written. PR #25 merged *before its own run finished*, green by luck
+  (archive, twenty-sixth). **Wait for the run before merging.** **`dev` sits behind
   `main` with identical trees** — merge commits that never come back down;
   harmless, and *not* a reason to rebase. **The trap stands:** CI runs on `pull_request` and
   on push to `main` only, so **a push to `dev` with no open PR runs nothing,
