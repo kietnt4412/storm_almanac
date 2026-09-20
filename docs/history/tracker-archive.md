@@ -2746,6 +2746,87 @@ maintainer's, not a session's.
   expressible now and a banner still declares no pull currency and no price —
   **N28** — so nothing was published and there is no sequence 5.
 
+**Then all four Phase 4 items were planned, one decided and three held.** The
+maintainer asked for a plan per numbered action, chose option 2 on N30, and held
+the rest to decide later — with the condition that **Phase 4 does not close until
+each is done or explicitly cut on the record**. That condition is now on the
+Phase 4 board entry. The plans, so no session re-derives one:
+
+- **N30 — decided: a deadline, not a schedule.** The two candidates were (1) give
+  the event grant a cost in days and let `FEWEST_DAYS` schedule it, which wants a
+  time index and so collides with ADR 0013, and (2) let it stay supply that
+  `occurrences` already truncates, and report the deadline. **(2) was chosen.**
+  What is already true: `occurrences` truncates against `closesAt`,
+  `Cadence.EVENT`/`ONE_OFF` cap at one, and `Availability.isExpiring()` exists
+  and is read by nothing. Three gaps: a **deadline note**; a **lapsed note**,
+  because `claimable()` filters a reward with zero occurrences out *silently*, so
+  a grant that shut on day 4 of a 63-day plan vanishes rather than being reported
+  — the exact mirror of ADR 0022's `withheldGrants`; and a **`FEWEST_DAYS`
+  sentence**, since a shorter horizon is the only thing that keeps an expiring
+  grant in reach. Shape: `Outcome` gains `expiringClaims` and `lapsedGrants`, two
+  notes in `MipOptimizer` beside the existing pair, **ADR 0024**, and tests
+  against `pg-event-1` — present in proving-ground 1.0, gone from 1.1 because the
+  event ended, which is a ready-made fixture pair. No migration, no bundle
+  change, nothing game-specific. **Explicitly out of scope, so nobody re-opens
+  it:** no time index, no per-day variables, no scheduling of the claim.
+- **N33 — the premise was wrong and the finding is worth more than the plan.**
+  The maintainer asked to skip the per-level EXP and record "the level and the
+  Cogs" instead. **Both are already recorded.** The thirteen level gates are in
+  the bundle's own Promote comment — Lv 2, 10, 20, 30, 40, 45, 50, 55, 60, 65,
+  70, 75, 80, with step 11's Lv.70 read through an overlapping weapon model — and
+  the thirteen Cog costs are rows, 5 000 up to 100 000, **542 500 in total, Cogs
+  only**. What is missing is only the EXP, and **the bundle comment already
+  explains why that blocks the gates; the code confirms it.**
+  `DemandResolver.payUpTo(required, false)` passes `mustBeReachable = false` for
+  a gate, deliberately, because a gate may name the start of a track
+  (`promote-0`). So a required state that **no upgrade produces resolves to an
+  empty path and costs nothing**: `"requires": ["level-40"]` today would be a
+  gate every plan meets for free — which is *worse* than prose, because prose is
+  honest about being unread and a free gate looks priced. So the twelve gates
+  need the EXP or they need nothing. **Two things make it cheaper than it looks.**
+  It is **incremental** — the ladder is a chain, so any prefix priced unlocks
+  exactly that many gates, and Lv 80 is already pinned at 497 000; one sitting
+  need not do twelve. And there is **a code-only piece available now**: a state
+  required by a gate but appearing as neither a `toState` nor any upgrade's
+  `fromState` can never be produced by anything, and today that is
+  indistinguishable from a legitimate track start. Refusing it by name in
+  `AuthoredBundlesTest` turns the trap into a build failure — at present the
+  guard is a human holding it up in a JSON comment.
+- **N20 — five pieces, and the work is the fifth.** `EnergyMip.matchingDays`
+  (line 682) calls `from.atZone(ZoneOffset.UTC).getDayOfWeek()`. The schema half
+  is exactly the **V11** shape just executed: two fields on `Game` (rollover zone
+  and hour), parser, writer, migration, JDBC round trip, optional so every
+  published bundle reads back meaning what it claimed. **The real work is step
+  five**: a 05:00 boundary changes *which weekday a plan starting before 05:00
+  begins on*, and the rotation grouping shares capacity over subsets of weekday
+  restrictions, so a wrong start day moves a whole day of energy into the wrong
+  bucket. **Two traps:** do not let a rollover hour become a per-day variable
+  (ADR 0013 is what holds p95 at 1 807 ms), and do not try to finish
+  `Availability.opensAt` in the same change — the banner's opening time is still
+  unread. Do it with PGR, whose 05:00 UTC reset was read 2026-09-19.
+- **B5 — the sequence, and what a session cannot do alone.** Current state
+  checked: `deploy` is `if: false` at `ci.yml:76`, its body still echoes
+  *"TODO(phase-0) wire Fly.io or the VPS deploy here"* then `exit 1`, with
+  `DEPLOY_URL: https://example.invalid`. Keep the skipped-is-honest property that
+  comment argues for. **Two decisions first.** *One origin or two:* `SecurityConfig`
+  writes the CSRF token into a cookie the page reads and the commented OAuth
+  stanza uses `{baseUrl}/login/oauth2/code/{registrationId}`; locally the Vite
+  proxy forwards `/api` and `/dev` to `localhost:8080`, so everything has been
+  same-origin from day one — a Vercel rewrite preserves that and two real origins
+  break session cookie, CSRF cookie and OAuth redirect at once. *The free tier
+  sleeps:* decide warm-up ping, honest loading state, or acceptance **before**
+  five strangers meet it. **Then:** (1) build the image locally, end to end, which
+  has never been done — the in-container Gradle download was abandoned at 10%
+  after twenty minutes — and check the `COPY` list against the module tree first,
+  because it omitted `adapters/` for a whole phase; (2) Render service plus
+  Postgres, where Flyway's **eleven** migrations meet an empty database outside
+  Testcontainers for the first time; (3) Vercel with the `/api/*` rewrite; (4)
+  register the OAuth client against the real redirect URI, the first exchange
+  ever; (5) flip `deploy` to `main`, replace the TODO, keep the `curl --fail`
+  smoke; (6) **delete `:modules:identity-dev`** — ADR 0017's trigger, and the
+  actual end of B5. **Steps 2 to 4 need the maintainer's accounts**; a session can
+  do 1, 5, 6 and the rewrite config.
+
 **2026-09-20 (twenty-ninth) — N32 (5): a grant sized by the player is an answer
 the reader supplies.** [ADR 0022](../adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md).
 No new reading. **This closes N32**: all five shapes the first full bundle

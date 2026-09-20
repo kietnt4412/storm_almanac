@@ -53,8 +53,7 @@ being finished with is.
   **Nothing is deleted yet and the order matters:** the adapter stays as a
   never-shipped cross-check until a replacement exists, because removing it first
   leaves the project with no real data at all. **The cost on patch 3.5:** ~2 700
-  catalog facts — typing, mostly additive — and **595 drop-rate facts**, which is
-  the bootstrap problem.
+  catalog facts, and **595 drop-rate facts** — the bootstrap problem.
 - **The bootstrap problem is the main risk in the project, and the cheap way out
   is not there** (N26). No yield means no ranking means no plan; own drop data
   means Phase 6, which means users, which means a working plan. **The publisher
@@ -194,113 +193,118 @@ Be precise about this, because the temptation is to read "build green" as "it
 works". It does not mean that:
 
 - **CI does not run the tests that matter most.** The three snapshot-gated classes
-  are the ones that would catch an upstream-shape surprise, **and the only
-  evidence the optimizer is fast enough or right about anything real.** The stale
-  stage table that cost five sessions of plans was caught by no test at all — a
-  person went looking.
-- **The OAuth exchange has never run.** No client id, no secret, no redirect
-  followed, because there is no URL to register one against (D1). **The
-  development sign-in does not narrow this by one inch** — it builds a principal
-  directly — and reading N24 as "sign-in works" is the misreading ADR 0017 exists
-  to prevent.
-- **Most authenticated tests still go through MockMvc.** `DevSignInTest` is the
-  exception — a real port, a hand-kept cookie jar — so the servlet container is
-  exercised for sign-in and profiles **and not for the plan or the merge**.
-- **No two real devices have ever synced**, though one browser's stale edit has now lost to a newer
-  value and said so. Still argued rather than measured: two requests interleaving on the same key at
-  the same instant. And **a merge publishes nothing**, so a cached plan is not invalidated when the
-  inventory under it moves — harmless today, **read it before Phase 6 depends on an inventory being
-  current**.
-- **Nothing has ever asked the gacha engines a question on behalf of a player.** No route, no
-  screen, no bean, and **`PityState` is stored nowhere** — `player` has an inventory, a roster and
-  goals, and no pity counters. "Probability of guaranteeing her" is computable and unanswerable,
-  and the gap is a schema and a screen rather than an engine. **Three banners are first-hand and
-  five are not (Q4)** — R1999's anniversary limited, and both PGR archetypes since 2026-09-20 — so
-  every other fixture proves only that the model reproduces figures it was *given*; and
-  **multi-copy answers are too pessimistic**, because 200 Cassettes of the Lost buy a copy and
-  nothing models it: at two copies the engines say 280 pulls and the truth is 200. **No bundle
-  declares a banner at all**, so every gacha number here is a fixture's (**N28**).
-- **One character is not a catalog, and its plans are partial.** Twelve of
-  thirteen Promote gates are prose, because no level below 80 has a price; and
-  the roster holds **one state per entity**, so a reader recorded at
-  `promote-12` is charged the whole level track again (ADR 0019). **No
-  `progress:` line or shadow price has ever rendered in the frontend, and no
-  frontend sends `reach`** — so every plan the web client asks for counts no
-  scored grant and carries the note saying which ones it left out (ADR 0022).
-  Every R1999 catalog and drop number in this file still comes from Kornblume.
-- **Nothing is deployed** ([D1](#d1--deployment-deferred-2026-09-02); the `deploy`
-  job is `if: false`), **nothing has run against a jar from a Dockerfile that
-  works**, and **nothing has called the API under load** — every request loads a
-  whole version, fifteen queries, a deferral written into `GameDataReadModel`'s
-  javadoc. The PWA has been loaded with its origin dead but **an offline *write*
-  path has not**; reproducing the load needs the **built** bundle (`web-built`,
-  port 4173), because the dev server has no worker worth the name.
-- **The frontend's 15 tests will never catch one class of defect.** jsdom computes
-  no layout — a `display: block` folding a table header got through. **Behaviour
-  is the pipeline's, appearance is a person's, and driving a browser before
-  shipping a screen is still required.** Relatedly, **a new page and an old API do
-  not deploy at the same instant, and the first time that happened the page
-  rendered as nothing**: fixed, with the wire types now marking the field optional
-  so the compiler points at every call site. **That is B5's problem in miniature.**
+  are the only evidence the optimizer is fast enough or right about anything real.
+  The stale stage table that cost five sessions of plans was caught by no test at
+  all — a person went looking.
+- **Two layers are barely exercised.** Most authenticated tests go through
+  MockMvc; `DevSignInTest` is the exception — a real port, a hand-kept cookie jar
+  — so the container is exercised for sign-in and **not for the plan or the
+  merge**. And jsdom computes no layout, which let a `display: block` fold a table
+  header past the frontend's 15 tests: **appearance is a person's job, and driving
+  a browser before shipping a screen is still required.**
+- **Five things have never run once, and every one waits on B5.** The **OAuth
+  exchange** — no client id, no secret, no redirect followed, and **the
+  development sign-in does not narrow it by one inch**, so reading N24 as
+  "sign-in works" is the misreading ADR 0017 exists to prevent. **A jar from a
+  Dockerfile that works.** **The API under load** — every request loads a whole
+  version, fifteen queries, a deferral written into `GameDataReadModel`'s javadoc.
+  **An offline *write* path**, which needs the **built** bundle (`web-built`, port
+  4173) because the dev server has no worker worth the name. And **a page and an
+  API deployed at different instants** — that happened once and the page rendered
+  as nothing, fixed by wire types marking the field optional so the compiler
+  points at every call site. **B5's problem in miniature.**
+- **No two real devices have ever synced.** One browser's stale edit has lost to a
+  newer value and said so; two requests interleaving on the same key at the same
+  instant is argued rather than measured. And **a merge publishes nothing**, so a
+  cached plan survives the inventory under it moving — harmless until Phase 6.
+- **Nothing has ever asked the gacha engines a question on behalf of a player.**
+  No route, no screen, no bean, and **`PityState` is stored nowhere**: the gap is a
+  schema and a screen rather than an engine. **Three banners are first-hand and
+  five are not (Q4)**, **no bundle declares a banner at all** (**N28**), and
+  **multi-copy answers are too pessimistic** — 200 Cassettes of the Lost buy a
+  copy and nothing models it, so at two copies the engines say 280 pulls and the
+  truth is 200.
+- **One character is not a catalog, and its plans are partial** (**N33**). The
+  roster holds **one state per entity**, so a reader recorded at `promote-12` is
+  charged the whole level track again (ADR 0019). **No `progress:` line or shadow
+  price has ever rendered, and no frontend sends `reach`** — so every plan the web
+  client asks for counts no scored grant and says which it left out (ADR 0022).
+  Every R1999 catalog and drop number in this file comes from Kornblume.
 - **Eight qualifications of the closed phases are
   [in the archive](docs/history/tracker-archive.md#qualifications-moved-out-of-the-live-tracker-2026-09-11-seventeenth-session)**
-  — the benchmark being one guide, the two large community disagreements, the three shapes the
-  model cannot express, and the rest. **Read them before re-opening Phase 1, 2 or 11.**
+  — the benchmark being one guide, the two community disagreements, the three
+  shapes the model cannot express. **Read before re-opening Phase 1, 2 or 11.**
 
 ---
 
 ## Next actions
 
-Ordered. Completed ones move to
-[the archive](docs/history/tracker-archive.md#completed-next-actions).
+**One item is live; everything else is held for the maintainer.** Completed ones
+move to [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **N33 — Read the EXP to Lv 2, 10, 20 … 75, and price the other twelve
-      Promote gates.** **A reading, not code, and the maintainer's.** MAX on one
-      Pod size from each level, the way Lv 80 was pinned to (496 000, 497 000].
-      Until it exists, twelve of thirteen gates are prose and **every plan below
-      the top rank is cheaper than the truth** — the same error that made her
-      last rank 180 Serum when it is 1 470. **N32 is closed and this is what it
-      left** ([the account](docs/history/tracker-archive.md#completed-next-actions)):
-      the format can now hold the rows, so nothing but the reading is missing.
-      Carry one thing into it: the roster's **one state per entity** over-charges
-      any reader whose recorded state is on a different track from the gate —
-      read ADR 0019 first.
-- [ ] **N30 — Put the event shape into the solver (D3).** **Shops are done**
-      (twenty-fifth session) **and so is fodder** (twenty-sixth). **Dropped** —
-      **probabilistic goals**: weapon
-      Resonance is picked; Memory Resonance is rolled but no goal names its skill.
-      **Also:** a PGR event is **a one-time grant behind a capability gate inside
-      a closing window** — no energy, no repetition, no yield; `EnergyMip` and
-      `Reward`'s cadence cannot express it, and **`FEWEST_DAYS` against
-      `Availability.closesAt`** is the question, not `LEAST_ENERGY`. **The gate
-      half is answered:** *"can this player clear N"* is an input the reader
-      supplies (ADR 0022), and an event mission is a `Reward` with a requirement
-      and a `closesAt`. What is left is the **window**, and whether a one-time
-      grant the reader must act on inside it is a plan or a deadline.
-- [ ] **N28 — Give a banner a pull currency and a price, then write `IncomeModel`.
-      Unblocked — the numbers exist.** **1 pull = 250 Event Construct R&D
-      Tickets**, **1 Black Card = 1 ticket**, **1 Rainbow = 10 Black**, **119
-      Rainbow = $19.99** — about $4.20 a pull. A schema change rather than a
-      decision: a bundle field, parser, writer, a migration and the JDBC round
-      trip, exactly like **N20**. **Plus a decision the first bundle forced** — the
-      ticket must exist as an `Item` and `Item.rarity` is required. Shop and
-      reward *tiles* turned out to grade Cogs, Simulation Score and Scars, so try
-      the ticket's tile before making rarity optional. **Do it with a game whose income sources are
-      ingested**: the accrual side reads `Reward` cadences and nothing ingested has
-      been checked for them. **Two more fields belong in the same change**, both
-      from R1999: a **shop exchange for the featured unit** — cassettes cut six
-      copies from 840 pulls to 560 — and a **cap on copies**, since `copies` is
-      unbounded. **This is now the only thing keeping a banner out of a bundle**:
-      since ADR 0023 both PGR archetypes are expressible and neither is authored,
-      so N28 ends in a **sequence 5** rather than in a schema.
+### Take next
+
+- [ ] **N30 — An expiring grant is a deadline the plan reports, not a schedule
+      it builds (D3).** **Decided 2026-09-20**, which closes the window question
+      N30 was carrying: an event never becomes a solver decision, so no time index
+      and ADR 0013 stands. **Most of it already works** — `occurrences` truncates
+      against `closesAt`, `Cadence.EVENT` caps at one, `Availability.isExpiring()`
+      exists and is read by nothing. **Three things are missing:** a **deadline
+      note** for a claimed grant closing inside the horizon; a **lapsed note** for
+      one closing *before* the horizon ends, which `claimable()` drops
+      **silently** today, so a reader on a 63-day plan is never told the event
+      shut on day 4 — the ADR 0022 mirror, and the half that matters; and the
+      **`FEWEST_DAYS` sentence**, because a shorter horizon is the one thing that
+      keeps an expiring grant in reach and saying so beats modelling it.
+      `Outcome` gains `expiringClaims` and `lapsedGrants`; **ADR 0024**; fixture
+      is `pg-event-1`, in proving-ground 1.0 and gone from 1.1. **No migration, no
+      bundle change, nothing game-specific.**
+
+### Held — Phase 4 scope, and the maintainer decides
+
+**None of these is started, and that is deliberate.** **Phase 4 does not close
+until each is done or explicitly cut, on the record** — a cut is a decision and
+goes in the session log; a silence is not a cut. **Each was planned in full on
+2026-09-20, [in the archive](docs/history/tracker-archive.md#session-log)** —
+read the plan rather than re-deriving one.
+
+- [ ] **N33 — Price the twelve Promote gates. A reading, and the maintainer's.**
+      **The levels and the Cogs are already read** — Lv 2, 10, 20 … 80 in the
+      bundle's own Promote comment, thirteen Cog rows totalling **542 500**.
+      **Only the EXP is missing, and without it the gates cannot be written at
+      all:** a required state no upgrade produces resolves to an empty path and
+      **costs nothing**, so `"requires": ["level-40"]` today is a gate every plan
+      meets for free — worse than prose. **Incremental**: any prefix priced
+      unlocks that many gates.
 - [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
       `EnergyMip.matchingDays` reads weekdays in **UTC**, a game assumption in a
-      game-agnostic module. R1999 Global rolls over at **05:00 UTC−5, weekly
-      Monday**; **PGR's server clock is UTC and its daily reset 05:00 UTC** (read
-      2026-09-19, cross-checked against this machine's clock). The banner still
-      has no window: its *opening* time was never read. PGR rotates, and it is
-      the launch. Same five pieces as
-      N28; do it *with* that game, not speculatively.
+      game-agnostic module that `GameAgnosticismTest` cannot see. **PGR's reset is
+      05:00 UTC**, R1999 Global's 05:00 UTC−5. Five pieces, exactly the **V11**
+      shape — and the work is the last one, because a rollover hour changes which
+      weekday index 0 is. **Do not index by day** (ADR 0013).
+- [ ] **B5 — Wire the real deploy: Vercel and Render.** **Settle two things
+      first.** *One origin or two:* a Vercel rewrite of `/api/*` to Render keeps
+      the same-origin session, CSRF and OAuth redirect the backend was built
+      around; two real origins do not. *The free tier sleeps:* a cold start is
+      tens of seconds against a two-second solve promise. **Build the image
+      locally first** — never done end to end, and nothing else is testable until
+      it is. **Ends with `:modules:identity-dev` deleted** (ADR 0017's trigger),
+      not merely with a URL.
+
+### Held — later phases, not Phase 4's business
+
+- [ ] **N28 — Give a banner a pull currency and a price, then write `IncomeModel`.
+      Unblocked — the numbers exist** and are in
+      [the research note](docs/game-facts/punishing-gray-raven-research-disclosure.md):
+      **1 pull = 250 Event Construct R&D Tickets**, about **$4.20 a pull**. A
+      schema change rather than a decision, the same five pieces as **N20**.
+      **Plus a decision the first bundle forced** — the ticket must be an `Item`
+      and `Item.rarity` is required; tiles grade Cogs, Score and Scars, so try the
+      ticket's tile before making rarity optional. **Two more fields belong in the
+      same change**, both R1999: a **shop exchange for the featured unit** —
+      cassettes cut six copies from 840 pulls to 560 — and a **cap on copies**.
+      **This is the only thing keeping a banner out of a bundle**, so N28 ends in a
+      **sequence 5** rather than in a schema.
 - [ ] **N18 — Put drop estimates into `SolveKey` in the same change that first
       publishes one.** The moment Phase 6 does, a plan cached against yesterday's
       rates is served as today's — the one staleness bug the key's design cannot
@@ -309,15 +313,6 @@ Ordered. Completed ones move to
       trigger), **and before any benchmark against the Phase 8 replicated KV**
       whatever the node count: a replicated cache measured against an in-process
       map is measuring the network, which ADR 0003 forbids.
-- [ ] **B5 — Wire the real deploy: Vercel and Render.** The `deploy` job stays
-      `if: false` until there is a real URL to smoke, which is what this produces.
-      **Settle two things first.** *One origin or two:* a Vercel rewrite of
-      `/api/*` to Render keeps the same-origin session, CSRF and OAuth redirect the
-      backend was built around; two real origins do not. *The free tier sleeps:* a
-      cold start is tens of seconds against a two-second solve promise — warm-up
-      ping, honest loading state, or acceptance, decided before five strangers meet
-      it. **This also unblocks the OAuth exchange**, and it **ends with
-      `:modules:identity-dev` deleted** (ADR 0017's trigger), not merely with a URL.
 
 ---
 
@@ -342,11 +337,15 @@ previous one's criterion is met. The "Landed" record for closed phases is
       and **N25 is closed** — five screens driven in a browser including the
       overlay, provenance read back onto the page, the PWA loaded with its server
       killed, a frontend suite in CI. **Nothing is deployed**, and since D3 the
-      launch title is PGR: its bundle plans a character whole except the twelve
-      unpriced gates (**N30**, **N33**). Launch publicly even if ugly.
+      launch title is PGR, which **no screen has ever rendered** — every one was
+      built against R1999. Launch publicly even if ugly.
       **Exit:** five strangers complete a plan without asking for help, and a
       logged-in character page shows what that reader is short of. *The second
       clause is served; the first needs **B5**.*
+      **Closing condition, set 2026-09-20:** the exit is necessary and not
+      sufficient — **N30, N33, N20 and B5 are each either done or explicitly cut
+      before this box is ticked**, with the cut recorded in the session log.
+      Nothing here closes by having been forgotten.
 - [x] **Phase 5 · Gacha engine** — closed 2026-09-12 out of order
       ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)); **one banner
       first-hand (Q4)**, income model and shop exchange are **N28**.
@@ -526,7 +525,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-20 | thirtieth | N31: a drawn guarantee is a rate curve, not a state dimension (ADR 0023, V11). The exact chain gained nothing; the simulation draws anyway, and caught itself sampling the prior — 0.558 against the chain's right 0.382 |
+| 2026-09-20 | thirtieth | N31: a drawn guarantee is a rate curve, not a state dimension (ADR 0023, V11). The exact chain gained nothing; the simulation draws anyway, and caught itself sampling the prior — 0.558 against the chain's right 0.382. Then all four Phase 4 items planned: N30 decided as a deadline, N33's premise found already recorded, three held |
 | 2026-09-20 | twenty-ninth | N32 closed by its fifth shape: a grant behind a score the reader supplies (ADR 0022, V10). Sequence 4, the Phantom Pain Cage: Evolve to SS in 63 days and no Serum. The EXP reading leaves as N33 |
 | 2026-09-19 | twenty-eighth | N32 (4): one step at several prices is a choice the solver makes (ADR 0021, V9). Sequence 3: Samantha's Resonance, 90 Serum |
 | 2026-09-19 | twenty-seventh | N32 (3): a shop limit that never resets (ADR 0020). Sequence 2, the shard shop, published; Evolve to SS plans |
