@@ -1112,6 +1112,36 @@ solver cannot reach.
       because the file changed after draft 0 was ingested. Awaken and the
       Phantom Pain shop were read and **refused by the format** — now **N32**.
 
+- [x] ~~**N32 (1)–(5) — Give the format the shapes the first full bundle
+      refused.**~~ Done across four sessions, 2026-09-19 to 2026-09-20. Each one
+      was read off Punishing: Gray Raven, refused by the model, and then written:
+
+      1. **A gate is a state, and a level is a cost in EXP.** ADR 0019, `V8`.
+         Her last Promote step went from 180 Serum to **1 470** — the gate was
+         88% of the goal and the old plan charged none of it.
+      2. **Fodder pays progress.** Same ADR and migration: a `Fodder` rule names
+         the `progress:<kind>` it feeds, so Pods have somewhere to go. Samantha's
+         Overclock went 240 → **420 Serum**.
+      3. **A limit that never resets is offered whole.** ADR 0020, a shop period
+         of `"never"`; the plan says it assumed none of the allowance spent,
+         because nothing a reader records says otherwise. Evolve to SS became
+         plannable for a reader holding Scars.
+      4. **One step at several prices is a choice the solver makes.** ADR 0021,
+         `V9` dropping `upgrade_edge_unique`. Several upgrades making the same
+         move are one step, demanded as a `choice:` item. Samantha's Resonance
+         is **90 Serum** through the one price that can be farmed.
+      5. **A grant sized by the player is an answer the reader supplies.** ADR
+         0022, `V10`. A `Reward` may stand behind a score on an opaque measure,
+         and `SolveRequest.reach` is what the reader says they reach. The weekly
+         Phantom Pain Cage is nine tiers, and Evolve to SS is **63 days and no
+         Serum** for a reader who clears it.
+
+      **Exit met:** every one of the five is in the bundle as a row, published
+      (sequences 1–4) and read back as *no changes*, with a plan whose arithmetic
+      was worked out by hand before it was run. **What N32 keeps** is the one
+      part that was never code: the **EXP at the other twelve Promote gates**,
+      which is a reading and the maintainer's.
+
 ## Closed phases, in full
 
 The live tracker keeps each phase's exit criterion, its status and the
@@ -2588,6 +2618,75 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-20 (twenty-ninth) — N32 (5): a grant sized by the player is an answer
+the reader supplies.** [ADR 0022](../adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md).
+No new reading. **This closes the format work N32 opened**: all five shapes the
+first full bundle refused are now writable.
+
+- **The remote at start:** PR #28 merged, `dev` and `main` with identical trees,
+  nothing outstanding.
+- **The problem, stated as three bad options.** The weekly Phantom Pain Cage
+  pays Scars in nine tiers, 4 to 10 each, behind scores from 30 000 to
+  1 100 000, and they add to the 56 a week the maintainer reports. Writing the
+  56 promises every reader the top tier; writing the bottom tier is a different
+  reader's week; leaving it out — which sequence 3 did — charges 500 Scars for
+  Evolve to SS and names no way to earn one. **The size of the grant is not a
+  fact about the game.**
+- **So it is a fact about the reader, and the project already had one of those:
+  `energyPerDay`.** `PlanController` refuses to guess it, on the grounds that a
+  guess produces a plan that is wrong in days without being wrong in any way the
+  reader can see. A weekly score is the same argument one step out, which is why
+  `reach` went on `SolveRequest` rather than into the player schema.
+- **One reward per rung.** `Reward.Requirement(measure, atLeast)`, the measure an
+  opaque label like a state or a `Progress.kind`. Nine tiers are nine `WEEKLY`
+  rewards, and the format learns nothing about ladders: a reader at 120 000
+  clears three of them by comparison, not by rule. `V10` adds two nullable
+  columns with a both-or-neither check — a measure read back without its bar
+  would turn a tier some readers collect into one everybody does.
+- **Withheld grants are dropped before the model, not bounded at zero inside
+  it**, so every count a plan or a refusal reports is the game *that reader*
+  plays. The refusal for the one tier they do clear says "1 reward(s)", not 9.
+- **Three things the session measured rather than assumed.**
+  1. **The solver claims 8 of the bottom tier, not 9.** Nine weeks of all nine
+     tiers is 504 Scars against the 500 the shards cost, so it drops one claim
+     of the 4-Scar tier and lands on exactly 500. That is the reward tie-break
+     doing what it was written for, and the first assertion was wrong, not the
+     code.
+  2. **The refusal still named nothing**, because the demanded item is the
+     *shard* and the Scar is the shop's *currency* — and `whyNotBuyable` stopped
+     at "nothing available can supply it". So it now follows the currency one
+     level down and names the **lowest** bar of the nine plus how many are
+     above it. One level only: a refusal nobody finishes reading is a refusal
+     that did not happen.
+  3. **Existing plans did not move.** Every other test in
+     `AuthoredBundlePlanTest` passed untouched, because an unanswered measure
+     counts nothing — but the Cage grants Cogs and Skill Points, so those plans
+     now carry the note saying what was not counted.
+- **Sequence 4 of the bundle:** nine `phantom-pain-cage-*` rewards under a new
+  provenance, `phantom-pain-cage-screen` (OBSERVED_IN_GAME, the maintainer's
+  2026-09-19 screenshots of the Weekly Reward screen). *Preview* read **exactly
+  nine additions**, 104 facts over six provenances, all first-hand. *Ingest*
+  made draft 4 with the same nine. *Publish*: **2026-09-20T00:13:59Z**, and a
+  re-preview against it reads **no changes**. The next correction is a
+  sequence 5.
+- **Three tiers are written short, always downward.** The 500 000 and 1 000 000
+  tiles also pay a gold 5★ card and a 4★ chip, and the 700 000 tile a 4★
+  portrait item; none has been opened, so none is a bundle item and none is in
+  the rows. A tier that pays less than it does makes the plan dearer than the
+  truth.
+- **What it buys, worked out by hand first and matched on the first run:** a
+  reader who says they reach 1 100 000 is planned Evolve S → SS in **63 days
+  and no Serum** — 30 shards at 10 and 20 Scars is 500, nine weekly resets pay
+  504. A reader who says 30 000 is refused. A reader who says nothing is refused
+  *by name*, which is the sentence the session before could not produce.
+- **384 backend tests (+9), 0 skipped locally**; 368 expected on CI, where the
+  16 snapshot-gated ones skip. The upstream snapshot is present on this machine,
+  so the local run included them.
+- **Left undone, deliberately.** No screen asks the reader what they reach, so
+  `reach` is retyped per request and no frontend sends it at all. A measure has
+  no display name, so the screen that does ask will have a slug to show. Both
+  are in ADR 0022's consequences, and the second is what would hurt first.
 
 **2026-09-19 (twenty-eighth) — N32 (4): one step at several prices is a choice
 the solver makes.** [ADR 0021](../adr/0021-one-step-at-several-prices-is-a-choice-the-solver-makes.md). No new reading.

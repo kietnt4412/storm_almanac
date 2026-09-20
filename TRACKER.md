@@ -16,7 +16,7 @@ being finished with is.
   [The 826-line version it replaces is in the archive, verbatim](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression) —
   go there for anything this file no longer carries, and decide whether it is
   still operative rather than assuming it was lost.
-- Last updated: **2026-09-19** (twenty-eighth session)
+- Last updated: **2026-09-20** (twenty-ninth session)
 
 ---
 
@@ -35,8 +35,10 @@ being finished with is.
   skill to its cap is **150 Serum**, a Memory's Overclock **420**, her
   last rank **1 470**, Evolve to SS **30 shards from a stock that never resets**
   (`AuthoredBundlePlanTest`, [ADR 0020](docs/adr/0020-a-limit-that-never-resets-is-offered-whole.md)).
-  **Sequence 3 is published** (2026-09-19T09:18:31Z, read back as *no changes*):
-  Samantha's Resonance at three prices, 90 Serum. Below the top rank plans are still too cheap:
+  **Sequence 4 is published** (2026-09-20T00:13:59Z, read back as *no changes*): the weekly Phantom
+  Pain Cage, nine tiers behind nine scores ([ADR 0022](docs/adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md)),
+  so a reader who says they clear it is planned **Evolve to SS in 63 days and no Serum**, and one
+  who says nothing is refused *by name*. Below the top rank plans are still too cheap:
   no level under 80 has a price, so twelve gates are prose. What the client
   overruled in the guides: the featured rule is a **per-banner rate** (70% with
   a Calibration guarantee, or 100%); **events have no shops** and pay one-time
@@ -68,17 +70,14 @@ being finished with is.
   2026-09-09, every image build failing in six seconds while this file called it
   verified, so **anything added beside `modules`, `adapters`, `substrate`, `app`
   needs a line there**.
-- **The remote, checked 2026-09-19 — re-check it, do not trust it.**
-  **[PR #27](https://github.com/kietnt4412/storm_almanac/pull/27) is MERGED**,
-  its PR run green; the push-to-`main` run `35432960832` was in progress when
-  checked. **[PR #28](https://github.com/kietnt4412/storm_almanac/pull/28) is OPEN**, the twenty-eighth session's work.
-  PR #25 merged *before its own run finished*, green by luck
-  (archive, twenty-sixth). **Wait for the run before merging.** **`dev` sits behind
-  `main` with identical trees** — merge commits that never come back down;
-  harmless, and *not* a reason to rebase. **The trap stands:** CI runs on `pull_request` and
-  on push to `main` only, so **a push to `dev` with no open PR runs nothing,
-  silently**. Every merge re-arms it; six times now, each caught by looking.
-  **Run `gh pr list` and open the PR before trusting a push to `dev`.**
+- **The remote, checked 2026-09-20 — re-check it, do not trust it.**
+  **[PR #28](https://github.com/kietnt4412/storm_almanac/pull/28) is MERGED**, and `dev` and `main`
+  had identical trees at the start of this session — `dev` sits behind by merge commits that never
+  come back down, which is harmless and *not* a reason to rebase. **The trap stands:** CI runs on
+  `pull_request` and on push to `main` only, so **a push to `dev` with no open PR runs nothing,
+  silently**; every merge re-arms it, seven times now, each caught by looking. And PR #25 merged
+  *before its own run finished*, green by luck (archive, twenty-sixth). **Run `gh pr list`, open the
+  PR, and wait for the run before merging.**
 
 ### Two standing caveats, read them every session
 
@@ -157,12 +156,12 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **375 tests** in full 2026-09-19, 0 skipped locally; **359 expected on CI**, where the 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
-| Authored game data | **One bundle, sequence 3 published, first-hand** | Helentine: Lacrimosa (level to 80, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, and Upper Resonance at three prices since sequence 3), one stage, 11 shop rows, 2 box crafts, 5 fodder rules. **Sequence 1 published 2026-09-19T08:13:20Z**, read back as *no changes*. The file is **sequence 2**: the two Phantom Pain shard rows, `"never"`, 90 facts, all first-hand. Preview, ingest and publish read **exactly those two changes**; **published 2026-09-19T08:40:51Z**, read back as *no changes*. **Sequence 3, published 2026-09-19T09:18:31Z** (preview and ingest read exactly five changes, 95 facts all first-hand; read back as *no changes*; the next correction is a sequence 4), adds the 5★ Memory Shard (named from its item card, a maintainer screenshot), Special Support Token, and three Resonance rows: 246 Score is 3 runs, 90 Serum. The second tier's price of 20 is their in-game reading, against a tile that says *"was 30"*. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan |
+| Backend build | **Green** | **384 tests** in full 2026-09-20, 0 skipped locally; **368 expected on CI**, where the 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
+| Authored game data | **One bundle, sequence 4 published, first-hand** | Helentine: Lacrimosa (level to 80, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, and — since **sequence 4, published 2026-09-20T00:13:59Z** — the weekly Phantom Pain Cage's nine tiers. **104 facts, all first-hand**, over six provenance entries; preview and ingest read **exactly the nine additions**, and the published version reads back as *no changes*. **Every sequence so far has been published and read back clean** ([the loop, per sequence, in the archive](docs/history/tracker-archive.md#session-log)); the next correction is a sequence 5. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan |
 | CI workflow | **Green, no warnings, Node 24** | Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
-| The MIP (`EnergyMip`) | **Stages, crafts, shops, rewards and fodder** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. A purchase is a conversion capped at limit × *whole* periods, or the whole allowance of one that never resets, which the plan says it assumed unspent (ADR 0020); feeding fodder is a conversion into a `progress:<kind>` item, and paying one of a step's several prices a conversion into a `choice:` item (ADR 0021). Gates are not in the model: `DemandResolver` turns them into demand (ADR 0019) |
+| The MIP (`EnergyMip`) | **Stages, crafts, shops, rewards and fodder** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. A purchase is a conversion capped at limit × *whole* periods, or the whole allowance of one that never resets, which the plan says it assumed unspent (ADR 0020); feeding fodder is a conversion into a `progress:<kind>` item, and paying one of a step's several prices a conversion into a `choice:` item (ADR 0021). Gates are not in the model: `DemandResolver` turns them into demand (ADR 0019). **A grant behind a score the reader has not cleared is dropped before the model** and reported in the notes, so the counts in a plan and in a refusal are the game *that reader* plays (ADR 0022) |
 | The time axis | **A scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). Rotation is capacity shared over *subsets* of weekday restrictions; **no variable is indexed by day**, which is why p95 held at **1 807 ms**. Weekdays are read in **UTC** — a game assumption in a game-agnostic module (**N20**) |
 | `gacha` — engines | **Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). An exact chain and 500 000 seeded trials sharing one validated `PullModel`, so both refuse the same banners for the same reasons. **51 tests, worst gap 0.110 points over 96 questions, at 2.22 standard errors.** Only the headline rarity is modelled |
 | `gacha` — income model | **Interface only, unwritable** | `projectedPulls` needs to know which item is pull currency and what a pull costs in it. **Neither `BannerModel` nor the `banner` table declares either** — **N28**, whose numbers now exist |
@@ -204,17 +203,15 @@ works". It does not mean that:
 - **Most authenticated tests still go through MockMvc.** `DevSignInTest` is the
   exception — a real port, a hand-kept cookie jar — so the servlet container is
   exercised for sign-in and profiles **and not for the plan or the merge**.
-- **No two real devices have ever synced**, though one browser's stale edit has
-  now lost to a newer value and said so. Still argued rather than measured: two
-  requests interleaving on the same key at the same instant. And **a merge
-  publishes nothing**, so a cached plan is not invalidated when the inventory
-  under it moves — harmless today, **read it before Phase 6 depends on an
-  inventory being current**.
-- **Nothing has ever asked the gacha engines a question on behalf of a player.**
-  No route, no screen, no bean, and **`PityState` is stored nowhere** — `player`
-  has an inventory, a roster and goals, and no pity counters. "Probability of
-  guaranteeing her" is computable and unanswerable, and the gap is a schema and a
-  screen rather than an engine. **One banner is first-hand and six are not (Q4)**,
+- **No two real devices have ever synced**, though one browser's stale edit has now lost to a newer
+  value and said so. Still argued rather than measured: two requests interleaving on the same key at
+  the same instant. And **a merge publishes nothing**, so a cached plan is not invalidated when the
+  inventory under it moves — harmless today, **read it before Phase 6 depends on an inventory being
+  current**.
+- **Nothing has ever asked the gacha engines a question on behalf of a player.** No route, no
+  screen, no bean, and **`PityState` is stored nowhere** — `player` has an inventory, a roster and
+  goals, and no pity counters. "Probability of guaranteeing her" is computable and unanswerable,
+  and the gap is a schema and a screen rather than an engine. **One banner is first-hand and six are not (Q4)**,
   so every other fixture proves only that the model reproduces figures it was
   *given* — and **multi-copy answers are too pessimistic**, because 200 Cassettes
   of the Lost buy a copy and nothing models it: at two copies the engines say 280
@@ -223,8 +220,10 @@ works". It does not mean that:
   thirteen Promote gates are prose, because no level below 80 has a price; and
   the roster holds **one state per entity**, so a reader recorded at
   `promote-12` is charged the whole level track again (ADR 0019). **No
-  `progress:` line or shadow price has ever rendered in the frontend.** Every
-  R1999 catalog and drop number in this file still comes from Kornblume.
+  `progress:` line or shadow price has ever rendered in the frontend, and no
+  frontend sends `reach`** — so every plan the web client asks for counts no
+  scored grant and carries the note saying which ones it left out (ADR 0022).
+  Every R1999 catalog and drop number in this file still comes from Kornblume.
 - **Nothing is deployed** ([D1](#d1--deployment-deferred-2026-09-02); the `deploy`
   job is `if: false`), **nothing has run against a jar from a Dockerfile that
   works**, and **nothing has called the API under load** — every request loads a
@@ -240,10 +239,9 @@ works". It does not mean that:
   rendered as nothing**: fixed, with the wire types now marking the field optional
   so the compiler points at every call site. **That is B5's problem in miniature.**
 - **Eight qualifications of the closed phases are
-  [in the archive](docs/history/tracker-archive.md#qualifications-moved-out-of-the-live-tracker-2026-09-11-seventeenth-session)** —
-  the benchmark being one guide, the two large community disagreements, the three
-  shapes the model cannot express, and the rest. **Read them before re-opening
-  Phase 1, 2 or 11.**
+  [in the archive](docs/history/tracker-archive.md#qualifications-moved-out-of-the-live-tracker-2026-09-11-seventeenth-session)**
+  — the benchmark being one guide, the two large community disagreements, the three shapes the
+  model cannot express, and the rest. **Read them before re-opening Phase 1, 2 or 11.**
 
 ---
 
@@ -252,18 +250,17 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **N32 — Give the format the shapes the first full bundle refused.**
-      **(1) gates, (2) EXP, (3) a limit that never resets and (4) one step at
-      several prices are done** (ADR 0019–0021); (4)'s bundle row is Samantha's
-      Resonance, three prices, in sequence 3. Left: (5) **a grant
-      sized by the player's score**: the weekly Phantom Pain Cage pays 0–56
-      Scars; without it Evolve plans only for a reader who holds the Scars, and
-      one Scar short gets a generic refusal naming no item. **Also left, and a
-      reading rather than code:** the EXP to Lv 2, 10, 20 … 75, which is what
-      turns the other twelve Promote gates from prose into rows (MAX on one Pod
-      size from each level, as Lv 80 was pinned). And the roster's **one state
-      per entity** now over-charges any reader whose recorded state is on a
-      different track from the gate — read ADR 0019 before designing around it.
+- [ ] **N32 — Read the EXP to Lv 2, 10, 20 … 75.** **All five shapes the first
+      full bundle refused are in** (ADR 0019–0022, sequences 1–4;
+      [the account is in the archive](docs/history/tracker-archive.md#completed-next-actions)),
+      so what is left of N32 is **a reading rather than code**, and it is the
+      maintainer's: the EXP at each of the other twelve Promote gates, which is
+      what turns them from prose into rows (MAX on one Pod size from each level,
+      as Lv 80 was pinned). Two things to carry into it: the roster's **one state
+      per entity** over-charges any reader whose recorded state is on a different
+      track from the gate — read ADR 0019 first — and **no screen asks a reader
+      what they reach**, so ADR 0022's answer is retyped per request until one
+      does.
 - [ ] **N31 — Give `PityRule` a guarantee that is drawn, not fixed.** PGR's Themed
       Construct pool draws its wall **uniformly 80–100, redrawn on every S-Rank**;
       `hardAt` is an `int`, so **the archetype is absent from the first bundle
@@ -279,9 +276,11 @@ Ordered. Completed ones move to
       **Also:** a PGR event is **a one-time grant behind a capability gate inside
       a closing window** — no energy, no repetition, no yield; `EnergyMip` and
       `Reward`'s cadence cannot express it, and **`FEWEST_DAYS` against
-      `Availability.closesAt`** is the question, not `LEAST_ENERGY`. Decide that
-      *"can this player clear N"* is an input the reader supplies — the weekly
-      Cage (**N32** (5)) needs the same answer.
+      `Availability.closesAt`** is the question, not `LEAST_ENERGY`. **The gate
+      half is answered:** *"can this player clear N"* is an input the reader
+      supplies (ADR 0022), and an event mission is a `Reward` with a requirement
+      and a `closesAt`. What is left is the **window**, and whether a one-time
+      grant the reader must act on inside it is a plan or a deadline.
 - [ ] **N28 — Give a banner a pull currency and a price, then write `IncomeModel`.
       Unblocked — the numbers exist.** **1 pull = 250 Event Construct R&D
       Tickets**, **1 Black Card = 1 ticket**, **1 Rainbow = 10 Black**, **119
@@ -526,6 +525,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-20 | twenty-ninth | N32 (5) closes the format work: a grant behind a score the reader supplies (ADR 0022, V10). Sequence 4, the Phantom Pain Cage: Evolve to SS in 63 days and no Serum |
 | 2026-09-19 | twenty-eighth | N32 (4): one step at several prices is a choice the solver makes (ADR 0021, V9). Sequence 3: Samantha's Resonance, 90 Serum |
 | 2026-09-19 | twenty-seventh | N32 (3): a shop limit that never resets (ADR 0020). Sequence 2, the shard shop, published; Evolve to SS plans |
 | 2026-09-19 | twenty-sixth | N32 (1)+(2): gates become demand and fodder feeds EXP (ADR 0019, V8). Sequence 1 published; plans 240 → 420 and 180 → 1 470 |
