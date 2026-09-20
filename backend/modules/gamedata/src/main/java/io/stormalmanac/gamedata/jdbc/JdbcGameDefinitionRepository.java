@@ -377,14 +377,23 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
 
         return jdbc.query(
                 """
-                SELECT id, slug, cadence, available_days, opens_at, closes_at
+                SELECT id, slug, cadence, available_days, opens_at, closes_at,
+                       requires_measure, requires_at_least
                   FROM gamedata.reward WHERE version_id = ? ORDER BY id
                 """,
                 (rs, row) -> new Reward(
                         rs.getString("slug"),
                         Reward.Cadence.valueOf(rs.getString("cadence")),
                         grants.getOrDefault(rs.getLong("id"), List.of()),
-                        Availabilities.read(rs)),
+                        Availabilities.read(rs),
+                        // Read through the column rather than the object: a NULL
+                        // measure is "everybody collects it", and getInt would
+                        // turn the bar beside it into a 0 the record refuses.
+                        rs.getString("requires_measure") == null
+                                ? null
+                                : new Reward.Requirement(
+                                        rs.getString("requires_measure"),
+                                        rs.getInt("requires_at_least"))),
                 version);
     }
 

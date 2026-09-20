@@ -174,13 +174,85 @@ class AuthoredBundlePlanTest {
     }
 
     @Test
+    @DisplayName("a reader who clears the Cage earns the Scars: 30 shards in nine weeks and no Serum")
+    void evolveIsEarnedByClearingTheWeekly() {
+        // 30 shards: the first 10 at 10 Scars and the next 20 at 20, so 500
+        // Scars. A perfect Cage is 56 a week, and 500 / 56 = 8.9, so nine
+        // weekly resets — 63 days — is the shortest horizon that can pay for it.
+        // Nine weeks of all nine tiers is 504, four more than the shards cost,
+        // so the plan skips the bottom tier once: 9 x 56 - 4 = 500, exactly.
+        // That is the tie-break doing its job — a plan says it leans on the
+        // grants it needs and not on every grant that exists. No stage pays
+        // Scars, so no Serum is spent: the whole plan is waiting, which is
+        // exactly what the mode is.
+        Plan plan = solve(Goal.deterministic(HELENTINE, "evolve-ss"), Inventory.empty(PROFILE),
+                63, Map.of("phantom-pain-cage-score", 1_100_000));
+
+        assertThat(plan.totalEnergy()).isZero();
+        assertThat(plan.conversions()).containsExactly(
+                new Conversion("phantom-pain-shop-inver-shard-lacrimosa", 20),
+                new Conversion("phantom-pain-shop-inver-shard-lacrimosa-discounted", 10));
+        assertThat(plan.rewardClaims()).hasSize(9);
+        assertThat(scarsClaimedBy(plan))
+                .as("the Scars claimed are the Scars spent, to the one")
+                .isEqualTo(500);
+        assertThat(plan.explanation().notes()).anySatisfy(note -> assertThat(note)
+                .startsWith("Counting on free income over the horizon")
+                .contains("phantom-pain-cage-1100000 ×9"));
+    }
+
+    /** What the tiers the plan claims pay in Scars, read back off the bundle. */
+    private int scarsClaimedBy(Plan plan) {
+        Map<String, Integer> perClaim = definition.rewards().stream().collect(java.util.stream.Collectors
+                .toMap(reward -> reward.id(), reward -> reward.grants().stream()
+                        .filter(grant -> grant.item().equals(new ItemId("phantom-pain-scar")))
+                        .mapToInt(grant -> grant.quantity()).sum()));
+        return plan.rewardClaims().stream()
+                .mapToInt(claim -> claim.times() * perClaim.getOrDefault(claim.reward(), 0))
+                .sum();
+    }
+
+    @Test
+    @DisplayName("a reader who clears only the first tier is eight weeks short, and the plan is refused")
+    void clearingOneTierIsNotEnough() {
+        // 30 000 is the bottom tier alone: 4 Scars a week, 36 over nine weeks
+        // against the 500 the shards cost. The eight tiers above pay the same
+        // item and are not counted, which is why the refusal says one reward and
+        // not nine: the model is the game this reader plays, not the one the
+        // bundle describes.
+        assertThatThrownBy(() -> solve(Goal.deterministic(HELENTINE, "evolve-ss"),
+                Inventory.empty(PROFILE), 63, Map.of("phantom-pain-cage-score", 30_000)))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("1 reward(s)");
+    }
+
+    @Test
+    @DisplayName("saying nothing about the Cage, the refusal names the bar and what it was told")
+    void silenceAboutTheCageIsRefusedByName() {
+        // The reader holds no Scars and has not said what they clear, so the
+        // only source of the currency is out of reach rather than absent — and
+        // that is the difference between "this game has no route" and "tell me
+        // what you clear". The refusal follows the currency one level down and
+        // names the lowest bar of the nine, which is the least this reader
+        // would have to say to be given a plan at all.
+        assertThatThrownBy(() -> solve(Goal.deterministic(HELENTINE, "evolve-ss")))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("phantom-pain-scar")
+                .hasMessageContaining("phantom-pain-cage-30000")
+                .hasMessageContaining("phantom-pain-cage-score")
+                .hasMessageContaining("reaching 0")
+                .hasMessageContaining("8 more behind a higher score");
+    }
+
+    @Test
     @DisplayName("one Scar short and Evolve is refused, and the refusal cannot say which item ran out")
     void evolveOneScarShortIsRefused() {
         // 459 Scars buy the cheap ten and 17 of the rest; the 28th shard needs
-        // 20 more, and nothing in the bundle pays Scars (N32 (5)). The refusal
-        // is the generic one: the Scar has a source, the reader's own stock, so
-        // the item-by-item diagnosis finds nothing missing, and a stock that
-        // runs out is a quantity the MIP reports only as infeasible.
+        // 20 more, and this reader has not said they clear a Cage tier, so
+        // nothing they can collect pays Scars. The refusal is the generic one:
+        // the Scar has a source, the reader's own stock, so the item-by-item
+        // diagnosis finds nothing missing, and a stock that runs out is a
+        // quantity the MIP reports only as infeasible.
         assertThatThrownBy(() -> solve(Goal.deterministic(HELENTINE, "evolve-ss"),
                 Inventory.empty(PROFILE)
                         .with(new ItemId("inver-shard-lacrimosa"), 2)
@@ -230,6 +302,10 @@ class AuthoredBundlePlanTest {
     }
 
     private Plan solve(Goal goal, Inventory inventory) {
+        return solve(goal, inventory, 30, Map.of());
+    }
+
+    private Plan solve(Goal goal, Inventory inventory, int horizonDays, Map<String, Integer> reach) {
         MipOptimizer optimizer = new MipOptimizer(
                 new InMemoryPlanning.OneVersion(definition),
                 new InMemoryPlanning.FixedPlayer(
@@ -240,9 +316,12 @@ class AuthoredBundlePlanTest {
                 Duration.ofSeconds(2));
 
         // 240 Serum a day over thirty days is far more than any goal here
-        // spends, so neither binds and each total is the goal's own price.
+        // spends, so neither binds and each total is the goal's own price. The
+        // horizon is a parameter only because a weekly grant is paid in weeks,
+        // and nine of them do not fit in a month.
         return optimizer.solve(new SolveRequest(
-                PROFILE, definition.version(), List.of(goal), Objective.LEAST_ENERGY, 240, 30));
+                PROFILE, definition.version(), List.of(goal), Objective.LEAST_ENERGY, 240,
+                horizonDays, reach));
     }
 
     private static GameDefinition load() {

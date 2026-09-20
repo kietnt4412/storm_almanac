@@ -96,6 +96,10 @@ final class Facts {
                     about.put("cadence", reward.cadence().name());
                     about.put("availability", availability(reward.availability()));
                     stacks(about, "grants", reward.grants());
+                    if (reward.requires() != null) {
+                        about.put("requires", reward.requires().measure()
+                                + " >= " + reward.requires().atLeast());
+                    }
                 }
             }
         }

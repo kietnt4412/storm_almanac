@@ -10,6 +10,7 @@ import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.Progress;
 import io.stormalmanac.gamedata.Rarity;
+import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Stage;
 import io.stormalmanac.gamedata.Upgrade;
 import java.time.DayOfWeek;
@@ -169,6 +170,38 @@ class CanonicalBundleParserTest {
                         List.of(), List.of(), List.of(new Progress("hero-exp", 900))),
                 new Fodder("feed", "material", new Rarity("2*", 2), "hero-exp", 100, List.of()),
                 new Fodder("older", "material", new Rarity("2*", 2), null, 100, List.of()));
+    }
+
+    @Test
+    @DisplayName("a reward can stand behind a score, and one that does not is offered to everybody")
+    void rewardRequirementsParse() {
+        GameDataBundle bundle = parser.parse(minimal("""
+                "rewards": [
+                  { "id": "cage-tier-1", "cadence": "WEEKLY",
+                    "grants": [ { "item": "ore", "quantity": 4 } ],
+                    "requires": { "measure": "cage-score", "atLeast": 30000 } },
+                  { "id": "daily", "cadence": "DAILY",
+                    "grants": [ { "item": "ore", "quantity": 1 } ] } ]
+                """));
+
+        assertThat(bundle.sources()).containsExactly(
+                new Reward("cage-tier-1", Reward.Cadence.WEEKLY,
+                        List.of(new ItemStack(new ItemId("ore"), 4)), Availability.ALWAYS,
+                        new Reward.Requirement("cage-score", 30_000)),
+                new Reward("daily", Reward.Cadence.DAILY,
+                        List.of(new ItemStack(new ItemId("ore"), 1)), Availability.ALWAYS, null));
+    }
+
+    @Test
+    @DisplayName("half a requirement is refused: a measure with no bar would read as no bar at all")
+    void halfARequirementIsRefused() {
+        assertThatThrownBy(() -> parser.parse(minimal("""
+                "rewards": [ { "id": "cage-tier-1", "cadence": "WEEKLY",
+                               "grants": [ { "item": "ore", "quantity": 4 } ],
+                               "requires": { "measure": "cage-score" } } ]
+                """)))
+                .isInstanceOf(BundleFormatException.class)
+                .hasMessageContaining("requires.atLeast is required");
     }
 
     @Test

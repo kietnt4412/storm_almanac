@@ -29,3 +29,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0019](0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-demanded-as-an-item.md) | A gate is a goal inside a goal, and progress is demanded as an item | Accepted |
 | [0020](0020-a-limit-that-never-resets-is-offered-whole.md) | A limit that never resets is offered whole, and the plan says so | Accepted |
 | [0021](0021-one-step-at-several-prices-is-a-choice-the-solver-makes.md) | One step at several prices is a choice the solver makes | Accepted |
+| [0022](0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md) | A grant sized by the player is an answer the reader supplies | Accepted |

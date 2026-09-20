@@ -199,6 +199,11 @@ public final class CanonicalBundleWriter {
         node.put("cadence", reward.cadence().name());
         stacks(node, "grants", reward.grants());
         availability(node, reward.availability());
+        if (reward.requires() != null) {
+            ObjectNode requires = node.putObject("requires");
+            requires.put("measure", reward.requires().measure());
+            requires.put("atLeast", reward.requires().atLeast());
+        }
     }
 
     private void upgrade(ObjectNode node, Upgrade upgrade) {

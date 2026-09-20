@@ -186,6 +186,13 @@ final class EnergyMip {
 
     /**
      * @param rewardClaims    free income the plan leans on
+     * @param withheldGrants  income the plan did <b>not</b> lean on because the
+     *                        reader has not said they can collect it, and which
+     *                        would have supplied something the goal set needs.
+     *                        Reported rather than silently dropped: a grant left
+     *                        out is the difference between a plan and a cheaper
+     *                        plan, and the reader is the only one who can say
+     *                        whether it belongs
      * @param daysNeeded      whole days the plan cannot be compressed below,
      *                        because of a cadence it waits on or a stage that is
      *                        only open some weekdays. Zero when nothing but
@@ -210,10 +217,24 @@ final class EnergyMip {
      *                        restrictions to enforce exactly, so the schedule is
      *                        checked group by group rather than jointly
      */
+    /**
+     * A grant this plan could have used and was not allowed to count.
+     *
+     * @param reward  which grant
+     * @param measure what the game scores to decide who collects it
+     * @param atLeast the bar this grant stands behind
+     * @param said    what the reader said they reach, which is zero when they
+     *                said nothing at all — the two are not distinguished, because
+     *                a reader who has not answered has not earned the grant any
+     *                more than one who answered low
+     */
+    record Withheld(String reward, String measure, int atLeast, int said) {}
+
     record Outcome(
             List<StageRun> stageRuns,
             List<Conversion> conversions,
             List<RewardClaim> rewardClaims,
+            List<Withheld> withheldGrants,
             int totalEnergy,
             int daysNeeded,
             int horizonUsed,
@@ -245,6 +266,9 @@ final class EnergyMip {
      *                     {@code docs/game-facts/reverse-1999-economy.md}
      * @param energyPerDay what the player earns and is willing to spend per day
      * @param horizonDays  how many days the plan may take
+     * @param reach        what the reader says they reach, by measure, against
+     *                     which {@link Reward#isOfferedTo} decides whether a
+     *                     score-scaled grant is income or not (ADR 0022)
      */
     record Inputs(
             GameDefinition definition,
@@ -255,7 +279,8 @@ final class EnergyMip {
             long budgetMillis,
             Objective objective,
             int energyPerDay,
-            int horizonDays
+            int horizonDays,
+            Map<String, Integer> reach
     ) {
         int inventoryOf(ItemId item) {
             return inventory.getOrDefault(item, 0);
@@ -267,12 +292,12 @@ final class EnergyMip {
 
         Inputs withDemand(Map<ItemId, Integer> replacement) {
             return new Inputs(definition, yields, inventory, replacement, at, budgetMillis,
-                    objective, energyPerDay, horizonDays);
+                    objective, energyPerDay, horizonDays, reach);
         }
 
         Inputs withBudget(long millis) {
             return new Inputs(definition, yields, inventory, demand, at, millis,
-                    objective, energyPerDay, horizonDays);
+                    objective, energyPerDay, horizonDays, reach);
         }
 
         /**
@@ -285,7 +310,7 @@ final class EnergyMip {
          */
         Inputs pinnedTo(int days) {
             return new Inputs(definition, yields, inventory, demand, at, budgetMillis,
-                    Objective.LEAST_ENERGY, energyPerDay, days);
+                    Objective.LEAST_ENERGY, energyPerDay, days, reach);
         }
     }
 
@@ -363,7 +388,9 @@ final class EnergyMip {
     }
 
     private static Outcome empty(int horizon) {
-        return new Outcome(List.of(), List.of(), List.of(), 0, 0, horizon, 0, 0, 0, 0, 0, true, 0.0, true);
+        return new Outcome(
+                List.of(), List.of(), List.of(), List.of(),
+                0, 0, horizon, 0, 0, 0, 0, 0, true, 0.0, true);
     }
 
     private static Outcome solveAt(Inputs in, int horizonDays) {
@@ -371,9 +398,24 @@ final class EnergyMip {
 
         List<Stage> stages = open(in.definition().stages(), Stage::availability, in.at());
         List<Exchange> exchanges = exchanges(in, horizonDays);
-        List<Reward> rewards = claimable(
+        List<Reward> collectable = claimable(
                 open(in.definition().rewards(), Reward::availability, in.at()), in.at(), horizonDays);
+        // A grant the reader has not said they can collect is not income. It is
+        // dropped before the model rather than bounded at zero inside it, so
+        // that every count the plan reports — variables, sources, the refusal —
+        // is about the game this reader actually plays (ADR 0022).
+        List<Reward> rewards = collectable.stream().filter(r -> r.isOfferedTo(in.reach())).toList();
         Set<ItemId> relevant = relevantItems(in.demand().keySet(), exchanges);
+        List<Withheld> withheld = collectable.stream()
+                .filter(r -> !r.isOfferedTo(in.reach()))
+                .filter(r -> r.grants().stream().anyMatch(g -> relevant.contains(g.item())))
+                .map(r -> new Withheld(
+                        r.id(),
+                        r.requires().measure(),
+                        r.requires().atLeast(),
+                        in.reach().getOrDefault(r.requires().measure(), 0)))
+                .sorted(Comparator.comparing(Withheld::reward))
+                .toList();
 
         requireReachable(in, stages, exchanges, rewards, relevant, horizonDays);
 
@@ -517,6 +559,7 @@ final class EnergyMip {
                 List.copyOf(plan),
                 List.copyOf(conversions),
                 List.copyOf(claimed),
+                withheld,
                 totalEnergy,
                 daysNeeded(plan, claimCounts, in, horizonDays),
                 horizonDays,
@@ -965,7 +1008,7 @@ final class EnergyMip {
         for (ItemId item : relevant) {
             if (in.demandOf(item) <= in.inventoryOf(item) || producible.contains(item)) continue;
             unreachable.add(item.value() + " ("
-                    + whyNot(in.definition(), item, in.at(), horizonDays) + ")");
+                    + whyNot(in.definition(), in.reach(), item, in.at(), horizonDays) + ")");
         }
         if (!unreachable.isEmpty()) {
             throw new Optimizer.InfeasibleGoalException(
@@ -982,7 +1025,11 @@ final class EnergyMip {
      * recipe; naming the recipe and the reason sends them to the right place.
      */
     private static String whyNot(
-            GameDefinition definition, ItemId item, Instant at, int horizonDays) {
+            GameDefinition definition,
+            Map<String, Integer> reach,
+            ItemId item,
+            Instant at,
+            int horizonDays) {
 
         if (Demand.isChoiceItem(item)) {
             List<String> prices = severalPrices(definition).stream()
@@ -1007,16 +1054,22 @@ final class EnergyMip {
         List<String> closed = new ArrayList<>();
         List<String> recipes = new ArrayList<>();
         List<String> shops = new ArrayList<>();
+        List<Reward> outOfReach = new ArrayList<>();
         Reward tooSlow = null;
 
         for (Source source : definition.sources()) {
             if (source.potentialOutput().stream().noneMatch(s -> s.item().equals(item))) continue;
             if (source instanceof Shop offer) {
-                shops.add(whyNotBuyable(offer, at, horizonDays));
+                shops.add(whyNotBuyable(definition, reach, offer, at, horizonDays));
             } else if (source instanceof Reward grant) {
-                // Reachable rewards are modelled now, so one reaching here either
-                // is not open or does not come round inside the horizon.
-                tooSlow = grant;
+                // Reachable rewards are modelled now, so one reaching here is not
+                // open, does not come round inside the horizon, or pays a score
+                // this reader has not said they reach.
+                if (!grant.isOfferedTo(reach)) {
+                    outOfReach.add(grant);
+                } else {
+                    tooSlow = grant;
+                }
             } else if (source instanceof Craft craft) {
                 recipes.add(craft.id());
             } else if (!isReachable(source.availability(), at)) {
@@ -1031,6 +1084,12 @@ final class EnergyMip {
         if (!shops.isEmpty()) {
             return "it is sold only by " + String.join(", and by ", shops);
         }
+        if (!outOfReach.isEmpty()) {
+            // Before the cadence branch, because "it only comes round monthly" is
+            // the wrong thing to tell a reader whose real problem is that they
+            // have not said how far they get — and that one they can fix.
+            return "it is granted only by " + describe(outOfReach, reach);
+        }
         if (tooSlow != null) {
             return "its only source is the " + tooSlow.cadence() + " reward \"" + tooSlow.id()
                     + "\", which does not come round inside a " + horizonDays + "-day horizon";
@@ -1043,7 +1102,13 @@ final class EnergyMip {
     }
 
     /** Of the three ways a shop can fail to supply, which one this is. */
-    private static String whyNotBuyable(Shop shop, Instant at, int horizonDays) {
+    private static String whyNotBuyable(
+            GameDefinition definition,
+            Map<String, Integer> reach,
+            Shop shop,
+            Instant at,
+            int horizonDays) {
+
         String named = "the shop \"" + shop.id() + "\"";
         if (!isReachable(shop.availability(), at)) {
             return named + ", which is closed or unreleased";
@@ -1055,8 +1120,39 @@ final class EnergyMip {
                     : named + ", whose limit of " + shop.periodLimit() + " per " + shop.period()
                             + " does not reset inside a " + horizonDays + "-day horizon";
         }
-        return named + ", whose currency \"" + shop.currency().value()
-                + "\" nothing available can supply";
+        // One level down, and only this one. "Nothing can supply the currency" is
+        // a true sentence that sends a reader looking for a stage that drops it
+        // when the real answer is that they have not said how far they get in the
+        // mode that pays it — which is a thing they can fix in one field.
+        List<Reward> outOfReach = definition.rewards().stream()
+                .filter(grant -> !grant.isOfferedTo(reach))
+                .filter(grant -> grant.grants().stream().anyMatch(g -> g.item().equals(shop.currency())))
+                .toList();
+        return named + ", whose currency \"" + shop.currency().value() + "\" "
+                + (outOfReach.isEmpty()
+                        ? "nothing available can supply"
+                        : "is granted only by " + describe(outOfReach, reach));
+    }
+
+    /**
+     * Grants the reader has not said they can collect, in one clause.
+     *
+     * <p>Only the lowest bar is spelled out, because a ladder is nine of them
+     * and a refusal nobody finishes reading is a refusal that did not happen.
+     * The lowest is also the one that answers the reader's question: it is the
+     * least they would have to say to make this plan possible at all.
+     */
+    private static String describe(List<Reward> grants, Map<String, Integer> reach) {
+        Reward lowest = grants.stream()
+                .min(Comparator.comparingInt(g -> g.requires().atLeast()))
+                .orElseThrow();
+        String clause = "the " + lowest.cadence() + " reward \"" + lowest.id()
+                + "\", which pays readers reaching " + lowest.requires().atLeast()
+                + " of \"" + lowest.requires().measure() + "\" and this plan was asked for one"
+                + " reaching " + reach.getOrDefault(lowest.requires().measure(), 0);
+        return grants.size() == 1
+                ? clause
+                : clause + " (and " + (grants.size() - 1) + " more behind a higher score)";
     }
 
     private static <T> List<T> open(List<T> sources, Function<T, Availability> availability, Instant at) {

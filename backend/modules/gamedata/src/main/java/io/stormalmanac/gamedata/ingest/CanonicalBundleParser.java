@@ -306,11 +306,36 @@ public final class CanonicalBundleParser {
                     text(node, "id", at + ".id"),
                     Reward.Cadence.valueOf(cadence),
                     stacks(node, "grants", at),
-                    availability(node, at));
+                    availability(node, at),
+                    requirement(node, at));
         } catch (IllegalArgumentException e) {
             throw new BundleFormatException(
                     at + ".cadence must be one of " + List.of(Reward.Cadence.values()) + ", not \"" + cadence + "\"",
                     e);
+        }
+    }
+
+    /**
+     * The bar a grant stands behind, or nothing.
+     *
+     * <p>Absent means the grant turns up for every reader, which is what every
+     * reward written before ADR 0022 says. An object that is there is checked
+     * whole: a measure with no bar, or a bar with no measure, is a row somebody
+     * meant to finish.
+     */
+    private static Reward.Requirement requirement(JsonNode node, String at) {
+        JsonNode requires = node.get("requires");
+        if (requires == null || requires.isNull()) return null;
+        if (!requires.isObject()) {
+            throw new BundleFormatException(
+                    at + ".requires must be an object with a measure and an atLeast");
+        }
+        try {
+            return new Reward.Requirement(
+                    text(requires, "measure", at + ".requires.measure"),
+                    (int) integer(requires, "atLeast", at + ".requires.atLeast"));
+        } catch (IllegalArgumentException e) {
+            throw new BundleFormatException(at + ".requires is not a requirement: " + e.getMessage(), e);
         }
     }
 

@@ -67,7 +67,7 @@ class GameDataIngestTest extends SharedDatabaseTest {
     }
 
     @Test
-    @DisplayName("gates, progress costs, what a fodder rule feeds and a limit that never resets survive the schema")
+    @DisplayName("gates, progress, what fodder feeds, a limit that never resets and a bar on a grant survive the schema")
     void gatesAndProgressRoundTrip() throws IOException {
         // The authored launch bundle rather than proving-ground, because it is
         // the one bundle that has these shapes for a reason: V8 exists for it.
@@ -101,6 +101,19 @@ class GameDataIngestTest extends SharedDatabaseTest {
                                 "phantom-pain-shop-inver-shard-lacrimosa-discounted", 10),
                         org.assertj.core.groups.Tuple.tuple(
                                 "phantom-pain-shop-inver-shard-lacrimosa", 20));
+        // Two nullable columns that have to come back as one object or as
+        // nothing: a measure read back without its bar, or a bar read back as a
+        // zero, would turn a tier only some readers collect into one everybody
+        // does, and nothing else in the pipeline would notice.
+        assertThat(loaded.rewards())
+                .hasSize(9)
+                .allSatisfy(reward -> assertThat(reward.requires().measure())
+                        .isEqualTo("phantom-pain-cage-score"));
+        assertThat(loaded.rewards())
+                .extracting(reward -> reward.requires().atLeast())
+                .containsExactlyInAnyOrder(
+                        30_000, 90_000, 120_000, 360_000, 500_000,
+                        700_000, 900_000, 1_000_000, 1_100_000);
     }
 
     private static Upgrade upgradeOf(GameDefinition definition, String id) {

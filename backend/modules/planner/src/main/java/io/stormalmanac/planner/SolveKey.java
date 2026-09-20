@@ -50,6 +50,15 @@ public final class SolveKey {
                 .append("\nenergyPerDay=").append(request.energyPerDay())
                 .append("\nhorizonDays=").append(request.horizonDays());
 
+        // Two readers with the same items and the same goals get different plans
+        // when one of them clears the weekly the other cannot, so this is part of
+        // the question and not of the asker. Left out, the second reader would be
+        // served the first one's plan from cache.
+        canonical.append("\nreach=");
+        request.reach().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(e -> canonical.append(e.getKey()).append('=').append(e.getValue()).append(','));
+
         canonical.append("\ngoals=");
         List<Goal> goals = request.goals().stream()
                 .sorted(Comparator.comparing((Goal g) -> g.entity().value())

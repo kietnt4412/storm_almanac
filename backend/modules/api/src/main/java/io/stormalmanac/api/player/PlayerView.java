@@ -198,8 +198,18 @@ public final class PlayerView {
      *                     {@link SolveRequest#DEFAULT_HORIZON_DAYS}, and the
      *                     default is a real choice — without a horizon the
      *                     cheapest plan is always "wait"
+     * @param reach        what this account can reach in the modes that pay by
+     *                     score, by measure: {@code {"phantom-pain-cage-score":
+     *                     500000}}. Absent means none of them are counted, which
+     *                     is the honest default rather than the generous one —
+     *                     see ADR 0022 — and the plan's notes name every grant
+     *                     it left out
      */
-    public record PlanRequest(String objective, Integer energyPerDay, Integer horizonDays) {
+    public record PlanRequest(
+            String objective,
+            Integer energyPerDay,
+            Integer horizonDays,
+            Map<String, Integer> reach) {
 
         public Objective resolvedObjective() {
             return objective == null || objective.isBlank()
@@ -209,6 +219,10 @@ public final class PlayerView {
 
         public int resolvedHorizonDays() {
             return horizonDays == null ? SolveRequest.DEFAULT_HORIZON_DAYS : horizonDays;
+        }
+
+        public Map<String, Integer> resolvedReach() {
+            return reach == null ? Map.of() : reach;
         }
     }
 

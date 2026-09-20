@@ -165,7 +165,7 @@ public final class MipOptimizer implements Optimizer {
                 (long) (budget.toMillis() * SEARCH_BUDGET_SHARE);
         EnergyMip.Inputs inputs = new EnergyMip.Inputs(
                 definition, yields, inventory.quantities(), demand.quantities(), now, searchMillis,
-                request.objective(), request.energyPerDay(), request.horizonDays());
+                request.objective(), request.energyPerDay(), request.horizonDays(), request.reach());
 
         EnergyMip.Outcome outcome = EnergyMip.solve(inputs);
 
@@ -326,6 +326,19 @@ public final class MipOptimizer implements Optimizer {
                     .map(claim -> claim.reward() + " ×" + claim.times())
                     .reduce((a, b) -> a + ", " + b).orElse("")
                     + ". Miss those and the plan costs more energy than it says.");
+        }
+        if (!outcome.withheldGrants().isEmpty()) {
+            // The mirror of the note above, and the more actionable of the two:
+            // that one says what the plan assumes a reader will collect, this one
+            // says what it refused to assume. A reader who does clear the weekly
+            // is holding a cheaper plan than the one in front of them, and the
+            // only way they find that out is if the plan says so.
+            notes.add("Not counted, because nothing says this account can collect them: "
+                    + outcome.withheldGrants().stream()
+                            .map(grant -> grant.reward() + " (needs " + grant.atLeast() + " of "
+                                    + grant.measure() + "; this plan was asked for " + grant.said() + ")")
+                            .collect(Collectors.joining(", "))
+                    + ". Say what you reach and the plan gets cheaper, never dearer.");
         }
         Set<String> lifetime = inputs.definition().shops().stream()
                 .filter(Shop::neverResets).map(Shop::id).collect(Collectors.toSet());

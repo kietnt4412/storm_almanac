@@ -70,7 +70,7 @@ public class PlanController {
             @RequestBody(required = false) PlanRequest request) {
 
         PlayerProfile owner = owned.require(profile);
-        PlanRequest body = request == null ? new PlanRequest(null, null, null) : request;
+        PlanRequest body = request == null ? new PlanRequest(null, null, null, null) : request;
 
         if (body.energyPerDay() == null) {
             // Not defaulted. Every other field here has an honest default and
@@ -94,7 +94,8 @@ public class PlanController {
                 goals.goals(),
                 body.resolvedObjective(),
                 body.energyPerDay(),
-                body.resolvedHorizonDays());
+                body.resolvedHorizonDays(),
+                body.resolvedReach());
 
         return PlanResponse.of(optimizer.solve(solve));
     }
