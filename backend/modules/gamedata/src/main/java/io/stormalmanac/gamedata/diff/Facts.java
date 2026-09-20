@@ -172,6 +172,10 @@ final class Facts {
                 about.put("pity " + rarity.label() + " soft from", String.valueOf(rule.softFrom()));
                 about.put("pity " + rarity.label() + " soft jump", String.valueOf(rule.softJumpTo()));
                 about.put("pity " + rarity.label() + " soft step", String.valueOf(rule.softStep()));
+                // Without this a patch that turned a fixed wall into a drawn one
+                // would report "hard at 80 -> 100" and call it a nerf, which is
+                // the opposite of what happened.
+                about.put("pity " + rarity.label() + " drawn from", String.valueOf(rule.drawnFrom()));
             });
             banner.floors().forEach(floor -> about.put(
                     "floor every " + floor.everyN(), rarity(floor.minimumRarity())));

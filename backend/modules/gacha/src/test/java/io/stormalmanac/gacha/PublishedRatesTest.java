@@ -232,11 +232,16 @@ class PublishedRatesTest {
         }
 
         @Test
-        @DisplayName("variable walls are numbers and not types: 30 for weapons, 40 beginner, 80 floating")
+        @DisplayName("variable walls are numbers and not types: 30 for weapons, 40 beginner, 80–100 drawn")
         void everyPublishedWallIsTheSameRecord() {
             assertThat(PullModel.of(Banners.grayRavenWeapon()).hardAt()).isEqualTo(30);
             assertThat(PullModel.of(Banners.grayRavenBeginner()).hardAt()).isEqualTo(40);
-            assertThat(PullModel.of(Banners.grayRavenFloating()).hardAt()).isEqualTo(80);
+            // The Themed Construct pool's certainty is 100 and its wall is drawn
+            // from 80 up. Reading hardAt as "where the wall is" would be wrong
+            // here and right everywhere else, which is why it is spelled twice.
+            assertThat(PullModel.of(Banners.grayRavenFloating()).hardAt()).isEqualTo(100);
+            assertThat(Banners.grayRavenFloating().pityRules().values().iterator().next().drawnFrom())
+                    .isEqualTo(80);
 
             // Certainty arrives at the worst case and not at the wall. Writing this
             // test the other way round is how the distinction got checked: asserting
@@ -260,23 +265,63 @@ class PublishedRatesTest {
         }
 
         @Test
-        @DisplayName("the floating variant's 1.5% base is the flat rate it claims")
-        void floatingVariantBaseRate() {
-            BannerModel floating = Banners.grayRavenFloating();
-            PullModel model = PullModel.of(floating);
+        @DisplayName("the Themed Construct pool's 1.5% base is flat until a threshold could land")
+        void themedPoolBaseRate() {
+            BannerModel themed = Banners.grayRavenFloating();
+            PullModel model = PullModel.of(themed);
             assertThat(model.hitRateAt(0)).isEqualTo(0.015);
             assertThat(model.hitRateAt(78)).isEqualTo(0.015);
-            assertThat(model.hitRateAt(79)).isEqualTo(1.0);
+            // Pull 80 is the first one a drawn threshold can be, and from there
+            // the rate rises as thresholds are ruled out rather than jumping.
+            assertThat(model.hitRateAt(79)).isCloseTo(0.0619047619, within(1e-9));
+            assertThat(model.hitRateAt(99)).isEqualTo(1.0);
 
-            // Not simply "one hit in ten pulls times the 70% split". That product
-            // was the first thing written here, and it is 0.0982 against 0.1010:
-            // it forgets that losing the split early leaves room to hit again inside
-            // the same ten pulls, and the second hit is guaranteed.
-            double oneHit = 1.0 - Math.pow(0.985, 10);
-            assertThat(exact.probabilityOfFeatured(floating, Banners.freshFor(floating), 10, 1))
-                    .isCloseTo(0.1009925325, within(1e-9))
-                    .isGreaterThan(oneHit * 0.70)
-                    .isLessThan(oneHit);
+            // At 100% of the S-Rank pool there is no split, so ten pulls is just
+            // ten base rolls — the number the Arrival pool's split pulls away from.
+            assertThat(exact.probabilityOfFeatured(themed, Banners.freshFor(themed), 10, 1))
+                    .isCloseTo(1.0 - Math.pow(0.985, 10), within(1e-9))
+                    .isCloseTo(0.1402695577, within(1e-9));
+        }
+
+        @Test
+        @DisplayName("a drawn wall means 80 pulls is 71.6% and only 100 is certainty")
+        void themedPoolGuaranteeIsDrawnAndNotFixed() {
+            BannerModel themed = Banners.grayRavenFloating();
+            PityState fresh = Banners.freshFor(themed);
+
+            // The mistake this banner exists to refuse: reading `80` off the
+            // counter as a wall. It says 80~100, and at pull 80 a fifth of the
+            // thresholds have not arrived yet.
+            assertThat(exact.probabilityOfFeatured(themed, fresh, 80, 1))
+                    .isCloseTo(0.7157443271, within(1e-9))
+                    .isLessThan(1.0);
+            assertThat(exact.probabilityOfFeatured(themed, fresh, 90, 1))
+                    .isCloseTo(0.8778083723, within(1e-9));
+            assertThat(exact.probabilityOfFeatured(themed, fresh, 99, 1))
+                    .isCloseTo(0.9893348363, within(1e-9))
+                    .isLessThan(1.0);
+            assertThat(exact.probabilityOfFeatured(themed, fresh, 100, 1)).isEqualTo(1.0);
+
+            // The featured unit is the whole S-Rank pool here, so the worst case
+            // is one wall and not two — the only PGR banner of which that is true
+            // besides the debut one.
+            assertThat(PullModel.of(themed).worstCasePulls()).isEqualTo(100L);
+        }
+
+        @Test
+        @DisplayName("an average of 49.49 pulls, which is the 2.02% the note computed by hand")
+        void themedPoolReproducesTheNotesArithmetic() {
+            BannerModel themed = Banners.grayRavenFloating();
+            double average = exact.expectedPullsToFeatured(themed, Banners.freshFor(themed));
+            assertThat(average).isCloseTo(49.4881101003, within(1e-9));
+
+            // The research disclosure note worked the long-run share out by hand
+            // as 2.021% against the publisher's advertised 1.90%, and concluded
+            // the advertised figure is an outcome share rather than a per-pull
+            // vector (Q4). This is that arithmetic arriving from the other end —
+            // a chain that knows nothing about the note — so the disagreement is
+            // now the model's and not a spreadsheet's.
+            assertThat(100.0 / average).isCloseTo(2.0207, within(0.0005));
         }
 
         @Test

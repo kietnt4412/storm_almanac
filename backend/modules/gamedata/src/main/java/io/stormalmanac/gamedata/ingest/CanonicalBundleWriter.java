@@ -255,6 +255,10 @@ public final class CanonicalBundleWriter {
                 rule.put("softJumpTo", pity.softJumpTo());
                 rule.put("softStep", pity.softStep());
             }
+            // Same rule, same reason: absent is how a fixed guarantee is spelled.
+            if (pity.drawnFrom() != null) {
+                rule.put("drawnFrom", pity.drawnFrom());
+            }
         }
 
         array(node, "floors", banner.floors(), (f, floor) -> {

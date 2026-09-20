@@ -78,6 +78,26 @@ class EngineAgreementTest {
             // off-by-one in the exact chain would hide.
             asked.add(new Question(banner, fresh, wall * 2, 2));
             asked.add(new Question(banner, fresh, (int) model.worstCasePulls() * 2, 2));
+
+            // The band a drawn threshold can land in, pull by pull. The generic
+            // points above miss it entirely — half a wall of 100 is 50, which is
+            // below the range, and 99 and 100 are both at certainty's doorstep —
+            // so without these the one place the two engines take different roads
+            // is never asked about. Here the chain is using a posterior and the
+            // simulation is using a number it drew, and only the middle of the
+            // band tells them apart.
+            Integer drawnFrom = banner.pityRules().get(banner.headlineRarity()).drawnFrom();
+            if (drawnFrom != null) {
+                for (int pulls = drawnFrom; pulls < wall; pulls += 2) {
+                    asked.add(new Question(banner, fresh, pulls, 1));
+                }
+                // And carried into the band rather than started outside it, which
+                // is the state a player who switched pools actually turns up in.
+                PityState inside = new PityState(
+                        banner.pityScope(), banner.bannerType(), drawnFrom + 5, 0);
+                asked.add(new Question(banner, inside, 5, 1));
+                asked.add(new Question(banner, inside, wall - drawnFrom, 1));
+            }
         }
         return asked;
     }

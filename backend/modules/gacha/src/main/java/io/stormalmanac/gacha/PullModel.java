@@ -62,7 +62,8 @@ public record PullModel(Rarity headline, double baseRate, PityRule pity, Feature
     }
 
     /**
-     * Probability that the next pull hits the headline rarity.
+     * Probability that the next pull hits the headline rarity, with a drawn
+     * guarantee integrated out.
      *
      * <p>A count at or past {@code hardAt} is read as "the next pull is the
      * guaranteed one" rather than refused: a state carried over from a banner
@@ -73,17 +74,64 @@ public record PullModel(Rarity headline, double baseRate, PityRule pity, Feature
         return pity.rateAt(Math.min(pullsSinceHit, hardAt() - 1), baseRate);
     }
 
+    /**
+     * The same probability for a caller that drew a threshold and is carrying it.
+     *
+     * <p>{@link #hitRateAt(int)} averages over every threshold the banner could
+     * have drawn; this one is conditioned on the threshold in hand. They are two
+     * roads to the same distribution, and the engines deliberately take one each
+     * — a simulation that reused the integrated curve would agree with the exact
+     * chain about the marginalisation by construction, and prove nothing.
+     */
+    public double hitRateAt(int pullsSinceHit, int wall) {
+        return pity.rateAtWall(Math.min(pullsSinceHit, hardAt() - 1), baseRate, wall);
+    }
+
+    /**
+     * The guarantee threshold for a pity cycle: the fixed wall, or a draw from
+     * the range the banner declares, <em>conditioned on the misses already in
+     * the state</em>.
+     *
+     * <p>Punishing: Gray Raven redraws on every S-Rank rather than once per
+     * banner, so this is called once per pity cycle and not once per run — and a
+     * fresh cycle has {@code pullsSinceHit} of zero, where the condition does
+     * nothing.
+     *
+     * <p><b>The conditioning is not a refinement, it is the difference between
+     * right and wrong.</b> A player carrying 85 misses on a wall drawn from
+     * 80–100 cannot have drawn 80: they would have hit it. Drawing from the whole
+     * range anyway hands that player a forced hit on their next pull about a
+     * quarter of the time, and the answer comes back 0.558 where the truth is
+     * 0.382. That is how this was found — the exact chain integrates over the
+     * posterior, which is uniform above the misses, and the simulation was
+     * sampling the prior. The chain was right.
+     */
+    public int drawWall(RandomGenerator rng, int pullsSinceHit) {
+        if (!pity.hasDrawnGuarantee()) return hardAt();
+        // A state carried over from a banner with a longer wall clamps to the
+        // wall itself, which reads as "the next pull is the guaranteed one" —
+        // the same reading hitRateAt gives it.
+        int lowest = Math.min(Math.max(pity.drawnFrom(), pullsSinceHit + 1), hardAt());
+        return rng.nextInt(lowest, hardAt() + 1);
+    }
+
     /** Probability a hit is the featured unit, given the losses carried into it. */
     public double featuredChanceAfter(int consecutiveLosses) {
         return consecutiveLosses >= featured.guaranteeAfterLoss() ? 1.0 : featured.chanceAtHit();
     }
 
     /**
-     * One pull. The single place the rules are applied; the exact chain walks the
-     * same branches with probabilities instead of a random number.
+     * One pull against a known threshold. The single place the rules are applied;
+     * the exact chain walks the same branches with probabilities instead of a
+     * random number.
+     *
+     * <p>{@code wall} comes from {@link #drawWall}, and for every banner whose
+     * guarantee is fixed it is just {@link #hardAt()}. A caller holding a drawn
+     * one must redraw whenever {@code headlineHit} comes back true, because that
+     * is where the game redraws.
      */
-    public PullResult draw(PityState from, RandomGenerator rng) {
-        if (rng.nextDouble() >= hitRateAt(from.pullsSinceHit())) {
+    public PullResult draw(PityState from, RandomGenerator rng, int wall) {
+        if (rng.nextDouble() >= hitRateAt(from.pullsSinceHit(), wall)) {
             return new PullResult(false, false, from.afterMiss());
         }
         if (rng.nextDouble() < featuredChanceAfter(from.consecutiveLosses())) {
@@ -102,6 +150,9 @@ public record PullModel(Rarity headline, double baseRate, PityRule pity, Feature
      * two, so this is the wall itself there. Getting that wrong would only have
      * made a bound loose, which is exactly the kind of wrong that never fails a
      * test and quietly weakens one.
+     *
+     * <p>A drawn guarantee makes this the top of its range and not the middle:
+     * the worst case is the run in which every draw came out at 100.
      */
     public long worstCasePulls() {
         long hitsNeeded = featured.chanceAtHit() >= 1.0 ? 1L : featured.guaranteeAfterLoss() + 1L;

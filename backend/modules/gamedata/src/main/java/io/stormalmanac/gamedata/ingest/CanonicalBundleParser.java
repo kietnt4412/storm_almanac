@@ -409,11 +409,16 @@ public final class CanonicalBundleParser {
     private static PityRule pityRule(JsonNode node, String at) {
         JsonNode softFrom = node.get("softFrom");
         boolean soft = softFrom != null && !softFrom.isNull();
+        // Absent means the guarantee is fixed at hardAt, which is what every
+        // bundle written before a game drew its wall was saying all along.
+        JsonNode drawnFrom = node.get("drawnFrom");
+        boolean drawn = drawnFrom != null && !drawnFrom.isNull();
         return new PityRule(
                 (int) integer(node, "hardAt", at + ".hardAt"),
                 soft ? (int) integer(node, "softFrom", at + ".softFrom") : null,
                 soft ? number(node, "softJumpTo", at + ".softJumpTo") : null,
-                soft ? number(node, "softStep", at + ".softStep") : null);
+                soft ? number(node, "softStep", at + ".softStep") : null,
+                drawn ? (int) integer(node, "drawnFrom", at + ".drawnFrom") : null);
     }
 
     private static Rarity rarity(JsonNode node, String at) {

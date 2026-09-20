@@ -172,11 +172,14 @@ class PullModelTest {
 
         private final PullModel model = PullModel.of(Banners.grayRavenRotational());
         private final PityState fresh = PityState.fresh(PityScope.BANNER_TYPE, "character");
+        // This banner's guarantee is fixed, so drawing it is the identity; the
+        // branches below are about the three transitions and not about the wall.
+        private final int wall = model.hardAt();
 
         @Test
         @DisplayName("a miss raises pity and leaves the split alone")
         void aMiss() {
-            PullResult result = model.draw(fresh, rolling(0.9));
+            PullResult result = model.draw(fresh, rolling(0.9), wall);
             assertThat(result.headlineHit()).isFalse();
             assertThat(result.featured()).isFalse();
             assertThat(result.stateAfter().pullsSinceHit()).isEqualTo(1);
@@ -187,7 +190,7 @@ class PullModelTest {
         @DisplayName("a featured hit resets pity and the accumulated guarantee together")
         void aFeaturedHit() {
             PityState owed = new PityState(PityScope.BANNER_TYPE, "character", 40, 1);
-            PullResult result = model.draw(owed, rolling(0.001, 0.1));
+            PullResult result = model.draw(owed, rolling(0.001, 0.1), wall);
             assertThat(result.headlineHit()).isTrue();
             assertThat(result.featured()).isTrue();
             assertThat(result.stateAfter().pullsSinceHit()).isZero();
@@ -197,7 +200,7 @@ class PullModelTest {
         @Test
         @DisplayName("losing the split resets pity and moves the guarantee one closer")
         void anOffFeaturedHit() {
-            PullResult result = model.draw(fresh, rolling(0.001, 0.8));
+            PullResult result = model.draw(fresh, rolling(0.001, 0.8), wall);
             assertThat(result.headlineHit()).isTrue();
             assertThat(result.featured()).isFalse();
             assertThat(result.stateAfter().pullsSinceHit()).isZero();
@@ -209,7 +212,7 @@ class PullModelTest {
         void theGuaranteeCannotBeLost() {
             PityState guaranteed = new PityState(PityScope.BANNER_TYPE, "character", 0, 1);
             // 0.999999 would lose a 70% split outright; the guarantee overrides it.
-            PullResult result = model.draw(guaranteed, rolling(0.001, 0.999999));
+            PullResult result = model.draw(guaranteed, rolling(0.001, 0.999999), wall);
             assertThat(result.featured()).isTrue();
         }
 
@@ -217,7 +220,7 @@ class PullModelTest {
         @DisplayName("at the wall the rarity arrives whatever the generator says")
         void theWallIgnoresTheGenerator() {
             PityState atTheWall = new PityState(PityScope.BANNER_TYPE, "character", 59, 0);
-            PullResult result = model.draw(atTheWall, rolling(0.999999, 0.001));
+            PullResult result = model.draw(atTheWall, rolling(0.999999, 0.001), wall);
             assertThat(result.headlineHit()).isTrue();
         }
 

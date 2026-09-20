@@ -1145,6 +1145,66 @@ solver cannot reach.
       made a finished item look unfinished for as long as it took somebody to
       open a screen.
 
+- [x] ~~**N31 — Give `PityRule` a guarantee that is drawn, not fixed.**~~ Done
+      2026-09-20, thirtieth session.
+      [ADR 0023](../adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md),
+      `V11`, one nullable column, **393 tests green and 0 skipped locally**.
+
+      **The cost the item warned about was not real.** Carrying PGR's drawn
+      80–100 threshold exactly looked like a fourth dimension on the exact chain
+      or twenty-one mixed chains. It is neither: conditioned on `c` misses, the
+      posterior over the threshold is uniform on
+      `{max(drawnFrom, c+1) .. hardAt}` — the curve rolls are independent of the
+      draw, so `c` misses rule out every threshold at or below `c` and nothing
+      else. It depends on the pity counter alone, so **the marginal is a rising
+      hazard curve**, the shape soft pity already had, and `MarkovBannerEngine`
+      was not touched. `hardAt` keeps its meaning — the pull at which the rarity
+      is certain — so every rule written before this reads back unchanged.
+
+      **The simulation draws anyway, and that is the point.** A Monte Carlo
+      engine reusing the integrated curve would have agreed with the chain about
+      the marginalisation by construction. It draws a threshold per pity cycle
+      and redraws on every headline hit, won or lost.
+
+      **It found a real bug on its first run, which is the first time the two
+      engines have disagreed about anything but rounding since Phase 5 closed.**
+      A player carrying 85 misses against a threshold drawn from 80–100 *cannot
+      have drawn 80*; the simulation was sampling the prior and handing that
+      player a forced hit about a quarter of the time. Exact `0.381856` against
+      simulated `0.557824` — 17.6 points, and **the chain was right**. `drawWall`
+      now draws from `{max(drawnFrom, pullsSinceHit + 1) .. hardAt}`.
+
+      **The agreement test had to be told where to look.** Its generic questions
+      are 1, 10, half the wall, the wall, the worst case — for a wall of 100 that
+      is 1, 10, **50**, 99, 100, every one below the drawn range or at
+      certainty's doorstep. The one band where the roads can part was never
+      sampled. Questions across the band are now generated for any drawn banner:
+      96 → **108 questions**, worst gap unchanged at **0.110 points at 2.22
+      standard errors**.
+
+      **The fixture correction, which the item asked for, was wrong in both
+      halves.** `Banners.grayRavenFloating()` paired 1.50% with a 70% featured
+      rate and a fixed wall at 80; the client pairs 1.50% with **100%** and the
+      drawn range, on one screen. So the worst case is one wall and not two, and
+      ten pulls is ten base rolls. Renamed to the Themed Construct pool.
+
+      **And it reproduces the note's arithmetic from the other end.** The
+      research disclosure computed the Themed pool's long-run share by hand as
+      **2.021%** against the advertised 1.90%; the chain says 49.488 pulls, which
+      is **2.0207%**. The disagreement with the publisher is now the model's and
+      not a spreadsheet's — which is what **Q4** needs before anything is
+      concluded from it.
+
+      **Proved against Postgres, not only the parser.** The proving-ground
+      fixture gained a second banner with a drawn guarantee, so the column
+      crosses the writer, parser, migration and JDBC round trip. `Facts` carries
+      it too, or a patch turning a fixed wall into a drawn one would report
+      `hard at 80 -> 100` and read as a nerf. One brittle assertion moved with
+      it: the second-hand refusal now names 21 facts, not 20.
+
+      **What it does not do is put a PGR banner in the bundle.** The archetype is
+      expressible; a banner still has no pull currency and no price, which is
+      **N28**.
 ## Closed phases, in full
 
 The live tracker keeps each phase's exit criterion, its status and the
@@ -2621,6 +2681,151 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-20 (thirtieth) — N31: a drawn guarantee is a rate curve, not a state
+dimension.** [ADR 0023](../adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md),
+`V11`. No new reading — this is the 2026-09-18 PGR reading finally written down.
+**N33 was skipped deliberately**: it is a reading of the game client and the
+maintainer's, not a session's.
+
+- **The remote at start:** `1f451b2` on `dev`, tree clean, PR #28 merged and
+  nothing outstanding. Not re-checked against `gh` — no push was made.
+- **The expensive option was not needed, and the argument is three lines.**
+  N31 said the exact chain needed the drawn threshold in its state or 21 mixed
+  chains. Condition on `c` misses: a miss is a failed curve roll *and* an absent
+  wall, and the roll is independent of the draw, so `c` misses are impossible for
+  every `W <= c` and equally likely for every `W > c`. The posterior is uniform
+  on `{max(drawnFrom, c+1) .. hardAt}`, depends on `c` alone, and the chance this
+  pull is the forced one is `1/(hardAt - c)`. **`MarkovBannerEngine` was not
+  touched.** The state space kept three dimensions and got a hundred deep.
+- **`hardAt` was not repurposed**, which is why nothing published had to move.
+  It still means the pull at which the rarity is certain; `drawnFrom` is the
+  bottom of the range. A `drawnFrom` equal to `hardAt` is refused by name — a
+  range of one is a fixed wall spelled the long way, and two spellings of one
+  banner is a diff nobody can read.
+- **The cross-check paid for itself, and it is the first disagreement since
+  Phase 5 closed that was not rounding.** The simulation draws rather than
+  reusing the integrated curve — deliberately, or the agreement would be
+  circular — and it drew from the *prior*. A player carrying 85 misses against a
+  threshold drawn from 80–100 cannot have drawn 80; the simulation handed that
+  player a forced hit a quarter of the time. **Exact 0.381856 against simulated
+  0.557824**, 17.6 points, and **the chain was right**. The fix is one `max` in
+  `drawWall`. Note the shape of the bug: plausible, monotone, and wrong in the
+  direction that flatters the player — what a single engine ships.
+- **The test suite had to be told where to look, and this generalises.** The
+  agreement questions are generated at 1, 10, half the wall, the wall and the
+  worst case. For a wall of 100 that is 1, 10, **50**, 99, 100 — all below the
+  drawn range or at certainty's doorstep, so the only band where the two roads
+  can disagree was never asked about. **A question set generated from a banner's
+  parameters is not automatically a question set that probes them.** 96 → 108
+  questions; worst gap unchanged at 0.110 points at 2.22 standard errors.
+- **Two numbers now agree that did not have to.** The research note computed the
+  Themed pool's long-run share by hand as **2.021%** against the publisher's
+  advertised 1.90%. The chain, which knows nothing about the note, says 49.488
+  pulls on average — **2.0207%**. Q4's PGR disagreement is now the model's rather
+  than a spreadsheet's, which is what it has to be before anything is concluded
+  from it. It does **not** answer Q4; it makes the question sharper.
+- **The fixture correction N31 asked for was wrong in both halves.**
+  `Banners.grayRavenFloating()` had 1.50% with a 70% featured rate and a fixed
+  wall at 80. The client pairs 1.50% with **100%** and the drawn range, on one
+  screen — the axes pair. So ten pulls is now ten base rolls (no split to lose)
+  and certainty arrives at 100, not 80. Three published-rates tests moved.
+- **The column was proved against Postgres, not only the parser.** The
+  proving-ground fixture gained a second banner, `warden-return`, whose guarantee
+  is drawn 40–50, so `drawn_from` crosses the writer, the parser, `V11` and the
+  JDBC round trip like every other field. `Facts` carries it too — without that a
+  patch turning a fixed wall into a drawn one reports `hard at 80 -> 100` and
+  reads as a nerf. One brittle assertion moved with the fixture: the second-hand
+  refusal names **21** facts, not 20. That count is hand-written and will move
+  again the next time the fixture grows; it is asserted because the difference
+  between "not first-hand" and "twenty facts are not first-hand" is a different
+  decision for whoever reads it.
+- **Build:** 384 → **393 tests**, 0 skipped locally, green. CI will show **377**,
+  the 16 snapshot-gated ones skipping as always.
+- **Not done, and named:** no PGR banner is in the bundle. The archetype is
+  expressible now and a banner still declares no pull currency and no price —
+  **N28** — so nothing was published and there is no sequence 5.
+
+**Then all four Phase 4 items were planned, one decided and three held.** The
+maintainer asked for a plan per numbered action, chose option 2 on N30, and held
+the rest to decide later — with the condition that **Phase 4 does not close until
+each is done or explicitly cut on the record**. That condition is now on the
+Phase 4 board entry. The plans, so no session re-derives one:
+
+- **N30 — decided: a deadline, not a schedule.** The two candidates were (1) give
+  the event grant a cost in days and let `FEWEST_DAYS` schedule it, which wants a
+  time index and so collides with ADR 0013, and (2) let it stay supply that
+  `occurrences` already truncates, and report the deadline. **(2) was chosen.**
+  What is already true: `occurrences` truncates against `closesAt`,
+  `Cadence.EVENT`/`ONE_OFF` cap at one, and `Availability.isExpiring()` exists
+  and is read by nothing. Three gaps: a **deadline note**; a **lapsed note**,
+  because `claimable()` filters a reward with zero occurrences out *silently*, so
+  a grant that shut on day 4 of a 63-day plan vanishes rather than being reported
+  — the exact mirror of ADR 0022's `withheldGrants`; and a **`FEWEST_DAYS`
+  sentence**, since a shorter horizon is the only thing that keeps an expiring
+  grant in reach. Shape: `Outcome` gains `expiringClaims` and `lapsedGrants`, two
+  notes in `MipOptimizer` beside the existing pair, **ADR 0024**, and tests
+  against `pg-event-1` — present in proving-ground 1.0, gone from 1.1 because the
+  event ended, which is a ready-made fixture pair. No migration, no bundle
+  change, nothing game-specific. **Explicitly out of scope, so nobody re-opens
+  it:** no time index, no per-day variables, no scheduling of the claim.
+- **N33 — the premise was wrong and the finding is worth more than the plan.**
+  The maintainer asked to skip the per-level EXP and record "the level and the
+  Cogs" instead. **Both are already recorded.** The thirteen level gates are in
+  the bundle's own Promote comment — Lv 2, 10, 20, 30, 40, 45, 50, 55, 60, 65,
+  70, 75, 80, with step 11's Lv.70 read through an overlapping weapon model — and
+  the thirteen Cog costs are rows, 5 000 up to 100 000, **542 500 in total, Cogs
+  only**. What is missing is only the EXP, and **the bundle comment already
+  explains why that blocks the gates; the code confirms it.**
+  `DemandResolver.payUpTo(required, false)` passes `mustBeReachable = false` for
+  a gate, deliberately, because a gate may name the start of a track
+  (`promote-0`). So a required state that **no upgrade produces resolves to an
+  empty path and costs nothing**: `"requires": ["level-40"]` today would be a
+  gate every plan meets for free — which is *worse* than prose, because prose is
+  honest about being unread and a free gate looks priced. So the twelve gates
+  need the EXP or they need nothing. **Two things make it cheaper than it looks.**
+  It is **incremental** — the ladder is a chain, so any prefix priced unlocks
+  exactly that many gates, and Lv 80 is already pinned at 497 000; one sitting
+  need not do twelve. And there is **a code-only piece available now**: a state
+  required by a gate but appearing as neither a `toState` nor any upgrade's
+  `fromState` can never be produced by anything, and today that is
+  indistinguishable from a legitimate track start. Refusing it by name in
+  `AuthoredBundlesTest` turns the trap into a build failure — at present the
+  guard is a human holding it up in a JSON comment.
+- **N20 — five pieces, and the work is the fifth.** `EnergyMip.matchingDays`
+  (line 682) calls `from.atZone(ZoneOffset.UTC).getDayOfWeek()`. The schema half
+  is exactly the **V11** shape just executed: two fields on `Game` (rollover zone
+  and hour), parser, writer, migration, JDBC round trip, optional so every
+  published bundle reads back meaning what it claimed. **The real work is step
+  five**: a 05:00 boundary changes *which weekday a plan starting before 05:00
+  begins on*, and the rotation grouping shares capacity over subsets of weekday
+  restrictions, so a wrong start day moves a whole day of energy into the wrong
+  bucket. **Two traps:** do not let a rollover hour become a per-day variable
+  (ADR 0013 is what holds p95 at 1 807 ms), and do not try to finish
+  `Availability.opensAt` in the same change — the banner's opening time is still
+  unread. Do it with PGR, whose 05:00 UTC reset was read 2026-09-19.
+- **B5 — the sequence, and what a session cannot do alone.** Current state
+  checked: `deploy` is `if: false` at `ci.yml:76`, its body still echoes
+  *"TODO(phase-0) wire Fly.io or the VPS deploy here"* then `exit 1`, with
+  `DEPLOY_URL: https://example.invalid`. Keep the skipped-is-honest property that
+  comment argues for. **Two decisions first.** *One origin or two:* `SecurityConfig`
+  writes the CSRF token into a cookie the page reads and the commented OAuth
+  stanza uses `{baseUrl}/login/oauth2/code/{registrationId}`; locally the Vite
+  proxy forwards `/api` and `/dev` to `localhost:8080`, so everything has been
+  same-origin from day one — a Vercel rewrite preserves that and two real origins
+  break session cookie, CSRF cookie and OAuth redirect at once. *The free tier
+  sleeps:* decide warm-up ping, honest loading state, or acceptance **before**
+  five strangers meet it. **Then:** (1) build the image locally, end to end, which
+  has never been done — the in-container Gradle download was abandoned at 10%
+  after twenty minutes — and check the `COPY` list against the module tree first,
+  because it omitted `adapters/` for a whole phase; (2) Render service plus
+  Postgres, where Flyway's **eleven** migrations meet an empty database outside
+  Testcontainers for the first time; (3) Vercel with the `/api/*` rewrite; (4)
+  register the OAuth client against the real redirect URI, the first exchange
+  ever; (5) flip `deploy` to `main`, replace the TODO, keep the `curl --fail`
+  smoke; (6) **delete `:modules:identity-dev`** — ADR 0017's trigger, and the
+  actual end of B5. **Steps 2 to 4 need the maintainer's accounts**; a session can
+  do 1, 5, 6 and the rewrite config.
 
 **2026-09-20 (twenty-ninth) — N32 (5): a grant sized by the player is an answer
 the reader supplies.** [ADR 0022](../adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md).

@@ -471,12 +471,15 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
         Map<Long, Map<Rarity, PityRule>> pityRules = new LinkedHashMap<>();
         jdbc.query(
                 """
-                SELECT banner_id, rarity_label, rarity_rank, hard_at, soft_from, soft_jump_to, soft_step
+                SELECT banner_id, rarity_label, rarity_rank,
+                       hard_at, soft_from, soft_jump_to, soft_step, drawn_from
                   FROM gamedata.banner_pity_rule WHERE version_id = ? ORDER BY banner_id, rarity_rank
                 """,
                 rs -> {
                     // soft_from is null when the banner has no soft pity, and the
-                    // other two follow it. getInt/getDouble would read those as 0.
+                    // other two follow it. getInt/getDouble would read those as 0
+                    // — and a drawn_from read as 0 would refuse to construct at
+                    // all, which is the loud half of the same mistake.
                     Integer softFrom = (Integer) rs.getObject("soft_from");
                     pityRules.computeIfAbsent(rs.getLong("banner_id"), key -> new LinkedHashMap<>())
                             .put(rarity(rs, "rarity_label", "rarity_rank"),
@@ -484,7 +487,8 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
                                             rs.getInt("hard_at"),
                                             softFrom,
                                             (Double) rs.getObject("soft_jump_to"),
-                                            (Double) rs.getObject("soft_step")));
+                                            (Double) rs.getObject("soft_step"),
+                                            (Integer) rs.getObject("drawn_from")));
                 },
                 version);
 
