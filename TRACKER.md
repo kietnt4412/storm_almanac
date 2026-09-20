@@ -250,17 +250,17 @@ works". It does not mean that:
 Ordered. Completed ones move to
 [the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-- [ ] **N32 — Read the EXP to Lv 2, 10, 20 … 75.** **All five shapes the first
-      full bundle refused are in** (ADR 0019–0022, sequences 1–4;
-      [the account is in the archive](docs/history/tracker-archive.md#completed-next-actions)),
-      so what is left of N32 is **a reading rather than code**, and it is the
-      maintainer's: the EXP at each of the other twelve Promote gates, which is
-      what turns them from prose into rows (MAX on one Pod size from each level,
-      as Lv 80 was pinned). Two things to carry into it: the roster's **one state
-      per entity** over-charges any reader whose recorded state is on a different
-      track from the gate — read ADR 0019 first — and **no screen asks a reader
-      what they reach**, so ADR 0022's answer is retyped per request until one
-      does.
+- [ ] **N33 — Read the EXP to Lv 2, 10, 20 … 75, and price the other twelve
+      Promote gates.** **A reading, not code, and the maintainer's.** MAX on one
+      Pod size from each level, the way Lv 80 was pinned to (496 000, 497 000].
+      Until it exists, twelve of thirteen gates are prose and **every plan below
+      the top rank is cheaper than the truth** — the same error that made her
+      last rank 180 Serum when it is 1 470. **N32 is closed and this is what it
+      left** ([the account](docs/history/tracker-archive.md#completed-next-actions)):
+      the format can now hold the rows, so nothing but the reading is missing.
+      Carry one thing into it: the roster's **one state per entity** over-charges
+      any reader whose recorded state is on a different track from the gate —
+      read ADR 0019 first.
 - [ ] **N31 — Give `PityRule` a guarantee that is drawn, not fixed.** PGR's Themed
       Construct pool draws its wall **uniformly 80–100, redrawn on every S-Rank**;
       `hardAt` is an `int`, so **the archetype is absent from the first bundle
@@ -344,8 +344,8 @@ previous one's criterion is met. The "Landed" record for closed phases is
       and **N25 is closed** — five screens driven in a browser including the
       overlay, provenance read back onto the page, the PWA loaded with its server
       killed, a frontend suite in CI. **Nothing is deployed**, and since D3 the
-      launch title is PGR: its first bundle plans, EXP and one gate included,
-      (**N30**, **N32**). Launch publicly even if ugly.
+      launch title is PGR: its bundle plans a character whole except the twelve
+      unpriced gates (**N30**, **N33**). Launch publicly even if ugly.
       **Exit:** five strangers complete a plan without asking for help, and a
       logged-in character page shows what that reader is short of. *The second
       clause is served; the first needs **B5**.*
@@ -525,7 +525,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-20 | twenty-ninth | N32 (5) closes the format work: a grant behind a score the reader supplies (ADR 0022, V10). Sequence 4, the Phantom Pain Cage: Evolve to SS in 63 days and no Serum |
+| 2026-09-20 | twenty-ninth | N32 closed by its fifth shape: a grant behind a score the reader supplies (ADR 0022, V10). Sequence 4, the Phantom Pain Cage: Evolve to SS in 63 days and no Serum. The EXP reading leaves as N33 |
 | 2026-09-19 | twenty-eighth | N32 (4): one step at several prices is a choice the solver makes (ADR 0021, V9). Sequence 3: Samantha's Resonance, 90 Serum |
 | 2026-09-19 | twenty-seventh | N32 (3): a shop limit that never resets (ADR 0020). Sequence 2, the shard shop, published; Evolve to SS plans |
 | 2026-09-19 | twenty-sixth | N32 (1)+(2): gates become demand and fodder feeds EXP (ADR 0019, V8). Sequence 1 published; plans 240 → 420 and 180 → 1 470 |

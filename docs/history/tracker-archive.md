@@ -1138,9 +1138,12 @@ solver cannot reach.
 
       **Exit met:** every one of the five is in the bundle as a row, published
       (sequences 1–4) and read back as *no changes*, with a plan whose arithmetic
-      was worked out by hand before it was run. **What N32 keeps** is the one
-      part that was never code: the **EXP at the other twelve Promote gates**,
-      which is a reading and the maintainer's.
+      was worked out by hand before it was run. **N32 is closed on that
+      criterion**, and the one part of it that was never code — the **EXP at the
+      other twelve Promote gates** — leaves as **N33**, because a reading is not
+      a shape the format refused and keeping it under this number would have
+      made a finished item look unfinished for as long as it took somebody to
+      open a screen.
 
 ## Closed phases, in full
 
@@ -2621,8 +2624,9 @@ what `git log` is for.
 
 **2026-09-20 (twenty-ninth) — N32 (5): a grant sized by the player is an answer
 the reader supplies.** [ADR 0022](../adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md).
-No new reading. **This closes the format work N32 opened**: all five shapes the
-first full bundle refused are now writable.
+No new reading. **This closes N32**: all five shapes the first full bundle
+refused are now writable. The EXP reading it was also carrying leaves as
+**N33** — the item's criterion was the shapes, and it was met.
 
 - **The remote at start:** PR #28 merged, `dev` and `main` with identical trees,
   nothing outstanding.
