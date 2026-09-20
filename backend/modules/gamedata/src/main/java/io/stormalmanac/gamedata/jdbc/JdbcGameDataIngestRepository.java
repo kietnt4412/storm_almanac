@@ -477,15 +477,18 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
         long id = jdbc.queryForObject(
                 """
                 INSERT INTO gamedata.reward
-                    (version_id, slug, cadence, available_days, opens_at, closes_at)
-                VALUES (?, ?, ?, ?::text[], ?, ?)
+                    (version_id, slug, cadence, available_days, opens_at, closes_at,
+                     requires_measure, requires_at_least)
+                VALUES (?, ?, ?, ?::text[], ?, ?, ?, ?)
                 RETURNING id
                 """,
                 Long.class,
                 version, reward.id(), reward.cadence().name(),
                 Availabilities.days(reward.availability()),
                 Timestamps.at(reward.availability().opensAt()),
-                Timestamps.at(reward.availability().closesAt()));
+                Timestamps.at(reward.availability().closesAt()),
+                reward.requires() == null ? null : reward.requires().measure(),
+                reward.requires() == null ? null : reward.requires().atLeast());
 
         writeStacks(version, reward.grants(), items,
                 "INSERT INTO gamedata.reward_grant (reward_id, version_id, ordinal, item_id, quantity)"

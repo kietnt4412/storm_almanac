@@ -84,9 +84,21 @@ class EnergyMipTest {
             Objective objective,
             int energyPerDay,
             int horizonDays) {
+        return solve(definition, inventory, demand, objective, energyPerDay, horizonDays, Map.of());
+    }
+
+    /** The same solve from a reader who has said what they reach (ADR 0022). */
+    private static EnergyMip.Outcome solve(
+            GameDefinition definition,
+            Map<ItemId, Integer> inventory,
+            Map<ItemId, Integer> demand,
+            Objective objective,
+            int energyPerDay,
+            int horizonDays,
+            Map<String, Integer> reach) {
         return EnergyMip.solve(new EnergyMip.Inputs(
                 definition, YieldTable.declared(definition), inventory, demand, NOW, 2000L,
-                objective, energyPerDay, horizonDays));
+                objective, energyPerDay, horizonDays, reach));
     }
 
     @Test
@@ -381,6 +393,80 @@ class EnergyMipTest {
 
         assertThat(outcome.rewardClaims()).containsExactly(new RewardClaim("daily-login", 1));
         assertThat(outcome.daysNeeded()).isEqualTo(1);
+    }
+
+    // ── Grants paid by how well the reader plays (ADR 0022) ─────────────────
+
+    /**
+     * A weekly mode paying by score: 1 relic for showing up, 5 more for clearing
+     * it. The tier is a reward of its own standing behind a bar, which is how a
+     * ladder of nine tiers is written without the format learning what a ladder
+     * is.
+     */
+    private static GameDefinition scoredWeekly() {
+        return TestGame.builder()
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .source(new Reward("cage-bronze", Reward.Cadence.WEEKLY,
+                        List.of(new ItemStack(RELIC, 1)), Availability.ALWAYS,
+                        new Reward.Requirement("cage-score", 30_000)))
+                .source(new Reward("cage-gold", Reward.Cadence.WEEKLY,
+                        List.of(new ItemStack(RELIC, 5)), Availability.ALWAYS,
+                        new Reward.Requirement("cage-score", 500_000)))
+                .build();
+    }
+
+    @Test
+    @DisplayName("a grant behind a score is counted for the reader who says they reach it")
+    void aGrantIsIncomeForAReaderWhoClearsIt() {
+        // 500 000 clears both bars, so both tiers pay every week: 6 relics a
+        // week, and 4 weeks fit in the horizon.
+        EnergyMip.Outcome outcome = solve(scoredWeekly(), Map.of(), Map.of(RELIC, 6),
+                Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, UNCONSTRAINED_HORIZON,
+                Map.of("cage-score", 500_000));
+
+        assertThat(outcome.totalEnergy()).isZero();
+        assertThat(outcome.rewardClaims()).containsExactlyInAnyOrder(
+                new RewardClaim("cage-bronze", 1), new RewardClaim("cage-gold", 1));
+        assertThat(outcome.withheldGrants()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("the tiers above what the reader reaches are not income, and the plan names them")
+    void aGrantAboveTheReaderIsWithheldAndReported() {
+        // 30 000 clears the bronze bar only. One relic a week, four weeks, so
+        // six relics are not reachable at all — and the refusal has to say why,
+        // because "no source yields it" would be a lie about a mode the reader
+        // plays every week.
+        EnergyMip.Outcome outcome = solve(scoredWeekly(), Map.of(), Map.of(RELIC, 4),
+                Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, UNCONSTRAINED_HORIZON,
+                Map.of("cage-score", 30_000));
+
+        assertThat(outcome.rewardClaims()).containsExactly(new RewardClaim("cage-bronze", 4));
+        assertThat(outcome.withheldGrants()).containsExactly(
+                new EnergyMip.Withheld("cage-gold", "cage-score", 500_000, 30_000));
+    }
+
+    @Test
+    @DisplayName("a reader who says nothing collects nothing, which is dearer and never cheaper")
+    void silenceCountsNoScoredGrant() {
+        EnergyMip.Outcome outcome = solve(scoredWeekly(), Map.of(), Map.of(GOLD, 100));
+
+        assertThat(outcome.rewardClaims()).isEmpty();
+        // The relics are not in this goal set, so the withheld grants supply
+        // nothing anybody asked for and are not worth a note.
+        assertThat(outcome.withheldGrants()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("an item only a grant out of reach supplies is refused by the bar, not by the cadence")
+    void theRefusalNamesTheBarAndWhatTheReaderSaid() {
+        assertThatThrownBy(() -> solve(scoredWeekly(), Map.of(), Map.of(RELIC, 1),
+                Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, UNCONSTRAINED_HORIZON, Map.of()))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("cage-bronze")
+                .hasMessageContaining("30000")
+                .hasMessageContaining("cage-score")
+                .hasMessageContaining("reaching 0");
     }
 
     private static final ItemId HERO_EXP = Demand.progressItem("hero-exp");

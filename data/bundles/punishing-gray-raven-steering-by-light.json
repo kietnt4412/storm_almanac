@@ -27,7 +27,7 @@
     "reward tiles too, and Helentine: Lacrimosa went in whole except Awaken,",
     "whose tiers are conditions rather than costs. Still refused: the Themed",
     "Construct pool, every level and rank gate whose level has no price (see",
-    "sequence 1 below), score-scaled weekly grants, and the currencies no",
+    "sequence 1 below), score-scaled weekly grants (see sequence 4 below), and the currencies no",
     "screen has graded (Black and Rainbow Cards).",
     "",
     "PGR records patches by name rather than number, so the label is a name.",
@@ -47,7 +47,16 @@
     "Upper Resonance, now that one step can have several prices (ADR 0021):",
     "150 5-star Memory Shard, 234 Special Support Token or 246 Simulation",
     "Score, any one of them. The Memory Shard was read only by its icon until",
-    "the maintainer opened its item card the same day."
+    "the maintainer opened its item card the same day.",
+    "",
+    "Sequence 3 was published on 2026-09-19. Sequence 4 adds the weekly Phantom",
+    "Pain Cage, nine claim tiers and 56 Scars, now that a grant can stand behind",
+    "a score the reader supplies (ADR 0022). Nothing new was read: the tiles",
+    "were transcribed in the same 2026-09-19 sitting as the character and left",
+    "out because the format could only promise every reader the top tier. The",
+    "Scars they pay are the only source of the currency sequence 2's shard rows",
+    "spend, so Evolve to SS is a plan rather than a bill for a reader who says",
+    "what they clear."
   ],
 
   "game": {
@@ -55,7 +64,7 @@
     "displayName": "Punishing: Gray Raven",
     "energyUnit": "Serum"
   },
-  "sequence": 3,
+  "sequence": 4,
   "label": "Steering By Light",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client, patch \"Steering By Light\", on 2026-09-18. Numbers and text only; no game assets.",
 
@@ -88,6 +97,12 @@
       "id": "memory-shard-card",
       "origin": "OBSERVED_IN_GAME",
       "detail": "The 5-star Memory Shard's Item Details card, opened from the inventory's Item tab: name, \"Owned 4300\", and \"Obtained from recycling 5-star Memory Chips\". The owned count is the one the Resonance screen showed beside the unnamed 5-star price, which is how the two were matched. A screenshot taken by the maintainer on 2026-09-19 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch \"Steering By Light\".",
+      "observedOn": "2026-09-19"
+    },
+    {
+      "id": "phantom-pain-cage-screen",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "The Phantom Pain Cage's Weekly Reward screen — \"Resets weekly. Reach enough progress to claim.\" — read tile by tile down all nine claim tiers, from 30 000 progress to 1 100 000, each tile's Phantom Pain Scar count and the items beside it. Screenshots taken by the maintainer on 2026-09-19 and transcribed in a Claude Code session; not committed, because game assets are not allowed in this repository. That the Scars add up to the 56 they report collecting in a week is how the set of tiles was checked for a gap. Same client and account, patch \"Steering By Light\".",
       "observedOn": "2026-09-19"
     }
   ],
@@ -179,7 +194,16 @@
     "item:special-support-token": "character-screens",
     "upgrade:samantha-upper-resonance-by-memory-shard": "character-screens",
     "upgrade:samantha-upper-resonance-by-special-support-token": "character-screens",
-    "upgrade:samantha-upper-resonance-by-simulation-score": "character-screens"
+    "upgrade:samantha-upper-resonance-by-simulation-score": "character-screens",
+    "reward:phantom-pain-cage-30000": "phantom-pain-cage-screen",
+    "reward:phantom-pain-cage-90000": "phantom-pain-cage-screen",
+    "reward:phantom-pain-cage-120000": "phantom-pain-cage-screen",
+    "reward:phantom-pain-cage-360000": "phantom-pain-cage-screen",
+    "reward:phantom-pain-cage-500000": "phantom-pain-cage-screen",
+    "reward:phantom-pain-cage-700000": "phantom-pain-cage-screen",
+    "reward:phantom-pain-cage-900000": "phantom-pain-cage-screen",
+    "reward:phantom-pain-cage-1000000": "phantom-pain-cage-screen",
+    "reward:phantom-pain-cage-1100000": "phantom-pain-cage-screen"
   },
 
   "items": [
@@ -632,7 +656,120 @@
       "period": "never"
     }
   ],
-  "rewards": [],
+  "rewards": [
+    {
+      "_comment": [
+        "The weekly Phantom Pain Cage, nine claim tiers, each behind a score.",
+        "Together they are the 56 Scars a week the maintainer reports, and the",
+        "only source of the Scars the Phantom Pain shop's shard rows spend: 30",
+        "shards to Evolve S -> SS cost 500, which is at least nine perfect weeks.",
+        "",
+        "One reward per tier with the bar it stands behind (ADR 0022). Writing",
+        "the 56 as one grant would promise every reader the top tier; writing",
+        "the bottom tier only would be a different reader's week; leaving the",
+        "mode out charges 500 Scars and names no way to earn one. The reader",
+        "says what they reach in 'phantom-pain-cage-score' and the planner",
+        "counts the tiers they clear.",
+        "",
+        "Three grants are written short, and always downward. The 500 000 and",
+        "1 000 000 tiles also pay a gold 5-star card and a 4-star chip, and the",
+        "700 000 tile a 4-star character portrait; none of those three items was",
+        "opened, so none is a bundle item, so none is written. A tier that pays",
+        "less than it does makes the plan dearer than the truth."
+      ],
+      "id": "phantom-pain-cage-30000",
+      "cadence": "WEEKLY",
+      "grants": [
+        { "item": "phantom-pain-scar", "quantity": 4 },
+        { "item": "skill-point", "quantity": 3 },
+        { "item": "exp-pod-m", "quantity": 1 },
+        { "item": "cogs", "quantity": 6000 }
+      ],
+      "requires": { "measure": "phantom-pain-cage-score", "atLeast": 30000 }
+    },
+    {
+      "id": "phantom-pain-cage-90000",
+      "cadence": "WEEKLY",
+      "grants": [
+        { "item": "phantom-pain-scar", "quantity": 5 },
+        { "item": "major-overclock-alloy", "quantity": 1 },
+        { "item": "exp-pod-m", "quantity": 1 },
+        { "item": "cogs", "quantity": 6000 }
+      ],
+      "requires": { "measure": "phantom-pain-cage-score", "atLeast": 90000 }
+    },
+    {
+      "id": "phantom-pain-cage-120000",
+      "cadence": "WEEKLY",
+      "grants": [
+        { "item": "phantom-pain-scar", "quantity": 6 },
+        { "item": "memory-overclock-circuit-ii", "quantity": 1 },
+        { "item": "exp-pod-m", "quantity": 1 },
+        { "item": "cogs", "quantity": 8000 }
+      ],
+      "requires": { "measure": "phantom-pain-cage-score", "atLeast": 120000 }
+    },
+    {
+      "id": "phantom-pain-cage-360000",
+      "cadence": "WEEKLY",
+      "grants": [
+        { "item": "phantom-pain-scar", "quantity": 8 },
+        { "item": "weapon-overclock-core-ii", "quantity": 1 },
+        { "item": "exp-pod-m", "quantity": 1 },
+        { "item": "cogs", "quantity": 18000 }
+      ],
+      "requires": { "measure": "phantom-pain-cage-score", "atLeast": 360000 }
+    },
+    {
+      "_comment": "Also 10 of a gold 5-star card and 5 of a 4-star chip, neither of them opened and so neither of them here.",
+      "id": "phantom-pain-cage-500000",
+      "cadence": "WEEKLY",
+      "grants": [
+        { "item": "phantom-pain-scar", "quantity": 10 },
+        { "item": "skill-point", "quantity": 2 }
+      ],
+      "requires": { "measure": "phantom-pain-cage-score", "atLeast": 500000 }
+    },
+    {
+      "_comment": "Also one 4-star character portrait, not opened and so not here.",
+      "id": "phantom-pain-cage-700000",
+      "cadence": "WEEKLY",
+      "grants": [
+        { "item": "phantom-pain-scar", "quantity": 3 },
+        { "item": "exp-pod-l", "quantity": 1 },
+        { "item": "cogs", "quantity": 30000 }
+      ],
+      "requires": { "measure": "phantom-pain-cage-score", "atLeast": 700000 }
+    },
+    {
+      "id": "phantom-pain-cage-900000",
+      "cadence": "WEEKLY",
+      "grants": [
+        { "item": "phantom-pain-scar", "quantity": 5 },
+        { "item": "cogs", "quantity": 40000 }
+      ],
+      "requires": { "measure": "phantom-pain-cage-score", "atLeast": 900000 }
+    },
+    {
+      "_comment": "Also 15 of the same gold 5-star card and 5 of the same 4-star chip.",
+      "id": "phantom-pain-cage-1000000",
+      "cadence": "WEEKLY",
+      "grants": [
+        { "item": "phantom-pain-scar", "quantity": 6 },
+        { "item": "skill-point", "quantity": 2 }
+      ],
+      "requires": { "measure": "phantom-pain-cage-score", "atLeast": 1000000 }
+    },
+    {
+      "id": "phantom-pain-cage-1100000",
+      "cadence": "WEEKLY",
+      "grants": [
+        { "item": "phantom-pain-scar", "quantity": 9 },
+        { "item": "cogs", "quantity": 50000 }
+      ],
+      "requires": { "measure": "phantom-pain-cage-score", "atLeast": 1100000 }
+    }
+  ],
   "upgrades": [
     {
       "_comment": "One Overclock step takes Hear the Bell's level range to its maximum of 45 (maintainer); the recipe is the one read on 2026-09-18 with the slider on Highest. The 340 000 Cogs is that screen's one Consume figure for the whole Lv 1 -> 45 advance, Enhance and Overclock together; it lands on this row because this row is the advance to 45, and Cogs had no item until 2026-09-19. The EXP half, the same screen's Enhancement Cost of 24 000, lands here for the same reason, since sequence 1. States are opaque labels for 'before' and 'after'.",

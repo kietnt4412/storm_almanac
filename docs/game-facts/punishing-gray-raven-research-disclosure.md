@@ -1020,3 +1020,40 @@ second screen.** The first person to buy an eleventh shard should look.
 The limit is now writable: a shop period of `"never"` ([ADR 0020](../adr/0020-a-limit-that-never-resets-is-offered-whole.md)).
 Sequence 2 of the bundle has two rows, 10 at 10 and 20 at 20, and Evolve
 S → SS plans for a reader who holds the Scars.
+
+---
+
+## 2026-09-20 — the Cage goes in, and nothing new was read
+
+**No new reading.** Every number below was read on 2026-09-19 and is already in
+this note, under *[Phantom Pain Cage — Weekly Reward](#the-character-rows-and-one-number-the-screen-and-the-report-disagree-on)*.
+What changed is the format: a grant can now stand behind a score the reader
+supplies ([ADR 0022](../adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md)),
+so the nine tiles are nine rows in **sequence 4** instead of a paragraph saying
+why they could not be written.
+
+**The paragraph that said so is now wrong, and is kept.** *"Not a bundle row,
+deliberately"* was true of the format as it stood, and the reasoning in it —
+that writing the 56-Scar maximum would promise every reader the top tier — is
+exactly the reasoning ADR 0022 acts on. Read it as the question, and this as the
+answer.
+
+**Three tiers are written short.** The 500 000 and 1 000 000 tiles also pay a
+gold 5★ card ×10 and ×15 and a 4★ chip ×5, and the 700 000 tile a 4★ character
+portrait ×1. None of those three items has been opened, so none is a bundle
+item, so none is in the rows. A tier that pays less than it does makes a plan
+dearer than the truth, which is the safe direction — but it is still three
+grants this project does not carry, and the first person to open those cards
+should say what they are.
+
+**What it buys, measured.** With the tiers in, a reader who says they reach
+1 100 000 is planned Evolve S → SS in **63 days and no Serum**: 30 shards at
+10 and 20 Scars is 500, nine weekly resets pay 504, and the plan skips the
+bottom tier once to land on exactly 500. A reader who says **nothing** gets the
+refusal the session before could not give — it names the Scar, the lowest tier,
+the measure, and the zero it was told — and a reader who says they reach only
+30 000 is told the goal does not fit, with one tier counted rather than nine.
+
+**Still the maintainer's report, not a screen:** that a perfect week is 56. It
+is how the nine tiles were checked for a gap, so it is load-bearing for the
+claim that no tier is missing between the screenshots, not for any single row.
