@@ -16,7 +16,7 @@ being finished with is.
   [The 826-line version it replaces is in the archive, verbatim](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression) —
   go there for anything this file no longer carries, and decide whether it is
   still operative rather than assuming it was lost.
-- Last updated: **2026-09-20** (twenty-ninth session)
+- Last updated: **2026-09-20** (thirtieth session)
 
 ---
 
@@ -31,20 +31,22 @@ being finished with is.
 - **PGR is read first-hand ([the note](docs/game-facts/punishing-gray-raven-research-disclosure.md)),
   and [its bundle](data/bundles/punishing-gray-raven-steering-by-light.json)
   plans, EXP and one gate included ([ADR 0019](docs/adr/0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-demanded-as-an-item.md)).**
-  Simulated Battlefield pays Score, and Score buys every material and Pod. A
-  skill to its cap is **150 Serum**, a Memory's Overclock **420**, her
-  last rank **1 470**, Evolve to SS **30 shards from a stock that never resets**
-  (`AuthoredBundlePlanTest`, [ADR 0020](docs/adr/0020-a-limit-that-never-resets-is-offered-whole.md)).
-  **Sequence 4 is published** (2026-09-20T00:13:59Z, read back as *no changes*): the weekly Phantom
-  Pain Cage, nine tiers behind nine scores ([ADR 0022](docs/adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md)),
-  so a reader who says they clear it is planned **Evolve to SS in 63 days and no Serum**, and one
-  who says nothing is refused *by name*. Below the top rank plans are still too cheap:
-  no level under 80 has a price, so twelve gates are prose. What the client
-  overruled in the guides: the featured rule is a **per-banner rate** (70% with
-  a Calibration guarantee, or 100%); **events have no shops** and pay one-time
-  grants (**N30**); the Themed pool's wall floats (**N31**); and its
-  **`PityScope` inherits Calibration across pools**, where R1999 clears — the two
-  published games disagree on the one question that enum exists to answer.
+  Simulated Battlefield pays Score, and Score buys every material and Pod.
+  **Sequence 4 is published** (2026-09-20T00:13:59Z, read back as *no changes*), so a reader
+  who says they clear the weekly Phantom Pain Cage is planned **Evolve to SS in 63 days and no
+  Serum** and one who says nothing is refused *by name*
+  ([ADR 0022](docs/adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md));
+  the rest of the prices are in [the table below](#what-the-next-work-touches). **Below the top rank
+  plans are still too cheap:** no level under 80 has a price, so twelve gates are prose (**N33**).
+  What the client overruled in the guides: the featured rule is a **per-banner rate**; **events
+  have no shops** and pay one-time grants (**N30**); the Themed pool's wall is **drawn** (ADR 0023);
+  and its **`PityScope` inherits Calibration across pools**, where R1999 clears — the two published
+  games disagree on the one question that enum exists to answer.
+- **Both PGR banner archetypes are expressible and neither is authored, 2026-09-20**
+  ([ADR 0023](docs/adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md), `V11`).
+  `PityRule.drawnFrom` is the bottom of a drawn range and `hardAt` still means certainty, so
+  nothing published moved; **the exact chain gained no state**, because the posterior over the
+  threshold depends on the pity counter alone. Authoring one is **N28**.
 - **Going first-hand on game data**, 2026-09-09
   ([ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)),
   superseding 0009 and closing Q2, Q3, F1 and F2. Kornblume is unlicensed.
@@ -70,9 +72,10 @@ being finished with is.
   2026-09-09, every image build failing in six seconds while this file called it
   verified, so **anything added beside `modules`, `adapters`, `substrate`, `app`
   needs a line there**.
-- **The remote, checked 2026-09-20 — re-check it, do not trust it.**
+- **The remote, last checked 2026-09-20 (twenty-ninth) — re-check it, do not trust it.**
+  The thirtieth session pushed nothing and did not re-check.
   **[PR #28](https://github.com/kietnt4412/storm_almanac/pull/28) is MERGED**, and `dev` and `main`
-  had identical trees at the start of this session — `dev` sits behind by merge commits that never
+  had identical trees at the start of that session — `dev` sits behind by merge commits that never
   come back down, which is harmless and *not* a reason to rebase. **The trap stands:** CI runs on
   `pull_request` and on push to `main` only, so **a push to `dev` with no open PR runs nothing,
   silently**; every merge re-arms it, seven times now, each caught by looking. And PR #25 merged
@@ -156,14 +159,14 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **384 tests** in full 2026-09-20, 0 skipped locally; **368 expected on CI**, where the 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
-| Authored game data | **One bundle, sequence 4 published, first-hand** | Helentine: Lacrimosa (level to 80, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, and — since **sequence 4, published 2026-09-20T00:13:59Z** — the weekly Phantom Pain Cage's nine tiers. **104 facts, all first-hand**, over six provenance entries; preview and ingest read **exactly the nine additions**, and the published version reads back as *no changes*. **Every sequence so far has been published and read back clean** ([the loop, per sequence, in the archive](docs/history/tracker-archive.md#session-log)); the next correction is a sequence 5. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan |
+| Backend build | **Green** | **393 tests** in full 2026-09-20, 0 skipped locally; **377 expected on CI**, where the 16 snapshot-gated ones skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
+| Authored game data | **One bundle, sequence 4 published, first-hand** | Helentine: Lacrimosa (level to 80, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, and — since **sequence 4, published 2026-09-20T00:13:59Z** — the weekly Phantom Pain Cage's nine tiers. **104 facts, all first-hand**, over six provenance entries; preview and ingest read **exactly the nine additions**, and the published version reads back as *no changes*. **Every sequence so far has been published and read back clean** ([the loop, per sequence, in the archive](docs/history/tracker-archive.md#session-log)); the next correction is a sequence 5. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) |
 | CI workflow | **Green, no warnings, Node 24** | Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
 | The MIP (`EnergyMip`) | **Stages, crafts, shops, rewards and fodder** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. A purchase is a conversion capped at limit × *whole* periods, or the whole allowance of one that never resets, which the plan says it assumed unspent (ADR 0020); feeding fodder is a conversion into a `progress:<kind>` item, and paying one of a step's several prices a conversion into a `choice:` item (ADR 0021). Gates are not in the model: `DemandResolver` turns them into demand (ADR 0019). **A grant behind a score the reader has not cleared is dropped before the model** and reported in the notes, so the counts in a plan and in a refusal are the game *that reader* plays (ADR 0022) |
 | The time axis | **A scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). Rotation is capacity shared over *subsets* of weekday restrictions; **no variable is indexed by day**, which is why p95 held at **1 807 ms**. Weekdays are read in **UTC** — a game assumption in a game-agnostic module (**N20**) |
-| `gacha` — engines | **Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). An exact chain and 500 000 seeded trials sharing one validated `PullModel`, so both refuse the same banners for the same reasons. **51 tests, worst gap 0.110 points over 96 questions, at 2.22 standard errors.** Only the headline rarity is modelled |
+| `gacha` — engines | **Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). An exact chain and 500 000 seeded trials sharing one validated `PullModel`, so both refuse the same banners for the same reasons. **53 tests, worst gap 0.110 points over 108 questions, at 2.22 standard errors.** Only the headline rarity is modelled. **Through a drawn guarantee they take different roads on purpose** — the chain integrates it out, the simulation draws it (ADR 0023) — which is what caught the simulation sampling the prior, 0.558 against the chain's right 0.382. **A generated question set is not automatically one that probes the band it generated:** every generic question for a wall of 100 lands below the drawn range or at certainty |
 | `gacha` — income model | **Interface only, unwritable** | `projectedPulls` needs to know which item is pull currency and what a pull costs in it. **Neither `BannerModel` nor the `banner` table declares either** — **N28**, whose numbers now exist |
 | Frontend | **Five screens, browser-driven, 15 tests** | Inventory editor, goal picker, plan view carrying **every one of the solver's notes**, catalog browse and search, and the character page with the **personalized overlay**. Same-origin locally via the Vite proxy. **Never rendered PGR** — every screen was built against R1999 |
 | Docker Compose | **Repaired, and no image built end to end** | The fixed tree builds the jar locally and that jar contains no development sign-in. **The image itself is unproven** — the in-container Gradle download was abandoned at 10% after twenty minutes |
@@ -211,11 +214,12 @@ works". It does not mean that:
 - **Nothing has ever asked the gacha engines a question on behalf of a player.** No route, no
   screen, no bean, and **`PityState` is stored nowhere** — `player` has an inventory, a roster and
   goals, and no pity counters. "Probability of guaranteeing her" is computable and unanswerable,
-  and the gap is a schema and a screen rather than an engine. **One banner is first-hand and six are not (Q4)**,
-  so every other fixture proves only that the model reproduces figures it was
-  *given* — and **multi-copy answers are too pessimistic**, because 200 Cassettes
-  of the Lost buy a copy and nothing models it: at two copies the engines say 280
-  pulls and the truth is 200.
+  and the gap is a schema and a screen rather than an engine. **Three banners are first-hand and
+  five are not (Q4)** — R1999's anniversary limited, and both PGR archetypes since 2026-09-20 — so
+  every other fixture proves only that the model reproduces figures it was *given*; and
+  **multi-copy answers are too pessimistic**, because 200 Cassettes of the Lost buy a copy and
+  nothing models it: at two copies the engines say 280 pulls and the truth is 200. **No bundle
+  declares a banner at all**, so every gacha number here is a fixture's (**N28**).
 - **One character is not a catalog, and its plans are partial.** Twelve of
   thirteen Promote gates are prose, because no level below 80 has a price; and
   the roster holds **one state per entity**, so a reader recorded at
@@ -261,14 +265,6 @@ Ordered. Completed ones move to
       Carry one thing into it: the roster's **one state per entity** over-charges
       any reader whose recorded state is on a different track from the gate —
       read ADR 0019 first.
-- [ ] **N31 — Give `PityRule` a guarantee that is drawn, not fixed.** PGR's Themed
-      Construct pool draws its wall **uniformly 80–100, redrawn on every S-Rank**;
-      `hardAt` is an `int`, so **the archetype is absent from the first bundle
-      rather than approximated** — a gap in data now, not an argument in a note.
-      Monte Carlo needs one extra draw; the exact chain needs the drawn threshold
-      in its state, or 21 mixed chains (ADR 0018). **Do it with the fixture
-      correction it implies** — `Banners.grayRavenFloating()` pairs the 1.50% base
-      with 70% featured, and the client pairs 1.50% with **100%**.
 - [ ] **N30 — Put the event shape into the solver (D3).** **Shops are done**
       (twenty-fifth session) **and so is fodder** (twenty-sixth). **Dropped** —
       **probabilistic goals**: weapon
@@ -294,7 +290,9 @@ Ordered. Completed ones move to
       been checked for them. **Two more fields belong in the same change**, both
       from R1999: a **shop exchange for the featured unit** — cassettes cut six
       copies from 840 pulls to 560 — and a **cap on copies**, since `copies` is
-      unbounded.
+      unbounded. **This is now the only thing keeping a banner out of a bundle**:
+      since ADR 0023 both PGR archetypes are expressible and neither is authored,
+      so N28 ends in a **sequence 5** rather than in a schema.
 - [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
       `EnergyMip.matchingDays` reads weekdays in **UTC**, a game assumption in a
       game-agnostic module. R1999 Global rolls over at **05:00 UTC−5, weekly
@@ -513,8 +511,11 @@ Carry forward until answered, then move the entry [to the archive](docs/history/
   engine models**. **PGR's advertised 1.90% does *not* reproduce** from its own
   numbers — 1.925% and 2.021% computed — and the note argues the disclosure is a
   long-run outcome share rather than a per-pull vector, with **the per-10 A-Rank
-  floor the untested candidate**. Still second-hand: R1999's beginner banner, and
-  PGR's weapon, CUB and basic pools.
+  floor the untested candidate**. **The 2.021% is now the model's own answer**
+  (2.0207%, from a chain that knows nothing about the note, 2026-09-20), so the
+  disagreement is no longer a spreadsheet's and is pinned by a test — which
+  sharpens the question rather than answering it. Still second-hand: R1999's
+  beginner banner, and PGR's weapon, CUB and basic pools.
 
 ---
 
@@ -525,6 +526,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-20 | thirtieth | N31: a drawn guarantee is a rate curve, not a state dimension (ADR 0023, V11). The exact chain gained nothing; the simulation draws anyway, and caught itself sampling the prior — 0.558 against the chain's right 0.382 |
 | 2026-09-20 | twenty-ninth | N32 closed by its fifth shape: a grant behind a score the reader supplies (ADR 0022, V10). Sequence 4, the Phantom Pain Cage: Evolve to SS in 63 days and no Serum. The EXP reading leaves as N33 |
 | 2026-09-19 | twenty-eighth | N32 (4): one step at several prices is a choice the solver makes (ADR 0021, V9). Sequence 3: Samantha's Resonance, 90 Serum |
 | 2026-09-19 | twenty-seventh | N32 (3): a shop limit that never resets (ADR 0020). Sequence 2, the shard shop, published; Evolve to SS plans |

@@ -587,11 +587,12 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
                     """
                     INSERT INTO gamedata.banner_pity_rule
                         (banner_id, version_id, rarity_label, rarity_rank,
-                         hard_at, soft_from, soft_jump_to, soft_step)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                         hard_at, soft_from, soft_jump_to, soft_step, drawn_from)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     id, version, rarity.label(), rarity.rank(),
-                    rule.hardAt(), rule.softFrom(), rule.softJumpTo(), rule.softStep()));
+                    rule.hardAt(), rule.softFrom(), rule.softJumpTo(), rule.softStep(),
+                    rule.drawnFrom()));
 
             List<io.stormalmanac.gamedata.banner.Floor> floors = banner.floors();
             for (int ordinal = 0; ordinal < floors.size(); ordinal++) {

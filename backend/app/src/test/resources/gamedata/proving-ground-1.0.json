@@ -11,8 +11,9 @@
     "",
     "So this bundle exists to exercise every shape the canonical format can hold —",
     "all four source kinds, both sink kinds, the catalog axis, a rotating stage, an",
-    "expiring event, and a banner with soft pity and a floor. proving-ground-1.1",
-    "is the same game one patch later and is what the diff is computed against."
+    "expiring event, a banner with soft pity and a floor, and one whose guarantee",
+    "is drawn rather than fixed. proving-ground-1.1 is the same game one patch",
+    "later and is what the diff is computed against."
   ],
 
   "game": { "id": "proving-ground", "displayName": "The Proving Ground", "energyUnit": "Vigour" },
@@ -245,6 +246,34 @@
       "floors": [
         { "everyN": 10, "minimumRarity": { "label": "4*", "rank": 4 } }
       ],
+      "featured": { "chanceAtHit": 1.0, "guaranteeAfterLoss": 1 },
+      "availability": { "opensAt": "2026-08-01T00:00:00Z", "closesAt": "2026-08-22T00:00:00Z" }
+    },
+    {
+      "_comment": [
+        "The second archetype: a guarantee the game DRAWS rather than fixes.",
+        "drawnFrom is the bottom of the range and hardAt stays the pull at which",
+        "the rarity is certain, so the wall lands somewhere in 40..50 and the",
+        "player is never told where. Invented like the rest of this fixture, but",
+        "invented because a real game does it — see the Punishing: Gray Raven",
+        "research note — and because a column no fixture writes is a column the",
+        "round trip cannot prove."
+      ],
+      "id": "warden-return",
+      "displayName": "Rekindling — The Warden",
+      "bannerType": "character",
+      "pityScope": "BANNER_TYPE",
+      "baseRates": [
+        { "rarity": { "label": "5*", "rank": 5 }, "rate": 0.02 }
+      ],
+      "pityRules": [
+        {
+          "rarity": { "label": "5*", "rank": 5 },
+          "hardAt": 50,
+          "drawnFrom": 40
+        }
+      ],
+      "floors": [],
       "featured": { "chanceAtHit": 1.0, "guaranteeAfterLoss": 1 },
       "availability": { "opensAt": "2026-08-01T00:00:00Z", "closesAt": "2026-08-22T00:00:00Z" }
     }

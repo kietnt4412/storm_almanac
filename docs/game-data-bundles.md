@@ -205,6 +205,16 @@ wall with no soft pity; if you give it, `softJumpTo` and `softStep` are required
 too and `softFrom` must precede `hardAt`. Base rates must sum to at most 1.0.
 `featured` defaults to "always the featured unit".
 
+**A guarantee the game draws instead of fixing** gets `drawnFrom`, the bottom of
+the range; `hardAt` stays what it always was, the pull at which the rarity is
+certain. Punishing: Gray Raven's Themed Construct pool draws uniformly over
+80–100 and redraws on every hit, so it is `"drawnFrom": 80, "hardAt": 100`. Omit
+`drawnFrom` for a fixed wall — that is what every banner written before this said
+— and it must be at least 1 and strictly below `hardAt`, because a range of one
+is a fixed wall spelled the long way. It is a property of the *data*: neither
+engine needs telling, and the exact chain gains no state
+([ADR 0023](adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md)).
+
 ---
 
 ## What gets rejected, and how

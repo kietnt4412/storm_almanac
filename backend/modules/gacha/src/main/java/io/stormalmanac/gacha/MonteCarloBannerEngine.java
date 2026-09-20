@@ -21,6 +21,16 @@ import java.util.function.ToLongFunction;
  * alone, and the first place they part company is a real bug rather than a
  * rounding difference.
  *
+ * <p><b>It draws the guarantee, where the chain integrates it out.</b> A banner
+ * with a floating wall generates its threshold per pity cycle and redraws it on
+ * every headline hit; this engine does exactly that, one {@code nextInt} per
+ * cycle, and asks the model for the rate <em>given</em> the threshold in hand.
+ * {@link MarkovBannerEngine} never draws one and instead uses the marginal
+ * hazard. That difference is the whole reason to keep two engines here: the
+ * agreement between them is the only evidence the marginalisation is right, and
+ * a simulation that reused the integrated curve would have agreed by
+ * construction.
+ *
  * <p><b>Seeded, and that is the point.</b> An unseeded simulation turns every
  * agreement assertion into a coin flip that passes most of the time, which in a
  * pipeline is worse than no assertion: the failure arrives attached to an
@@ -100,11 +110,15 @@ public final class MonteCarloBannerEngine implements BannerEngine {
             long hits = 0;
             for (int trial = 0, of = chunk.trials(); trial < of; trial++) {
                 PityState state = from;
+                int wall = model.drawWall(chunk.random(), state.pullsSinceHit());
                 int held = 0;
                 for (int pull = 0; pull < pulls && held < copies; pull++) {
-                    PullResult result = model.draw(state, chunk.random());
+                    PullResult result = model.draw(state, chunk.random(), wall);
                     state = result.stateAfter();
                     if (result.featured()) held++;
+                    // The threshold is redrawn where the game redraws it: on the
+                    // rarity arriving, won or lost, and not on the featured unit.
+                    if (result.headlineHit()) wall = model.drawWall(chunk.random(), 0);
                 }
                 if (held >= copies) hits++;
             }
@@ -122,12 +136,14 @@ public final class MonteCarloBannerEngine implements BannerEngine {
             long pulls = 0;
             for (int trial = 0, of = chunk.trials(); trial < of; trial++) {
                 PityState state = from;
+                int wall = model.drawWall(chunk.random(), state.pullsSinceHit());
                 long taken = 0;
                 while (true) {
-                    PullResult result = model.draw(state, chunk.random());
+                    PullResult result = model.draw(state, chunk.random(), wall);
                     state = result.stateAfter();
                     taken++;
                     if (result.featured()) break;
+                    if (result.headlineHit()) wall = model.drawWall(chunk.random(), 0);
                     if (taken > ceiling) {
                         // Hard pity and the featured guarantee between them make
                         // this unreachable. Arriving here means the transitions

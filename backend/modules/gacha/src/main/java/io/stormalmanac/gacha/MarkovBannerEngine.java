@@ -14,6 +14,18 @@ import java.util.Arrays;
  * that reached the absorbing "enough copies" state. No sampling and no interval:
  * the only error is floating point.
  *
+ * <p><b>A drawn guarantee costs this engine nothing, which was not obvious.</b>
+ * Punishing: Gray Raven's Themed Construct pool draws its wall uniformly over
+ * 80–100 and redraws on every hit, and the apparent options were to carry the
+ * drawn threshold as a fourth dimension or to mix twenty-one chains. Neither is
+ * needed: conditioned on {@code c} misses the posterior over the threshold is
+ * uniform on {@code {max(from, c+1) .. hardAt}}, so it depends on {@code c}
+ * alone and the marginal hazard is a function of the pity counter — a rising
+ * curve, exactly the shape soft pity already had. The state space keeps its three
+ * dimensions and gets a hundred deep instead of sixty.
+ * {@link io.stormalmanac.gamedata.banner.PityRule} carries the derivation and
+ * ADR 0023 the argument.
+ *
  * <p>{@link #expectedPullsToFeatured} needs no linear solve at all, which is
  * worth writing down because reaching for one is the obvious move. Let
  * {@code H(c)} be the expected pulls to the next headline hit from pity count

@@ -30,3 +30,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0020](0020-a-limit-that-never-resets-is-offered-whole.md) | A limit that never resets is offered whole, and the plan says so | Accepted |
 | [0021](0021-one-step-at-several-prices-is-a-choice-the-solver-makes.md) | One step at several prices is a choice the solver makes | Accepted |
 | [0022](0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md) | A grant sized by the player is an answer the reader supplies | Accepted |
+| [0023](0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md) | A drawn guarantee is a rate curve, not a state dimension | Accepted |

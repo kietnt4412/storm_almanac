@@ -132,10 +132,28 @@ final class Banners {
                 0.005, PityRule.hard(40), new FeaturedRule(0.70, 1), PityScope.BANNER_TYPE);
     }
 
-    /** The "floating guarantee" variant — 1.5% base against a wall at 80. */
+    /**
+     * Punishing: Gray Raven's <b>Themed Construct</b> pool — 1.50% base, a
+     * guarantee drawn uniformly over 80–100 and redrawn on every S-Rank, and the
+     * featured unit at <b>100%</b> of the S-Rank pool.
+     *
+     * <p><b>Corrected 2026-09-20, and it was wrong in both halves.</b> It was
+     * written as {@code hard(80)} with a 70% split, from second-hand sources and
+     * before {@link PityRule} could say anything else. The client says otherwise
+     * on one screen: the counter reads {@code 8/80~100}, the rules panel says a
+     * value is generated between 80 and 100 and generated again once an S-Rank
+     * arrives, and the Switch panel says "Rate in S-Rank pool: 100%". The two
+     * axes pair — base rate and guarantee mechanism are read off the same banner,
+     * which is why there are two archetypes here and not four. At 100% there is
+     * no split to lose, so {@code guaranteeAfterLoss} never fires and the worst
+     * case is one wall rather than two.
+     *
+     * <p>Source note:
+     * {@code docs/game-facts/punishing-gray-raven-research-disclosure.md}.
+     */
     static BannerModel grayRavenFloating() {
-        return rank("pgr-floating", "Floating guarantee", "character",
-                0.015, PityRule.hard(80), new FeaturedRule(0.70, 1), PityScope.BANNER_TYPE);
+        return rank("pgr-floating", "Themed Construct", "character",
+                0.015, PityRule.drawn(80, 100), FeaturedRule.ALWAYS, PityScope.BANNER_TYPE);
     }
 
     private static BannerModel rank(

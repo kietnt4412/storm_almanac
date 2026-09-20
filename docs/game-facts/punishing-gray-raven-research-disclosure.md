@@ -162,6 +162,17 @@ random variable, drawn uniformly per cycle and resampled on every hit. Under
 copies held)`; modelling this exactly means carrying the drawn threshold in the
 state, or mixing 21 chains. `MonteCarloBannerEngine` needs only an extra draw.
 
+> **Paid, 2026-09-20 (N31).** `PityRule` gained `drawnFrom` and the exact chain
+> gained nothing: conditioned on `c` misses the posterior over the threshold is
+> uniform on `{max(drawnFrom, c+1) .. hardAt}`, so it depends on the pity counter
+> alone and the marginal is a rising hazard curve. Neither the fourth dimension
+> nor the 21 chains were needed
+> ([ADR 0023](../adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md)).
+> The simulation does draw, deliberately, so the agreement between the two
+> engines is evidence about the marginalisation rather than a tautology — and it
+> caught a real error on its first run, the simulation sampling the prior where a
+> carried pity count makes the low thresholds impossible.
+
 **`PityScope` needs a pool-type scope, and it must carry the loss too.** Progress
 is inherited by the next pool of the same type — which is neither `BANNER` nor
 anything the enum has — and the rules say **"(Calibration included)"**, so a
@@ -569,7 +580,10 @@ clearly and could not be written down, and each names a specific gap:
    threshold uniformly 80–100 per cycle and redraws it on every S-Rank. There is
    no number to put there that is not an invention, so the banner is absent from
    the bundle rather than approximated. **This is the floating-guarantee cost,
-   now paid in data rather than argued in prose.**
+   now paid in data rather than argued in prose.** *(2026-09-20: the format can
+   now hold it — `"drawnFrom": 80, "hardAt": 100`, ADR 0023. What still keeps
+   every PGR banner out of the bundle is **N28**: a banner has no pull currency
+   and no price.)*
 2. **The weapon's Overclock recipe (16/16/20/28) and its Harmony Lv 1 cost (25
    Harmony Accelerator).** An `Upgrade` must name the entity it advances, and the
    weapon these were read off was at 45/45 with its **name not recorded**. The
@@ -604,15 +618,21 @@ whoever did the reading.
 java -jar backend/app/build/libs/storm-almanac.jar --gamedata=publish punishing-gray-raven 0
 ```
 
-### One second-hand fixture the reading contradicts
+### One second-hand fixture the reading contradicts — **corrected 2026-09-20**
 
-`Banners.grayRavenFloating()` in the gacha tests is the "floating guarantee"
+`Banners.grayRavenFloating()` in the gacha tests was the "floating guarantee"
 variant — 1.5% base, wall at 80, **featured 0.70**. The first-hand reading pairs
-that 1.50% base with a **100%** featured rate, not 70%: the two axes pair, and
-they were read off the same screen. The fixture is second-hand and is not wrong
-about any rate it was given, but it describes a banner PGR does not appear to
-run. **Left alone here** — correcting a gacha acceptance fixture is Phase 5 work
-and moves a published-rates test, not an authoring step.
+that 1.50% base with a **100%** featured rate, not 70%, and with a guarantee
+drawn from 80 up rather than fixed at 80: the axes pair, and they were read off
+the same screen. The fixture was second-hand and not wrong about any rate it was
+given, but it described a banner PGR does not appear to run.
+
+**It now carries the reading** — 1.50%, `drawn(80, 100)`, `FeaturedRule.ALWAYS`,
+renamed to the Themed Construct pool — which moved three published-rates tests
+and is what N31 meant by doing the work "with the fixture correction it implies".
+Two answers changed shape rather than value: ten pulls is now ten base rolls,
+because at 100% there is no split to lose, and certainty arrives at 100 rather
+than 80.
 
 ## 2026-09-19 — the weapon named, and the first farm route
 

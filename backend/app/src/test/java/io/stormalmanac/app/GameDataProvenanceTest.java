@@ -87,7 +87,7 @@ class GameDataProvenanceTest extends SharedDatabaseTest {
                 // and which source can go and read the screen — and one told
                 // only the first five still needs to know it is twenty and not
                 // five, because those are different decisions.
-                .hasMessageContaining("20 fact(s)")
+                .hasMessageContaining("21 fact(s)")
                 .hasMessageContaining("banner:warden-debut (borrowed)")
                 .hasMessageContaining("and more")
                 .hasMessageContaining("ADR 0015");
