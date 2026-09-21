@@ -206,10 +206,10 @@ function Overlay({ game, entity, states }: { game: string; entity: string; state
   }, [goalTarget, states]);
 
   const roster = effectiveRoster(storedRoster.data?.entities ?? {}, outbox.roster);
-  const currentState = roster[entity];
+  const currentStates = roster[entity] ?? [];
 
   const shortfall = useQuery({
-    queryKey: ['shortfall', profile?.id, entity, target, currentState],
+    queryKey: ['shortfall', profile?.id, entity, target, currentStates.join('+')],
     queryFn: () => getShortfall(profile!.id, entity, target),
     enabled: Boolean(profile && target),
     retry: (_failures, error) => !(error instanceof ApiError && error.isUnanswerable),
@@ -234,7 +234,9 @@ function Overlay({ game, entity, states }: { game: string; entity: string; state
         <div>
           <h2 className="font-medium">What you are short of</h2>
           <p className="muted text-sm">
-            {currentState ? `You have her at ${currentState}.` : 'Not on your roster — this is the whole track.'}
+            {currentStates.length > 0
+              ? `You have her at ${currentStates.join(', ')}.`
+              : 'Not on your roster — this is the whole track.'}
           </p>
         </div>
         <label className="flex items-center gap-2 text-sm">

@@ -32,8 +32,10 @@ import io.stormalmanac.player.Roster;
 import io.stormalmanac.player.RosterEdit;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -211,15 +213,23 @@ public class PlayerController {
     public RosterResponse saveRoster(@PathVariable String profile, @RequestBody RosterRequest request) {
         ProfileId id = owned.require(profile).id();
 
-        Map<EntityId, String> states = new LinkedHashMap<>();
-        each(request.entities()).forEach((slug, state) -> {
-            if (state == null || state.isBlank()) {
-                // An owned entity is always at some state, so a blank one is a
+        Map<EntityId, Set<String>> states = new LinkedHashMap<>();
+        each(request.entities()).forEach((slug, reached) -> {
+            if (reached == null || reached.isEmpty()) {
+                // An owned entity is always somewhere, so an empty list is a
                 // client bug rather than a way of saying "not owned" — that is
                 // what leaving the key out means.
                 throw new IllegalArgumentException("entity '" + slug + "' has no current state");
             }
-            states.put(EntityId.of(slug), state);
+            reached.forEach(state -> {
+                if (state == null || state.isBlank()) {
+                    throw new IllegalArgumentException("entity '" + slug + "' has a blank current state");
+                }
+            });
+            // A duplicate is not an error, it is a client sending a set through
+            // a JSON list. LinkedHashSet keeps the order it arrived in, which
+            // only matters for the error messages above.
+            states.put(EntityId.of(slug), new LinkedHashSet<>(reached));
         });
 
         Roster roster = new Roster(id, states);
@@ -230,9 +240,16 @@ public class PlayerController {
     /**
      * Merge an offline device's roster edits, key by key.
      *
-     * <p>A null or absent {@code state} removes the entity from the roster, and
+     * <p>A null or absent {@code states} removes the entity from the roster, and
      * is the one place a client can say "I no longer own this" — the PUT route
      * says it by leaving the key out, which a patch by definition cannot.
+     *
+     * <p><b>An edit states an entity in full.</b> The entity is the merge unit,
+     * so the list replaces whatever was held for it rather than adding to it: a
+     * client that levelled a construct sends every state that construct is now
+     * at, and a state left out is one given up. Merging state by state would
+     * let two devices that each advanced a different track both win, leaving a
+     * roster neither has ever held.
      */
     @PatchMapping("/profiles/{profile}/roster")
     public RosterPatchResponse patchRoster(@PathVariable String profile, @RequestBody RosterPatchRequest request) {
@@ -246,13 +263,23 @@ public class PlayerController {
             if (edit.at() == null) {
                 throw new IllegalArgumentException("entity '" + slug + "' does not say when it was edited");
             }
-            // Blank is refused where null is accepted: null is "no longer
-            // owned", blank is a form that did not fill in, and treating the
-            // second as the first would delete a roster entry on a client bug.
-            if (edit.state() != null && edit.state().isBlank()) {
-                throw new IllegalArgumentException("entity '" + slug + "' has a blank current state");
+            // Empty and blank are refused where null is accepted: null is "no
+            // longer owned", an empty list or a blank state is a form that did
+            // not fill in, and treating the second as the first would delete a
+            // roster entry on a client bug.
+            Set<String> reached = null;
+            if (edit.states() != null) {
+                if (edit.states().isEmpty()) {
+                    throw new IllegalArgumentException("entity '" + slug + "' has no current state");
+                }
+                edit.states().forEach(state -> {
+                    if (state == null || state.isBlank()) {
+                        throw new IllegalArgumentException("entity '" + slug + "' has a blank current state");
+                    }
+                });
+                reached = new LinkedHashSet<>(edit.states());
             }
-            edits.add(new RosterEdit(EntityId.of(slug), edit.state(), edit.at()));
+            edits.add(new RosterEdit(EntityId.of(slug), reached, edit.at()));
         });
 
         MergeOutcome<EntityId> outcome = players.mergeRoster(id, edits);

@@ -92,7 +92,7 @@ export function useOutboxFlush(profileId: string | null): FlushState {
           Object.fromEntries(
             Object.entries(sending.roster).map(([entity, edit]) => [
               entity,
-              { state: edit.value, at: edit.at },
+              { states: edit.value, at: edit.at },
             ]),
           ),
         );

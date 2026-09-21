@@ -20,9 +20,11 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -204,16 +206,21 @@ public class JdbcPlayerStateRepository implements PlayerStateRepository {
     @Override
     @Transactional(readOnly = true)
     public Roster rosterOf(ProfileId profile) {
-        Map<EntityId, String> states = new LinkedHashMap<>();
+        // An entity is several rows since V13, so this groups. Ordered by slug
+        // then state so the map and each set come back in a stable order: a
+        // solve key hashes this, and a key that depends on row order would miss
+        // the cache for reasons nobody could see.
+        Map<EntityId, Set<String>> states = new LinkedHashMap<>();
         jdbc.query(
                 """
                 SELECT entity_slug, current_state
                   FROM player.roster_entry
                  WHERE profile_id = ?
-                 ORDER BY entity_slug
+                 ORDER BY entity_slug, current_state
                 """,
                 rs -> {
-                    states.put(EntityId.of(rs.getString("entity_slug")), rs.getString("current_state"));
+                    states.computeIfAbsent(EntityId.of(rs.getString("entity_slug")), e -> new LinkedHashSet<>())
+                            .add(rs.getString("current_state"));
                 },
                 profile.value());
         return new Roster(profile, states);
@@ -224,8 +231,9 @@ public class JdbcPlayerStateRepository implements PlayerStateRepository {
     public void saveRoster(Roster roster) {
         jdbc.update("DELETE FROM player.roster_entry WHERE profile_id = ?", roster.profile().value());
 
-        List<Object[]> rows = roster.currentState().entrySet().stream()
-                .map(e -> new Object[] {roster.profile().value(), e.getKey().value(), e.getValue()})
+        List<Object[]> rows = roster.currentStates().entrySet().stream()
+                .flatMap(e -> e.getValue().stream()
+                        .map(state -> new Object[] {roster.profile().value(), e.getKey().value(), state}))
                 .toList();
 
         jdbc.batchUpdate(
@@ -350,22 +358,24 @@ public class JdbcPlayerStateRepository implements PlayerStateRepository {
                 continue;
             }
 
-            if (edit.isRemoval()) {
-                jdbc.update(
-                        "DELETE FROM player.roster_entry WHERE profile_id = ? AND entity_slug = ?",
-                        profile.value(),
-                        edit.entity().value());
-            } else {
-                jdbc.update(
+            // The entity's whole set moves together, so both branches start by
+            // clearing it. An UPSERT per state would leave behind any state the
+            // edit dropped, which would make "I am no longer at this state" —
+            // a correction, or a state the game took back — impossible to say.
+            jdbc.update(
+                    "DELETE FROM player.roster_entry WHERE profile_id = ? AND entity_slug = ?",
+                    profile.value(),
+                    edit.entity().value());
+
+            if (!edit.isRemoval()) {
+                jdbc.batchUpdate(
                         """
                         INSERT INTO player.roster_entry (profile_id, entity_slug, current_state)
                         VALUES (?, ?, ?)
-                        ON CONFLICT (profile_id, entity_slug)
-                        DO UPDATE SET current_state = EXCLUDED.current_state
                         """,
-                        profile.value(),
-                        edit.entity().value(),
-                        edit.state());
+                        edit.states().stream()
+                                .map(state -> new Object[] {profile.value(), edit.entity().value(), state})
+                                .toList());
             }
             applied.add(edit.entity());
         }

@@ -46,10 +46,12 @@ being finished with is.
   have no shops** and pay one-time grants, which the plan reports as a deadline (ADR 0024); the Themed pool's wall is **drawn** (ADR 0023);
   and its **`PityScope` inherits Calibration across pools**, where R1999 clears — the two published
   games disagree on the one question that enum exists to answer.
-- **Four decisions closed since 2026-09-20 — [0023](docs/adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md)
+- **Five decisions closed since 2026-09-20 — [0023](docs/adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md)
   (`V11`), [0024](docs/adr/0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md),
-  [0025](docs/adr/0025-the-day-boundary-is-a-property-of-the-game.md) (`V12`) and
-  [0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md). Each ADR is its own account; read it
+  [0025](docs/adr/0025-the-day-boundary-is-a-property-of-the-game.md) (`V12`),
+  [0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md) and
+  [0027](docs/adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md) (`V13`).
+  Each ADR is its own account; read it
   rather than a summary.** What still bites elsewhere in this file: both PGR pity archetypes are
   expressible and **neither is authored** (**N28**); **`Availability.opensAt` is read by nobody**,
   deliberately, the last of that record nothing reads; **`GameAgnosticismTest` is blind to a
@@ -170,7 +172,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **411 tests** in full 2026-09-21, 0 skipped locally **and all 16 snapshot-gated ones actually ran and passed**, so standing caveat 1 is satisfied for that build rather than assumed; **395 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
+| Backend build | **Green** | **419 tests** in full 2026-09-21, 0 skipped locally **and all 16 snapshot-gated ones actually ran and passed**, so standing caveat 1 is satisfied for that build rather than assumed; **403 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
 | Authored game data | **One bundle, sequence 6 published, first-hand** | Helentine: Lacrimosa (level to 80 **as a thirteen-link chain, every gated level priced**, 13-step Promote **all gated**, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, and — since **sequence 4, published 2026-09-20T00:13:59Z** — the weekly Phantom Pain Cage's nine tiers, and — since **sequence 5, published 2026-09-21T01:11:15Z** — the game's own **05:00 UTC** day boundary, and — since **sequence 6, published 2026-09-21T02:49:27Z** — the whole level ladder as a thirteen-link chain. **116 facts, all first-hand**, over seven provenance entries: the boundary is a game-level field and so adds no fact, which is exactly why `Facts` had to learn to flatten `Game` (ADR 0025). Preview and ingest read **exactly the changes intended** — 26 of them for sequence 6 — and each published version reads back as *no changes*. **Every sequence so far has been published and read back clean** ([the loop, per sequence, in the archive](docs/history/tracker-archive.md#session-log)); the next correction is a sequence 7. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) |
 | CI workflow | **Green, no warnings, Node 24; triggers on `dev`** | Since B6 (2026-09-21) it runs on push to `main` **and `dev`** as well as `pull_request`, so a push to the working branch with no PR open is built rather than silently ignored. **A push to `dev` while a PR is open from `dev` runs twice, on purpose** — the concurrency group stays keyed by ref, because collapsing push and PR into one group lets `cancel-in-progress` cancel the run the PR needs green. **The `deploy` job is still `if: false` and must be gated to `refs/heads/main` when B5 turns it on**, or it ships every commit landing on `dev`. Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
@@ -236,26 +238,29 @@ works". It does not mean that:
   **multi-copy answers are too pessimistic** — 200 Cassettes of the Lost buy a
   copy and nothing models it, so at two copies the engines say 280 pulls and the
   truth is 200.
-- **One character is not a catalog, and its plans are still partial — but the
-  worst half of it closed 2026-09-21
-  ([ADR 0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md)).** The roster
-  still holds **one state per entity**, so a reader records where they are on one
-  track and nothing about the others. **What changed is that the planner no
-  longer needs them to.** A gate is a condition the game enforced, so a player
-  standing past a gated step demonstrably met it: `achieved` now credits the
-  `requires` of every upgrade behind them, not just its `fromState`. A reader at
-  `promote-6` asking for step 7 pays the **20 000 EXP between Lv 45 and Lv 50**
-  instead of 60 000 from Lv 1 — **90 Serum against 180**.
-  **What is still wrong, and needs the schema:** a reader whose recorded state is
-  *behind* the gate gets no credit. Someone at `promote-0` who levelled to 80
-  anyway — which PGR permits, levels are not capped by rank — is still charged
-  the whole ladder. **That half wants `Roster` to hold a set of states**, which
-  is a migration, a breaking change to the roster wire format, the offline sync
-  patch shape and the frontend. Nobody has written it. **No
-  `progress:` line or shadow price has ever rendered, and no frontend sends
-  `reach`** — so every plan the web
-  client asks for counts no scored grant and says which it left out (ADR 0022).
-  Every R1999 catalog and drop number in this file comes from Kornblume.
+- **One character is not a catalog, and the overcharge that made its plans wrong
+  is closed at both ends** — [ADR 0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md)
+  2026-09-21 and [ADR 0027](docs/adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md)
+  the same day. **0026 took the half that could be inferred:** a gate is a
+  condition the game enforced, so `achieved` credits the `requires` of every
+  upgrade behind the player — a reader at `promote-6` asking for step 7 pays the
+  **20 000 EXP between Lv 45 and Lv 50** instead of 60 000, **90 Serum against
+  180**. That inference only ever reaches *backwards*. **0027 took the half that
+  could not be inferred at all:** `Roster` holds `Map<EntityId, Set<String>>`
+  (`V13`), so a reader at `promote-0` who levelled to 80 anyway — which PGR
+  permits, levels are not capped by rank — can now **say so**, and is charged
+  nothing for the ladder they climbed. **The merge unit stays the entity**: an
+  edit states it in full, a state left out is one given up, and V6's clock is
+  untouched. **A `progress:` line has now rendered, 2026-09-21** — the shortfall
+  table showed `character-exp 90,000` to the maintainer in a real browser, which
+  retires a claim this file had carried as never-observed; **it renders as the
+  bare slug** next to a properly named `Cogs`, which is N35's to fix. **What is
+  still wrong here:** no shadow price has ever rendered, **no frontend sends
+  `reach`** — so every plan the web client asks for counts no scored grant and
+  says which it left out (ADR 0022) — and **states are still edited only on a
+  goal row**, so a reader cannot record a construct they have no goal for
+  (**N35**). Every R1999 catalog and drop number in this file comes from
+  Kornblume.
 - **Eight qualifications of the closed phases are
   [in the archive](docs/history/tracker-archive.md#qualifications-moved-out-of-the-live-tracker-2026-09-11-seventeenth-session)**
   — the benchmark being one guide, the two community disagreements, the three
@@ -265,44 +270,42 @@ works". It does not mean that:
 
 ## Next actions
 
-**N30, N20, N33 and now B6 all closed 2026-09-21** and are
+**N30, N20, N33, B6 and N34 all closed 2026-09-21** and are
 [in the archive](docs/history/tracker-archive.md#completed-next-actions). **B5 is
 the only Phase 4 item left**, and it needs the maintainer's own accounts.
 
-**The three items under *Before B5* below are what remains of four added on
+**The two items under *Before B5* below are what remains of four added on
 2026-09-21.** Each was already described somewhere in this file — in *Status*, in
 the two standing caveats, or in *What is still unverified* — and **none of them
 was an action anybody could pick up.** A known defect that is only ever
 *described* is one nobody is going to fix; these are the ones worth paying before
 the deploy rather than after, and each says why it is on this side of B5. **A
-session can take any of them alone.** B6 was the cheapest and went the same day
-the list was written, which is the argument for the list.
+session can take any of them alone.** **Two of the four went within a day of the
+list being written — B6 and N34 — which is the argument for the list**; and N34
+falsified half of N35 on its way past, so the two that remain are smaller than
+they were.
 
 ### Before B5 — debt worth paying first
 
-- [ ] **N34 — Let `Roster` hold a set of states, not one.** The half of the
-      roster flaw [ADR 0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md)
-      deliberately did not fix. A reader whose recorded state is *behind* a gate
-      gets no credit: someone at `promote-0` who levelled to 80 anyway is charged
-      the whole ladder, and **PGR permits exactly that** because levels are not
-      capped by rank. **Five pieces:** a migration adding `current_state` to
-      `roster_entry`'s primary key; `Roster.currentState` becoming
-      `Map<EntityId, Set<String>>`; `achieved` seeded from all of them;
-      the roster wire format, which is a **breaking** change to `GET`/`PUT`/`PATCH`
-      `/api/me/profiles/{profile}/roster`; and the offline sync patch shape,
-      where the per-key clock stays per-entity because an entity's whole state
-      set is the merge unit. **Before B5 because the wire format is published the
-      moment a stranger loads the page.**
-- [ ] **N35 — Render PGR, and send `reach`.** Two faults on the same surface.
-      **No screen has ever rendered PGR** — all five were built against R1999,
-      and PGR has been the launch title since D3 on 2026-09-13. **And no frontend
-      sends `reach`**, so every plan the web client asks for counts **no scored
-      grant** and reports which it left out in a note nothing displays
+- [ ] **N35 — Finish PGR's screens, and send `reach`.** **Rescoped 2026-09-21,
+      because half its premise stopped being true during N34.** PGR *has* now
+      been rendered — Goals, the catalog and the character page, driven in a
+      browser by both the session and the maintainer, planning Helentine from a
+      two-state roster. So "no screen has ever rendered PGR" is retired, and
+      what is left is narrower and still real:
+      **no frontend sends `reach`**, so every plan the web client asks for
+      counts **no scored grant** and reports which it left out in a note nothing
+      displays
       ([ADR 0022](docs/adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md));
-      no `progress:` line or shadow price has ever rendered either. **This is
+      **a `progress:` line renders as its bare slug** — `character-exp` beside a
+      properly named `Cogs` — and **no shadow price has ever rendered**; and
+      **there is no roster screen**, so states are editable only on a goal row
+      and a reader cannot record a construct they have no goal for. **This is
       Phase 4's own exit criterion in disguise** — five strangers completing a
       plan means five strangers seeing these screens, so it cannot wait for after
-      the deploy. **jsdom computes no layout**, so a browser has to be driven.
+      the deploy. **jsdom computes no layout**, so a browser has to be driven:
+      N34 shipped a `select multiple` that passed all 16 frontend tests and was
+      unusable, and what caught it was two people looking at it.
 - [ ] **N36 — Fetch upstream before trusting a green build, once, and write down
       what it proves.** Standing caveat 1 says the strongest tests here are ones
       CI does not run: `RealUpstreamPatchTest`, `RealUpstreamPlanTest` and
@@ -575,6 +578,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-21 | thirty-fourth (cont.) | N34 closed: a roster entry holds a set of states (ADR 0027, `V13`). A reader at `promote-6` who says they are also at `level-80` pays 127 500 Cogs and **no EXP** where they were charged 90 000 over six steps. The merge unit stays the entity. **The frontend shipped wrong twice with 16 green tests each time** — a `select multiple` nobody could use, then chips styled as buttons the maintainer looked straight at and did not see. Two live claims died: a `progress:` line *has* rendered (as a bare slug), and PGR *has* been rendered, so N35 was rescoped rather than ticked |
 | 2026-09-21 | thirty-fourth | B6 closed the day after it was written: CI triggers on a push to `dev`, proven by a run on `cfa6fe4` with no PR open. The session-start check found the trap live — the previous session's own commit had sat on `dev` unbuilt. The concurrency group stays keyed by ref *on purpose*: deduping push and PR would let a push cancel the check the PR needs green. Deploy must be gated to `main` when B5 turns it on |
 | 2026-09-21 | thirty-third (cont.) | PR #33 opened and green. The deferred-defect list audited into *Next actions* as **B6, N34, N35, N36** — every one was already described somewhere in this file and none was an action anybody could pick up. One archived qualification found stale: a lifetime purchase limit has been expressible since ADR 0020 |
 | 2026-09-21 | thirty-third (cont.) | The roster flaw N33 widened, half closed the same day (ADR 0026): a crossed gate is a reached state, so `achieved` credits the `requires` of every upgrade behind the player. A reader at Promote 6 pays 90 Serum for step 7 where they were billed 180. No migration, no wire change — the other half, a reader *behind* the gate, still wants a set of states on `Roster` |

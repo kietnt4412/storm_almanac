@@ -17,6 +17,7 @@ import io.stormalmanac.gamedata.Upgrade;
 import io.stormalmanac.player.Roster;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +44,7 @@ class DemandResolverTest {
     }
 
     private static Roster at(String state) {
-        return new Roster(PROFILE, state == null ? Map.of() : Map.of(HERO, state));
+        return new Roster(PROFILE, state == null ? Map.of() : Map.of(HERO, Set.of(state)));
     }
 
     @Test
@@ -295,5 +296,60 @@ class DemandResolverTest {
                 List.of(Goal.deterministic(HERO, "level-20")));
 
         assertThat(demand.quantityOf(GOLD)).isEqualTo(50);
+    }
+
+    // ── N34: the player stands on more than one track at once ───────────────
+
+    @Test
+    @DisplayName("a track the player records is not charged for, even when no gate implies it")
+    void aStateBesideTheGoalIsCredited() {
+        // level-40 sits beside the insight track rather than behind it: no
+        // insight step is gated on it, so no inference can reach it. Only the
+        // player saying so can, which is the whole of N34.
+        Demand demand = resolver.resolve(
+                twoTracks(),
+                new Roster(PROFILE, Map.of(HERO, Set.of("insight-1", "level-20"))),
+                List.of(Goal.deterministic(HERO, "insight-2"), Goal.deterministic(HERO, "level-20")));
+
+        assertThat(demand.steps()).containsExactly("i2");
+        assertThat(demand.quantityOf(GOLD)).isEqualTo(500);
+        // The level goal is behind them, so it is met rather than bought again.
+        assertThat(demand.alreadyMet()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("the whole ladder is charged when the player records only the rank, and not when they record the level")
+    void recordingTheLevelIsWhatStopsTheDoubleCharge() {
+        GameDefinition gated = TestGame.builder()
+                .upgrade("l1", HERO, "level-1", "level-20", List.of(stack(GOLD, 50)))
+                .upgrade("l2", HERO, "level-20", "level-40", List.of(stack(GOLD, 70)))
+                .upgrade("i1", HERO, "insight-0", "insight-1", List.of(stack(ORE, 4)))
+                .sink(new Upgrade("i2", HERO, "insight-1", "insight-2", List.of(stack(INGOT, 2)),
+                        List.of("level-40"), List.of()))
+                .build();
+
+        // Recorded at insight-1 only. Nothing implies the level track, so the
+        // gate on i2 pulls in the whole ladder — 50 + 70. This is the charge
+        // ADR 0026 could not remove and said so.
+        Demand behindTheGate = resolver.resolve(
+                gated, at("insight-1"), List.of(Goal.deterministic(HERO, "insight-2")));
+        assertThat(behindTheGate.quantityOf(GOLD)).isEqualTo(120);
+
+        // The same reader, having said where they actually are. PGR permits
+        // exactly this — levels are not capped by rank — and it is now sayable.
+        Demand havingSaidSo = resolver.resolve(
+                gated,
+                new Roster(PROFILE, Map.of(HERO, Set.of("insight-1", "level-40"))),
+                List.of(Goal.deterministic(HERO, "insight-2")));
+        assertThat(havingSaidSo.quantityOf(GOLD)).isZero();
+        assertThat(havingSaidSo.steps()).containsExactly("i2");
+    }
+
+    @Test
+    @DisplayName("an entity on the roster at no state at all is a caller bug, not an empty roster")
+    void anEmptyStateSetIsRefused() {
+        assertThatThrownBy(() -> new Roster(PROFILE, Map.of(HERO, Set.of())))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("at no state");
     }
 }

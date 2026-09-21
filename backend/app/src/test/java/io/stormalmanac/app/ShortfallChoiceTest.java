@@ -17,6 +17,7 @@ import io.stormalmanac.player.Roster;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -87,9 +88,9 @@ class ShortfallChoiceTest {
 
     private ShortfallResponse shortfall(Inventory inventory) {
         Demand demand = new DemandResolver().resolve(
-                definition, new Roster(PROFILE, Map.of(WARDEN, "base")),
+                definition, new Roster(PROFILE, Map.of(WARDEN, Set.of("base"))),
                 List.of(Goal.deterministic(WARDEN, "resonance")));
         return ShortfallResponse.of(
-                PROFILE.value(), definition, WARDEN.value(), "base", "resonance", demand, inventory);
+                PROFILE.value(), definition, WARDEN.value(), List.of("base"), "resonance", demand, inventory);
     }
 }

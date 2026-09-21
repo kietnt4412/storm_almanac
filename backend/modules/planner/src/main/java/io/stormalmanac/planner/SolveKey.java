@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * The fingerprint of a solve.
@@ -77,11 +78,19 @@ public final class SolveKey {
                 .forEach(e -> canonical.append(e.getKey().value())
                         .append('=').append(e.getValue()).append(','));
 
+        // An entity's states are a set, so they are sorted before they are
+        // hashed: two devices that reported the same roster in a different
+        // order hold the same roster and must not miss each other's cached
+        // plan. The separator is '+' rather than ',' so that a state containing
+        // the entry separator cannot make two different rosters canonicalize
+        // the same way.
         canonical.append("\nroster=");
-        roster.currentState().entrySet().stream()
+        roster.currentStates().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(EntityId::value)))
                 .forEach(e -> canonical.append(e.getKey().value())
-                        .append('=').append(e.getValue()).append(','));
+                        .append('=')
+                        .append(e.getValue().stream().sorted().collect(Collectors.joining("+")))
+                        .append(','));
 
         return digest(canonical.toString());
     }

@@ -18,8 +18,8 @@ export interface PendingEdit<T> {
 interface ProfileOutbox {
   /** item slug → quantity. */
   inventory: Record<string, PendingEdit<number>>;
-  /** entity slug → upgrade state, or null for "no longer owned". */
-  roster: Record<string, PendingEdit<string | null>>;
+  /** entity slug → every state the entity has reached, or null for "no longer owned". */
+  roster: Record<string, PendingEdit<string[] | null>>;
 }
 
 interface PlannerState {
@@ -43,7 +43,7 @@ interface PlannerState {
 
   selectProfile: (profileId: string) => void;
   editQuantity: (profileId: string, item: string, quantity: number) => void;
-  editRosterState: (profileId: string, entity: string, state: string | null) => void;
+  editRosterState: (profileId: string, entity: string, states: string[] | null) => void;
   /** Drop the edits a flush confirmed, keeping anything typed while it was in flight. */
   settle: (profileId: string, flushed: ProfileOutbox, rejected: string[]) => void;
   /** The reader has seen which keys lost; stop saying so. */
@@ -64,7 +64,7 @@ const emptyOutbox = (): ProfileOutbox => ({ inventory: {}, roster: {} });
  */
 const NO_OUTBOX: ProfileOutbox = Object.freeze({
   inventory: Object.freeze({}) as Record<string, PendingEdit<number>>,
-  roster: Object.freeze({}) as Record<string, PendingEdit<string | null>>,
+  roster: Object.freeze({}) as Record<string, PendingEdit<string[] | null>>,
 });
 
 export const usePlannerStore = create<PlannerState>()(
@@ -182,9 +182,9 @@ export const effectiveInventory = (
 };
 
 export const effectiveRoster = (
-  stored: Record<string, string>,
-  pending: Record<string, PendingEdit<string | null>>,
-): Record<string, string> => {
+  stored: Record<string, string[]>,
+  pending: Record<string, PendingEdit<string[] | null>>,
+): Record<string, string[]> => {
   const merged = { ...stored };
   for (const [entity, edit] of Object.entries(pending)) {
     if (edit.value === null) delete merged[entity];

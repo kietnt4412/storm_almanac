@@ -183,22 +183,70 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                     starting point is the difference between "6 Greater Sigils"
                     and "the whole track twice over", and asking for it on a
                     separate screen is how it ends up never being set.
+
+                    Several at once, because a character is on several tracks
+                    and the game ties none of them together: a reader may be at
+                    Lv 80 and rank 0. A single select would make saying the
+                    second erase the first, and the planner would charge them
+                    the level ladder they have already climbed.
                   */}
-                  <select
-                    className="input"
-                    value={roster[goal.entity] ?? ''}
-                    aria-label={`Current state of ${entity?.displayName ?? goal.entity}`}
-                    onChange={(event) =>
-                      editRosterState(profileId, goal.entity, event.target.value || null)
-                    }
-                  >
-                    <option value="">don’t own her</option>
-                    {states.starts.map((state) => (
-                      <option key={state} value={state}>
+                  {/*
+                    Chips plus an add-one dropdown, rather than a `select
+                    multiple`. The multi-select was tried first and is wrong
+                    here: this bundle publishes 68 start states, which a list
+                    box shows four at a time, clearing it needs a ctrl-click
+                    nobody discovers, and what is currently chosen cannot be
+                    seen without scrolling. A dropdown of what is *not* yet
+                    chosen keeps the familiar control and stays type-ahead
+                    searchable; the chips are the answer to "where am I".
+                  */}
+                  <span className="flex flex-wrap items-center gap-1">
+                    {(roster[goal.entity] ?? []).map((state) => (
+                      <button
+                        key={state}
+                        type="button"
+                        className="chip"
+                        aria-label={`Remove ${state}`}
+                        title={`No longer at ${state}`}
+                        onClick={() => {
+                          const left = (roster[goal.entity] ?? []).filter((held) => held !== state);
+                          // Empty is "not on the roster". The API refuses an
+                          // empty list precisely so this stays one meaning
+                          // rather than two.
+                          editRosterState(profileId, goal.entity, left.length > 0 ? left : null);
+                        }}
+                      >
                         {state}
-                      </option>
+                        <span className="chip-x" aria-hidden="true">
+                          ✕
+                        </span>
+                      </button>
                     ))}
-                  </select>
+
+                    <select
+                      className="input"
+                      value=""
+                      aria-label={`Add a current state for ${entity?.displayName ?? goal.entity}`}
+                      onChange={(event) => {
+                        if (!event.target.value) return;
+                        editRosterState(profileId, goal.entity, [
+                          ...(roster[goal.entity] ?? []),
+                          event.target.value,
+                        ]);
+                      }}
+                    >
+                      <option value="">
+                        {(roster[goal.entity] ?? []).length > 0 ? 'and also…' : 'don’t own her'}
+                      </option>
+                      {states.starts
+                        .filter((state) => !(roster[goal.entity] ?? []).includes(state))
+                        .map((state) => (
+                          <option key={state} value={state}>
+                            {state}
+                          </option>
+                        ))}
+                    </select>
+                  </span>
                 </label>
 
                 <div className="ml-auto flex items-center gap-1">

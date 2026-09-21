@@ -254,18 +254,18 @@ class OfflineSyncTest extends SharedDatabaseTest {
                 player,
                 profile,
                 Map.of(
-                        "warden", rosterEdit("insight-0", minutesAgo(60)),
-                        "sotheby", rosterEdit("insight-1", minutesAgo(60))));
+                        "warden", rosterEdit(minutesAgo(60), "insight-0"),
+                        "sotheby", rosterEdit(minutesAgo(60), "insight-1")));
 
         Map<String, Object> edits = new HashMap<>();
-        edits.put("warden", rosterEdit("insight-2", minutesAgo(1)));
+        edits.put("warden", rosterEdit(minutesAgo(1), "insight-2"));
         // Null, not blank: "no longer on the roster" rather than "a form that
         // did not fill in".
-        edits.put("sotheby", rosterEdit(null, minutesAgo(1)));
+        edits.put("sotheby", rosterEdit(minutesAgo(1)));
 
         JsonNode merged = body(patchRoster(player, profile, edits));
 
-        assertThat(merged.get("entities").get("warden").asText()).isEqualTo("insight-2");
+        assertThat(names(merged.get("entities").get("warden"))).containsExactly("insight-2");
         assertThat(merged.get("entities").has("sotheby")).isFalse();
         assertThat(names(merged.get("applied"))).containsExactly("sotheby", "warden");
     }
@@ -276,12 +276,44 @@ class OfflineSyncTest extends SharedDatabaseTest {
         RequestPostProcessor player = signedIn("google", "sub-vertin", "Vertin");
         String profile = profileOf(player);
 
-        patchRoster(player, profile, Map.of("warden", rosterEdit("insight-2", minutesAgo(5))));
+        patchRoster(player, profile, Map.of("warden", rosterEdit(minutesAgo(5), "insight-2")));
         JsonNode merged =
-                body(patchRoster(player, profile, Map.of("warden", rosterEdit("insight-0", minutesAgo(60)))));
+                body(patchRoster(player, profile, Map.of("warden", rosterEdit(minutesAgo(60), "insight-0"))));
 
-        assertThat(merged.get("entities").get("warden").asText()).isEqualTo("insight-2");
+        assertThat(names(merged.get("entities").get("warden"))).containsExactly("insight-2");
         assertThat(names(merged.get("rejected"))).containsExactly("warden");
+    }
+
+    @Test
+    @DisplayName("an entity's states move as one, so a state left out of a newer edit is given up")
+    void theWholeStateSetIsTheMergeUnit() throws Exception {
+        RequestPostProcessor player = signedIn("google", "sub-vertin", "Vertin");
+        String profile = profileOf(player);
+
+        patchRoster(player, profile, Map.of("warden", rosterEdit(minutesAgo(60), "insight-1", "level-40")));
+
+        // The same entity, later, on two tracks — one advanced and one dropped.
+        // If the merge were per state rather than per entity, "level-40" would
+        // survive this because nothing newer names it, and the roster would say
+        // something no device ever said.
+        JsonNode merged =
+                body(patchRoster(player, profile, Map.of("warden", rosterEdit(minutesAgo(1), "insight-2"))));
+
+        assertThat(names(merged.get("entities").get("warden"))).containsExactly("insight-2");
+    }
+
+    @Test
+    @DisplayName("two devices on different entities both win, even when each names several states")
+    void differentEntitiesDoNotCollide() throws Exception {
+        RequestPostProcessor player = signedIn("google", "sub-vertin", "Vertin");
+        String profile = profileOf(player);
+
+        patchRoster(player, profile, Map.of("warden", rosterEdit(minutesAgo(60), "insight-1", "level-40")));
+        JsonNode merged = body(patchRoster(
+                player, profile, Map.of("sotheby", rosterEdit(minutesAgo(1), "insight-2", "level-60"))));
+
+        assertThat(names(merged.get("entities").get("warden"))).containsExactly("insight-1", "level-40");
+        assertThat(names(merged.get("entities").get("sotheby"))).containsExactly("insight-2", "level-60");
     }
 
     // ── Refusals ────────────────────────────────────────────────────────────
@@ -317,7 +349,7 @@ class OfflineSyncTest extends SharedDatabaseTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(
-                                Map.of("entities", Map.of("warden", rosterEdit("   ", minutesAgo(1)))))))
+                                Map.of("entities", Map.of("warden", rosterEdit(minutesAgo(1), "   "))))))
                 .andExpect(status -> assertThat(status.getResponse().getStatus()).isEqualTo(400));
     }
 
@@ -375,9 +407,14 @@ class OfflineSyncTest extends SharedDatabaseTest {
         return Map.of("quantity", quantity, "at", at.toString());
     }
 
-    private static Map<String, Object> rosterEdit(String state, Instant at) {
+    /**
+     * A roster edit states the entity in full: the list replaces whatever was
+     * held, because the entity is the merge unit and not the state. Null says
+     * the entity is off the roster.
+     */
+    private static Map<String, Object> rosterEdit(Instant at, String... states) {
         Map<String, Object> edit = new HashMap<>();
-        edit.put("state", state);
+        edit.put("states", states.length == 0 ? null : List.of(states));
         edit.put("at", at.toString());
         return edit;
     }

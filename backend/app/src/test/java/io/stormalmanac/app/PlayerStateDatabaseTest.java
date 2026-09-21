@@ -18,6 +18,7 @@ import io.stormalmanac.player.PlayerStateRepository;
 import io.stormalmanac.player.Roster;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,10 +144,13 @@ class PlayerStateDatabaseTest extends SharedDatabaseTest {
         ProfileId profile = profileFor(account(), "global");
 
         Roster saved = new Roster(
-                profile, Map.of(EntityId.of("vertin"), "insight-1", EntityId.of("regulus"), "insight-2"));
+                profile,
+                Map.of(
+                        EntityId.of("vertin"), Set.of("insight-1", "level-40"),
+                        EntityId.of("regulus"), Set.of("insight-2")));
         players.saveRoster(saved);
 
-        assertThat(players.rosterOf(profile).currentState()).isEqualTo(saved.currentState());
+        assertThat(players.rosterOf(profile).currentStates()).isEqualTo(saved.currentStates());
         assertThat(players.rosterOf(profile).owns(EntityId.of("vertin"))).isTrue();
         assertThat(players.rosterOf(profile).owns(EntityId.of("sotheby"))).isFalse();
     }
@@ -225,14 +229,14 @@ class PlayerStateDatabaseTest extends SharedDatabaseTest {
     void deletingAProfileCascades() {
         ProfileId profile = profileFor(account(), "global");
         players.saveInventory(Inventory.empty(profile).with(ItemId.of("sharpened-tool"), 42));
-        players.saveRoster(new Roster(profile, Map.of(EntityId.of("vertin"), "insight-1")));
+        players.saveRoster(new Roster(profile, Map.of(EntityId.of("vertin"), Set.of("insight-1"))));
         players.saveGoals(new Goals(profile, List.of(Goal.deterministic(EntityId.of("vertin"), "insight-2"))));
 
         jdbc.update("DELETE FROM player.profile WHERE id = ?", profile.value());
 
         assertThat(players.findProfile(profile)).isEmpty();
         assertThat(players.inventoryOf(profile).quantities()).isEmpty();
-        assertThat(players.rosterOf(profile).currentState()).isEmpty();
+        assertThat(players.rosterOf(profile).currentStates()).isEmpty();
         assertThat(players.goalsOf(profile).goals()).isEmpty();
     }
 

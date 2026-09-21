@@ -83,6 +83,30 @@ a {
     background: transparent;
   }
 
+  /*
+   * A value the reader has recorded, with a way to take it back. Not a button,
+   * though it is one: a `btn-quiet` here reads as another control in a row that
+   * already ends in three of them, and the first reader shown it looked straight
+   * at one and reported seeing no chip at all. So it is filled rather than
+   * outlined, and the × is dimmed until hover — the state is the content and
+   * removing it is the afterthought, which is the opposite of what a button says.
+   */
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-medium;
+    background: color-mix(in srgb, var(--brand) 18%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand) 45%, transparent);
+    color: var(--ink);
+  }
+
+  .chip > .chip-x {
+    @apply text-xs leading-none opacity-50 transition-opacity;
+  }
+
+  .chip:hover > .chip-x,
+  .chip:focus-visible > .chip-x {
+    @apply opacity-100;
+  }
+
   .input {
     @apply rounded-md border px-2 py-1 text-sm;
     background: var(--surface);
