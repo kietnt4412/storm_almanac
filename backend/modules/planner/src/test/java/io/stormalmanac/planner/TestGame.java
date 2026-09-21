@@ -7,6 +7,7 @@ import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.StageId;
 import io.stormalmanac.gamedata.Availability;
 import io.stormalmanac.gamedata.Craft;
+import io.stormalmanac.gamedata.DayBoundary;
 import io.stormalmanac.gamedata.Drop;
 import io.stormalmanac.gamedata.Game;
 import io.stormalmanac.gamedata.GameDefinition;
@@ -48,6 +49,9 @@ final class TestGame {
     private final List<Source> sources = new ArrayList<>();
     private final List<Sink> sinks = new ArrayList<>();
 
+    /** Null until a test says otherwise, which is what most published bundles say. */
+    private DayBoundary dayBoundary;
+
     private TestGame() {}
 
     static TestGame builder() {
@@ -87,9 +91,15 @@ final class TestGame {
         return this;
     }
 
+    /** A title whose day starts somewhere other than midnight UTC. */
+    TestGame rollingOverAt(DayBoundary boundary) {
+        this.dayBoundary = boundary;
+        return this;
+    }
+
     GameDefinition build() {
         return new GameDefinition(
-                new Game(ID, "Unit Test Game", "Vigour"),
+                new Game(ID, "Unit Test Game", "Vigour", dayBoundary),
                 new GameDataVersion(ID, 0, "1.0", Instant.parse("2026-01-01T00:00:00Z"),
                         "Synthetic fixture authored for this test. Not any published game's data."),
                 List.of(

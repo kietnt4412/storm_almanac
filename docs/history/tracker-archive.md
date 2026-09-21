@@ -31,6 +31,20 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**N20 — Put the game's day boundary on the game, not in the planner.**~~
+      Done 2026-09-21,
+      [ADR 0025](../adr/0025-the-day-boundary-is-a-property-of-the-game.md), `V12`.
+      `DayBoundary(ZoneId, int hour)` on `Game`, the five pieces exactly as the
+      thirtieth session planned them, and `EnergyMip.matchingDays` reading the
+      game instead of `ZoneOffset.UTC`. **No variable indexed by day** — one
+      `DayOfWeek` moves and no constraint row is written, so ADR 0013 stands.
+      **Null is *unstated*, not midnight**, so every version published before
+      `V12` reads back claiming nothing and plans exactly as it did. **A sixth
+      piece the plan did not name:** `Facts` never flattened `Game`, so the first
+      preview of the sequence that declares a boundary said *no changes* — found
+      by running the tool, not by a test. PGR **sequence 5** carries the 05:00
+      UTC reset, published and read back clean. **R1999's own boundary is Phase
+      11's**, because its number is second-hand and its stage table rotates.
 - [x] ~~**N30 — An expiring grant is a deadline the plan reports, not a schedule
       it builds (D3).**~~ Done 2026-09-21,
       [ADR 0024](../adr/0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md).
@@ -2692,6 +2706,70 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-21 (thirty-second) — N20: the day boundary is a property of the game.**
+[ADR 0025](../adr/0025-the-day-boundary-is-a-property-of-the-game.md), `V12`,
+and **PGR sequence 5 published and read back as no changes**. No new reading.
+The thirtieth session's plan was followed as written, and its "five pieces, and
+the work is the fifth" held — with one piece it did not name, found by running
+the tool rather than by a test.
+
+- **The remote at start:** `dev` level with `origin/dev`, its tree identical to
+  `origin/main`, no open PRs. **PR #31 has merged since the tracker's note about
+  #30** — the trap re-armed for the ninth time and was caught by looking.
+- **The maintainer picked N20 from the three held items**, which is what the
+  tracker's *Held* section asks for. N33 needs a reading only they can take and
+  B5 needs their accounts; N20 was the one a session could finish alone.
+- **What was wrong.** `EnergyMip.matchingDays` read `atZone(ZoneOffset.UTC)`,
+  with a javadoc that said in as many words that this was a placeholder rather
+  than a decision. PGR resets at **05:00 UTC**, so 03:00 UTC on a Monday is
+  Monday to the planner and **still Sunday** to a player. Rotation is a shared
+  capacity over subsets of weekday restrictions, so a wrong start day does not
+  fail — it moves a whole day of energy into the wrong bucket, silently.
+- **`GameAgnosticismTest` was always blind to this, and still is.** It scans the
+  guarded source roots for game names; `UTC` is not a game name. The invariant is
+  *no `if (game == …)`*, and this was the other shape — a constant right for no
+  game in particular. **What caught it was a javadoc a previous session was
+  honest enough to write**, which is worth more here than the source scan was.
+- **The shape.** `DayBoundary(ZoneId zone, int hour)` on `Game`, with
+  `dayOfWeekAt(Instant)` doing `atZone(zone).minusHours(hour)`. **A zone rather
+  than an offset**, because an offset cannot summer — there is a test that pins a
+  civil zone at 09:00 UTC in July and 10:00 UTC in December.
+- **Null is *unstated*, not midnight**, through parser, writer, schema and
+  reader, and the fallback lives once in `Game.dayBoundaryOrDefault()`. Every
+  version published before `V12` reads back claiming nothing and plans exactly as
+  it did. **No variable is indexed by day** — the change moves one `DayOfWeek`
+  and writes no constraint rows, so ADR 0013 is untouched.
+- **The piece the plan did not name, and the preview found it.** `Facts` never
+  flattened `Game` at all. So the first preview of sequence 5 said **"no
+  changes"** — a version whose one difference moves every rotating stage's
+  capacity, reported as nothing. The title is now one subject on the progression
+  axis, `energy unit` and `day rollover`, and the second preview read exactly
+  *`~ game 'punishing-gray-raven' · day rollover: unstated → 05:00 UTC`*. The
+  test for it was written after the tool found it, not before.
+- **`ZoneId.of("UTC+7")` is valid** and normalises to `UTC+07:00`; the first
+  draft of the parser test assumed it was not and failed. A mistyped *region* —
+  `America/New_Yrok` — is the refusal worth having, because it looks right.
+- **Sequence 5 published 2026-09-21T01:11:15Z and read back as no changes**, the
+  sixth sequence in a row to do so. It moves no plan in that bundle: nothing in
+  it rotates by weekday. It is written so the first rotating stage does not have
+  to remember.
+- **The fact ledger cannot carry this fact.** `factRefs()` covers items,
+  entities, sources, sinks and banners — not `Game` — so the boundary has no
+  `factProvenance` row, exactly as `energyUnit` has none. Its reading is
+  `equipment-and-resource-screens`, and only the bundle comment and ADR 0025 say
+  so. **104 facts, unchanged**, which is why the provenance table did not move.
+- **R1999 was left alone on purpose.** Its 05:00 UTC−5 is second-hand, the
+  Kornblume adapter is a never-shipped cross-check, and **its stage table does
+  rotate** — so declaring a boundary there would move the nine benchmark
+  agreements on the strength of a number nobody here read. Phase 11's business.
+- **Build:** 401 → **411 tests**, 0 skipped locally, green in 4m 04s. **All 16
+  snapshot-gated tests ran and passed**, so standing caveat 1 is satisfied for
+  this session rather than assumed. CI will show **395**.
+- **Not done, and named:** `Availability.opensAt` is still read by nobody, and
+  this change deliberately does not fix it — a rollover hour and an unread banner
+  window are different problems that share a package. Nothing renders any of this
+  in a browser, and **no screen has ever rendered PGR**.
 
 **2026-09-21 (thirty-first) — N30: an expiring grant is a deadline the plan
 reports, not a schedule it builds.**

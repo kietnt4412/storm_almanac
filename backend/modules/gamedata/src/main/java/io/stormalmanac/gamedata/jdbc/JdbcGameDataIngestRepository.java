@@ -5,6 +5,7 @@ import io.stormalmanac.common.id.EntityId;
 import io.stormalmanac.common.id.GameId;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.Craft;
+import io.stormalmanac.gamedata.DayBoundary;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
@@ -255,15 +256,26 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
 
     /** A title outlives any patch of its data, so this row is not versioned. */
     private void upsertGame(GameDataBundle bundle) {
+        DayBoundary boundary = bundle.game().dayBoundary();
         jdbc.update(
                 """
-                INSERT INTO gamedata.game (id, display_name, energy_unit)
-                VALUES (?, ?, ?)
+                INSERT INTO gamedata.game
+                       (id, display_name, energy_unit, day_rollover_zone, day_rollover_hour)
+                VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT (id) DO UPDATE
-                    SET display_name = EXCLUDED.display_name,
-                        energy_unit  = EXCLUDED.energy_unit
+                    SET display_name      = EXCLUDED.display_name,
+                        energy_unit       = EXCLUDED.energy_unit,
+                        day_rollover_zone = EXCLUDED.day_rollover_zone,
+                        day_rollover_hour = EXCLUDED.day_rollover_hour
                 """,
-                bundle.game().id().value(), bundle.game().displayName(), bundle.game().energyUnit());
+                bundle.game().id().value(),
+                bundle.game().displayName(),
+                bundle.game().energyUnit(),
+                // Null rather than the placeholder: this row is not versioned, so
+                // writing midnight UTC here would claim a reading for every
+                // version of this game at once, including the ones that predate it.
+                boundary == null ? null : boundary.zone().getId(),
+                boundary == null ? null : boundary.hour());
     }
 
     /**

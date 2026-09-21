@@ -16,7 +16,7 @@ being finished with is.
   [The 826-line version it replaces is in the archive, verbatim](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression) —
   go there for anything this file no longer carries, and decide whether it is
   still operative rather than assuming it was lost.
-- Last updated: **2026-09-21** (thirty-first session)
+- Last updated: **2026-09-21** (thirty-second session)
 
 ---
 
@@ -32,31 +32,34 @@ being finished with is.
   and [its bundle](data/bundles/punishing-gray-raven-steering-by-light.json)
   plans, EXP and one gate included ([ADR 0019](docs/adr/0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-demanded-as-an-item.md)).**
   Simulated Battlefield pays Score, and Score buys every material and Pod.
-  **Sequence 4 is published** (2026-09-20T00:13:59Z, read back as *no changes*), so a reader
-  who says they clear the weekly Phantom Pain Cage is planned **Evolve to SS in 63 days and no
-  Serum** and one who says nothing is refused *by name*
-  ([ADR 0022](docs/adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md));
-  the rest of the prices are in [the table below](#what-the-next-work-touches). **Below the top rank
-  plans are still too cheap:** no level under 80 has a price, so twelve gates are prose (**N33**).
+  **Sequences 4 and 5 are published** (2026-09-20T00:13:59Z and 2026-09-21T01:11:15Z, both read
+  back as *no changes*): a reader who says they clear the weekly Phantom Pain Cage is planned
+  **Evolve to SS in 63 days and no Serum** and one who says nothing is refused *by name*
+  ([ADR 0022](docs/adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md)), and
+  the game declares its **05:00 UTC** reset. The rest of the prices are in
+  [the table below](#what-the-next-work-touches). **Below the top rank plans are still too cheap:**
+  no level under 80 has a price, so twelve gates are prose (**N33**).
   What the client overruled in the guides: the featured rule is a **per-banner rate**; **events
   have no shops** and pay one-time grants, which the plan reports as a deadline (ADR 0024); the Themed pool's wall is **drawn** (ADR 0023);
   and its **`PityScope` inherits Calibration across pools**, where R1999 clears — the two published
   games disagree on the one question that enum exists to answer.
-- **Both PGR banner archetypes are expressible and neither is authored, 2026-09-20**
-  ([ADR 0023](docs/adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md), `V11`).
-  `PityRule.drawnFrom` is the bottom of a drawn range and `hardAt` still means certainty, so
-  nothing published moved; **the exact chain gained no state**, because the posterior over the
-  threshold depends on the pity counter alone. Authoring one is **N28**.
-- **An expiring grant is a deadline the plan reports, 2026-09-21**
-  ([ADR 0024](docs/adr/0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md)).
-  **N30 closed with no time index and no new variables** — `occurrences` always truncated the
-  supply and nothing ever said so, so the change is `Outcome.expiringClaims`, `Outcome.lapsedGrants`,
-  three notes, and a refusal that names the window instead of blaming the cadence. **A lapse is a
-  window and not a cadence:** the predicate is `occurrences == 0` *and* that the same cadence over
-  the untruncated horizon *would* have paid, or the note tells a reader to hurry over a monthly.
-  **The plan for this action had its `FEWEST_DAYS` sentence backwards** — shortening a horizon never
-  raises an expiring grant's claims and can lower them — and ADR 0024 carries the correction.
-  **`opensAt` is still read by nobody**, deliberately, and belongs with **N20**.
+- **Three decisions closed since 2026-09-20. The ADR is the account; this is what each left.**
+  **[0023](docs/adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md), `V11` — a
+  drawn guarantee is a rate curve, not a state dimension.** `PityRule.drawnFrom` is the bottom of
+  a drawn range, `hardAt` still means certainty, nothing published moved, and **the exact chain
+  gained no state**. Both PGR archetypes are expressible and **neither is authored** (**N28**).
+  **[0024](docs/adr/0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md)
+  — an expiring grant is a deadline the plan reports.** Two lists on `Outcome`, no time index, no
+  new variables. **A lapse is a window and not a cadence** — the predicate also needs *the same
+  cadence over the untruncated horizon would have paid*, or a note hurries a reader over a monthly.
+  **`opensAt` is read by nobody**, deliberately, and is the last of `Availability` nothing reads.
+  **[0025](docs/adr/0025-the-day-boundary-is-a-property-of-the-game.md), `V12` — the day boundary
+  belongs to the game.** A zone and an hour on `Game`; `null` is *unstated*, not midnight, so
+  everything published before it plans as it did. **`GameAgnosticismTest` is blind to this class
+  of bug** — `UTC` is not a game name, and a javadoc caught it. **The preview found a sixth piece
+  the plan never named:** `Facts` flattened `Game` not at all, so a version whose one difference
+  moves every rotating stage's capacity read as *no changes*. **R1999's boundary is Phase 11's** —
+  second-hand number, rotating stage table, nine benchmark agreements at stake.
 - **Going first-hand on game data**, 2026-09-09
   ([ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)),
   superseding 0009 and closing Q2, Q3, F1 and F2. Kornblume is unlicensed.
@@ -81,13 +84,13 @@ being finished with is.
   2026-09-09, every image build failing in six seconds while this file called it
   verified, so **anything added beside `modules`, `adapters`, `substrate`, `app`
   needs a line there**.
-- **The remote, last checked 2026-09-21 (thirty-first) — re-check it, do not trust it.**
-  **[PR #30](https://github.com/kietnt4412/storm_almanac/pull/30) is MERGED** — the thirtieth
-  session's work went up and came back down while this file still named #28. `dev` was level with
+- **The remote, last checked 2026-09-21 (thirty-second) — re-check it, do not trust it.**
+  **[PR #31](https://github.com/kietnt4412/storm_almanac/pull/31) is MERGED** — the thirty-first
+  session's work went up and came back down while this file still named #30. `dev` was level with
   `origin/dev` and its tree identical to `origin/main` at the start of this session; `dev` sits
   behind by merge commits that never come back down, which is harmless and *not* a reason to
   rebase. **The trap stands:** CI runs on `pull_request` and on push to `main` only, so **a push to
-  `dev` with no open PR runs nothing, silently**; every merge re-arms it, eight times now, each
+  `dev` with no open PR runs nothing, silently**; every merge re-arms it, nine times now, each
   caught by looking. And PR #25 merged *before its own run finished*, green by luck (archive,
   twenty-sixth). **Run `gh pr list`, open the PR, and wait for the run before merging.**
 
@@ -168,13 +171,13 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **401 tests** in full 2026-09-21, 0 skipped locally **and all 16 snapshot-gated ones actually ran and passed**, so standing caveat 1 is satisfied for that build rather than assumed; **385 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
-| Authored game data | **One bundle, sequence 4 published, first-hand** | Helentine: Lacrimosa (level to 80, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, and — since **sequence 4, published 2026-09-20T00:13:59Z** — the weekly Phantom Pain Cage's nine tiers. **104 facts, all first-hand**, over six provenance entries; preview and ingest read **exactly the nine additions**, and the published version reads back as *no changes*. **Every sequence so far has been published and read back clean** ([the loop, per sequence, in the archive](docs/history/tracker-archive.md#session-log)); the next correction is a sequence 5. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) |
+| Backend build | **Green** | **411 tests** in full 2026-09-21, 0 skipped locally **and all 16 snapshot-gated ones actually ran and passed**, so standing caveat 1 is satisfied for that build rather than assumed; **395 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
+| Authored game data | **One bundle, sequence 5 published, first-hand** | Helentine: Lacrimosa (level to 80, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, and — since **sequence 4, published 2026-09-20T00:13:59Z** — the weekly Phantom Pain Cage's nine tiers, and — since **sequence 5, published 2026-09-21T01:11:15Z** — the game's own **05:00 UTC** day boundary. **104 facts, all first-hand**, over six provenance entries: the boundary is a game-level field and so adds no fact, which is exactly why `Facts` had to learn to flatten `Game` (ADR 0025). Preview and ingest read **exactly the one change**, and the published version reads back as *no changes*. **Every sequence so far has been published and read back clean** ([the loop, per sequence, in the archive](docs/history/tracker-archive.md#session-log)); the next correction is a sequence 6. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) |
 | CI workflow | **Green, no warnings, Node 24** | Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
 | The MIP (`EnergyMip`) | **Stages, crafts, shops, rewards and fodder** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. A purchase is a conversion capped at limit × *whole* periods, or the whole allowance of one that never resets, which the plan says it assumed unspent (ADR 0020); feeding fodder is a conversion into a `progress:<kind>` item, and paying one of a step's several prices a conversion into a `choice:` item (ADR 0021). Gates are not in the model: `DemandResolver` turns them into demand (ADR 0019). **A grant behind a score the reader has not cleared is dropped before the model** and reported in the notes, so the counts in a plan and in a refusal are the game *that reader* plays (ADR 0022) |
-| The time axis | **A scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). Rotation is capacity shared over *subsets* of weekday restrictions; **no variable is indexed by day**, which is why p95 held at **1 807 ms**. An expiring grant is **supply plus a reported deadline**, never a scheduled claim (ADR 0024). Weekdays are read in **UTC** — a game assumption in a game-agnostic module (**N20**) |
+| The time axis | **A scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). Rotation is capacity shared over *subsets* of weekday restrictions; **no variable is indexed by day**, which is why p95 held at **1 807 ms**. An expiring grant is **supply plus a reported deadline**, never a scheduled claim (ADR 0024). **Which weekday day zero is comes off the game** — `Game.dayBoundary`, a zone and an hour, and `null` means the midnight-UTC every version published before `V12` was planned by (ADR 0025) |
 | `gacha` — engines | **Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). An exact chain and 500 000 seeded trials sharing one validated `PullModel`, so both refuse the same banners for the same reasons. **53 tests, worst gap 0.110 points over 108 questions, at 2.22 standard errors.** Only the headline rarity is modelled. **Through a drawn guarantee they take different roads on purpose** — the chain integrates it out, the simulation draws it (ADR 0023) — which is what caught the simulation sampling the prior, 0.558 against the chain's right 0.382. **A generated question set is not automatically one that probes the band it generated:** every generic question for a wall of 100 lands below the drawn range or at certainty |
 | `gacha` — income model | **Interface only, unwritable** | `projectedPulls` needs to know which item is pull currency and what a pull costs in it. **Neither `BannerModel` nor the `banner` table declares either** — **N28**, whose numbers now exist |
 | Frontend | **Five screens, browser-driven, 15 tests** | Inventory editor, goal picker, plan view carrying **every one of the solver's notes**, catalog browse and search, and the character page with the **personalized overlay**. Same-origin locally via the Vite proxy. **Never rendered PGR** — every screen was built against R1999 |
@@ -249,13 +252,13 @@ works". It does not mean that:
 
 ## Next actions
 
-**Nothing is live: every remaining item is the maintainer's.** N30 closed
-2026-09-21 and moved to
-[the archive](docs/history/tracker-archive.md#completed-next-actions); the three
+**Nothing is live: every remaining item is the maintainer's.** N30 and **N20**
+both closed 2026-09-21 and moved to
+[the archive](docs/history/tracker-archive.md#completed-next-actions); the two
 below are held by an explicit decision taken on 2026-09-20, not by neglect.
-**A session should not promote one of them on its own** — two need the
-maintainer's own reading or accounts, and the third is a schema change whose
-shape is already written down. Say which one and it starts.
+**A session should not promote one of them on its own** — both need the
+maintainer's own reading or accounts, and there is no longer a third that a
+session could take alone. Say which one and it starts.
 
 ### Held — Phase 4 scope, and the maintainer decides
 
@@ -273,12 +276,6 @@ read the plan rather than re-deriving one.
       **costs nothing**, so `"requires": ["level-40"]` today is a gate every plan
       meets for free — worse than prose. **Incremental**: any prefix priced
       unlocks that many gates.
-- [ ] **N20 — Put the game's day boundary on the game, not in the planner.**
-      `EnergyMip.matchingDays` reads weekdays in **UTC**, a game assumption in a
-      game-agnostic module that `GameAgnosticismTest` cannot see. **PGR's reset is
-      05:00 UTC**, R1999 Global's 05:00 UTC−5. Five pieces, exactly the **V11**
-      shape — and the work is the last one, because a rollover hour changes which
-      weekday index 0 is. **Do not index by day** (ADR 0013).
 - [ ] **B5 — Wire the real deploy: Vercel and Render.** **Settle two things
       first.** *One origin or two:* a Vercel rewrite of `/api/*` to Render keeps
       the same-origin session, CSRF and OAuth redirect the backend was built
@@ -294,14 +291,16 @@ read the plan rather than re-deriving one.
       Unblocked — the numbers exist** and are in
       [the research note](docs/game-facts/punishing-gray-raven-research-disclosure.md):
       **1 pull = 250 Event Construct R&D Tickets**, about **$4.20 a pull**. A
-      schema change rather than a decision, the same five pieces as **N20**.
+      schema change rather than a decision, the same five pieces N20 walked on
+      2026-09-21 — and N20 found a sixth, that `Facts` must flatten whatever the
+      field hangs off or the preview reports nothing (ADR 0025).
       **Plus a decision the first bundle forced** — the ticket must be an `Item`
       and `Item.rarity` is required; tiles grade Cogs, Score and Scars, so try the
       ticket's tile before making rarity optional. **Two more fields belong in the
       same change**, both R1999: a **shop exchange for the featured unit** —
       cassettes cut six copies from 840 pulls to 560 — and a **cap on copies**.
       **This is the only thing keeping a banner out of a bundle**, so N28 ends in a
-      **sequence 5** rather than in a schema.
+      **sequence 6** rather than in a schema.
 - [ ] **N18 — Put drop estimates into `SolveKey` in the same change that first
       publishes one.** The moment Phase 6 does, a plan cached against yesterday's
       rates is served as today's — the one staleness bug the key's design cannot
@@ -342,8 +341,8 @@ previous one's criterion is met. The "Landed" record for closed phases is
       **Closing condition, set 2026-09-20:** the exit is necessary and not
       sufficient — **N30, N33, N20 and B5 are each either done or explicitly cut
       before this box is ticked**, with the cut recorded in the session log.
-      Nothing here closes by having been forgotten. **N30 is done
-      (2026-09-21, ADR 0024); N33, N20 and B5 remain.**
+      Nothing here closes by having been forgotten. **N30 (ADR 0024) and N20
+      (ADR 0025) are both done, 2026-09-21; N33 and B5 remain.**
 - [x] **Phase 5 · Gacha engine** — closed 2026-09-12 out of order
       ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)); **one banner
       first-hand (Q4)**, income model and shop exchange are **N28**.
@@ -523,6 +522,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-21 | thirty-second | N20 closed: the day boundary is a property of the game (ADR 0025, V12). A zone and an hour on `Game`, one `DayOfWeek` moved and no row written; null is *unstated*, not midnight. The preview found a sixth piece the plan never named — `Facts` flattened `Game` not at all, so the sequence that declares a boundary read as *no changes*. PGR sequence 5 published and read back clean |
 | 2026-09-21 | thirty-first | N30 closed: an expiring grant is a deadline the plan reports, not a schedule it builds (ADR 0024). No time index, no new variables — two lists, three notes and a refusal that names the window instead of blaming the cadence. The plan's `FEWEST_DAYS` sentence was backwards and the ADR carries the correction |
 | 2026-09-20 | thirtieth | N31: a drawn guarantee is a rate curve, not a state dimension (ADR 0023, V11). The exact chain gained nothing; the simulation draws anyway, and caught itself sampling the prior — 0.558 against the chain's right 0.382. Then all four Phase 4 items planned: N30 decided as a deadline, N33's premise found already recorded, three held |
 | 2026-09-20 | twenty-ninth | N32 closed by its fifth shape: a grant behind a score the reader supplies (ADR 0022, V10). Sequence 4, the Phantom Pain Cage: Evolve to SS in 63 days and no Serum. The EXP reading leaves as N33 |

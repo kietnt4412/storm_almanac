@@ -7,6 +7,7 @@ import io.stormalmanac.common.id.GameId;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.StageId;
 import io.stormalmanac.gamedata.Craft;
+import io.stormalmanac.gamedata.DayBoundary;
 import io.stormalmanac.gamedata.Drop;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Game;
@@ -34,6 +35,7 @@ import io.stormalmanac.gamedata.catalog.Talent;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Period;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -75,7 +77,8 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
         return versionRow(
                 """
                 SELECT v.id, v.sequence, v.label, v.published_at, v.attribution,
-                       g.id AS game_id, g.display_name AS game_name, g.energy_unit
+                       g.id AS game_id, g.display_name AS game_name, g.energy_unit,
+                       g.day_rollover_zone, g.day_rollover_hour
                   FROM gamedata.game_data_version v
                   JOIN gamedata.game g ON g.id = v.game_id
                  WHERE v.game_id = ? AND v.status = 'PUBLISHED'
@@ -91,7 +94,8 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
         return versionRow(
                 """
                 SELECT v.id, v.sequence, v.label, v.published_at, v.attribution,
-                       g.id AS game_id, g.display_name AS game_name, g.energy_unit
+                       g.id AS game_id, g.display_name AS game_name, g.energy_unit,
+                       g.day_rollover_zone, g.day_rollover_hour
                   FROM gamedata.game_data_version v
                   JOIN gamedata.game g ON g.id = v.game_id
                  WHERE v.game_id = ? AND v.sequence = ? AND v.status = 'PUBLISHED'
@@ -127,7 +131,8 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
                 """
                 SELECT DISTINCT ON (v.game_id)
                        v.game_id, v.sequence, v.label, v.published_at, v.attribution,
-                       g.display_name AS game_name, g.energy_unit
+                       g.display_name AS game_name, g.energy_unit,
+                       g.day_rollover_zone, g.day_rollover_hour
                   FROM gamedata.game_data_version v
                   JOIN gamedata.game g ON g.id = v.game_id
                  WHERE v.status = 'PUBLISHED'
@@ -136,7 +141,8 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
                 (rs, row) -> {
                     GameId id = new GameId(rs.getString("game_id"));
                     return new PublishedGame(
-                            new Game(id, rs.getString("game_name"), rs.getString("energy_unit")),
+                            new Game(id, rs.getString("game_name"), rs.getString("energy_unit"),
+                                    dayBoundary(rs)),
                             new GameDataVersion(
                                     id,
                                     rs.getLong("sequence"),
@@ -146,11 +152,26 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
                 });
     }
 
+    /**
+     * The game's rollover, or null when it has none recorded.
+     *
+     * <p>The zone column decides, and the hour is read with {@code getObject}
+     * rather than {@code getInt} — the check constraint makes the pair whole, so
+     * a NULL hour beside a non-NULL zone cannot be in the table, and reading it
+     * as {@code getInt}'s zero would turn a reset nobody recorded into midnight
+     * if it ever were.
+     */
+    private static DayBoundary dayBoundary(ResultSet rs) throws SQLException {
+        String zone = rs.getString("day_rollover_zone");
+        Integer hour = (Integer) rs.getObject("day_rollover_hour");
+        return zone == null || hour == null ? null : new DayBoundary(ZoneId.of(zone), hour);
+    }
+
     private Optional<GameDefinition> versionRow(String sql, Object... args) {
         List<Header> headers = jdbc.query(sql, (rs, row) -> new Header(
                 rs.getLong("id"),
                 new Game(new GameId(rs.getString("game_id")), rs.getString("game_name"),
-                        rs.getString("energy_unit")),
+                        rs.getString("energy_unit"), dayBoundary(rs)),
                 new GameDataVersion(
                         new GameId(rs.getString("game_id")),
                         rs.getLong("sequence"),

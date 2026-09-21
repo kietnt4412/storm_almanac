@@ -10,6 +10,7 @@ import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.StageId;
 import io.stormalmanac.gamedata.Availability;
 import io.stormalmanac.gamedata.Craft;
+import io.stormalmanac.gamedata.DayBoundary;
 import io.stormalmanac.gamedata.Drop;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Game;
@@ -35,10 +36,12 @@ import io.stormalmanac.gamedata.catalog.StatCurve;
 import io.stormalmanac.gamedata.catalog.Talent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.DateTimeException;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,7 +119,8 @@ public final class CanonicalBundleParser {
                 new Game(
                         new GameId(text(game, "id", "game.id")),
                         text(game, "displayName", "game.displayName"),
-                        text(game, "energyUnit", "game.energyUnit")),
+                        text(game, "energyUnit", "game.energyUnit"),
+                        dayBoundary(game)),
                 integer(root, "sequence", "sequence"),
                 textOrEmpty(root, "label"),
                 text(root, "attribution", "attribution"),
@@ -403,6 +407,34 @@ public final class CanonicalBundleParser {
                     availability(node, at));
         } catch (IllegalArgumentException e) {
             throw new BundleFormatException(at + ": " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * When the game's day rolls over, if the bundle says.
+     *
+     * <p>Absent stays absent rather than becoming midnight UTC: a version is
+     * immutable, and every one published before this field existed claimed
+     * nothing about a reset. The zone is refused by name when it is not a zone
+     * Java knows, because {@code "UTC+7"} and {@code "Asia/Bangkok"} are both
+     * things a reader might type and only one of them is an identifier.
+     */
+    private static DayBoundary dayBoundary(JsonNode game) {
+        JsonNode node = game.get("dayBoundary");
+        if (node == null || node.isNull()) return null;
+        if (!node.isObject()) {
+            throw new BundleFormatException("game.dayBoundary must be an object of zone and hour");
+        }
+        String zone = text(node, "zone", "game.dayBoundary.zone");
+        try {
+            return new DayBoundary(
+                    ZoneId.of(zone),
+                    (int) integer(node, "hour", "game.dayBoundary.hour"));
+        } catch (DateTimeException e) {
+            throw new BundleFormatException(
+                    "game.dayBoundary.zone is not a zone: '" + zone + "'", e);
+        } catch (IllegalArgumentException e) {
+            throw new BundleFormatException("game.dayBoundary: " + e.getMessage(), e);
         }
     }
 

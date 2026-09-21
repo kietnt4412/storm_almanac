@@ -2,6 +2,7 @@ package io.stormalmanac.gamedata.diff;
 
 import io.stormalmanac.gamedata.Availability;
 import io.stormalmanac.gamedata.Craft;
+import io.stormalmanac.gamedata.DayBoundary;
 import io.stormalmanac.gamedata.Drop;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.GameDefinition;
@@ -57,6 +58,18 @@ final class Facts {
 
     static Map<Subject, Map<String, String>> of(GameDefinition definition) {
         Map<Subject, Map<String, String>> facts = new LinkedHashMap<>();
+
+        // The title itself, which for a long time nothing flattened. That was
+        // harmless while the only field was the energy unit, and stopped being
+        // harmless the moment a game could say when its day rolls over: a
+        // correction to that moves every rotating stage's capacity, and a patch
+        // report that could not mention it would show a sequence as "no changes"
+        // while the plans under it moved. One subject, filed under progression
+        // because the day boundary is a farming fact.
+        Map<String, String> game = subject(
+                facts, Axis.PROGRESSION, "game", definition.game().id().value());
+        game.put("energy unit", definition.game().energyUnit());
+        game.put("day rollover", dayBoundary(definition.game().dayBoundary()));
 
         for (Item item : definition.items()) {
             Map<String, String> about = subject(facts, Axis.PROGRESSION, "item", item.id().value());
@@ -212,6 +225,19 @@ final class Facts {
         return drop.isSampled()
                 ? drop.expectedYield() + " over " + drop.sampledRuns() + " runs"
                 : String.valueOf(drop.expectedYield());
+    }
+
+    /**
+     * A rollover reads as a clock time, and an undeclared one says so.
+     *
+     * <p>"unstated" rather than "00:00 UTC": a reader approving the version that
+     * first declares a boundary should see the reading arrive, not a value that
+     * appears to have changed from one somebody chose.
+     */
+    private static String dayBoundary(DayBoundary boundary) {
+        return boundary == null
+                ? "unstated"
+                : String.format("%02d:00 %s", boundary.hour(), boundary.zone().getId());
     }
 
     private static String availability(Availability availability) {

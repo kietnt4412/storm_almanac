@@ -1077,3 +1077,30 @@ the measure, and the zero it was told — and a reader who says they reach only
 **Still the maintainer's report, not a screen:** that a perfect week is 56. It
 is how the nine tiles were checked for a gap, so it is load-bearing for the
 claim that no tier is missing between the screenshots, not for any single row.
+
+---
+
+## 2026-09-21 — the day boundary goes in, and nothing new was read
+
+**No new reading.** The number is the one settled on 2026-09-19 under
+*[The day boundary, half read](#the-day-boundary-half-read)* and the note
+beneath it: the home clock at 00:04 server time against a 04:58:18 countdown,
+and a server clock that runs UTC. **The daily reset is 05:00 UTC.**
+
+What changed is that there is now somewhere to put it. A game says when its day
+rolls over ([ADR 0025](../adr/0025-the-day-boundary-is-a-property-of-the-game.md)),
+so it is a field on the title in **sequence 5** rather than a sentence in this
+file that the planner could not read. Until now every game's weekday was read in
+UTC at midnight, five hours early for this one.
+
+**It moves no plan in the bundle**, because nothing in it rotates by weekday —
+the one stage, Simulated Battlefield, is open every day. Written anyway: the
+first PGR stage that *does* rotate would otherwise have been farmed on a day
+that had not begun, and nothing in the pipeline would have looked wrong.
+
+**One gap, and it is the fact ledger's.** A game-level field carries no
+`factProvenance` row — no more than `energyUnit` does — so nothing in the
+published version records that this reading came from
+`equipment-and-resource-screens`. The bundle's own comment says it, and ADR 0025
+admits it. **The banner's opening time is still unread**, so the window on
+`Availability.opensAt` is not closed by this and was never going to be.
