@@ -87,3 +87,10 @@ echo "    --gamedata=adapt reverse-1999 ${TARGET}/3.3 0 3.3 build/reverse-1999-3
 echo
 echo "Run the tests that need it:"
 echo "  ./gradlew :app:test -Dstorm-almanac.upstream=\$(pwd)/${TARGET}"
+echo
+echo "Both halves of that line are load-bearing and neither used to work. The"
+echo "property is now forwarded to the test worker, so a custom TARGET actually"
+echo "reaches the tests instead of being ignored; and this directory is a declared"
+echo "task input, so fetching into it makes the task out of date instead of"
+echo "UP-TO-DATE from the run that had no snapshots. Record the numbers in"
+echo "docs/benchmarks/snapshot-gated-runs.md."

@@ -16,7 +16,7 @@ being finished with is.
   [The 826-line version it replaces is in the archive, verbatim](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression) —
   go there for anything this file no longer carries, and decide whether it is
   still operative rather than assuming it was lost.
-- Last updated: **2026-09-21** (thirty-fourth session)
+- Last updated: **2026-09-21** (thirty-fifth session)
 
 ---
 
@@ -82,18 +82,16 @@ being finished with is.
   2026-09-09, every image build failing in six seconds while this file called it
   verified, so **anything added beside `modules`, `adapters`, `substrate`, `app`
   needs a line there**.
-- **The remote, last checked 2026-09-21 (thirty-fourth) — re-check it, do not trust it.**
-  **[PR #33](https://github.com/kietnt4412/storm_almanac/pull/33) is MERGED** at 03:09:07Z. This
-  file named #31 until now, one session stale, which is exactly what the instruction above is for.
-  **The check found the trap sprung:** `cc9e7d1`, the thirty-third session's own last commit, sat
-  on `dev` alone with no PR open and therefore **had never been built at all** — the tenth
-  occurrence, and the first one caught in the working tree rather than told as a story. **B6 closed
-  it the same day**: CI now triggers on a push to `dev`, proven by run `35576845184` firing on
-  `cfa6fe4` with no PR open. **What the trigger does not do is watch the merge** — PR #25 merged
-  *before its own run finished* and was green by luck (archive, twenty-sixth) — so **wait for the
-  run before merging** still stands, and is now the only half of this a person has to remember.
-  `dev` sits behind `main` by merge commits that never come back down, which is harmless and *not*
-  a reason to rebase.
+- **The remote, last checked 2026-09-21 (thirty-fifth) — re-check it, do not trust it.**
+  **[PR #35](https://github.com/kietnt4412/storm_almanac/pull/35) is MERGED** at 08:58:28Z, and
+  `dev` was clean at `6414441`. **This file has now named a stale PR on two consecutive checks**
+  (#31 when #33 was current, #33 when #35 was), which is the whole argument for re-checking rather
+  than reading. **The unbuilt-`dev`-commit trap was not sprung**, and B6 means it largely cannot be
+  any more: CI triggers on a push to `dev`, so a commit with no PR open is built.
+  **What the trigger does not do is watch the merge** — PR #25 merged *before its own run finished*
+  and was green by luck (archive, twenty-sixth) — so **wait for the run before merging** still
+  stands, and is now the only half of this a person has to remember. `dev` sits behind `main` by
+  merge commits that never come back down, which is harmless and *not* a reason to rebase.
 
 ### Two standing caveats, read them every session
 
@@ -103,7 +101,13 @@ being finished with is.
    skip on the runner — 16 tests. **Every performance number and every comparison
    with an outside answer in this file comes from a test the pipeline does not
    run.** Run `backend/tools/fetch-upstream.sh` before trusting a green build to
-   mean the pipeline handles real data.
+   mean the pipeline handles real data — **and until 2026-09-21 doing exactly
+   that proved nothing**, because the property was not forwarded to the test
+   worker and the directory was not a task input, so the fetch changed nothing
+   Gradle could see and `:app:test` came back `UP-TO-DATE` from the run that had
+   no snapshots. Both are fixed and the fix is measured (N36). **The dated
+   numbers live in [docs/benchmarks/snapshot-gated-runs.md](docs/benchmarks/snapshot-gated-runs.md)
+   — append a run there rather than re-asserting a figure here.**
 2. **A green build says nothing about whether the data going into it is what the
    upstream publishes.** The adapter spent five sessions reading a stale stage
    table with two thirds of the game missing, green throughout. What caught it was
@@ -164,6 +168,13 @@ not ship, so until a self-sourced bundle reproduces them they are evidence about
 somebody else's numbers run through our solver. **The method survives untouched**,
 because the guide is a separate published artifact: a claim to re-earn, not a test
 to delete. [The benchmark](docs/benchmarks/reverse-1999-community-answers.md).
+**Re-measured 2026-09-21 against freshly fetched snapshots and every figure held**
+— nine agreements, five of them on raw point estimates, 3 880 against 4 017 over
+the 11 benchmark materials, and all three disagreements over 25% resting on a
+small sample with none that does not
+([the dated run](docs/benchmarks/snapshot-gated-runs.md)). That does not make the
+claim any less one to re-earn: it is the same Kornblume data, confirmed to be
+still saying what this file says it says.
 
 Toolchain on this machine: JDK 21.0.12 (Temurin), Gradle **9.6.0** via the
 committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
@@ -172,13 +183,13 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **419 tests** in full 2026-09-21, 0 skipped locally **and all 16 snapshot-gated ones actually ran and passed**, so standing caveat 1 is satisfied for that build rather than assumed; **403 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
+| Backend build | **Green** | **419 tests** in full 2026-09-21, 0 skipped locally **and all 16 snapshot-gated ones verified against freshly fetched upstream data the same day** ([the dated run](docs/benchmarks/snapshot-gated-runs.md)), so standing caveat 1 is satisfied for that build by measurement rather than assumed; **403 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares **two** directories outside every source set as inputs — `data/bundles`, without which `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed, and `build/upstream-snapshots`, without which fetching upstream left the task `UP-TO-DATE` (N36). **The second was the identical bug ten lines below the first's fix.** `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
 | Authored game data | **One bundle, sequence 6 published, first-hand** | Helentine: Lacrimosa (level to 80 **as a thirteen-link chain, every gated level priced**, 13-step Promote **all gated**, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, and — since **sequence 4, published 2026-09-20T00:13:59Z** — the weekly Phantom Pain Cage's nine tiers, and — since **sequence 5, published 2026-09-21T01:11:15Z** — the game's own **05:00 UTC** day boundary, and — since **sequence 6, published 2026-09-21T02:49:27Z** — the whole level ladder as a thirteen-link chain. **116 facts, all first-hand**, over seven provenance entries: the boundary is a game-level field and so adds no fact, which is exactly why `Facts` had to learn to flatten `Game` (ADR 0025). Preview and ingest read **exactly the changes intended** — 26 of them for sequence 6 — and each published version reads back as *no changes*. **Every sequence so far has been published and read back clean** ([the loop, per sequence, in the archive](docs/history/tracker-archive.md#session-log)); the next correction is a sequence 7. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) |
 | CI workflow | **Green, no warnings, Node 24; triggers on `dev`** | Since B6 (2026-09-21) it runs on push to `main` **and `dev`** as well as `pull_request`, so a push to the working branch with no PR open is built rather than silently ignored. **A push to `dev` while a PR is open from `dev` runs twice, on purpose** — the concurrency group stays keyed by ref, because collapsing push and PR into one group lets `cancel-in-progress` cancel the run the PR needs green. **The `deploy` job is still `if: false` and must be gated to `refs/heads/main` when B5 turns it on**, or it ships every commit landing on `dev`. Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
 | The MIP (`EnergyMip`) | **Stages, crafts, shops, rewards and fodder** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. A purchase is a conversion capped at limit × *whole* periods, or the whole allowance of one that never resets, which the plan says it assumed unspent (ADR 0020); feeding fodder is a conversion into a `progress:<kind>` item, and paying one of a step's several prices a conversion into a `choice:` item (ADR 0021). Gates are not in the model: `DemandResolver` turns them into demand (ADR 0019). **A grant behind a score the reader has not cleared is dropped before the model** and reported in the notes, so the counts in a plan and in a refusal are the game *that reader* plays (ADR 0022) |
-| The time axis | **A scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). Rotation is capacity shared over *subsets* of weekday restrictions; **no variable is indexed by day**, which is why p95 held at **1 807 ms**. An expiring grant is **supply plus a reported deadline**, never a scheduled claim (ADR 0024). **Which weekday day zero is comes off the game** — `Game.dayBoundary`, a zone and an hour, and `null` means the midnight-UTC every version published before `V12` was planned by (ADR 0025) |
+| The time axis | **A scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). Rotation is capacity shared over *subsets* of weekday restrictions; **no variable is indexed by day**, which is why p95 held at **1 808 ms, re-measured 2026-09-21** (median 1 805, max 1 813; it read 1 807 when first recorded, and one millisecond on a 2 000 ms budget is noise, not drift). An expiring grant is **supply plus a reported deadline**, never a scheduled claim (ADR 0024). **Which weekday day zero is comes off the game** — `Game.dayBoundary`, a zone and an hour, and `null` means the midnight-UTC every version published before `V12` was planned by (ADR 0025) |
 | `gacha` — engines | **Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). An exact chain and 500 000 seeded trials sharing one validated `PullModel`, so both refuse the same banners for the same reasons. **53 tests, worst gap 0.110 points over 108 questions, at 2.22 standard errors.** Only the headline rarity is modelled. **Through a drawn guarantee they take different roads on purpose** — the chain integrates it out, the simulation draws it (ADR 0023) — which is what caught the simulation sampling the prior, 0.558 against the chain's right 0.382. **A generated question set is not automatically one that probes the band it generated:** every generic question for a wall of 100 lands below the drawn range or at certainty |
 | `gacha` — income model | **Interface only, unwritable** | `projectedPulls` needs to know which item is pull currency and what a pull costs in it. **Neither `BannerModel` nor the `banner` table declares either** — **N28**, whose numbers now exist |
 | Frontend | **Five screens, browser-driven, 15 tests** | Inventory editor, goal picker, plan view carrying **every one of the solver's notes**, catalog browse and search, and the character page with the **personalized overlay**. Same-origin locally via the Vite proxy. **Never rendered PGR** — every screen was built against R1999 |
@@ -270,20 +281,16 @@ works". It does not mean that:
 
 ## Next actions
 
-**N30, N20, N33, B6 and N34 all closed 2026-09-21** and are
+**N30, N20, N33, B6, N34 and N36 all closed 2026-09-21** and are
 [in the archive](docs/history/tracker-archive.md#completed-next-actions). **B5 is
 the only Phase 4 item left**, and it needs the maintainer's own accounts.
 
-**The two items under *Before B5* below are what remains of four added on
-2026-09-21.** Each was already described somewhere in this file — in *Status*, in
-the two standing caveats, or in *What is still unverified* — and **none of them
-was an action anybody could pick up.** A known defect that is only ever
-*described* is one nobody is going to fix; these are the ones worth paying before
-the deploy rather than after, and each says why it is on this side of B5. **A
-session can take any of them alone.** **Two of the four went within a day of the
-list being written — B6 and N34 — which is the argument for the list**; and N34
-falsified half of N35 on its way past, so the two that remain are smaller than
-they were.
+**N35 below is the last of four defects turned into actions on 2026-09-21.** Each
+was already described somewhere in this file and **none was an action anybody
+could pick up**; three went within two days (B6, N34, N36), which is the argument
+for the list. **Two of the three found their entry was wrong** — N34 falsified
+half of N35, and N36, scoped as paperwork, found the workflow it was told to
+follow had never worked. **A described defect stays true until somebody runs it.**
 
 ### Before B5 — debt worth paying first
 
@@ -306,18 +313,6 @@ they were.
       the deploy. **jsdom computes no layout**, so a browser has to be driven:
       N34 shipped a `select multiple` that passed all 16 frontend tests and was
       unusable, and what caught it was two people looking at it.
-- [ ] **N36 — Fetch upstream before trusting a green build, once, and write down
-      what it proves.** Standing caveat 1 says the strongest tests here are ones
-      CI does not run: `RealUpstreamPatchTest`, `RealUpstreamPlanTest` and
-      `CommunityBenchmarkTest`, **16 tests**, skip on the runner because upstream
-      data is fetched and never vendored
-      ([ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md)).
-      Every performance number and every outside comparison in this file comes
-      from them. **Run `backend/tools/fetch-upstream.sh` and record the numbers
-      with a date**, so "p95 1 807 ms" stops being a figure of unknown age.
-      **Not a code change** — an hour, and it either confirms the file or
-      contradicts it.
-
 ### Held — Phase 4 scope, and the maintainer decides
 
 **Phase 4 does not close until each is done or explicitly cut, on the record** —
@@ -578,6 +573,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-21 | thirty-fifth | N36 closed, and it was not the paperwork it was scoped as. Every load-bearing figure held — nine agreements, 3 880 against 4 017, 419 tests and all 16 gated ones run — but **following the documented workflow proved nothing**: the property never reached the test worker and the snapshot directory was not a task input, so a fetch left `:app:test` `UP-TO-DATE`. The second is the identical bug to `data/bundles`, ten lines above its own fix. Both fixed, both proven by measurement; numbers now dated in `docs/benchmarks/snapshot-gated-runs.md` |
 | 2026-09-21 | thirty-fourth (cont.) | N34 closed: a roster entry holds a set of states (ADR 0027, `V13`). A reader at `promote-6` who says they are also at `level-80` pays 127 500 Cogs and **no EXP** where they were charged 90 000 over six steps. The merge unit stays the entity. **The frontend shipped wrong twice with 16 green tests each time** — a `select multiple` nobody could use, then chips styled as buttons the maintainer looked straight at and did not see. Two live claims died: a `progress:` line *has* rendered (as a bare slug), and PGR *has* been rendered, so N35 was rescoped rather than ticked |
 | 2026-09-21 | thirty-fourth | B6 closed the day after it was written: CI triggers on a push to `dev`, proven by a run on `cfa6fe4` with no PR open. The session-start check found the trap live — the previous session's own commit had sat on `dev` unbuilt. The concurrency group stays keyed by ref *on purpose*: deduping push and PR would let a push cancel the check the PR needs green. Deploy must be gated to `main` when B5 turns it on |
 | 2026-09-21 | thirty-third (cont.) | PR #33 opened and green. The deferred-defect list audited into *Next actions* as **B6, N34, N35, N36** — every one was already described somewhere in this file and none was an action anybody could pick up. One archived qualification found stale: a lifetime purchase limit has been expressible since ADR 0020 |

@@ -78,4 +78,27 @@ tasks.named<Test>("test") {
     inputs.dir(layout.projectDirectory.dir("../../data/bundles"))
         .withPropertyName("authoredBundles")
         .withPathSensitivity(PathSensitivity.RELATIVE)
+
+    // The same hole as data/bundles above, with two extra teeth, both found by
+    // running the documented workflow in N36 and watching it prove nothing.
+    //
+    // RealUpstreamPatchTest, RealUpstreamPlanTest and CommunityBenchmarkTest read
+    // snapshots that ADR 0009 forbids vendoring, so tools/fetch-upstream.sh puts
+    // them outside every source set and the tests skip themselves when they are
+    // absent. First tooth: -Dstorm-almanac.upstream on the Gradle command line
+    // never reached the test worker, because nothing forwarded it — so the
+    // script's own custom-directory mode sent the tests to the default path,
+    // where they found nothing and skipped, silently and green. Second tooth: the
+    // default path is under build/, so a plain `./gradlew build` immediately
+    // after fetching comes back UP-TO-DATE from the run that had no snapshots at
+    // all. Forwarding the property fixes the first; declaring the directory fixes
+    // the second, and it is optional because absent snapshots must still be a
+    // skip rather than a build failure — that is the whole point of ADR 0009.
+    val upstream = providers.systemProperty("storm-almanac.upstream")
+        .orElse(layout.projectDirectory.dir("../build/upstream-snapshots").asFile.path)
+    systemProperty("storm-almanac.upstream", upstream.get())
+    inputs.files(fileTree(upstream.get()))
+        .withPropertyName("upstreamSnapshots")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+        .optional(true)
 }

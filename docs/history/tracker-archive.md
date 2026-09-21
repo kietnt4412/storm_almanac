@@ -31,6 +31,71 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**N36 — Fetch upstream before trusting a green build, once, and write down
+      what it proves.**~~ Done 2026-09-21. The entry as it stood is in the tracker's
+      2026-09-21 revision; it said **"not a code change — an hour, and it either
+      confirms the file or contradicts it."** It was a code change, and it did both.
+
+      **Exit met, and the numbers are in
+      [docs/benchmarks/snapshot-gated-runs.md](../benchmarks/snapshot-gated-runs.md)**,
+      a file built to be appended to per run rather than edited, so a figure never
+      again has no date. Both snapshots fetched clean (3.3 at `d49efab2a18f`, 3.5 at
+      `8b40541a9c42`, 12 files), Docker 29.8.0 answering, `:app:test` 165 tests and
+      **419 across all modules, 0 skipped, 0 failures** — and **all 16 snapshot-gated
+      tests ran**: `CommunityBenchmarkTest` 5, `RealUpstreamPatchTest` 3,
+      `RealUpstreamPlanTest` 8.
+
+      **Every load-bearing figure in the tracker held.** Nine benchmark agreements on
+      the yields the solver uses and five on raw point estimates — the gap ADR 0011
+      bought, unchanged. 3 880 Activity against the guide's 4 017 over 11 materials.
+      All three disagreements over 25% rest on a small sample and **none does not**.
+      118 insight-2 goals in 3.5, 0 unreachable, 0 unsolved. The budget note still
+      names its own gap, at 2.40%. **Two figures moved by a notch and neither means
+      anything:** p95 is **1 808 ms** where the file carried 1 807, on a median of
+      1 805 and a max of 1 813 — noise on a 2 000 ms budget; and the cached repeat is
+      **0 ms** where the file carried 2, off the same 1 806 ms solve, which is the
+      cache being faster than the clock rather than faster than before.
+
+      **What it contradicted is the workflow itself, and this is the part worth
+      keeping.** Standing caveat 1 has told every session since it was written to run
+      `fetch-upstream.sh` before trusting a green build. Doing that produced
+      `BUILD SUCCESSFUL in 5s` with `:app:test` `UP-TO-DATE` — from the run that had
+      no snapshots at all. **Two independent faults, either of which alone makes the
+      caveat's instruction a no-op:**
+
+      1. **`-Dstorm-almanac.upstream` never reached the test worker.** `RealUpstream`
+         reads it with `System.getProperty`, nothing forwarded it, and a Gradle test
+         worker does not inherit the CLI's properties. So `fetch-upstream.sh /somewhere`
+         — the script's own documented custom-directory mode, printed as its closing
+         advice — pointed the tests at the *default* path, where a custom run has
+         nothing, and all 16 skipped in silence.
+      2. **The snapshot directory was not a task input.** It lands under
+         `backend/build/`, outside every source set, so fetching changed nothing
+         Gradle could see.
+
+      **The second is the same bug as `data/bundles` and `AuthoredBundlesTest`, whose
+      fix sits ten lines above it in the same file and whose comment explains the
+      exact failure mode.** The lesson is not that the hole existed; it is that
+      patching one instance of it did not prompt anyone to look for the next, and the
+      next was adjacent. Both are fixed in `backend/app/build.gradle.kts`, and the
+      input is **`optional`** on purpose — absent snapshots must stay a skip rather
+      than become a build failure, which is what ADR 0009 is for.
+
+      **The fix is proven by measurement, not by reading it.** Property pointed at an
+      empty directory → **16 skipped** (before the fix, that run passed on the default
+      path); default path → **0 skipped**; immediate repeat → **`UP-TO-DATE` in
+      957 ms**; snapshots moved aside with no `--rerun` → **task re-ran, 16 skipped**,
+      where before it stayed `UP-TO-DATE` and reported 0. **That first row is a keeper:
+      pointing the property at an empty directory is now the cheapest way to reproduce
+      CI's own behaviour locally**, and it names the three classes while doing it.
+
+      **What the run does not establish**, recorded so the next one is not oversold:
+      it is one machine, once, and not a regression guard until there is a second
+      entry; all 16 tests are R1999 against Kornblume data that ADR 0015 says the
+      product will not ship, so the tracker's framing stands — evidence about somebody
+      else's numbers through our solver; and it does not touch Q5, since whether this
+      3.5 is anyone else's 3.5 is still open.
+
 - [x] ~~**N34 — Let `Roster` hold a set of states, not one.**~~ Done 2026-09-21,
       [ADR 0027](../adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md), `V13`.
       `Roster.currentStates` is `Map<EntityId, Set<String>>` and `DemandResolver` seeds its walk
@@ -2765,6 +2830,63 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+
+**2026-09-21 (thirty-fifth) — N36: the verification the file kept asking for, and
+the two reasons it had never worked.** The third of the four deferred defects,
+closed within two days of the list being written. It was scoped as paperwork —
+*"not a code change, an hour"* — and the hour was right for the paperwork. The
+code change was the finding.
+
+**Session start, the remote check the tracker demands.** The file named PR #33 as
+the newest merged; #34 (B6) and #35 (N34) were merged too, so it was one session
+stale in exactly the way the instruction anticipates. `dev` was clean and equal to
+`origin/dev` at `6414441`, and the unbuilt-commit trap was **not** sprung —
+though B6 now means a bare `dev` push is built anyway, so that check has less to
+catch than it did.
+
+**The paperwork half, and it confirms the file.** Both snapshots fetched clean on
+the first attempt; Docker answered 29.8.0. 419 tests across all modules, 0 skipped,
+0 failures, and all 16 snapshot-gated tests ran — 5, 3 and 8 across the three
+classes. Nine benchmark agreements on the solver's yields, five on raw point
+estimates, 3 880 Activity against the guide's 4 017, three disagreements over 25%
+and every one on a small sample. p95 **1 808 ms** against the recorded 1 807, and a
+cached repeat of **0 ms** against the recorded 2 — both noise, both written down as
+noise rather than quietly corrected, because the point of a dated record is that
+drift is visible and this is not drift. It all lives in
+[docs/benchmarks/snapshot-gated-runs.md](../benchmarks/snapshot-gated-runs.md),
+shaped to be appended to per run.
+
+**The half that was not paperwork.** Running the documented workflow produced
+`BUILD SUCCESSFUL in 5s`, `:app:test` `UP-TO-DATE` — from the run that had no
+snapshots. The property was never forwarded to the test worker, so the script's own
+custom-directory mode sent the tests to the default path and all 16 skipped
+silently; and the snapshot directory was not a task input, so fetching it changed
+nothing Gradle could see. **Standing caveat 1 has been instructing sessions to do
+something that could not work since it was written.**
+
+**The uncomfortable part.** The second fault is the identical bug as `data/bundles`
+and `AuthoredBundlesTest` — and that fix sits *ten lines above it in the same
+file*, with a comment spelling out the failure mode and noting it was measured
+rather than feared. Fixing one instance of a bug did not cause anyone to look one
+screen down for the next. **This is the third item in a row whose real content was
+not what its entry described** — N33 widened a flaw it did not name, N34 falsified
+half of N35, N36 turned out to be a code change. The pattern is worth naming: **a
+defect that has only ever been described stays true; going and running it is what
+turns it into something else.**
+
+**Both fixed and both proven by measurement**, because a build fix that is only
+read is the same category of thing as a caveat that is only followed: empty
+directory → 16 skipped; default path → 0 skipped; repeat → `UP-TO-DATE` in 957 ms;
+snapshots moved aside → the task re-ran and 16 skipped, where before it would have
+stayed up to date and reported 0. **Pointing the property at an empty directory is
+now the cheapest local reproduction of CI's behaviour**, and the input is `optional`
+so that absent snapshots stay a skip — ADR 0009's whole point — rather than a
+build failure.
+
+**What was deliberately not done.** No attempt to make CI run these 16; that would
+need vendoring the data and ADR 0009 forbids it. And the run is one machine once,
+so it is a dated baseline and not yet a regression guard — the second entry in that
+file is what makes it one.
 
 **2026-09-21 (thirty-fourth, continued) — N34: a roster entry holds a set.**
 [ADR 0027](../adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md),
