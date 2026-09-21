@@ -144,6 +144,32 @@ export interface EntityResponse {
   sourcing?: Sourcing;
 }
 
+/**
+ * One rung of a scored ladder: the bar, and what clearing it pays.
+ *
+ * The grants are why this is worth fetching rather than assumed. A measure is an
+ * opaque slug the bundle supplies — `phantom-pain-cage-score` — and no reader
+ * has ever seen that string; what they recognise is the nine Scars at the top of
+ * it. ADR 0022, and the `measures` route that exists for this screen.
+ */
+export interface MeasureBar {
+  reward: string;
+  atLeast: number;
+  cadence: string;
+  grants: Cost[];
+}
+
+export interface Measure {
+  measure: string;
+  bars: MeasureBar[];
+}
+
+export interface MeasuresResponse {
+  game: string;
+  version: Version;
+  measures: Measure[];
+}
+
 export interface UpgradeStep {
   id: string;
   fromState: string;
@@ -338,6 +364,16 @@ export const getItems = (game: string, version?: number) =>
 export const getEntities = (game: string, version?: number) =>
   request<EntitiesResponse>(versioned(`/api/games/${game}/entities`, version));
 
+/**
+ * What this game scores a grant on, and the bars it pays at.
+ *
+ * The read side of `reach`. Nothing else on this API says which measures exist —
+ * a measure is a label on a reward and is declared nowhere — so a screen cannot
+ * ask the reader how far they get without asking this first.
+ */
+export const getMeasures = (game: string, version?: number) =>
+  request<MeasuresResponse>(versioned(`/api/games/${game}/measures`, version));
+
 export const getEntity = (game: string, entity: string, version?: number) =>
   request<EntityResponse>(versioned(`/api/games/${game}/entities/${entity}`, version));
 
@@ -384,9 +420,18 @@ export const saveGoals = (profile: string, goals: Goal[]) =>
     body: JSON.stringify({ goals }),
   });
 
+/**
+ * `reach` is what the reader says they clear, by measure.
+ *
+ * Absent or empty counts none of the scored grants, which is the honest default
+ * rather than the generous one: a plan that counted a weekly the reader cannot
+ * actually clear promises income that never arrives. Being wrong this way makes
+ * the plan dearer than the truth, and the server's notes name every grant it
+ * left out. ADR 0022.
+ */
 export const solve = (
   profile: string,
-  body: { energyPerDay: number; horizonDays?: number; objective?: string },
+  body: { energyPerDay: number; horizonDays?: number; objective?: string; reach?: Record<string, number> },
   version?: number,
 ) =>
   request<Plan>(versioned(`/api/me/profiles/${profile}/plan`, version), {

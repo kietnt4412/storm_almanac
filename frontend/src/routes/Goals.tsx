@@ -10,6 +10,7 @@ import {
   type Goal,
 } from '../api/client';
 import { ProfileGate } from '../profile';
+import { StateChips, statesOfGraph } from '../roster/StateChips';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 
 /**
@@ -55,32 +56,15 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
     })),
   });
 
-  /**
-   * Two different lists per entity, and conflating them was a real bug.
-   *
-   * A *target* can only be a state some upgrade arrives at — aiming at a state
-   * nothing reaches is a goal the solver can only refuse. A *current* state can
-   * also be one nothing arrives at: the base of a track is a `fromState` and
-   * never a `toState`, and a player sitting on it could not say so while these
-   * were the same list. They only looked equivalent because "don't own her"
-   * happens to resolve the same way on a track with one base.
-   */
+  // Targets and current states are two different lists per entity, and
+  // conflating them was a real bug — see statesOfGraph, which is where the
+  // distinction now lives, shared with the roster screen.
   const statesOf = useMemo(() => {
     const byEntity = new Map<string, { targets: string[]; starts: string[] }>();
     graphs.forEach((graph) => {
       const data = graph.data;
       if (!data) return;
-      const targets: string[] = [];
-      const starts: string[] = [];
-      const remember = (list: string[], state: string) => {
-        if (!list.includes(state)) list.push(state);
-      };
-      for (const step of data.steps) {
-        remember(starts, step.fromState);
-        remember(targets, step.toState);
-        remember(starts, step.toState);
-      }
-      byEntity.set(data.entity.id, { targets, starts });
+      byEntity.set(data.entity.id, statesOfGraph(data.steps));
     });
     return byEntity;
   }, [graphs]);
@@ -181,72 +165,20 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                   {/*
                     The roster, edited where the goal is. A target without a
                     starting point is the difference between "6 Greater Sigils"
-                    and "the whole track twice over", and asking for it on a
-                    separate screen is how it ends up never being set.
+                    and "the whole track twice over", and asking for it only on
+                    another screen is how it ends up never being set.
 
-                    Several at once, because a character is on several tracks
-                    and the game ties none of them together: a reader may be at
-                    Lv 80 and rank 0. A single select would make saying the
-                    second erase the first, and the planner would charge them
-                    the level ladder they have already climbed.
+                    The same component the roster screen uses, and that is the
+                    point of it being one: two editors of one aggregate that
+                    drift apart is how a reader gets two answers to "where am I".
                   */}
-                  {/*
-                    Chips plus an add-one dropdown, rather than a `select
-                    multiple`. The multi-select was tried first and is wrong
-                    here: this bundle publishes 68 start states, which a list
-                    box shows four at a time, clearing it needs a ctrl-click
-                    nobody discovers, and what is currently chosen cannot be
-                    seen without scrolling. A dropdown of what is *not* yet
-                    chosen keeps the familiar control and stays type-ahead
-                    searchable; the chips are the answer to "where am I".
-                  */}
-                  <span className="flex flex-wrap items-center gap-1">
-                    {(roster[goal.entity] ?? []).map((state) => (
-                      <button
-                        key={state}
-                        type="button"
-                        className="chip"
-                        aria-label={`Remove ${state}`}
-                        title={`No longer at ${state}`}
-                        onClick={() => {
-                          const left = (roster[goal.entity] ?? []).filter((held) => held !== state);
-                          // Empty is "not on the roster". The API refuses an
-                          // empty list precisely so this stays one meaning
-                          // rather than two.
-                          editRosterState(profileId, goal.entity, left.length > 0 ? left : null);
-                        }}
-                      >
-                        {state}
-                        <span className="chip-x" aria-hidden="true">
-                          ✕
-                        </span>
-                      </button>
-                    ))}
-
-                    <select
-                      className="input"
-                      value=""
-                      aria-label={`Add a current state for ${entity?.displayName ?? goal.entity}`}
-                      onChange={(event) => {
-                        if (!event.target.value) return;
-                        editRosterState(profileId, goal.entity, [
-                          ...(roster[goal.entity] ?? []),
-                          event.target.value,
-                        ]);
-                      }}
-                    >
-                      <option value="">
-                        {(roster[goal.entity] ?? []).length > 0 ? 'and also…' : 'don’t own her'}
-                      </option>
-                      {states.starts
-                        .filter((state) => !(roster[goal.entity] ?? []).includes(state))
-                        .map((state) => (
-                          <option key={state} value={state}>
-                            {state}
-                          </option>
-                        ))}
-                    </select>
-                  </span>
+                  <StateChips
+                    subject={entity?.displayName ?? goal.entity}
+                    states={roster[goal.entity] ?? []}
+                    choices={states.starts}
+                    emptyWord="not owned"
+                    onChange={(next) => editRosterState(profileId, goal.entity, next)}
+                  />
                 </label>
 
                 <div className="ml-auto flex items-center gap-1">

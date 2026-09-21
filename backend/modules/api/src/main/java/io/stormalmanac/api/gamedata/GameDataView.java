@@ -132,6 +132,25 @@ public final class GameDataView {
     /** One change in a patch diff, flattened the way {@code Change} already is. */
     public record ChangeView(String axis, String kind, String subject, String detail, String before, String after) {}
 
+    /**
+     * One rung of a scored ladder: the bar, and what clearing it pays.
+     *
+     * <p>{@code grants} resolves the item names like every other cost on this
+     * wire, and here that is load-bearing rather than tidy. The measure itself
+     * is a slug nobody outside the bundle has ever seen, so the only thing on
+     * this record that lets a reader recognise what they are being asked about
+     * is what the rungs pay: "9 Phantom Pain Scars a week" is a question
+     * somebody can answer, and "tier 9" is not.
+     *
+     * @param reward  the reward's own id, so a plan's note naming
+     *                {@code phantom-pain-cage-1100000} can be found on this list
+     *                rather than deciphered
+     * @param cadence how often the rung is paid. Two ladders on one measure are
+     *                a shape no published game has yet and the format permits,
+     *                and without this they would be indistinguishable here
+     */
+    public record BarView(String reward, int atLeast, String cadence, List<CostView> grants) {}
+
     // ── Responses ───────────────────────────────────────────────────────────
 
     /**
@@ -176,4 +195,30 @@ public final class GameDataView {
 
     public record DiffResponse(
             String game, VersionView from, VersionView to, List<ChangeView> changes) {}
+
+    /**
+     * One thing this version's grants are scored on, and every bar it pays at.
+     *
+     * <p><b>Why there is a route for this at all.</b> ADR 0022 made a scored
+     * grant an answer the reader supplies — {@code reach} on the plan request —
+     * and wrote the cost of that into its own consequences: a measure is
+     * declared nowhere, so "a screen that wants to ask 'how far do you get in
+     * the Phantom Pain Cage?' has to collect the measures off the rewards it can
+     * see". This is that collection, done once on the server rather than once
+     * per client, and no client can ask the question without it: the whole
+     * difficulty is that there is no list of the questions.
+     *
+     * <p><b>The measure stays a slug, and that stays the trade.</b> It has no
+     * declaration to hang a display name on, so {@code phantom-pain-cage-score}
+     * is what a reader sees — the same trade an opaque state makes. The bars are
+     * what makes it survivable rather than a fix for it.
+     *
+     * <p>Ordered by bar, lowest first, which is the order a ladder is climbed
+     * and therefore the order a reader picks their own rung out of. An empty
+     * list is a 200: a game whose grants all turn up for everybody has no
+     * measures, which is an answer and not an absence.
+     */
+    public record MeasureView(String measure, List<BarView> bars) {}
+
+    public record MeasuresResponse(String game, VersionView version, List<MeasureView> measures) {}
 }

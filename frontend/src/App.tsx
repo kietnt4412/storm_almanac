@@ -64,6 +64,7 @@ export function App() {
           <nav className="flex gap-4 text-sm">
             <Tab to="/plan">Plan</Tab>
             <Tab to="/inventory">Inventory</Tab>
+            <Tab to="/roster">Roster</Tab>
             <Tab to="/goals">Goals</Tab>
             <Tab to="/catalog">Catalog</Tab>
           </nav>

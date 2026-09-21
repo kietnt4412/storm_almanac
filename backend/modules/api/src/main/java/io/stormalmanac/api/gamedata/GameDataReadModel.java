@@ -11,8 +11,11 @@ import io.stormalmanac.api.gamedata.GameDataView.EntitySummaryView;
 import io.stormalmanac.api.gamedata.GameDataView.EntityView;
 import io.stormalmanac.api.gamedata.GameDataView.GameSummaryView;
 import io.stormalmanac.api.gamedata.GameDataView.GamesResponse;
+import io.stormalmanac.api.gamedata.GameDataView.BarView;
 import io.stormalmanac.api.gamedata.GameDataView.ItemView;
 import io.stormalmanac.api.gamedata.GameDataView.ItemsResponse;
+import io.stormalmanac.api.gamedata.GameDataView.MeasureView;
+import io.stormalmanac.api.gamedata.GameDataView.MeasuresResponse;
 import io.stormalmanac.api.gamedata.GameDataView.ProvenanceView;
 import io.stormalmanac.api.gamedata.GameDataView.RankView;
 import io.stormalmanac.api.gamedata.GameDataView.RarityView;
@@ -36,6 +39,7 @@ import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.ProvenanceRepository;
 import io.stormalmanac.gamedata.ProvenanceRepository.Sourcing;
 import io.stormalmanac.gamedata.Rarity;
+import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Upgrade;
 import io.stormalmanac.gamedata.catalog.Entity;
 import io.stormalmanac.gamedata.catalog.Skill;
@@ -221,6 +225,55 @@ public class GameDataReadModel {
                 steps,
                 total(upgrades, items),
                 sourcing(data, facts));
+    }
+
+    /**
+     * Every measure this version scores a grant on, with the bars it pays at.
+     *
+     * <p>Collected off the rewards rather than read from a declaration, because
+     * there is no declaration: ADR 0022 made a measure an opaque label a reward
+     * carries and said in as many words that the first screen to ask the reader
+     * about one would have to gather them this way. Gathering them here rather
+     * than in the browser is the same argument the shortfall route makes — a
+     * traversal implemented twice is implemented once too often, and the copy in
+     * the client is the one no test runs.
+     *
+     * <p>Grants are carried and are not decoration. A reader being asked how far
+     * they get in {@code phantom-pain-cage-score} has never seen that string;
+     * what they recognise is the nine Scars at the top of it.
+     *
+     * <p>Nothing here is filtered by {@link io.stormalmanac.gamedata.Availability}.
+     * A closed event's ladder is still a ladder, and a reward the plan would
+     * drop for being out of its window is the planner's judgement to make
+     * against a horizon this route does not have.
+     */
+    public MeasuresResponse measures(GameId game, Long sequence) {
+        GameDefinition data = load(game, sequence);
+        Map<ItemId, Item> items = data.itemsById();
+
+        // Insertion-ordered on both axes: the measures in the order the bundle
+        // first mentions them, and inside one, sorted by the bar. A ladder read
+        // in rung order is the order a reader picks their own rung out of, and
+        // a bundle is under no obligation to have written the rungs in it.
+        Map<String, List<BarView>> ladders = new LinkedHashMap<>();
+        for (Reward reward : data.rewards()) {
+            Reward.Requirement bar = reward.requires();
+            if (bar == null) continue;
+            ladders.computeIfAbsent(bar.measure(), measure -> new ArrayList<>())
+                    .add(new BarView(
+                            reward.id(),
+                            bar.atLeast(),
+                            reward.cadence().name(),
+                            costs(reward.grants(), items)));
+        }
+        ladders.values().forEach(bars -> bars.sort(Comparator.comparingInt(BarView::atLeast)));
+
+        return new MeasuresResponse(
+                game.value(),
+                version(data.version()),
+                ladders.entrySet().stream()
+                        .map(ladder -> new MeasureView(ladder.getKey(), List.copyOf(ladder.getValue())))
+                        .toList());
     }
 
     /**

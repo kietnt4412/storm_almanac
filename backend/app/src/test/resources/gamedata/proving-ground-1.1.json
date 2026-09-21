@@ -192,6 +192,28 @@
         { "item": "sigil-lesser", "quantity": 2 },
         { "item": "gold", "quantity": 1000 }
       ]
+    },
+    {
+      "_comment": [
+        "A two-rung scored ladder, the shape ADR 0022 exists for. The rungs are",
+        "written out of order on purpose: the measures route sorts by the bar,",
+        "and a fixture already in rung order could not tell a sort from a no-op.",
+        "1.0 has no ladder at all, which is what makes 'this game scores nothing'",
+        "a case the API is asked about rather than an assumption."
+      ],
+      "id": "trial-gauntlet-800",
+      "cadence": "WEEKLY",
+      "grants": [
+        { "item": "sigil-greater", "quantity": 2 },
+        { "item": "gold", "quantity": 4000 }
+      ],
+      "requires": { "measure": "gauntlet-depth", "atLeast": 800 }
+    },
+    {
+      "id": "trial-gauntlet-200",
+      "cadence": "WEEKLY",
+      "grants": [ { "item": "sigil-lesser", "quantity": 1 } ],
+      "requires": { "measure": "gauntlet-depth", "atLeast": 200 }
     }
   ],
 

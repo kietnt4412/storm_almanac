@@ -6,6 +6,7 @@ import { App } from './App';
 import { Home } from './routes/Home';
 import { Inventory } from './routes/Inventory';
 import { Goals } from './routes/Goals';
+import { Roster } from './routes/Roster';
 import { PlanView } from './routes/PlanView';
 import { Catalog } from './routes/Catalog';
 import { EntityPage } from './routes/EntityPage';
@@ -35,6 +36,7 @@ createRoot(document.getElementById('root')!).render(
           <Route path="/" element={<App />}>
             <Route index element={<Home />} />
             <Route path="inventory" element={<Inventory />} />
+            <Route path="roster" element={<Roster />} />
             <Route path="goals" element={<Goals />} />
             <Route path="plan" element={<PlanView />} />
             {/*

@@ -5,6 +5,7 @@ import {
   effectiveRoster,
   outboxOf,
   pendingCount,
+  reachOf,
   usePlannerStore,
 } from './plannerStore';
 
@@ -108,6 +109,55 @@ describe('the offline outbox', () => {
     );
 
     expect(merged).toEqual({ sotheby: ['insight-2'] });
+  });
+});
+
+/**
+ * What the reader says they reach, which is not player state and is not
+ * nothing either.
+ *
+ * ADR 0022 keeps `reach` on the plan request, beside `energyPerDay`: the server
+ * stores it nowhere and the solve key hashes it. What the store holds is only
+ * the memory of the answer, so that this device stops asking on every solve.
+ */
+describe('what the reader says they reach', () => {
+  beforeEach(() => {
+    usePlannerStore.setState({ profileId: null, outbox: {}, reach: {}, rejected: [], lastSyncedAt: null });
+  });
+
+  it('hands back the same empty answer every time it is asked', () => {
+    // The identical rule to the outbox's, for the identical reason: a selector
+    // that builds a fresh object every call makes React schedule a render for
+    // every render. It is worth asserting twice because it is invisible to a
+    // typechecker, and this one sits on the screen the plan is asked from.
+    const state = usePlannerStore.getState();
+
+    expect(reachOf(state, 'nobody')).toBe(reachOf(state, 'nobody-else'));
+    expect(reachOf(state, null)).toBe(reachOf(state, 'nobody'));
+  });
+
+  it('keeps one answer per measure, per profile', () => {
+    // Two profiles are two accounts playing two games; one of them clearing the
+    // weekly says nothing about the other, and a plan computed with the wrong
+    // one counts income that reader never earns.
+    usePlannerStore.getState().setReach('p1', 'phantom-pain-cage-score', 120_000);
+    usePlannerStore.getState().setReach('p1', 'phantom-pain-cage-score', 500_000);
+    usePlannerStore.getState().setReach('p2', 'phantom-pain-cage-score', 30_000);
+
+    const state = usePlannerStore.getState();
+    expect(reachOf(state, 'p1')).toEqual({ 'phantom-pain-cage-score': 500_000 });
+    expect(reachOf(state, 'p2')).toEqual({ 'phantom-pain-cage-score': 30_000 });
+  });
+
+  it('remembers a deliberate zero rather than forgetting the question was asked', () => {
+    // Zero and absent have the same consequence on the wire — neither counts a
+    // scored grant — and they are different things to a reader. Somebody who
+    // chose "I don't get there" should find their own answer when they come
+    // back, not a form that looks untouched.
+    usePlannerStore.getState().setReach('p1', 'gauntlet-depth', 800);
+    usePlannerStore.getState().setReach('p1', 'gauntlet-depth', 0);
+
+    expect(reachOf(usePlannerStore.getState(), 'p1')).toEqual({ 'gauntlet-depth': 0 });
   });
 });
 
