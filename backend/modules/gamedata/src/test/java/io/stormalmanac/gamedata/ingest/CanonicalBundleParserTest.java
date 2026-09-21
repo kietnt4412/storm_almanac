@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.stormalmanac.common.id.EntityId;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.Availability;
+import io.stormalmanac.gamedata.DayBoundary;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.Progress;
@@ -15,6 +16,7 @@ import io.stormalmanac.gamedata.Stage;
 import io.stormalmanac.gamedata.Upgrade;
 import java.time.DayOfWeek;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -331,6 +333,72 @@ class CanonicalBundleParserTest {
                 """)))
                 .isInstanceOf(BundleFormatException.class)
                 .hasMessageContaining("crafts[0].produces is empty");
+    }
+
+    @Test
+    @DisplayName("a game can say when its day rolls over, and one that does not says nothing")
+    void aGameMaySayWhenItsDayStarts() {
+        GameDataBundle declared = parser.parse(
+                """
+                {
+                  "game": { "id": "t", "displayName": "Test", "energyUnit": "Serum",
+                            "dayBoundary": { "zone": "UTC", "hour": 5 } },
+                  "sequence": 0,
+                  "attribution": "hand-written",
+                  "items": []
+                }
+                """);
+
+        assertThat(declared.game().dayBoundary())
+                .isEqualTo(new DayBoundary(ZoneId.of("UTC"), 5));
+        // Absent is absent rather than midnight: a version published before the
+        // field existed claimed nothing about a reset, and has to read back that
+        // way however sensible the default is.
+        assertThat(parser.parse(minimal("")).game().dayBoundary()).isNull();
+        assertThat(parser.parse(minimal("")).game().dayBoundaryOrDefault())
+                .isEqualTo(DayBoundary.UTC_MIDNIGHT);
+    }
+
+    @Test
+    @DisplayName("a rollover zone that is not a zone is refused by name, not read as UTC")
+    void aBoundaryMustNameAZoneJavaKnows() {
+        // A mistyped region is the failure that matters: it looks right, and a
+        // parser that fell back to UTC would move a boundary by hours and say
+        // nothing. An offset spelling is not a mistake — "UTC+7" is a zone id,
+        // and a game really on a fixed offset is entitled to write one.
+        assertThat(parser.parse(
+                """
+                {
+                  "game": { "id": "t", "displayName": "Test", "energyUnit": "Serum",
+                            "dayBoundary": { "zone": "UTC+7", "hour": 5 } },
+                  "sequence": 0, "attribution": "hand-written", "items": []
+                }
+                """).game().dayBoundary().zone())
+                .isEqualTo(ZoneId.of("UTC+07:00"));
+
+        assertThatThrownBy(() -> parser.parse(
+                """
+                {
+                  "game": { "id": "t", "displayName": "Test", "energyUnit": "Serum",
+                            "dayBoundary": { "zone": "America/New_Yrok", "hour": 5 } },
+                  "sequence": 0, "attribution": "hand-written", "items": []
+                }
+                """))
+                .isInstanceOf(BundleFormatException.class)
+                .hasMessageContaining("game.dayBoundary.zone is not a zone")
+                .hasMessageContaining("America/New_Yrok");
+
+        assertThatThrownBy(() -> parser.parse(
+                """
+                {
+                  "game": { "id": "t", "displayName": "Test", "energyUnit": "Serum",
+                            "dayBoundary": { "zone": "UTC", "hour": 25 } },
+                  "sequence": 0, "attribution": "hand-written", "items": []
+                }
+                """))
+                .isInstanceOf(BundleFormatException.class)
+                .hasMessageContaining("game.dayBoundary")
+                .hasMessageContaining("0-23");
     }
 
     @Test

@@ -85,6 +85,12 @@ class GameDataIngestTest extends SharedDatabaseTest {
         GameDefinition loaded = definitions.findLatest(pgr).orElseThrow();
 
         assertThat(loaded).isEqualTo(bundle.definitionApprovedAt(published.publishedAt()));
+        // Two more nullable columns on a row that is not versioned, and the only
+        // proof they come back as one object is reading them back. A zone read
+        // without its hour, or an hour read as getInt's zero, would both spell
+        // midnight — the exact value this game is not.
+        assertThat(loaded.game().dayBoundary())
+                .isEqualTo(new io.stormalmanac.gamedata.DayBoundary(java.time.ZoneId.of("UTC"), 5));
         Upgrade lastRank = upgradeOf(loaded, "helentine-lacrimosa-promote-13");
         assertThat(lastRank.requires()).containsExactly("level-80");
         assertThat(upgradeOf(loaded, "helentine-lacrimosa-level-80").progress())

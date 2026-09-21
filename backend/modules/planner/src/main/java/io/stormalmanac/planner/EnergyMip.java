@@ -3,6 +3,7 @@ package io.stormalmanac.planner;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.Availability;
 import io.stormalmanac.gamedata.Craft;
+import io.stormalmanac.gamedata.DayBoundary;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.Item;
@@ -16,7 +17,6 @@ import io.stormalmanac.gamedata.Upgrade;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -304,17 +304,13 @@ final class EnergyMip {
      * same plan.
      *
      * @param at           when the plan starts, which fixes the weekday the
-     *                     horizon begins on. <b>Weekdays are read in UTC, and
-     *                     that is a placeholder rather than a decision.</b> A
-     *                     game rolls its day over on its own clock — Reverse:
-     *                     1999 Global at 05:00 UTC−5, which is 10:00 UTC — so
-     *                     the zone and the hour are properties of the game and
-     *                     belong on its definition, not on this class. They are
-     *                     not there yet because adding them is a bundle field, a
-     *                     parser change and a migration, and no game this project
-     *                     has ingested rotates, so the assumption is currently
-     *                     inert. It stops being inert the moment one does; see
-     *                     {@code docs/game-facts/reverse-1999-economy.md}
+     *                     horizon begins on. <b>Which weekday that is comes off
+     *                     the game</b> — {@code definition.game().dayBoundary()},
+     *                     the zone and hour its day rolls over on — so this class
+     *                     holds no opinion about when a day starts. A bundle that
+     *                     declares none is planned at midnight UTC, which is what
+     *                     every version published before the field existed was
+     *                     planned by; see {@link #rollover}
      * @param energyPerDay what the player earns and is willing to spend per day
      * @param horizonDays  how many days the plan may take
      * @param reach        what the reader says they reach, by measure, against
@@ -719,7 +715,7 @@ final class EnergyMip {
             }
             long days = anyUnrestricted
                     ? horizonDays
-                    : matchingDays(reachable, in.at(), horizonDays);
+                    : matchingDays(reachable, rollover(in), in.at(), horizonDays);
 
             Expression capacity = model.newExpression("days:" + row++);
             for (int g : subset) {
@@ -761,10 +757,31 @@ final class EnergyMip {
      * <p>Counted rather than approximated as {@code horizon * |days| / 7}. Over a
      * horizon of ten days that approximation is out by a whole day either way,
      * and a day of energy is tens of stage runs.
+     *
+     * <p>Which weekday the count starts on is the game's business, not this
+     * class's: {@code boundary} comes off the {@link io.stormalmanac.gamedata.Game}
+     * and decides whether an instant three hours after midnight belongs to that
+     * day or the one before. Still no variable indexed by day — this moves one
+     * {@code DayOfWeek} and writes no rows (ADR 0013).
      */
-    private static long matchingDays(Set<DayOfWeek> days, Instant from, int horizonDays) {
+    /**
+     * When this game's day rolls over, or midnight UTC when it does not say.
+     *
+     * <p>One method rather than a field so that there is exactly one place the
+     * fallback happens. A game whose bundle declares a boundary gets it; a game
+     * whose bundle predates the field gets the behaviour it was published with,
+     * which is the only answer that leaves a stored version meaning what it
+     * meant.
+     */
+    private static DayBoundary rollover(Inputs in) {
+        return in.definition().game().dayBoundaryOrDefault();
+    }
+
+    private static long matchingDays(
+            Set<DayOfWeek> days, DayBoundary boundary, Instant from, int horizonDays) {
+
         if (days.isEmpty()) return horizonDays;
-        DayOfWeek start = from.atZone(ZoneOffset.UTC).getDayOfWeek();
+        DayOfWeek start = boundary.dayOfWeekAt(from);
         long matching = 0;
         for (int i = 0; i < horizonDays; i++) {
             if (days.contains(start.plus(i))) matching++;
@@ -991,7 +1008,7 @@ final class EnergyMip {
         }
         for (Map.Entry<Set<DayOfWeek>, Long> entry : energyByRestriction.entrySet()) {
             for (int days = needed; days <= horizonDays; days++) {
-                if (matchingDays(entry.getKey(), in.at(), days) * (long) in.energyPerDay()
+                if (matchingDays(entry.getKey(), rollover(in), in.at(), days) * (long) in.energyPerDay()
                         >= entry.getValue()) {
                     needed = days;
                     break;

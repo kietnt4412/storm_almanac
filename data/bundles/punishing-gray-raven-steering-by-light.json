@@ -56,15 +56,31 @@
     "out because the format could only promise every reader the top tier. The",
     "Scars they pay are the only source of the currency sequence 2's shard rows",
     "spend, so Evolve to SS is a plan rather than a bill for a reader who says",
-    "what they clear."
+    "what they clear.",
+    "",
+    "Sequence 4 was published on 2026-09-20. Sequence 5 reads nothing new: it",
+    "writes down when this game's day starts, which was read on 2026-09-19 and",
+    "had nowhere to live. The home screen showed 00:04 server time while the",
+    "Resources menu counted down 04:58:18 to reset, and the server clock is UTC,",
+    "so the day rolls over at 05:00 UTC. Until now every game's weekday was read",
+    "in UTC at midnight, five hours early for this one (N20, ADR 0025).",
+    "",
+    "It moves no plan in this file, because nothing here rotates by weekday: the",
+    "one stage is open every day. It is written anyway, because the first PGR",
+    "stage that does rotate would otherwise be farmed on a day that has not",
+    "begun and nothing would look wrong. One honest gap: a game-level field",
+    "carries no factProvenance row, exactly as energyUnit does not, so the fact",
+    "ledger cannot say that the reading behind this one is",
+    "'equipment-and-resource-screens'. This comment says it instead."
   ],
 
   "game": {
     "id": "punishing-gray-raven",
     "displayName": "Punishing: Gray Raven",
-    "energyUnit": "Serum"
+    "energyUnit": "Serum",
+    "dayBoundary": { "zone": "UTC", "hour": 5 }
   },
-  "sequence": 4,
+  "sequence": 5,
   "label": "Steering By Light",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client, patch \"Steering By Light\", on 2026-09-18. Numbers and text only; no game assets.",
 

@@ -2,6 +2,8 @@ package io.stormalmanac.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.stormalmanac.gamedata.DayBoundary;
+import io.stormalmanac.gamedata.Game;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.diff.Axis;
 import io.stormalmanac.gamedata.diff.Change;
@@ -10,6 +12,7 @@ import io.stormalmanac.gamedata.ingest.CanonicalBundleParser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
+import java.time.ZoneId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -111,6 +114,21 @@ class GameDataDiffTest {
     }
 
     @Test
+    @DisplayName("a day boundary arriving is a change the report names, not a silent one")
+    void aDeclaredDayBoundaryIsReported() {
+        // The title itself was flattened by nothing at all until the day
+        // boundary landed, which meant the sequence that first declared one
+        // previewed as "no changes" while every rotating stage's capacity moved
+        // under it. Found by running the preview, not by a test.
+        GameDefinition before = load("1.0");
+        GameDefinition after = withRollover(before, new DayBoundary(ZoneId.of("UTC"), 5));
+
+        assertThat(VersionDiff.between(before, after).on(Axis.PROGRESSION))
+                .containsExactly(new Change(Axis.PROGRESSION, Change.Kind.CHANGED,
+                        "game 'proving-ground'", "day rollover", "unstated", "05:00 UTC"));
+    }
+
+    @Test
     @DisplayName("the rendered report names the versions and groups by axis")
     void theReportRenders() {
         String report = diff.render();
@@ -121,6 +139,14 @@ class GameDataDiffTest {
         assertThat(report).contains("- stage 'pg-event-1'");
         assertThat(report).contains("+ stage 'pg-3-1'");
         assertThat(report).doesNotContain("gacha");
+    }
+
+    private static GameDefinition withRollover(GameDefinition definition, DayBoundary boundary) {
+        Game game = definition.game();
+        return new GameDefinition(
+                new Game(game.id(), game.displayName(), game.energyUnit(), boundary),
+                definition.version(), definition.items(), definition.sources(),
+                definition.sinks(), definition.banners(), definition.entities());
     }
 
     private static GameDefinition load(String label) {

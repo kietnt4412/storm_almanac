@@ -74,6 +74,14 @@ public final class CanonicalBundleWriter {
         game.put("id", bundle.game().id().value());
         game.put("displayName", bundle.game().displayName());
         game.put("energyUnit", bundle.game().energyUnit());
+        // Written only when declared. Writing the placeholder back would turn
+        // "nobody has read this game's reset" into "its reset is midnight UTC",
+        // and a round trip through this writer is how a correction is prepared.
+        if (bundle.game().dayBoundary() != null) {
+            ObjectNode boundary = game.putObject("dayBoundary");
+            boundary.put("zone", bundle.game().dayBoundary().zone().getId());
+            boundary.put("hour", bundle.game().dayBoundary().hour());
+        }
 
         root.put("sequence", bundle.sequence());
         root.put("label", bundle.label());

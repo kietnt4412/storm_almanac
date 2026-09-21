@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.Availability;
+import io.stormalmanac.gamedata.DayBoundary;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.ItemStack;
@@ -26,6 +27,7 @@ import io.stormalmanac.gamedata.Upgrade;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.Period;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
@@ -758,6 +760,61 @@ class EnergyMipTest {
         EnergyMip.Outcome outcome = solve(
                 definition, Map.of(), Map.of(ORE, 20, RELIC, 20), Objective.LEAST_ENERGY, 100, 7);
         assertThat(outcome.totalEnergy()).isEqualTo(200);
+    }
+
+    @Test
+    @DisplayName("the game says when its day starts, so a plan before the reset is still on yesterday")
+    void theWeekdayComesOffTheGameRatherThanOffUtc() {
+        // NOW is midnight UTC on a Monday. To a game that rolls over at 05:00 it
+        // is still Sunday — the reader has five hours of Sunday left — so the
+        // nine-day window in front of them holds one Tuesday where a
+        // midnight-UTC game's holds two, and the first Tuesday is a day further
+        // off. Same instant, same stage, same horizon: only the game differs.
+        assertThat(NOW).isEqualTo(Instant.parse("2026-09-07T00:00:00Z"));
+        GameDefinition midnight = tuesdayOnly(null);
+        GameDefinition fiveAm = tuesdayOnly(new DayBoundary(ZoneId.of("UTC"), 5));
+
+        assertThat(solveAt(midnight, NOW, Map.of(ORE, 6), 30, 9).daysNeeded()).isEqualTo(2);
+        assertThat(solveAt(fiveAm, NOW, Map.of(ORE, 6), 30, 9).daysNeeded()).isEqualTo(3);
+
+        // Twelve ore is two Tuesdays' worth. The midnight game has two; the
+        // 05:00 game has one, and the capacity row — not a filter — refuses it.
+        assertThat(solveAt(midnight, NOW, Map.of(ORE, 12), 30, 9).totalEnergy()).isEqualTo(60);
+        assertThatThrownBy(() -> solveAt(fiveAm, NOW, Map.of(ORE, 12), 30, 9))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class);
+    }
+
+    @Test
+    @DisplayName("after the reset the two games agree again, which is what makes the boundary a boundary")
+    void pastTheResetTheBoundaryStopsMattering() {
+        // 06:00 on the same Monday is Monday to both of them. A boundary that
+        // moved the answer here would be moving it by the zone rather than by
+        // the hour, and would be wrong for every instant rather than for five.
+        Instant afterTheReset = Instant.parse("2026-09-07T06:00:00Z");
+
+        assertThat(solveAt(tuesdayOnly(null), afterTheReset, Map.of(ORE, 6), 30, 9).daysNeeded())
+                .isEqualTo(solveAt(tuesdayOnly(new DayBoundary(ZoneId.of("UTC"), 5)),
+                        afterTheReset, Map.of(ORE, 6), 30, 9).daysNeeded());
+    }
+
+    private static GameDefinition tuesdayOnly(DayBoundary boundary) {
+        return TestGame.builder()
+                .rollingOverAt(boundary)
+                .stage(ORE_STAGE, 10, new Availability(Set.of(DayOfWeek.TUESDAY), null, null),
+                        ORE, 2.0)
+                .build();
+    }
+
+    /** A solve from a chosen instant, which is the only input these two vary. */
+    private static EnergyMip.Outcome solveAt(
+            GameDefinition definition,
+            Instant at,
+            Map<ItemId, Integer> demand,
+            int energyPerDay,
+            int horizonDays) {
+        return EnergyMip.solve(new EnergyMip.Inputs(
+                definition, YieldTable.declared(definition), Map.of(), demand, at, 2000L,
+                Objective.LEAST_ENERGY, energyPerDay, horizonDays, Map.of()));
     }
 
     private static GameDefinition rotatingPair() {
