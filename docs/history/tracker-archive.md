@@ -1484,6 +1484,15 @@ Phase 11 row rather than being left only here.
   **a reward conditional on spending energy**, and **a lifetime purchase limit**
   (`Shop` caps at "n per `Period`", not "five, ever"). Examples and provenance in
   [the economy facts](../game-facts/reverse-1999-economy.md).
+
+  **Correction, 2026-09-21: the third of those is closed and this entry was
+  stale.** [ADR 0020](../adr/0020-a-limit-that-never-resets-is-offered-whole.md)
+  made a lifetime limit expressible, and PGR sequence 2 published two shop rows
+  that use it — 10 Inver-Shards at 10 Scars then 20 at 20, **30 ever**. The
+  first two shapes are still unexpressible and still have no ADR. Left in place
+  rather than edited away, because an archived qualification that quietly
+  changes is worse than one that says when it stopped being true; the rule that
+  nothing here is deleted cuts both ways.
 - **The adapter converts less than the upstream publishes** — no shop offers, no
   alternative resonance-pattern costs, no unreleased content — each with a reason
   in `KornblumeAdapter`'s javadoc. That sentence is only reassuring when somebody
@@ -2719,6 +2728,38 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-21 (thirty-third, continued) — the deferred defects, audited into
+actions.** No code. [PR #33](https://github.com/kietnt4412/storm_almanac/pull/33)
+opened with the session's two commits; backend and frontend green, `deploy`
+correctly skipping.
+
+- **The finding is about the shape of this file, not about any one defect.**
+  Asked to list everything skipped since the beginning, the list came almost
+  entirely *out of* the tracker — *Status*, the two standing caveats, *What is
+  still unverified*, and the archived qualifications. Every item was written
+  down. **Not one of them was an action.** A defect that is only ever described
+  is one nobody picks up, and four of them had been described for weeks.
+- **Four became next actions**, each with a stated reason for being on this side
+  of B5 rather than after it: **B6**, CI running nothing on a push to `dev` — the
+  cheapest fix in the file, and B5 adds a `deploy` job that must never fire from
+  an untested commit; **N34**, `Roster` holding a set of states, the half
+  [ADR 0026](../adr/0026-a-crossed-gate-is-a-reached-state.md) left, whose wire
+  format is published the moment a stranger loads the page; **N35**, rendering
+  PGR and sending `reach`, which is Phase 4's own exit criterion in disguise;
+  **N36**, running the upstream fetch once so the performance numbers stop being
+  of unknown age.
+- **One item turned out to belong to an existing action rather than a new one.**
+  The gacha multi-copy pessimism — 280 pulls quoted where the truth is 200 — is
+  fixed by the shop exchange N28 already carries, so it was written into N28
+  instead of duplicated beside it.
+- **One archived qualification was stale.** The seventeenth session recorded
+  three shapes the model cannot express; **a lifetime purchase limit has been
+  expressible since [ADR 0020](../adr/0020-a-limit-that-never-resets-is-offered-whole.md)**,
+  and PGR sequence 2 publishes two rows that use it. Corrected in place by
+  appending rather than by editing the original, because an archived claim that
+  quietly changes is worse than one that says when it stopped being true. The
+  other two shapes are still unexpressible and still have no ADR.
 
 **2026-09-21 (thirty-third, continued) — the roster flaw, half closed.**
 [ADR 0026](../adr/0026-a-crossed-gate-is-a-reached-state.md). No migration, no

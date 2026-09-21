@@ -46,23 +46,16 @@ being finished with is.
   have no shops** and pay one-time grants, which the plan reports as a deadline (ADR 0024); the Themed pool's wall is **drawn** (ADR 0023);
   and its **`PityScope` inherits Calibration across pools**, where R1999 clears — the two published
   games disagree on the one question that enum exists to answer.
-- **Three decisions closed since 2026-09-20. The ADR is the account; this is what each left.**
-  **[0023](docs/adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md), `V11` — a
-  drawn guarantee is a rate curve, not a state dimension.** `PityRule.drawnFrom` is the bottom of
-  a drawn range, `hardAt` still means certainty, nothing published moved, and **the exact chain
-  gained no state**. Both PGR archetypes are expressible and **neither is authored** (**N28**).
-  **[0024](docs/adr/0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md)
-  — an expiring grant is a deadline the plan reports.** Two lists on `Outcome`, no time index, no
-  new variables. **A lapse is a window and not a cadence** — the predicate also needs *the same
-  cadence over the untruncated horizon would have paid*, or a note hurries a reader over a monthly.
-  **`opensAt` is read by nobody**, deliberately, and is the last of `Availability` nothing reads.
-  **[0025](docs/adr/0025-the-day-boundary-is-a-property-of-the-game.md), `V12` — the day boundary
-  belongs to the game.** A zone and an hour on `Game`; `null` is *unstated*, not midnight, so
-  everything published before it plans as it did. **`GameAgnosticismTest` is blind to this class
-  of bug** — `UTC` is not a game name, and a javadoc caught it. **The preview found a sixth piece
-  the plan never named:** `Facts` flattened `Game` not at all, so a version whose one difference
-  moves every rotating stage's capacity read as *no changes*. **R1999's boundary is Phase 11's** —
-  second-hand number, rotating stage table, nine benchmark agreements at stake.
+- **Four decisions closed since 2026-09-20 — [0023](docs/adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md)
+  (`V11`), [0024](docs/adr/0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md),
+  [0025](docs/adr/0025-the-day-boundary-is-a-property-of-the-game.md) (`V12`) and
+  [0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md). Each ADR is its own account; read it
+  rather than a summary.** What still bites elsewhere in this file: both PGR pity archetypes are
+  expressible and **neither is authored** (**N28**); **`Availability.opensAt` is read by nobody**,
+  deliberately, the last of that record nothing reads; **`GameAgnosticismTest` is blind to a
+  constant that is right for no game** — `UTC` is not a game name, and a javadoc caught 0025's bug,
+  no test did; and **R1999's day boundary is Phase 11's problem**, with a second-hand number, a
+  rotating stage table and nine benchmark agreements at stake.
 - **Going first-hand on game data**, 2026-09-09
   ([ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)),
   superseding 0009 and closing Q2, Q3, F1 and F2. Kornblume is unlicensed.
@@ -269,13 +262,62 @@ works". It does not mean that:
 
 ## Next actions
 
-**Nothing is live: every remaining item is the maintainer's.** N30 and **N20**
-both closed 2026-09-21 and moved to
-[the archive](docs/history/tracker-archive.md#completed-next-actions); the two
-below are held by an explicit decision taken on 2026-09-20, not by neglect.
-**A session should not promote one of them on its own** — both need the
-maintainer's own reading or accounts, and there is no longer a third that a
-session could take alone. Say which one and it starts.
+**N30, N20 and N33 all closed 2026-09-21** and are
+[in the archive](docs/history/tracker-archive.md#completed-next-actions). **B5 is
+the only Phase 4 item left**, and it needs the maintainer's own accounts.
+
+**The four items under *Before B5* below are new on 2026-09-21.** Each was
+already described somewhere in this file — in *Status*, in the two standing
+caveats, or in *What is still unverified* — and **none of them was an action
+anybody could pick up.** A known defect that is only ever *described* is one
+nobody is going to fix; these are the ones worth paying before the deploy rather
+than after, and each says why it is on this side of B5. **A session can take any
+of them alone.**
+
+### Before B5 — debt worth paying first
+
+- [ ] **B6 — Make CI run on a push to `dev`.** **A push to `dev` with no open PR
+      runs nothing, silently** — CI triggers on `pull_request` and on push to
+      `main` only. Nine merges have re-armed this and every one was caught by a
+      person looking; PR #25 once merged *before its own run finished* and was
+      green by luck (archive, twenty-sixth). **This is the cheapest item in the
+      file** — a `push: branches: [dev]` trigger — and it is on this side of B5
+      because B5 adds a `deploy` job that must never fire from an untested
+      commit. **Exit:** a push to `dev` with no PR open produces a run.
+- [ ] **N34 — Let `Roster` hold a set of states, not one.** The half of the
+      roster flaw [ADR 0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md)
+      deliberately did not fix. A reader whose recorded state is *behind* a gate
+      gets no credit: someone at `promote-0` who levelled to 80 anyway is charged
+      the whole ladder, and **PGR permits exactly that** because levels are not
+      capped by rank. **Five pieces:** a migration adding `current_state` to
+      `roster_entry`'s primary key; `Roster.currentState` becoming
+      `Map<EntityId, Set<String>>`; `achieved` seeded from all of them;
+      the roster wire format, which is a **breaking** change to `GET`/`PUT`/`PATCH`
+      `/api/me/profiles/{profile}/roster`; and the offline sync patch shape,
+      where the per-key clock stays per-entity because an entity's whole state
+      set is the merge unit. **Before B5 because the wire format is published the
+      moment a stranger loads the page.**
+- [ ] **N35 — Render PGR, and send `reach`.** Two faults on the same surface.
+      **No screen has ever rendered PGR** — all five were built against R1999,
+      and PGR has been the launch title since D3 on 2026-09-13. **And no frontend
+      sends `reach`**, so every plan the web client asks for counts **no scored
+      grant** and reports which it left out in a note nothing displays
+      ([ADR 0022](docs/adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md));
+      no `progress:` line or shadow price has ever rendered either. **This is
+      Phase 4's own exit criterion in disguise** — five strangers completing a
+      plan means five strangers seeing these screens, so it cannot wait for after
+      the deploy. **jsdom computes no layout**, so a browser has to be driven.
+- [ ] **N36 — Fetch upstream before trusting a green build, once, and write down
+      what it proves.** Standing caveat 1 says the strongest tests here are ones
+      CI does not run: `RealUpstreamPatchTest`, `RealUpstreamPlanTest` and
+      `CommunityBenchmarkTest`, **16 tests**, skip on the runner because upstream
+      data is fetched and never vendored
+      ([ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md)).
+      Every performance number and every outside comparison in this file comes
+      from them. **Run `backend/tools/fetch-upstream.sh` and record the numbers
+      with a date**, so "p95 1 807 ms" stops being a figure of unknown age.
+      **Not a code change** — an hour, and it either confirms the file or
+      contradicts it.
 
 ### Held — Phase 4 scope, and the maintainer decides
 
@@ -311,7 +353,10 @@ the last one, and it is not started.**
       same change**, both R1999: a **shop exchange for the featured unit** —
       cassettes cut six copies from 840 pulls to 560 — and a **cap on copies**.
       **This is the only thing keeping a banner out of a bundle**, so N28 ends in a
-      **sequence 6** rather than in a schema.
+      **sequence 7** rather than in a schema — 6 was N33's. **The multi-copy
+      pessimism belongs to this item**: 200 Cassettes of the Lost buy a copy,
+      nothing models it, so at two copies the engines say 280 pulls when the
+      truth is 200, and the shop exchange above is the fix.
 - [ ] **N18 — Put drop estimates into `SolveKey` in the same change that first
       publishes one.** The moment Phase 6 does, a plan cached against yesterday's
       rates is served as today's — the one staleness bug the key's design cannot
@@ -534,6 +579,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-21 | thirty-third (cont.) | PR #33 opened and green. The deferred-defect list audited into *Next actions* as **B6, N34, N35, N36** — every one was already described somewhere in this file and none was an action anybody could pick up. One archived qualification found stale: a lifetime purchase limit has been expressible since ADR 0020 |
 | 2026-09-21 | thirty-third (cont.) | The roster flaw N33 widened, half closed the same day (ADR 0026): a crossed gate is a reached state, so `achieved` credits the `requires` of every upgrade behind the player. A reader at Promote 6 pays 90 Serum for step 7 where they were billed 180. No migration, no wire change — the other half, a reader *behind* the gate, still wants a set of states on `Roster` |
 | 2026-09-21 | thirty-third | N33 closed: the level ladder is priced end to end and all thirteen Promote gates are `requires`. Twenty-two Level Up previews on a Lv 1 construct, nothing spent and nobody levelled; thirteen cumulative figures, each pinned by the selection 1 000 below it falling short. The track became a chain because spokes from `level-1` would double-charge. Sequence 6 published 2026-09-21T02:49:27Z and read back as *no changes*; 411 tests, 0 skipped |
 | 2026-09-21 | thirty-second | N20 closed: the day boundary is a property of the game (ADR 0025, V12). A zone and an hour on `Game`, one `DayOfWeek` moved and no row written; null is *unstated*, not midnight. The preview found a sixth piece the plan never named — `Facts` flattened `Game` not at all, so the sequence that declares a boundary read as *no changes*. PGR sequence 5 published and read back clean |
