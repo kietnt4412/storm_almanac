@@ -31,6 +31,17 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**N30 — An expiring grant is a deadline the plan reports, not a schedule
+      it builds (D3).**~~ Done 2026-09-21,
+      [ADR 0024](../adr/0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md).
+      `Outcome` gained `expiringClaims` and `lapsedGrants`, `MipOptimizer` three
+      notes, `whyNot` a window-aware refusal, and `EnergyMip` a `daysUntil` that
+      every `closesAt` truncation now shares. **No time index, no per-day
+      variable, and no new variables at all** — ADR 0013 untouched. Eight tests.
+      **The option that was refused is in the ADR**, so nobody re-opens it: the
+      alternative was to give the claim a cost in days and let `FEWEST_DAYS`
+      schedule it. The session log entry has the one thing the plan got
+      backwards.
 - [x] ~~**B0 — Make it build.**~~ Done. JDK 21 via
       `winget install EclipseAdoptium.Temurin.21.JDK`; note the MSI does **not**
       set `PATH`/`JAVA_HOME` under winget, so both were set by hand in
@@ -2681,6 +2692,69 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-21 (thirty-first) — N30: an expiring grant is a deadline the plan
+reports, not a schedule it builds.**
+[ADR 0024](../adr/0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md).
+No new reading, no migration, no bundle change, and **`EnergyMip` gained no
+variables and no constraints** — the change is two lists on `Outcome` and four
+sentences. The thirtieth session's plan was followed as written, except on one
+point where it was backwards, below.
+
+- **The remote at start:** `dev` level with `origin/dev`, trees identical to
+  `origin/main`, no open PRs. **PR #30 has merged since the tracker's note about
+  #28** — the trap re-armed for the eighth time and was caught by looking, which
+  is the only thing that has ever caught it.
+- **What was already true, and is why this was cheap.** `occurrences` has
+  truncated a reward's cadence against its own `closesAt` since the time axis
+  landed, so the *supply* was never wrong. `Availability.isExpiring()` has
+  existed since phase 1 and was read by nothing.
+- **The two silences, and the second is the one that mattered.** A grant the
+  plan leans on that closes inside the horizon had its count right and its date
+  nowhere. A grant closing *before* it can pay once was removed by `claimable()`
+  with nothing said at all — so a plan made dearer by an event that ended on day
+  four was **indistinguishable from a plan that was always that dear**. That is
+  the exact mirror of ADR 0022's `withheldGrants`, and the two are now computed
+  four lines apart on purpose.
+- **A lapse is a window, not a cadence, and the predicate is the whole trick.**
+  "Has zero occurrences" is the wrong test: a monthly reward in a seven-day
+  horizon has zero of those and has lapsed nothing. The test is that the close
+  is *what* removed it — `occurrences(...) == 0` **and**
+  `cadence.occurrencesIn(horizonDays) > 0`. Without the second clause the note
+  blames a deadline for a cadence and tells a reader to hurry over a window that
+  runs for another year. There is a test named after exactly that.
+- **The refusal was wrong too, and it was free to fix.** An item whose only
+  source is a grant whose window has shut was refused with *"does not come round
+  inside a 30-day horizon"* — true, and it sends the reader off to wait for
+  something that is never coming back. It now names the date: *"the horizon
+  holds 4 of them and the window holds none"*.
+- **The tracker's `FEWEST_DAYS` framing was backwards, and this is the
+  correction.** It read *"a shorter horizon is the one thing that keeps an
+  expiring grant in reach"*. It is not. `occurrences` takes
+  `min(horizonDays, daysUntil(closesAt))`, so **shortening the horizon never
+  raises an expiring grant's claims and can lower them** — when the horizon the
+  search settles on ends before the window does. The sentence the code says is
+  the true one: a longer plan collects no more of them, a shorter one may
+  collect fewer. Written up as a consequence of ADR 0024 so the wrong version
+  does not come back.
+- **One arithmetic, one place.** `daysUntil` is new, and every truncation
+  against a `closesAt` — rewards, shops, the stage closing cap — now goes
+  through it. Two copies of that rounding is a plan telling a reader they have
+  three days to collect something it counted four of.
+- **Left deliberately, and named in the ADR:** `opensAt`. A reward whose window
+  has not opened is dropped whole by `open()` with nothing said, including one
+  that opens on day two of a sixty-three-day plan. The direction is the safe one
+  — the plan counts no income and is dearer than the truth — and it belongs with
+  **N20** and the banner's unread opening time rather than here. `Lapsed`
+  deliberately does not cover it: "this closed" and "this has not opened" are
+  different sentences, and one record for both would be the third silence rather
+  than the end of the second.
+- **Build:** 393 → **401 tests**, 0 skipped locally, green in 3m 50s. **All 16
+  snapshot-gated tests ran and passed**, so standing caveat 1 is satisfied for
+  this session rather than assumed. CI will show **385**.
+- **Not done, and named:** nothing renders this in a browser. The notes reach a
+  reader through the plan view, which renders every note and **has still never
+  rendered PGR**.
 
 **2026-09-20 (thirtieth) — N31: a drawn guarantee is a rate curve, not a state
 dimension.** [ADR 0023](../adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md),

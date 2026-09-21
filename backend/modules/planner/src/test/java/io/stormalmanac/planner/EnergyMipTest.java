@@ -469,6 +469,115 @@ class EnergyMipTest {
                 .hasMessageContaining("reaching 0");
     }
 
+    // ── Grants that run out before the horizon does (ADR 0024) ─────────────
+
+    /** Three days from {@code NOW}: shorter than the weekly cadence below. */
+    private static final Instant CLOSES_SOON = Instant.parse("2026-09-10T00:00:00Z");
+
+    /** Fifteen days from {@code NOW}: two weeklies fit, the other two do not. */
+    private static final Instant CLOSES_MIDWAY = Instant.parse("2026-09-22T00:00:00Z");
+
+    /**
+     * A festival handing out a relic a week until it shuts, next to a stage that
+     * sells the same relic for energy. Which of the two a plan leans on is the
+     * whole question, and the date is the only thing that decides it.
+     */
+    private static GameDefinition festival(Instant closesAt) {
+        return TestGame.builder()
+                .stage(RELIC_STAGE, 40, RELIC, 1.0)
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .source(new Reward("festival-weekly", Reward.Cadence.WEEKLY,
+                        List.of(new ItemStack(RELIC, 1)),
+                        new Availability(Set.of(), null, closesAt)))
+                .build();
+    }
+
+    @Test
+    @DisplayName("a claim the plan leans on carries the date it stops being collectable")
+    void anExpiringClaimIsReportedWithItsDeadline() {
+        // 15 days of a weekly is 2 claims, not 4: the window truncates the
+        // cadence, which already worked. The remaining 2 relics cost 40 each.
+        EnergyMip.Outcome outcome = solve(festival(CLOSES_MIDWAY), Map.of(), Map.of(RELIC, 4),
+                Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, UNCONSTRAINED_HORIZON);
+
+        assertThat(outcome.rewardClaims()).containsExactly(new RewardClaim("festival-weekly", 2));
+        assertThat(outcome.totalEnergy()).isEqualTo(80);
+        assertThat(outcome.expiringClaims()).containsExactly(
+                new EnergyMip.Expiring("festival-weekly", 2, CLOSES_MIDWAY, 15));
+        assertThat(outcome.lapsedGrants()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("a grant that shuts before it pays once is reported, not silently dropped")
+    void aLapsedGrantIsNamedRatherThanVanishing() {
+        // Three days of a weekly is no claims at all, so claimable() removes it
+        // and the plan pays 40 energy a relic with nothing to say for itself —
+        // which is the silence ADR 0024 is about. A 30-day horizon would have
+        // allowed 4 of them.
+        EnergyMip.Outcome outcome = solve(festival(CLOSES_SOON), Map.of(), Map.of(RELIC, 2),
+                Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, UNCONSTRAINED_HORIZON);
+
+        assertThat(outcome.rewardClaims()).isEmpty();
+        assertThat(outcome.totalEnergy()).isEqualTo(80);
+        assertThat(outcome.expiringClaims()).isEmpty();
+        assertThat(outcome.lapsedGrants()).containsExactly(
+                new EnergyMip.Lapsed("festival-weekly", CLOSES_SOON, 4));
+    }
+
+    @Test
+    @DisplayName("a cadence too slow for the horizon is not a lapse, and is not reported as one")
+    void aSlowCadenceIsNotADeadline() {
+        // A monthly grant in a 7-day horizon pays nothing either, and no date is
+        // to blame: its window runs for another year. Reporting this as a lapsed
+        // event would be the note telling a reader to hurry over a deadline that
+        // does not exist.
+        GameDefinition yearLong = TestGame.builder()
+                .stage(RELIC_STAGE, 40, RELIC, 1.0)
+                .source(new Reward("monthly-gift", Reward.Cadence.MONTHLY,
+                        List.of(new ItemStack(RELIC, 1)),
+                        new Availability(Set.of(), null, Instant.parse("2027-09-07T00:00:00Z"))))
+                .build();
+
+        EnergyMip.Outcome outcome = solve(yearLong, Map.of(), Map.of(RELIC, 1),
+                Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, 7);
+
+        assertThat(outcome.totalEnergy()).isEqualTo(40);
+        assertThat(outcome.lapsedGrants()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("an expiring grant nothing in the goal set needs gets no deadline")
+    void anUnclaimedExpiringGrantIsNotADeadline() {
+        // The festival is still live and still closing, and this plan is about
+        // gold. A date for something nobody was asked to do is how a note stops
+        // being read.
+        EnergyMip.Outcome outcome = solve(festival(CLOSES_MIDWAY), Map.of(), Map.of(GOLD, 100),
+                Objective.LEAST_ENERGY, UNCONSTRAINED_RATE, UNCONSTRAINED_HORIZON);
+
+        assertThat(outcome.totalEnergy()).isEqualTo(5);
+        assertThat(outcome.expiringClaims()).isEmpty();
+        assertThat(outcome.lapsedGrants()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("an item only a closed grant supplies is refused by the window, not by the cadence")
+    void theRefusalNamesTheWindowRatherThanTheCadence() {
+        // "It does not come round inside a 30-day horizon" is true and sends the
+        // reader off to wait for something that is never coming back.
+        GameDefinition noStage = TestGame.builder()
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .source(new Reward("festival-weekly", Reward.Cadence.WEEKLY,
+                        List.of(new ItemStack(RELIC, 1)),
+                        new Availability(Set.of(), null, CLOSES_SOON)))
+                .build();
+
+        assertThatThrownBy(() -> solve(noStage, Map.of(), Map.of(RELIC, 1)))
+                .isInstanceOf(Optimizer.InfeasibleGoalException.class)
+                .hasMessageContaining("festival-weekly")
+                .hasMessageContaining("closes 2026-09-10T00:00:00Z")
+                .hasMessageContaining("the horizon holds 4 of them and the window holds none");
+    }
+
     private static final ItemId HERO_EXP = Demand.progressItem("hero-exp");
 
     /** The workshop, plus one rule: any 3★-or-better material is worth 100 hero EXP, for 10 gold. */

@@ -340,6 +340,33 @@ public final class MipOptimizer implements Optimizer {
                             .collect(Collectors.joining(", "))
                     + ". Say what you reach and the plan gets cheaper, never dearer.");
         }
+        if (!outcome.expiringClaims().isEmpty()) {
+            // The supply is already right — occurrences truncates against the
+            // close — so this note adds nothing to the arithmetic and everything
+            // to whether it happens. A plan cannot collect a grant; a reader on
+            // a Thursday can (ADR 0024).
+            notes.add("On a deadline, and this plan is counting on them: "
+                    + outcome.expiringClaims().stream()
+                            .map(claim -> claim.reward() + " ×" + claim.times() + ", which closes "
+                                    + claim.closesAt() + ", " + claim.daysLeft() + " day(s) in")
+                            .collect(Collectors.joining("; "))
+                    + ". The counts above already stop at those dates; what this plan cannot do is"
+                    + " remind you on the day.");
+        }
+        if (!outcome.lapsedGrants().isEmpty()) {
+            // The mirror of the deadline note, pointing at the past. Nothing is
+            // actionable here and it is still worth a line: without it, a plan
+            // made dearer by an event that ended is indistinguishable from a
+            // plan that was always that dear.
+            notes.add("Closed too early to pay out once, and this goal set needed what they grant: "
+                    + outcome.lapsedGrants().stream()
+                            .map(grant -> grant.reward() + " (window ends " + grant.closesAt()
+                                    + "; this horizon would otherwise have allowed "
+                                    + grant.missedClaims() + ")")
+                            .collect(Collectors.joining(", "))
+                    + ". Nothing can be done about a window that has shut — this is here so the"
+                    + " price of the plan is not a mystery.");
+        }
         Set<String> lifetime = inputs.definition().shops().stream()
                 .filter(Shop::neverResets).map(Shop::id).collect(Collectors.toSet());
         List<String> spendsLifetime = outcome.conversions().stream()
@@ -375,6 +402,21 @@ public final class MipOptimizer implements Optimizer {
                     : ("This goal set needs the whole %d-day horizon, so fewest days and least"
                             + " energy are asking the same question of it.")
                                     .formatted(request.horizonDays()));
+        }
+        if (request.objective() == Objective.FEWEST_DAYS && !outcome.expiringClaims().isEmpty()) {
+            // The one thing a reader might reasonably try after reading the
+            // deadline note is to ask for a different horizon, so say which
+            // direction that moves them. An expiring grant is capped by its own
+            // end date, so a longer plan collects no more of it; a shorter one —
+            // which is what this objective searches for — can collect fewer, if
+            // the horizon it settles on ends before the window does. That is the
+            // whole trade, and reporting it is what ADR 0024 does instead of
+            // giving the claim a day index (ADR 0013).
+            notes.add(("Fewest days was asked for, and %d of the grant(s) above close inside the"
+                    + " %d-day horizon this search settled on. Their supply is fixed by their own"
+                    + " end date rather than by how long the plan runs: a longer plan collects no"
+                    + " more of them, and a shorter one may collect fewer.")
+                    .formatted(outcome.expiringClaims().size(), outcome.horizonUsed()));
         }
         if (outcome.rewardVariables() == 0 && request.objective() == Objective.FEWEST_DAYS) {
             notes.add("Nothing in this game's data accrues on a cadence, so days here buy nothing"
