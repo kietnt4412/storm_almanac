@@ -31,3 +31,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0021](0021-one-step-at-several-prices-is-a-choice-the-solver-makes.md) | One step at several prices is a choice the solver makes | Accepted |
 | [0022](0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md) | A grant sized by the player is an answer the reader supplies | Accepted |
 | [0023](0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md) | A drawn guarantee is a rate curve, not a state dimension | Accepted |
+| [0024](0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md) | An expiring grant is a deadline the plan reports, not a schedule it builds | Accepted |

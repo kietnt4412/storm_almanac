@@ -6,6 +6,7 @@ import static io.stormalmanac.planner.TestGame.HERO;
 import static io.stormalmanac.planner.TestGame.INGOT;
 import static io.stormalmanac.planner.TestGame.ORE;
 import static io.stormalmanac.planner.TestGame.ORE_STAGE;
+import static io.stormalmanac.planner.TestGame.RELIC;
 import static io.stormalmanac.planner.TestGame.stack;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -14,9 +15,12 @@ import io.stormalmanac.common.GameDataVersion;
 import io.stormalmanac.common.id.AccountId;
 import io.stormalmanac.common.id.GameId;
 import io.stormalmanac.common.id.ProfileId;
+import io.stormalmanac.gamedata.Availability;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.GameDefinitionRepository;
 import io.stormalmanac.gamedata.Goal;
+import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.player.Goals;
 import io.stormalmanac.player.Inventory;
 import io.stormalmanac.player.PlayerProfile;
@@ -29,6 +33,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -163,6 +168,109 @@ class MipOptimizerTest {
                 assertThat(note).contains("Nothing in this game's data accrues on a cadence"));
         assertThat(energy.explanation().notes()).noneSatisfy(note ->
                 assertThat(note).contains("Nothing in this game's data accrues on a cadence"));
+    }
+
+    // -- The deadline a plan reports rather than schedules (ADR 0024) -------
+
+    /** A day and a half after {@code NOW}: not even one weekly fits. */
+    private static final Instant FESTIVAL_CLOSED = Instant.parse("2026-09-09T00:00:00Z");
+
+    /** Three and a half days after {@code NOW}: three dailies fit, and no more. */
+    private static final Instant FESTIVAL_CLOSES = Instant.parse("2026-09-11T00:00:00Z");
+
+    /** The workshop, plus a festival handing out ingots until it shuts. */
+    private static GameDefinition workshopWithFestival(Instant closesAt) {
+        return TestGame.builder()
+                .stage(ORE_STAGE, 10, ORE, 2.0)
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .craft("smelt", List.of(stack(ORE, 3), stack(GOLD, 50)), List.of(stack(INGOT, 1)))
+                .source(new Reward("festival-daily", Reward.Cadence.DAILY,
+                        List.of(new ItemStack(INGOT, 2)),
+                        new Availability(Set.of(), null, closesAt)))
+                .upgrade("i1", HERO, "insight-0", "insight-1", List.of(stack(INGOT, 6)))
+                .build();
+    }
+
+    @Test
+    @DisplayName("a plan leaning on a grant that is about to close says when it closes")
+    void theDeadlineIsReported() {
+        // The festival pays 2 ingots a day and shuts after three of them, which
+        // is exactly the 6 the upgrade wants, for no energy at all. The reader
+        // has three days to collect something the plan has already spent.
+        GameDefinition definition = workshopWithFestival(FESTIVAL_CLOSES);
+        Plan plan = optimizerOver(definition, Inventory.empty(PROFILE))
+                .solve(request(definition, Objective.LEAST_ENERGY));
+
+        assertThat(plan.totalEnergy()).isZero();
+        assertThat(plan.rewardClaims()).containsExactly(new RewardClaim("festival-daily", 3));
+        assertThat(plan.explanation().notes()).anySatisfy(note -> assertThat(note)
+                .contains("On a deadline, and this plan is counting on them")
+                .contains("festival-daily")
+                .contains("2026-09-11T00:00:00Z")
+                .contains("3 day(s) in"));
+    }
+
+    @Test
+    @DisplayName("a grant that shut before the plan began is named, so the price is not a mystery")
+    void theLapseIsReported() {
+        // The same festival, closed a day and a half in: a weekly cadence gets
+        // nothing out of it, the plan pays the full 105 energy, and before this
+        // note the grant left no trace of having existed.
+        GameDefinition definition = TestGame.builder()
+                .stage(ORE_STAGE, 10, ORE, 2.0)
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .craft("smelt", List.of(stack(ORE, 3), stack(GOLD, 50)), List.of(stack(INGOT, 1)))
+                .source(new Reward("festival-weekly", Reward.Cadence.WEEKLY,
+                        List.of(new ItemStack(INGOT, 2)),
+                        new Availability(Set.of(), null, FESTIVAL_CLOSED)))
+                .upgrade("i1", HERO, "insight-0", "insight-1", List.of(stack(INGOT, 6)))
+                .build();
+        Plan plan = optimizerOver(definition, Inventory.empty(PROFILE))
+                .solve(request(definition, Objective.LEAST_ENERGY));
+
+        assertThat(plan.totalEnergy()).isEqualTo(105);
+        assertThat(plan.rewardClaims()).isEmpty();
+        assertThat(plan.explanation().notes()).anySatisfy(note -> assertThat(note)
+                .contains("Closed too early to pay out once")
+                .contains("festival-weekly")
+                .contains("2026-09-09T00:00:00Z")
+                .contains("would otherwise have allowed 4"));
+    }
+
+    @Test
+    @DisplayName("fewest days says which way the horizon moves a deadline, and does not schedule it")
+    void fewestDaysSaysWhatTheHorizonDoesToADeadline() {
+        // Relics come only from an unhurried weekly, so three of them force a
+        // 21-day horizon however fast everything else is -- and inside that
+        // horizon the festival's own end date is what caps it at three claims.
+        // The sentence has to be the true one: a longer plan collects no more of
+        // it. ADR 0013 stands; nothing here is indexed by day.
+        GameDefinition definition = TestGame.builder()
+                .stage(GOLD_STAGE, 5, GOLD, 100.0)
+                .source(new Reward("festival-daily", Reward.Cadence.DAILY,
+                        List.of(new ItemStack(INGOT, 2)),
+                        new Availability(Set.of(), null, FESTIVAL_CLOSES)))
+                .source(new Reward("slow-weekly", Reward.Cadence.WEEKLY,
+                        List.of(new ItemStack(RELIC, 1)), Availability.ALWAYS))
+                .upgrade("i1", HERO, "insight-0", "insight-1",
+                        List.of(stack(INGOT, 6), stack(RELIC, 3)))
+                .build();
+
+        Plan days = optimizerOver(definition, Inventory.empty(PROFILE))
+                .solve(request(definition, Objective.FEWEST_DAYS));
+        Plan energy = optimizerOver(definition, Inventory.empty(PROFILE))
+                .solve(request(definition, Objective.LEAST_ENERGY));
+
+        assertThat(days.etaDays()).isEqualTo(21.0);
+        assertThat(days.explanation().notes()).anySatisfy(note -> assertThat(note)
+                .contains("Fewest days was asked for, and 1 of the grant(s) above close inside"
+                        + " the 21-day horizon this search settled on")
+                .contains("a longer plan collects no more of them"));
+        // The deadline itself is reported either way; only the sentence about
+        // what the horizon does to it belongs to this objective.
+        assertThat(energy.explanation().notes())
+                .anySatisfy(note -> assertThat(note).contains("On a deadline"))
+                .noneSatisfy(note -> assertThat(note).contains("Fewest days was asked for"));
     }
 
     @Test

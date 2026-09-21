@@ -193,6 +193,14 @@ final class EnergyMip {
      *                        out is the difference between a plan and a cheaper
      *                        plan, and the reader is the only one who can say
      *                        whether it belongs
+     * @param expiringClaims  free income the plan <b>does</b> lean on that stops
+     *                        being collectable inside the horizon. A deadline
+     *                        the plan reports rather than a schedule it builds:
+     *                        the supply is already truncated, and what is added
+     *                        is the date (ADR 0024)
+     * @param lapsedGrants    income that closed too early to pay out once, and
+     *                        which would have supplied something the goal set
+     *                        needs. Dropped silently before this existed
      * @param daysNeeded      whole days the plan cannot be compressed below,
      *                        because of a cadence it waits on or a stage that is
      *                        only open some weekdays. Zero when nothing but
@@ -230,11 +238,54 @@ final class EnergyMip {
      */
     record Withheld(String reward, String measure, int atLeast, int said) {}
 
+    /**
+     * A grant this plan leans on that will not be there for the whole horizon.
+     *
+     * <p>The claim is counted, correctly: {@link #occurrences} already truncates
+     * an expiring reward against its own end date, so a weekly that shuts on day
+     * nine of a sixty-three day plan supplies one claim and not nine. What was
+     * missing is that <em>nobody was told</em>. The supply is in the arithmetic
+     * and the deadline is in the reader's calendar, and a plan that knows the
+     * first and says nothing about the second is asking somebody to discover it
+     * by missing it. ADR 0024.
+     *
+     * @param reward   which grant
+     * @param times    how many claims the plan is counting on
+     * @param closesAt when it stops being collectable
+     * @param daysLeft whole days from the start of the plan until then, which is
+     *                 the number a reader acts on
+     */
+    record Expiring(String reward, int times, Instant closesAt, int daysLeft) {}
+
+    /**
+     * A grant that would have supplied something this goal set needs and closes
+     * too early to pay out once.
+     *
+     * <p>The exact mirror of {@link Withheld}, and the more insidious of the two:
+     * a withheld grant at least had a reader to ask, whereas this one is removed
+     * by {@link #claimable} before the model sees it and leaves no trace at all.
+     * A reader on a sixty-three day plan is never told the event shut on day
+     * four; they are simply handed a dearer plan.
+     *
+     * <p>The test is not "has zero occurrences" — a monthly reward in a seven-day
+     * horizon has zero of those and has lapsed nothing. It is that the close is
+     * <em>what</em> removed it: the same cadence over the untruncated horizon
+     * would have paid. ADR 0024.
+     *
+     * @param reward       which grant
+     * @param closesAt     when it stopped, or stops, being collectable
+     * @param missedClaims what the horizon would have allowed had it stayed open,
+     *                     which is how much the deadline actually cost
+     */
+    record Lapsed(String reward, Instant closesAt, int missedClaims) {}
+
     record Outcome(
             List<StageRun> stageRuns,
             List<Conversion> conversions,
             List<RewardClaim> rewardClaims,
             List<Withheld> withheldGrants,
+            List<Expiring> expiringClaims,
+            List<Lapsed> lapsedGrants,
             int totalEnergy,
             int daysNeeded,
             int horizonUsed,
@@ -389,7 +440,7 @@ final class EnergyMip {
 
     private static Outcome empty(int horizon) {
         return new Outcome(
-                List.of(), List.of(), List.of(), List.of(),
+                List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
                 0, 0, horizon, 0, 0, 0, 0, 0, true, 0.0, true);
     }
 
@@ -415,6 +466,24 @@ final class EnergyMip {
                         r.requires().atLeast(),
                         in.reach().getOrDefault(r.requires().measure(), 0)))
                 .sorted(Comparator.comparing(Withheld::reward))
+                .toList();
+        // And the other silent drop, which is not about the reader at all. A
+        // grant whose window shut is removed by open() or by claimable() with
+        // nothing said, so a plan that is dearer because an event ended looks
+        // exactly like a plan that was always that dear (ADR 0024).
+        List<Lapsed> lapsed = in.definition().rewards().stream()
+                .filter(r -> r.availability().isExpiring())
+                .filter(r -> occurrences(r, in.at(), horizonDays) == 0)
+                // The close is what removed it. Without this line a monthly
+                // reward inside a seven-day horizon reads as a lapsed event,
+                // and the note would be blaming a deadline for a cadence.
+                .filter(r -> r.cadence().occurrencesIn(horizonDays) > 0)
+                .filter(r -> r.grants().stream().anyMatch(g -> relevant.contains(g.item())))
+                .map(r -> new Lapsed(
+                        r.id(),
+                        r.availability().closesAt(),
+                        r.cadence().occurrencesIn(horizonDays)))
+                .sorted(Comparator.comparing(Lapsed::reward))
                 .toList();
 
         requireReachable(in, stages, exchanges, rewards, relevant, horizonDays);
@@ -550,6 +619,20 @@ final class EnergyMip {
             }
         }
 
+        // Only the grants the plan leans on. An expiring reward nobody claims
+        // needs no deadline, and a list of dates for things the reader is not
+        // being asked to do is how a note stops being read.
+        List<Expiring> expiring = claimCounts.entrySet().stream()
+                .filter(e -> e.getKey().availability().isExpiring())
+                .filter(e -> daysUntil(in.at(), e.getKey().availability().closesAt()) < horizonDays)
+                .map(e -> new Expiring(
+                        e.getKey().id(),
+                        e.getValue(),
+                        e.getKey().availability().closesAt(),
+                        (int) daysUntil(in.at(), e.getKey().availability().closesAt())))
+                .sorted(Comparator.comparing(Expiring::reward))
+                .toList();
+
         plan.sort(Comparator.comparingInt(StageRun::totalEnergy).reversed()
                 .thenComparing(run -> run.stage().value()));
         conversions.sort(Comparator.comparing(Conversion::sourceOrSinkId));
@@ -560,6 +643,8 @@ final class EnergyMip {
                 List.copyOf(conversions),
                 List.copyOf(claimed),
                 withheld,
+                expiring,
+                lapsed,
                 totalEnergy,
                 daysNeeded(plan, claimCounts, in, horizonDays),
                 horizonDays,
@@ -702,11 +787,24 @@ final class EnergyMip {
      */
     private static int occurrences(Reward reward, Instant at, int horizonDays) {
         Instant closes = reward.availability().closesAt();
-        int days = horizonDays;
-        if (closes != null) {
-            days = (int) Math.max(0, Math.min(horizonDays, Duration.between(at, closes).toDays()));
-        }
+        int days = closes == null
+                ? horizonDays
+                : (int) Math.min(horizonDays, daysUntil(at, closes));
         return reward.cadence().occurrencesIn(days);
+    }
+
+    /**
+     * Whole days from the start of the plan until a window shuts, floored at
+     * zero: one that shut yesterday has none left rather than minus one.
+     *
+     * <p>Every truncation against a {@code closesAt} goes through here, because
+     * the deadline a plan reports and the supply it counts have to be the same
+     * arithmetic. Two copies of this rounding, one in the model and one in the
+     * note, is a plan telling a reader they have three days to collect something
+     * it counted four of.
+     */
+    private static long daysUntil(Instant at, Instant closes) {
+        return Math.max(0, Duration.between(at, closes).toDays());
     }
 
     /**
@@ -715,10 +813,9 @@ final class EnergyMip {
      */
     private static long purchases(Shop shop, Instant at, int horizonDays) {
         Instant closes = shop.availability().closesAt();
-        int days = horizonDays;
-        if (closes != null) {
-            days = (int) Math.max(0, Math.min(horizonDays, Duration.between(at, closes).toDays()));
-        }
+        int days = closes == null
+                ? horizonDays
+                : (int) Math.min(horizonDays, daysUntil(at, closes));
         return shop.purchasesIn(days);
     }
 
@@ -854,7 +951,7 @@ final class EnergyMip {
         Instant closes = stage.availability().closesAt();
         if (closes == null || stage.energyCost() <= 0) return Long.MAX_VALUE;
 
-        long days = Math.max(0, Math.min(horizonDays, Duration.between(in.at(), closes).toDays()));
+        long days = Math.min(horizonDays, daysUntil(in.at(), closes));
         return days * (long) in.energyPerDay() / stage.energyCost();
     }
 
@@ -1091,8 +1188,17 @@ final class EnergyMip {
             return "it is granted only by " + describe(outOfReach, reach);
         }
         if (tooSlow != null) {
-            return "its only source is the " + tooSlow.cadence() + " reward \"" + tooSlow.id()
-                    + "\", which does not come round inside a " + horizonDays + "-day horizon";
+            // "It only comes round monthly" and "the event ended" are different
+            // problems with different answers — wait, against there is nothing to
+            // wait for — and before ADR 0024 a reader got the first sentence for
+            // both. Same test as Lapsed: the close is what did it.
+            String named = "its only source is the " + tooSlow.cadence() + " reward \""
+                    + tooSlow.id() + "\", which ";
+            int wouldHavePaid = tooSlow.cadence().occurrencesIn(horizonDays);
+            return tooSlow.availability().isExpiring() && wouldHavePaid > 0
+                    ? named + "closes " + tooSlow.availability().closesAt() + ": the horizon holds "
+                            + wouldHavePaid + " of them and the window holds none"
+                    : named + "does not come round inside a " + horizonDays + "-day horizon";
         }
         if (!recipes.isEmpty()) {
             return "no stage drops it and the recipe(s) that make it — " + String.join(", ", recipes)
