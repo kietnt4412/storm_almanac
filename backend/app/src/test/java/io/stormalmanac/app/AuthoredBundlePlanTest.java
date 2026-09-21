@@ -137,6 +137,29 @@ class AuthoredBundlePlanTest {
     }
 
     @Test
+    @DisplayName("a reader already at Promote 6 is charged the levels above 45, not the ladder from Lv 1")
+    void aPartPromotedReaderIsNotChargedTheWholeLadder() {
+        // Standing on promote-6 is proof of level-45: the game would not have
+        // let them take step 6 otherwise. So the only EXP owed for step 7's
+        // level-50 gate is the 20 000 between them, not the 60 000 from Lv 1.
+        //
+        // 35 000 Cogs at 1 200 a purchase = 30 Score. 20 000 EXP is 7 Pod (L)
+        // (6.67 rounded up), and the shop sells them five at a time for 103, so
+        // 2 purchases = 206 Score. 236 Score at 82 a run is 2.88, so 3 runs.
+        // Charged the ladder from Lv 1 it would be 60 000 EXP, 20 Pods, 4
+        // purchases and 6 runs — this reader was billed double.
+        Plan plan = solve(
+                Goal.deterministic(HELENTINE, "promote-7"), Inventory.empty(PROFILE), 30, Map.of(),
+                new Roster(PROFILE, Map.of(HELENTINE, "promote-6")));
+
+        assertThat(plan.totalEnergy()).isEqualTo(90);
+        assertThat(plan.conversions()).containsExactly(
+                new Conversion("character-exp-pod-l", 7),
+                new Conversion("simulation-shop-cogs", 30),
+                new Conversion("simulation-shop-exp-pod-l", 2));
+    }
+
+    @Test
     @DisplayName("Pods the reader holds pay the gate, so only the Cogs are farmed: 180 Serum")
     void heldPodsPayTheGate() {
         // 25 EXP Pod (XL) at 20 000 is 500 000 EXP, past 497 000, so nothing is
@@ -306,11 +329,14 @@ class AuthoredBundlePlanTest {
     }
 
     private Plan solve(Goal goal, Inventory inventory, int horizonDays, Map<String, Integer> reach) {
+        return solve(goal, inventory, horizonDays, reach, new Roster(PROFILE, Map.of()));
+    }
+
+    private Plan solve(Goal goal, Inventory inventory, int horizonDays, Map<String, Integer> reach, Roster roster) {
         MipOptimizer optimizer = new MipOptimizer(
                 new InMemoryPlanning.OneVersion(definition),
                 new InMemoryPlanning.FixedPlayer(
-                        PROFILE, definition.game().id(), inventory,
-                        new Roster(PROFILE, Map.of())),
+                        PROFILE, definition.game().id(), inventory, roster),
                 null,
                 Clock.fixed(NOW, ZoneOffset.UTC),
                 Duration.ofSeconds(2));

@@ -33,3 +33,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0023](0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md) | A drawn guarantee is a rate curve, not a state dimension | Accepted |
 | [0024](0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md) | An expiring grant is a deadline the plan reports, not a schedule it builds | Accepted |
 | [0025](0025-the-day-boundary-is-a-property-of-the-game.md) | The day boundary is a property of the game | Accepted |
+| [0026](0026-a-crossed-gate-is-a-reached-state.md) | A crossed gate is a reached state | Accepted |

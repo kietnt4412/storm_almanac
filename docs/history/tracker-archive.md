@@ -31,6 +31,19 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**N33 — Price the twelve Promote gates. A reading, and the maintainer's.**~~
+      Done 2026-09-21, PGR **sequence 6**, published 2026-09-21T02:49:27Z and read back as *no changes*.
+      All thirteen gated levels priced and all thirteen Promote steps carry a
+      `requires`. **The item's premise was wrong in a way worth remembering:** it
+      asked for the per-level EXP curve, and the bundle never wanted one — a gate
+      needs the smallest *Pod-expressible* total that reaches the level, which
+      the Level Up preview gives without spending anything. Twenty-two readings,
+      each gate bracketed by the total 1 000 below it falling short. **The level
+      track became a chain in the same change**, because `DemandResolver` sums
+      what it walks and spokes from `level-1` would have charged the ladder twice
+      for a plan naming two gated levels; the total to Lv 80 is unchanged at
+      497 000 and no published plan moved. Exit criterion — *the twelve gates are
+      `requires` rather than prose* — met in full rather than by a prefix.
 - [x] ~~**N20 — Put the game's day boundary on the game, not in the planner.**~~
       Done 2026-09-21,
       [ADR 0025](../adr/0025-the-day-boundary-is-a-property-of-the-game.md), `V12`.
@@ -2706,6 +2719,107 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-21 (thirty-third, continued) — the roster flaw, half closed.**
+[ADR 0026](../adr/0026-a-crossed-gate-is-a-reached-state.md). No migration, no
+wire change, no published version moved.
+
+- **N33 turned a latent flaw into a live wrong answer, and this is the same
+  session paying for it.** Gating all thirteen Promote steps meant a reader
+  recorded at `promote-6` asking for step 7 was billed 60 000 character EXP —
+  the ladder from Lv 1 — for a Lv 50 the game had already made them reach.
+- **The expected fix was a schema change and it was not needed for this half.**
+  A gate is not a guess about a player; it is a condition the game enforced
+  before letting them take a step, so standing past that step *is* proof the gate
+  was met. `achieved` now follows `requires` as well as `fromState` when walking
+  back from the recorded state. **The roster, the schema, the wire format and the
+  frontend are all untouched.**
+- **Only what every parent demands is claimed.** Several upgrades into one state
+  are either one step at several prices, which share their gates, or different
+  routes, where which was taken is unknown. `pathTo` refuses the second shape, so
+  the intersection is a safeguard rather than a live case — but it is the
+  difference between an exact claim and a probable one, and this project does not
+  ship probable ones.
+- **The number, against the published bundle:** step 7 from `promote-6` costs the
+  **20 000 EXP between Lv 45 and Lv 50** — 7 Pod (L), 2 shop purchases, 30 Cogs
+  purchases, **3 runs and 90 Serum**. Charged from Lv 1 it was 60 000 EXP, 20
+  Pods, 4 purchases, 6 runs, 180 Serum. **The reader was being billed double.**
+  The test computed the arithmetic by hand first and passed on the first run.
+- **What is still broken, stated so nobody reads this as done.** A reader whose
+  recorded state is *behind* the gate gets no credit — someone at `promote-0` who
+  levelled to 80 anyway is still charged the ladder, and **PGR permits exactly
+  that**, because levels are not capped by rank (maintainer, 2026-09-21, and it
+  is why the thirteen level gates exist at all). That half wants `Roster` to hold
+  a **set** of states, which is a migration, a breaking roster wire format, the
+  offline sync patch shape and a frontend that has never rendered this game.
+- **A plan can now be cheaper than before for the same inputs**, which is the
+  direction this project is normally careful about. It is safe only because the
+  claim is about what the game enforced rather than what a player probably did.
+
+**2026-09-21 (thirty-third) — N33: the level ladder is priced end to end, and a
+gate is a link in a chain.** Sequence 6 authored, **not yet published**. The
+reading was the maintainer's and took one sitting.
+
+- **The premise the item was written on was wrong, and finding out cost one
+  screenshot.** N33 said the twelve unpriced gates needed the per-level EXP
+  curve. They did not. The bundle records *a demand in Pods*, not raw EXP — the
+  Lv 80 row was already pinned that way — so what a gate needs is **the smallest
+  multiple of 1 000 whose Level Up preview shows that level**, because a Pod (M)
+  is 1 000 and nothing smaller can be spent. The maintainer's first screen (one
+  Pod M reaching Lv 10) priced two gates by itself, and their worry that the
+  smallest Pod overshoots Lv 2 turned out to be the answer rather than the
+  obstacle: **Lv 2 and Lv 10 both cost 1 000, so the link between them is free.**
+- **Twenty-two readings, none of them destructive.** The Level Up preview reports
+  the level a selection *would* reach, so the whole ladder was bracketed on a
+  fresh Lv 1 construct without pressing the button once. Each gate is pinned by a
+  pair — the total that reaches it and the total 1 000 lower that does not.
+  Cumulative from Lv 1: **1 000, 1 000, 4 000, 10 000, 25 000, 40 000, 60 000,
+  89 000, 130 000, 186 000, 263 000, 365 000, 497 000.**
+- **Five gates were first bracketed 2 000 or 3 000 wide and were deliberately not
+  written.** A Pod (L) is 3 000, so crossing a threshold by adding whole M pods
+  to a run of L overshoots. One more selection each closed them, and **all five
+  landed at the top of their range** — which is what writing the upper bound
+  would have assumed. They are in the bundle because they were read, not because
+  the guess would have been right.
+- **The track had to become a chain, and that is a `DemandResolver` fact, not a
+  preference.** `pathTo` walks backwards through `fromState`, summing every row
+  it crosses, and `counted` skips rows already paid. Thirteen rows each hanging
+  off `level-1` with a cumulative figure would have charged the ladder **twice**
+  for a plan wanting Lv 40 for one Promote step and Lv 80 for another. As a
+  chain it is paid once. The published `level-1 -> level-80` row is now the last
+  link, `level-75 -> level-80` at 132 000; **the sum is still 497 000 and no
+  published plan moved** — `AuthoredBundlePlanTest`'s *"her last rank is gated on
+  level 80 … 1 470 Serum"* passes at the same number, which is the proof it was a
+  reshape and not a repricing.
+- **What this actually fixes is the partial plan.** A reader going to HERO paid
+  the ladder either way. A reader stopping at Promote step 7 paid Cogs and **no
+  EXP at all**, because the level its screen demands lived in a JSON comment.
+  **That also makes the roster's one-state-per-entity flaw worse rather than
+  better** — now every step charges a level the reader may already hold, where
+  before only step 13 did. The gates are right; the roster is wrong, and unfixed.
+- **The readings were taken on Luna: Oblivion, not on Helentine: Lacrimosa**, and
+  transferred on the maintainer's report that S-rank constructs share a level
+  curve. That report was **cross-checked, not taken**: the 2026-09-19 Lacrimosa
+  readings of +1 000 -> Lv 10 and +3 000 -> Lv 17 reproduced exactly, and the
+  (496 000, 497 000] bracket for Lv 80 reproduced in both directions. Three
+  agreement points at both ends of the ladder. Luna is not added as an entity —
+  she would arrive with a level track and no Promote, Skill or Evolve.
+- **A screen field was read and rejected.** The Level Up bar shows `EXP 0/20` at
+  Lv 10, Lv 20 and Lv 80 alike. It does not vary with level, so it cannot be a
+  per-level requirement, and it is recorded in the provenance entry as *not
+  used* rather than left to be rediscovered and chased.
+- **One test had to change, and the change is the point.** `GameDataIngestTest`
+  pinned `helentine-lacrimosa-level-80` at 497 000 — fine when the ladder was one
+  row, wrong the moment it was thirteen. It now asserts that **the links sum to
+  497 000**, which survives every future split of the chain instead of breaking
+  on it. 411 tests, 0 skipped, `BUILD SUCCESSFUL`.
+- **The loop ran and was clean.** Preview reported **26 changes and nothing
+  else** — twelve new level rows, `level-80` re-pointed `level-1 → level-80` to
+  `level-75 → level-80` and re-priced 497 000 → 132 000, and twelve promote steps
+  gaining a `requires`; step 13 unchanged, because it already had one. The new
+  provenance entry carries **13 facts**, taking the bundle to **116, all
+  first-hand**. Published 2026-09-21T02:49:27Z as sequence 6, and the re-preview
+  read back as *no changes* — seven for seven.
 
 **2026-09-21 (thirty-second) — N20: the day boundary is a property of the game.**
 [ADR 0025](../adr/0025-the-day-boundary-is-a-property-of-the-game.md), `V12`,
