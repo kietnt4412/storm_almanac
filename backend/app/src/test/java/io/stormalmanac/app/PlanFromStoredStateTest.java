@@ -109,7 +109,7 @@ class PlanFromStoredStateTest extends SharedDatabaseTest {
                         .with(player)
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json.writeValueAsString(Map.of("entities", Map.of("warden", "insight-0")))))
+                        .content(json.writeValueAsString(Map.of("entities", Map.of("warden", List.of("insight-0"))))))
                 .andExpect(status -> assertThat(status.getResponse().getStatus()).isEqualTo(200));
 
         // 4. What they want.
@@ -316,7 +316,7 @@ class PlanFromStoredStateTest extends SharedDatabaseTest {
                 .with(player)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json.writeValueAsString(Map.of("entities", Map.of("warden", "insight-0")))));
+                .content(json.writeValueAsString(Map.of("entities", Map.of("warden", List.of("insight-0"))))));
 
         mvc.perform(put("/api/me/profiles/" + profile + "/goals")
                 .with(player)

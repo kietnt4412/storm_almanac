@@ -39,11 +39,14 @@ public final class ShortfallView {
     private ShortfallView() {}
 
     /**
-     * @param currentState where the roster says this reader stands, or null if
-     *                     they do not own the entity. Null rather than an
-     *                     invented starting state: "not owned" is a real answer
-     *                     and the demand walk already handles it by walking back
-     *                     to a track with nothing before it
+     * @param currentStates where the roster says this reader stands, on every
+     *                     track they have recorded — an entity has a level, a
+     *                     rank and an evolution at once and the game ties none
+     *                     of them together. Empty rather than an invented
+     *                     starting state when they do not own the entity: "not
+     *                     owned" is a real answer and the demand walk already
+     *                     handles it by walking back to a track with nothing
+     *                     before it
      * @param alreadyMet   the reader is at or past the target. Not an error and
      *                     not an empty list either — those are different facts,
      *                     and a page that renders "nothing needed" for both
@@ -61,7 +64,7 @@ public final class ShortfallView {
             String versionLabel,
             String attribution,
             String entity,
-            String currentState,
+            List<String> currentStates,
             String targetState,
             boolean alreadyMet,
             List<String> steps,
@@ -72,7 +75,7 @@ public final class ShortfallView {
                 String profile,
                 GameDefinition definition,
                 String entity,
-                String currentState,
+                List<String> currentStates,
                 String targetState,
                 Demand demand,
                 Inventory inventory) {
@@ -118,7 +121,7 @@ public final class ShortfallView {
                     at.label(),
                     at.attribution(),
                     entity,
-                    currentState,
+                    currentStates,
                     targetState,
                     !demand.alreadyMet().isEmpty(),
                     demand.steps(),

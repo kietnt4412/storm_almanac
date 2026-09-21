@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -150,7 +151,7 @@ class AuthoredBundlePlanTest {
         // purchases and 6 runs — this reader was billed double.
         Plan plan = solve(
                 Goal.deterministic(HELENTINE, "promote-7"), Inventory.empty(PROFILE), 30, Map.of(),
-                new Roster(PROFILE, Map.of(HELENTINE, "promote-6")));
+                new Roster(PROFILE, Map.of(HELENTINE, Set.of("promote-6"))));
 
         assertThat(plan.totalEnergy()).isEqualTo(90);
         assertThat(plan.conversions()).containsExactly(

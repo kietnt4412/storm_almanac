@@ -309,7 +309,7 @@ class MipOptimizerTest {
         MipOptimizer optimizer = new MipOptimizer(
                 new TestRepositories.Definitions(definition),
                 TestRepositories.Players.of(definition.game().id(), PROFILE,
-                        Inventory.empty(PROFILE), new Roster(PROFILE, Map.of(HERO, "insight-1"))),
+                        Inventory.empty(PROFILE), new Roster(PROFILE, Map.of(HERO, Set.of("insight-1")))),
                 null,
                 Clock.fixed(NOW, ZoneOffset.UTC),
                 Duration.ofSeconds(2));

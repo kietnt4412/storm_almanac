@@ -169,7 +169,7 @@ export interface InventoryResponse {
 
 export interface RosterResponse {
   profile: string;
-  entities: Record<string, string>;
+  entities: Record<string, string[]>;
 }
 
 export interface Goal {
@@ -200,7 +200,7 @@ export interface InventoryPatchResponse {
 
 export interface RosterPatchResponse {
   profile: string;
-  entities: Record<string, string>;
+  entities: Record<string, string[]>;
   applied: string[];
   rejected: string[];
 }
@@ -239,7 +239,7 @@ export interface Shortfall {
   versionLabel: string;
   attribution: string;
   entity: string;
-  currentState: string | null;
+  currentStates: string[];
   targetState: string;
   alreadyMet: boolean;
   steps: string[];
@@ -365,7 +365,7 @@ export const patchInventory = (profile: string, items: Record<string, InventoryE
 export const getRoster = (profile: string) =>
   request<RosterResponse>(`/api/me/profiles/${profile}/roster`);
 
-export const patchRoster = (profile: string, entities: Record<string, { state: string | null; at: string }>) =>
+export const patchRoster = (profile: string, entities: Record<string, { states: string[] | null; at: string }>) =>
   request<RosterPatchResponse>(`/api/me/profiles/${profile}/roster`, {
     method: 'PATCH',
     body: JSON.stringify({ entities }),

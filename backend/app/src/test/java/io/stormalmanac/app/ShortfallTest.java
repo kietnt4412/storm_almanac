@@ -80,7 +80,7 @@ class ShortfallTest extends SharedDatabaseTest {
                 .with(player)));
 
         assertThat(shortfall.get("entity").asText()).isEqualTo("warden");
-        assertThat(shortfall.get("currentState").asText()).isEqualTo("insight-1");
+        assertThat(lines(shortfall.get("currentStates"))).containsExactly("insight-1");
         assertThat(shortfall.get("targetState").asText()).isEqualTo("insight-2");
         assertThat(shortfall.get("alreadyMet").asBoolean()).isFalse();
         assertThat(shortfall.get("complete").asBoolean()).isFalse();
@@ -172,7 +172,7 @@ class ShortfallTest extends SharedDatabaseTest {
                 .param("target", "insight-2")
                 .with(player)));
 
-        assertThat(shortfall.get("currentState").isNull()).isTrue();
+        assertThat(shortfall.get("currentStates")).isEmpty();
         assertThat(lines(shortfall.get("steps")))
                 .containsExactlyInAnyOrder("warden-insight-1", "warden-insight-2");
 
@@ -267,7 +267,7 @@ class ShortfallTest extends SharedDatabaseTest {
                 .with(player)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json.writeValueAsString(Map.of("entities", Map.of("warden", state)))));
+                .content(json.writeValueAsString(Map.of("entities", Map.of("warden", List.of(state))))));
 
         return profile;
     }

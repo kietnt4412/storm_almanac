@@ -125,33 +125,45 @@ public final class PlayerView {
         }
     }
 
-    public record RosterResponse(String profile, Map<String, String> entities) {
+    /**
+     * <p><b>A list of states per entity, not a state.</b> An entity stands on
+     * several tracks at once — a level, a rank, an evolution, a skill each —
+     * and the game ties none of them to each other. A list rather than a set
+     * because JSON has no set; it is sorted here so a client diffing two reads
+     * sees a change only when one happened.
+     */
+    public record RosterResponse(String profile, Map<String, List<String>> entities) {
 
         public static RosterResponse of(Roster roster) {
-            Map<String, String> entities = new LinkedHashMap<>();
-            roster.currentState().entrySet().stream()
+            Map<String, List<String>> entities = new LinkedHashMap<>();
+            roster.currentStates().entrySet().stream()
                     .sorted(Map.Entry.comparingByKey(Comparator.comparing(id -> id.value())))
-                    .forEach(e -> entities.put(e.getKey().value(), e.getValue()));
+                    .forEach(e -> entities.put(
+                            e.getKey().value(), e.getValue().stream().sorted().toList()));
             return new RosterResponse(roster.profile().value(), entities);
         }
     }
 
-    public record RosterRequest(Map<String, String> entities) {}
+    public record RosterRequest(Map<String, List<String>> entities) {}
 
     /** A roster patch, on the same terms as {@link InventoryPatchRequest}. */
     public record RosterPatchRequest(Map<String, RosterEditView> entities) {}
 
     /**
-     * @param state the entity's current upgrade state, or {@code null} to say it
-     *              is no longer on the roster. An omitted {@code state} member
-     *              reads as null and therefore as a removal — JSON cannot tell
-     *              absent from null, and inventing a third spelling for it would
-     *              be a worse trade than saying so here
+     * @param states the states the entity has reached, in full, or {@code null}
+     *               to say it is no longer on the roster. An omitted
+     *               {@code states} member reads as null and therefore as a
+     *               removal — JSON cannot tell absent from null, and inventing a
+     *               third spelling for it would be a worse trade than saying so
+     *               here. <b>The list is the whole set, not an addition to it:</b>
+     *               the entity is the merge unit, so a client that means to add
+     *               one state sends the states it now holds, and a state left
+     *               out is a state given up
      */
-    public record RosterEditView(String state, Instant at) {}
+    public record RosterEditView(List<String> states, Instant at) {}
 
     public record RosterPatchResponse(
-            String profile, Map<String, String> entities, List<String> applied, List<String> rejected) {
+            String profile, Map<String, List<String>> entities, List<String> applied, List<String> rejected) {
 
         public static RosterPatchResponse of(Roster merged, MergeOutcome<EntityId> outcome) {
             return new RosterPatchResponse(

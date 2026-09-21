@@ -31,6 +31,25 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**N34 — Let `Roster` hold a set of states, not one.**~~ Done 2026-09-21,
+      [ADR 0027](../adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md), `V13`.
+      `Roster.currentStates` is `Map<EntityId, Set<String>>` and `DemandResolver` seeds its walk
+      from all of them. **The five pieces the item named were the five pieces it took**, which is
+      worth recording because the last three items each found a sixth: the migration, the record,
+      `achieved`, the wire format and the sync patch shape, and nothing else. **The decision inside
+      it that is not obvious:** the primary key widens to
+      `(profile_id, entity_slug, current_state)` rather than the column becoming `TEXT[]`. An array
+      is one statement and no new rows, and it loses the per-state not-blank CHECK, makes a state
+      unqueryable without `unnest`, and reintroduces the empty-array/absent-row ambiguity V5's
+      fourth decision spent a paragraph removing. **The merge unit stayed the entity** and V6's
+      clock was not touched: an edit states an entity in full, so a state left out of a newer edit
+      is given up. Per-state clocks would let two devices that each advanced a different track both
+      win, leaving a roster neither device ever held — `OfflineSyncTest` states that as its own
+      case. **The frontend was the piece most easily got wrong:** the goal row's single `select`
+      would have made recording a second track erase the first, which is the overcharge this item
+      exists to remove, reintroduced at the last layer. It is a `select multiple` now. **What N34
+      did not do:** states are still edited only on a goal row, so a reader cannot record a
+      construct they have no goal for. That surface is N35's.
 - [x] ~~**B6 — Make CI run on a push to `dev`.**~~ Done 2026-09-21. `.github/workflows/ci.yml`
       triggers on `push: branches: [main, dev]`. Exit criterion — *a push to `dev` with no PR open
       produces a run* — met by run `35576845184` on `cfa6fe4`, `gh pr list` empty at the moment of
@@ -2746,6 +2765,56 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+
+**2026-09-21 (thirty-fourth, continued) — N34: a roster entry holds a set.**
+[ADR 0027](../adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md),
+`V13`. The second of the four deferred defects, closed the day after the list
+was written.
+
+- **The five pieces the item named were the five it took.** Migration, record,
+  `achieved`, wire format, sync patch shape. Worth recording because N20, N32
+  and N33 each found a sixth piece their plan had not named; this one did not,
+  and the difference is that N34's plan was written by a session that had just
+  finished walking the same five for N20.
+- **Measured end to end, through a browser and a real Postgres.** A reader at
+  `promote-6` asking for `promote-9` was charged **127 500 Cogs and 90 000
+  character EXP over six steps**. The same reader, having said they are also at
+  `level-80`: **127 500 Cogs, no EXP, three steps.** The EXP vanishes because
+  the three level steps it paid for were already climbed. That is the charge
+  ADR 0026 explicitly could not remove.
+- **The first measurement was wrong and the mistake is worth keeping.** Testing
+  with `promote-6` + `level-40` showed **no change at all**, which looked like a
+  broken feature for a minute. It is not: `level-40` sits *behind* the
+  `level-45` that ADR 0026 already credits through `promote-6`'s gate, so it
+  adds nothing. **The gain only appears when the recorded state is ahead of what
+  the gates imply**, and a future session testing this will reach for a low
+  level first exactly as this one did.
+- **The frontend shipped wrong twice before it shipped right, and no test ever
+  failed.** First a `select multiple`: 4 visible rows out of 68 states, "don't
+  own her" gone because clearing a multi-select needs an undiscoverable
+  ctrl-click, and no way to see what was chosen without scrolling. Replaced with
+  chips plus an add-one dropdown. Then the chips were styled `btn-quiet` — the
+  same class as the `↑ ↓ ×` controls at the end of the same row — and **the
+  maintainer looked straight at `promote-6 ×` and reported seeing no chip.** A
+  value that looks like a control is not a value. They are `.chip` now, filled
+  and rounded with a dimmed `✕`. **All 16 frontend tests passed at every one of
+  those three stages**, which is the whole of standing caveat 2's frontend
+  cousin: jsdom computes no layout, so appearance is a person's job.
+- **Two claims in the live tracker died today and were retired rather than left
+  standing.** "No `progress:` line has ever rendered" — one did, `character-exp
+  90,000`, in the maintainer's browser; it renders as the **bare slug** beside a
+  properly named `Cogs`, which is a real defect and now N35's. And "no screen
+  has ever rendered PGR" — three did. **N35 was rescoped rather than ticked**:
+  what is left of it is `reach`, the slug, the shadow price and the absent
+  roster screen.
+- **What N34 did not do:** states are editable only on a goal row, so a reader
+  cannot record a construct they have no goal for. Named in the ADR and in N35
+  rather than left implied.
+- **Build:** 419 tests, 0 skipped, 0 failures — up from 411, the 8 new ones
+  being this change's. 0 skipped means the 16 snapshot-gated tests actually ran,
+  so standing caveat 1 is satisfied for this build rather than assumed. **The
+  first full run failed 4**, all test-side fallout from the deliberate wire
+  break, one of them a PUT correctly answering 400 to the old shape.
 **2026-09-21 (thirty-fourth) — B6: a push to `dev` builds.** One workflow file,
 twenty lines, and the shortest gap on record between a defect becoming an action
 and being fixed — the list that named it was written the day before.

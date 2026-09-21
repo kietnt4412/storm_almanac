@@ -91,11 +91,23 @@ describe('the offline outbox', () => {
     // value would leave a character on the roster at a state that does not
     // exist, and the planner would then be asked what it costs to reach it.
     const merged = effectiveRoster(
-      { sotheby: 'insight-2', regulus: 'insight-1' },
+      { sotheby: ['insight-2'], regulus: ['insight-1'] },
       { regulus: { value: null, at: now() } },
     );
 
-    expect(merged).toEqual({ sotheby: 'insight-2' });
+    expect(merged).toEqual({ sotheby: ['insight-2'] });
+  });
+
+  it('replaces an entity’s whole state set, because the entity is the merge unit', () => {
+    // A pending edit states the entity in full. Merging state by state would
+    // leave 'level-40' behind here, and the roster would say something this
+    // device never said.
+    const merged = effectiveRoster(
+      { sotheby: ['insight-1', 'level-40'] },
+      { sotheby: { value: ['insight-2'], at: now() } },
+    );
+
+    expect(merged).toEqual({ sotheby: ['insight-2'] });
   });
 });
 

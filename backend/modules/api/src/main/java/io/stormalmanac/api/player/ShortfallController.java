@@ -98,7 +98,7 @@ public class ShortfallController {
                 owner.id().value(),
                 definition,
                 entity,
-                roster.currentState().get(id),
+                roster.statesOf(id).stream().sorted().toList(),
                 target,
                 demand,
                 players.inventoryOf(owner.id()));

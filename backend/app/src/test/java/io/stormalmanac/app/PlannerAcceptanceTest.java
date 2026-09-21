@@ -27,6 +27,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -172,7 +173,7 @@ class PlannerAcceptanceTest {
         Plan plan = solve(
                 goal(WARDEN, "insight-2"),
                 Inventory.empty(PROFILE),
-                Map.of(WARDEN, "insight-1"));
+                Map.of(WARDEN, Set.of("insight-1")));
 
         assertThat(plan.totalEnergy()).isEqualTo(450);
         assertThat(plan.conversions()).containsExactly(
@@ -192,7 +193,7 @@ class PlannerAcceptanceTest {
         assertThatThrownBy(() -> solve(
                 goal(WARDEN, "insight-2"),
                 Inventory.empty(PROFILE),
-                Map.of(WARDEN, "insight-1"),
+                Map.of(WARDEN, Set.of("insight-1")),
                 Objective.LEAST_ENERGY, 6))
                 .isInstanceOf(Optimizer.InfeasibleGoalException.class)
                 .hasMessageContaining("sigil-greater")
@@ -221,14 +222,14 @@ class PlannerAcceptanceTest {
 
     // ── plumbing ────────────────────────────────────────────────────────────
 
-    private Plan solve(Goal goal, Inventory inventory, Map<EntityId, String> roster) {
+    private Plan solve(Goal goal, Inventory inventory, Map<EntityId, Set<String>> roster) {
         return solve(goal, inventory, roster, Objective.LEAST_ENERGY, 30);
     }
 
     private Plan solve(
             Goal goal,
             Inventory inventory,
-            Map<EntityId, String> roster,
+            Map<EntityId, Set<String>> roster,
             Objective objective,
             int horizonDays) {
 

@@ -70,8 +70,7 @@ public final class DemandResolver {
                                 + definition.game().id() + " " + definition.version().label());
             }
 
-            String current = roster.currentState().get(goal.entity());
-            Set<String> achieved = achieved(edges, current);
+            Set<String> achieved = achieved(edges, roster.statesOf(goal.entity()));
             if (achieved.contains(goal.targetState())) {
                 alreadyMet.add(goal);
                 continue;
@@ -165,14 +164,23 @@ public final class DemandResolver {
      * to stop. A current state the graph has never heard of is still achieved —
      * the bundle does not get to tell a player they are not where they are.
      *
+     * <p><b>The player may stand in several places at once, and this walks from
+     * all of them.</b> An entity is not on one track — a construct has a level,
+     * a rank, an evolution and six skills, and the game ties none of them to
+     * each other. The roster holds a state per track the player has recorded,
+     * and every one of them is a starting point: what is behind any of them is
+     * behind the player.
+     *
      * <p><b>A crossed gate is a reached state, and the roster does not have to
-     * say so.</b> The roster holds one state per entity, so a player recorded on
-     * one track says nothing directly about the others. But an upgrade they have
-     * demonstrably taken could only have been taken with its gates satisfied —
-     * that is what a gate is, a condition the game itself enforced before
-     * letting them through. So every gate on every upgrade behind them is
-     * behind them too, and charging for it again bills a player for something
-     * the game already made them do.
+     * say so.</b> An upgrade a player has demonstrably taken could only have
+     * been taken with its gates satisfied — that is what a gate is, a condition
+     * the game itself enforced before letting them through. So every gate on
+     * every upgrade behind them is behind them too, and charging for it again
+     * bills a player for something the game already made them do. That
+     * inference only ever reaches <em>backwards</em>, which is why the set
+     * above is needed as well: a track standing <em>beside</em> a recorded
+     * state is implied by nothing, and only the player can say where they are
+     * on it.
      *
      * <p>Only what <em>every</em> parent demands is claimed. Several upgrades
      * arriving at one state are either one step at several prices, which share
@@ -186,12 +194,11 @@ public final class DemandResolver {
      * game where one can be given up would need this walk to stop at the gate
      * rather than pass through it.
      */
-    private static Set<String> achieved(Map<String, List<Upgrade>> edges, String current) {
-        if (current == null) return Set.of();
+    private static Set<String> achieved(Map<String, List<Upgrade>> edges, Set<String> current) {
+        if (current.isEmpty()) return Set.of();
 
         Set<String> seen = new LinkedHashSet<>();
-        Deque<String> queue = new ArrayDeque<>();
-        queue.add(current);
+        Deque<String> queue = new ArrayDeque<>(current);
         while (!queue.isEmpty()) {
             String state = queue.removeFirst();
             if (!seen.add(state)) continue;
