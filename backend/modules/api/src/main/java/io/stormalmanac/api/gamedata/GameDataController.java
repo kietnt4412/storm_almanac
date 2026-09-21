@@ -4,6 +4,7 @@ import io.stormalmanac.api.gamedata.GameDataView.DiffResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntitiesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntityResponse;
 import io.stormalmanac.api.gamedata.GameDataView.ItemsResponse;
+import io.stormalmanac.api.gamedata.GameDataView.MeasuresResponse;
 import io.stormalmanac.api.gamedata.GameDataView.UpgradesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.VersionsResponse;
 import io.stormalmanac.common.id.EntityId;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  * GET /api/games/{game}/versions
  * GET /api/games/{game}/entities                    [?version=N]
  * GET /api/games/{game}/items                       [?version=N]
+ * GET /api/games/{game}/measures                    [?version=N]
  * GET /api/games/{game}/entities/{entity}           [?version=N]
  * GET /api/games/{game}/entities/{entity}/upgrades  [?version=N]
  * GET /api/games/{game}/diff?from=N&amp;to=M
@@ -78,6 +80,23 @@ public class GameDataController {
             @PathVariable String entity,
             @RequestParam(required = false) Long version) {
         return readModel.entity(new GameId(game), version, new EntityId(entity));
+    }
+
+    /**
+     * "What does this game score me on, and what does clearing it pay?"
+     *
+     * <p>The read side of {@code reach}. A plan counts a scored grant only if
+     * the reader says they clear its bar (ADR 0022), and until this route
+     * existed there was no way for a screen to find out which bars there are —
+     * a measure is an opaque label on a reward and is declared nowhere else.
+     *
+     * <p>Anonymous with the rest of the catalog, because it is published game
+     * data: what the ladder pays is a fact about the game, and only the answer
+     * to it is a fact about a reader.
+     */
+    @GetMapping("/measures")
+    public MeasuresResponse measures(@PathVariable String game, @RequestParam(required = false) Long version) {
+        return readModel.measures(new GameId(game), version);
     }
 
     /** "What does Insight 2 cost?" — the other half. */

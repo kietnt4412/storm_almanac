@@ -37,6 +37,22 @@ interface PlannerState {
    */
   outbox: Record<string, ProfileOutbox>;
 
+  /**
+   * What the reader says they clear, by measure, per profile.
+   *
+   * Not in the outbox, because it is not player state. ADR 0022 put `reach` on
+   * the plan request beside `energyPerDay` — a fact about the reader that the
+   * server stores nowhere and the solve key hashes — and what it is doing here
+   * is narrower than storage: remembering the answer so this device does not ask
+   * for it again on every solve. A second device asks again, which is the cost
+   * the ADR wrote down and the trigger that would make it real player state.
+   *
+   * Zero and absent mean the same thing on the wire and are kept apart here: a
+   * reader who deliberately answered "I don't get there" should see their own
+   * answer when they come back, not an empty form.
+   */
+  reach: Record<string, Record<string, number>>;
+
   /** Keys the server refused on the last flush, because it held something newer. */
   rejected: string[];
   lastSyncedAt: string | null;
@@ -44,6 +60,7 @@ interface PlannerState {
   selectProfile: (profileId: string) => void;
   editQuantity: (profileId: string, item: string, quantity: number) => void;
   editRosterState: (profileId: string, entity: string, states: string[] | null) => void;
+  setReach: (profileId: string, measure: string, score: number) => void;
   /** Drop the edits a flush confirmed, keeping anything typed while it was in flight. */
   settle: (profileId: string, flushed: ProfileOutbox, rejected: string[]) => void;
   /** The reader has seen which keys lost; stop saying so. */
@@ -72,6 +89,7 @@ export const usePlannerStore = create<PlannerState>()(
     (set) => ({
       profileId: null,
       outbox: {},
+      reach: {},
       rejected: [],
       lastSyncedAt: null,
 
@@ -110,6 +128,14 @@ export const usePlannerStore = create<PlannerState>()(
             },
           };
         }),
+
+      setReach: (profileId, measure, score) =>
+        set((state) => ({
+          reach: {
+            ...state.reach,
+            [profileId]: { ...(state.reach[profileId] ?? {}), [measure]: score },
+          },
+        })),
 
       // Persisted, so it survives a reload — a lost edit the reader closed the
       // tab before seeing is exactly the one worth still telling them about.
@@ -150,14 +176,35 @@ export const usePlannerStore = create<PlannerState>()(
       // Bumped when the shape changed from a flat draft to a per-profile
       // outbox. Without it a persisted v0 draft would rehydrate into fields
       // that no longer exist and the editor would render undefined counts.
-      version: 1,
-      migrate: (persisted, from) =>
-        from < 1
-          ? { profileId: null, outbox: {}, rejected: [], lastSyncedAt: null }
-          : (persisted as PlannerState),
+      //
+      // 2 adds `reach`, and that migration *adds a field* rather than resetting:
+      // an outbox is unsent edits, and throwing one away to gain a field nobody
+      // has filled in yet would lose a reader's inventory to a version bump.
+      version: 2,
+      migrate: (persisted, from) => {
+        if (from < 1) {
+          return { profileId: null, outbox: {}, reach: {}, rejected: [], lastSyncedAt: null };
+        }
+        const held = persisted as PlannerState;
+        return from < 2 ? { ...held, reach: {} } : held;
+      },
     },
   ),
 );
+
+/**
+ * What one profile has said it reaches, as one frozen object when it has said
+ * nothing.
+ *
+ * Same reason `NO_OUTBOX` is a constant rather than a literal: a selector that
+ * builds `{}` fresh never compares equal to the one it returned last, so every
+ * render schedules another. That is the bug that rendered a whole page as
+ * nothing once already.
+ */
+const NO_REACH: Record<string, number> = Object.freeze({});
+
+export const reachOf = (state: PlannerState, profileId: string | null): Record<string, number> =>
+  (profileId ? state.reach[profileId] : undefined) ?? NO_REACH;
 
 /** The outbox for one profile, or an empty one — never undefined at a call site. */
 export const outboxOf = (state: PlannerState, profileId: string | null): ProfileOutbox =>

@@ -2817,6 +2817,83 @@ Rewrite a section instead.**
 
 **549 → 550 → 549 on 2026-09-19 (twenty-eighth).** N32 (4) closed; the index line was paid for by rewriting N32's own entry one line shorter.
 
+**549 → 606, unrecorded, over sessions twenty-ninth to thirty-fifth.** Seven
+sessions, five ADRs, four closed actions and no ledger entry for any of them. The
+rule was never argued with; it was simply not run, and `wc -l` is one command.
+**The thirty-fifth left the file 56 lines over its own limit and said nothing**,
+which is the failure mode the rule exists to make visible and did not. Worth
+naming because the rewrite *was* holding while anybody was measuring: three
+sessions in a row landed on 549.
+
+**614 → 550 on 2026-09-21 (thirty-sixth): Status rewritten, and the first honest
+accounting of how it works.** The rewrite of *Status* — the section that had
+become a narrative, carrying every sequence's publication timestamp and an index
+of five ADRs with their migrations — is
+[here](#what-status-carried-until-the-2026-09-21-rewrite), and **on its own it
+saved two lines.** 95 → 93. That is the finding, and it is the same one the
+twenty-second session recorded and nobody acted on: *moving prose to the archive
+and writing shorter prose in its place does not change `wc -l`, because the
+prose rewraps to the same height.* **What actually moved the number was
+rewrapping** — the file's paragraphs were set at ~78 columns and its table rows
+at no limit at all, so eight of its densest blocks were reflowed to ~118 and the
+file lost 62 lines without losing a word. **So the rule as written is only half
+right.** "Rewrite a section, do not shave it" is the right instruction for
+*legibility* and it is what made `Status` readable again; it is **not** what
+holds the line count, and a session that follows it expecting the number to move
+will be disappointed by 60 lines. The cheap lever is the column width, it is
+worth about 12% of the file, and **it can only be pulled once** — after which
+the only thing left is genuinely carrying less.
+
+---
+
+## What *Status* carried until the 2026-09-21 rewrite
+
+The four *Status* bullets the thirty-sixth session rewrote, as they stood.
+**Kept verbatim**, because the rule this file runs on is that nothing is deleted
+and a later session decides for itself whether something is still operative.
+Most of what is below is *true* — it is here because it stopped being something a
+session needs before it starts work, not because it stopped being so.
+
+> - **PGR is read first-hand, and its bundle plans, EXP and one gate included
+>   (ADR 0019).** Simulated Battlefield pays Score, and Score buys every material
+>   and Pod. **Sequences 4, 5 and 6 are published** (2026-09-20T00:13:59Z,
+>   2026-09-21T01:11:15Z and 2026-09-21T02:49:27Z, all read back as *no
+>   changes*): a reader who says they clear the weekly Phantom Pain Cage is
+>   planned **Evolve to SS in 63 days and no Serum** and one who says nothing is
+>   refused *by name* (ADR 0022), and the game declares its **05:00 UTC** reset.
+>   The rest of the prices are in the table below. **Since sequence 6 the level
+>   ladder is priced end to end and every one of the thirteen Promote gates is a
+>   `requires`** (N33, 2026-09-21): thirteen cumulative EXP figures from 1 000 to
+>   497 000, each pinned by the Pod selection that reaches it and the one 1 000
+>   lower that does not. **A partial Promote plan used to be too cheap** —
+>   stopping at step 7 paid Cogs and no EXP at all — and is not any more. What the
+>   client overruled in the guides: the featured rule is a **per-banner rate**;
+>   **events have no shops** and pay one-time grants, which the plan reports as a
+>   deadline (ADR 0024); the Themed pool's wall is **drawn** (ADR 0023); and its
+>   **`PityScope` inherits Calibration across pools**, where R1999 clears — the
+>   two published games disagree on the one question that enum exists to answer.
+> - **Five decisions closed since 2026-09-20 — 0023 (`V11`), 0024, 0025 (`V12`),
+>   0026 and 0027 (`V13`). Each ADR is its own account; read it rather than a
+>   summary.** What still bites elsewhere in this file: both PGR pity archetypes
+>   are expressible and **neither is authored** (**N28**); **`Availability.opensAt`
+>   is read by nobody**, deliberately, the last of that record nothing reads;
+>   **`GameAgnosticismTest` is blind to a constant that is right for no game** —
+>   `UTC` is not a game name, and a javadoc caught 0025's bug, no test did; and
+>   **R1999's day boundary is Phase 11's problem**, with a second-hand number, a
+>   rotating stage table and nine benchmark agreements at stake.
+> - **Going first-hand on game data**, 2026-09-09 (ADR 0015), superseding 0009 and
+>   closing Q2, Q3, F1 and F2. Kornblume is unlicensed. **Nothing is deleted yet
+>   and the order matters:** the adapter stays as a never-shipped cross-check until
+>   a replacement exists, because removing it first leaves the project with no real
+>   data at all. **The cost on patch 3.5:** ~2 700 catalog facts, and **595
+>   drop-rate facts** — the bootstrap problem.
+
+Three of those four are carried forward in the rewritten section in shorter
+words. **The one to come back here for is the second bullet's list of what the
+PGR guides got wrong**, which is the only place it is written down outside the
+research note, and which is the standing argument for reading the client rather
+than a wiki.
+
 ---
 
 ## Session log
@@ -2830,6 +2907,100 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+
+**2026-09-21 (thirty-sixth) — N35, most of it: the reader is asked how far they
+get, and there is a screen for where they stand.** The last of the four deferred
+defects, and the first of them that turned out to be roughly what its entry said
+— which is itself worth recording after three in a row that did not.
+
+**Session start, the remote check the tracker demands.** PR #36 merged at
+`26e4345`; `dev` clean and equal to `origin/dev` at `6cdf520`; no PR open. The
+file named #35 as newest merged, so it was one session stale **for the third
+consecutive check**. The instruction to re-check rather than read is now
+three-for-three.
+
+**The fork, and it was put to the maintainer.** ADR 0022 put `reach` on the plan
+request beside `energyPerDay` and wrote its own reversal trigger: make it player
+state "the moment a screen asks for it", which is the moment this session
+arrived at. The maintainer chose to keep it on the request and have the screen
+remember the answer locally, so **ADR 0022 stands unreversed** and its trigger
+is still live — what fires it is a reader having to answer twice, which now
+means a second device. The store holds `reach` per profile at persist version 2,
+migrated by *adding the field* rather than resetting, because resetting would
+throw away an unsent inventory to gain a field nobody has filled in.
+
+**The measures had to be served before anything could ask.** ADR 0022 predicted
+this precisely — "a measure is not declared anywhere ... so a screen that wants
+to ask 'how far do you get in the Phantom Pain Cage?' has to collect the measures
+off the rewards it can see" — so `GET /api/games/{game}/measures` does the
+collecting once on the server. It carries each rung's **grants with names
+resolved**, and that is load-bearing rather than tidy: the measure is a slug no
+player has ever seen, and what makes the question answerable is the payout.
+Ordered lowest bar first; an empty list is a 200, because a game that scores
+nothing is an answer.
+
+**What the browser showed, and one number that checks another.** Driven against
+the real PGR bundle, signed in, roster recorded through the new screen at
+`promote-6` and `level-80`, goal Evolve to SS, 63 days. Answering *nothing*:
+refused, and the refusal names the measure, the lowest bar and what the reader
+said — ADR 0022 clause 5, **rendered to a reader for the first time**. Answering
+*1 100 000*: **63 days, 0 Serum**, the plan `AuthoredBundlePlanTest` has asserted
+since the twenty-ninth session and which no web client had ever been able to ask
+for. The ladder summary computes **56 Phantom Pain Scars a week** from the
+published rungs, which is the figure ADR 0022 states in prose — two independent
+routes to one number, and they agree.
+
+**A dropdown of the bars, not a number box.** The bars are the question's whole
+domain: a reader at 150 000 on a ladder whose rungs are 120 000 and 360 000 is
+answering 120 000, and a free field invites them to type the truth and then
+wonder why the plan did not move. Zero stays on the list after it is chosen,
+because "I don't get there" is an answer and not a placeholder.
+
+**The roster screen, and the component both screens now share.** States were
+editable only on a goal row, so a construct with no goal could not be recorded —
+and the planner charges for every track it has not been told about. The new
+screen fetches upgrade graphs **only for the entities on it**, unlike the goal
+screen, which fetches every graph in the catalog: fine for one construct, not
+fine for a second game with hundreds. The chips-and-dropdown control is now one
+component used by both, deliberately — two editors of one aggregate that drift
+apart is how a reader gets two answers to "where am I". An opened row with no
+states is local only, because an entity with no states *is* one that is not on
+the roster (V13), and a placeholder row would invent a third thing between owned
+and not.
+
+**Measured.** 420 backend tests, 0 skipped, 0 failures (419 before; the new one
+is the measures route, asserting the empty case and the sort together). Frontend
+**16 → 28**: three on the remembered answer, four on the state control, five on
+the ladder. Both new screens driven in a browser at desktop and phone width, the
+roster surviving a reload — which is the outbox flushing and the server handing
+it back, not local state.
+
+**What is left of N35, and it is not nothing.** A `progress:` line still renders
+as its bare slug — `character-exp` beside a properly named `Cogs` — and so would
+a `choice:` line; that needs a display name from somewhere, which is a bundle
+field and a sequence 7 rather than a frontend fix. **And no shadow price has
+still ever rendered** — but this session found out *why*, which is progress of a
+kind: on this plan the pricing re-solve reported `One more inver-shard-lacrimosa
+is not obtainable`, so the item is at its bound and the map is legitimately
+empty. The code path is not dead; it has never been given a plan with slack in
+it.
+
+**A mistake worth recording so the next session does not repeat it.** `npx
+prettier` was run on three source files with no config in the repo, so it applied
+prettier's defaults — double quotes, 80 columns — and reformatted 456 lines of a
+269-line change. **This project has no prettier config and its files are
+hand-formatted at roughly 100 columns with single quotes**; `npm run lint` names
+eslint and there is no eslint config either. Recovered with
+`git show HEAD:<path> >` per file and the edits redone by hand. Do not run a
+formatter here until somebody commits a config for it.
+
+**And the tracker was found 56 lines over its own limit, unrecorded.** 606 at
+session start, 614 after this session's findings. The ledger had not been written
+in since the twenty-eighth. *Status* was rewritten as the rule instructs and the
+file is back at **550** — but **the rewrite is not what did it**, and the
+[ledger entry](#the-line-count-ledger) says so in detail: rewriting `Status`
+saved two lines, and reflowing eight over-narrow blocks saved sixty-two. Worth
+reading before the next session trusts the rule to hold the number.
 
 **2026-09-21 (thirty-fifth) — N36: the verification the file kept asking for, and
 the two reasons it had never worked.** The third of the four deferred defects,

@@ -9,6 +9,7 @@ import io.stormalmanac.api.gamedata.GameDataView.EntitiesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntityResponse;
 import io.stormalmanac.api.gamedata.GameDataView.GamesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.ItemsResponse;
+import io.stormalmanac.api.gamedata.GameDataView.MeasuresResponse;
 import io.stormalmanac.api.gamedata.GameDataView.RankView;
 import io.stormalmanac.api.gamedata.GameDataView.UpgradeStepView;
 import io.stormalmanac.api.gamedata.GameDataView.UpgradesResponse;
@@ -216,6 +217,45 @@ class GameDataApiTest extends SharedDatabaseTest {
                 "/api/games/proving-ground/versions", VersionsResponse.class));
 
         assertThat(versions.versions()).extracting("label").containsExactly("1.1", "1.0");
+    }
+
+    @Test
+    @DisplayName("the measures a screen has to ask about are served, lowest bar first, saying what each pays")
+    void servesTheScoredLadders() {
+        publish("proving-ground-1.0.json");
+        publish("proving-ground-1.1.json");
+
+        // 1.0 scores nothing, and that is a 200 with an empty list rather than a
+        // 404. "This game has no measures" is a true answer about a version that
+        // exists, and a screen that has to distinguish it from "no such game"
+        // gets to.
+        MeasuresResponse before = ok(http.getForEntity(
+                "/api/games/proving-ground/measures?version=0", MeasuresResponse.class));
+        assertThat(before.measures()).isEmpty();
+        assertThat(before.version().label()).isEqualTo("1.0");
+
+        MeasuresResponse after = ok(http.getForEntity(
+                "/api/games/proving-ground/measures", MeasuresResponse.class));
+
+        assertThat(after.measures()).singleElement().satisfies(ladder -> {
+            assertThat(ladder.measure()).isEqualTo("gauntlet-depth");
+
+            // Sorted by the bar and not by the order the bundle wrote them, which
+            // is the order a ladder is climbed in and the order a reader picks
+            // their own rung out of. The fixture writes 800 before 200.
+            assertThat(ladder.bars()).extracting("atLeast").containsExactly(200, 800);
+            assertThat(ladder.bars()).extracting("reward")
+                    .containsExactly("trial-gauntlet-200", "trial-gauntlet-800");
+
+            // Names resolved, because the measure itself is a slug nobody has
+            // ever seen and what a rung pays is the only thing on this response
+            // a reader can recognise. ADR 0022 predicted this would be the first
+            // thing to hurt; serving the grants is what keeps it bearable.
+            assertThat(ladder.bars().getLast().cadence()).isEqualTo("WEEKLY");
+            assertThat(ladder.bars().getLast().grants()).containsExactly(
+                    new CostView("sigil-greater", "Greater Sigil", 2),
+                    new CostView("gold", "Gold", 4000));
+        });
     }
 
     @Test
