@@ -240,6 +240,37 @@ class DemandResolverTest {
     }
 
     @Test
+    @DisplayName("a player past a gated step has met its gate, and is not charged the gate's track again")
+    void aCrossedGateIsBehindThePlayer() {
+        Demand demand = resolver.resolve(gated(), at("insight-2"), List.of(Goal.deterministic(HERO, "level-20")));
+
+        assertThat(demand.steps()).isEmpty();
+        assertThat(demand.quantities()).isEmpty();
+        assertThat(demand.alreadyMet()).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("the gate a crossed step demanded is met without the roster ever naming it")
+    void aCrossedGateNeedsNoRosterEntry() {
+        GameDefinition twoGates = TestGame.builder()
+                .upgrade("l1", HERO, "level-1", "level-20", List.of(stack(GOLD, 50)))
+                .upgrade("l2", HERO, "level-20", "level-40", List.of(stack(GOLD, 70)))
+                .upgrade("i1", HERO, "insight-0", "insight-1", List.of(stack(ORE, 4)))
+                .sink(new Upgrade("i2", HERO, "insight-1", "insight-2", List.of(stack(INGOT, 2)),
+                        List.of("level-20"), List.of()))
+                .sink(new Upgrade("i3", HERO, "insight-2", "insight-3", List.of(stack(INGOT, 3)),
+                        List.of("level-40"), List.of()))
+                .build();
+
+        // Standing on insight-2 means level-20 was reached, because i2 could not
+        // have been taken otherwise. Only the rest of the level track is owed.
+        Demand demand = resolver.resolve(twoGates, at("insight-2"), List.of(Goal.deterministic(HERO, "insight-3")));
+
+        assertThat(demand.steps()).containsExactly("l2", "i3");
+        assertThat(demand.quantityOf(GOLD)).isEqualTo(70);
+    }
+
+    @Test
     @DisplayName("a step gated on a state only it leads to is refused rather than looped on")
     void aSelfGateIsRefused() {
         GameDefinition circular = TestGame.builder()

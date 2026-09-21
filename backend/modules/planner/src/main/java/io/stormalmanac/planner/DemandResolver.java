@@ -157,12 +157,34 @@ public final class DemandResolver {
     }
 
     /**
-     * Every state the player is at or has passed through.
+     * Every state the player is at, has passed through, or must have reached to
+     * be standing where they are.
      *
      * <p>Needed so that a goal already behind the player costs nothing rather
      * than costing the whole track again, and so that the walk below knows where
      * to stop. A current state the graph has never heard of is still achieved —
      * the bundle does not get to tell a player they are not where they are.
+     *
+     * <p><b>A crossed gate is a reached state, and the roster does not have to
+     * say so.</b> The roster holds one state per entity, so a player recorded on
+     * one track says nothing directly about the others. But an upgrade they have
+     * demonstrably taken could only have been taken with its gates satisfied —
+     * that is what a gate is, a condition the game itself enforced before
+     * letting them through. So every gate on every upgrade behind them is
+     * behind them too, and charging for it again bills a player for something
+     * the game already made them do.
+     *
+     * <p>Only what <em>every</em> parent demands is claimed. Several upgrades
+     * arriving at one state are either one step at several prices, which share
+     * their gates and so intersect to themselves, or different routes — and
+     * which route was taken is unknown here, so the intersection is the most
+     * that is certain. {@link #pathTo} refuses the second shape outright, which
+     * is why this is a safeguard rather than a live case.
+     *
+     * <p>This assumes a gated state cannot be lost once reached. Every state in
+     * both published games is monotone — a level, a rank, an evolution — and a
+     * game where one can be given up would need this walk to stop at the gate
+     * rather than pass through it.
      */
     private static Set<String> achieved(Map<String, List<Upgrade>> edges, String current) {
         if (current == null) return Set.of();
@@ -173,8 +195,14 @@ public final class DemandResolver {
         while (!queue.isEmpty()) {
             String state = queue.removeFirst();
             if (!seen.add(state)) continue;
-            for (Upgrade edge : edges.getOrDefault(state, List.of())) {
+            List<Upgrade> parents = edges.getOrDefault(state, List.of());
+            for (Upgrade edge : parents) {
                 queue.add(edge.fromState());
+            }
+            if (!parents.isEmpty()) {
+                Set<String> certain = new LinkedHashSet<>(parents.get(0).requires());
+                parents.forEach(parent -> certain.retainAll(parent.requires()));
+                queue.addAll(certain);
             }
         }
         return seen;

@@ -93,8 +93,15 @@ class GameDataIngestTest extends SharedDatabaseTest {
                 .isEqualTo(new io.stormalmanac.gamedata.DayBoundary(java.time.ZoneId.of("UTC"), 5));
         Upgrade lastRank = upgradeOf(loaded, "helentine-lacrimosa-promote-13");
         assertThat(lastRank.requires()).containsExactly("level-80");
-        assertThat(upgradeOf(loaded, "helentine-lacrimosa-level-80").progress())
-                .containsExactly(new io.stormalmanac.gamedata.Progress("character-exp", 497000));
+        // Since sequence 6 the level track is a chain, not one row, so no single
+        // upgrade carries the ladder. What has to survive the schema is every
+        // link — and their sum is the EXP to Lv 80, which stays 497 000 however
+        // finely the priced gates split it.
+        assertThat(loaded.sinks()).filteredOn(s -> s instanceof Upgrade u && u.toState().startsWith("level-"))
+                .flatExtracting(s -> ((Upgrade) s).progress())
+                .extracting(io.stormalmanac.gamedata.Progress::quantity)
+                .asInstanceOf(org.assertj.core.api.InstanceOfAssertFactories.list(Integer.class))
+                .satisfies(links -> assertThat(links.stream().mapToInt(Integer::intValue).sum()).isEqualTo(497000));
         assertThat(loaded.sinks()).filteredOn(s -> s instanceof io.stormalmanac.gamedata.Fodder)
                 .extracting(s -> ((io.stormalmanac.gamedata.Fodder) s).progress())
                 .containsOnly("weapon-exp", "memory-exp", "character-exp");

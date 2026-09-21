@@ -16,7 +16,7 @@ being finished with is.
   [The 826-line version it replaces is in the archive, verbatim](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression) —
   go there for anything this file no longer carries, and decide whether it is
   still operative rather than assuming it was lost.
-- Last updated: **2026-09-21** (thirty-second session)
+- Last updated: **2026-09-21** (thirty-third session)
 
 ---
 
@@ -32,13 +32,16 @@ being finished with is.
   and [its bundle](data/bundles/punishing-gray-raven-steering-by-light.json)
   plans, EXP and one gate included ([ADR 0019](docs/adr/0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-demanded-as-an-item.md)).**
   Simulated Battlefield pays Score, and Score buys every material and Pod.
-  **Sequences 4 and 5 are published** (2026-09-20T00:13:59Z and 2026-09-21T01:11:15Z, both read
-  back as *no changes*): a reader who says they clear the weekly Phantom Pain Cage is planned
+  **Sequences 4, 5 and 6 are published** (2026-09-20T00:13:59Z, 2026-09-21T01:11:15Z and
+  2026-09-21T02:49:27Z, all read back as *no changes*): a reader who says they clear the weekly Phantom Pain Cage is planned
   **Evolve to SS in 63 days and no Serum** and one who says nothing is refused *by name*
   ([ADR 0022](docs/adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md)), and
   the game declares its **05:00 UTC** reset. The rest of the prices are in
-  [the table below](#what-the-next-work-touches). **Below the top rank plans are still too cheap:**
-  no level under 80 has a price, so twelve gates are prose (**N33**).
+  [the table below](#what-the-next-work-touches). **Since sequence 6 the level ladder is priced
+  end to end and every one of the thirteen Promote gates is a `requires`** (N33, 2026-09-21):
+  thirteen cumulative EXP figures from 1 000 to 497 000, each pinned by the Pod selection
+  that reaches it and the one 1 000 lower that does not. **A partial Promote plan used to be
+  too cheap** — stopping at step 7 paid Cogs and no EXP at all — and is not any more.
   What the client overruled in the guides: the featured rule is a **per-banner rate**; **events
   have no shops** and pay one-time grants, which the plan reports as a deadline (ADR 0024); the Themed pool's wall is **drawn** (ADR 0023);
   and its **`PityScope` inherits Calibration across pools**, where R1999 clears — the two published
@@ -172,7 +175,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
 | Backend build | **Green** | **411 tests** in full 2026-09-21, 0 skipped locally **and all 16 snapshot-gated ones actually ran and passed**, so standing caveat 1 is satisfied for that build rather than assumed; **395 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
-| Authored game data | **One bundle, sequence 5 published, first-hand** | Helentine: Lacrimosa (level to 80, 13-step Promote, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, and — since **sequence 4, published 2026-09-20T00:13:59Z** — the weekly Phantom Pain Cage's nine tiers, and — since **sequence 5, published 2026-09-21T01:11:15Z** — the game's own **05:00 UTC** day boundary. **104 facts, all first-hand**, over six provenance entries: the boundary is a game-level field and so adds no fact, which is exactly why `Facts` had to learn to flatten `Game` (ADR 0025). Preview and ingest read **exactly the one change**, and the published version reads back as *no changes*. **Every sequence so far has been published and read back clean** ([the loop, per sequence, in the archive](docs/history/tracker-archive.md#session-log)); the next correction is a sequence 6. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) |
+| Authored game data | **One bundle, sequence 6 published, first-hand** | Helentine: Lacrimosa (level to 80 **as a thirteen-link chain, every gated level priced**, 13-step Promote **all gated**, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, and — since **sequence 4, published 2026-09-20T00:13:59Z** — the weekly Phantom Pain Cage's nine tiers, and — since **sequence 5, published 2026-09-21T01:11:15Z** — the game's own **05:00 UTC** day boundary, and — since **sequence 6, published 2026-09-21T02:49:27Z** — the whole level ladder as a thirteen-link chain. **116 facts, all first-hand**, over seven provenance entries: the boundary is a game-level field and so adds no fact, which is exactly why `Facts` had to learn to flatten `Game` (ADR 0025). Preview and ingest read **exactly the changes intended** — 26 of them for sequence 6 — and each published version reads back as *no changes*. **Every sequence so far has been published and read back clean** ([the loop, per sequence, in the archive](docs/history/tracker-archive.md#session-log)); the next correction is a sequence 7. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) |
 | CI workflow | **Green, no warnings, Node 24** | Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
@@ -237,10 +240,24 @@ works". It does not mean that:
   **multi-copy answers are too pessimistic** — 200 Cassettes of the Lost buy a
   copy and nothing models it, so at two copies the engines say 280 pulls and the
   truth is 200.
-- **One character is not a catalog, and its plans are partial** (**N33**). The
-  roster holds **one state per entity**, so a reader recorded at `promote-12` is
-  charged the whole level track again (ADR 0019). **No `progress:` line or shadow
-  price has ever rendered, and no frontend sends `reach`** — so every plan the web
+- **One character is not a catalog, and its plans are still partial — but the
+  worst half of it closed 2026-09-21
+  ([ADR 0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md)).** The roster
+  still holds **one state per entity**, so a reader records where they are on one
+  track and nothing about the others. **What changed is that the planner no
+  longer needs them to.** A gate is a condition the game enforced, so a player
+  standing past a gated step demonstrably met it: `achieved` now credits the
+  `requires` of every upgrade behind them, not just its `fromState`. A reader at
+  `promote-6` asking for step 7 pays the **20 000 EXP between Lv 45 and Lv 50**
+  instead of 60 000 from Lv 1 — **90 Serum against 180**.
+  **What is still wrong, and needs the schema:** a reader whose recorded state is
+  *behind* the gate gets no credit. Someone at `promote-0` who levelled to 80
+  anyway — which PGR permits, levels are not capped by rank — is still charged
+  the whole ladder. **That half wants `Roster` to hold a set of states**, which
+  is a migration, a breaking change to the roster wire format, the offline sync
+  patch shape and the frontend. Nobody has written it. **No
+  `progress:` line or shadow price has ever rendered, and no frontend sends
+  `reach`** — so every plan the web
   client asks for counts no scored grant and says which it left out (ADR 0022).
   Every R1999 catalog and drop number in this file comes from Kornblume.
 - **Eight qualifications of the closed phases are
@@ -262,20 +279,14 @@ session could take alone. Say which one and it starts.
 
 ### Held — Phase 4 scope, and the maintainer decides
 
-**None of these is started, and that is deliberate.** **Phase 4 does not close
-until each is done or explicitly cut, on the record** — a cut is a decision and
-goes in the session log; a silence is not a cut. **Each was planned in full on
-2026-09-20, [in the archive](docs/history/tracker-archive.md#session-log)** —
-read the plan rather than re-deriving one.
+**Phase 4 does not close until each is done or explicitly cut, on the record** —
+a cut is a decision and goes in the session log; a silence is not a cut. **Each
+was planned in full on 2026-09-20,
+[in the archive](docs/history/tracker-archive.md#session-log)** — read the plan
+rather than re-deriving one. **N33 closed 2026-09-21 and is
+[in the archive](docs/history/tracker-archive.md#completed-next-actions); B5 is
+the last one, and it is not started.**
 
-- [ ] **N33 — Price the twelve Promote gates. A reading, and the maintainer's.**
-      **The levels and the Cogs are already read** — Lv 2, 10, 20 … 80 in the
-      bundle's own Promote comment, thirteen Cog rows totalling **542 500**.
-      **Only the EXP is missing, and without it the gates cannot be written at
-      all:** a required state no upgrade produces resolves to an empty path and
-      **costs nothing**, so `"requires": ["level-40"]` today is a gate every plan
-      meets for free — worse than prose. **Incremental**: any prefix priced
-      unlocks that many gates.
 - [ ] **B5 — Wire the real deploy: Vercel and Render.** **Settle two things
       first.** *One origin or two:* a Vercel rewrite of `/api/*` to Render keeps
       the same-origin session, CSRF and OAuth redirect the backend was built
@@ -341,8 +352,9 @@ previous one's criterion is met. The "Landed" record for closed phases is
       **Closing condition, set 2026-09-20:** the exit is necessary and not
       sufficient — **N30, N33, N20 and B5 are each either done or explicitly cut
       before this box is ticked**, with the cut recorded in the session log.
-      Nothing here closes by having been forgotten. **N30 (ADR 0024) and N20
-      (ADR 0025) are both done, 2026-09-21; N33 and B5 remain.**
+      Nothing here closes by having been forgotten. **N30 (ADR 0024), N20
+      (ADR 0025) and N33 (sequence 6) are all done, 2026-09-21; B5 is the only
+      one left.**
 - [x] **Phase 5 · Gacha engine** — closed 2026-09-12 out of order
       ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)); **one banner
       first-hand (Q4)**, income model and shop exchange are **N28**.
@@ -522,6 +534,8 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-21 | thirty-third (cont.) | The roster flaw N33 widened, half closed the same day (ADR 0026): a crossed gate is a reached state, so `achieved` credits the `requires` of every upgrade behind the player. A reader at Promote 6 pays 90 Serum for step 7 where they were billed 180. No migration, no wire change — the other half, a reader *behind* the gate, still wants a set of states on `Roster` |
+| 2026-09-21 | thirty-third | N33 closed: the level ladder is priced end to end and all thirteen Promote gates are `requires`. Twenty-two Level Up previews on a Lv 1 construct, nothing spent and nobody levelled; thirteen cumulative figures, each pinned by the selection 1 000 below it falling short. The track became a chain because spokes from `level-1` would double-charge. Sequence 6 published 2026-09-21T02:49:27Z and read back as *no changes*; 411 tests, 0 skipped |
 | 2026-09-21 | thirty-second | N20 closed: the day boundary is a property of the game (ADR 0025, V12). A zone and an hour on `Game`, one `DayOfWeek` moved and no row written; null is *unstated*, not midnight. The preview found a sixth piece the plan never named — `Facts` flattened `Game` not at all, so the sequence that declares a boundary read as *no changes*. PGR sequence 5 published and read back clean |
 | 2026-09-21 | thirty-first | N30 closed: an expiring grant is a deadline the plan reports, not a schedule it builds (ADR 0024). No time index, no new variables — two lists, three notes and a refusal that names the window instead of blaming the cadence. The plan's `FEWEST_DAYS` sentence was backwards and the ADR carries the correction |
 | 2026-09-20 | thirtieth | N31: a drawn guarantee is a rate curve, not a state dimension (ADR 0023, V11). The exact chain gained nothing; the simulation draws anyway, and caught itself sampling the prior — 0.558 against the chain's right 0.382. Then all four Phase 4 items planned: N30 decided as a deadline, N33's premise found already recorded, three held |
