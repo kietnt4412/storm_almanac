@@ -31,6 +31,23 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**B6 — Make CI run on a push to `dev`.**~~ Done 2026-09-21. `.github/workflows/ci.yml`
+      triggers on `push: branches: [main, dev]`. Exit criterion — *a push to `dev` with no PR open
+      produces a run* — met by run `35576845184` on `cfa6fe4`, `gh pr list` empty at the moment of
+      the push, green. **The trap was live while the item was being read:** `cc9e7d1`, the previous
+      session's own commit, was sitting on `dev` unbuilt, which is the tenth occurrence and the
+      first caught in the tree rather than recalled. **One decision inside it that a future session
+      will be tempted to undo:** the concurrency group stays `ci-${{ github.ref }}`, so a push to
+      `dev` while a PR is open from `dev` runs the workflow twice. Keying it
+      `github.head_ref || github.ref_name` instead would dedupe them into one group — and
+      `cancel-in-progress` would then cancel the older of the pair, which in practice means a push
+      cancelling the PR's own required check. A cancelled run is not a passing one. **Two honest
+      runs beat one that sometimes vanishes**, and the duplicate is the price of the trigger.
+      **What B6 does not buy:** it does not watch the merge, so PR #25's failure mode — merged
+      before its own run finished, green by luck — is untouched, and *wait for the run before
+      merging* is still a human step. **The `deploy` job carries B6's other half as a written
+      condition:** it is `if: false`, and turning it on in B5 must gate it to `refs/heads/main`,
+      because an ungated deploy under this trigger ships every commit that lands on `dev`.
 - [x] ~~**N33 — Price the twelve Promote gates. A reading, and the maintainer's.**~~
       Done 2026-09-21, PGR **sequence 6**, published 2026-09-21T02:49:27Z and read back as *no changes*.
       All thirteen gated levels priced and all thirteen Promote steps carry a
@@ -1484,6 +1501,15 @@ Phase 11 row rather than being left only here.
   **a reward conditional on spending energy**, and **a lifetime purchase limit**
   (`Shop` caps at "n per `Period`", not "five, ever"). Examples and provenance in
   [the economy facts](../game-facts/reverse-1999-economy.md).
+
+  **Correction, 2026-09-21: the third of those is closed and this entry was
+  stale.** [ADR 0020](../adr/0020-a-limit-that-never-resets-is-offered-whole.md)
+  made a lifetime limit expressible, and PGR sequence 2 published two shop rows
+  that use it — 10 Inver-Shards at 10 Scars then 20 at 20, **30 ever**. The
+  first two shapes are still unexpressible and still have no ADR. Left in place
+  rather than edited away, because an archived qualification that quietly
+  changes is worse than one that says when it stopped being true; the rule that
+  nothing here is deleted cuts both ways.
 - **The adapter converts less than the upstream publishes** — no shop offers, no
   alternative resonance-pattern costs, no unreleased content — each with a reason
   in `KornblumeAdapter`'s javadoc. That sentence is only reassuring when somebody
@@ -2719,6 +2745,79 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-21 (thirty-fourth) — B6: a push to `dev` builds.** One workflow file,
+twenty lines, and the shortest gap on record between a defect becoming an action
+and being fixed — the list that named it was written the day before.
+
+- **The check that opens every session found the thing the session was about to
+  fix, already broken.** *Status* named PR #31 and was one session stale: #33 had
+  merged at 03:09:07Z. Worse, `cc9e7d1` — the thirty-third session's own last
+  commit, the one that *wrote B6 down* — was sitting on `dev` with no PR open and
+  **had never been built**. Tenth occurrence, first one found in the working tree
+  instead of recounted from the archive. **The instruction to re-check the remote
+  rather than trust the file earned its place again.**
+- **The fix is `push: branches: [main, dev]`.** Exit criterion met by run
+  `35576845184` on `cfa6fe4`, pushed with `gh pr list` returning `[]`, green.
+  Before it, no run in the history has event `push` and branch `dev` — the
+  absence is as much the evidence as the presence.
+- **The decision worth defending is the one that looks like a mistake.** The
+  concurrency group was left keyed by `github.ref`, which means a push to `dev`
+  while a PR is open from `dev` now runs CI **twice**. The obvious tidy-up —
+  `github.head_ref || github.ref_name`, so push and PR share a group — is wrong
+  here, because `cancel-in-progress: true` would then have the push cancel the
+  older run of the pair, and the older run is routinely *the PR's own required
+  check*. **A cancelled run is not a passing one.** The duplicate is the price of
+  the trigger and it is cheaper than a check that intermittently disappears.
+  Written into the workflow as a comment, because the next person to see two runs
+  will reach for exactly that fix.
+- **B6's other half is a condition, not code.** The `deploy` job is still
+  `if: false`; when B5 turns it on it **must** be gated to `refs/heads/main`, or
+  an ungated deploy under this trigger ships every commit that lands on `dev`.
+  That hazard is the entire reason B6 was placed before B5, so the requirement
+  now sits in the deploy job's own comment rather than in this file alone.
+- **What B6 does not buy, and the tracker now says so:** the trigger does not
+  watch the *merge*. PR #25 merged before its own run finished and was green by
+  luck; that is untouched. *Wait for the run before merging* is still a person's
+  job, and is now the only half of the old warning that is.
+- **One thing left undone and named here so it is not discovered again:** this
+  file is **605 lines** against its own 550-line limit, and the rule says to
+  **rewrite a section, not shave it**. The thirty-third session's four new
+  actions pushed it over; B6 gave three lines back. The next session that touches
+  *Next actions* or *What is still unverified* should take the rewrite rather
+  than adding to them.
+
+**2026-09-21 (thirty-third, continued) — the deferred defects, audited into
+actions.** No code. [PR #33](https://github.com/kietnt4412/storm_almanac/pull/33)
+opened with the session's two commits; backend and frontend green, `deploy`
+correctly skipping.
+
+- **The finding is about the shape of this file, not about any one defect.**
+  Asked to list everything skipped since the beginning, the list came almost
+  entirely *out of* the tracker — *Status*, the two standing caveats, *What is
+  still unverified*, and the archived qualifications. Every item was written
+  down. **Not one of them was an action.** A defect that is only ever described
+  is one nobody picks up, and four of them had been described for weeks.
+- **Four became next actions**, each with a stated reason for being on this side
+  of B5 rather than after it: **B6**, CI running nothing on a push to `dev` — the
+  cheapest fix in the file, and B5 adds a `deploy` job that must never fire from
+  an untested commit; **N34**, `Roster` holding a set of states, the half
+  [ADR 0026](../adr/0026-a-crossed-gate-is-a-reached-state.md) left, whose wire
+  format is published the moment a stranger loads the page; **N35**, rendering
+  PGR and sending `reach`, which is Phase 4's own exit criterion in disguise;
+  **N36**, running the upstream fetch once so the performance numbers stop being
+  of unknown age.
+- **One item turned out to belong to an existing action rather than a new one.**
+  The gacha multi-copy pessimism — 280 pulls quoted where the truth is 200 — is
+  fixed by the shop exchange N28 already carries, so it was written into N28
+  instead of duplicated beside it.
+- **One archived qualification was stale.** The seventeenth session recorded
+  three shapes the model cannot express; **a lifetime purchase limit has been
+  expressible since [ADR 0020](../adr/0020-a-limit-that-never-resets-is-offered-whole.md)**,
+  and PGR sequence 2 publishes two rows that use it. Corrected in place by
+  appending rather than by editing the original, because an archived claim that
+  quietly changes is worse than one that says when it stopped being true. The
+  other two shapes are still unexpressible and still have no ADR.
 
 **2026-09-21 (thirty-third, continued) — the roster flaw, half closed.**
 [ADR 0026](../adr/0026-a-crossed-gate-is-a-reached-state.md). No migration, no

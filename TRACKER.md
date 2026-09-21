@@ -16,7 +16,7 @@ being finished with is.
   [The 826-line version it replaces is in the archive, verbatim](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression) —
   go there for anything this file no longer carries, and decide whether it is
   still operative rather than assuming it was lost.
-- Last updated: **2026-09-21** (thirty-third session)
+- Last updated: **2026-09-21** (thirty-fourth session)
 
 ---
 
@@ -46,23 +46,16 @@ being finished with is.
   have no shops** and pay one-time grants, which the plan reports as a deadline (ADR 0024); the Themed pool's wall is **drawn** (ADR 0023);
   and its **`PityScope` inherits Calibration across pools**, where R1999 clears — the two published
   games disagree on the one question that enum exists to answer.
-- **Three decisions closed since 2026-09-20. The ADR is the account; this is what each left.**
-  **[0023](docs/adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md), `V11` — a
-  drawn guarantee is a rate curve, not a state dimension.** `PityRule.drawnFrom` is the bottom of
-  a drawn range, `hardAt` still means certainty, nothing published moved, and **the exact chain
-  gained no state**. Both PGR archetypes are expressible and **neither is authored** (**N28**).
-  **[0024](docs/adr/0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md)
-  — an expiring grant is a deadline the plan reports.** Two lists on `Outcome`, no time index, no
-  new variables. **A lapse is a window and not a cadence** — the predicate also needs *the same
-  cadence over the untruncated horizon would have paid*, or a note hurries a reader over a monthly.
-  **`opensAt` is read by nobody**, deliberately, and is the last of `Availability` nothing reads.
-  **[0025](docs/adr/0025-the-day-boundary-is-a-property-of-the-game.md), `V12` — the day boundary
-  belongs to the game.** A zone and an hour on `Game`; `null` is *unstated*, not midnight, so
-  everything published before it plans as it did. **`GameAgnosticismTest` is blind to this class
-  of bug** — `UTC` is not a game name, and a javadoc caught it. **The preview found a sixth piece
-  the plan never named:** `Facts` flattened `Game` not at all, so a version whose one difference
-  moves every rotating stage's capacity read as *no changes*. **R1999's boundary is Phase 11's** —
-  second-hand number, rotating stage table, nine benchmark agreements at stake.
+- **Four decisions closed since 2026-09-20 — [0023](docs/adr/0023-a-drawn-guarantee-is-a-rate-curve-not-a-state-dimension.md)
+  (`V11`), [0024](docs/adr/0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md),
+  [0025](docs/adr/0025-the-day-boundary-is-a-property-of-the-game.md) (`V12`) and
+  [0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md). Each ADR is its own account; read it
+  rather than a summary.** What still bites elsewhere in this file: both PGR pity archetypes are
+  expressible and **neither is authored** (**N28**); **`Availability.opensAt` is read by nobody**,
+  deliberately, the last of that record nothing reads; **`GameAgnosticismTest` is blind to a
+  constant that is right for no game** — `UTC` is not a game name, and a javadoc caught 0025's bug,
+  no test did; and **R1999's day boundary is Phase 11's problem**, with a second-hand number, a
+  rotating stage table and nine benchmark agreements at stake.
 - **Going first-hand on game data**, 2026-09-09
   ([ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)),
   superseding 0009 and closing Q2, Q3, F1 and F2. Kornblume is unlicensed.
@@ -87,15 +80,18 @@ being finished with is.
   2026-09-09, every image build failing in six seconds while this file called it
   verified, so **anything added beside `modules`, `adapters`, `substrate`, `app`
   needs a line there**.
-- **The remote, last checked 2026-09-21 (thirty-second) — re-check it, do not trust it.**
-  **[PR #31](https://github.com/kietnt4412/storm_almanac/pull/31) is MERGED** — the thirty-first
-  session's work went up and came back down while this file still named #30. `dev` was level with
-  `origin/dev` and its tree identical to `origin/main` at the start of this session; `dev` sits
-  behind by merge commits that never come back down, which is harmless and *not* a reason to
-  rebase. **The trap stands:** CI runs on `pull_request` and on push to `main` only, so **a push to
-  `dev` with no open PR runs nothing, silently**; every merge re-arms it, nine times now, each
-  caught by looking. And PR #25 merged *before its own run finished*, green by luck (archive,
-  twenty-sixth). **Run `gh pr list`, open the PR, and wait for the run before merging.**
+- **The remote, last checked 2026-09-21 (thirty-fourth) — re-check it, do not trust it.**
+  **[PR #33](https://github.com/kietnt4412/storm_almanac/pull/33) is MERGED** at 03:09:07Z. This
+  file named #31 until now, one session stale, which is exactly what the instruction above is for.
+  **The check found the trap sprung:** `cc9e7d1`, the thirty-third session's own last commit, sat
+  on `dev` alone with no PR open and therefore **had never been built at all** — the tenth
+  occurrence, and the first one caught in the working tree rather than told as a story. **B6 closed
+  it the same day**: CI now triggers on a push to `dev`, proven by run `35576845184` firing on
+  `cfa6fe4` with no PR open. **What the trigger does not do is watch the merge** — PR #25 merged
+  *before its own run finished* and was green by luck (archive, twenty-sixth) — so **wait for the
+  run before merging** still stands, and is now the only half of this a person has to remember.
+  `dev` sits behind `main` by merge commits that never come back down, which is harmless and *not*
+  a reason to rebase.
 
 ### Two standing caveats, read them every session
 
@@ -176,7 +172,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 |------|-------|-----------------------|
 | Backend build | **Green** | **411 tests** in full 2026-09-21, 0 skipped locally **and all 16 snapshot-gated ones actually ran and passed**, so standing caveat 1 is satisfied for that build rather than assumed; **395 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares `data/bundles` as an input — without that, `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed. `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
 | Authored game data | **One bundle, sequence 6 published, first-hand** | Helentine: Lacrimosa (level to 80 **as a thirteen-link chain, every gated level priced**, 13-step Promote **all gated**, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, and — since **sequence 4, published 2026-09-20T00:13:59Z** — the weekly Phantom Pain Cage's nine tiers, and — since **sequence 5, published 2026-09-21T01:11:15Z** — the game's own **05:00 UTC** day boundary, and — since **sequence 6, published 2026-09-21T02:49:27Z** — the whole level ladder as a thirteen-link chain. **116 facts, all first-hand**, over seven provenance entries: the boundary is a game-level field and so adds no fact, which is exactly why `Facts` had to learn to flatten `Game` (ADR 0025). Preview and ingest read **exactly the changes intended** — 26 of them for sequence 6 — and each published version reads back as *no changes*. **Every sequence so far has been published and read back clean** ([the loop, per sequence, in the archive](docs/history/tracker-archive.md#session-log)); the next correction is a sequence 7. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) |
-| CI workflow | **Green, no warnings, Node 24** | Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
+| CI workflow | **Green, no warnings, Node 24; triggers on `dev`** | Since B6 (2026-09-21) it runs on push to `main` **and `dev`** as well as `pull_request`, so a push to the working branch with no PR open is built rather than silently ignored. **A push to `dev` while a PR is open from `dev` runs twice, on purpose** — the concurrency group stays keyed by ref, because collapsing push and PR into one group lets `cancel-in-progress` cancel the run the PR needs green. **The `deploy` job is still `if: false` and must be gated to `refs/heads/main` when B5 turns it on**, or it ships every commit landing on `dev`. Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
 | The MIP (`EnergyMip`) | **Stages, crafts, shops, rewards and fodder** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. A purchase is a conversion capped at limit × *whole* periods, or the whole allowance of one that never resets, which the plan says it assumed unspent (ADR 0020); feeding fodder is a conversion into a `progress:<kind>` item, and paying one of a step's several prices a conversion into a `choice:` item (ADR 0021). Gates are not in the model: `DemandResolver` turns them into demand (ADR 0019). **A grant behind a score the reader has not cleared is dropped before the model** and reported in the notes, so the counts in a plan and in a refusal are the game *that reader* plays (ADR 0022) |
@@ -269,13 +265,55 @@ works". It does not mean that:
 
 ## Next actions
 
-**Nothing is live: every remaining item is the maintainer's.** N30 and **N20**
-both closed 2026-09-21 and moved to
-[the archive](docs/history/tracker-archive.md#completed-next-actions); the two
-below are held by an explicit decision taken on 2026-09-20, not by neglect.
-**A session should not promote one of them on its own** — both need the
-maintainer's own reading or accounts, and there is no longer a third that a
-session could take alone. Say which one and it starts.
+**N30, N20, N33 and now B6 all closed 2026-09-21** and are
+[in the archive](docs/history/tracker-archive.md#completed-next-actions). **B5 is
+the only Phase 4 item left**, and it needs the maintainer's own accounts.
+
+**The three items under *Before B5* below are what remains of four added on
+2026-09-21.** Each was already described somewhere in this file — in *Status*, in
+the two standing caveats, or in *What is still unverified* — and **none of them
+was an action anybody could pick up.** A known defect that is only ever
+*described* is one nobody is going to fix; these are the ones worth paying before
+the deploy rather than after, and each says why it is on this side of B5. **A
+session can take any of them alone.** B6 was the cheapest and went the same day
+the list was written, which is the argument for the list.
+
+### Before B5 — debt worth paying first
+
+- [ ] **N34 — Let `Roster` hold a set of states, not one.** The half of the
+      roster flaw [ADR 0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md)
+      deliberately did not fix. A reader whose recorded state is *behind* a gate
+      gets no credit: someone at `promote-0` who levelled to 80 anyway is charged
+      the whole ladder, and **PGR permits exactly that** because levels are not
+      capped by rank. **Five pieces:** a migration adding `current_state` to
+      `roster_entry`'s primary key; `Roster.currentState` becoming
+      `Map<EntityId, Set<String>>`; `achieved` seeded from all of them;
+      the roster wire format, which is a **breaking** change to `GET`/`PUT`/`PATCH`
+      `/api/me/profiles/{profile}/roster`; and the offline sync patch shape,
+      where the per-key clock stays per-entity because an entity's whole state
+      set is the merge unit. **Before B5 because the wire format is published the
+      moment a stranger loads the page.**
+- [ ] **N35 — Render PGR, and send `reach`.** Two faults on the same surface.
+      **No screen has ever rendered PGR** — all five were built against R1999,
+      and PGR has been the launch title since D3 on 2026-09-13. **And no frontend
+      sends `reach`**, so every plan the web client asks for counts **no scored
+      grant** and reports which it left out in a note nothing displays
+      ([ADR 0022](docs/adr/0022-a-grant-sized-by-the-player-is-an-answer-the-reader-supplies.md));
+      no `progress:` line or shadow price has ever rendered either. **This is
+      Phase 4's own exit criterion in disguise** — five strangers completing a
+      plan means five strangers seeing these screens, so it cannot wait for after
+      the deploy. **jsdom computes no layout**, so a browser has to be driven.
+- [ ] **N36 — Fetch upstream before trusting a green build, once, and write down
+      what it proves.** Standing caveat 1 says the strongest tests here are ones
+      CI does not run: `RealUpstreamPatchTest`, `RealUpstreamPlanTest` and
+      `CommunityBenchmarkTest`, **16 tests**, skip on the runner because upstream
+      data is fetched and never vendored
+      ([ADR 0009](docs/adr/0009-upstream-data-is-fetched-never-vendored.md)).
+      Every performance number and every outside comparison in this file comes
+      from them. **Run `backend/tools/fetch-upstream.sh` and record the numbers
+      with a date**, so "p95 1 807 ms" stops being a figure of unknown age.
+      **Not a code change** — an hour, and it either confirms the file or
+      contradicts it.
 
 ### Held — Phase 4 scope, and the maintainer decides
 
@@ -311,7 +349,10 @@ the last one, and it is not started.**
       same change**, both R1999: a **shop exchange for the featured unit** —
       cassettes cut six copies from 840 pulls to 560 — and a **cap on copies**.
       **This is the only thing keeping a banner out of a bundle**, so N28 ends in a
-      **sequence 6** rather than in a schema.
+      **sequence 7** rather than in a schema — 6 was N33's. **The multi-copy
+      pessimism belongs to this item**: 200 Cassettes of the Lost buy a copy,
+      nothing models it, so at two copies the engines say 280 pulls when the
+      truth is 200, and the shop exchange above is the fix.
 - [ ] **N18 — Put drop estimates into `SolveKey` in the same change that first
       publishes one.** The moment Phase 6 does, a plan cached against yesterday's
       rates is served as today's — the one staleness bug the key's design cannot
@@ -534,6 +575,8 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-21 | thirty-fourth | B6 closed the day after it was written: CI triggers on a push to `dev`, proven by a run on `cfa6fe4` with no PR open. The session-start check found the trap live — the previous session's own commit had sat on `dev` unbuilt. The concurrency group stays keyed by ref *on purpose*: deduping push and PR would let a push cancel the check the PR needs green. Deploy must be gated to `main` when B5 turns it on |
+| 2026-09-21 | thirty-third (cont.) | PR #33 opened and green. The deferred-defect list audited into *Next actions* as **B6, N34, N35, N36** — every one was already described somewhere in this file and none was an action anybody could pick up. One archived qualification found stale: a lifetime purchase limit has been expressible since ADR 0020 |
 | 2026-09-21 | thirty-third (cont.) | The roster flaw N33 widened, half closed the same day (ADR 0026): a crossed gate is a reached state, so `achieved` credits the `requires` of every upgrade behind the player. A reader at Promote 6 pays 90 Serum for step 7 where they were billed 180. No migration, no wire change — the other half, a reader *behind* the gate, still wants a set of states on `Roster` |
 | 2026-09-21 | thirty-third | N33 closed: the level ladder is priced end to end and all thirteen Promote gates are `requires`. Twenty-two Level Up previews on a Lv 1 construct, nothing spent and nobody levelled; thirteen cumulative figures, each pinned by the selection 1 000 below it falling short. The track became a chain because spokes from `level-1` would double-charge. Sequence 6 published 2026-09-21T02:49:27Z and read back as *no changes*; 411 tests, 0 skipped |
 | 2026-09-21 | thirty-second | N20 closed: the day boundary is a property of the game (ADR 0025, V12). A zone and an hour on `Game`, one `DayOfWeek` moved and no row written; null is *unstated*, not midnight. The preview found a sixth piece the plan never named — `Facts` flattened `Game` not at all, so the sequence that declares a boundary read as *no changes*. PGR sequence 5 published and read back clean |
