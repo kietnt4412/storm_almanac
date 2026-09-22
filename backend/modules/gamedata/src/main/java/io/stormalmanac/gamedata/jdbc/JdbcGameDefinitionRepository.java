@@ -16,6 +16,7 @@ import io.stormalmanac.gamedata.GameDefinitionRepository;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.Progress;
+import io.stormalmanac.gamedata.ProgressKind;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
@@ -28,6 +29,7 @@ import io.stormalmanac.gamedata.banner.FeaturedRule;
 import io.stormalmanac.gamedata.banner.Floor;
 import io.stormalmanac.gamedata.banner.PityRule;
 import io.stormalmanac.gamedata.banner.PityScope;
+import io.stormalmanac.gamedata.banner.PullPrice;
 import io.stormalmanac.gamedata.catalog.Entity;
 import io.stormalmanac.gamedata.catalog.Skill;
 import io.stormalmanac.gamedata.catalog.StatCurve;
@@ -53,7 +55,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Loads one whole published version.
  *
  * <p>Every collection is fetched as one query over the version and grouped by
- * parent in memory. Fifteen queries and no joins beats one query per parent,
+ * parent in memory. Sixteen queries and no joins beats one query per parent,
  * and a version is a few thousand rows — small enough that assembling it in
  * Java is the cheap part.
  *
@@ -220,7 +222,24 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
 
         return new GameDefinition(
                 header.game(), header.version(), items, sources, sinks,
-                banners(version), entities(version, itemSlugs));
+                banners(version, itemSlugs), entities(version, itemSlugs), progressKinds(version));
+    }
+
+    /**
+     * The names for this version's progress kinds, which most versions have none
+     * of. Ordered by kind rather than by id so that two versions carrying the
+     * same names read back in the same order whatever order they were ingested
+     * in; nothing downstream depends on the order, and a round trip that did
+     * would be relying on an insert.
+     */
+    private List<ProgressKind> progressKinds(long version) {
+        return jdbc.query(
+                """
+                SELECT kind, display_name
+                  FROM gamedata.progress_kind WHERE version_id = ? ORDER BY kind
+                """,
+                (rs, row) -> new ProgressKind(rs.getString("kind"), rs.getString("display_name")),
+                version);
     }
 
     // ── Entities and the catalog axis ───────────────────────────────────────
@@ -476,7 +495,7 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
 
     // ── Banners ─────────────────────────────────────────────────────────────
 
-    private List<BannerModel> banners(long version) {
+    private List<BannerModel> banners(long version, Map<Long, ItemId> items) {
         Map<Long, Map<Rarity, Double>> baseRates = new LinkedHashMap<>();
         jdbc.query(
                 """
@@ -525,7 +544,8 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
                 """
                 SELECT id, slug, display_name, banner_type, pity_scope,
                        featured_chance_at_hit, featured_guarantee_after_loss,
-                       available_days, opens_at, closes_at
+                       available_days, opens_at, closes_at,
+                       pull_currency_id, pull_cost
                   FROM gamedata.banner WHERE version_id = ? ORDER BY id
                 """,
                 (rs, row) -> {
@@ -540,9 +560,26 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
                                     rs.getDouble("featured_chance_at_hit"),
                                     rs.getInt("featured_guarantee_after_loss")),
                             PityScope.valueOf(rs.getString("pity_scope")),
-                            Availabilities.read(rs));
+                            Availabilities.read(rs),
+                            pullPrice(rs, items));
                 },
                 version);
+    }
+
+    /**
+     * What a pull costs, or null when this banner does not say.
+     *
+     * <p>Read with {@code getObject} on both columns for the same reason the day
+     * boundary's hour is: the check constraint makes the pair whole, and
+     * {@code getInt}'s zero would turn a price nobody read into a free pull —
+     * which {@link io.stormalmanac.gamedata.banner.PullPrice} would then refuse
+     * to construct, so the failure would at least be loud. Null is quieter and
+     * correct.
+     */
+    private static PullPrice pullPrice(ResultSet rs, Map<Long, ItemId> items) throws SQLException {
+        Long currency = (Long) rs.getObject("pull_currency_id");
+        Integer cost = (Integer) rs.getObject("pull_cost");
+        return currency == null || cost == null ? null : new PullPrice(items.get(currency), cost);
     }
 
     // ── Shared ──────────────────────────────────────────────────────────────

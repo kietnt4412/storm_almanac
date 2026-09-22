@@ -146,7 +146,12 @@ class GameDataDiffTest {
         return new GameDefinition(
                 new Game(game.id(), game.displayName(), game.energyUnit(), boundary),
                 definition.version(), definition.items(), definition.sources(),
-                definition.sinks(), definition.banners(), definition.entities());
+                definition.sinks(), definition.banners(), definition.entities(),
+                // Carried, not defaulted. The seven-argument constructor exists
+                // for versions published before a progress kind could be named,
+                // and reaching for it here would drop the fixture's own names
+                // and report a rename this test never made.
+                definition.progressKinds());
     }
 
     private static GameDefinition load(String label) {

@@ -1,3 +1,4 @@
+| [0027](0027-a-roster-entry-holds-the-states-an-entity-has-reached.md) | A roster entry holds the states an entity has reached | Accepted |
 # Architecture decision records
 
 Every record names the **trigger that would reverse it**. A decision without a
@@ -34,3 +35,6 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0024](0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md) | An expiring grant is a deadline the plan reports, not a schedule it builds | Accepted |
 | [0025](0025-the-day-boundary-is-a-property-of-the-game.md) | The day boundary is a property of the game | Accepted |
 | [0026](0026-a-crossed-gate-is-a-reached-state.md) | A crossed gate is a reached state | Accepted |
+| [0027](0027-a-roster-entry-holds-the-states-an-entity-has-reached.md) | A roster entry holds the states an entity has reached | Accepted |
+| [0028](0028-a-name-for-a-progress-kind-is-the-bundles-word-not-the-games.md) | A name for a progress kind is the bundle's word, not the game's | Accepted |
+| [0029](0029-income-is-what-the-bundle-declares-not-a-rate-per-day.md) | Income is what the bundle declares, not a rate per day | Accepted |

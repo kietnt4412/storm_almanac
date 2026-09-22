@@ -10,6 +10,7 @@ import io.stormalmanac.gamedata.Game;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.ProgressKind;
 import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -70,6 +72,11 @@ import java.util.Set;
  *                        {@code sourcedBy}. Overrides only; a fact absent here
  *                        is covered by the default, so this map is small on
  *                        purpose and every entry in it is a deliberate claim
+ * @param progressKinds   names for the progress kinds this bundle's upgrades
+ *                        cost and its fodder rules feed. Not facts and not
+ *                        required — see {@link ProgressKind} — so they appear in
+ *                        no {@code factRef} and a kind nobody names renders as
+ *                        its slug
  */
 public record GameDataBundle(
         Game game,
@@ -83,8 +90,27 @@ public record GameDataBundle(
         List<Source> sources,
         List<Sink> sinks,
         List<BannerModel> banners,
-        List<Entity> entities
+        List<Entity> entities,
+        List<ProgressKind> progressKinds
 ) {
+
+    /** A bundle from before a progress kind could be named. */
+    public GameDataBundle(
+            Game game,
+            long sequence,
+            String label,
+            String attribution,
+            List<Provenance> provenance,
+            String sourcedBy,
+            Map<String, String> factProvenance,
+            List<Item> items,
+            List<Source> sources,
+            List<Sink> sinks,
+            List<BannerModel> banners,
+            List<Entity> entities) {
+        this(game, sequence, label, attribution, provenance, sourcedBy, factProvenance,
+                items, sources, sinks, banners, entities, List.of());
+    }
 
     public GameDataBundle {
         if (game == null) throw new BundleFormatException("game is required");
@@ -99,6 +125,11 @@ public record GameDataBundle(
         sinks = List.copyOf(sinks);
         banners = List.copyOf(banners);
         entities = List.copyOf(entities);
+        // Sorted, like GameDefinition's: names have no order, and a bundle that
+        // lists them in reading order has to equal the one the database returns.
+        progressKinds = progressKinds.stream()
+                .sorted(Comparator.comparing(ProgressKind::kind))
+                .toList();
         // Silence is given a meaning rather than left as a hole: a bundle that
         // declares nothing is a bundle whose facts came from nowhere anybody
         // recorded, which is not first-hand and so cannot be published. See
@@ -116,7 +147,7 @@ public record GameDataBundle(
         // constraint. "stage_drop_item_fk" is not something the person
         // approving a publish can act on; "stage '1-1' drops unknown item
         // 'sulfr'" is. See ADR 0008.
-        validate(items, sources, sinks, entities);
+        validate(items, sources, sinks, entities, banners, progressKinds);
         validateProvenance(provenance, sourcedBy, factProvenance,
                 refsOf(items, sources, sinks, banners, entities));
     }
@@ -135,7 +166,8 @@ public record GameDataBundle(
                 sources,
                 sinks,
                 banners,
-                entities);
+                entities,
+                progressKinds);
     }
 
     // ── Provenance ──────────────────────────────────────────────────────────
@@ -269,7 +301,8 @@ public record GameDataBundle(
     }
 
     private static void validate(
-            List<Item> items, List<Source> sources, List<Sink> sinks, List<Entity> entities) {
+            List<Item> items, List<Source> sources, List<Sink> sinks, List<Entity> entities,
+            List<BannerModel> banners, List<ProgressKind> progressKinds) {
 
         Set<ItemId> knownItems = new LinkedHashSet<>();
         for (Item item : items) {
@@ -332,6 +365,12 @@ public record GameDataBundle(
                 dangling.add("upgrade '" + upgrade.id() + "' advances unknown entity '" + upgrade.entity() + "'");
             }
         }
+        for (BannerModel banner : banners) {
+            if (banner.pullPrice() != null) {
+                require(knownItems, banner.pullPrice().currency(), dangling,
+                        "banner '" + banner.id().value() + "' prices a pull in");
+            }
+        }
         // A gate naming a state no upgrade touches cannot be met by any plan, and
         // would be reported at solve time as a goal nobody can reach. It is a typo
         // in the bundle, and the bundle is where to say so.
@@ -358,6 +397,31 @@ public record GameDataBundle(
                     requireStacks(knownItems, rank.upgradeCost(), dangling,
                             "skill '" + skill.id() + "' rank " + rank.rank() + " costs");
                 }
+            }
+        }
+
+        // A name for a kind nothing names is a typo, and a silent one: the name
+        // is never looked up, so the line it was written for goes on rendering
+        // its slug and the bundle looks like it fixed something. The opposite —
+        // a kind with no name — is legal and always will be, because every
+        // version published before names existed is exactly that.
+        Set<String> kindsInUse = new LinkedHashSet<>();
+        for (Sink sink : sinks) {
+            switch (sink) {
+                case Upgrade upgrade -> upgrade.progress().forEach(p -> kindsInUse.add(p.kind()));
+                case Fodder fodder -> {
+                    if (fodder.progress() != null) kindsInUse.add(fodder.progress());
+                }
+            }
+        }
+        Set<String> named = new LinkedHashSet<>();
+        for (ProgressKind kind : progressKinds) {
+            if (!named.add(kind.kind())) {
+                throw new BundleFormatException("duplicate progress kind '" + kind.kind() + "'");
+            }
+            if (!kindsInUse.contains(kind.kind())) {
+                dangling.add("progress kind '" + kind.kind() + "' is named but no upgrade costs it"
+                        + " and no fodder rule feeds it; in use: " + kindsInUse);
             }
         }
 

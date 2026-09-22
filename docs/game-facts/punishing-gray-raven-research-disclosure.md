@@ -18,7 +18,7 @@ Before it, PGR had no facts in this repository at all.
 | **Client** | English-language client, i.e. Global |
 | **Patch** | **"Steering By Light"**. PGR records patches **by name, not number** — the maintainer's report; the name appears on the home screen |
 | **Origin** | `PUBLISHER_DISCLOSURE` for everything under *the two pools* — it is the client's own Rules and Drop Details panels. `OBSERVED_IN_GAME` for the currency and energy readings |
-| **Read** | 2026-09-18. The maintainer took screenshots; a Claude Code session transcribed the numbers below from them. **No screenshot is committed** — game assets are not allowed in this repository |
+| **Read** | 2026-09-18, with later sittings on 2026-09-19, 2026-09-21 and 2026-09-22 marked where they appear. The maintainer took screenshots; a Claude Code session transcribed the numbers below from them. **No screenshot is committed** — game assets are not allowed in this repository |
 | **Account** | Commandant level 105. Account name and ID deliberately not recorded |
 
 Two origins are kept separate throughout, because they are different claims:
@@ -208,6 +208,17 @@ pull currency and what a pull costs in it**. Both are now read:
 Composed: **250 Black Cards a pull**, **25 Rainbow Cards a pull**, about
 **$4.20 a pull and $42 a ten-pull** — a plausible gacha price, which is itself a
 weak check on the 10:1 exchange.
+
+**Written down on 2026-09-22, as sequence 7** ([ADR 0029](../adr/0029-income-is-what-the-bundle-declares-not-a-rate-per-day.md)).
+The banner carries `pullPrice: { currency: "event-construct-rd-ticket", perPull:
+250 }` and the ticket is an item, 5★ off its tile. Only the 250 is in the
+bundle: the Black Card and Rainbow Card legs of the chain are not, because
+neither card is graded on any screen read so far and a currency conversion is a
+`Craft`-shaped thing nobody has modelled here. **What the bundle still cannot
+say is what accrues.** No reward in it grants a ticket, so `DeclaredIncomeModel`
+reports a balance and zero income — an honest answer and a visibly incomplete
+one. *The cheapest reading left: what the dailies and weeklies actually pay in
+Black Cards.*
 
 **Four pools, each with its own ticket and counter**, all priced 250 / 2500:
 
@@ -581,9 +592,12 @@ clearly and could not be written down, and each names a specific gap:
    no number to put there that is not an invention, so the banner is absent from
    the bundle rather than approximated. **This is the floating-guarantee cost,
    now paid in data rather than argued in prose.** *(2026-09-20: the format can
-   now hold it — `"drawnFrom": 80, "hardAt": 100`, ADR 0023. What still keeps
-   every PGR banner out of the bundle is **N28**: a banner has no pull currency
-   and no price.)*
+   now hold it — `"drawnFrom": 80, "hardAt": 100`, ADR 0023.)* **The claim that
+   followed this one — that N28 kept "every PGR banner out of the bundle" — was
+   wrong when it was written and stayed wrong for four sessions.** The Arrival
+   Construct banner has been in the bundle since sequence 0, on 2026-09-19;
+   what N28 kept out was its *price*, not the banner. Corrected 2026-09-22,
+   when the price went in as sequence 7.
 2. **The weapon's Overclock recipe (16/16/20/28) and its Harmony Lv 1 cost (25
    Harmony Accelerator).** An `Upgrade` must name the entity it advances, and the
    weapon these were read off was at 45/45 with its **name not recorded**. The
@@ -595,6 +609,18 @@ clearly and could not be written down, and each names a specific gap:
    asserting that everything in an inventory has a rarity, which a currency may
    simply not have. Worth deciding deliberately before **N28**, which needs the
    ticket to exist as an item.
+
+   ***Closed by reading rather than by deciding, and that is the finding.*** Four
+   of the five turned out to be graded after all — not on their item cards, which
+   show nothing, but on the shop and reward **tiles** they appear on. Simulation
+   Score read 4★ on a Battle Results tile and Cogs 3★ on a Simulation Shop tile
+   on 2026-09-19; Phantom Pain Scar read 3★ on the Cage's reward tiles the same
+   day; and the **Event Construct R&D Ticket read 5★ on a tile on 2026-09-22**,
+   which is what made N28's price writable. **Making `Item.rarity` optional was
+   the change this note argued for and it was never made**, because the premise —
+   that no screen grades a currency — was a statement about which screens had
+   been opened. Black and Rainbow Cards are still ungraded, and the same doubt
+   now applies to them: try the tile before changing the format.
 
 Two smaller shapes were bent rather than broken, and both are recorded in the
 bundle's own comments:

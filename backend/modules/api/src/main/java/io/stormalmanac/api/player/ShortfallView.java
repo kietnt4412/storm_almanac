@@ -101,7 +101,9 @@ public final class ShortfallView {
                 Item known = items.get(item);
                 lines.add(new ShortfallLine(
                         item.value(),
-                        progress ? Demand.progressKind(item) : known == null ? item.value() : known.displayName(),
+                        progress
+                                ? definition.nameOfProgress(Demand.progressKind(item))
+                                : known == null ? item.value() : known.displayName(),
                         required,
                         owned,
                         Math.max(0, required - owned)));

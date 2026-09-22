@@ -12,13 +12,12 @@ being finished with is.
 
 - The plan is [plan.html](plan.html) (13 phases, two tracks); [README.md](README.md)
   is the public face and [CLAUDE.md](CLAUDE.md) the working agreement.
-- **Rewritten end to end on 2026-09-18** after six sessions failed to trim it under 550 lines
-  ([the 826-line version, verbatim](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression)),
-  and **Status rewritten again on 2026-09-21** after seven unmeasured sessions took it to 614
-  ([what it carried](docs/history/tracker-archive.md#what-status-carried-until-the-2026-09-21-rewrite)).
-  Go there for anything this file no longer carries, and decide whether it is still operative
-  rather than assuming it was lost.
-- Last updated: **2026-09-21** (thirty-sixth session)
+- **Rewritten three times when it passed 550 lines** — end to end
+  [2026-09-18](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression) (826),
+  *Status* [2026-09-21](docs/history/tracker-archive.md#what-status-carried-until-the-2026-09-21-rewrite) (614),
+  the session index 2026-09-22 (566). Anything it no longer carries is in the archive verbatim — go and
+  decide whether it is still operative rather than assuming it was lost.
+- Last updated: **2026-09-22** (thirty-seventh session)
 
 ---
 
@@ -31,14 +30,16 @@ being finished with is.
   below that says "R1999" was true when written and still is — it is just no
   longer the launch.**
 - **PGR is read first-hand** ([the note](docs/game-facts/punishing-gray-raven-research-disclosure.md)) and
-  [its bundle](data/bundles/punishing-gray-raven-steering-by-light.json) is at **sequence 6** — 116 facts, the
-  level ladder, thirteen Promote gates, one weekly ladder, a **05:00 UTC** reset. Every sequence has published and
-  read back as *no changes*; the next correction is a **sequence 7**, which N37 and N28 both want. What it plans is
+  [its bundle](data/bundles/punishing-gray-raven-steering-by-light.json) is **published at sequence 7** — 117
+  facts over eight provenance entries, the level ladder, thirteen Promote gates, one weekly ladder, a
+  **05:00 UTC** reset, and since 2026-09-22 a **pull price**. Every sequence has published and
+  read back as *no changes*, sequence 7 included. **Sequence 7 closed N37 and N28's modelling half** and is the
+  first sequence carrying something that is not a fact at all (the EXP pool names, ADR 0028). What it holds is
   [in the table below](#what-the-next-work-touches). **Reading the client overruled the guides four times** — a
   per-banner featured rate, events with no shops, a drawn wall, a `PityScope` inheriting across pools where R1999
   clears — the standing argument for the client over a wiki
   ([the four](docs/history/tracker-archive.md#what-status-carried-until-the-2026-09-21-rewrite)).
-- **Nine decisions are live, and each is its own account — read the ADR, never a summary.**
+- **Eleven decisions are live, and each is its own account — read the ADR, never a summary.**
   [0019](docs/adr/0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-demanded-as-an-item.md) gates ·
   [0020](docs/adr/0020-a-limit-that-never-resets-is-offered-whole.md) lifetime caps ·
   [0021](docs/adr/0021-one-step-at-several-prices-is-a-choice-the-solver-makes.md) choices ·
@@ -47,10 +48,13 @@ being finished with is.
   [0024](docs/adr/0024-an-expiring-grant-is-a-deadline-the-plan-reports-not-a-schedule-it-builds.md) deadlines ·
   [0025](docs/adr/0025-the-day-boundary-is-a-property-of-the-game.md) day boundary ·
   [0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md) ·
-  [0027](docs/adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md) roster states. **0022's trigger is
+  [0027](docs/adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md) roster states ·
+  [0028](docs/adr/0028-a-name-for-a-progress-kind-is-the-bundles-word-not-the-games.md) progress names ·
+  [0029](docs/adr/0029-income-is-what-the-bundle-declares-not-a-rate-per-day.md) income. **0022's trigger is
   live:** `reach` becomes player state the moment a reader answers twice, which since 2026-09-21 means *a second
-  device*. **Three loose ends sit outside all nine:** both PGR pity archetypes are expressible and **neither is
-  authored** (N28); **`Availability.opensAt` is read by nobody**, deliberately; and **`GameAgnosticismTest` is blind
+  device*. **Three loose ends sit outside all eleven:** the **Themed Construct archetype is expressible and not
+  authored** — its wall is drawn 80–100 and ADR 0023 made that writable on 2026-09-20, but nobody has written it;
+  **`Availability.opensAt` is read by nobody**, deliberately; and **`GameAgnosticismTest` is blind
   to a constant right for no game** — `UTC` is not a game name, and a javadoc caught 0025's bug where no test did.
 - **Going first-hand on game data**, 2026-09-09
   ([ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)), superseding 0009 and closing Q2, Q3,
@@ -69,11 +73,12 @@ being finished with is.
   **`backend/Dockerfile`'s COPY list is B5's path and drifts in silence** — it omitted `adapters/` from Phase 1
   until 2026-09-09, every image build failing in six seconds while this file called it verified, so **anything added
   beside `modules`, `adapters`, `substrate`, `app` needs a line there**.
-- **The remote, last checked 2026-09-21 (thirty-sixth) — re-check it, do not trust it.**
-  **[PR #36](https://github.com/kietnt4412/storm_almanac/pull/36) is MERGED** at `26e4345`,
-  `dev` was clean at `6cdf520` and no PR was open. **This file has now named a stale PR on three
-  consecutive checks** (#31 when #33 was current, #33 when #35 was, #35 when #36 was), which is the
-  whole argument for re-checking rather than reading. **The unbuilt-`dev`-commit trap was not sprung**, and B6 means it largely cannot be
+- **The remote, last checked 2026-09-22 (thirty-seventh) — re-check it, do not trust it.**
+  **[PR #37](https://github.com/kietnt4412/storm_almanac/pull/37) is MERGED**,
+  `dev` and `origin/dev` were both clean at `4abf8ae` and no PR was open. **This file has now named a
+  stale PR on four consecutive checks** (#31 when #33 was current, #33 when #35 was, #35 when #36 was,
+  #36 when #37 was), which is the whole argument for re-checking rather than reading — and it is worth
+  noticing that the check has *never once* found the file right. **The unbuilt-`dev`-commit trap was not sprung**, and B6 means it largely cannot be
   any more: CI triggers on a push to `dev`, so a commit with no PR open is built.
   **What the trigger does not do is watch the merge** — PR #25 merged *before its own run finished*
   and was green by luck (archive, twenty-sixth) — so **wait for the run before merging** still
@@ -141,14 +146,17 @@ launch title's own data, which the solver plans from, EXP, one gate and one scor
 
 **The load-bearing claim, and it is a number to re-earn.** On **nine** benchmark materials the cheapest stage this
 project computes is the one a published guide tells players to farm, and the plan for a real goal set costs
-**3 880 Activity against the guide's 4 017** — which does not even cover the whole demand. Nine and not five
+**3 877 Activity against the guide's 4 017** — which does not even cover the whole demand. Nine and not five
 because a yield carries its sample size (ADR 0011). **Every one of those numbers comes from Kornblume-fed inputs**,
 which ADR 0015 says the product will not ship, so until a self-sourced bundle reproduces them they are evidence
 about somebody else's numbers run through our solver. **The method survives untouched**, because the guide is a
 separate published artifact: a claim to re-earn, not a test to delete
-([the benchmark](docs/benchmarks/reverse-1999-community-answers.md)). **Re-measured 2026-09-21 against freshly
-fetched snapshots and every figure held** ([the dated run](docs/benchmarks/snapshot-gated-runs.md)) — which
-confirms the same Kornblume data still says what this file says it says, and re-earns nothing.
+([the benchmark](docs/benchmarks/reverse-1999-community-answers.md)). **Re-measured 2026-09-21 and again
+2026-09-22 against freshly fetched snapshots** ([the dated runs](docs/benchmarks/snapshot-gated-runs.md)) —
+which confirms the same Kornblume data still says what this file says it says, and re-earns nothing.
+**The plan cost moved 3 880 → 3 877 between those two runs**, 0.08%, with nothing in the change touching the
+model: branch-and-bound landing on a different equally-good answer inside its budget is the expected shape
+(ADR 0010), and the figure is carried here as the measured one rather than the remembered one.
 
 Toolchain on this machine: JDK 21.0.12 (Temurin), Gradle **9.6.0** via the
 committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
@@ -157,16 +165,16 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **420 tests** in full 2026-09-21, 0 skipped locally **and all 16 snapshot-gated ones verified against freshly fetched upstream data the same day** ([the dated run](docs/benchmarks/snapshot-gated-runs.md)), so standing caveat 1 is satisfied for that build by measurement rather than assumed; **404 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares **two** directories outside every source set as inputs — `data/bundles`, without which `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed, and `build/upstream-snapshots`, without which fetching upstream left the task `UP-TO-DATE` (N36). **The second was the identical bug ten lines below the first's fix.** `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
-| Authored game data | **One bundle, sequence 6 published, first-hand** | **116 facts over seven provenance entries.** Helentine: Lacrimosa (level to 80 as a **thirteen-link chain, every gated level priced**, 13-step Promote **all gated**, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, the weekly Phantom Pain Cage's nine tiers, and the game's **05:00 UTC** day boundary — which is a game-level field and so adds no fact, exactly why `Facts` had to learn to flatten `Game` (ADR 0025). **What each sequence added and when it published is [in the archive](docs/history/tracker-archive.md#session-log)**; every one read back as *no changes*, and the next correction is a sequence 7. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) — or, for a reader who says they clear the whole Cage, **63 days and none at all** (ADR 0022) |
+| Backend build | **Green** | **435 tests** in full 2026-09-22, 0 skipped locally **and all 16 snapshot-gated ones verified against freshly fetched upstream data the same day** ([the dated run](docs/benchmarks/snapshot-gated-runs.md)), so standing caveat 1 is satisfied for that build by measurement rather than assumed; **419 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares **two** directories outside every source set as inputs — `data/bundles`, without which `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed, and `build/upstream-snapshots`, without which fetching upstream left the task `UP-TO-DATE` (N36). **The second was the identical bug ten lines below the first's fix.** `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
+| Authored game data | **One bundle, sequence 7 published, first-hand** | **Sequence 7 added one item and one provenance entry** — the Event Construct R&D Ticket, **5★ off a tile on 2026-09-22**, which is the fourth currency graded that way where its own item card grades nothing. It carries the banner's pull price (250, credited to the 2026-09-18 pool-screen sitting) and the three EXP pool names, which are **not facts and declare no provenance** (ADR 0028) and so show in the diff as three `progress '<kind>'` subjects and in no provenance count. **117 facts over eight provenance entries.** Helentine: Lacrimosa (level to 80 as a **thirteen-link chain, every gated level priced**, 13-step Promote **all gated**, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, the weekly Phantom Pain Cage's nine tiers, and the game's **05:00 UTC** day boundary — which is a game-level field and so adds no fact, exactly why `Facts` had to learn to flatten `Game` (ADR 0025). **What each sequence added and when it published is [in the archive](docs/history/tracker-archive.md#session-log)**; every one read back as *no changes*. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) — or, for a reader who says they clear the whole Cage, **63 days and none at all** (ADR 0022) |
 | CI workflow | **Green, Node 24; triggers on `dev`** | Since B6 (2026-09-21) it runs on push to `main` **and `dev`** as well as `pull_request`, so a push to the working branch with no PR open is built rather than silently ignored. **One annotation, and it is GitHub's rather than ours:** `ubuntu-latest` migrates to Ubuntu 26 from 2026-10-19 — nothing to fix, worth knowing before a green run starts carrying a warning nobody placed. **A push to `dev` while a PR is open from `dev` runs twice, on purpose** — the concurrency group stays keyed by ref, because collapsing push and PR into one group lets `cancel-in-progress` cancel the run the PR needs green. **The `deploy` job is still `if: false` and must be gated to `refs/heads/main` when B5 turns it on**, or it ships every commit landing on `dev`. Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
 | The MIP (`EnergyMip`) | **Stages, crafts, shops, rewards and fodder** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. A purchase is a conversion capped at limit × *whole* periods, or the whole allowance of one that never resets, which the plan says it assumed unspent (ADR 0020); feeding fodder is a conversion into a `progress:<kind>` item, and paying one of a step's several prices a conversion into a `choice:` item (ADR 0021). Gates are not in the model: `DemandResolver` turns them into demand (ADR 0019). **A grant behind a score the reader has not cleared is dropped before the model** and reported in the notes, so the counts in a plan and in a refusal are the game *that reader* plays (ADR 0022) |
-| The time axis | **A scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). Rotation is capacity shared over *subsets* of weekday restrictions; **no variable is indexed by day**, which is why p95 held at **1 808 ms, re-measured 2026-09-21** (median 1 805, max 1 813; it read 1 807 when first recorded, and one millisecond on a 2 000 ms budget is noise, not drift). An expiring grant is **supply plus a reported deadline**, never a scheduled claim (ADR 0024). **Which weekday day zero is comes off the game** — `Game.dayBoundary`, a zone and an hour, and `null` means the midnight-UTC every version published before `V12` was planned by (ADR 0025) |
+| The time axis | **A scalar, not an index** | [ADR 0013](docs/adr/0013-the-horizon-is-a-scalar-not-an-index.md). Rotation is capacity shared over *subsets* of weekday restrictions; **no variable is indexed by day**, which is why p95 has held across three measurements — **1 807 ms, then 1 808 on 2026-09-21, then 1 812 on 2026-09-22** (max 1 814), a 7 ms band on a 2 000 ms budget with 188 ms of headroom. All three drifts are upward, which is worth watching and is not yet drift; the dated runs are in [the benchmark log](docs/benchmarks/snapshot-gated-runs.md). An expiring grant is **supply plus a reported deadline**, never a scheduled claim (ADR 0024). **Which weekday day zero is comes off the game** — `Game.dayBoundary`, a zone and an hour, and `null` means the midnight-UTC every version published before `V12` was planned by (ADR 0025) |
 | `gacha` — engines | **Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). An exact chain and 500 000 seeded trials sharing one validated `PullModel`, so both refuse the same banners for the same reasons. **53 tests, worst gap 0.110 points over 108 questions, at 2.22 standard errors.** Only the headline rarity is modelled. **Through a drawn guarantee they take different roads on purpose** — the chain integrates it out, the simulation draws it (ADR 0023) — which is what caught the simulation sampling the prior, 0.558 against the chain's right 0.382. **A generated question set is not automatically one that probes the band it generated:** every generic question for a wall of 100 lands below the drawn range or at certainty |
-| `gacha` — income model | **Interface only, unwritable** | `projectedPulls` needs to know which item is pull currency and what a pull costs in it. **Neither `BannerModel` nor the `banner` table declares either** — **N28**, whose numbers now exist |
-| Frontend | **Six screens, browser-driven, 28 tests** | Inventory editor, goal picker, plan view carrying **every one of the solver's notes**, catalog browse and search, the character page with the **personalized overlay**, and — since 2026-09-21 — a **roster screen**, so a construct with no goal can be recorded at all. The plan form **asks how far the reader gets and sends `reach`**, off `GET /api/games/{game}/measures`, remembered per profile in the store (persist v2) and **not stored server-side** — ADR 0022 stands, and its reversal trigger is now "a second device asks again". Same-origin locally via the Vite proxy. **There is no prettier or eslint config in the repo** and the files are hand-formatted — do not run a formatter here until somebody commits one |
+| `gacha` — income model | **Written, and nothing calls it** | [ADR 0029](docs/adr/0029-income-is-what-the-bundle-declares-not-a-rate-per-day.md), 2026-09-22. `BannerModel.pullPrice` (`V15`, nullable — **unstated is not free**, and `pricedPull()` refuses rather than answering zero) plus `DeclaredIncomeModel`: balance from the inventory, accrual from the `Reward` rows that grant the currency at their own cadence, `reach` applied and every dropped grant **named**. **There is deliberately no pulls-per-day constant** — that number is on no screen. **PGR's bundle declares no reward paying a ticket, so accrual is zero and a test asserts it**: the assertion is a marker for a missing reading, and the reading to take is what the dailies pay in Black Cards. Still no route, no screen, no bean, and `PityState` stored nowhere — N28 closed the model, not the wiring |
+| Frontend | **Six screens, browser-driven, 31 tests** | Inventory editor, goal picker, plan view carrying **every one of the solver's notes**, catalog browse and search, the character page with the **personalized overlay**, and — since 2026-09-21 — a **roster screen**, so a construct with no goal can be recorded at all. The plan form **asks how far the reader gets and sends `reach`**, off `GET /api/games/{game}/measures`, remembered per profile in the store (persist v2) and **not stored server-side** — ADR 0022 stands, and its reversal trigger is now "a second device asks again". Same-origin locally via the Vite proxy. **There is no prettier or eslint config in the repo** and the files are hand-formatted — do not run a formatter here until somebody commits one |
 | Docker Compose | **Repaired, and no image built end to end** | The fixed tree builds the jar locally and that jar contains no development sign-in. **The image itself is unproven** — the in-container Gradle download was abandoned at 10% after twenty minutes |
 | Development sign-in | **Done, and absent from the artifact** | [ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md). `:modules:identity-dev` is `testAndDevelopmentOnly`, so **no property or profile can reach it**; `DeployableJarTest` opens the jar and proves the absence on every build. **Do not add a switch that turns it on** |
 
@@ -209,19 +217,24 @@ works". It does not mean that:
   nothing**, so a cached plan survives the inventory under it moving — harmless until Phase 6.
 - **Nothing has ever asked the gacha engines a question on behalf of a player.** No route, no screen, no bean, and
   **`PityState` is stored nowhere**: the gap is a schema and a screen rather than an engine. **Three banners are
-  first-hand and five are not (Q4)**, **no bundle declares a banner at all** (**N28**), and **multi-copy answers are
+  first-hand and five are not (Q4)**, and **multi-copy answers are
   too pessimistic** — 200 Cassettes of the Lost buy a copy and nothing models it, so at two copies the engines say
-  280 pulls and the truth is 200.
-- **One character is not a catalog.** The overcharge that made its plans wrong is
-  closed at both ends — [ADR 0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md) inferred
-  what sits *behind* a recorded state, [ADR 0027](docs/adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md)
-  (`V13`) let a reader say what sits *beside* it, and each is its own account — and since
-  2026-09-21 there is a roster screen to type it into and a plan form that sends `reach`.
-  **What is still wrong here:** a `progress:` line **renders as its bare slug** next to a
-  properly named `Cogs` (**N37**, and it wants a sequence 7 rather than a frontend change), and
-  **no shadow price has ever rendered** — though the reason is now known rather than suspected:
-  on the Evolve to SS plan the one demanded item is at its bound, so the map is legitimately
-  empty and the notes say so. Every R1999 catalog and drop number in this file comes from Kornblume.
+  280 pulls and the truth is 200 (**N38**). *This bullet also said "no bundle declares a banner at all" until
+  2026-09-22; the PGR bundle has declared one since sequence 0 on 2026-09-19, and what N28 was actually missing was
+  the banner's price.* **Since sequence 7 an account's budget can be computed** (ADR 0029) and nothing calls that
+  either.
+- **One character is not a catalog.** The overcharge that made its plans wrong is closed at both ends —
+  [ADR 0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md) inferred what sits *behind* a recorded state,
+  [ADR 0027](docs/adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md) (`V13`) let a reader say
+  what sits *beside* it — and since 2026-09-21 there is a roster screen and a plan form that sends `reach`.
+  **What is still wrong here:** **no shadow price has ever rendered against a real plan** — the
+  reason is known rather than suspected (on the Evolve to SS plan the one demanded item is at its
+  bound, so the list is legitimately empty and the notes say so), and what it wants is a goal set
+  with a farmable stage in it, which one PGR bundle does not yet have. The naming half is closed:
+  a `progress:` line rendered as its bare slug beside a properly named `Cogs` until 2026-09-22
+  (N37, ADR 0028). **A `choice:` line still renders as `one of: <upgrade id>, <upgrade id>`**, and
+  that one is *not* the same fix — an upgrade's name would be the game's word, so it is a fact with
+  provenance. Every R1999 catalog and drop number in this file comes from Kornblume.
 - **Eight qualifications of the closed phases are
   [in the archive](docs/history/tracker-archive.md#qualifications-moved-out-of-the-live-tracker-2026-09-11-seventeenth-session)**
   — the benchmark being one guide, the two community disagreements, the three
@@ -231,34 +244,30 @@ works". It does not mean that:
 
 ## Next actions
 
-**N30, N20, N33, B6, N34, N36 and N35's two load-bearing halves all closed
-2026-09-21** — [in the archive](docs/history/tracker-archive.md#completed-next-actions).
+**N37 and N28's modelling half closed 2026-09-22** (ADR 0028, ADR 0029) — with
+N30, N20, N33, B6, N34, N36 and N35's two load-bearing halves on 2026-09-21,
+[in the archive](docs/history/tracker-archive.md#completed-next-actions).
 **B5 is the only Phase 4 item left**, and it needs the maintainer's own accounts.
 
-**That closes the four defects turned into actions on 2026-09-21**, all within
-two days, which is the argument for having written the list: each was already
-described somewhere in this file and **none was an action anybody could pick
-up**. **Three of the four found their entry was wrong** — N34 falsified half of
-N35, N36 was scoped as paperwork and found the workflow it was told to follow had
-never worked, and N33 widened a flaw it did not name. **A described defect stays
-true until somebody runs it.**
+**Every defect turned into an action on 2026-09-21 is now closed**, and the
+pattern from that batch held into this one: **an entry is wrong until somebody
+runs it.** N28 said "no bundle declares a banner at all" and one had since
+sequence 0; N37 was scoped as one sequence and turned out to be two decisions
+that share a file and nothing else. **Three stale claims were corrected in this
+file and one in the research note as a side effect of doing the work** — which is
+the argument for doing it rather than re-reading it.
 
 ### Before B5 — debt worth paying first
 
-- [ ] **N37 — A demand line that is not a catalog item renders as a slug.** What
-      is left of N35. **A `progress:` line renders as its bare slug** —
-      `character-exp` beside a properly named `Cogs`, on the shortfall table and
-      in the shadow-price list — and a `choice:` line would too. **The fix is not
-      in the frontend:** a progress kind has no display name anywhere to render,
-      so this is a bundle field, a parser change and a **sequence 7** — the same
-      five pieces N20 and N33 each walked. **N28 also wants a sequence 7, so the
-      two should land together.** The shadow price is a separate and smaller
-      thing and **is no longer evidence of a defect**: the `PlanView` path is live
-      and correct, and the Evolve to SS plan prices nothing because its one
-      demanded item is at its bound, which the notes say out loud. What it wants
-      is a plan with slack — a goal set with a farmable stage in it, which PGR's
-      one bundle does not yet have. Drive it when there is one, rather than
-      asserting a number nobody has seen.
+**Nothing.** N37 was the last of it and closed 2026-09-22.
+
+**One thing worth knowing for the next sequence, learned doing this one:** the
+CLI needs a **live Postgres carrying every previous sequence** for `preview` to
+mean anything — a fresh database reports *"this bundle would be the first"*,
+which is not the check. `docker compose up -d postgres` restores it from the
+`storm_almanac_postgres-data` volume, which still holds every version published
+since 2026-09-06. **Even `validate`, which touches no version, boots the whole
+Spring context and fails without a database.**
 
 ### Held — Phase 4 scope, and the maintainer decides
 
@@ -279,23 +288,24 @@ in full on 2026-09-20 — read the plan rather than re-deriving one.
 
 ### Held — later phases, not Phase 4's business
 
-- [ ] **N28 — Give a banner a pull currency and a price, then write `IncomeModel`.
-      Unblocked — the numbers exist** and are in
-      [the research note](docs/game-facts/punishing-gray-raven-research-disclosure.md):
-      **1 pull = 250 Event Construct R&D Tickets**, about **$4.20 a pull**. A
-      schema change rather than a decision, the same five pieces N20 walked on
-      2026-09-21 — and N20 found a sixth, that `Facts` must flatten whatever the
-      field hangs off or the preview reports nothing (ADR 0025).
-      **Plus a decision the first bundle forced** — the ticket must be an `Item`
-      and `Item.rarity` is required; tiles grade Cogs, Score and Scars, so try the
-      ticket's tile before making rarity optional. **Two more fields belong in the
-      same change**, both R1999: a **shop exchange for the featured unit** —
-      cassettes cut six copies from 840 pulls to 560 — and a **cap on copies**.
-      **This is the only thing keeping a banner out of a bundle**, so N28 ends in a
-      **sequence 7** rather than in a schema — 6 was N33's. **The multi-copy
-      pessimism belongs to this item**: 200 Cassettes of the Lost buy a copy,
-      nothing models it, so at two copies the engines say 280 pulls when the
-      truth is 200, and the shop exchange above is the fix.
+- [ ] **N38 — A shop exchange for the featured unit, and both engines spending
+      it.** **Cut out of N28 on 2026-09-22 deliberately, and the cut is on the
+      record.** R1999 sells a copy for **200 Cassettes of the Lost**, one per
+      pull, so six copies cost **560 pulls and not 840** — and at two copies the
+      engines say 280 where the truth is 200. **This is not a field, it is an
+      engine change**: the exchange goes on `BannerModel`, and then
+      `probabilityOfFeatured(…, copies)` has to spend it in *both* engines, which
+      grows the chain's state space. **And it has nothing to exercise it** —
+      the reading is R1999's, R1999 has no first-hand bundle, and a column no
+      bundle can fill is `Availability.opensAt` again. **Do it with Phase 11's
+      R1999 sourcing**, or earlier if a PGR pool turns out to sell copies.
+- [ ] **N39 — Read what the dailies and weeklies pay in Black Cards.** The one
+      reading that would make `DeclaredIncomeModel` say something. PGR's bundle
+      declares no reward granting a research ticket, so accrual is **zero and a
+      test asserts it** — an honest answer and a visibly incomplete one. Two
+      shapes to watch for: the chain is **Rainbow Card → 10 Black Cards → 1
+      ticket**, and ADR 0029 says a conversion chain may want `Craft` rather than
+      a grant; and paid income is not income this project should model at all.
 - [ ] **N18 — Put drop estimates into `SolveKey` in the same change that first
       publishes one.** The moment Phase 6 does, a plan cached against yesterday's
       rates is served as today's — the one staleness bug the key's design cannot
@@ -338,8 +348,8 @@ previous one's criterion is met. The "Landed" record for closed phases is
       closes by having been forgotten. **The first three are done; B5 is the only
       one left.**
 - [x] **Phase 5 · Gacha engine** — closed 2026-09-12 out of order
-      ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)); **one banner
-      first-hand (Q4)**, income model and shop exchange are **N28**.
+      ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)); **one banner first-hand (Q4)**;
+      income model landed 2026-09-22 (ADR 0029), shop exchange is **N38**.
 - [ ] **Phase 6 · Drop statistics on Postgres** — 1.5 weeks. Report submission,
       Wilson intervals, provenance, abuse controls, estimates feeding the
       optimizer — on the boring implementation first, because this is the interface
@@ -439,7 +449,7 @@ where Phase 5's criterion was a proof about a model.
 
 ### D1 · Deployment deferred (2026-09-02)
 
-**REVERSED 2026-09-09.** Heading kept verbatim so every link still lands. Both halves of its own trigger fired at once — Phase 4 reached, a free tier accepted — so **Vercel for the frontend, Render for the backend**, still no money ([in full](docs/history/tracker-archive.md#d1--the-deferral-in-full)). **What it cost is what B5 buys back:** Phase 0's box is unticked, the gate has no meaning without real traffic, and deploy problems really were found late.
+**REVERSED 2026-09-09**, heading kept verbatim so every link still lands. Both halves of its trigger fired at once — Phase 4 reached, a free tier accepted — so **Vercel for the frontend, Render for the backend**, still no money ([in full](docs/history/tracker-archive.md#d1--the-deferral-in-full)). **What it cost is what B5 buys back:** Phase 0's box is unticked, the gate has no meaning without real traffic, and deploy problems really were found late.
 
 ---
 
@@ -516,6 +526,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-22 | thirty-seventh | N37 and N28 closed as one sequence 7, published and read back as *no changes*. **The EXP pool names are the bundle's own word, not the game's** — PGR calls all three pools "EXP" (ADR 0028) — and the pull price is 250 tickets, writable at last because the maintainer opened the ticket's tile and it grades 5★, so the format change the research note argued for was never needed (ADR 0029). `IncomeModel` written, and nothing calls it. **Three stale claims fell out of doing the work**, including "no bundle declares a banner at all", which had been false since sequence 0. Whole-graph equality caught an ordering bug the field-by-field assertions missed. 435 tests, 16 gated ones run; p95 1 812 ms and the plan 3 877 Activity, both recorded rather than smoothed |
 | 2026-09-21 | thirty-sixth | N35's two load-bearing halves closed, leaving N37. The plan form asks **how far do you get** and sends `reach`, off a new `/measures` route that collects the ladders ADR 0022 said were declared nowhere; answering nothing is refused *by name*, answering 1 100 000 plans **Evolve to SS in 63 days and 0 Serum** — the first plan a web client has ever asked for that counts a scored grant. The ladder summary computes **56 Scars a week**, agreeing with the figure ADR 0022 states in prose. A roster screen, sharing one state-editing component with Goals. 420 backend tests, frontend 16 → 28. ADR 0022 stands: the maintainer kept `reach` on the request, so its trigger is now a *second device*. **Do not run prettier here** — no config, and it reformatted 456 lines of a 269-line change |
 | 2026-09-21 | thirty-fifth | N36 closed, and it was not the paperwork it was scoped as. Every load-bearing figure held — nine agreements, 3 880 against 4 017, 419 tests and all 16 gated ones run — but **following the documented workflow proved nothing**: the property never reached the test worker and the snapshot directory was not a task input, so a fetch left `:app:test` `UP-TO-DATE`. The second is the identical bug to `data/bundles`, ten lines above its own fix. Both fixed, both proven by measurement; numbers now dated in `docs/benchmarks/snapshot-gated-runs.md` |
 | 2026-09-21 | thirty-fourth (cont.) | N34 closed: a roster entry holds a set of states (ADR 0027, `V13`). A reader at `promote-6` who says they are also at `level-80` pays 127 500 Cogs and **no EXP** where they were charged 90 000 over six steps. The merge unit stays the entity. **The frontend shipped wrong twice with 16 green tests each time** — a `select multiple` nobody could use, then chips styled as buttons the maintainer looked straight at and did not see. Two live claims died: a `progress:` line *has* rendered (as a bare slug), and PGR *has* been rendered, so N35 was rescoped rather than ticked |
@@ -536,15 +547,4 @@ newest first. **Write the entry there; add one short line here.**
 | 2026-09-18 | twenty-second | PGR read off the client, and the guides wrong twice: a per-banner featured rate, and events with no shops. N28 unblocked, N30 rescoped, N31's cause found |
 | 2026-09-14 | twenty-first | The PGR survey D3 was missing. Nothing found plans PGR farming from an inventory; its one finding with teeth came from guides and was false |
 | 2026-09-13 | twentieth | Launch title swapped to PGR (D3) — Kornblume solves per player. Q4 answered for one banner off the client. N5: every CI action onto Node 24 |
-| 2026-09-12 | nineteenth | Phase 5 closed out of order (D2): two engines, worst gap 0.110 points over 84 questions. Four decisions in ADR 0018 |
-| 2026-09-12 | eighteenth | N4: ADR 0007's own open gap becomes a failing build — `EntityKindBoundaryTest`, an allowlist over bytecode |
-| 2026-09-11 | seventeenth | N25's three debts paid: provenance read back through a second port, the PWA loaded with the server killed, 15 frontend tests |
-| 2026-09-11 | sixteenth | N25: five screens driven in a browser, and a character page that says what the reader is short of |
-| 2026-09-09 | fifteenth | N24: a browser signs in, through a module the deployable jar does not contain (ADR 0017). Found a CSRF cookie never issued |
-| 2026-09-09 | fourteenth | N26 answered — no, drop rates are not disclosed. Provenance becomes a field and `publish` enforces it (ADR 0016) |
-| 2026-09-09 | thirteenth | N23 pays Phase 3's sync debt (ADR 0014); then the largest decision — go first-hand on game data (ADR 0015) |
-| 2026-09-08 | twelfth | Phase 3 opened and closed: V5, sign-in creating the account, a plan from goals nobody handed the optimizer |
-| 2026-09-08 | eleventh | N14: the horizon as a scalar (ADR 0013), p95 held at 1 807 ms, the two objectives finally disagree |
-| 2026-09-08 | tenth · ninth | N15's solve cache, 1 806 ms → 2 ms; then N16 and N17 close Phase 2 and yields learn their sample size |
-| 2026-09-07 | eighth · seventh | The community's answers, and the stage table missing two thirds of the game; the optimizer says how much it does not know (ADR 0010) |
-| 2026-09-02 – 09-06 | first to sixth | Scaffold, first green build, first CI, prior art, D1 · the equipment question (ADR 0007) · Phase 1's schema · V3 · the API answering Phase 1's exit · ADR 0009 |
+| 2026-09-02 – 09-12 | first to nineteenth | **Collapsed into one row on 2026-09-22, when this file passed 550 lines again.** Nineteen sessions from the scaffold to Phase 5 closing out of order: the first green build and CI, prior art and D1, the equipment question (ADR 0007), Phase 1's schema and the API answering its exit, ADR 0009, the community's answers and the stage table missing two thirds of the game (ADR 0010), yields learning their sample size (ADR 0011), the solve cache, the horizon as a scalar (ADR 0013), Phase 3, the sync debt (ADR 0014), **going first-hand (ADR 0015)** and provenance (ADR 0016), a browser signing in (ADR 0017), five screens driven in a browser, and two gacha engines agreeing (ADR 0018). **Each still has its own full entry [in the archive](docs/history/tracker-archive.md#session-log), newest first** — these one-liners were a second index over a file that is itself an index |

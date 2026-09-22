@@ -31,6 +31,43 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**N37 — A demand line that is not a catalog item renders as a slug.**~~
+      Done 2026-09-22, ADR 0028. The entry said the fix was "a bundle field, a
+      parser change and a sequence 7 — the same five pieces N20 and N33 each
+      walked", and it was, plus a sixth the entry could not have known: **what
+      the name should say.** The game calls all three PGR pools "EXP", so a
+      first-hand name would have made the defect worse. The name is the bundle's
+      own word and carries no provenance, which makes it the first text in a
+      bundle here that is deliberately not a reading. The shadow-price half of
+      the entry became a wire change — `Map<String, Double>` to a list of
+      `{item, displayName, price}` — because a map has nowhere to put a name.
+      **Not done and not the same fix:** a `choice:` line still renders its
+      upgrade ids, and an upgrade's name would be the *game's* word, so a fact
+      with provenance.
+
+- [x] ~~**N28 — Give a banner a pull currency and a price, then write
+      `IncomeModel`.**~~ Done 2026-09-22, ADR 0029. Two things in the entry were
+      wrong and one decision in it was never needed.
+
+      **Wrong:** "this is the only thing keeping a banner out of a bundle" — a
+      banner had been in the PGR bundle since sequence 0 on 2026-09-19, and what
+      was missing was its price. **Never needed:** "the ticket must be an `Item`
+      and `Item.rarity` is required; tiles grade Cogs, Score and Scars, so try
+      the ticket's tile before making rarity optional." The tile was tried. It
+      grades the ticket **5★**, and the format change the research note had
+      argued for since 2026-09-18 turned out to rest on which screens had been
+      opened rather than on the game.
+
+      **`IncomeModel`'s own signature was the real obstacle**, which the entry
+      did not name: `projectedPulls(ProfileId, LocalDate)` names no banner, and
+      PGR's four pools have four different tickets. It became
+      `affordableWithin(game, banner, held, days, reach)`.
+
+      **Cut on the record**, per the entry's "two more fields belong in the same
+      change": the R1999 shop exchange and the copy cap are **N38**, because they
+      are an engine change rather than fields and because R1999 has no first-hand
+      bundle to exercise them.
+
 - [x] ~~**N36 — Fetch upstream before trusting a green build, once, and write down
       what it proves.**~~ Done 2026-09-21. The entry as it stood is in the tracker's
       2026-09-21 revision; it said **"not a code change — an hour, and it either
@@ -2906,6 +2943,107 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-22 (thirty-seventh) — one bundle sequence, two decisions that share
+nothing but a file.** N37 and N28, which the tracker said "should land together"
+because both wanted a sequence 7. They did land together, and the only thing
+they had in common was the sequence number.
+
+**Session start, the remote check.** PR #37 merged; `dev` and `origin/dev` both
+clean at `4abf8ae`; no PR open. The file named #36 as newest merged — **stale for
+the fourth consecutive check.** The check has now never once found the file
+right, which is a stronger statement than "re-check rather than read" and is
+worth saying in those words.
+
+**N37 turned on a question the code could not answer: what *is* a progress
+kind's name?** The obvious answer — write down what the game calls it — is
+wrong, and PGR is the case that proves it. The character Level Up screen reads
+`EXP 0/20`, the weapon Enhancement Cost picker `EXP 24 000`, the Memory picker
+`Obtained EXP 300`. **All three pools are called EXP**, so a first-hand name puts
+three identical lines in one plan and leaves the reader unable to tell which one
+they are short of. Put to the maintainer, who chose a bundle-authored label with
+no provenance: `Character EXP`, `Weapon EXP`, `Memory EXP`. **ADR 0028**, and it
+is the first text in a bundle of this project's that is deliberately not a
+reading — `V14`, `progressKinds`, flattened into the diff anyway because a rename
+moves every shortfall table.
+
+**N28's blocker was never the reading.** Both numbers — 250 tickets a pull, 2 500
+for ten — were read on 2026-09-18 in the same sitting as the rates. What kept
+them out was that a price names an `Item`, `Item.rarity` is required, and the
+research note recorded that no screen read that year graded a currency, so the
+note argued for making rarity optional. **The premise was a statement about which
+screens had been opened.** The maintainer opened the ticket's tile during this
+session: **5★**. That is the fourth currency graded on a tile whose own item card
+grades nothing, after Simulation Score, Phantom Pain Scar and Cogs. **The format
+change the note argued for was never needed and is now recorded as not needed**,
+with the same doubt transferred to Black and Rainbow Cards: try the tile first.
+
+**`IncomeModel` was an interface with no implementation for the whole of Phase
+5, and writing it meant refusing the easy number.** `projectedPulls(ProfileId,
+LocalDate)` could not answer its own question — it named no banner, and PGR's
+four pools have four different tickets — so it became
+`affordableWithin(game, banner, held, days, reach)`: days not a date (ADR 0013's
+argument), and accrual **summed from the `Reward` rows that grant the currency at
+their own cadence** rather than from a pulls-per-day constant. **PGR's bundle
+declares no reward paying a ticket, so accrual is zero and a test asserts that**
+— the assertion is a marker for a missing reading, and the reading to take is
+what the dailies pay in Black Cards (now N39). **ADR 0029**, `V15`, nullable
+columns where null is *unstated* and `pricedPull()` refuses rather than answering
+zero: "cannot afford" and "nobody read the price" are different answers, and a
+screen showing the first for the second is wrong in the one way a reader cannot
+detect.
+
+**What was cut, on the record.** N28's entry asked for two more fields, both
+R1999: a shop exchange for the featured unit and a cap on copies. **Not done, and
+cut deliberately rather than forgotten** — it is not a field, it is an engine
+change (`probabilityOfFeatured(…, copies)` has to spend the exchange in *both*
+engines, growing the chain's state space), and it has nothing to exercise it
+because R1999 has no first-hand bundle. A column no bundle can fill is
+`Availability.opensAt` again. It is now **N38**, held for Phase 11.
+
+**Three stale claims fell out of doing the work**, which is the argument for
+doing it rather than re-reading it:
+
+1. **"No bundle declares a banner at all" (N28, the tracker, the research
+   note).** The PGR bundle has declared one since sequence 0 on 2026-09-19. What
+   N28 was missing was the banner's *price*.
+2. **"Both PGR pity archetypes are expressible and neither is authored."** The
+   Arrival Construct one is authored. The Themed Construct one — the wall drawn
+   80–100 — is what nobody has written.
+3. **ADR 0027 was never added to `docs/adr/README.md`** by the session that wrote
+   it. Added.
+
+**The one failure worth recording, because it was caught by the right thing.**
+`GameDataIngestTest`'s whole-graph equality failed: the bundle lists its progress
+kinds in reading order and the database returned them sorted by kind. Fixed by
+normalising in the record — the same thing `Upgrade` does to its gates and its
+progress costs, and for the reason its javadoc already gives. **What found it was
+a test that compares the whole graph rather than the fields somebody remembered
+to assert.** The convenience constructor added in this change proved the same
+point immediately: `GameDataDiffTest`'s `withRollover` helper used the
+seven-argument `GameDefinition`, silently dropped the fixture's names, and
+reported a rename the test never made.
+
+**Measured, not assumed.** 435 tests, 0 skipped locally, **all 16 snapshot-gated
+ones run against freshly fetched upstream data** — run 2 in
+`docs/benchmarks/snapshot-gated-runs.md`. Nine benchmark agreements held. **Two
+figures moved and both are recorded rather than smoothed over:** p95 1 808 →
+1 812 ms (third measurement, 7 ms band, 188 ms of headroom, all three drifts
+upward), and the plan cost **3 880 → 3 877 Activity**, 0.08%, with nothing in the
+change touching the model — branch-and-bound landing on a different equally-good
+answer inside its budget, which ADR 0010 says is the expected shape. Frontend
+28 → 31.
+
+**Sequence 7 published**, 2026-09-22T02:44:15Z, and read back as *no changes*.
+The preview against published sequence 6 was exactly five lines — one item, three
+`progress '<kind>'` subjects, and `pull price: unstated → 250 ×
+event-construct-rd-ticket` — and 117 facts over eight provenance entries, all
+first-hand. **A thing the next sequence will need:** the CLI boots the whole
+Spring context and needs a live Postgres for *every* command, `validate`
+included, and `preview` is only meaningful against a database carrying the
+previous sequences. `docker compose up -d postgres` restores that from the
+`storm_almanac_postgres-data` volume, which still holds every version published
+since 2026-09-06.
 
 
 **2026-09-21 (thirty-sixth) — N35, most of it: the reader is asked how far they

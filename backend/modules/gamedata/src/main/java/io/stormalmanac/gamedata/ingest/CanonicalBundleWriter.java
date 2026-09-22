@@ -9,6 +9,7 @@ import io.stormalmanac.gamedata.Craft;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.ProgressKind;
 import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
@@ -110,6 +111,7 @@ public final class CanonicalBundleWriter {
         array(root, "upgrades", sinksOf(bundle.sinks(), Upgrade.class), this::upgrade);
         array(root, "fodder", sinksOf(bundle.sinks(), Fodder.class), this::fodder);
         array(root, "banners", bundle.banners(), this::banner);
+        array(root, "progressKinds", bundle.progressKinds(), this::progressKind);
         return root;
     }
 
@@ -120,6 +122,11 @@ public final class CanonicalBundleWriter {
         node.put("origin", provenance.origin().name());
         node.put("detail", provenance.detail());
         node.put("observedOn", provenance.observedOn().toString());
+    }
+
+    private void progressKind(ObjectNode node, ProgressKind kind) {
+        node.put("kind", kind.kind());
+        node.put("displayName", kind.displayName());
     }
 
     private void item(ObjectNode node, Item item) {
@@ -277,6 +284,16 @@ public final class CanonicalBundleWriter {
         ObjectNode featured = node.putObject("featured");
         featured.put("chanceAtHit", banner.featuredRule().chanceAtHit());
         featured.put("guaranteeAfterLoss", banner.featuredRule().guaranteeAfterLoss());
+
+        // Written only when declared, on the same terms as the day boundary:
+        // writing a zero back would turn "nobody read what a pull costs" into
+        // "a pull is free", and a round trip through this writer is how a
+        // correction is prepared.
+        if (banner.pullPrice() != null) {
+            ObjectNode price = node.putObject("pullPrice");
+            price.put("currency", banner.pullPrice().currency().value());
+            price.put("perPull", banner.pullPrice().perPull());
+        }
 
         availability(node, banner.window());
     }
