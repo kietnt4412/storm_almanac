@@ -4,6 +4,7 @@ import io.stormalmanac.api.player.PlayerView.PlanRequest;
 import io.stormalmanac.api.player.PlayerView.PlanResponse;
 import io.stormalmanac.common.GameDataVersion;
 import io.stormalmanac.common.id.ProfileId;
+import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.GameDefinitionRepository;
 import io.stormalmanac.api.ResourceNotFoundException;
 import io.stormalmanac.planner.Optimizer;
@@ -80,7 +81,12 @@ public class PlanController {
             throw new IllegalArgumentException("energyPerDay is required: it is a fact about the account");
         }
 
-        GameDataVersion gameVersion = versionFor(owner, version);
+        // The whole definition, not only its version: the plan's shadow prices
+        // have to be named, and a demand line can stand for something with no
+        // entry in the item table — EXP, or one step at several prices. See
+        // PlayerView.ShadowPriceView.
+        GameDefinition definition = definitionFor(owner, version);
+        GameDataVersion gameVersion = definition.version();
 
         Goals goals = players.goalsOf(owner.id());
         if (goals.goals().isEmpty()) {
@@ -97,17 +103,16 @@ public class PlanController {
                 body.resolvedHorizonDays(),
                 body.resolvedReach());
 
-        return PlanResponse.of(optimizer.solve(solve));
+        return PlanResponse.of(optimizer.solve(solve), definition);
     }
 
-    private GameDataVersion versionFor(PlayerProfile profile, Long version) {
+    private GameDefinition definitionFor(PlayerProfile profile, Long version) {
         return (version == null
                         ? definitions.findLatest(profile.game())
                         : definitions.find(profile.game(), version))
                 .orElseThrow(() -> new ResourceNotFoundException(version == null
                                 ? "no published version of " + profile.game().value()
                                 : "no published version " + version + " of "
-                                        + profile.game().value()))
-                .version();
+                                        + profile.game().value()));
     }
 }

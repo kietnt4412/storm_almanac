@@ -9,6 +9,7 @@ import io.stormalmanac.gamedata.DayBoundary;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.ProgressKind;
 import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
@@ -17,6 +18,7 @@ import io.stormalmanac.gamedata.Source;
 import io.stormalmanac.gamedata.Stage;
 import io.stormalmanac.gamedata.Upgrade;
 import io.stormalmanac.gamedata.banner.BannerModel;
+import io.stormalmanac.gamedata.banner.PullPrice;
 import io.stormalmanac.gamedata.catalog.Entity;
 import io.stormalmanac.gamedata.catalog.Skill;
 import io.stormalmanac.gamedata.catalog.StatCurve;
@@ -80,7 +82,8 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
         Map<EntityId, Long> entities = writeEntities(version, bundle.entities(), items);
         writeSources(version, bundle.sources(), items);
         writeSinks(version, bundle.sinks(), items, entities);
-        writeBanners(version, bundle.banners());
+        writeBanners(version, bundle.banners(), items);
+        writeProgressKinds(version, bundle.progressKinds());
         writeProvenance(version, bundle);
         return version;
     }
@@ -570,15 +573,17 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
 
     // ── Banners ─────────────────────────────────────────────────────────────
 
-    private void writeBanners(long version, List<BannerModel> banners) {
+    private void writeBanners(long version, List<BannerModel> banners, Map<ItemId, Long> items) {
         for (BannerModel banner : banners) {
+            PullPrice price = banner.pullPrice();
             long id = jdbc.queryForObject(
                     """
                     INSERT INTO gamedata.banner
                         (version_id, slug, display_name, banner_type, pity_scope,
                          featured_chance_at_hit, featured_guarantee_after_loss,
-                         available_days, opens_at, closes_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?::text[], ?, ?)
+                         available_days, opens_at, closes_at,
+                         pull_currency_id, pull_cost)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?::text[], ?, ?, ?, ?)
                     RETURNING id
                     """,
                     Long.class,
@@ -587,7 +592,9 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
                     banner.featuredRule().chanceAtHit(), banner.featuredRule().guaranteeAfterLoss(),
                     Availabilities.days(banner.window()),
                     Timestamps.at(banner.window().opensAt()),
-                    Timestamps.at(banner.window().closesAt()));
+                    Timestamps.at(banner.window().closesAt()),
+                    price == null ? null : items.get(price.currency()),
+                    price == null ? null : price.perPull());
 
             banner.baseRates().forEach((rarity, rate) -> jdbc.update(
                     "INSERT INTO gamedata.banner_base_rate"
@@ -619,6 +626,18 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
                         floor.minimumRarity().label(), floor.minimumRarity().rank());
             }
         }
+    }
+
+    /**
+     * The names, which are not facts and so are written after everything and
+     * pointed at by nothing. See {@code V14__a_progress_kind_may_be_named.sql}.
+     */
+    private void writeProgressKinds(long version, List<ProgressKind> kinds) {
+        jdbc.batchUpdate(
+                "INSERT INTO gamedata.progress_kind (version_id, kind, display_name) VALUES (?, ?, ?)",
+                kinds.stream()
+                        .map(kind -> new Object[] {version, kind.kind(), kind.displayName()})
+                        .toList());
     }
 
     // ── Shared ──────────────────────────────────────────────────────────────

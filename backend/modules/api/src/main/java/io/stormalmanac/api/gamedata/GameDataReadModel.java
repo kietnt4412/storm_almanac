@@ -69,7 +69,7 @@ import org.springframework.stereotype.Service;
  * so that reading one is enough.
  *
  * <p><b>Known cost, deliberately not paid yet:</b> every request loads a whole
- * version — fifteen queries, a few thousand rows — to answer a question about
+ * version — sixteen queries, a few thousand rows — to answer a question about
  * one entity. That is fine at this phase's traffic and it will not be fine at
  * phase 4's. The fix is a cache keyed on {@code (game, sequence)}, correct by
  * construction because a published version is immutable; it is not written now

@@ -256,7 +256,7 @@ function Refusal({ error }: { error: Error }) {
   );
 }
 
-function Answer({ plan, energyUnit }: { plan: Plan; energyUnit: string }) {
+export function Answer({ plan, energyUnit }: { plan: Plan; energyUnit: string }) {
   return (
     <div className="space-y-4">
       <section className="card">
@@ -363,7 +363,7 @@ function Answer({ plan, energyUnit }: { plan: Plan; energyUnit: string }) {
         </section>
       )}
 
-      {Object.keys(plan.shadowPrice).length > 0 && (
+      {plan.shadowPrice.length > 0 && (
         <section className="card">
           <h2 className="mb-1 font-medium">What each material is costing you</h2>
           <p className="muted mb-2 text-xs">
@@ -371,12 +371,12 @@ function Answer({ plan, energyUnit }: { plan: Plan; energyUnit: string }) {
             — so it is also what a material is worth when a banner or an event hands you some.
           </p>
           <ul className="grid gap-1 text-sm sm:grid-cols-2">
-            {Object.entries(plan.shadowPrice)
-              .sort(([, a], [, b]) => b - a)
-              .map(([item, price]) => (
-                <li key={item} className="flex justify-between gap-4">
-                  <span>{item}</span>
-                  <span className="count muted">{price.toFixed(2)}</span>
+            {[...plan.shadowPrice]
+              .sort((a, b) => b.price - a.price)
+              .map((priced) => (
+                <li key={priced.item} className="flex justify-between gap-4">
+                  <span>{priced.displayName}</span>
+                  <span className="count muted">{priced.price.toFixed(2)}</span>
                 </li>
               ))}
           </ul>

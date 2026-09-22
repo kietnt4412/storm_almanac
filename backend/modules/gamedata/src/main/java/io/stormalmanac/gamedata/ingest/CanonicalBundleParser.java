@@ -17,6 +17,7 @@ import io.stormalmanac.gamedata.Game;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.Progress;
+import io.stormalmanac.gamedata.ProgressKind;
 import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
@@ -30,6 +31,7 @@ import io.stormalmanac.gamedata.banner.FeaturedRule;
 import io.stormalmanac.gamedata.banner.Floor;
 import io.stormalmanac.gamedata.banner.PityRule;
 import io.stormalmanac.gamedata.banner.PityScope;
+import io.stormalmanac.gamedata.banner.PullPrice;
 import io.stormalmanac.gamedata.catalog.Entity;
 import io.stormalmanac.gamedata.catalog.Skill;
 import io.stormalmanac.gamedata.catalog.StatCurve;
@@ -131,7 +133,8 @@ public final class CanonicalBundleParser {
                 sources,
                 sinks,
                 each(root, "banners", CanonicalBundleParser::banner),
-                each(root, "entities", CanonicalBundleParser::entity));
+                each(root, "entities", CanonicalBundleParser::entity),
+                each(root, "progressKinds", CanonicalBundleParser::progressKind));
     }
 
     // ── The domain shapes, one method each ──────────────────────────────────
@@ -181,6 +184,17 @@ public final class CanonicalBundleParser {
             overrides.put(entry.getKey(), entry.getValue().textValue());
         });
         return overrides;
+    }
+
+    /**
+     * A name for a progress kind. Two textual fields and no rarity, no
+     * provenance and no id — it is not a fact, it is the bundle spelling its own
+     * opaque label for a reader. See {@link ProgressKind}.
+     */
+    private static ProgressKind progressKind(JsonNode node, String at) {
+        return new ProgressKind(
+                text(node, "kind", at + ".kind"),
+                text(node, "displayName", at + ".displayName"));
     }
 
     private static Item item(JsonNode node, String at) {
@@ -404,10 +418,26 @@ public final class CanonicalBundleParser {
                                     (int) integer(featured, "guaranteeAfterLoss",
                                             at + ".featured.guaranteeAfterLoss")),
                     PityScope.valueOf(scope),
-                    availability(node, at));
+                    availability(node, at),
+                    pullPrice(node, at));
         } catch (IllegalArgumentException e) {
             throw new BundleFormatException(at + ": " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * What a pull costs, or null when the banner does not say.
+     *
+     * <p>Absent stays absent rather than becoming a zero price. A banner read
+     * for its rates before anybody read its price is a real thing in this
+     * repository's history, and it has to round-trip as one.
+     */
+    private static PullPrice pullPrice(JsonNode node, String at) {
+        JsonNode price = node.get("pullPrice");
+        if (price == null || price.isNull()) return null;
+        return new PullPrice(
+                new ItemId(text(price, "currency", at + ".pullPrice.currency")),
+                (int) integer(price, "perPull", at + ".pullPrice.perPull"));
     }
 
     /**

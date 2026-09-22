@@ -219,6 +219,7 @@
       "id": "amulet-feed",
       "consumesCategory": "fodder-material",
       "minimumRarity": { "label": "3*", "rank": 3 },
+      "progress": "amulet-exp",
       "progressPerUnit": 5,
       "costs": [ { "item": "gold", "quantity": 200 } ]
     }
@@ -247,6 +248,7 @@
         { "everyN": 10, "minimumRarity": { "label": "4*", "rank": 4 } }
       ],
       "featured": { "chanceAtHit": 1.0, "guaranteeAfterLoss": 1 },
+      "pullPrice": { "currency": "gold", "perPull": 1600 },
       "availability": { "opensAt": "2026-08-01T00:00:00Z", "closesAt": "2026-08-22T00:00:00Z" }
     },
     {
@@ -275,7 +277,12 @@
       ],
       "floors": [],
       "featured": { "chanceAtHit": 1.0, "guaranteeAfterLoss": 1 },
+      "pullPrice": { "currency": "gold", "perPull": 1600 },
       "availability": { "opensAt": "2026-08-01T00:00:00Z", "closesAt": "2026-08-22T00:00:00Z" }
     }
+  ],
+
+  "progressKinds": [
+    { "kind": "amulet-exp", "displayName": "Amulet EXP" }
   ]
 }

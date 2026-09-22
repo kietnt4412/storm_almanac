@@ -54,7 +54,11 @@ class ShortfallProgressTest {
 
         ShortfallLine line = lineFor(held, CHARACTER_EXP);
 
-        assertThat(line.displayName()).isEqualTo("character-exp");
+        // "Character EXP" and not "character-exp": the bundle names its own
+        // progress kinds since sequence 7, and the reason the name is not the
+        // game's own word is that the game's own word is "EXP" on all three of
+        // its pools. N37.
+        assertThat(line.displayName()).isEqualTo("Character EXP");
         assertThat(line.required()).isEqualTo(497_000);
         assertThat(line.owned()).isEqualTo(495_000);
         assertThat(line.missing()).isEqualTo(2_000);

@@ -96,7 +96,33 @@
     "The readings were taken on Luna: Oblivion rather than on Helentine:",
     "Lacrimosa, and transferred on the maintainer's report that S-rank",
     "constructs share a level curve. The report is cross-checked at three",
-    "points rather than assumed; the provenance entry says how."
+    "points rather than assumed; the provenance entry says how.",
+    "",
+    "Sequence 6 was published on 2026-09-21. Sequence 7 carries two changes",
+    "that have nothing to do with each other and one thing in common: each",
+    "was blocked on a field the format did not have.",
+    "",
+    "N37. The three progress pools get names. A demand line for one has been",
+    "rendering as its bare slug — 'character-exp' beside a properly named",
+    "'Cogs' — since the first plan that demanded EXP, and there was no name",
+    "anywhere in the model to render instead. The names are at the foot of",
+    "this file and they are the only text here that was not read off a",
+    "screen: the game calls all three 'EXP' and naming them that way would",
+    "put three identical lines in one plan.",
+    "",
+    "N28. The banner says what a pull costs: 250 Event Construct R&D Tickets",
+    "for one, 2 500 for ten, so no discount. That was read on 2026-09-18 in",
+    "the same sitting as the rates and has had nowhere to live since, because",
+    "a price names an Item and Item.rarity is required while no screen read",
+    "that year graded a currency. The ticket's tile was opened on 2026-09-22",
+    "and grades it five stars, which is the fourth currency read that way and",
+    "is what makes the price writable at all. IncomeModel — an interface with",
+    "no implementation for the whole of phase 5 — has one now.",
+    "",
+    "What this does NOT do is move a plan. The solver does not pull, the",
+    "ticket is spent by nothing in this file, and no reward here grants one,",
+    "so DeclaredIncomeModel reads a balance and accrues zero. That gap is a",
+    "reading nobody has taken rather than a number anybody invented."
   ],
 
   "game": {
@@ -105,7 +131,7 @@
     "energyUnit": "Serum",
     "dayBoundary": { "zone": "UTC", "hour": 5 }
   },
-  "sequence": 6,
+  "sequence": 7,
   "label": "Steering By Light",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client, patch \"Steering By Light\", on 2026-09-18. Numbers and text only; no game assets.",
 
@@ -113,7 +139,7 @@
     {
       "id": "research-pool-panels",
       "origin": "PUBLISHER_DISCLOSURE",
-      "detail": "The research pool's own Basic Rules, Details, Switch and Drop Details panels, Punishing: Gray Raven Global (English) client, patch \"Steering By Light\", Commandant level 105, on the Selena: Pianissimo (Arrival Construct, 09/17-10/01) and Karenina: Effulgence (Themed Construct, 08/19-09/23) banners. Screenshots taken by the maintainer on 2026-09-18 and transcribed in a Claude Code session; no screenshot is committed, because game assets are not allowed in this repository.",
+      "detail": "The research pool's own Basic Rules, Details, Switch and Drop Details panels, Punishing: Gray Raven Global (English) client, patch \"Steering By Light\", Commandant level 105, on the Selena: Pianissimo (Arrival Construct, 09/17-10/01) and Karenina: Effulgence (Themed Construct, 08/19-09/23) banners. The pool screen carrying those panels is also where the price of a pull was read, on its own pull buttons: 250 Event Construct R&D Tickets for one and 2 500 for ten, so there is no ten-pull discount. That half was in front of the maintainer in the same sitting and had nowhere to live until sequence 7, which is why this detail line names it only now. Screenshots taken by the maintainer on 2026-09-18 and transcribed in a Claude Code session; no screenshot is committed, because game assets are not allowed in this repository.",
       "observedOn": "2026-09-18"
     },
     {
@@ -147,6 +173,12 @@
       "observedOn": "2026-09-21"
     },
     {
+      "id": "research-ticket-tile",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "The Event Construct R&D Ticket graded five stars on a shop or reward tile, the same client, account and patch. It is the fourth currency read this way — Simulation Score, Phantom Pain Scar and Cogs each carry a grade on a tile while their own item cards carry none — and the 2026-09-18 note listed the currencies as unwritable for exactly that reason. The maintainer read the grade on 2026-09-22 and reported it to a Claude Code session; which tile it was is not recorded, and no screenshot is committed, because game assets are not allowed in this repository. Nothing else about the ticket is claimed here: what a pull costs in it was read on 2026-09-18 and belongs to 'research-pool-panels'.",
+      "observedOn": "2026-09-22"
+    },
+    {
       "id": "phantom-pain-cage-screen",
       "origin": "OBSERVED_IN_GAME",
       "detail": "The Phantom Pain Cage's Weekly Reward screen — \"Resets weekly. Reach enough progress to claim.\" — read tile by tile down all nine claim tiers, from 30 000 progress to 1 100 000, each tile's Phantom Pain Scar count and the items beside it. Screenshots taken by the maintainer on 2026-09-19 and transcribed in a Claude Code session; not committed, because game assets are not allowed in this repository. That the Scars add up to the 56 they report collecting in a week is how the set of tiles was checked for a gap. Same client and account, patch \"Steering By Light\".",
@@ -158,6 +190,7 @@
     "entity:selena-pianissimo": "research-pool-panels",
     "entity:karenina-effulgence": "research-pool-panels",
     "banner:pgr-selena-pianissimo": "research-pool-panels",
+    "item:event-construct-rd-ticket": "research-ticket-tile",
     "entity:hear-the-bell": "equipment-and-resource-screens",
     "item:weapon-enhancer-iv": "equipment-and-resource-screens",
     "item:simulation-score": "equipment-and-resource-screens",
@@ -386,6 +419,24 @@
       "category": "currency"
     },
     {
+      "_comment": [
+        "The pull currency, and the fourth currency a tile has graded where its",
+        "own item card does not: five stars, read 2026-09-22. Until it existed",
+        "no banner in this repository could say what a pull costs, because a",
+        "price names an Item and Item.rarity is required — which is the exact",
+        "shape the 2026-09-18 note listed as refusing every currency.",
+        "",
+        "Only the event pool's ticket is written. The note reads three more —",
+        "Target Weapon, CUB and Basic Weapon R&D Tickets, all priced 250 / 2500",
+        "— and none of their pools is a banner here, so an item nothing spends",
+        "would be a row with no reader."
+      ],
+      "id": "event-construct-rd-ticket",
+      "displayName": "Event Construct R&D Ticket",
+      "rarity": { "label": "5*", "rank": 5 },
+      "category": "currency"
+    },
+    {
       "_comment": "Three stars from its Simulation Shop tile. Spent with Cogs to unlock a skill: 3 and 25 000 for Helentine: Lacrimosa's leader skill.",
       "id": "skill-point",
       "displayName": "Skill Point",
@@ -482,7 +533,8 @@
       "floors": [
         { "everyN": 10, "minimumRarity": { "label": "A", "rank": 2 } }
       ],
-      "featured": { "chanceAtHit": 0.70, "guaranteeAfterLoss": 1 }
+      "featured": { "chanceAtHit": 0.70, "guaranteeAfterLoss": 1 },
+      "pullPrice": { "currency": "event-construct-rd-ticket", "perPull": 250 }
     }
   ],
 
@@ -1456,5 +1508,27 @@
         { "item": "cogs", "quantity": 20000 }
       ]
     }
+  ],
+
+  "progressKinds": [
+    {
+      "_comment": [
+        "Not facts, and the only text in this file that is not. PGR calls all",
+        "three pools 'EXP' — the character Level Up screen reads EXP 0/20, the",
+        "weapon Enhancement Cost picker EXP 24 000, the Memory picker 'Obtained",
+        "EXP 300' — so the game's own words would put three lines reading 'EXP'",
+        "in one plan and leave the reader unable to tell which pool is short.",
+        "These are this project's words for this project's slugs, exactly as",
+        "'character-exp' is one, and they carry no factProvenance row for the",
+        "same reason the energy unit and the day boundary carry none.",
+        "",
+        "A kind with no name renders as its slug, which is what sequences 0 to 6",
+        "do and go on doing: they are published and immutable."
+      ],
+      "kind": "character-exp",
+      "displayName": "Character EXP"
+    },
+    { "kind": "weapon-exp", "displayName": "Weapon EXP" },
+    { "kind": "memory-exp", "displayName": "Memory EXP" }
   ]
 }

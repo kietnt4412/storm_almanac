@@ -8,6 +8,7 @@ import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.ProgressKind;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
@@ -16,6 +17,7 @@ import io.stormalmanac.gamedata.Source;
 import io.stormalmanac.gamedata.Stage;
 import io.stormalmanac.gamedata.Upgrade;
 import io.stormalmanac.gamedata.banner.BannerModel;
+import io.stormalmanac.gamedata.banner.PullPrice;
 import io.stormalmanac.gamedata.catalog.Entity;
 import io.stormalmanac.gamedata.catalog.Skill;
 import io.stormalmanac.gamedata.catalog.StatCurve;
@@ -70,6 +72,16 @@ final class Facts {
                 facts, Axis.PROGRESSION, "game", definition.game().id().value());
         game.put("energy unit", definition.game().energyUnit());
         game.put("day rollover", dayBoundary(definition.game().dayBoundary()));
+
+        // Named pools, which are not facts and declare no provenance, and are
+        // flattened anyway. A sequence that renamed "Character EXP" to something
+        // else would move what every shortfall table says, and a patch report
+        // that could not mention it would be the same silence ADR 0025 closed
+        // for the day boundary. One subject per kind, so a rename is one change
+        // rather than a field on a subject nobody would look under.
+        for (ProgressKind kind : definition.progressKinds()) {
+            subject(facts, Axis.PROGRESSION, "progress", kind.kind()).put("name", kind.displayName());
+        }
 
         for (Item item : definition.items()) {
             Map<String, String> about = subject(facts, Axis.PROGRESSION, "item", item.id().value());
@@ -177,6 +189,7 @@ final class Facts {
             about.put("featured chance", String.valueOf(banner.featuredRule().chanceAtHit()));
             about.put("featured guarantee", String.valueOf(banner.featuredRule().guaranteeAfterLoss()));
             about.put("availability", availability(banner.window()));
+            about.put("pull price", pullPrice(banner.pullPrice()));
 
             banner.baseRates().forEach((rarity, rate) ->
                     about.put("base rate " + rarity.label(), String.valueOf(rate)));
@@ -238,6 +251,20 @@ final class Facts {
         return boundary == null
                 ? "unstated"
                 : String.format("%02d:00 %s", boundary.hour(), boundary.zone().getId());
+    }
+
+    /**
+     * A price reads as a count and a currency, and an undeclared one says so.
+     *
+     * <p>One fact rather than two, for the same reason a sampled yield is one:
+     * a re-reading moves the number and the currency together — a pool that
+     * changed its ticket changed its price — and a reader approving a publish
+     * wants <em>"unstated → 250 × event-construct-rd-ticket"</em> on one line.
+     */
+    private static String pullPrice(PullPrice price) {
+        return price == null
+                ? "unstated"
+                : price.perPull() + " × " + price.currency().value();
     }
 
     private static String availability(Availability availability) {

@@ -6,6 +6,7 @@ import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.StageId;
 import io.stormalmanac.gamedata.banner.BannerModel;
 import io.stormalmanac.gamedata.catalog.Entity;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -27,7 +28,8 @@ public record GameDefinition(
         List<Source> sources,
         List<Sink> sinks,
         List<BannerModel> banners,
-        List<Entity> entities
+        List<Entity> entities,
+        List<ProgressKind> progressKinds
 ) {
 
     public GameDefinition {
@@ -36,6 +38,48 @@ public record GameDefinition(
         sinks = List.copyOf(sinks);
         banners = List.copyOf(banners);
         entities = List.copyOf(entities);
+        // Sorted, not copied in the order it arrived. Names have no order — the
+        // bundle lists them in the order they were read, the database returns
+        // them however it returns them — and the same version written two ways
+        // has to be one value, which is what lets a version read back from the
+        // database equal the bundle it came from. The same normalisation
+        // Upgrade applies to its gates and its progress costs, for the same
+        // reason: reordering a bundle produces no changes in the patch diff.
+        progressKinds = progressKinds.stream()
+                .sorted(Comparator.comparing(ProgressKind::kind))
+                .toList();
+    }
+
+    /**
+     * A version whose progress kinds are unnamed, which is every version
+     * published before they could be.
+     */
+    public GameDefinition(
+            Game game,
+            GameDataVersion version,
+            List<Item> items,
+            List<Source> sources,
+            List<Sink> sinks,
+            List<BannerModel> banners,
+            List<Entity> entities) {
+        this(game, version, items, sources, sinks, banners, entities, List.of());
+    }
+
+    /**
+     * What to call a progress kind, falling back to the kind itself.
+     *
+     * <p>The fallback lives here, once, rather than at each call site: a page
+     * that forgot it would print {@code character-exp} beside a properly named
+     * {@code Cogs} and nothing would look broken. Naming is optional by design —
+     * see {@link ProgressKind} — so the fallback is the normal path for every
+     * version published before sequence 7, not an error case.
+     */
+    public String nameOfProgress(String kind) {
+        return progressKinds.stream()
+                .filter(named -> named.kind().equals(kind))
+                .map(ProgressKind::displayName)
+                .findFirst()
+                .orElse(kind);
     }
 
     public Map<ItemId, Item> itemsById() {

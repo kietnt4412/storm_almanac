@@ -231,6 +231,20 @@ export interface RosterPatchResponse {
   rejected: string[];
 }
 
+/**
+ * What one more of a thing would cost, with something to call it.
+ *
+ * A list rather than the `Record<string, number>` this was: a demand line can
+ * stand for something the item table has no row for — EXP, or a step offered at
+ * several prices — so the key is not always a name, and `character-exp` rendered
+ * beside a properly named `Cogs`.
+ */
+export interface ShadowPrice {
+  item: string;
+  displayName: string;
+  price: number;
+}
+
 export interface Plan {
   id: string;
   profile: string;
@@ -244,7 +258,7 @@ export interface Plan {
   rewards: { reward: string; times: number }[];
   totalEnergy: number;
   etaDays: number;
-  shadowPrice: Record<string, number>;
+  shadowPrice: ShadowPrice[];
   bindingStages: string[];
   notes: string[];
   computedAt: string;
