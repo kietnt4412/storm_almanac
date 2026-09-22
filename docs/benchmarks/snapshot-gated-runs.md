@@ -149,3 +149,53 @@ honest to compare against.
   *evidence about somebody else's numbers run through our solver*.
 - **It does not answer Q5.** The 3.5 pinned here is the commit dated 2026-03-17,
   and whether that is anyone else's 3.5 is still open.
+
+---
+
+## Run 2 — 2026-09-22, thirty-seventh session
+
+**Why it was run.** Not to re-measure. The session added two nullable columns to
+`gamedata.banner`, a new table, a component to `GameDefinition` and a new list on
+every bundle, so the question was whether anything in the optimizer's real-data
+path moved. The figures below are a by-product of asking that.
+
+| | |
+|---|---|
+| Snapshots | `bash tools/fetch-upstream.sh`, default location, same two pinned commits (3.3 `d49efab2a18f`, 3.5 `8b40541a9c42`) |
+| Command | `./gradlew build` — no `--rerun`, and the task was out of date on its own because the source changed |
+| Gated tests | **16, 0 skipped**: `RealUpstreamPlanTest` 8, `RealUpstreamPatchTest` 3, `CommunityBenchmarkTest` 5 |
+| Whole suite | **435 tests, 0 skipped locally**, up 15 from 2026-09-21 and every one of the 15 new |
+
+### What held
+
+- **Nine benchmark agreements, and three disagreements over 25% all on a small
+  sample, none not.** Identical to run 1, down to which three.
+- **The guide's own advice still costs 4 017** for the 11 benchmark materials.
+- **The two-second budget is still met.**
+
+### The two figures that moved, again
+
+- **p95 is 1 812 ms** (max 1 814), against run 1's 1 808 and the tracker's
+  original 1 807. Three runs, three values inside 7 ms on a 2 000 ms budget, with
+  188 ms of headroom — this is the machine, not the code. **Worth watching only
+  if a later run leaves that band**, and worth noting that all three drifts have
+  been upward.
+- **The plan costs 3 877 Activity**, against run 1's 3 880 and the tracker's
+  3 880. **Three Activity on 3 880 is 0.08%**, and the comparison it exists to
+  make — cheaper than the guide's 4 017, which does not even cover the whole
+  demand — is untouched. The likely cause is the solver's branch-and-bound
+  landing on a different equally-good answer within its budget
+  ([ADR 0010](../adr/0010-a-plan-is-the-best-provable-in-the-budget.md): a plan
+  is the best *provable* in the budget, not the optimum), and nothing in this
+  session's change touches the model. **It is recorded rather than explained** —
+  a fourth run that moves it again in the same direction would be a different
+  story from one that moves it back.
+
+### What this run does not establish
+
+Everything run 1 disclaimed still applies, unchanged: one machine, nothing about
+PGR, and no answer to Q5. One thing to add — **nothing here exercises the columns
+this session added.** The pull price and the progress names are PGR's, and every
+one of these 16 tests is Reverse: 1999. What proves those is
+`GameDataIngestTest`'s whole-graph equality and the sequence 7 publish reading
+back as *no changes*, both of which are ordinary tests CI runs.
