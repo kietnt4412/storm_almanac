@@ -3092,7 +3092,10 @@ checked for a goal or roster entry naming an Astral Armament state and held
 the thirty-eighth session's transcript, and the password from
 `~/.neon-storm-almanac`, which was supposed to be deleted after that session
 and was still there. It was read into an environment variable, never printed,
-and the maintainer was told it's still there. Committed as `99683a8` before
+and the maintainer was told it's still there. **They chose to keep it for
+future publishes.** That supersedes the thirty-eighth session's "to be deleted
+after". The tracker's claim that the session log had "the exact commands" was
+false: the host and role were never written down. Committed as `99683a8` before
 the Neon publish, then the tracker was updated for the publish.
 
 **What N41 still needs is words, not numbers.** For each construct: eight

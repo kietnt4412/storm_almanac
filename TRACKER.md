@@ -248,7 +248,7 @@ and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archiv
 
 ### Before the next sequence — worth knowing
 
-**Production is a second database.** Publishing a sequence now means doing it twice: into the local volume, which `preview` diffs against, and into Neon, which readers see — the same `preview`, `ingest`, `publish` with `DATABASE_URL` pointed at Neon (the 2026-09-24 session log has the exact commands). Neon holds sequence 8, published at 08:36:52Z on 2026-09-24.
+**Production is a second database.** Publishing a sequence now means doing it twice: into the local volume, which `preview` diffs against, and into Neon, which readers see — the same `preview`, `ingest`, `publish` with `DATABASE_URL`, `DATABASE_USER` and `DATABASE_PASSWORD` pointed at Neon. **The password lives in `~/.neon-storm-almanac` on this machine, kept there on purpose** (maintainer, 2026-09-24): read it into the variable, never print it, don't delete it. The host and role are deliberately not in this repo; the session log never had them, and the thirty-ninth session recovered them from an earlier transcript and kept them in the agent's local notes. Neon holds sequence 8, published at 08:36:52Z on 2026-09-24.
 
 **One thing worth knowing for the next sequence, learned doing this one:** the
 CLI needs a **live Postgres carrying every previous sequence** for `preview` to
