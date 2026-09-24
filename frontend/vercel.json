@@ -4,6 +4,7 @@
     { "source": "/api/:path*", "destination": "https://storm-almanac.onrender.com/api/:path*" },
     { "source": "/oauth2/:path*", "destination": "https://storm-almanac.onrender.com/oauth2/:path*" },
     { "source": "/login/oauth2/:path*", "destination": "https://storm-almanac.onrender.com/login/oauth2/:path*" },
+    { "source": "/logout", "destination": "https://storm-almanac.onrender.com/logout" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

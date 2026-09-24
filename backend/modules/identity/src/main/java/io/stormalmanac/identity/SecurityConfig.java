@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
@@ -132,6 +133,16 @@ public class SecurityConfig {
                 // needs one, and a permitAll probe never does. What changed is
                 // that a signed-in browser now needs one.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                // Spring Security's own POST /logout, which was always here and
+                // answered with a redirect to /login?logout — a page this
+                // application has never had. Nothing called it, because the only
+                // sign-out a browser was ever shown was the development one, and
+                // the deployed product had no way out at all (B5). A JSON API
+                // answers the fact and lets the page decide where to go, the same
+                // reasoning as the 401 entry point above. It stays POST and
+                // CSRF-checked, or any page on the web could sign a reader out.
+                .logout(logout -> logout.logoutSuccessHandler(
+                        new HttpStatusReturningLogoutSuccessHandler(HttpStatus.NO_CONTENT)))
                 .csrf(browserCsrf());
 
         // A second filter chain may exist ahead of this one — the development

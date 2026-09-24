@@ -481,5 +481,22 @@ export const signInUrl = (then = '/'): string =>
     ? `/dev/sign-in?as=dev&then=${encodeURIComponent(then)}`
     : `/oauth2/authorization/google`;
 
-export const signOutUrl = (then = '/'): string | null =>
-  import.meta.env.DEV ? `/dev/sign-out?then=${encodeURIComponent(then)}` : null;
+/**
+ * Ends the session on the server.
+ *
+ * A POST carrying the CSRF token, not a link: a sign-out anybody's page could
+ * trigger with an `<img>` is a nuisance an attacker gets for free. The server
+ * answers 204 and says nothing about where to go, so the caller decides. Until
+ * B5 this was a development-only link and the deployed product had no sign-out
+ * at all — `signOutUrl()` returned null outside `DEV`, and the page drew nothing.
+ */
+export async function signOut(): Promise<void> {
+  const response = await fetch(`${BASE}/logout`, {
+    method: 'POST',
+    headers: { 'X-XSRF-TOKEN': csrfToken() },
+    credentials: 'include',
+  });
+  if (!response.ok) {
+    throw new ApiError('/logout', response.status, await detailOf(response));
+  }
+}
