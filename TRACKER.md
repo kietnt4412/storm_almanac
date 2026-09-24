@@ -17,7 +17,7 @@ being finished with is.
   *Status* [2026-09-21](docs/history/tracker-archive.md#what-status-carried-until-the-2026-09-21-rewrite) (614),
   the session index 2026-09-22 (566) and again 2026-09-24 (561). Anything it no longer carries is in the archive verbatim — go and
   decide whether it is still operative rather than assuming it was lost.
-- Last updated: **2026-09-24** (thirty-eighth session)
+- Last updated: **2026-09-24** (fortieth session)
 
 ---
 
@@ -30,16 +30,16 @@ being finished with is.
   below that says "R1999" was true when written and still is — it is just no
   longer the launch.**
 - **PGR is read first-hand** ([the note](docs/game-facts/punishing-gray-raven-research-disclosure.md)) and
-  [its bundle](data/bundles/punishing-gray-raven-steering-by-light.json) is **published at sequence 7** — 117
-  facts over eight provenance entries, the level ladder, thirteen Promote gates, one weekly ladder, a
+  [its bundle](data/bundles/punishing-gray-raven-steering-by-light.json) is **published at sequence 10** (2026-09-24, **Global 4.8.0
+  "Anchored in Faith"**) — 250 facts over eleven provenance entries, **three constructs on one S-rank ladder**, one weekly ladder, a
   **05:00 UTC** reset, and since 2026-09-22 a **pull price**. Every sequence has published and
-  read back as *no changes*, sequence 7 included. **Sequence 7 closed N37 and N28's modelling half** and is the
+  read back as *no changes*, sequence 10 included — in both databases. **Sequence 7 closed N37 and N28's modelling half** and is the
   first sequence carrying something that is not a fact at all (the EXP pool names, ADR 0028). What it holds is
   [in the table below](#what-the-next-work-touches). **Reading the client overruled the guides four times** — a
   per-banner featured rate, events with no shops, a drawn wall, a `PityScope` inheriting across pools where R1999
   clears — the standing argument for the client over a wiki
   ([the four](docs/history/tracker-archive.md#what-status-carried-until-the-2026-09-21-rewrite)).
-- **Twelve decisions are live, and each is its own account — read the ADR, never a summary.**
+- **Thirteen decisions are live, and each is its own account — read the ADR, never a summary.**
   [0019](docs/adr/0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-demanded-as-an-item.md) gates ·
   [0020](docs/adr/0020-a-limit-that-never-resets-is-offered-whole.md) lifetime caps ·
   [0021](docs/adr/0021-one-step-at-several-prices-is-a-choice-the-solver-makes.md) choices ·
@@ -50,9 +50,10 @@ being finished with is.
   [0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md) ·
   [0027](docs/adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md) roster states ·
   [0028](docs/adr/0028-a-name-for-a-progress-kind-is-the-bundles-word-not-the-games.md) progress names ·
-  [0029](docs/adr/0029-income-is-what-the-bundle-declares-not-a-rate-per-day.md) income · [0030](docs/adr/0030-the-development-sign-in-stays-because-the-hands-that-need-it-cannot-sign-in.md) dev sign-in stays. **0022's trigger is
+  [0029](docs/adr/0029-income-is-what-the-bundle-declares-not-a-rate-per-day.md) income · [0030](docs/adr/0030-the-development-sign-in-stays-because-the-hands-that-need-it-cannot-sign-in.md) dev sign-in stays ·
+  [0031](docs/adr/0031-a-shared-upgrade-path-is-written-once-and-expanded-in-the-file.md) shared ladders. **0022's trigger is
   live:** `reach` becomes player state the moment a reader answers twice, which since 2026-09-21 means *a second
-  device*. **Three loose ends sit outside all twelve:** the **Themed Construct archetype is expressible and not
+  device*. **Three loose ends sit outside all thirteen:** the **Themed Construct archetype is expressible and not
   authored** — its wall is drawn 80–100 and ADR 0023 made that writable on 2026-09-20, but nobody has written it;
   **`Availability.opensAt` is read by nobody**, deliberately; and **`GameAgnosticismTest` is blind
   to a constant right for no game** — `UTC` is not a game name, and a javadoc caught 0025's bug where no test did.
@@ -69,15 +70,15 @@ being finished with is.
   live until Phase 6 ([the note](docs/game-facts/reverse-1999-drop-disclosure.md)).
 - **Phases 0–3 and 5 are closed; Phase 4 is open; Track B is gated.** Phase 0's box, unticked since 2026-09-05, was ticked 2026-09-24 when the pipeline deployed; Phase 5 closed **out of order on purpose** ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)) and **nothing calls either gacha engine**. [The board](#track-a--product).
 - **Deployed and signed into since 2026-09-24** ([D1 reversed](#d1--deployment-deferred-2026-09-02)) —
-  `https://storm-almanac.vercel.app` rewrites to Render, which serves PGR sequence 7 from Neon; the first real OAuth
+  `https://storm-almanac.vercel.app` rewrites to Render, which serves PGR sequence 8 from Neon; the first real OAuth
   exchange and the first production write ran the same day. Free tier, still no money. **CI deploys it:** a push to
   `main` that passes calls Render's deploy hook and waits for `/api/health` to report its SHA (~4½ min).
   **`backend/Dockerfile`'s COPY list is B5's path and drifts in silence** — it omitted `adapters/` from Phase 1
   until 2026-09-09, every image build failing in six seconds while this file called it verified, so **anything added
   beside `modules`, `adapters`, `substrate`, `app` needs a line there**.
-- **The remote, last checked 2026-09-24 (thirty-eighth) — re-check it, do not trust it.**
-  **[PR #43](https://github.com/kietnt4412/storm_almanac/pull/43) is MERGED** (04:38Z);
-  at session start this file named #37 while #38 had merged — **stale on five consecutive checks**, never once
+- **The remote, last checked 2026-09-24 (fortieth) — re-check it, do not trust it.**
+  **[PR #44](https://github.com/kietnt4412/storm_almanac/pull/44) is MERGED** (06:02Z), and
+  `dev` is 9 commits ahead of `main` with no PR open. This file named #43 — **stale on six consecutive checks**, never once
   right, so re-check rather than read. B6 means a commit on `dev` with no PR open is still built.
   **What the trigger does not do is watch the merge** — PR #25 merged *before its own run finished*
   and was green by luck (archive, twenty-sixth) — so **wait for the run before merging** still
@@ -164,8 +165,8 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **441 tests** in full 2026-09-24, 0 skipped locally with the 2026-09-22 snapshots present; the last *measured* gated run is still [the dated one](docs/benchmarks/snapshot-gated-runs.md) of 2026-09-22 — nothing in this session touched the model; **425 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares **two** directories outside every source set as inputs — `data/bundles`, without which `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed, and `build/upstream-snapshots`, without which fetching upstream left the task `UP-TO-DATE` (N36). **The second was the identical bug ten lines below the first's fix.** `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
-| Authored game data | **One bundle, sequence 7 published, first-hand** | **Sequence 7 added one item and one provenance entry** — the Event Construct R&D Ticket, **5★ off a tile on 2026-09-22**, which is the fourth currency graded that way where its own item card grades nothing. It carries the banner's pull price (250, credited to the 2026-09-18 pool-screen sitting) and the three EXP pool names, which are **not facts and declare no provenance** (ADR 0028) and so show in the diff as three `progress '<kind>'` subjects and in no provenance count. **117 facts over eight provenance entries.** Helentine: Lacrimosa (level to 80 as a **thirteen-link chain, every gated level priced**, 13-step Promote **all gated**, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, the weekly Phantom Pain Cage's nine tiers, and the game's **05:00 UTC** day boundary — which is a game-level field and so adds no fact, exactly why `Facts` had to learn to flatten `Game` (ADR 0025). **What each sequence added and when it published is [in the archive](docs/history/tracker-archive.md#session-log)**; every one read back as *no changes*. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) — or, for a reader who says they clear the whole Cage, **63 days and none at all** (ADR 0022) |
+| Backend build | **Green** | **452 tests** in full 2026-09-24 (thirty-ninth), 0 skipped locally with the 2026-09-22 snapshots present; the last *measured* gated run is still [the dated one](docs/benchmarks/snapshot-gated-runs.md) of 2026-09-22 — nothing in this session touched the model; **436 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares **two** directories outside every source set as inputs — `data/bundles`, without which `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed, and `build/upstream-snapshots`, without which fetching upstream left the task `UP-TO-DATE` (N36). **The second was the identical bug ten lines below the first's fix.** `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
+| Authored game data | **One bundle, sequence 10 published, first-hand** | **Sequence 9 (2026-09-24) put Selena: Pianissimo and Lucia: Inverse Crown on the ladder** — a climber, a shard and two shard shop rows each, +129 facts; **sequence 10 changed no fact** and names the patch: readings to 2026-09-22 are 4.7.0 "Steering By Light", those of 2026-09-24 are **4.8.0 "Anchored in Faith"**, which sequences 8 and 9 got wrong. **Lucia's numbers are all the maintainer's every-S-rank report, none read on her screens.** **Since 2026-09-24 Lacrimosa's 57 rows are written as a ladder** (`s-rank-construct`, ADR 0031) — 30 entries, the skill curve once — which the parser expands back into the same rows; proven to diff against sequence 7 as *no changes*, same 117 facts, same provenance per fact. **Sequence 8, published 2026-09-24 locally and to Neon**, corrects her skills: eight levelled, not seven (N41). **Sequence 7 added one item and one provenance entry** — the Event Construct R&D Ticket, **5★ off a tile on 2026-09-22**, which is the fourth currency graded that way where its own item card grades nothing. It carries the banner's pull price (250, credited to the 2026-09-18 pool-screen sitting) and the three EXP pool names, which are **not facts and declare no provenance** (ADR 0028) and so show in the diff as three `progress '<kind>'` subjects and in no provenance count. **117 facts over eight provenance entries.** Helentine: Lacrimosa (level to 80 as a **thirteen-link chain, every gated level priced**, 13-step Promote **all gated**, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, the weekly Phantom Pain Cage's nine tiers, and the game's **05:00 UTC** day boundary — which is a game-level field and so adds no fact, exactly why `Facts` had to learn to flatten `Game` (ADR 0025). **What each sequence added and when it published is [in the archive](docs/history/tracker-archive.md#session-log)**; every one read back as *no changes*. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) — or, for a reader who says they clear the whole Cage, **63 days and none at all** (ADR 0022) |
 | CI workflow | **Green, Node 24; triggers on `dev`** | Since B6 (2026-09-21) it runs on push to `main` **and `dev`** as well as `pull_request`, so a push to the working branch with no PR open is built rather than silently ignored. **One annotation, and it is GitHub's rather than ours:** `ubuntu-latest` migrates to Ubuntu 26 from 2026-10-19 — nothing to fix, worth knowing before a green run starts carrying a warning nobody placed. **A push to `dev` while a PR is open from `dev` runs twice, on purpose** — the concurrency group stays keyed by ref, because collapsing push and PR into one group lets `cancel-in-progress` cancel the run the PR needs green. **Since 2026-09-24 `deploy` ships production**, gated to a push to `main` — ungated it would ship every commit on `dev` — via the `RENDER_DEPLOY_HOOK` secret; it fails loudly if the secret is gone, and waits for `/api/health` to report its SHA. First run `35954626572`, green. Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
@@ -245,9 +246,15 @@ after N37 and N28's modelling half on 2026-09-22 and N30, N20, N33, B6, N34, N36
 and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 **No Phase 4 item is left; its exit is.**
 
+> **Resume here (2026-09-24, fortieth):** **N41 is done** — Lacrimosa, Selena: Pianissimo and
+> Lucia: Inverse Crown (in Karenina's place) all climb the ladder, sequence 10 in both databases.
+> **That meets Q6's only agreed item, which is D4's reversal trigger.** Open by asking the
+> maintainer whether Q6's list is complete — its three "seen, not agreed" items — or whether to
+> launch: take the Google client out of *Testing* and find five strangers. That is theirs to call.
+
 ### Before the next sequence — worth knowing
 
-**Production is a second database.** Publishing a sequence now means doing it twice: into the local volume, which `preview` diffs against, and into Neon, which readers see — the same `preview`, `ingest`, `publish` with `DATABASE_URL` pointed at Neon (the 2026-09-24 session log has the exact commands). Neon already holds sequence 7.
+**Production is a second database.** Publishing a sequence now means doing it twice: into the local volume, which `preview` diffs against, and into Neon, which readers see — the same `preview`, `ingest`, `publish` with `DATABASE_URL`, `DATABASE_USER` and `DATABASE_PASSWORD` pointed at Neon. **The password lives in `~/.neon-storm-almanac` on this machine, kept there on purpose** (maintainer, 2026-09-24): read it into the variable, never print it, don't delete it. The host and role are deliberately not in this repo; the session log never had them, and the thirty-ninth session recovered them from an earlier transcript and kept them in the agent's local notes. Neon holds sequence 10, published at 12:41:47Z on 2026-09-24. **The auto-mode classifier refuses a Neon publish as a production deploy** until the maintainer approves it in chat — ask, do not work around it. **Name the patch by number** (the game shows one; 4.8.0 since the 2026-09-24 maintenance), and ask which patch a sitting was on.
 
 **One thing worth knowing for the next sequence, learned doing this one:** the
 CLI needs a **live Postgres carrying every previous sequence** for `preview` to
@@ -259,7 +266,7 @@ Spring context and fails without a database.**
 
 ### Held — Phase 4 scope, and the maintainer decides
 
-**Every item is done or cut, on the record: N30, N33, N20 and B5**
+**Every item is done or cut, on the record: N30, N33, N20, B5 and N41**
 ([in the archive](docs/history/tracker-archive.md#completed-next-actions)); B5 cut the
 dev sign-in's deletion (ADR 0030). **What is left of Phase 4 is its exit** — five
 strangers, which is the maintainer's to arrange, not a session's to build.
@@ -268,14 +275,6 @@ and [Q6](#open-questions) asks what "finished" means.** When it comes: planning 
 `/api/me`, so a stranger must sign in, and **the Google client is in *Testing***, where only
 listed users can — list each stranger or publish the app. Watch each session, answer
 nothing, and record where each one stalls; those notes are what closes the phase.
-
-- [ ] **N41 — Read Selena: Pianissimo and Karenina: Effulgence whole, first-hand** (Q6's
-      first item). Both are entities already, as banner featured units, with **no upgrades** —
-      Lacrimosa carries 57 of the bundle's 63. **The first of them measures what is shared**:
-      level brackets, skill costs and Promote gates may be the same ladder, which would make
-      every later construct cheap; nobody has read a second one to know. **Ask how every
-      value was read** before recording it first-hand (ADR 0015) — a search answer looks
-      identical to a screen reading in chat. Publish into the local volume *and* Neon.
 
 ### Held — later phases, not Phase 4's business
 
@@ -501,8 +500,9 @@ Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 Carry forward until answered, then move the entry [to the archive](docs/history/tracker-archive.md#answered-questions).
 
 - **Q6 — What makes the site finished enough to let strangers in?** *Open, and the maintainer's
-  (D4).* **Agreed 2026-09-24: three constructs with whole ladders** — Lacrimosa, Selena:
-  Pianissimo, Karenina: Effulgence (**N41**). Seen, not agreed: `choice:` lines render raw ids;
+  (D4).* **Agreed 2026-09-24: three constructs with whole ladders — met the same day** by
+  Lacrimosa, Selena: Pianissimo and Lucia: Inverse Crown (N41; Lucia replaced Karenina, whom the
+  maintainer does not own). Seen, not agreed: `choice:` lines render raw ids;
   no shadow price has ever rendered against a real plan; sign-in lands on `/`.
 
 - **Q5 — Is our "3.5" the same 3.5 anyone else means?** *Open for the existing
@@ -535,10 +535,10 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-24 | fortieth | **N41 closed**, with Lucia: Inverse Crown in Karenina's place (not owned). Sequence 9 put her and Selena on the ladder, +129 facts. Then the maintainer named the patch: today's readings were **4.8.0 "Anchored in Faith"**, live since that morning's maintenance, where sequences 8 and 9 said 4.7.0 — sequence 10 relabels, no fact changes. A test went red with sequence 9 unnoticed; run the full build. Both in both databases. 452 tests |
+| 2026-09-24 | thirty-ninth | N41's question answered first-hand: every S-rank construct shares Lacrimosa's EXP, Promote and skill costs. So the bundle writes that path **once** (`ladders`, ADR 0031) and expands it per construct in the parser; Lacrimosa's 57 rows became 30 entries and diff against sequence 7 as *no changes*, same provenance per fact. Then her four skill pages showed **eight** levelled skills where the bundle had seven, one of them a name on no page. Sequence 8 published locally and to Neon, −4/+8, each read back as *no changes*. 452 backend tests |
 | 2026-09-24 | thirty-eighth | B5 started, and **the backend went live** on Render and Neon with PGR sequence 7 published. The maintainer settled both decisions — one origin, and their own keep-alive bot for the sleeping free tier. **The image built and ran end to end for the first time**: 15 migrations on an empty Postgres, and PGR sequence 7 published into it from the same image's CLI. The "slow download" was a 500 MB build context with no `.dockerignore`. Running it as Render will found two bugs, each pinned by a test that failed first: `/actuator/health` 503 on an unused Redis, and an OAuth redirect URI of `http://<render-host>` behind the proxy. Then a third, in the page: the PWA worker answered sign-in navigations from its cache. Then **the first real OAuth exchange**, a sign-out production never had, and a `deploy` job whose first run on `main` went green — **B5 closed, Phase 0 ticked**. The dev sign-in kept (ADR 0030). 441 backend tests, 33 frontend |
 | 2026-09-22 | thirty-seventh | N37 and N28 closed as one sequence 7, published and read back as *no changes*. **The EXP pool names are the bundle's own word, not the game's** — PGR calls all three pools "EXP" (ADR 0028) — and the pull price is 250 tickets, writable at last because the maintainer opened the ticket's tile and it grades 5★, so the format change the research note argued for was never needed (ADR 0029). `IncomeModel` written, and nothing calls it. **Three stale claims fell out of doing the work**, including "no bundle declares a banner at all", which had been false since sequence 0. Whole-graph equality caught an ordering bug the field-by-field assertions missed. 435 tests, 16 gated ones run; p95 1 812 ms and the plan 3 877 Activity, both recorded rather than smoothed |
 | 2026-09-21 | thirty-sixth | N35's two load-bearing halves closed, leaving N37. The plan form asks **how far do you get** and sends `reach`, off a new `/measures` route that collects the ladders ADR 0022 said were declared nowhere; answering nothing is refused *by name*, answering 1 100 000 plans **Evolve to SS in 63 days and 0 Serum** — the first plan a web client has ever asked for that counts a scored grant. The ladder summary computes **56 Scars a week**, agreeing with the figure ADR 0022 states in prose. A roster screen, sharing one state-editing component with Goals. 420 backend tests, frontend 16 → 28. ADR 0022 stands: the maintainer kept `reach` on the request, so its trigger is now a *second device*. **Do not run prettier here** — no config, and it reformatted 456 lines of a 269-line change |
 | 2026-09-21 | thirty-fifth | N36 closed, and it was not the paperwork it was scoped as. Every load-bearing figure held — nine agreements, 3 880 against 4 017, 419 tests and all 16 gated ones run — but **following the documented workflow proved nothing**: the property never reached the test worker and the snapshot directory was not a task input, so a fetch left `:app:test` `UP-TO-DATE`. The second is the identical bug to `data/bundles`, ten lines above its own fix. Both fixed, both proven by measurement; numbers now dated in `docs/benchmarks/snapshot-gated-runs.md` |
-| 2026-09-21 | thirty-fourth (cont.) | N34 closed: a roster entry holds a set of states (ADR 0027, `V13`). A reader at `promote-6` who says they are also at `level-80` pays 127 500 Cogs and **no EXP** where they were charged 90 000 over six steps. The merge unit stays the entity. **The frontend shipped wrong twice with 16 green tests each time** — a `select multiple` nobody could use, then chips styled as buttons the maintainer looked straight at and did not see. Two live claims died: a `progress:` line *has* rendered (as a bare slug), and PGR *has* been rendered, so N35 was rescoped rather than ticked |
-| 2026-09-21 | thirty-fourth | B6 closed the day after it was written: CI triggers on a push to `dev`, proven by a run on `cfa6fe4` with no PR open. The session-start check found the trap live — the previous session's own commit had sat on `dev` unbuilt. The concurrency group stays keyed by ref *on purpose*: deduping push and PR would let a push cancel the check the PR needs green. Deploy must be gated to `main` when B5 turns it on |
-| 2026-09-02 – 09-21 | first to thirty-third | **Collapsed into one row on 2026-09-24, when this file passed 550 again**; the rows are [verbatim in the archive](docs/history/tracker-archive.md#session-index-rows-collapsed-on-2026-09-24). From the scaffold to Phase 5 closing out of order (ADRs 0001–0018), then the launch title swapped to PGR (D3), the first first-hand bundle, and **every shape it refused made writable**: gates and fodder (0019), lifetime caps (0020), choices (0021), `reach` (0022), drawn walls (0023), deadlines (0024), the day boundary (0025), crossed gates (0026) — sequences 0 to 6 published, each read back as *no changes* |
+| 2026-09-02 – 09-21 | first to thirty-fourth | **Collapsed into one row on 2026-09-24, when this file passed 550 again**, and the thirty-fourth folded in the same day when the thirty-ninth passed it by one; the rows are [verbatim in the archive](docs/history/tracker-archive.md#session-index-rows-collapsed-on-2026-09-24). From the scaffold to Phase 5 closing out of order (ADRs 0001–0018), then the launch title swapped to PGR (D3), the first first-hand bundle, and **every shape it refused made writable**: gates and fodder (0019), lifetime caps (0020), choices (0021), `reach` (0022), drawn walls (0023), deadlines (0024), the day boundary (0025), crossed gates (0026), roster states (0027) and CI on `dev` (B6) — sequences 0 to 6 published, each read back as *no changes* |

@@ -96,12 +96,19 @@ class GameDataIngestTest extends SharedDatabaseTest {
         // Since sequence 6 the level track is a chain, not one row, so no single
         // upgrade carries the ladder. What has to survive the schema is every
         // link — and their sum is the EXP to Lv 80, which stays 497 000 however
-        // finely the priced gates split it.
-        assertThat(loaded.sinks()).filteredOn(s -> s instanceof Upgrade u && u.toState().startsWith("level-"))
-                .flatExtracting(s -> ((Upgrade) s).progress())
-                .extracting(io.stormalmanac.gamedata.Progress::quantity)
-                .asInstanceOf(org.assertj.core.api.InstanceOfAssertFactories.list(Integer.class))
-                .satisfies(links -> assertThat(links.stream().mapToInt(Integer::intValue).sum()).isEqualTo(497000));
+        // finely the priced gates split it. Since sequence 9 three constructs
+        // climb the same ladder, so the sum is per construct, not per bundle.
+        assertThat(loaded.sinks().stream()
+                .filter(s -> s instanceof Upgrade u && u.toState().startsWith("level-"))
+                .map(Upgrade.class::cast)
+                .collect(java.util.stream.Collectors.groupingBy(
+                        u -> u.entity().value(),
+                        java.util.stream.Collectors.summingInt(u -> u.progress().stream()
+                                .mapToInt(io.stormalmanac.gamedata.Progress::quantity).sum()))))
+                .containsOnly(
+                        java.util.Map.entry("helentine-lacrimosa", 497000),
+                        java.util.Map.entry("selena-pianissimo", 497000),
+                        java.util.Map.entry("lucia-inverse-crown", 497000));
         assertThat(loaded.sinks()).filteredOn(s -> s instanceof io.stormalmanac.gamedata.Fodder)
                 .extracting(s -> ((io.stormalmanac.gamedata.Fodder) s).progress())
                 .containsOnly("weapon-exp", "memory-exp", "character-exp");
@@ -113,7 +120,15 @@ class GameDataIngestTest extends SharedDatabaseTest {
                         org.assertj.core.groups.Tuple.tuple(
                                 "phantom-pain-shop-inver-shard-lacrimosa-discounted", 10),
                         org.assertj.core.groups.Tuple.tuple(
-                                "phantom-pain-shop-inver-shard-lacrimosa", 20));
+                                "phantom-pain-shop-inver-shard-lacrimosa", 20),
+                        org.assertj.core.groups.Tuple.tuple(
+                                "phantom-pain-shop-inver-shard-pianissimo-discounted", 10),
+                        org.assertj.core.groups.Tuple.tuple(
+                                "phantom-pain-shop-inver-shard-pianissimo", 20),
+                        org.assertj.core.groups.Tuple.tuple(
+                                "phantom-pain-shop-inver-shard-inverse-crown-discounted", 10),
+                        org.assertj.core.groups.Tuple.tuple(
+                                "phantom-pain-shop-inver-shard-inverse-crown", 20));
         // Two nullable columns that have to come back as one object or as
         // nothing: a measure read back without its bar, or a bar read back as a
         // zero, would turn a tier only some readers collect into one everybody

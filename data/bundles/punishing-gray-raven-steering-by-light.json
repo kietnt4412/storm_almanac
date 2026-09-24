@@ -122,7 +122,38 @@
     "What this does NOT do is move a plan. The solver does not pull, the",
     "ticket is spent by nothing in this file, and no reward here grants one,",
     "so DeclaredIncomeModel reads a balance and accrues zero. That gap is a",
-    "reading nobody has taken rather than a number anybody invented."
+    "reading nobody has taken rather than a number anybody invented.",
+    "",
+    "Sequence 8 corrects Lacrimosa's skills, and is the first sequence written",
+    "with a ladder (ADR 0031). Reading all four of her skill pages on",
+    "2026-09-24 found thirteen skills, eight on the level curve, where this",
+    "file had seven: 'Astral Armament' is on no page and is gone, and the",
+    "Signature Move (Allegory of the Wondrous Night) and the QTE (Fluid",
+    "Emotions) are added. A plan to every skill cap costs one skill more than",
+    "it did. The ladder itself moved nothing: written on its own, it diffed",
+    "against sequence 7 as no changes.",
+    "",
+    "Sequence 9 puts Selena: Pianissimo and Lucia: Inverse Crown on the",
+    "S-rank ladder: a climber each, a shard each, and each shard's two",
+    "Phantom Pain shop rows. Every number is the ladder's, and what is theirs",
+    "is words, read off their skill pages and shard cards on 2026-09-24. The",
+    "two rows ADR 0031 held back for confirmation per climber, Evolve and the",
+    "SS passive's unlock, the maintainer confirmed for every S-rank construct.",
+    "Selena had been an entity since sequence 0, as the target of the Arrival",
+    "Construct pool, with nothing to climb; Lucia is new. She takes the place",
+    "Karenina: Effulgence had in the plan, because the maintainer does not",
+    "own Karenina and so cannot read her.",
+    "",
+    "Sequence 10 changes no fact. It corrects which patch the readings were",
+    "taken on. The game moved from 4.7.0 \"Steering By Light\" to 4.8.0",
+    "\"Anchored in Faith\" at the 2026-09-24 maintenance, and every screen read",
+    "that day (Lacrimosa's skill pages, Selena's and Lucia's screens) was read",
+    "after it, where sequences 8 and 9 had called them \"Steering By Light\".",
+    "The label moves to 4.8.0 because that is the patch a reader plays. What",
+    "carries the 4.7.0 readings across is the maintainer's report of noticing",
+    "no cost change in 4.8.0, plus one point measured on both sides: a skill's",
+    "1 -> 2 at 1 Skill Point + 2 000 Cogs, read on 2026-09-19 and again on",
+    "2026-09-24. The file keeps its name; a file name is not a label."
   ],
 
   "game": {
@@ -131,15 +162,15 @@
     "energyUnit": "Serum",
     "dayBoundary": { "zone": "UTC", "hour": 5 }
   },
-  "sequence": 7,
-  "label": "Steering By Light",
-  "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client, patch \"Steering By Light\", on 2026-09-18. Numbers and text only; no game assets.",
+  "sequence": 10,
+  "label": "Anchored in Faith (Global 4.8.0)",
+  "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client: patch 4.7.0 \"Steering By Light\" from 2026-09-18 to 2026-09-22, and patch 4.8.0 \"Anchored in Faith\" on 2026-09-24. Numbers and text only; no game assets.",
 
   "provenance": [
     {
       "id": "research-pool-panels",
       "origin": "PUBLISHER_DISCLOSURE",
-      "detail": "The research pool's own Basic Rules, Details, Switch and Drop Details panels, Punishing: Gray Raven Global (English) client, patch \"Steering By Light\", Commandant level 105, on the Selena: Pianissimo (Arrival Construct, 09/17-10/01) and Karenina: Effulgence (Themed Construct, 08/19-09/23) banners. The pool screen carrying those panels is also where the price of a pull was read, on its own pull buttons: 250 Event Construct R&D Tickets for one and 2 500 for ten, so there is no ten-pull discount. That half was in front of the maintainer in the same sitting and had nowhere to live until sequence 7, which is why this detail line names it only now. Screenshots taken by the maintainer on 2026-09-18 and transcribed in a Claude Code session; no screenshot is committed, because game assets are not allowed in this repository.",
+      "detail": "The research pool's own Basic Rules, Details, Switch and Drop Details panels, Punishing: Gray Raven Global (English) client, patch 4.7.0 \"Steering By Light\", Commandant level 105, on the Selena: Pianissimo (Arrival Construct, 09/17-10/01) and Karenina: Effulgence (Themed Construct, 08/19-09/23) banners. The pool screen carrying those panels is also where the price of a pull was read, on its own pull buttons: 250 Event Construct R&D Tickets for one and 2 500 for ten, so there is no ten-pull discount. That half was in front of the maintainer in the same sitting and had nowhere to live until sequence 7, which is why this detail line names it only now. Screenshots taken by the maintainer on 2026-09-18 and transcribed in a Claude Code session; no screenshot is committed, because game assets are not allowed in this repository.",
       "observedOn": "2026-09-18"
     },
     {
@@ -151,25 +182,25 @@
     {
       "id": "equipment-and-resource-screens",
       "origin": "OBSERVED_IN_GAME",
-      "detail": "The Select Equipment screen naming Hear the Bell (6-star, ATK 50 / CRIT 25, the same base stats the 2026-09-18 Enhance screen showed), the Weapon Enhancer IV item card, the Resources menu, the Simulated Battlefield stage screen and one run's Battle Results, the Simulation Score item card, the Simulation Shop's Material (both pages), Memory and Version Limited tabs, the reward screen from opening one stack of Overclock Material Box (beta), the Authority Level panel, and the Major Overclock Alloy, Weapon Overclock Core II and Memory Overclock Circuit II item cards. Same client and account, patch \"Steering By Light\". The run was read during a 2x event and its score halved on the maintainer's report that the event doubles it; the result tile itself is marked 'Double'. That the score is fixed per run and unmoved by Authority Level, and that the box opens into a fixed split, are the maintainer's reports from playing daily.",
+      "detail": "The Select Equipment screen naming Hear the Bell (6-star, ATK 50 / CRIT 25, the same base stats the 2026-09-18 Enhance screen showed), the Weapon Enhancer IV item card, the Resources menu, the Simulated Battlefield stage screen and one run's Battle Results, the Simulation Score item card, the Simulation Shop's Material (both pages), Memory and Version Limited tabs, the reward screen from opening one stack of Overclock Material Box (beta), the Authority Level panel, and the Major Overclock Alloy, Weapon Overclock Core II and Memory Overclock Circuit II item cards. Same client and account, patch 4.7.0 \"Steering By Light\". The run was read during a 2x event and its score halved on the maintainer's report that the event doubles it; the result tile itself is marked 'Double'. That the score is fixed per run and unmoved by Authority Level, and that the box opens into a fixed split, are the maintainer's reports from playing daily.",
       "observedOn": "2026-09-19"
     },
     {
       "id": "character-screens",
       "origin": "OBSERVED_IN_GAME",
-      "detail": "Helentine: Lacrimosa's Level Up screen at Lv 1 / 80 with one EXP Pod (M), (L) and (XL) selected in turn, her Evolution screen, and her four Awaken tiers; Liv: Limpidity's Infinitas orb-colour screen and the Ultima: Lacrimosa item card; the Memory Samantha's detail, Enhance (to 45) and Resonance screens, and the Memory Enhancement Cost picker with one Memory Enhancer IV selected; the Inver-Shard - Lacrimosa and Phantom Pain Scar cards and the Phantom Pain shop's shard tile. That shards 11 to 30 cost 20 Scars each is the maintainer's reading of that tile in game, not of the one read here, which showed the first ten's 10. Same client and account, patch \"Steering By Light\". Also her Promote tab at every step from PRIVATE to HERO and her Skill screens (the leader skill's Unlock, the core passive's Level Up). That Level Up has no Cog cost, that she was pulled at S rank, and that every skill unlock costs the same as the one read are the maintainer's reports; their report that every skill level costs the same was contradicted by the Delusional Spin screens and the 1 -> 18 upgrade prompt, and is not relied on.",
+      "detail": "Helentine: Lacrimosa's Level Up screen at Lv 1 / 80 with one EXP Pod (M), (L) and (XL) selected in turn, her Evolution screen, and her four Awaken tiers; Liv: Limpidity's Infinitas orb-colour screen and the Ultima: Lacrimosa item card; the Memory Samantha's detail, Enhance (to 45) and Resonance screens, and the Memory Enhancement Cost picker with one Memory Enhancer IV selected; the Inver-Shard - Lacrimosa and Phantom Pain Scar cards and the Phantom Pain shop's shard tile. That shards 11 to 30 cost 20 Scars each is the maintainer's reading of that tile in game, not of the one read here, which showed the first ten's 10. Same client and account, patch 4.7.0 \"Steering By Light\". Also her Promote tab at every step from PRIVATE to HERO and her Skill screens (the leader skill's Unlock, the core passive's Level Up). That Level Up has no Cog cost, that she was pulled at S rank, and that every skill unlock costs the same as the one read are the maintainer's reports; their report that every skill level costs the same was contradicted by the Delusional Spin screens and the 1 -> 18 upgrade prompt, and is not relied on.",
       "observedOn": "2026-09-19"
     },
     {
       "id": "memory-shard-card",
       "origin": "OBSERVED_IN_GAME",
-      "detail": "The 5-star Memory Shard's Item Details card, opened from the inventory's Item tab: name, \"Owned 4300\", and \"Obtained from recycling 5-star Memory Chips\". The owned count is the one the Resonance screen showed beside the unnamed 5-star price, which is how the two were matched. A screenshot taken by the maintainer on 2026-09-19 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch \"Steering By Light\".",
+      "detail": "The 5-star Memory Shard's Item Details card, opened from the inventory's Item tab: name, \"Owned 4300\", and \"Obtained from recycling 5-star Memory Chips\". The owned count is the one the Resonance screen showed beside the unnamed 5-star price, which is how the two were matched. A screenshot taken by the maintainer on 2026-09-19 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch 4.7.0 \"Steering By Light\".",
       "observedOn": "2026-09-19"
     },
     {
       "id": "level-bracket-screens",
       "origin": "OBSERVED_IN_GAME",
-      "detail": "The Level Up screen's selection preview, read on Luna: Oblivion at Lv 1 / 80 — a freshly obtained S-rank construct, BP 326, no Memory equipped — with EXP Pods selected and the Level Up button never pressed, so the whole ladder was bracketed without spending anything. Twenty-two selections were read, and every one of the thirteen gated levels is pinned to a single multiple of 1 000 by the pair that brackets it — the total that reaches it and the total 1 000 lower that does not. 1 M (+1 000) shows Lv 10, and nothing smaller than one Pod exists, so Lv 2 and Lv 10 are both 1 000. Then: 3 M (+3 000) shows Lv 17 with 4 M (+4 000) showing Lv 20; 3 L (+9 000) shows Lv 29 with 3 L + 1 M (+10 000) showing Lv 30; 8 L (+24 000) shows Lv 39 with 8 L + 1 M (+25 000) showing Lv 40; 13 L (+39 000) shows Lv 44 with 13 L + 1 M (+40 000) showing Lv 45; 19 L + 2 M (+59 000) shows Lv 49 with 19 L + 3 M (+60 000) showing Lv 50; 29 L + 1 M (+88 000) shows Lv 54 with 29 L + 2 M (+89 000) showing Lv 55; 43 L (+129 000) shows Lv 59 with 43 L + 1 M (+130 000) showing Lv 60; 61 L + 2 M (+185 000) shows Lv 64 with 61 L + 3 M (+186 000) showing Lv 65; 87 L + 1 M (+262 000) shows Lv 69 with 87 L + 2 M (+263 000) showing Lv 70; 121 L + 1 M (+364 000) shows Lv 74 with 121 L + 2 M (+365 000) showing Lv 75; and 165 L + 1 M (+496 000) shows Lv 79 with 165 L + 2 M (+497 000) showing 80 / 80. The wider first brackets these replaced — 19 L, 29 L, 61 L, 87 L and 121 L, each 2 000 or 3 000 below its gate — were read in the same sitting and are superseded by the pairs above. Screenshots taken by the maintainer on 2026-09-21 and transcribed in a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch \"Steering By Light\". These figures are written on Helentine: Lacrimosa, not on Luna: Oblivion, on the maintainer's report that S-rank constructs share one level curve. That report is cross-checked rather than taken: the 2026-09-19 Lacrimosa readings of +1 000 -> Lv 10 and +3 000 -> Lv 17 are reproduced here exactly, and the (496 000, 497 000] bracket for Lv 80 is reproduced in both directions. Three agreement points, at both ends of the ladder. Luna: Oblivion is not an entity in this bundle, because she would arrive with a level track and no Promote, Skill or Evolve data. The screen's 'EXP 0/20' field is not recorded: it reads 0/20 at Lv 10, Lv 20 and Lv 80 alike, so it does not vary with level and cannot be a per-level requirement.",
+      "detail": "The Level Up screen's selection preview, read on Luna: Oblivion at Lv 1 / 80 — a freshly obtained S-rank construct, BP 326, no Memory equipped — with EXP Pods selected and the Level Up button never pressed, so the whole ladder was bracketed without spending anything. Twenty-two selections were read, and every one of the thirteen gated levels is pinned to a single multiple of 1 000 by the pair that brackets it — the total that reaches it and the total 1 000 lower that does not. 1 M (+1 000) shows Lv 10, and nothing smaller than one Pod exists, so Lv 2 and Lv 10 are both 1 000. Then: 3 M (+3 000) shows Lv 17 with 4 M (+4 000) showing Lv 20; 3 L (+9 000) shows Lv 29 with 3 L + 1 M (+10 000) showing Lv 30; 8 L (+24 000) shows Lv 39 with 8 L + 1 M (+25 000) showing Lv 40; 13 L (+39 000) shows Lv 44 with 13 L + 1 M (+40 000) showing Lv 45; 19 L + 2 M (+59 000) shows Lv 49 with 19 L + 3 M (+60 000) showing Lv 50; 29 L + 1 M (+88 000) shows Lv 54 with 29 L + 2 M (+89 000) showing Lv 55; 43 L (+129 000) shows Lv 59 with 43 L + 1 M (+130 000) showing Lv 60; 61 L + 2 M (+185 000) shows Lv 64 with 61 L + 3 M (+186 000) showing Lv 65; 87 L + 1 M (+262 000) shows Lv 69 with 87 L + 2 M (+263 000) showing Lv 70; 121 L + 1 M (+364 000) shows Lv 74 with 121 L + 2 M (+365 000) showing Lv 75; and 165 L + 1 M (+496 000) shows Lv 79 with 165 L + 2 M (+497 000) showing 80 / 80. The wider first brackets these replaced — 19 L, 29 L, 61 L, 87 L and 121 L, each 2 000 or 3 000 below its gate — were read in the same sitting and are superseded by the pairs above. Screenshots taken by the maintainer on 2026-09-21 and transcribed in a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch 4.7.0 \"Steering By Light\". These figures are written on Helentine: Lacrimosa, not on Luna: Oblivion, on the maintainer's report that S-rank constructs share one level curve. That report is cross-checked rather than taken: the 2026-09-19 Lacrimosa readings of +1 000 -> Lv 10 and +3 000 -> Lv 17 are reproduced here exactly, and the (496 000, 497 000] bracket for Lv 80 is reproduced in both directions. Three agreement points, at both ends of the ladder. Luna: Oblivion is not an entity in this bundle, because she would arrive with a level track and no Promote, Skill or Evolve data. The screen's 'EXP 0/20' field is not recorded: it reads 0/20 at Lv 10, Lv 20 and Lv 80 alike, so it does not vary with level and cannot be a per-level requirement.",
       "observedOn": "2026-09-21"
     },
     {
@@ -181,8 +212,26 @@
     {
       "id": "phantom-pain-cage-screen",
       "origin": "OBSERVED_IN_GAME",
-      "detail": "The Phantom Pain Cage's Weekly Reward screen — \"Resets weekly. Reach enough progress to claim.\" — read tile by tile down all nine claim tiers, from 30 000 progress to 1 100 000, each tile's Phantom Pain Scar count and the items beside it. Screenshots taken by the maintainer on 2026-09-19 and transcribed in a Claude Code session; not committed, because game assets are not allowed in this repository. That the Scars add up to the 56 they report collecting in a week is how the set of tiles was checked for a gap. Same client and account, patch \"Steering By Light\".",
+      "detail": "The Phantom Pain Cage's Weekly Reward screen — \"Resets weekly. Reach enough progress to claim.\" — read tile by tile down all nine claim tiers, from 30 000 progress to 1 100 000, each tile's Phantom Pain Scar count and the items beside it. Screenshots taken by the maintainer on 2026-09-19 and transcribed in a Claude Code session; not committed, because game assets are not allowed in this repository. That the Scars add up to the 56 they report collecting in a week is how the set of tiles was checked for a gap. Same client and account, patch 4.7.0 \"Steering By Light\".",
       "observedOn": "2026-09-19"
+    },
+    {
+      "id": "skill-pages",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "Helentine: Lacrimosa's four skill pages, read whole: Basic Skill — Delusional Spin [Red Orb] at Lv 18 with 'Max Level Reached', Withering Spiral [Yellow Orb], Blight Excision [Blue Orb], Link Dissolution [Basic Attack]; Special Skill — Seeker System [Core Passive], Allegory of the Wondrous Night [Signature Move] and Fluid Emotions [QTE], each at Lv 1 with Consume 1 Skill Point + 2 000 Cogs; Common Effect — Leader - Fading Fern [Leader Skill] with Unlock 3 Skill Points + 25 000 Cogs, Amplifier at Lv 1, and Ultima Awaken, 'Awaken Lacrimosa's Ultima Rank', with no Skill Point or Cog cost; Evolution Effect — Vestige [SS Rank Passive Skill] at Lv 2, 'Max Level Reached', Styx Reflection [SSS Rank Passive Skill], 'Unlocked at SS3 Rank', and Mourning Heteronomy [SSS+ Rank Passive Skill], 'Unlocked at SSS3 / SSS6 / SSS+ Rank', both with their Unlock buttons greyed. Thirteen skills, eight on the level curve; the Yellow Orb's and the class skill's names were read by the maintainer on tapping them and reported in the same session. The curve beyond 1 -> 2 is the 2026-09-19 reading under 'character-screens' — the 1 -> 18 prompt at 44 Skill Points and 206 000 Cogs — and that the Signature Move and the QTE share it is the maintainer's report, as for the other six. This sitting removed 'Astral Armament', a name recorded on 2026-09-19 that is on none of the four pages; the maintainer reports it belongs to another construct, none of the three in this bundle. Screenshots taken by the maintainer on 2026-09-24 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch 4.8.0 \"Anchored in Faith\", after that day's maintenance (the maintainer); sequences 8 and 9 said \"Steering By Light\", which was wrong.",
+      "observedOn": "2026-09-24"
+    },
+    {
+      "id": "selena-pianissimo-screens",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "Selena: Pianissimo's skill pages, each at 'Max Level Reached': Flaming Chord [Red Orb], Thunderous Transposition [Yellow Orb], Rhythmic Piercing [Blue Orb] and Reverberating Legato [Basic Attack], each at Lv 18; Classical Romanticism [Core Passive] at Lv 24, shown as 18 (+6), Fugal Sonata [Signature Move] and Resplendent Symphony [QTE] at Lv 18; Attacker [Class Skill] at Lv 18; and Rainbow-Hued Melody [SS Rank Passive Skill] at Lv 2, its Lv 1 'Unlocked at S5 Rank' and its Lv 2 'Unlocked at SS Rank', the same shape as Lacrimosa's Vestige. Eight skills on the level curve, in the same slots as Lacrimosa's eight. The Core Passive's +6 is a bonus from an equipped Memory's Resonance (maintainer), not a level the curve prices, and is not modelled. Also the Inver-Shard - Pianissimo item card, 'Owned 2'; its five stars were read on its Phantom Pain shop tile (maintainer). That she climbs the S-rank ladder — the same EXP per level, Cogs per Promote step and Skill Points and Cogs per skill level as Lacrimosa — is the maintainer's comparison of her Level Up, Promote and Skill screens with Lacrimosa's on 2026-09-24 (ADR 0031). The two rows that comparison did not cover were confirmed by the maintainer in a later sitting the same day: Evolve S -> SS costs 30 Inver-Shard - Pianissimo, and the SS passive's Unlock costs 2 Skill Points + 20 000 Cogs, both as for Lacrimosa; and her shard's Phantom Pain shop tile sells 30 ever, 10 at 10 Scars then 20 at 20, which the maintainer reports holds for every S-rank construct. Screenshots taken by the maintainer on 2026-09-24 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch 4.8.0 \"Anchored in Faith\", after that day's maintenance (the maintainer); sequence 9 said \"Steering By Light\", which was wrong.",
+      "observedOn": "2026-09-24"
+    },
+    {
+      "id": "lucia-inverse-crown-screens",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "Lucia: Inverse Crown's character screen ('Lucia / Inverse Crown', Evolve SS, Lv 80 / 80) and her skill pages, each at 'Max Level Reached': Abyssal Lament [Red Orb], Dusklit Severance [Yellow Orb], Frosty Thorns [Blue Orb] and Malevolent March [Basic Attack], each at Lv 18; Sequence Traversal [Core Passive] and Savage Afterglow [QTE] at Lv 18, Silenced Abysslight [Signature Move] at Lv 24, shown as 18 (+6); Attacker [Class Skill] at Lv 18; and Bloomtide: Genesis [SS Rank Passive Skill] at Lv 2, its Lv 1 'Unlocked at S5 Rank' and its Lv 2 'Unlocked at SS Rank', the same shape as Lacrimosa's Vestige. Eight skills on the level curve, in the same slots as Lacrimosa's eight. The Signature Move's +6 is read as the same Memory Resonance bonus the maintainer named on Selena: Pianissimo's Core Passive, and is not modelled. Also the Inver-Shard - Inverse Crown item card, 'Owned 0'. That she is S-rank is the maintainer's report. That she climbs the S-rank ladder — EXP per level, Cogs per Promote step, Skill Points and Cogs per skill level, 30 shards to Evolve S -> SS, 2 Skill Points + 20 000 Cogs for the SS passive's unlock — and that her shard's Phantom Pain shop tile is five stars and sells 30 ever, 10 at 10 Scars then 20 at 20, are the maintainer's reports of 2026-09-24 that these hold for every S-rank construct; none of those numbers was read on her screens. She replaces Karenina: Effulgence as the third construct on the ladder because the maintainer does not own Karenina. Screenshots taken by the maintainer on 2026-09-24 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch 4.8.0 \"Anchored in Faith\", after that day's maintenance (the maintainer); sequence 9 said \"Steering By Light\", which was wrong.",
+      "observedOn": "2026-09-24"
     }
   ],
   "sourcedBy": "weapon-upgrade-screens",
@@ -212,74 +261,24 @@
     "shop:simulation-shop-cogs": "equipment-and-resource-screens",
     "shop:simulation-shop-skill-point": "equipment-and-resource-screens",
     "entity:helentine-lacrimosa": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-1": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-2": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-3": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-4": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-5": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-6": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-7": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-8": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-9": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-10": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-11": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-12": "character-screens",
-    "upgrade:helentine-lacrimosa-promote-13": "character-screens",
-    "upgrade:helentine-lacrimosa-leader-skill-unlock": "character-screens",
-    "upgrade:helentine-lacrimosa-astral-armament-2": "character-screens",
-    "upgrade:helentine-lacrimosa-astral-armament-3": "character-screens",
-    "upgrade:helentine-lacrimosa-astral-armament-4": "character-screens",
-    "upgrade:helentine-lacrimosa-astral-armament-18": "character-screens",
-    "upgrade:helentine-lacrimosa-seeker-system-2": "character-screens",
-    "upgrade:helentine-lacrimosa-seeker-system-3": "character-screens",
-    "upgrade:helentine-lacrimosa-seeker-system-4": "character-screens",
-    "upgrade:helentine-lacrimosa-seeker-system-18": "character-screens",
-    "upgrade:helentine-lacrimosa-delusional-spin-2": "character-screens",
-    "upgrade:helentine-lacrimosa-delusional-spin-3": "character-screens",
-    "upgrade:helentine-lacrimosa-delusional-spin-4": "character-screens",
-    "upgrade:helentine-lacrimosa-delusional-spin-18": "character-screens",
-    "upgrade:helentine-lacrimosa-withering-spiral-2": "character-screens",
-    "upgrade:helentine-lacrimosa-withering-spiral-3": "character-screens",
-    "upgrade:helentine-lacrimosa-withering-spiral-4": "character-screens",
-    "upgrade:helentine-lacrimosa-withering-spiral-18": "character-screens",
-    "upgrade:helentine-lacrimosa-amplifier-2": "character-screens",
-    "upgrade:helentine-lacrimosa-amplifier-3": "character-screens",
-    "upgrade:helentine-lacrimosa-amplifier-4": "character-screens",
-    "upgrade:helentine-lacrimosa-amplifier-18": "character-screens",
-    "upgrade:helentine-lacrimosa-blight-excision-2": "character-screens",
-    "upgrade:helentine-lacrimosa-blight-excision-3": "character-screens",
-    "upgrade:helentine-lacrimosa-blight-excision-4": "character-screens",
-    "upgrade:helentine-lacrimosa-blight-excision-18": "character-screens",
-    "upgrade:helentine-lacrimosa-link-dissolution-2": "character-screens",
-    "upgrade:helentine-lacrimosa-link-dissolution-3": "character-screens",
-    "upgrade:helentine-lacrimosa-link-dissolution-4": "character-screens",
-    "upgrade:helentine-lacrimosa-link-dissolution-18": "character-screens",
     "item:overclock-material-box-alpha": "equipment-and-resource-screens",
     "item:memory-overclock-circuit-i": "equipment-and-resource-screens",
     "shop:simulation-shop-overclock-material-box-alpha": "equipment-and-resource-screens",
     "craft:open-overclock-material-box-alpha": "equipment-and-resource-screens",
     "item:inver-shard-lacrimosa": "character-screens",
+    "item:inver-shard-pianissimo": "selena-pianissimo-screens",
+    "shop:phantom-pain-shop-inver-shard-pianissimo-discounted": "selena-pianissimo-screens",
+    "shop:phantom-pain-shop-inver-shard-pianissimo": "selena-pianissimo-screens",
+    "entity:lucia-inverse-crown": "lucia-inverse-crown-screens",
+    "item:inver-shard-inverse-crown": "lucia-inverse-crown-screens",
+    "shop:phantom-pain-shop-inver-shard-inverse-crown-discounted": "lucia-inverse-crown-screens",
+    "shop:phantom-pain-shop-inver-shard-inverse-crown": "lucia-inverse-crown-screens",
     "item:phantom-pain-scar": "character-screens",
-    "upgrade:helentine-lacrimosa-evolve-ss": "character-screens",
     "item:memory-enhancer-iv": "character-screens",
     "fodder:memory-exp-4-star": "character-screens",
     "shop:simulation-shop-memory-enhancer-iv": "equipment-and-resource-screens",
     "entity:samantha": "character-screens",
     "upgrade:samantha-overclock-1": "character-screens",
-    "upgrade:helentine-lacrimosa-vestige-unlock": "character-screens",
-    "upgrade:helentine-lacrimosa-level-2": "level-bracket-screens",
-    "upgrade:helentine-lacrimosa-level-10": "level-bracket-screens",
-    "upgrade:helentine-lacrimosa-level-20": "level-bracket-screens",
-    "upgrade:helentine-lacrimosa-level-30": "level-bracket-screens",
-    "upgrade:helentine-lacrimosa-level-40": "level-bracket-screens",
-    "upgrade:helentine-lacrimosa-level-45": "level-bracket-screens",
-    "upgrade:helentine-lacrimosa-level-50": "level-bracket-screens",
-    "upgrade:helentine-lacrimosa-level-55": "level-bracket-screens",
-    "upgrade:helentine-lacrimosa-level-60": "level-bracket-screens",
-    "upgrade:helentine-lacrimosa-level-65": "level-bracket-screens",
-    "upgrade:helentine-lacrimosa-level-70": "level-bracket-screens",
-    "upgrade:helentine-lacrimosa-level-75": "level-bracket-screens",
-    "upgrade:helentine-lacrimosa-level-80": "level-bracket-screens",
     "shop:phantom-pain-shop-inver-shard-lacrimosa-discounted": "character-screens",
     "shop:phantom-pain-shop-inver-shard-lacrimosa": "character-screens",
     "item:memory-shard-5-star": "memory-shard-card",
@@ -386,6 +385,20 @@
       "category": "construct-shard"
     },
     {
+      "_comment": "Named on its own item card, which shows no grade; five stars from its Phantom Pain shop tile (maintainer), as for Lacrimosa's. Its card says Construct Memory recycles into Inver-Shards, which is the duplicate route.",
+      "id": "inver-shard-pianissimo",
+      "displayName": "Inver-Shard - Pianissimo",
+      "rarity": { "label": "5*", "rank": 5 },
+      "category": "construct-shard"
+    },
+    {
+      "_comment": "Named on its own item card ('Owned 0'), which shows no grade. Five stars on the maintainer's report that every S-rank construct's shard tile in the Phantom Pain shop is the same as Lacrimosa's and Selena's; this one's tile was not itself read.",
+      "id": "inver-shard-inverse-crown",
+      "displayName": "Inver-Shard - Inverse Crown",
+      "rarity": { "label": "5*", "rank": 5 },
+      "category": "construct-shard"
+    },
+    {
       "_comment": "Three stars (blue) on the Phantom Pain Cage's weekly reward tiles and on its own owned-count panel; the item card shows none. Earned from the weekly Cage, up to 56 a week by score; spent in the Phantom Pain shop on shards, since sequence 2.",
       "id": "phantom-pain-scar",
       "displayName": "Phantom Pain Scar",
@@ -484,6 +497,13 @@
       "_comment": "Pulled at S rank (maintainer). The character every Level Up, Promote, Evolve, Skill and Awaken screen in this bundle was read on.",
       "id": "helentine-lacrimosa",
       "displayName": "Helentine: Lacrimosa",
+      "kind": "character",
+      "rarity": { "label": "S", "rank": 3 }
+    },
+    {
+      "_comment": "Named on her character screen, 'Lucia / Inverse Crown', at SS and Lv 80 / 80; S-rank is the maintainer's report. The third construct on the S-rank ladder, in place of Karenina: Effulgence, whom the maintainer does not own and so cannot read.",
+      "id": "lucia-inverse-crown",
+      "displayName": "Lucia: Inverse Crown",
       "kind": "character",
       "rarity": { "label": "S", "rank": 3 }
     },
@@ -765,6 +785,40 @@
       "offer": { "item": "inver-shard-lacrimosa", "quantity": 1 },
       "periodLimit": 20,
       "period": "never"
+    },
+    {
+      "_comment": "Selena: Pianissimo's shard tile in the same shop: 30 ever, the first 10 at 10 Phantom Pain Scar and the next 20 at 20, the same split as Lacrimosa's. The maintainer's report of 2026-09-24 that every S-rank construct's tile is priced this way; the tile itself was read for its five-star grade.",
+      "id": "phantom-pain-shop-inver-shard-pianissimo-discounted",
+      "currency": "phantom-pain-scar",
+      "price": 10,
+      "offer": { "item": "inver-shard-pianissimo", "quantity": 1 },
+      "periodLimit": 10,
+      "period": "never"
+    },
+    {
+      "id": "phantom-pain-shop-inver-shard-pianissimo",
+      "currency": "phantom-pain-scar",
+      "price": 20,
+      "offer": { "item": "inver-shard-pianissimo", "quantity": 1 },
+      "periodLimit": 20,
+      "period": "never"
+    },
+    {
+      "_comment": "Lucia: Inverse Crown's shard tile, priced as every S-rank construct's is (maintainer, 2026-09-24): 30 ever, 10 at 10 Phantom Pain Scar then 20 at 20. This tile was not itself read.",
+      "id": "phantom-pain-shop-inver-shard-inverse-crown-discounted",
+      "currency": "phantom-pain-scar",
+      "price": 10,
+      "offer": { "item": "inver-shard-inverse-crown", "quantity": 1 },
+      "periodLimit": 10,
+      "period": "never"
+    },
+    {
+      "id": "phantom-pain-shop-inver-shard-inverse-crown",
+      "currency": "phantom-pain-scar",
+      "price": 20,
+      "offer": { "item": "inver-shard-inverse-crown", "quantity": 1 },
+      "periodLimit": 20,
+      "period": "never"
     }
   ],
   "rewards": [
@@ -952,560 +1006,322 @@
       "costs": [
         { "item": "harmony-accelerator", "quantity": 25 }
       ]
-    },
+    }
+  ],
+
+  "ladders": [
     {
       "_comment": [
-        "Promote, the whole ladder, read one Rank Up screen at a time up to HERO,",
-        "'Max Level Reached': thirteen steps, Cogs only, 542 500 in total.",
-        "States count steps; the ranks they cross are PRIVATE (step 1), SERGEANT",
-        "(2-3), ELITE (4-6), TASK FORCE (7-9) and ACE (10-13), ending at HERO.",
+        "The S-rank construct ladder, written once (ADR 0031). Every row below is",
+        "expanded once per entity in appliesTo, its id prefixed with the entity's",
+        "and every {placeholder} replaced by that entity's own word, before the",
+        "bundle is parsed; the database, the diff and the planner see the same",
+        "per-construct rows this file held by hand until sequence 8.",
         "",
-        "Every step is also gated on a level — 2, 10, 20, 30, 40, 45, 50, 55, 60,",
-        "65, 70, 75, 80. Step 11's 'Lv.70' was read through the weapon model",
-        "overlapping the text; the sequence around it agrees.",
+        "Why it is shared: the maintainer reports, from levelling many constructs",
+        "and from opening Selena: Pianissimo's and Karenina: Effulgence's screens",
+        "beside Lacrimosa's on 2026-09-24, that every S-rank construct pays the",
+        "same EXP per level, the same Cogs per Promote step and the same Skill",
+        "Points and Cogs per skill level. The level curve was already read on a",
+        "second construct, Luna: Oblivion, on 2026-09-21. What differs per",
+        "construct is words: the shard Evolve spends, the SS passive's name and",
+        "the skills' names.",
         "",
-        "Since sequence 1 an upgrade could require a state, and step 13 required",
-        "level-80. Since sequence 6 every step requires its level, because the",
-        "whole ladder is priced — the thirteen level rows are below. No gate in",
-        "this bundle is prose any more, and this comment no longer holds up a",
-        "reading the data cannot carry.",
-        "",
-        "The rule that kept the other twelve out is worth keeping. DemandResolver",
-        "passes mustBeReachable = false for a gate, deliberately, because a gate",
-        "may name the start of a track, so a required state that no upgrade",
-        "produces resolves to an empty path and costs nothing. A gate naming a",
-        "level with no row reaching it is therefore met by every plan for free,",
-        "which is worse than prose: prose is honest about being unread, and a",
-        "free gate looks priced."
+        "Provenance: a row's sourcedBy says where its numbers were read, the",
+        "ladder's covers the rest, and a climber's sourcedBy, when it has one,",
+        "covers every row it expands to — that is the sitting which says the",
+        "numbers are also that construct's."
       ],
-      "id": "helentine-lacrimosa-promote-1",
-      "entity": "helentine-lacrimosa",
-      "fromState": "promote-0",
-      "toState": "promote-1",
-      "costs": [ { "item": "cogs", "quantity": 5000 } ],
-      "requires": [ "level-2" ]
-    },
-    { "id": "helentine-lacrimosa-promote-2", "entity": "helentine-lacrimosa", "fromState": "promote-1", "toState": "promote-2", "costs": [ { "item": "cogs", "quantity": 10000 } ], "requires": [ "level-10" ] },
-    { "id": "helentine-lacrimosa-promote-3", "entity": "helentine-lacrimosa", "fromState": "promote-2", "toState": "promote-3", "costs": [ { "item": "cogs", "quantity": 15000 } ], "requires": [ "level-20" ] },
-    { "id": "helentine-lacrimosa-promote-4", "entity": "helentine-lacrimosa", "fromState": "promote-3", "toState": "promote-4", "costs": [ { "item": "cogs", "quantity": 20000 } ], "requires": [ "level-30" ] },
-    { "id": "helentine-lacrimosa-promote-5", "entity": "helentine-lacrimosa", "fromState": "promote-4", "toState": "promote-5", "costs": [ { "item": "cogs", "quantity": 25000 } ], "requires": [ "level-40" ] },
-    { "id": "helentine-lacrimosa-promote-6", "entity": "helentine-lacrimosa", "fromState": "promote-5", "toState": "promote-6", "costs": [ { "item": "cogs", "quantity": 30000 } ], "requires": [ "level-45" ] },
-    { "id": "helentine-lacrimosa-promote-7", "entity": "helentine-lacrimosa", "fromState": "promote-6", "toState": "promote-7", "costs": [ { "item": "cogs", "quantity": 35000 } ], "requires": [ "level-50" ] },
-    { "id": "helentine-lacrimosa-promote-8", "entity": "helentine-lacrimosa", "fromState": "promote-7", "toState": "promote-8", "costs": [ { "item": "cogs", "quantity": 42500 } ], "requires": [ "level-55" ] },
-    { "id": "helentine-lacrimosa-promote-9", "entity": "helentine-lacrimosa", "fromState": "promote-8", "toState": "promote-9", "costs": [ { "item": "cogs", "quantity": 50000 } ], "requires": [ "level-60" ] },
-    { "id": "helentine-lacrimosa-promote-10", "entity": "helentine-lacrimosa", "fromState": "promote-9", "toState": "promote-10", "costs": [ { "item": "cogs", "quantity": 60000 } ], "requires": [ "level-65" ] },
-    { "id": "helentine-lacrimosa-promote-11", "entity": "helentine-lacrimosa", "fromState": "promote-10", "toState": "promote-11", "costs": [ { "item": "cogs", "quantity": 70000 } ], "requires": [ "level-70" ] },
-    { "id": "helentine-lacrimosa-promote-12", "entity": "helentine-lacrimosa", "fromState": "promote-11", "toState": "promote-12", "costs": [ { "item": "cogs", "quantity": 80000 } ], "requires": [ "level-75" ] },
-    { "id": "helentine-lacrimosa-promote-13", "entity": "helentine-lacrimosa", "fromState": "promote-12", "toState": "promote-13", "costs": [ { "item": "cogs", "quantity": 100000 } ], "requires": [ "level-80" ] },
-    {
-      "_comment": [
-        "The level track, as a chain rather than as spokes from level-1. Every",
-        "figure is a cumulative reading from Lv 1 off the Level Up preview, and",
-        "the rows below carry the differences between consecutive ones. Nothing",
-        "here was levelled: the preview reports the level a selection would",
-        "reach, so the whole ladder is readable without spending a Pod.",
-        "",
-        "The chain is what DemandResolver needs. It walks backwards through",
-        "fromState and sums every row it crosses, skipping any already counted,",
-        "so a plan wanting Lv 40 for one Promote step and Lv 80 for another pays",
-        "the ladder once. Thirteen rows each hanging off level-1 with a",
-        "cumulative figure would have charged it twice.",
-        "",
-        "No Cog cost shows on Level Up and the maintainer confirms none.",
-        "",
-        "Every Pod is a multiple of 1 000 and the smallest, EXP Pod (M), is",
-        "1 000, so a figure is 'exact as a demand in Pods' when no smaller",
-        "multiple of 1 000 reaches the level — which is the only sense in which",
-        "a plan can be short of EXP. The true EXP thresholds between multiples",
-        "are unread and unreadable from this screen; for Lv 2 the true figure is",
-        "certainly far below 1 000, and 1 000 is still the honest demand,",
-        "because nothing smaller can be spent.",
-        "",
-        "Readings, all from Lv 1, each gate pinned by the pair that brackets it",
-        "— the total that reaches it and the one 1 000 lower that does not:",
-        "1 M (1 000) reaches Lv 10, and nothing smaller than one Pod exists;",
-        "3 M (3 000) reaches Lv 17 and 4 M (4 000) reaches Lv 20;",
-        "3 L (9 000) reaches Lv 29 and 3 L + 1 M (10 000) reaches Lv 30;",
-        "8 L (24 000) reaches Lv 39 and 8 L + 1 M (25 000) reaches Lv 40;",
-        "13 L (39 000) reaches Lv 44 and 13 L + 1 M (40 000) reaches Lv 45;",
-        "19 L + 2 M (59 000) reaches Lv 49 and 19 L + 3 M (60 000) reaches Lv 50;",
-        "29 L + 1 M (88 000) reaches Lv 54 and 29 L + 2 M (89 000) reaches Lv 55;",
-        "43 L (129 000) reaches Lv 59 and 43 L + 1 M (130 000) reaches Lv 60;",
-        "61 L + 2 M (185 000) reaches Lv 64 and 61 L + 3 M (186 000) reaches Lv 65;",
-        "87 L + 1 M (262 000) reaches Lv 69 and 87 L + 2 M (263 000) reaches Lv 70;",
-        "121 L + 1 M (364 000) reaches Lv 74 and 121 L + 2 M (365 000) reaches Lv 75;",
-        "165 L + 1 M (496 000) reaches Lv 79 and 165 L + 2 M (497 000) reaches",
-        "80 / 80.",
-        "",
-        "So the cumulative EXP from Lv 1 is 1 000, 1 000, 4 000, 10 000,",
-        "25 000, 40 000, 60 000, 89 000, 130 000, 186 000, 263 000, 365 000 and",
-        "497 000 for the thirteen gated levels, and the rows below carry the",
-        "differences. Every one is a single multiple of 1 000 with the multiple",
-        "below it observed to fall short, so none is a bound or a guess.",
-        "",
-        "Five of them were first bracketed 2 000 or 3 000 wide, because a Pod",
-        "(L) is 3 000 and the crossing was made by adding whole Pods (M) to a",
-        "run of them; one more selection each closed them. All five turned out",
-        "to sit at the top of their range, which is what an upper bound would",
-        "have assumed — and it is written here because it was read, not because",
-        "it was assumed.",
-        "",
-        "The 2026-09-19 Lacrimosa reading of one EXP Pod (XL), +20 000 ->",
-        "Lv 37, is not reproduced here but sits strictly between 10 000 -> Lv 30",
-        "and 24 000 -> Lv 39, so the two readings do not contradict.",
-        "",
-        "Lv 2 and Lv 10 are both 1 000: one Pod (M) is the smallest spendable",
-        "amount and it already carries a construct to Lv 10, so no Pod purchase",
-        "distinguishes them. The level-2 -> level-10 row is therefore free, and",
-        "that is a reading rather than a hole — the state exists, the chain",
-        "crosses it, and the step costs nothing. A gate naming a state with no",
-        "row at all is the hole, and is what the nine unpriced levels avoid by",
-        "staying prose."
+      "id": "s-rank-construct",
+      "sourcedBy": "character-screens",
+      "upgrades": [
+        {
+          "_comment": [
+            "Promote, the whole ladder, read one Rank Up screen at a time up to HERO,",
+            "'Max Level Reached': thirteen steps, Cogs only, 542 500 in total.",
+            "States count steps; the ranks they cross are PRIVATE (step 1), SERGEANT",
+            "(2-3), ELITE (4-6), TASK FORCE (7-9) and ACE (10-13), ending at HERO.",
+            "",
+            "Every step is also gated on a level — 2, 10, 20, 30, 40, 45, 50, 55, 60,",
+            "65, 70, 75, 80. Step 11's 'Lv.70' was read through the weapon model",
+            "overlapping the text; the sequence around it agrees.",
+            "",
+            "Since sequence 1 an upgrade could require a state, and step 13 required",
+            "level-80. Since sequence 6 every step requires its level, because the",
+            "whole ladder is priced — the thirteen level rows are below. No gate in",
+            "this bundle is prose any more, and this comment no longer holds up a",
+            "reading the data cannot carry.",
+            "",
+            "The rule that kept the other twelve out is worth keeping. DemandResolver",
+            "passes mustBeReachable = false for a gate, deliberately, because a gate",
+            "may name the start of a track, so a required state that no upgrade",
+            "produces resolves to an empty path and costs nothing. A gate naming a",
+            "level with no row reaching it is therefore met by every plan for free,",
+            "which is worse than prose: prose is honest about being unread, and a",
+            "free gate looks priced."
+          ],
+          "id": "promote-1",
+          "fromState": "promote-0",
+          "toState": "promote-1",
+          "costs": [ { "item": "cogs", "quantity": 5000 } ],
+          "requires": [ "level-2" ]
+        },
+        { "id": "promote-2", "fromState": "promote-1", "toState": "promote-2", "costs": [ { "item": "cogs", "quantity": 10000 } ], "requires": [ "level-10" ] },
+        { "id": "promote-3", "fromState": "promote-2", "toState": "promote-3", "costs": [ { "item": "cogs", "quantity": 15000 } ], "requires": [ "level-20" ] },
+        { "id": "promote-4", "fromState": "promote-3", "toState": "promote-4", "costs": [ { "item": "cogs", "quantity": 20000 } ], "requires": [ "level-30" ] },
+        { "id": "promote-5", "fromState": "promote-4", "toState": "promote-5", "costs": [ { "item": "cogs", "quantity": 25000 } ], "requires": [ "level-40" ] },
+        { "id": "promote-6", "fromState": "promote-5", "toState": "promote-6", "costs": [ { "item": "cogs", "quantity": 30000 } ], "requires": [ "level-45" ] },
+        { "id": "promote-7", "fromState": "promote-6", "toState": "promote-7", "costs": [ { "item": "cogs", "quantity": 35000 } ], "requires": [ "level-50" ] },
+        { "id": "promote-8", "fromState": "promote-7", "toState": "promote-8", "costs": [ { "item": "cogs", "quantity": 42500 } ], "requires": [ "level-55" ] },
+        { "id": "promote-9", "fromState": "promote-8", "toState": "promote-9", "costs": [ { "item": "cogs", "quantity": 50000 } ], "requires": [ "level-60" ] },
+        { "id": "promote-10", "fromState": "promote-9", "toState": "promote-10", "costs": [ { "item": "cogs", "quantity": 60000 } ], "requires": [ "level-65" ] },
+        { "id": "promote-11", "fromState": "promote-10", "toState": "promote-11", "costs": [ { "item": "cogs", "quantity": 70000 } ], "requires": [ "level-70" ] },
+        { "id": "promote-12", "fromState": "promote-11", "toState": "promote-12", "costs": [ { "item": "cogs", "quantity": 80000 } ], "requires": [ "level-75" ] },
+        { "id": "promote-13", "fromState": "promote-12", "toState": "promote-13", "costs": [ { "item": "cogs", "quantity": 100000 } ], "requires": [ "level-80" ] },
+        {
+          "_comment": [
+            "The level track, as a chain rather than as spokes from level-1. Every",
+            "figure is a cumulative reading from Lv 1 off the Level Up preview, and",
+            "the rows below carry the differences between consecutive ones. Nothing",
+            "here was levelled: the preview reports the level a selection would",
+            "reach, so the whole ladder is readable without spending a Pod.",
+            "",
+            "The chain is what DemandResolver needs. It walks backwards through",
+            "fromState and sums every row it crosses, skipping any already counted,",
+            "so a plan wanting Lv 40 for one Promote step and Lv 80 for another pays",
+            "the ladder once. Thirteen rows each hanging off level-1 with a",
+            "cumulative figure would have charged it twice.",
+            "",
+            "No Cog cost shows on Level Up and the maintainer confirms none.",
+            "",
+            "Every Pod is a multiple of 1 000 and the smallest, EXP Pod (M), is",
+            "1 000, so a figure is 'exact as a demand in Pods' when no smaller",
+            "multiple of 1 000 reaches the level — which is the only sense in which",
+            "a plan can be short of EXP. The true EXP thresholds between multiples",
+            "are unread and unreadable from this screen; for Lv 2 the true figure is",
+            "certainly far below 1 000, and 1 000 is still the honest demand,",
+            "because nothing smaller can be spent.",
+            "",
+            "Readings, all from Lv 1, each gate pinned by the pair that brackets it",
+            "— the total that reaches it and the one 1 000 lower that does not:",
+            "1 M (1 000) reaches Lv 10, and nothing smaller than one Pod exists;",
+            "3 M (3 000) reaches Lv 17 and 4 M (4 000) reaches Lv 20;",
+            "3 L (9 000) reaches Lv 29 and 3 L + 1 M (10 000) reaches Lv 30;",
+            "8 L (24 000) reaches Lv 39 and 8 L + 1 M (25 000) reaches Lv 40;",
+            "13 L (39 000) reaches Lv 44 and 13 L + 1 M (40 000) reaches Lv 45;",
+            "19 L + 2 M (59 000) reaches Lv 49 and 19 L + 3 M (60 000) reaches Lv 50;",
+            "29 L + 1 M (88 000) reaches Lv 54 and 29 L + 2 M (89 000) reaches Lv 55;",
+            "43 L (129 000) reaches Lv 59 and 43 L + 1 M (130 000) reaches Lv 60;",
+            "61 L + 2 M (185 000) reaches Lv 64 and 61 L + 3 M (186 000) reaches Lv 65;",
+            "87 L + 1 M (262 000) reaches Lv 69 and 87 L + 2 M (263 000) reaches Lv 70;",
+            "121 L + 1 M (364 000) reaches Lv 74 and 121 L + 2 M (365 000) reaches Lv 75;",
+            "165 L + 1 M (496 000) reaches Lv 79 and 165 L + 2 M (497 000) reaches",
+            "80 / 80.",
+            "",
+            "So the cumulative EXP from Lv 1 is 1 000, 1 000, 4 000, 10 000,",
+            "25 000, 40 000, 60 000, 89 000, 130 000, 186 000, 263 000, 365 000 and",
+            "497 000 for the thirteen gated levels, and the rows below carry the",
+            "differences. Every one is a single multiple of 1 000 with the multiple",
+            "below it observed to fall short, so none is a bound or a guess.",
+            "",
+            "Five of them were first bracketed 2 000 or 3 000 wide, because a Pod",
+            "(L) is 3 000 and the crossing was made by adding whole Pods (M) to a",
+            "run of them; one more selection each closed them. All five turned out",
+            "to sit at the top of their range, which is what an upper bound would",
+            "have assumed — and it is written here because it was read, not because",
+            "it was assumed.",
+            "",
+            "The 2026-09-19 Lacrimosa reading of one EXP Pod (XL), +20 000 ->",
+            "Lv 37, is not reproduced here but sits strictly between 10 000 -> Lv 30",
+            "and 24 000 -> Lv 39, so the two readings do not contradict.",
+            "",
+            "Lv 2 and Lv 10 are both 1 000: one Pod (M) is the smallest spendable",
+            "amount and it already carries a construct to Lv 10, so no Pod purchase",
+            "distinguishes them. The level-2 -> level-10 row is therefore free, and",
+            "that is a reading rather than a hole — the state exists, the chain",
+            "crosses it, and the step costs nothing. A gate naming a state with no",
+            "row at all is the hole, and is what the nine unpriced levels avoid by",
+            "staying prose."
+          ],
+          "id": "level-2",
+          "sourcedBy": "level-bracket-screens",
+          "fromState": "level-1",
+          "toState": "level-2",
+          "costs": [],
+          "progress": [ { "kind": "character-exp", "quantity": 1000 } ]
+        },
+        { "id": "level-10", "sourcedBy": "level-bracket-screens", "fromState": "level-2", "toState": "level-10", "costs": [] },
+        { "id": "level-20", "sourcedBy": "level-bracket-screens", "fromState": "level-10", "toState": "level-20", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 3000 } ] },
+        { "id": "level-30", "sourcedBy": "level-bracket-screens", "fromState": "level-20", "toState": "level-30", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 6000 } ] },
+        { "id": "level-40", "sourcedBy": "level-bracket-screens", "fromState": "level-30", "toState": "level-40", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 15000 } ] },
+        { "id": "level-45", "sourcedBy": "level-bracket-screens", "fromState": "level-40", "toState": "level-45", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 15000 } ] },
+        { "id": "level-50", "sourcedBy": "level-bracket-screens", "fromState": "level-45", "toState": "level-50", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 20000 } ] },
+        { "id": "level-55", "sourcedBy": "level-bracket-screens", "fromState": "level-50", "toState": "level-55", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 29000 } ] },
+        { "id": "level-60", "sourcedBy": "level-bracket-screens", "fromState": "level-55", "toState": "level-60", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 41000 } ] },
+        { "id": "level-65", "sourcedBy": "level-bracket-screens", "fromState": "level-60", "toState": "level-65", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 56000 } ] },
+        { "id": "level-70", "sourcedBy": "level-bracket-screens", "fromState": "level-65", "toState": "level-70", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 77000 } ] },
+        { "id": "level-75", "sourcedBy": "level-bracket-screens", "fromState": "level-70", "toState": "level-75", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 102000 } ] },
+        {
+          "_comment": [
+            "The last link, 365 000 to 497 000. Sequence 1's figure of 497 000 was",
+            "this row's whole cumulative, read as one step from Lv 1; 132 000 is",
+            "the same reading expressed as the end of a chain that now names every",
+            "gated level between."
+          ],
+          "id": "level-80",
+          "sourcedBy": "level-bracket-screens",
+          "fromState": "level-75",
+          "toState": "level-80",
+          "costs": [],
+          "progress": [ { "kind": "character-exp", "quantity": 132000 } ]
+        },
+        {
+          "_comment": [
+            "Evolve S -> SS: 30 Inver-Shard - Lacrimosa in total (maintainer); one",
+            "node inside it was read at 'Consume 2 / 9'. One row, because the nodes",
+            "between are unread. Shards come from duplicates and from the Phantom",
+            "Pain shop, whose two rows (sequence 2) sell exactly these 30, ever.",
+            "",
+            "ADR 0031 held this row to be confirmed per climber, because the",
+            "comparison that put constructs on the ladder did not cover Evolve.",
+            "The maintainer confirmed Selena: Pianissimo's 30 on 2026-09-24, and",
+            "that it holds for every S-rank construct, Lucia: Inverse Crown included."
+          ],
+          "id": "evolve-ss",
+          "fromState": "evolve-s",
+          "toState": "evolve-ss",
+          "costs": [ { "item": "{shard}", "quantity": 30 } ]
+        },
+        {
+          "_comment": "Unlocking the leader skill, Leader - Fading Fern: 3 Skill Points and 25 000 Cogs, read on its Unlock button. The maintainer reports every skill unlock costs the same.",
+          "id": "leader-skill-unlock",
+          "fromState": "leader-skill-locked",
+          "toState": "leader-skill-1",
+          "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 25000 } ]
+        },
+        {
+          "_comment": [
+            "One copy of these four rows per name in the climber's 'skill' list, in",
+            "order. The curve is the one read on Helentine: Lacrimosa; the names are",
+            "each construct's own and are bound where it climbs.",
+            "",
+            "Which skills level at all was settled on 2026-09-24 by reading all four",
+            "of Lacrimosa's skill pages: thirteen skills, eight of them levelled on",
+            "this curve — Basic Skill's four (Red, Yellow and Blue Orb, Basic",
+            "Attack), Special Skill's three (Core Passive, Signature Move, QTE) and",
+            "Common Effect's class skill. The other five are not a curve: the leader",
+            "skill and the SS passive are single unlocks, below; Ultima Awaken is",
+            "reached by the Ultima awakening, with no Skill Point or Cog cost on its",
+            "screen; and the SSS and SSS+ passives (Styx Reflection, Mourning",
+            "Heteronomy) are locked behind Evolve ranks SS3 to SSS+, which this",
+            "bundle does not model, with their unlock prices hidden until reached."
+          ],
+          "each": "skill",
+          "sourcedBy": "skill-pages",
+          "upgrades": [
+            {
+              "_comment": [
+                "Skill levels: one curve, written once per named skill, cap 18. Read:",
+                "1 -> 2 is 1 Skill Point + 2 000 Cogs on Seeker System, Withering",
+                "Spiral and Amplifier on 2026-09-19, and on Seeker System, Allegory of",
+                "the Wondrous Night and Fluid Emotions again on 2026-09-24; 2 -> 3 and 3 -> 4 are 1 +",
+                "3 000 and 1 + 4 000 on Delusional Spin; and the level-to-max prompt on",
+                "Seeker System at Lv 1 reads 1 -> 18 (Max) for 44 Skill Points and",
+                "206 000 Cogs, the same total an earlier prompt showed.",
+                "",
+                "4 -> 18 is DERIVED, not read: the prompt's total minus the three steps",
+                "read one at a time, 41 SP and 197 000 Cogs. It is one row because the",
+                "curve between 4 and 18 is unread, and because the planner refuses a",
+                "state two routes reach, so a 1 -> 18 shortcut beside the single steps",
+                "would break every goal on the skill. That every basic, special and",
+                "common-effect skill shares this curve is the maintainer's report, which",
+                "the four 1 -> 2 readings and the two identical prompts support. An",
+                "earlier report that every level costs 1 + 2 000 was contradicted by",
+                "the screens and is not used.",
+                "",
+                "Delusional Spin now reads Lv 18, 'Max Level Reached', so the cap is",
+                "on a screen and not only in a prompt.",
+                "",
+                "Until sequence 8 this list had seven names and one was wrong. It",
+                "carried 'Astral Armament', recorded on 2026-09-19 as her Core",
+                "Passive, and lacked the Signature Move and the QTE; on 2026-09-24",
+                "the Core Passive reads Seeker System and no page carries an Astral",
+                "Armament: it is another construct's skill (maintainer), read off the wrong screen. Every plan to a",
+                "skill cap before sequence 8 charged one skill she does not have and",
+                "left out two she does."
+              ],
+              "id": "{skill}-2",
+              "fromState": "{skill}-1",
+              "toState": "{skill}-2",
+              "costs": [ { "item": "skill-point", "quantity": 1 }, { "item": "cogs", "quantity": 2000 } ]
+            },
+            { "id": "{skill}-3", "fromState": "{skill}-2", "toState": "{skill}-3", "costs": [ { "item": "skill-point", "quantity": 1 }, { "item": "cogs", "quantity": 3000 } ] },
+            { "id": "{skill}-4", "fromState": "{skill}-3", "toState": "{skill}-4", "costs": [ { "item": "skill-point", "quantity": 1 }, { "item": "cogs", "quantity": 4000 } ] },
+            { "id": "{skill}-18", "fromState": "{skill}-4", "toState": "{skill}-18", "costs": [ { "item": "skill-point", "quantity": 41 }, { "item": "cogs", "quantity": 197000 } ] }
+          ]
+        },
+        {
+          "_comment": "Vestige [SS Rank Passive Skill], Evolution Effect page: Unlock costs 2 Skill Points + 20 000 Cogs, read on its button. Its Lv 1 is 'Unlocked at S5 Rank' and its Lv 2 'at SS Rank' — gates on Evolve, which Upgrade cannot express, and the maintainer cannot reach them to read what follows the unlock. The same price for Selena: Pianissimo's Rainbow-Hued Melody is the maintainer's confirmation of 2026-09-24; hers was already unlocked, so no button showed it. Lucia: Inverse Crown's Bloomtide: Genesis is covered by the maintainer's report that the price holds for every S-rank construct.",
+          "id": "{ss-passive}-unlock",
+          "fromState": "{ss-passive}-locked",
+          "toState": "{ss-passive}-1",
+          "costs": [ { "item": "skill-point", "quantity": 2 }, { "item": "cogs", "quantity": 20000 } ]
+        }
       ],
-      "id": "helentine-lacrimosa-level-2",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-1",
-      "toState": "level-2",
-      "costs": [],
-      "progress": [ { "kind": "character-exp", "quantity": 1000 } ]
-    },
-    {
-      "id": "helentine-lacrimosa-level-10",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-2",
-      "toState": "level-10",
-      "costs": []
-    },
-    {
-      "id": "helentine-lacrimosa-level-20",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-10",
-      "toState": "level-20",
-      "costs": [],
-      "progress": [ { "kind": "character-exp", "quantity": 3000 } ]
-    },
-    {
-      "id": "helentine-lacrimosa-level-30",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-20",
-      "toState": "level-30",
-      "costs": [],
-      "progress": [ { "kind": "character-exp", "quantity": 6000 } ]
-    },
-    {
-      "id": "helentine-lacrimosa-level-40",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-30",
-      "toState": "level-40",
-      "costs": [],
-      "progress": [ { "kind": "character-exp", "quantity": 15000 } ]
-    },
-    {
-      "id": "helentine-lacrimosa-level-45",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-40",
-      "toState": "level-45",
-      "costs": [],
-      "progress": [ { "kind": "character-exp", "quantity": 15000 } ]
-    },
-    {
-      "id": "helentine-lacrimosa-level-50",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-45",
-      "toState": "level-50",
-      "costs": [],
-      "progress": [ { "kind": "character-exp", "quantity": 20000 } ]
-    },
-    {
-      "id": "helentine-lacrimosa-level-55",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-50",
-      "toState": "level-55",
-      "costs": [],
-      "progress": [ { "kind": "character-exp", "quantity": 29000 } ]
-    },
-    {
-      "id": "helentine-lacrimosa-level-60",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-55",
-      "toState": "level-60",
-      "costs": [],
-      "progress": [ { "kind": "character-exp", "quantity": 41000 } ]
-    },
-    {
-      "id": "helentine-lacrimosa-level-65",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-60",
-      "toState": "level-65",
-      "costs": [],
-      "progress": [ { "kind": "character-exp", "quantity": 56000 } ]
-    },
-    {
-      "id": "helentine-lacrimosa-level-70",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-65",
-      "toState": "level-70",
-      "costs": [],
-      "progress": [ { "kind": "character-exp", "quantity": 77000 } ]
-    },
-    {
-      "id": "helentine-lacrimosa-level-75",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-70",
-      "toState": "level-75",
-      "costs": [],
-      "progress": [ { "kind": "character-exp", "quantity": 102000 } ]
-    },
-    {
-      "_comment": [
-        "The last link, 365 000 to 497 000. Sequence 1's figure of 497 000 was",
-        "this row's whole cumulative, read as one step from Lv 1; 132 000 is",
-        "the same reading expressed as the end of a chain that now names every",
-        "gated level between."
-      ],
-      "id": "helentine-lacrimosa-level-80",
-      "entity": "helentine-lacrimosa",
-      "fromState": "level-75",
-      "toState": "level-80",
-      "costs": [],
-      "progress": [ { "kind": "character-exp", "quantity": 132000 } ]
-    },
-    {
-      "_comment": [
-        "Evolve S -> SS: 30 Inver-Shard - Lacrimosa in total (maintainer); one",
-        "node inside it was read at 'Consume 2 / 9'. One row, because the nodes",
-        "between are unread. Shards come from duplicates and from the Phantom",
-        "Pain shop, whose two rows (sequence 2) sell exactly these 30, ever."
-      ],
-      "id": "helentine-lacrimosa-evolve-ss",
-      "entity": "helentine-lacrimosa",
-      "fromState": "evolve-s",
-      "toState": "evolve-ss",
-      "costs": [
-        { "item": "inver-shard-lacrimosa", "quantity": 30 }
-      ]
-    },
-    {
-      "_comment": "Unlocking the leader skill, Leader - Fading Fern: 3 Skill Points and 25 000 Cogs, read on its Unlock button. The maintainer reports every skill unlock costs the same.",
-      "id": "helentine-lacrimosa-leader-skill-unlock",
-      "entity": "helentine-lacrimosa",
-      "fromState": "leader-skill-locked",
-      "toState": "leader-skill-1",
-      "costs": [
-        { "item": "skill-point", "quantity": 3 },
-        { "item": "cogs", "quantity": 25000 }
-      ]
-    },
-    {
-      "_comment": [
-        "Skill levels: one curve, written once per named skill, cap 18. Read:",
-        "1 -> 2 is 1 Skill Point + 2 000 Cogs on four skills (Astral Armament,",
-        "Seeker System, Withering Spiral, Amplifier); 2 -> 3 and 3 -> 4 are 1 +",
-        "3 000 and 1 + 4 000 on Delusional Spin; and the level-to-max prompt on",
-        "Seeker System at Lv 1 reads 1 -> 18 (Max) for 44 Skill Points and",
-        "206 000 Cogs, the same total an earlier prompt showed.",
-        "",
-        "4 -> 18 is DERIVED, not read: the prompt's total minus the three steps",
-        "read one at a time, 41 SP and 197 000 Cogs. It is one row because the",
-        "curve between 4 and 18 is unread, and because the planner refuses a",
-        "state two routes reach, so a 1 -> 18 shortcut beside the single steps",
-        "would break every goal on the skill. That every basic, special and",
-        "common-effect skill shares this curve is the maintainer's report, which",
-        "the four 1 -> 2 readings and the two identical prompts support. An",
-        "earlier report that every level costs 1 + 2 000 was contradicted by",
-        "the screens and is not used.",
-        "",
-        "All seven of her basic, special and common-effect skills are named and",
-        "here; Blight Excision [Blue Orb] and Link Dissolution [Basic Attack] read 1 -> 2 at 1 + 2 000 too."
-      ],
-      "id": "helentine-lacrimosa-astral-armament-2",
-      "entity": "helentine-lacrimosa",
-      "fromState": "astral-armament-1",
-      "toState": "astral-armament-2",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 2000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-astral-armament-3",
-      "entity": "helentine-lacrimosa",
-      "fromState": "astral-armament-2",
-      "toState": "astral-armament-3",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 3000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-astral-armament-4",
-      "entity": "helentine-lacrimosa",
-      "fromState": "astral-armament-3",
-      "toState": "astral-armament-4",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 4000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-astral-armament-18",
-      "entity": "helentine-lacrimosa",
-      "fromState": "astral-armament-4",
-      "toState": "astral-armament-18",
-      "costs": [
-        { "item": "skill-point", "quantity": 41 },
-        { "item": "cogs", "quantity": 197000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-seeker-system-2",
-      "entity": "helentine-lacrimosa",
-      "fromState": "seeker-system-1",
-      "toState": "seeker-system-2",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 2000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-seeker-system-3",
-      "entity": "helentine-lacrimosa",
-      "fromState": "seeker-system-2",
-      "toState": "seeker-system-3",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 3000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-seeker-system-4",
-      "entity": "helentine-lacrimosa",
-      "fromState": "seeker-system-3",
-      "toState": "seeker-system-4",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 4000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-seeker-system-18",
-      "entity": "helentine-lacrimosa",
-      "fromState": "seeker-system-4",
-      "toState": "seeker-system-18",
-      "costs": [
-        { "item": "skill-point", "quantity": 41 },
-        { "item": "cogs", "quantity": 197000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-delusional-spin-2",
-      "entity": "helentine-lacrimosa",
-      "fromState": "delusional-spin-1",
-      "toState": "delusional-spin-2",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 2000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-delusional-spin-3",
-      "entity": "helentine-lacrimosa",
-      "fromState": "delusional-spin-2",
-      "toState": "delusional-spin-3",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 3000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-delusional-spin-4",
-      "entity": "helentine-lacrimosa",
-      "fromState": "delusional-spin-3",
-      "toState": "delusional-spin-4",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 4000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-delusional-spin-18",
-      "entity": "helentine-lacrimosa",
-      "fromState": "delusional-spin-4",
-      "toState": "delusional-spin-18",
-      "costs": [
-        { "item": "skill-point", "quantity": 41 },
-        { "item": "cogs", "quantity": 197000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-withering-spiral-2",
-      "entity": "helentine-lacrimosa",
-      "fromState": "withering-spiral-1",
-      "toState": "withering-spiral-2",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 2000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-withering-spiral-3",
-      "entity": "helentine-lacrimosa",
-      "fromState": "withering-spiral-2",
-      "toState": "withering-spiral-3",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 3000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-withering-spiral-4",
-      "entity": "helentine-lacrimosa",
-      "fromState": "withering-spiral-3",
-      "toState": "withering-spiral-4",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 4000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-withering-spiral-18",
-      "entity": "helentine-lacrimosa",
-      "fromState": "withering-spiral-4",
-      "toState": "withering-spiral-18",
-      "costs": [
-        { "item": "skill-point", "quantity": 41 },
-        { "item": "cogs", "quantity": 197000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-amplifier-2",
-      "entity": "helentine-lacrimosa",
-      "fromState": "amplifier-1",
-      "toState": "amplifier-2",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 2000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-amplifier-3",
-      "entity": "helentine-lacrimosa",
-      "fromState": "amplifier-2",
-      "toState": "amplifier-3",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 3000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-amplifier-4",
-      "entity": "helentine-lacrimosa",
-      "fromState": "amplifier-3",
-      "toState": "amplifier-4",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 4000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-amplifier-18",
-      "entity": "helentine-lacrimosa",
-      "fromState": "amplifier-4",
-      "toState": "amplifier-18",
-      "costs": [
-        { "item": "skill-point", "quantity": 41 },
-        { "item": "cogs", "quantity": 197000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-blight-excision-2",
-      "entity": "helentine-lacrimosa",
-      "fromState": "blight-excision-1",
-      "toState": "blight-excision-2",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 2000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-blight-excision-3",
-      "entity": "helentine-lacrimosa",
-      "fromState": "blight-excision-2",
-      "toState": "blight-excision-3",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 3000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-blight-excision-4",
-      "entity": "helentine-lacrimosa",
-      "fromState": "blight-excision-3",
-      "toState": "blight-excision-4",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 4000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-blight-excision-18",
-      "entity": "helentine-lacrimosa",
-      "fromState": "blight-excision-4",
-      "toState": "blight-excision-18",
-      "costs": [
-        { "item": "skill-point", "quantity": 41 },
-        { "item": "cogs", "quantity": 197000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-link-dissolution-2",
-      "entity": "helentine-lacrimosa",
-      "fromState": "link-dissolution-1",
-      "toState": "link-dissolution-2",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 2000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-link-dissolution-3",
-      "entity": "helentine-lacrimosa",
-      "fromState": "link-dissolution-2",
-      "toState": "link-dissolution-3",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 3000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-link-dissolution-4",
-      "entity": "helentine-lacrimosa",
-      "fromState": "link-dissolution-3",
-      "toState": "link-dissolution-4",
-      "costs": [
-        { "item": "skill-point", "quantity": 1 },
-        { "item": "cogs", "quantity": 4000 }
-      ]
-    },
-    {
-      "id": "helentine-lacrimosa-link-dissolution-18",
-      "entity": "helentine-lacrimosa",
-      "fromState": "link-dissolution-4",
-      "toState": "link-dissolution-18",
-      "costs": [
-        { "item": "skill-point", "quantity": 41 },
-        { "item": "cogs", "quantity": 197000 }
-      ]
-    },
-    {
-      "_comment": "Vestige [SS Rank Passive Skill], Evolution Effect page: Unlock costs 2 Skill Points + 20 000 Cogs, read on its button. Its Lv 1 is 'Unlocked at S5 Rank' and its Lv 2 'at SS Rank' — gates on Evolve, which Upgrade cannot express, and the maintainer cannot reach them to read what follows the unlock.",
-      "id": "helentine-lacrimosa-vestige-unlock",
-      "entity": "helentine-lacrimosa",
-      "fromState": "vestige-locked",
-      "toState": "vestige-1",
-      "costs": [
-        { "item": "skill-point", "quantity": 2 },
-        { "item": "cogs", "quantity": 20000 }
+      "appliesTo": [
+        {
+          "entity": "helentine-lacrimosa",
+          "with": {
+            "shard": "inver-shard-lacrimosa",
+            "ss-passive": "vestige",
+            "skill": [
+              "delusional-spin",
+              "withering-spiral",
+              "blight-excision",
+              "link-dissolution",
+              "seeker-system",
+              "allegory-of-the-wondrous-night",
+              "fluid-emotions",
+              "amplifier"
+            ]
+          }
+        },
+        {
+          "entity": "selena-pianissimo",
+          "sourcedBy": "selena-pianissimo-screens",
+          "with": {
+            "shard": "inver-shard-pianissimo",
+            "ss-passive": "rainbow-hued-melody",
+            "skill": [
+              "flaming-chord",
+              "thunderous-transposition",
+              "rhythmic-piercing",
+              "reverberating-legato",
+              "classical-romanticism",
+              "fugal-sonata",
+              "resplendent-symphony",
+              "attacker"
+            ]
+          }
+        },
+        {
+          "entity": "lucia-inverse-crown",
+          "sourcedBy": "lucia-inverse-crown-screens",
+          "with": {
+            "shard": "inver-shard-inverse-crown",
+            "ss-passive": "bloomtide-genesis",
+            "skill": [
+              "abyssal-lament",
+              "dusklit-severance",
+              "frosty-thorns",
+              "malevolent-march",
+              "sequence-traversal",
+              "silenced-abysslight",
+              "savage-afterglow",
+              "attacker"
+            ]
+          }
+        }
       ]
     }
   ],

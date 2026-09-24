@@ -962,6 +962,28 @@ Dissolution* [Basic Attack], both Lv 1, both 1 SP + 2 000 for 1 → 2 — so all
 seven of her levelled skills now carry the curve. The leader skill is an unlock
 row only.
 
+**Corrected 2026-09-24: eight levelled skills, and one of the seven names above
+was wrong.** The maintainer sent all four of her skill pages at once. There are
+thirteen skills:
+
+| Page | Skills |
+|---|---|
+| Basic Skill | Delusional Spin [Red Orb] (Lv 18, *Max Level Reached*), Withering Spiral [Yellow Orb], Blight Excision [Blue Orb], Link Dissolution [Basic Attack] |
+| Special Skill | Seeker System [Core Passive], Allegory of the Wondrous Night [Signature Move], Fluid Emotions [QTE] — each *Consume 1 SP + 2 000* at Lv 1 |
+| Common Effect | Leader – Fading Fern [Leader Skill] (*Unlock 3 SP + 25 000*), Amplifier (Lv 1), Ultima Awaken (*Awaken Lacrimosa's Ultima Rank*, no SP or Cog cost) |
+| Evolution Effect | Vestige [SS Rank Passive] (Lv 2, *Max Level Reached*), Styx Reflection [SSS Rank Passive] (*Unlocked at SS3 Rank*), Mourning Heteronomy [SSS+ Rank Passive] (*Unlocked at SSS3 / SSS6 / SSS+ Rank*) |
+
+**Eight skills level on the curve**: four Basic, three Special, and Amplifier.
+**"Astral Armament [Core Passive]" is on none of the four pages.** The Core
+Passive reads Seeker System. *(Maintainer:)* Astral Armament is **another
+construct's skill**, none of the three in the bundle, so the 2026-09-19 reading
+was taken off the wrong character's screen. The Signature Move and the QTE were
+never recorded. So before sequence 8,
+every plan to the skill caps charged one skill she doesn't have and missed two
+she does. Styx Reflection and Mourning Heteronomy sit behind Evolve ranks the
+bundle does not model, and their unlock prices are hidden until reached, so they
+have no rows. Ultima Awaken costs nothing on the skill screen.
+
 **The shard is named: Inver-Shard – Lacrimosa**, 2 owned, *"Collect a sufficient
 amount to link with the Construct"*; its flavour text says **Construct Memory
 recycles into Inver-Shards**, which is the duplicate route. **Its card shows no

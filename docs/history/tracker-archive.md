@@ -31,6 +31,12 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**N41 — Put Selena: Pianissimo and Karenina: Effulgence on the S-rank ladder.**~~ **Done 2026-09-24 (fortieth session), with Lucia: Inverse Crown in Karenina's place** — the maintainer does not own Karenina and so cannot read her. Selena and Lucia each climb `s-rank-construct` with their own eight skill names, SS passive and shard, and each shard has the two Phantom Pain shop rows (10 at 10 Scars, 20 at 20). Published as sequence 9, locally and to Neon, each read back as *no changes*; the live API serves 61 upgrade rows for each of the three. The entry as it stood:
+      **Every number is shared and confirmed** for all S-rank (maintainer, screens compared
+      2026-09-24), so the path is written once ([ADR 0031](../adr/0031-a-shared-upgrade-path-is-written-once-and-expanded-in-the-file.md)).
+      **Left is words, per construct** (the list is in *Resume here*), plus a provenance entry
+      for the comparison. Sequence 8 is published in both databases, fixing Lacrimosa's skills.
+
 - [x] ~~**N40 — See Neon suspend, then move the pool settings into `application.yml`.**~~ **Done 2026-09-24**, the same session it was opened: the maintainer read **SUSPENDED** in Neon's console with the keep-alive bot still pinging, and the first request after it took 2.06 s against 0.57–0.75 s warm — about 1.4 s per idle spell. The three settings moved into `spring.datasource.hikari` with that measurement beside them. The entry as it stood:
       `/api/health` touches no database, so the keep-alive bot wakes Render and not
       Neon — but Hikari's pool might. `MINIMUM_IDLE=0`, `IDLE_TIMEOUT=60000` and
@@ -2971,6 +2977,8 @@ than a wiki.
 
 ## Session index rows collapsed on 2026-09-24
 
+*The two thirty-fourth rows joined these later the same day, in the thirty-ninth session, when adding its row took the tracker to 551.*
+
 The tracker reached **561 lines** in the thirty-eighth session, eleven over its
 limit, before that session's own row was added. Its rule says rewrite a section
 rather than shave one, so the session index was rewritten a second time: every
@@ -2981,6 +2989,8 @@ has its full entry under [Session log](#session-log).
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-21 | thirty-fourth (cont.) | N34 closed: a roster entry holds a set of states (ADR 0027, `V13`). A reader at `promote-6` who says they are also at `level-80` pays 127 500 Cogs and **no EXP** where they were charged 90 000 over six steps. The merge unit stays the entity. **The frontend shipped wrong twice with 16 green tests each time** — a `select multiple` nobody could use, then chips styled as buttons the maintainer looked straight at and did not see. Two live claims died: a `progress:` line *has* rendered (as a bare slug), and PGR *has* been rendered, so N35 was rescoped rather than ticked |
+| 2026-09-21 | thirty-fourth | B6 closed the day after it was written: CI triggers on a push to `dev`, proven by a run on `cfa6fe4` with no PR open. The session-start check found the trap live — the previous session's own commit had sat on `dev` unbuilt. The concurrency group stays keyed by ref *on purpose*: deduping push and PR would let a push cancel the check the PR needs green. Deploy must be gated to `main` when B5 turns it on |
 | 2026-09-21 | thirty-third (cont.) | PR #33 opened and green. The deferred-defect list audited into *Next actions* as **B6, N34, N35, N36** — every one was already described somewhere in this file and none was an action anybody could pick up. One archived qualification found stale: a lifetime purchase limit has been expressible since ADR 0020 |
 | 2026-09-21 | thirty-third (cont.) | The roster flaw N33 widened, half closed the same day (ADR 0026): a crossed gate is a reached state, so `achieved` credits the `requires` of every upgrade behind the player. A reader at Promote 6 pays 90 Serum for step 7 where they were billed 180. No migration, no wire change — the other half, a reader *behind* the gate, still wants a set of states on `Roster` |
 | 2026-09-21 | thirty-third | N33 closed: the level ladder is priced end to end and all thirteen Promote gates are `requires`. Twenty-two Level Up previews on a Lv 1 construct, nothing spent and nobody levelled; thirteen cumulative figures, each pinned by the selection 1 000 below it falling short. The track became a chain because spokes from `level-1` would double-charge. Sequence 6 published 2026-09-21T02:49:27Z and read back as *no changes*; 411 tests, 0 skipped |
@@ -3011,6 +3021,155 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-24 (fortieth) — N41 closed with a different third construct, and
+the day's readings turned out to be on a patch that did not exist when they
+were labelled.**
+
+**Selena: Pianissimo went in from ten screenshots.** Eight skill pages, her SS
+passive (Rainbow-Hued Melody) and her shard card (Inver-Shard - Pianissimo).
+One climber, one item, and `preview` against sequence 8 read +62 and nothing
+else. **ADR 0031 held two rows back for confirmation per climber** (Evolve at
+30 shards, the SS passive's unlock at 2 SP + 20 000 Cogs), because the
+maintainer's comparison had not covered them. Asked, the maintainer confirmed
+both, said the shard's 5★ was read on its shop tile (the card shows none), and
+that **every S-rank shard tile sells 30 ever, 10 at 10 Scars then 20 at 20** —
+which added two shop rows per construct. **Her Core Passive reads 18 (+6)**:
+a bonus from an equipped Memory's Resonance (maintainer), not a level the
+curve prices, and not modelled.
+
+**Karenina: Effulgence was swapped out, by the maintainer, because they do not
+own her.** Lucia: Inverse Crown (S-rank, maintainer; SS and Lv 80 on her
+character screen) took her place in Q6's three. Karenina stays in the bundle as
+her banner's target entity with nothing to climb. Lucia arrived as a new
+entity, a shard (Inver-Shard - Inverse Crown, 'Owned 0'), two shop rows and a
+climber; her SS passive is Bloomtide: Genesis. **Her numbers were not read on
+her screens at all** — every one is the maintainer's report that it holds for
+every S-rank construct, and her provenance entry says so rather than implying a
+reading. Sequence 9 carried both: **129 facts added, 121 → 250**, nothing
+changed or removed.
+
+**The auto-mode classifier refused the Neon publish as a production deploy**,
+and it was not worked around; the maintainer approved it in chat and it ran
+after. That delay is what made the next finding cheap.
+
+**The patch was wrong.** Mid-session the maintainer offered a version number
+instead of a patch name, and asked, said **4.8.0 "Anchored in Faith" went live
+at the 2026-09-24 maintenance, and every screen read that day was read after
+it** — the thirty-ninth session's Lacrimosa skill pages included, which
+sequences 8 and 9 had labelled "Steering By Light". The older patch is 4.7.0.
+**Sequence 10 changes no fact:** it relabels the version "Anchored in Faith
+(Global 4.8.0)", names 4.7.0 or 4.8.0 in every provenance entry, and says in the
+three affected entries that the earlier sequences were wrong. What carries the
+4.7.0 numbers across is the maintainer's report of noticing no cost change,
+plus **one point read on both patches**: a skill's 1 -> 2 at 1 SP + 2 000 Cogs,
+on 2026-09-19 and again 2026-09-24. **Sequence 8 on Neon still says "Steering
+By Light" for 4.8.0 readings, and stays that way** — published versions are
+immutable, and sequence 10 is the correction. The file keeps its name; five
+tests open it by path, and a file name is not a label.
+
+**A test went red with sequence 9 and was missed.** Only the `AuthoredBundle*`
+tests were run before committing it; `GameDataIngestTest` summed every level
+link in the bundle to 497 000 and listed only Lacrimosa's never-resetting shop
+rows. The sum is now per construct, the list names all six. **Run the full
+build before calling a bundle change green** — the bundle is read by more tests
+than the ones with its name on them. 452 tests, 0 skipped.
+
+**Published:** sequences 9 and 10 locally (12:23Z, 12:37Z) and to Neon
+(12:40:52Z, 12:41:47Z), each read back as *no changes*; Neon got 9 from its
+commit (`fd8ea67`) so both databases hold the same history. The live
+`/api/games` reports sequence 10. `dev` pushed; PR #44 had merged before the
+session, which the tracker still called #43.
+
+**2026-09-24 (thirty-ninth) — N41's open question answered by the maintainer,
+and the answer turned into a ladder rather than 114 pasted rows.**
+
+**The question N41 was scoped to measure** — whether a second construct shares
+Lacrimosa's level, Promote and skill costs — **was answered in chat before a
+screen was transcribed.** The maintainer reports every S-rank construct pays the
+same EXP, Cogs and Skill Points. Asked how that was read (the standing memory
+note about relayed answers), they said: **opened Selena: Pianissimo's and
+Karenina: Effulgence's screens and compared them with Lacrimosa's**, plus
+levelling many constructs over a long time. First-hand, and recorded as such.
+The level curve had already been cross-checked on Luna: Oblivion (2026-09-21).
+
+**The maintainer asked whether dividing the data per construct was wise.** The
+answer split in two, and the split is ADR 0031. **The model keeps one row per
+construct:** goals, roster states (ADR 0027) and the solver are all per
+entity, and Evolve spends each construct's own shard. **The file stops copying
+it:** `ladders` writes an upgrade path once. Per-construct words are
+`{placeholders}` bound by each climber, and a list such as seven skill names is
+walked by an `each` group. `UpgradeLadders` expands the ladder into ordinary
+JSON rows before the existing `upgrade` parser sees them, so nothing downstream
+changed.
+
+**Provenance was the part with a real choice in it.** Each expanded row still
+gets its own `factProvenance` entry. The narrowest statement wins: climber, then
+row, then group, then ladder, then default. A `factProvenance` entry that *also*
+names a laddered row is refused rather than ordered. The climber wins because
+its claim is different: a row says where the numbers were read, and a climber
+says those numbers are *this construct's too*.
+
+**Lacrimosa converted, and proven not to move.** A one-off script rewrote her
+57 rows as 30 ladder entries: 13 Promote, 13 level links (each
+`sourcedBy: level-bracket-screens`), Evolve with `{shard}`, the leader unlock,
+one four-row skill group, and `{ss-passive}-unlock`. It also dropped her 57
+`factProvenance` lines. A throwaway test parsed the published sequence-7 file
+and the laddered one. `VersionDiff` reported **no changes**, the sink sets were
+equal, and all **117 facts had identical provenance**. The test was deleted
+after the run. The file still says sequence 7, because its content is sequence 7.
+
+**One bug, caught by the first test run:** the first expansion flattened a
+group into independent rows, so the output order was `slash-2, parry-2, slash-3,
+parry-3` rather than one skill's rows together. The diff compares as sets, so it
+would not have noticed. The test that asserts order did.
+
+**Then asking for the skill names found that Lacrimosa's own list was
+wrong.** The maintainer said there are 13 skills, not 7. They confirmed Evolve
+at 30 shards and the SS passive at 2 SP + 20 000 for all S-rank, and sent all
+four skill pages (Basic, Special, Common Effect, Evolution Effect). There are
+**eight skills on the level curve**, not seven. The **Signature Move** (Allegory
+of the Wondrous Night) and the **QTE** (Fluid Emotions) had never been
+recorded, and **"Astral Armament", recorded on 2026-09-19 as her Core Passive,
+is on no page**: the Core Passive reads Seeker System. The maintainer then
+identified it as **another construct's skill**, read off the wrong screen on
+2026-09-19. The lesson for readings: a skill screen doesn't say whose it is
+unless the name is in the text, so a transcription can't catch a screenshot
+from the wrong character. The other five are the
+leader unlock, the SS passive unlock, Ultima Awaken (no SP or Cog cost), and
+the SSS and SSS+ passives (gated on Evolve ranks the bundle does not model,
+prices hidden). The maintainer's first reaction, "why am I five short, did I
+duplicate something", was the right instinct pointed at the wrong list: the
+duplicate was ours.
+
+**Sequence 8 written, and the ladder earned its keep on its first day.** The
+fix was one edit to the climber's `skill` list, plus a `skill-pages` provenance
+entry for the group, now dated 2026-09-24. `preview` against the local volume
+showed −4 Astral Armament rows and +8 for the Signature Move and QTE, nothing
+else: 121 facts over nine provenance entries. The research note got a dated
+correction appended rather than its 2026-09-19 text rewritten.
+
+**Published on the maintainer's word, in both databases.** Locally at
+08:35:00Z, then Neon at 08:36:52Z. Each read back as *no changes*, and
+the live API reports `sequence: 8`. Before writing to Neon, production was
+checked for a goal or roster entry naming an Astral Armament state and held
+**no goals at all**, so nothing could break. The Neon host and role came from
+the thirty-eighth session's transcript, and the password from
+`~/.neon-storm-almanac`, which was supposed to be deleted after that session
+and was still there. It was read into an environment variable, never printed,
+and the maintainer was told it's still there. **They chose to keep it for
+future publishes.** That supersedes the thirty-eighth session's "to be deleted
+after". The tracker's claim that the session log had "the exact commands" was
+false: the host and role were never written down. Committed as `99683a8` before
+the Neon publish, then the tracker was updated for the publish.
+
+**What N41 still needs is words, not numbers.** For each construct: eight
+levelled skill names, the SS passive's name, and the Evolve shard item.
+
+452 backend tests (441 + 11 in `UpgradeLaddersTest`), 0 skipped locally, 0
+failed. Docker Desktop had to be started first (E4). Nothing committed or
+pushed in this session unless the maintainer asks. The remote was not
+re-checked.
 
 **2026-09-24 (thirty-eighth) — B5 started: the image runs, and running it the
 way Render will found two bugs no test could.**
