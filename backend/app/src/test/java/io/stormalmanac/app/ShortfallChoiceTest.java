@@ -68,7 +68,7 @@ class ShortfallChoiceTest {
 
         assertThat(response.steps()).containsExactly("resonate-by-token or resonate-by-score");
         assertThat(response.items()).singleElement().satisfies(line -> {
-            assertThat(line.displayName()).isEqualTo("one of: resonate-by-token, resonate-by-score");
+            assertThat(line.displayName()).isEqualTo("one of: 234 Token · 246 Score");
             assertThat(line.required()).isEqualTo(1);
             assertThat(line.owned()).isZero();
             assertThat(line.missing()).isEqualTo(1);
@@ -84,6 +84,47 @@ class ShortfallChoiceTest {
 
         assertThat(line.owned()).isEqualTo(1);
         assertThat(line.missing()).isZero();
+    }
+
+    @Test
+    @DisplayName("a price in several parts is written as one, joined with +, and large numbers are grouped")
+    void aPriceInSeveralParts() {
+        GameDefinition twoPartPrice = new CanonicalBundleParser().parse(
+                """
+                {
+                  "game": { "id": "proving-ground", "displayName": "The Proving Ground",
+                            "energyUnit": "Vigour" },
+                  "sequence": 0,
+                  "label": "1.0",
+                  "attribution": "hand-written",
+                  "items": [
+                    { "id": "token", "displayName": "Token", "rarity": { "label": "4*", "rank": 4 },
+                      "category": "currency" },
+                    { "id": "score", "displayName": "Score", "rarity": { "label": "4*", "rank": 4 },
+                      "category": "currency" }
+                  ],
+                  "entities": [
+                    { "id": "warden", "displayName": "The Warden", "kind": "character",
+                      "rarity": { "label": "5*", "rank": 5 } }
+                  ],
+                  "upgrades": [
+                    { "id": "resonate-by-both", "entity": "warden", "fromState": "base", "toState": "resonance",
+                      "costs": [ { "item": "token", "quantity": 12000 }, { "item": "score", "quantity": 10 } ] },
+                    { "id": "resonate-by-score", "entity": "warden", "fromState": "base", "toState": "resonance",
+                      "costs": [ { "item": "score", "quantity": 246 } ] }
+                  ]
+                }
+                """).definitionApprovedAt(Instant.EPOCH);
+        Demand demand = new DemandResolver().resolve(
+                twoPartPrice, new Roster(PROFILE, Map.of(WARDEN, Set.of("base"))),
+                List.of(Goal.deterministic(WARDEN, "resonance")));
+
+        ShortfallLine line = ShortfallResponse.of(
+                        PROFILE.value(), twoPartPrice, WARDEN.value(), List.of("base"), "resonance",
+                        demand, Inventory.empty(PROFILE))
+                .items().getFirst();
+
+        assertThat(line.displayName()).isEqualTo("one of: 12,000 Token + 10 Score · 246 Score");
     }
 
     private ShortfallResponse shortfall(Inventory inventory) {

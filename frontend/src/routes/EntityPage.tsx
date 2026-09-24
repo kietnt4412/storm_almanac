@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import {
   ApiError,
   getEntity,
+  getGames,
   getGoals,
   getRoster,
   getShortfall,
@@ -12,7 +13,7 @@ import {
   type Shortfall,
 } from '../api/client';
 import { Sourcing, merge } from '../catalog/Sourcing';
-import { useSelectedProfile } from '../profile';
+import { useCreateProfile, useProfileFor } from '../profile';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 
 /**
@@ -182,7 +183,7 @@ function statesOf(steps: { toState: string }[]): string[] {
  * a blank space teaches nobody that the page has another half.
  */
 function Overlay({ game, entity, states }: { game: string; entity: string; states: string[] }) {
-  const { profile, signedOut } = useSelectedProfile();
+  const { profile, signedOut, pending } = useProfileFor(game);
   const goals = useQuery({
     queryKey: ['goals', profile?.id],
     queryFn: () => getGoals(profile!.id),
@@ -209,10 +210,14 @@ function Overlay({ game, entity, states }: { game: string; entity: string; state
   const currentStates = roster[entity] ?? [];
 
   const shortfall = useQuery({
-    queryKey: ['shortfall', profile?.id, entity, target, currentStates.join('+')],
-    queryFn: () => getShortfall(profile!.id, entity, target),
+    queryKey: ['shortfall', profile?.id, game, entity, target, currentStates.join('+')],
+    queryFn: () => getShortfall(profile!.id, game, entity, target),
     enabled: Boolean(profile && target),
-    retry: (_failures, error) => !(error instanceof ApiError && error.isUnanswerable),
+    // Once for a dropped connection or a server fault, never for a refusal.
+    // This used to retry everything except a 422, and React Query takes a
+    // retry function returning true as "forever": a 400 sat under
+    // "Working it out…" with no end.
+    retry: (failures, error) => !(error instanceof ApiError && error.isRefusal) && failures < 1,
   });
 
   if (signedOut) {
@@ -226,7 +231,8 @@ function Overlay({ game, entity, states }: { game: string; entity: string; state
     );
   }
 
-  if (!profile || states.length === 0) return null;
+  if (pending || states.length === 0) return null;
+  if (!profile) return <NoProfileFor game={game} />;
 
   return (
     <section className="card" style={{ borderColor: 'var(--brand)' }}>
@@ -259,9 +265,43 @@ function Overlay({ game, entity, states }: { game: string; entity: string; state
       <div className="mt-3">
         {shortfall.isPending && <p className="muted text-sm">Working it out…</p>}
         {shortfall.isError && (
-          <p className="muted text-sm">{(shortfall.error as Error).message}</p>
+          <p className="text-sm" role="alert">
+            Could not work this out: {(shortfall.error as Error).message}
+          </p>
         )}
         {shortfall.data && <Lines shortfall={shortfall.data} />}
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Signed in, with no profile for the game this page is about.
+ *
+ * <p>Said, and offered, rather than answered with a profile of another game —
+ * which is what this page did until 2026-09-24. The new profile is made with
+ * the home screen's defaults and selected, because a reader who asks for one
+ * here is about to plan for it.
+ */
+function NoProfileFor({ game }: { game: string }) {
+  const games = useQuery({ queryKey: ['games'], queryFn: getGames });
+  const name = games.data?.games.find((published) => published.id === game)?.displayName ?? game;
+  const add = useCreateProfile();
+
+  return (
+    <section className="card">
+      <p className="text-sm">
+        You have no {name} profile, so there is no roster or inventory to measure this against.
+      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <button type="button" className="btn" onClick={() => add.mutate({ game, region: 'global', displayName: 'Main' })} disabled={add.isPending}>
+          {add.isPending ? 'Creating…' : `Make a ${name} profile`}
+        </button>
+        {add.isError && (
+          <p className="text-sm" role="alert">
+            Could not create it: {(add.error as Error).message}
+          </p>
+        )}
       </div>
     </section>
   );

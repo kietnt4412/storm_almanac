@@ -2979,6 +2979,8 @@ than a wiki.
 
 *The two thirty-fourth rows joined these later the same day, in the thirty-ninth session, when adding its row took the tracker to 551.*
 
+*The thirty-fifth row joined them in the forty-first session, for the same reason and at the same count, 551.*
+
 The tracker reached **561 lines** in the thirty-eighth session, eleven over its
 limit, before that session's own row was added. Its rule says rewrite a section
 rather than shave one, so the session index was rewritten a second time: every
@@ -2989,6 +2991,7 @@ has its full entry under [Session log](#session-log).
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-21 | thirty-fifth | N36 closed, and it was not the paperwork it was scoped as. Every load-bearing figure held — nine agreements, 3 880 against 4 017, 419 tests and all 16 gated ones run — but **following the documented workflow proved nothing**: the property never reached the test worker and the snapshot directory was not a task input, so a fetch left `:app:test` `UP-TO-DATE`. The second is the identical bug to `data/bundles`, ten lines above its own fix. Both fixed, both proven by measurement; numbers now dated in `docs/benchmarks/snapshot-gated-runs.md` |
 | 2026-09-21 | thirty-fourth (cont.) | N34 closed: a roster entry holds a set of states (ADR 0027, `V13`). A reader at `promote-6` who says they are also at `level-80` pays 127 500 Cogs and **no EXP** where they were charged 90 000 over six steps. The merge unit stays the entity. **The frontend shipped wrong twice with 16 green tests each time** — a `select multiple` nobody could use, then chips styled as buttons the maintainer looked straight at and did not see. Two live claims died: a `progress:` line *has* rendered (as a bare slug), and PGR *has* been rendered, so N35 was rescoped rather than ticked |
 | 2026-09-21 | thirty-fourth | B6 closed the day after it was written: CI triggers on a push to `dev`, proven by a run on `cfa6fe4` with no PR open. The session-start check found the trap live — the previous session's own commit had sat on `dev` unbuilt. The concurrency group stays keyed by ref *on purpose*: deduping push and PR would let a push cancel the check the PR needs green. Deploy must be gated to `main` when B5 turns it on |
 | 2026-09-21 | thirty-third (cont.) | PR #33 opened and green. The deferred-defect list audited into *Next actions* as **B6, N34, N35, N36** — every one was already described somewhere in this file and none was an action anybody could pick up. One archived qualification found stale: a lifetime purchase limit has been expressible since ADR 0020 |
@@ -3021,6 +3024,120 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-24 (forty-first) — Q6 written down, and its smallest item done.**
+
+The session opened as the fortieth's handoff asked: is Q6's list complete, or
+launch? **The maintainer added all three "seen, not agreed" items**, so D4 now
+reverses on four: three whole ladders (met), `choice:` lines naming their
+upgrades, a shadow price rendered against a real plan, and sign-in returning
+the reader where they were. The second is not a label fix — an upgrade's name
+is the game's word and so a fact with provenance. The third needs a goal set
+with a farmable stage, which the bundle's one stage does not give, so it may be
+data work before it is screen work. **The remote line was stale a seventh
+time**: it named #44 and "9 ahead"; PR #45 had merged at 12:47Z and `dev` had no
+commit `main` lacked.
+
+**Sign-in returns the reader to their page (Q6's fourth item).** The provider's
+flow could not take a destination, because the request that ends it is Google's
+redirect back and carries nothing of ours but `state`. `ReturnAfterSignIn` wraps
+Spring's authorization-request resolver to keep `?then=` in the session, and is
+the success handler that reads it once and redirects. With no `then`, Spring's
+saved-request handler runs as before. The session survives sign-in because
+fixation protection changes the id and keeps the attributes. **The open-redirect
+check the dev sign-in wrote in phase 3** ("the next endpoint that takes a
+redirect target may not be development-only") **is now shared as
+`LocalDestination`**, and it also refuses control characters. It is a class of its
+own because `identity-dev` has no OAuth client on its classpath: the first try put
+the check on `ReturnAfterSignIn` and `identity-dev` failed to compile against its
+interfaces. `identity` gained `compileOnly` servlet API, which needed E1's flag to
+download. **The Google leg is not tested**, because completing it would exchange a
+code with Google. The test drives the real authorization endpoint, hands that
+session to a `ReturnAfterSignIn`, and separately proves the chain's success handler
+is that class. With the wiring removed, the two tests that depend on it went red.
+The production bundle carries `?then=` and no `/dev/sign-in`. 462 backend tests,
+33 frontend.
+
+**A choice line is named by its prices (Q6's second item).** The tracker had
+said an upgrade's name "would be the game's word, so it is a fact with
+provenance". Correct, and it turned out not to be needed. The prices are
+facts already, and they are what the reader is choosing between: Samantha's
+line now reads "one of: 150 5★ Memory Shard · 234 Special Support Token · 246
+Simulation Score". A price in several parts is joined with `+`, and quantities are
+grouped with `Locale.ROOT` so every server writes them the same way. **Two views
+had named demand lines separately**, the shortfall and the plan's shadow prices,
+and both fell back to the raw id for a choice. `DemandNames` now names both.
+`AuthoredBundlePlanTest` pins Samantha's line against the real bundle. The planner's
+own refusal text (`whyNot`) still lists upgrade ids; that is a refusal message,
+not a page line, and it was left alone. Driven in a browser against the local
+database, the line wraps to three lines in a 186 px cell at 375 px and the page
+does not scroll sideways.
+
+**Driving it found a bug nobody had met.** The dev account's selected profile
+was R1999's, and the character page used it for a PGR construct. The shortfall
+route answered 400, because the local R1999 version no longer parses ("craft
+consumes nothing"; see *A published version that stopped being readable*), and
+the page retried under "Working it out…" forever. The page should use the
+profile whose game it is showing, and should say something when a request fails.
+A stranger holds one PGR profile and will not meet it, so it is recorded rather
+than fixed. 464 backend tests.
+
+**A shadow price rendered against a real plan (Q6's third item), with no reading
+taken.** The tracker had said the bundle lacked a goal set with a farmable
+stage, and that was wrong. `simulated-battlefield` has been farmable since the
+skill-to-cap test, and nobody had driven such a goal in a browser. Nothing
+filters the section: `MipOptimizer` re-solves every demanded item, zero
+included, and the page draws the list whenever it is non-empty. Lacrimosa's
+seeker-system to 18 alone rendered Cogs and Skill Point at **0.00**, which is
+correct: 5 runs pay 410 Score against 379, and that slack buys one more of
+either. Adding Samantha's Resonance (246 Score, exactly 3 runs, no slack)
+rendered its line at **90.00**, under the new choice name. Checked at 375 px,
+where the name wraps to three lines, the price stays right, and the page does
+not scroll sideways. **All four Q6 items met, so D4's trigger has fired.**
+Seen and not on the list: stage names and the *craft and buy* rows still show
+raw ids (`simulation-shop-cogs × 172`).
+
+**The character page asks with its own game's profile.** This is the bug found
+driving item 2, fixed in the same session, and there were three faults, not
+two. (1) The overlay asked with whichever profile was selected; it now uses
+`profileForGame`, which takes the selected profile if it plays the page's game,
+otherwise the first that does. With none it says so and offers **Make a
+<game> profile**. The shortfall route takes an optional `game` and refuses a
+mismatch *before loading anything*, 400 "profile … plays reverse-1999, not
+punishing-gray-raven". It is optional so that an old shortfall link still
+answers. (2) The retry rule was "retry unless 422", and React Query reads a
+retry function that returns true as *forever*. `ApiError.isRefusal` (any 4xx)
+now ends it, with one retry for a fault, and the error renders as an alert.
+(3) **Found only in the browser: the offer made the profile and the shell took
+it away again.** `App` re-selects the first profile when the selected id is not
+in the account, and the new id was selected before `/api/me` was re-read. The
+home screen's *Add a profile* had the same race, never noticed because a
+first profile *is* the first. `useCreateProfile` puts the profile into the
+cached account, then selects it, then re-reads, and both screens use it. The
+first version of the page test rendered `EntityPage` on its own and passed with
+the race in place, so it now renders inside `App`. Each of the three faults,
+put back, fails its own test. Driven in a browser with fresh dev accounts that
+hold only an R1999 profile: offer, create, the selection stays, and the
+shortfall is asked with `game=punishing-gray-raven`. With the backend stopped,
+two tries, then "Could not work this out: … responded 500". **Left alone:** a
+published version that no longer parses reaches the reader as **400** ("craft …
+consumes nothing"), because `ApiExceptionHandler` maps every
+`IllegalArgumentException` to the caller's mistake. That is a server-side data
+fault and should be a 5xx; no route a stranger uses meets it now. 466 backend
+tests, 39 frontend.
+
+**The tracker reached 554, and *Held — Phase 4 scope* was rewritten** to four
+lines, since D4 and the resume note now say most of it. Its text until then:
+
+> **Every item is done or cut, on the record: N30, N33, N20, B5 and N41**
+> ([in the archive](docs/history/tracker-archive.md#completed-next-actions)); B5 cut the
+> dev sign-in's deletion (ADR 0030). **What is left of Phase 4 is its exit** — five
+> strangers, which is the maintainer's to arrange, not a session's to build.
+> **Deferred by the maintainer until the site is more finished — [D4](#d4--public-launch-deferred-until-the-site-is-more-finished-2026-09-24),
+> and [Q6](#open-questions) asks what "finished" means.** When it comes: planning is under
+> `/api/me`, so a stranger must sign in, and **the Google client is in *Testing***, where only
+> listed users can — list each stranger or publish the app. Watch each session, answer
+> nothing, and record where each one stalls; those notes are what closes the phase.
 
 **2026-09-24 (fortieth) — N41 closed with a different third construct, and
 the day's readings turned out to be on a patch that did not exist when they

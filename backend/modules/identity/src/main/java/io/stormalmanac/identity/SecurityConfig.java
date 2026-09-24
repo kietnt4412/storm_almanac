@@ -110,10 +110,11 @@ public class SecurityConfig {
                         // generic body with nothing in it.
                         //
                         // The precise form of this is a DispatcherType.ERROR
-                        // matcher, which needs the servlet API on the compile
-                        // path. This module has security and no web starter, and
-                        // pulling one in for one enum is a worse trade than
-                        // naming the path.
+                        // matcher. It was not written because this module had
+                        // no servlet API to compile against; since
+                        // ReturnAfterSignIn it has one, compileOnly, and the
+                        // named path stays because it is proven and the matcher
+                        // would be a change for its own sake.
                         .requestMatchers("/error")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/games/**")
@@ -150,11 +151,16 @@ public class SecurityConfig {
         // contain. This method does not know about it and must not: what makes
         // that safe is the artifact, not a condition here.
 
-        if (registrations.getIfAvailable() != null) {
-            http.oauth2Login(login -> login.userInfoEndpoint(userInfo -> {
-                oidcUsers.ifAvailable(userInfo::oidcUserService);
-                oauth2Users.ifAvailable(userInfo::userService);
-            }));
+        ClientRegistrationRepository configured = registrations.getIfAvailable();
+        if (configured != null) {
+            ReturnAfterSignIn returnAfterSignIn = new ReturnAfterSignIn(configured);
+            http.oauth2Login(login -> login
+                    .authorizationEndpoint(endpoint -> endpoint.authorizationRequestResolver(returnAfterSignIn))
+                    .successHandler(returnAfterSignIn)
+                    .userInfoEndpoint(userInfo -> {
+                        oidcUsers.ifAvailable(userInfo::oidcUserService);
+                        oauth2Users.ifAvailable(userInfo::userService);
+                    }));
         }
 
         return http.build();

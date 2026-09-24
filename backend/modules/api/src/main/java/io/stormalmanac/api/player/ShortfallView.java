@@ -88,7 +88,7 @@ public final class ShortfallView {
                     int owned = prices.stream().anyMatch(price -> covers(definition, price, inventory)) ? required : 0;
                     lines.add(new ShortfallLine(
                             item.value(),
-                            "one of: " + String.join(", ", prices.stream().map(Upgrade::id).toList()),
+                            DemandNames.of(definition, items, item),
                             required,
                             owned,
                             required - owned));
@@ -98,12 +98,9 @@ public final class ShortfallView {
                 int owned = progress
                         ? progressHeld(definition, Demand.progressKind(item), inventory)
                         : inventory.quantityOf(item);
-                Item known = items.get(item);
                 lines.add(new ShortfallLine(
                         item.value(),
-                        progress
-                                ? definition.nameOfProgress(Demand.progressKind(item))
-                                : known == null ? item.value() : known.displayName(),
+                        DemandNames.of(definition, items, item),
                         required,
                         owned,
                         Math.max(0, required - owned)));
