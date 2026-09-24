@@ -9,6 +9,20 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/storm_almanac}
     username: ${DATABASE_USER:almanac}
     password: ${DATABASE_PASSWORD:almanac}
+    # Let the database sleep. Production Postgres is Neon's free tier, which
+    # suspends its compute when nothing is connected and bills the hours it is
+    # awake; Hikari's defaults hold ten connections open and would keep it up
+    # around the clock. So the pool keeps none idle, closes a spare after a
+    # minute, and sends no keepalive. The keep-alive bot pings /api/health,
+    # which touches no database, so it wakes Render without waking Neon.
+    # Measured 2026-09-24 (N40): Neon shown SUSPENDED under the bot's pings;
+    # the first request after a suspend took 2.06 s against 0.57–0.75 s warm —
+    # about 1.4 s, paid once per idle spell. Revisit if that ever outweighs the
+    # compute hours, or if Postgres moves somewhere that does not sleep.
+    hikari:
+      minimum-idle: 0
+      idle-timeout: 60000
+      keepalive-time: 0
   jpa:
     open-in-view: false
     hibernate:
