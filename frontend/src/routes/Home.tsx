@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'react-router-dom';
-import { ApiError, createProfile, getGames, getMe, signInUrl } from '../api/client';
+import { ApiError, getGames, getMe, signInUrl } from '../api/client';
+import { useCreateProfile } from '../profile';
 import { usePlannerStore } from '../store/plannerStore';
 
 /**
@@ -29,14 +30,7 @@ export function Home() {
   const [region, setRegion] = useState('global');
   const [displayName, setDisplayName] = useState('Main');
 
-  const queries = useQueryClient();
-  const add = useMutation({
-    mutationFn: () => createProfile(game || games.data?.games[0]?.id || '', region, displayName),
-    onSuccess: (profile) => {
-      selectProfile(profile.id);
-      queries.invalidateQueries({ queryKey: ['me'] });
-    },
-  });
+  const add = useCreateProfile();
 
   const signedOut = me.error instanceof ApiError && me.error.isSignedOut;
   const published = games.data?.games ?? [];
@@ -102,7 +96,7 @@ export function Home() {
             className="card flex flex-wrap items-end gap-3"
             onSubmit={(event) => {
               event.preventDefault();
-              add.mutate();
+              add.mutate({ game: game || games.data?.games[0]?.id || '', region, displayName });
             }}
           >
             <div>

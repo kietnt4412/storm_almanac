@@ -212,6 +212,44 @@ class ShortfallTest extends SharedDatabaseTest {
     }
 
     @Test
+    @DisplayName("an entity asked of another game is refused by name, naming both games")
+    void anotherGamesEntityIsRefusedByName() throws Exception {
+        // The character page for a PGR construct once asked with the reader's
+        // R1999 profile and got R1999's own parse error back. The page now says
+        // which game it is showing, and the route names the mismatch.
+        publish("proving-ground-1.0.json");
+        RequestPostProcessor player = signedIn("google", "sub-vertin", "Vertin");
+        String profile = profile(player, Map.of(), "insight-0");
+
+        MvcResult refused = mvc.perform(get("/api/me/profiles/" + profile + "/shortfall")
+                        .param("entity", "samantha")
+                        .param("target", "upper-resonance-1")
+                        .param("game", "punishing-gray-raven")
+                        .with(player))
+                .andReturn();
+
+        assertThat(refused.getResponse().getStatus()).isEqualTo(400);
+        assertThat(json.readTree(refused.getResponse().getContentAsString()).get("detail").asText())
+                .contains("plays proving-ground", "not punishing-gray-raven");
+    }
+
+    @Test
+    @DisplayName("an entity asked of the profile's own game is answered as before")
+    void theSameGameIsAnswered() throws Exception {
+        publish("proving-ground-1.0.json");
+        RequestPostProcessor player = signedIn("google", "sub-vertin", "Vertin");
+        String profile = profile(player, Map.of(), "insight-0");
+
+        JsonNode shortfall = body(mvc.perform(get("/api/me/profiles/" + profile + "/shortfall")
+                .param("entity", "warden")
+                .param("target", "insight-1")
+                .param("game", "proving-ground")
+                .with(player)));
+
+        assertThat(lines(shortfall.get("steps"))).containsExactly("warden-insight-1");
+    }
+
+    @Test
     @DisplayName("another account's shortfall is not found, and an anonymous one is not answered")
     void theOverlayIsNobodyElsesBusiness() throws Exception {
         publish("proving-ground-1.0.json");

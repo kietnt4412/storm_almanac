@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
  * What this reader is short of for one entity, at one target state.
  *
  * <pre>
- * GET /api/me/profiles/{profile}/shortfall?entity=warden&amp;target=insight-2  [?version=N]
+ * GET /api/me/profiles/{profile}/shortfall?entity=warden&amp;target=insight-2  [&amp;game=G] [&amp;version=N]
  * </pre>
  *
  * <p><b>This is phase 4's second exit clause, served.</b> The criterion is that
@@ -71,11 +71,23 @@ public class ShortfallController {
             @PathVariable String profile,
             @RequestParam String entity,
             @RequestParam String target,
+            @RequestParam(required = false) String game,
             @RequestParam(required = false) Long version) {
 
         PlayerProfile owner = owned.require(profile);
         if (target == null || target.isBlank()) {
             throw new IllegalArgumentException("target is required: a shortfall is measured against a state");
+        }
+        // An entity id means something only inside one game, so without this a
+        // character page that sent the wrong profile was answered about an
+        // entity of the same name in another game, or with whatever loading
+        // that game's version threw: on 2026-09-24 a PGR page holding an R1999
+        // profile got R1999's parse error. The page says which game it is
+        // showing, and a mismatch is refused by name before anything is loaded.
+        // Optional, so a shortfall link sent before this existed still answers.
+        if (game != null && !game.equals(owner.game().value())) {
+            throw new IllegalArgumentException("profile " + owner.id().value() + " plays " + owner.game().value()
+                    + ", not " + game + ": ask with a profile for " + game);
         }
 
         GameDefinition definition = (version == null

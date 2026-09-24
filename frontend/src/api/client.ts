@@ -355,6 +355,15 @@ export class ApiError extends Error {
   get isUnanswerable(): boolean {
     return this.status === 422;
   }
+
+  /**
+   * The server read the request and said no. Asking again gets the same answer,
+   * so a query should show it rather than retry: the character page once retried
+   * a 400 with no limit and sat on "Working it out…" for good.
+   */
+  get isRefusal(): boolean {
+    return this.status >= 400 && this.status < 500;
+  }
 }
 
 const versioned = (path: string, version?: number) =>
@@ -453,11 +462,17 @@ export const solve = (
     body: JSON.stringify(body),
   });
 
-/** What this reader is still short of for one entity at one target state. */
-export const getShortfall = (profile: string, entity: string, target: string, version?: number) =>
+/**
+ * What this reader is still short of for one entity at one target state.
+ *
+ * `game` is the game the page is showing. An entity id means something only
+ * inside one game, and the server refuses a profile of another game by name
+ * rather than answering about whatever that game calls the same id.
+ */
+export const getShortfall = (profile: string, game: string, entity: string, target: string, version?: number) =>
   request<Shortfall>(
     versioned(
-      `/api/me/profiles/${profile}/shortfall?entity=${encodeURIComponent(entity)}&target=${encodeURIComponent(target)}`,
+      `/api/me/profiles/${profile}/shortfall?game=${encodeURIComponent(game)}&entity=${encodeURIComponent(entity)}&target=${encodeURIComponent(target)}`,
       version,
     ),
   );

@@ -3097,6 +3097,35 @@ not scroll sideways. **All four Q6 items met, so D4's trigger has fired.**
 Seen and not on the list: stage names and the *craft and buy* rows still show
 raw ids (`simulation-shop-cogs × 172`).
 
+**The character page asks with its own game's profile.** This is the bug found
+driving item 2, fixed in the same session, and there were three faults, not
+two. (1) The overlay asked with whichever profile was selected; it now uses
+`profileForGame`, which takes the selected profile if it plays the page's game,
+otherwise the first that does. With none it says so and offers **Make a
+<game> profile**. The shortfall route takes an optional `game` and refuses a
+mismatch *before loading anything*, 400 "profile … plays reverse-1999, not
+punishing-gray-raven". It is optional so that an old shortfall link still
+answers. (2) The retry rule was "retry unless 422", and React Query reads a
+retry function that returns true as *forever*. `ApiError.isRefusal` (any 4xx)
+now ends it, with one retry for a fault, and the error renders as an alert.
+(3) **Found only in the browser: the offer made the profile and the shell took
+it away again.** `App` re-selects the first profile when the selected id is not
+in the account, and the new id was selected before `/api/me` was re-read. The
+home screen's *Add a profile* had the same race, never noticed because a
+first profile *is* the first. `useCreateProfile` puts the profile into the
+cached account, then selects it, then re-reads, and both screens use it. The
+first version of the page test rendered `EntityPage` on its own and passed with
+the race in place, so it now renders inside `App`. Each of the three faults,
+put back, fails its own test. Driven in a browser with fresh dev accounts that
+hold only an R1999 profile: offer, create, the selection stays, and the
+shortfall is asked with `game=punishing-gray-raven`. With the backend stopped,
+two tries, then "Could not work this out: … responded 500". **Left alone:** a
+published version that no longer parses reaches the reader as **400** ("craft …
+consumes nothing"), because `ApiExceptionHandler` maps every
+`IllegalArgumentException` to the caller's mistake. That is a server-side data
+fault and should be a 5xx; no route a stranger uses meets it now. 466 backend
+tests, 39 frontend.
+
 **The tracker reached 554, and *Held — Phase 4 scope* was rewritten** to four
 lines, since D4 and the resume note now say most of it. Its text until then:
 
