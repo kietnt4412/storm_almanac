@@ -3052,8 +3052,32 @@ seen suspending. **No object store is needed before Phase 12** — no game asset
 by rule, OCR runs on the reader's device, and the first thing that wants one is
 an off-provider backup for the restore drill.
 
-**Now with the maintainer:** the Render service, Neon, the Vercel project, the
-Google client. Then a session writes `vercel.json` against the
+**The backend went live the same session.** PR #39 merged at 02:39Z with every
+run green first; Render built `main` and `https://storm-almanac.onrender.com`
+answered `/api/health` 200, `/actuator/health` UP through Neon, `/api/games`
+empty, `/dev/sign-in` and `/api/me` 401. **PGR sequence 7 was published into
+Neon at 02:56:41Z**, run by the session at the maintainer's request. The
+password never passed through the chat: the maintainer wrote it to a file in
+their home directory, the commands read it from there, and the file was to be
+deleted after. The preview was identical to the local rehearsal (first bundle,
+22 items, 5 entities, 117 facts over eight entries) before anything was
+written, and the live API read it back. **Phase 0's box stays unticked**: a URL
+answers 200, but Render deploys it, not the pipeline.
+
+**Writing `vercel.json` found the PWA would have broken sign-in.** The generated
+service worker registered a `NavigationRoute` to `index.html` with no denylist,
+so once a worker controls the page, *every* navigation is answered from the
+cache — including `/oauth2/authorization/google` and the provider's return to
+`/login/oauth2/code/google`. A first visit would sign in, because no worker is
+in control yet; a returning reader would get the app shell and no error. It was
+invisible because sign-in had only ever run on the dev server, which registers
+no worker. `navigateFallbackDenylist` now covers `/api`, `/oauth2`, `/login` and
+`/dev`. **Proven on the built bundle in a browser:** with a fresh worker in
+control, `/plan` got the app shell and `/dev/sign-in` reached the preview's
+proxy (logged `ECONNREFUSED`, no backend running). The failing half was read
+off the old `sw.js` rather than reproduced in the browser. 31 frontend tests.
+
+**Now with the maintainer:** the Vercel project, the Google client. Then a session writes `vercel.json` against the
 real Render URL, gates `deploy` to `main`, and runs the first exchange.
 
 **2026-09-22 (thirty-seventh) — one bundle sequence, two decisions that share
