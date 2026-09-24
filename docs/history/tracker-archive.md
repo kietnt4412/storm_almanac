@@ -2979,6 +2979,8 @@ than a wiki.
 
 *The two thirty-fourth rows joined these later the same day, in the thirty-ninth session, when adding its row took the tracker to 551.*
 
+*The thirty-fifth row joined them in the forty-first session, for the same reason and at the same count, 551.*
+
 The tracker reached **561 lines** in the thirty-eighth session, eleven over its
 limit, before that session's own row was added. Its rule says rewrite a section
 rather than shave one, so the session index was rewritten a second time: every
@@ -2989,6 +2991,7 @@ has its full entry under [Session log](#session-log).
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-21 | thirty-fifth | N36 closed, and it was not the paperwork it was scoped as. Every load-bearing figure held — nine agreements, 3 880 against 4 017, 419 tests and all 16 gated ones run — but **following the documented workflow proved nothing**: the property never reached the test worker and the snapshot directory was not a task input, so a fetch left `:app:test` `UP-TO-DATE`. The second is the identical bug to `data/bundles`, ten lines above its own fix. Both fixed, both proven by measurement; numbers now dated in `docs/benchmarks/snapshot-gated-runs.md` |
 | 2026-09-21 | thirty-fourth (cont.) | N34 closed: a roster entry holds a set of states (ADR 0027, `V13`). A reader at `promote-6` who says they are also at `level-80` pays 127 500 Cogs and **no EXP** where they were charged 90 000 over six steps. The merge unit stays the entity. **The frontend shipped wrong twice with 16 green tests each time** — a `select multiple` nobody could use, then chips styled as buttons the maintainer looked straight at and did not see. Two live claims died: a `progress:` line *has* rendered (as a bare slug), and PGR *has* been rendered, so N35 was rescoped rather than ticked |
 | 2026-09-21 | thirty-fourth | B6 closed the day after it was written: CI triggers on a push to `dev`, proven by a run on `cfa6fe4` with no PR open. The session-start check found the trap live — the previous session's own commit had sat on `dev` unbuilt. The concurrency group stays keyed by ref *on purpose*: deduping push and PR would let a push cancel the check the PR needs green. Deploy must be gated to `main` when B5 turns it on |
 | 2026-09-21 | thirty-third (cont.) | PR #33 opened and green. The deferred-defect list audited into *Next actions* as **B6, N34, N35, N36** — every one was already described somewhere in this file and none was an action anybody could pick up. One archived qualification found stale: a lifetime purchase limit has been expressible since ADR 0020 |
@@ -3021,6 +3024,39 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-24 (forty-first) — Q6 written down, and its smallest item done.**
+
+The session opened as the fortieth's handoff asked: is Q6's list complete, or
+launch? **The maintainer added all three "seen, not agreed" items**, so D4 now
+reverses on four: three whole ladders (met), `choice:` lines naming their
+upgrades, a shadow price rendered against a real plan, and sign-in returning
+the reader where they were. The second is not a label fix — an upgrade's name
+is the game's word and so a fact with provenance. The third needs a goal set
+with a farmable stage, which the bundle's one stage does not give, so it may be
+data work before it is screen work. **The remote line was stale a seventh
+time**: it named #44 and "9 ahead"; PR #45 had merged at 12:47Z and `dev` had no
+commit `main` lacked.
+
+**Sign-in returns the reader to their page (Q6's fourth item).** The provider's
+flow could not take a destination, because the request that ends it is Google's
+redirect back and carries nothing of ours but `state`. `ReturnAfterSignIn` wraps
+Spring's authorization-request resolver to keep `?then=` in the session, and is
+the success handler that reads it once and redirects. With no `then`, Spring's
+saved-request handler runs as before. The session survives sign-in because
+fixation protection changes the id and keeps the attributes. **The open-redirect
+check the dev sign-in wrote in phase 3** ("the next endpoint that takes a
+redirect target may not be development-only") **is now shared as
+`LocalDestination`**, and it also refuses control characters. It is a class of its
+own because `identity-dev` has no OAuth client on its classpath: the first try put
+the check on `ReturnAfterSignIn` and `identity-dev` failed to compile against its
+interfaces. `identity` gained `compileOnly` servlet API, which needed E1's flag to
+download. **The Google leg is not tested**, because completing it would exchange a
+code with Google. The test drives the real authorization endpoint, hands that
+session to a `ReturnAfterSignIn`, and separately proves the chain's success handler
+is that class. With the wiring removed, the two tests that depend on it went red.
+The production bundle carries `?then=` and no `/dev/sign-in`. 462 backend tests,
+33 frontend.
 
 **2026-09-24 (fortieth) — N41 closed with a different third construct, and
 the day's readings turned out to be on a patch that did not exist when they

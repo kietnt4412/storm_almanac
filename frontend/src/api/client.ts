@@ -475,11 +475,15 @@ export const getShortfall = (profile: string, entity: string, target: string, ve
  * Neither URL is a fetch. Both are full-page navigations, because an OAuth
  * redirect cannot be followed by XHR and the development one is deliberately the
  * same shape.
+ *
+ * Both carry `then`, the page to come back to. The provider's took it only from
+ * 2026-09-24 (Q6) — until then every real sign-in ended on `/` — and the server
+ * holds it across the round trip to Google and refuses anything off this site.
  */
 export const signInUrl = (then = '/'): string =>
   import.meta.env.DEV
     ? `/dev/sign-in?as=dev&then=${encodeURIComponent(then)}`
-    : `/oauth2/authorization/google`;
+    : `/oauth2/authorization/google?then=${encodeURIComponent(then)}`;
 
 /**
  * Ends the session on the server.

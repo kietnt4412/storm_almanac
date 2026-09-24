@@ -2,6 +2,7 @@ package io.stormalmanac.devsignin;
 
 import io.stormalmanac.identity.Account;
 import io.stormalmanac.identity.AccountRepository;
+import io.stormalmanac.identity.LocalDestination;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -118,18 +119,16 @@ public class DevSignInController {
     /**
      * Where the browser goes next, restricted to this application.
      *
-     * <p>An unchecked {@code then} is an open redirect, and this endpoint is one
-     * of the few in the codebase that takes a destination from a query string.
-     * It costs three lines to refuse a foreign one, and refusing here rather
-     * than trusting the local-only deployment keeps the habit where it belongs —
-     * the next endpoint that takes a redirect target may not be development-only.
+     * <p>An unchecked {@code then} is an open redirect. This check was written
+     * here first, refusing a foreign destination even on a local-only endpoint
+     * because "the next endpoint that takes a redirect target may not be
+     * development-only" — and the next one was not: the provider's sign-in took
+     * a {@code then} for Q6. The check moved to {@link LocalDestination} so the
+     * two cannot disagree about what counts as local.
      */
     private static ResponseEntity<Void> redirectTo(String then) {
-        // "//host" and "/\host" are protocol-relative and leave the origin, so a
-        // leading slash alone is not enough.
-        boolean local = then.startsWith("/") && !then.startsWith("//") && !then.startsWith("/\\");
         return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", local ? then : "/")
+                .header("Location", LocalDestination.of(then))
                 .build();
     }
 
