@@ -250,7 +250,7 @@ and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archiv
 > maintainer for Selena: Pianissimo's and Karenina: Effulgence's **eight levelled skill names**
 > (4 Basic, 3 Special, the class skill on Common Effect), their **SS passive's name**, and their
 > **shard item** (exact name, star grade). Screenshots are the best source. Then add one climber
-> each to `s-rank-construct` and publish sequence 9 to both databases. **`dev` was 3 commits
+> each to `s-rank-construct` and publish sequence 9 to both databases. **`dev` was 5 commits
 > ahead of `origin/dev` at the end of the thirty-ninth session, not pushed.**
 
 ### Before the next sequence — worth knowing
@@ -280,10 +280,8 @@ nothing, and record where each one stalls; those notes are what closes the phase
 - [ ] **N41 — Put Selena: Pianissimo and Karenina: Effulgence on the S-rank ladder** (Q6).
       **Every number is shared and confirmed** for all S-rank (maintainer, screens compared
       2026-09-24), so the path is written once ([ADR 0031](docs/adr/0031-a-shared-upgrade-path-is-written-once-and-expanded-in-the-file.md)).
-      **Left is words, per construct:** eight levelled skill names, the SS passive's name, the
-      Evolve shard item (name, grade), and a provenance entry for the comparison. **Sequence 8
-      is published** in both databases — Lacrimosa's skill list fixed (−4/+8, 121 facts), each
-      read back as *no changes*; production held no goals, so none could name the removed skill.
+      **Left is words, per construct** (the list is in *Resume here*), plus a provenance entry
+      for the comparison. Sequence 8 is published in both databases, fixing Lacrimosa's skills.
 
 ### Held — later phases, not Phase 4's business
 
