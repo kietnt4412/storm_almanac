@@ -31,6 +31,12 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**N41 — Put Selena: Pianissimo and Karenina: Effulgence on the S-rank ladder.**~~ **Done 2026-09-24 (fortieth session), with Lucia: Inverse Crown in Karenina's place** — the maintainer does not own Karenina and so cannot read her. Selena and Lucia each climb `s-rank-construct` with their own eight skill names, SS passive and shard, and each shard has the two Phantom Pain shop rows (10 at 10 Scars, 20 at 20). Published as sequence 9, locally and to Neon, each read back as *no changes*; the live API serves 61 upgrade rows for each of the three. The entry as it stood:
+      **Every number is shared and confirmed** for all S-rank (maintainer, screens compared
+      2026-09-24), so the path is written once ([ADR 0031](../adr/0031-a-shared-upgrade-path-is-written-once-and-expanded-in-the-file.md)).
+      **Left is words, per construct** (the list is in *Resume here*), plus a provenance entry
+      for the comparison. Sequence 8 is published in both databases, fixing Lacrimosa's skills.
+
 - [x] ~~**N40 — See Neon suspend, then move the pool settings into `application.yml`.**~~ **Done 2026-09-24**, the same session it was opened: the maintainer read **SUSPENDED** in Neon's console with the keep-alive bot still pinging, and the first request after it took 2.06 s against 0.57–0.75 s warm — about 1.4 s per idle spell. The three settings moved into `spring.datasource.hikari` with that measurement beside them. The entry as it stood:
       `/api/health` touches no database, so the keep-alive bot wakes Render and not
       Neon — but Hikari's pool might. `MINIMUM_IDLE=0`, `IDLE_TIMEOUT=60000` and
@@ -3015,6 +3021,65 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-24 (fortieth) — N41 closed with a different third construct, and
+the day's readings turned out to be on a patch that did not exist when they
+were labelled.**
+
+**Selena: Pianissimo went in from ten screenshots.** Eight skill pages, her SS
+passive (Rainbow-Hued Melody) and her shard card (Inver-Shard - Pianissimo).
+One climber, one item, and `preview` against sequence 8 read +62 and nothing
+else. **ADR 0031 held two rows back for confirmation per climber** (Evolve at
+30 shards, the SS passive's unlock at 2 SP + 20 000 Cogs), because the
+maintainer's comparison had not covered them. Asked, the maintainer confirmed
+both, said the shard's 5★ was read on its shop tile (the card shows none), and
+that **every S-rank shard tile sells 30 ever, 10 at 10 Scars then 20 at 20** —
+which added two shop rows per construct. **Her Core Passive reads 18 (+6)**:
+a bonus from an equipped Memory's Resonance (maintainer), not a level the
+curve prices, and not modelled.
+
+**Karenina: Effulgence was swapped out, by the maintainer, because they do not
+own her.** Lucia: Inverse Crown (S-rank, maintainer; SS and Lv 80 on her
+character screen) took her place in Q6's three. Karenina stays in the bundle as
+her banner's target entity with nothing to climb. Lucia arrived as a new
+entity, a shard (Inver-Shard - Inverse Crown, 'Owned 0'), two shop rows and a
+climber; her SS passive is Bloomtide: Genesis. **Her numbers were not read on
+her screens at all** — every one is the maintainer's report that it holds for
+every S-rank construct, and her provenance entry says so rather than implying a
+reading. Sequence 9 carried both: **129 facts added, 121 → 250**, nothing
+changed or removed.
+
+**The auto-mode classifier refused the Neon publish as a production deploy**,
+and it was not worked around; the maintainer approved it in chat and it ran
+after. That delay is what made the next finding cheap.
+
+**The patch was wrong.** Mid-session the maintainer offered a version number
+instead of a patch name, and asked, said **4.8.0 "Anchored in Faith" went live
+at the 2026-09-24 maintenance, and every screen read that day was read after
+it** — the thirty-ninth session's Lacrimosa skill pages included, which
+sequences 8 and 9 had labelled "Steering By Light". The older patch is 4.7.0.
+**Sequence 10 changes no fact:** it relabels the version "Anchored in Faith
+(Global 4.8.0)", names 4.7.0 or 4.8.0 in every provenance entry, and says in the
+three affected entries that the earlier sequences were wrong. What carries the
+4.7.0 numbers across is the maintainer's report of noticing no cost change,
+plus **one point read on both patches**: a skill's 1 -> 2 at 1 SP + 2 000 Cogs,
+on 2026-09-19 and again 2026-09-24. **Sequence 8 on Neon still says "Steering
+By Light" for 4.8.0 readings, and stays that way** — published versions are
+immutable, and sequence 10 is the correction. The file keeps its name; five
+tests open it by path, and a file name is not a label.
+
+**A test went red with sequence 9 and was missed.** Only the `AuthoredBundle*`
+tests were run before committing it; `GameDataIngestTest` summed every level
+link in the bundle to 497 000 and listed only Lacrimosa's never-resetting shop
+rows. The sum is now per construct, the list names all six. **Run the full
+build before calling a bundle change green** — the bundle is read by more tests
+than the ones with its name on them. 452 tests, 0 skipped.
+
+**Published:** sequences 9 and 10 locally (12:23Z, 12:37Z) and to Neon
+(12:40:52Z, 12:41:47Z), each read back as *no changes*; Neon got 9 from its
+commit (`fd8ea67`) so both databases hold the same history. The live
+`/api/games` reports sequence 10. `dev` pushed; PR #44 had merged before the
+session, which the tracker still called #43.
 
 **2026-09-24 (thirty-ninth) — N41's open question answered by the maintainer,
 and the answer turned into a ladder rather than 114 pasted rows.**
