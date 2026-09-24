@@ -69,7 +69,7 @@ being finished with is.
   live until Phase 6 ([the note](docs/game-facts/reverse-1999-drop-disclosure.md)).
 - **Phases 0–3 and 5 are closed; Phase 4 is open; Track B is gated.** Phase 0 closed *by exception*, box unticked, because nothing is deployed; Phase 5 closed **out of order on purpose** ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)) and **nothing calls either gacha engine**. [The board](#track-a--product).
 - **Nothing is deployed, and [D1 is reversed](#d1--deployment-deferred-2026-09-02)** — Vercel and Render, free tier,
-  still no money. The wiring is **B5**, the only thing that can unblock a real OAuth exchange, and **it started
+  still no money, and **Postgres on Neon** since 2026-09-24. The wiring is **B5**, the only thing that can unblock a real OAuth exchange, and **it started
   2026-09-24**: the image builds and boots on an empty Postgres for the first time, and the maintainer is setting up
   both hosts.
   **`backend/Dockerfile`'s COPY list is B5's path and drifts in silence** — it omitted `adapters/` from Phase 1
@@ -277,25 +277,22 @@ the last one, started 2026-09-24**; the rest are
 [in the archive](docs/history/tracker-archive.md#completed-next-actions), planned
 in full on 2026-09-20 — read the plan rather than re-deriving one.
 
-- [ ] **B5 — Wire the real deploy: Vercel and Render.** **Started 2026-09-24.**
-      [The six steps](docs/history/tracker-archive.md#session-log) (thirtieth
-      entry) stand. **Both decisions settled by the maintainer:** *one origin*, a
-      Vercel rewrite to Render; *the free tier sleeps* — their own keep-alive bot,
-      **which must ping `/api/health`**. **Step 1 is done** (the image, above), and
-      two things it needs landed with it: `/actuator/health` no longer waits on an
-      unused Redis, and `X-Forwarded-*` are honoured so `{baseUrl}` is the public
-      origin (`ForwardedOriginTest` — *whether Vercel and Render deliver those
-      headers is unmeasured* until the first exchange). **What the plan missed:**
-      the rewrite needs `/api/*`, **`/oauth2/*` and `/login/oauth2/*`**, then an
-      `index.html` fallback for `BrowserRouter`; Render's `DATABASE_URL` must be
-      written as `jdbc:postgresql://…` with user and password apart; and **the new
-      database is empty until the maintainer publishes into it** with the CLI —
-      a human approval, and a step. **Now with the maintainer:** the Render
-      service (Docker, `backend/Dockerfile`, context the repo root) and Postgres,
-      the Vercel project (`frontend/`), the Google client. **Then a session:**
-      `vercel.json` once the Render URL exists, `deploy` gated to `main`, the
-      first exchange. **Ends with `:modules:identity-dev` deleted** (ADR 0017's
-      trigger), not merely with a URL.
+- [ ] **B5 — Wire the real deploy: Vercel, Render and Neon.** **Started 2026-09-24**;
+      [the six steps](docs/history/tracker-archive.md#session-log) (thirtieth entry) stand.
+      **Settled by the maintainer:** *one origin*, a Vercel rewrite to Render; *the sleeping
+      tier*, their own keep-alive bot, **which must ping `/api/health`** — it touches no
+      database; *Postgres on Neon*, because Render's free one expires (direct host, not
+      `-pooler`, Singapore, `?sslmode=require`). **Step 1 is done** (the image, above), with
+      `/actuator/health` no longer waiting on an unused Redis and `X-Forwarded-*` honoured so
+      `{baseUrl}` is the public origin (`ForwardedOriginTest`; *whether the hosts deliver those
+      headers is unmeasured*). **What the plan missed:** the rewrite needs `/api/*`,
+      **`/oauth2/*` and `/login/oauth2/*`**, then an `index.html` fallback for `BrowserRouter`;
+      `DATABASE_URL` is `jdbc:postgresql://…` with user and password apart; **the database is
+      empty until the maintainer publishes into it** with the CLI. **Unproven:** Hikari's
+      pool may keep Neon awake — `MINIMUM_IDLE=0`, `IDLE_TIMEOUT=60000`, `KEEPALIVE_TIME=0` are
+      Render env only, to move into `application.yml` once Neon is seen suspended. **Then a
+      session:** `vercel.json` against the Render URL, `deploy` gated to `main`, the first
+      exchange. **Ends with `:modules:identity-dev` deleted** (ADR 0017's trigger).
 
 ### Held — later phases, not Phase 4's business
 

@@ -3042,8 +3042,18 @@ with no Redis. **Compose itself was not re-run.** The tracker passed 550 lines
 (561) before this entry's row, and its session index was rewritten — the rows
 are [verbatim above](#session-index-rows-collapsed-on-2026-09-24).
 
-**Now with the maintainer:** the Render service and Postgres, the Vercel
-project, the Google client. Then a session writes `vercel.json` against the
+**The database moved to Neon mid-session**, the maintainer's call once
+Render's free Postgres was found to expire. It needed no code: a JDBC URL with
+`?sslmode=require`, the direct host rather than the pooler. The open question it
+brings is whether the application keeps Neon awake. `/api/health` touches no
+database, so the keep-alive bot does not; Hikari's pool might, and the three
+settings that should let it go are Render environment variables until Neon is
+seen suspending. **No object store is needed before Phase 12** — no game assets
+by rule, OCR runs on the reader's device, and the first thing that wants one is
+an off-provider backup for the restore drill.
+
+**Now with the maintainer:** the Render service, Neon, the Vercel project, the
+Google client. Then a session writes `vercel.json` against the
 real Render URL, gates `deploy` to `main`, and runs the first exchange.
 
 **2026-09-22 (thirty-seventh) — one bundle sequence, two decisions that share
