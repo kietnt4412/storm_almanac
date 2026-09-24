@@ -3276,7 +3276,41 @@ second one to know. Lacrimosa alone is 57 of the bundle's 63 upgrades.
 > file and one in the research note as a side effect of doing the work** — which is
 > the argument for doing it rather than re-reading it.
 
-**The Docker engine died twice in this session**, both times between one test
+**The second pipeline deploy failed, and nothing was wrong with it.** PR #43
+merged at 04:38:31Z; run `35956512041` called the hook at 04:40:06Z and timed
+out red at 05:05:19Z, never seeing `4e9c12d`. The maintainer pasted Render's
+log: a clean build, then Spring taking **147 s** to start on 0.1 CPU — 44 s for
+the web context alone — and `==> Timed Out` from Render about thirty seconds
+before `Tomcat started on port 10000`. Render kept the old instance, so nothing
+went down; the maintainer's manual redeploy then landed. **The first deploy had
+fitted in the same window by a margin nobody measured**, so every deploy was a
+coin flip that would get worse as the application grew. The `deploy` job going
+red was the pipeline working: it refused to call a deploy that had not landed
+green.
+
+**Measured before changing anything**, running the jar at `--cpus 0.1 --memory
+512m` against a live schema: fat jar **175.7 s**; fat jar with
+`-XX:TieredStopAtLevel=1` 76.0 s; the jar extracted to a plain classpath 133.6 s;
+extracted plus a CDS archive **65.4 s**; all three 29.4 s. One pair of runs
+first reported 133.6 s and 54.9 s *as CDS* — the log showed the archive had not
+loaded (`Required classpath entry does not exist`), because a dynamic archive
+records its classpath as written and the run used a different working
+directory; those numbers were kept as what they actually measured.
+
+**The image now extracts and trains an archive at build time.** The training
+run refreshes the context and exits, under `RUN --network=none`, with Flyway and
+Hibernate's schema validation off for that run only — tried first with
+networking disabled, and it exits 0, so the build can never come to need a
+database. Built from the real Dockerfile with `--build-context build=…` standing
+in for the Gradle stage, which E1 blocks on this machine, and run at Render's
+limits: **59.2 s**, no CDS warnings, Flyway still validating the 15 migrations
+at real startup, running as `almanac`, and no `devsignin` class in any extracted
+jar — the dev sign-in's absence re-checked in the image itself, since the image
+no longer holds the jar `DeployableJarTest` opens. **C1-only was not taken**: it
+halves startup again but gives up peak speed, and the solver has a two-second
+budget.
+
+**The Docker engine died three times in this session**, each time between one test
 run and the next with nothing touching it, and both times Testcontainers
 reported it as "Could not find a valid Docker environment" before a single
 assertion ran. E4's recipe brought it back in three to six seconds each time.
