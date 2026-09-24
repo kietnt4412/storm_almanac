@@ -72,7 +72,11 @@ management:
         enabled: true
 
 storm-almanac:
-  version: ${APP_VERSION:dev}
+  # The commit a deployment is running, which is how CI's deploy job knows the
+  # deploy it asked for has landed: it waits for /api/health to report its own
+  # SHA. Render sets RENDER_GIT_COMMIT on the service; APP_VERSION outranks it
+  # for any host that does not. `dev` is a checkout, not a release.
+  version: ${APP_VERSION:${RENDER_GIT_COMMIT:dev}}
   # Which implementation backs each Track B seam. Both stay in the codebase.
   # See docs/adr/0003-the-honesty-rule.md
   substrate:

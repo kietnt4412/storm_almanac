@@ -25,7 +25,7 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0014](0014-sync-is-last-write-wins-per-key-against-a-clock-that-outlives-the-value.md) | Sync is last-write-wins per key, against a clock that outlives the value | Accepted |
 | [0015](0015-game-data-is-sourced-first-hand-not-adapted.md) | Game data is sourced first-hand, not adapted from a community aggregator | Accepted |
 | [0016](0016-provenance-is-a-property-of-the-data.md) | Provenance is a property of the data, and publishing enforces it | Accepted |
-| [0017](0017-the-development-sign-in-is-absent-from-the-artifact.md) | The development sign-in is absent from the artifact, not disabled in it | Accepted |
+| [0017](0017-the-development-sign-in-is-absent-from-the-artifact.md) | The development sign-in is absent from the artifact, not disabled in it | **Reversal trigger superseded by [0030](0030-the-development-sign-in-stays-because-the-hands-that-need-it-cannot-sign-in.md)** |
 | [0018](0018-the-gacha-engines-answer-one-question-about-one-rarity.md) | The gacha engines answer one question about one rarity, and the trial count follows from the tolerance | Accepted |
 | [0019](0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-demanded-as-an-item.md) | A gate is a goal inside a goal, and progress is demanded as an item | Accepted |
 | [0020](0020-a-limit-that-never-resets-is-offered-whole.md) | A limit that never resets is offered whole, and the plan says so | Accepted |
@@ -38,3 +38,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0027](0027-a-roster-entry-holds-the-states-an-entity-has-reached.md) | A roster entry holds the states an entity has reached | Accepted |
 | [0028](0028-a-name-for-a-progress-kind-is-the-bundles-word-not-the-games.md) | A name for a progress kind is the bundle's word, not the game's | Accepted |
 | [0029](0029-income-is-what-the-bundle-declares-not-a-rate-per-day.md) | Income is what the bundle declares, not a rate per day | Accepted |
+| [0030](0030-the-development-sign-in-stays-because-the-hands-that-need-it-cannot-sign-in.md) | The development sign-in stays, because the hands that need it cannot sign in | Accepted |

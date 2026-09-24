@@ -79,31 +79,52 @@ jobs:
       - run: npm run build
 
   # Phase 0's exit criterion: a green pipeline deploying a health endpoint to a
-  # real URL. Wire the deploy target in before writing any product code — the
-  # deploy path is cheapest to fix while there is nothing to lose.
+  # real URL. Since B5 it does, and in that order — Render's own auto-deploy is
+  # off, so nothing reaches production that this workflow has not first built
+  # and tested. A red build never ships.
   #
-  # Disabled (`if: false`) until a host is chosen — see Q1 in TRACKER.md. A
-  # deploy job that echoes a TODO and exits 0 would paint the pipeline green
-  # while nothing deploys, which is precisely the self-deception the phase exit
-  # criterion exists to prevent. Skipped is honest; fake-green is not.
+  # Gated to a push to `main`. This workflow also runs on `dev` and on every
+  # pull request, and an ungated job would ship each of them: that hazard is
+  # why B6 was paid off before B5, and the gate is a condition of this job
+  # existing at all, not a refinement.
   #
-  # **When B5 enables it, gate it to `main`** — `if: github.ref ==
-  # 'refs/heads/main'`. This workflow now runs on a push to `dev` as well, so
-  # an ungated deploy job would ship every commit that lands on the working
-  # branch. That is the hazard B6 was paid off before B5 in order to remove,
-  # and removing it is a condition of turning this job on, not a follow-up.
+  # The job does not trust Render's word that a deploy happened. It waits for
+  # /api/health to report this commit — the application reads Render's
+  # RENDER_GIT_COMMIT into its version — then smokes the page's own origin,
+  # because a reader never talks to Render directly: every request goes through
+  # Vercel's rewrite, and a deploy that works on onrender.com and not through
+  # the rewrite is a deploy nobody can use.
   deploy:
     needs: [backend, frontend]
-    if: false
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
-      DEPLOY_URL: https://example.invalid
+      API_URL: https://storm-almanac.onrender.com
+      PAGE_URL: https://storm-almanac.vercel.app
     steps:
-      - uses: actions/checkout@v7
-      - name: Deploy
+      # The hook is a secret URL: anyone holding it can deploy. It is never
+      # echoed, and a missing secret fails loudly rather than skipping — a
+      # skipped deploy step would leave this job green with nothing shipped.
+      - name: Ask Render to deploy
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         run: |
-          echo "TODO(phase-0) wire Fly.io or the VPS deploy here"
-          exit 1
-      - name: Smoke the deployed health endpoint
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "::error::RENDER_DEPLOY_HOOK is not set; nothing was deployed"
+            exit 1
+          fi
+          curl --fail --silent --show-error --output /dev/null -X POST "$RENDER_DEPLOY_HOOK"
+      # A free-tier build runs the whole Gradle build in Docker, several
+      # minutes; the budget is generous so a slow build is not a red one.
+      - name: Wait until the API serves this commit
+        timeout-minutes: 25
         run: |
-          curl --fail --silent --show-error "$DEPLOY_URL/api/health"
+          until curl --silent "$API_URL/api/health" | grep -q "\"version\":\"$GITHUB_SHA\""; do
+            sleep 20
+          done
+          curl --fail --silent --show-error "$API_URL/api/health"
+      - name: Smoke through the page's origin
+        run: |
+          curl --fail --silent --show-error --output /dev/null "$PAGE_URL/"
+          curl --fail --silent --show-error "$PAGE_URL/api/health"
+          curl --fail --silent --show-error "$PAGE_URL/api/games" | grep -q '"games":\[{'

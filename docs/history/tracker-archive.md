@@ -3118,8 +3118,66 @@ the test sources is in every test context**; the probe is now a plain class
 arriving by `@Import`. Also on the way: the Docker engine died mid-session, and
 E4's recipe brought it back in six seconds.
 
-**Now with the maintainer:** the Render redirect-URI variable, then the first
-real sign-in. Then a session writes `vercel.json` against the
+**The first real OAuth exchange ran at about 03:40Z**, after PR #41 merged
+(03:38:36Z, the last check finished 03:37:57Z) and Render redeployed. With the
+pinned variable the authorization redirect through Vercel named
+`https://storm-almanac.vercel.app/login/oauth2/code/google`; the maintainer
+signed in with Google, landed back on `vercel.app` as themselves, and created a
+profile — **the first production write**, so the session cookie, the CSRF
+cookie and the CSRF header all survive Vercel's rewrite. The line this file
+carried since Phase 3, "the OAuth exchange has never run", is closed.
+
+**Production had no sign-out.** `signOutUrl()` returned `null` outside `DEV`, so
+the only sign-out that had ever existed was `/dev/sign-out`, in the module the
+jar does not contain. Spring Security's `POST /logout` was there all along and
+answered 302 to `/login?logout`, a page this application never had —
+`SignOutTest` failed on exactly that before `SecurityConfig` gave it a 204. The
+test holds the session in a real `MockHttpSession`, because the claim is about
+the session: an `oidcLogin()` principal would be there on the next request
+whatever sign-out did. The page's button POSTs with the CSRF header and then
+does a full navigation, so nothing fetched as the leaving reader stays on
+screen. Driven in a browser through the Vite proxy: 204, reload, `/api/me` 401.
+
+**The deploy job exists, and CI now ships.** The maintainer chose CI-triggered
+deploys over Render's own: auto-deploy off, `RENDER_DEPLOY_HOOK` as a GitHub
+secret, the job gated to a push to `main`, and it **fails loudly if the secret
+is missing** rather than skipping to green. It waits for `/api/health` to report
+its own SHA — the application's version now reads `RENDER_GIT_COMMIT` — then
+smokes through Vercel. **That Render exposes that variable at runtime is
+believed, not measured**, and the first run on `main` is the measurement.
+
+**ADR 0017's reversal has two conditions, and only one is met.** "A real
+provider configured against a deployed URL" — yes. "A developer can sign in
+locally against it" — not yet: the Vite proxy now forwards `/oauth2`,
+`/login/oauth2` and `/logout` keeping the Host header, and `bootRun` alone reads
+`~/.storm-almanac/` for the client secret, but the maintainer has to register
+`http://localhost:5173/login/oauth2/code/google` and sign in. **Measured the
+deletion's size against the ADR's own budget** (one settings line, one
+dependency line, a directory, two tests): the backend fits; the frontend does
+not — four screens import `signInUrl`, and sign-out existed only there.
+
+**The deploy hook went in** — Render's auto-deploy set to Off, `RENDER_DEPLOY_HOOK`
+set as a repository secret at 04:04:30Z (checked by name; GitHub never shows a
+value). The maintainer noticed Render also offers **"After CI Checks Pass"** and
+asked; it was not taken, because the `deploy` job is itself a check that waits
+for Render, and Render would wait for it. PR #42 opened; its workflow parsed and
+ran, `deploy` skipped off `main` as gated.
+
+**Cut, on the record: `:modules:identity-dev` is not deleted**
+([ADR 0030](../adr/0030-the-development-sign-in-stays-because-the-hands-that-need-it-cannot-sign-in.md)).
+The maintainer asked whether local sign-in was needed at all and said they would
+not use it. Following that through overturned B5's last step rather than just
+skipping it: ADR 0017's trigger pictured the developer as someone who can type a
+Google password, and the hands doing most of the signed-in work here are
+automated sessions that may not. Every signed-in screen, sign-out included,
+was driven through `/dev/sign-in` before it shipped, and `DevSignInTest` is the
+only socket-level authenticated test — the one that found the CSRF cookie was
+never issued. The safety 0017 bought is absence from the jar, which
+`DeployableJarTest` proves every build and Render confirmed from outside (`/dev/sign-in`
+401). 0030 supersedes only 0017's reversal trigger, and replaces it with two:
+signed-in screens drivable without it, or absence no longer provable. The local
+OAuth wiring stays, optional and inert. **B5 now closes on the first green
+`deploy` run on `main`.** Then a session writes `vercel.json` against the
 real Render URL, gates `deploy` to `main`, and runs the first exchange.
 
 **2026-09-22 (thirty-seventh) — one bundle sequence, two decisions that share

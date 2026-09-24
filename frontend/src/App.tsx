@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { ApiError, getHealth, getMe, signInUrl, signOutUrl } from './api/client';
+import { ApiError, getHealth, getMe, signInUrl, signOut } from './api/client';
 import { usePlannerStore } from './store/plannerStore';
 import { useOutboxFlush } from './sync/useOutboxFlush';
 
@@ -51,7 +51,20 @@ export function App() {
   }, [profileId, profiles, selectProfile]);
 
   const signedOut = me.error instanceof ApiError && me.error.isSignedOut;
-  const signOut = signOutUrl();
+  // A full navigation rather than invalidating the query: everything cached on
+  // this page was fetched as the reader who is leaving, and a reload is the one
+  // way to be sure none of it is shown to whoever sits down next. A failure —
+  // offline, most likely — leaves them signed in and the button usable again.
+  const [signingOut, setSigningOut] = useState(false);
+  const leave = async () => {
+    setSigningOut(true);
+    try {
+      await signOut();
+      window.location.assign('/');
+    } catch {
+      setSigningOut(false);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -88,7 +101,9 @@ export function App() {
             {me.data ? (
               <>
                 <span className="muted">{me.data.displayName}</span>
-                {signOut && <a href={signOut}>sign out</a>}
+                <button type="button" className="btn-quiet" onClick={leave} disabled={signingOut}>
+                  sign out
+                </button>
               </>
             ) : signedOut ? (
               <a href={signInUrl(location.pathname)}>Sign in</a>
