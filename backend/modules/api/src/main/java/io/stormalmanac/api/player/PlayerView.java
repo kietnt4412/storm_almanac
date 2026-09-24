@@ -7,7 +7,6 @@ import io.stormalmanac.gamedata.Goal;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.identity.Account;
 import io.stormalmanac.player.MergeOutcome;
-import io.stormalmanac.planner.Demand;
 import io.stormalmanac.planner.Objective;
 import io.stormalmanac.planner.Plan;
 import io.stormalmanac.planner.SolveRequest;
@@ -274,7 +273,7 @@ public final class PlayerView {
                     .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemId::value)))
                     .map(priced -> new ShadowPriceView(
                             priced.getKey().value(),
-                            nameOf(definition, items, priced.getKey()),
+                            DemandNames.of(definition, items, priced.getKey()),
                             priced.getValue()))
                     .toList();
 
@@ -322,18 +321,6 @@ public final class PlayerView {
      * a client can match against a shortfall line.
      */
     public record ShadowPriceView(String item, String displayName, double price) {}
-
-    /**
-     * A demanded thing's name: the item's, the progress kind's, or the id
-     * itself when it is a choice between prices, which nothing names.
-     */
-    private static String nameOf(GameDefinition definition, Map<ItemId, Item> items, ItemId id) {
-        if (Demand.isProgressItem(id)) {
-            return definition.nameOfProgress(Demand.progressKind(id));
-        }
-        Item known = items.get(id);
-        return known == null ? id.value() : known.displayName();
-    }
 
     public record StageRunView(String stage, int runs, int energyCost, int totalEnergy) {}
 

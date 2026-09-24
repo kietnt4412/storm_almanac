@@ -3,6 +3,8 @@ package io.stormalmanac.app;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.stormalmanac.api.player.ShortfallView.ShortfallLine;
+import io.stormalmanac.api.player.ShortfallView.ShortfallResponse;
 import io.stormalmanac.common.id.EntityId;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.ProfileId;
@@ -10,6 +12,8 @@ import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.Goal;
 import io.stormalmanac.gamedata.ingest.CanonicalBundleParser;
 import io.stormalmanac.planner.Conversion;
+import io.stormalmanac.planner.Demand;
+import io.stormalmanac.planner.DemandResolver;
 import io.stormalmanac.planner.MipOptimizer;
 import io.stormalmanac.planner.Objective;
 import io.stormalmanac.planner.Optimizer;
@@ -307,6 +311,21 @@ class AuthoredBundlePlanTest {
         assertThat(plan.totalEnergy()).isZero();
         assertThat(plan.conversions()).containsExactly(
                 new Conversion("samantha-upper-resonance-by-memory-shard", 1));
+    }
+
+    @Test
+    @DisplayName("Resonance's line on her page is named by its three prices, not by upgrade ids")
+    void resonanceIsNamedByItsPrices() {
+        // Q6: this line read "one of: samantha-upper-resonance-by-memory-shard,
+        // …" until 2026-09-24. Every word of the new one is already a fact.
+        Demand demand = new DemandResolver().resolve(
+                definition, new Roster(PROFILE, Map.of()), List.of(Goal.deterministic(SAMANTHA, "upper-resonance-1")));
+        ShortfallResponse page = ShortfallResponse.of(
+                PROFILE.value(), definition, SAMANTHA.value(), List.of(), "upper-resonance-1",
+                demand, Inventory.empty(PROFILE));
+
+        assertThat(page.items()).extracting(ShortfallLine::displayName).containsExactly(
+                "one of: 150 5★ Memory Shard · 234 Special Support Token · 246 Simulation Score");
     }
 
     @Test

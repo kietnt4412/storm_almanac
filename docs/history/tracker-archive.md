@@ -3058,6 +3058,43 @@ is that class. With the wiring removed, the two tests that depend on it went red
 The production bundle carries `?then=` and no `/dev/sign-in`. 462 backend tests,
 33 frontend.
 
+**A choice line is named by its prices (Q6's second item).** The tracker had
+said an upgrade's name "would be the game's word, so it is a fact with
+provenance". Correct, and it turned out not to be needed. The prices are
+facts already, and they are what the reader is choosing between: Samantha's
+line now reads "one of: 150 5★ Memory Shard · 234 Special Support Token · 246
+Simulation Score". A price in several parts is joined with `+`, and quantities are
+grouped with `Locale.ROOT` so every server writes them the same way. **Two views
+had named demand lines separately**, the shortfall and the plan's shadow prices,
+and both fell back to the raw id for a choice. `DemandNames` now names both.
+`AuthoredBundlePlanTest` pins Samantha's line against the real bundle. The planner's
+own refusal text (`whyNot`) still lists upgrade ids; that is a refusal message,
+not a page line, and it was left alone. Driven in a browser against the local
+database, the line wraps to three lines in a 186 px cell at 375 px and the page
+does not scroll sideways.
+
+**Driving it found a bug nobody had met.** The dev account's selected profile
+was R1999's, and the character page used it for a PGR construct. The shortfall
+route answered 400, because the local R1999 version no longer parses ("craft
+consumes nothing"; see *A published version that stopped being readable*), and
+the page retried under "Working it out…" forever. The page should use the
+profile whose game it is showing, and should say something when a request fails.
+A stranger holds one PGR profile and will not meet it, so it is recorded rather
+than fixed. 464 backend tests.
+
+**The tracker reached 554, and *Held — Phase 4 scope* was rewritten** to four
+lines, since D4 and the resume note now say most of it. Its text until then:
+
+> **Every item is done or cut, on the record: N30, N33, N20, B5 and N41**
+> ([in the archive](docs/history/tracker-archive.md#completed-next-actions)); B5 cut the
+> dev sign-in's deletion (ADR 0030). **What is left of Phase 4 is its exit** — five
+> strangers, which is the maintainer's to arrange, not a session's to build.
+> **Deferred by the maintainer until the site is more finished — [D4](#d4--public-launch-deferred-until-the-site-is-more-finished-2026-09-24),
+> and [Q6](#open-questions) asks what "finished" means.** When it comes: planning is under
+> `/api/me`, so a stranger must sign in, and **the Google client is in *Testing***, where only
+> listed users can — list each stranger or publish the app. Watch each session, answer
+> nothing, and record where each one stalls; those notes are what closes the phase.
+
 **2026-09-24 (fortieth) — N41 closed with a different third construct, and
 the day's readings turned out to be on a patch that did not exist when they
 were labelled.**
