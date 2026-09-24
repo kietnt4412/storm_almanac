@@ -3082,9 +3082,18 @@ fix was one edit to the climber's `skill` list, plus a `skill-pages` provenance
 entry for the group, now dated 2026-09-24. `preview` against the local volume
 showed −4 Astral Armament rows and +8 for the Signature Move and QTE, nothing
 else: 121 facts over nine provenance entries. The research note got a dated
-correction appended rather than its 2026-09-19 text rewritten. **Not
-published**, because publishing is the maintainer's approval. No local goal
-or roster entry names an Astral Armament state; production was not checked.
+correction appended rather than its 2026-09-19 text rewritten.
+
+**Published on the maintainer's word, in both databases.** Locally at
+08:35:00Z, then Neon at 08:36:52Z. Each read back as *no changes*, and
+the live API reports `sequence: 8`. Before writing to Neon, production was
+checked for a goal or roster entry naming an Astral Armament state and held
+**no goals at all**, so nothing could break. The Neon host and role came from
+the thirty-eighth session's transcript, and the password from
+`~/.neon-storm-almanac`, which was supposed to be deleted after that session
+and was still there. It was read into an environment variable, never printed,
+and the maintainer was told it's still there. Committed as `99683a8` before
+the Neon publish, then the tracker was updated for the publish.
 
 **What N41 still needs is words, not numbers.** For each construct: eight
 levelled skill names, the SS passive's name, and the Evolve shard item.
