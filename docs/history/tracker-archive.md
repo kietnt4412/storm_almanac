@@ -31,6 +31,34 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**B5 — Wire the real deploy: Vercel, Render and Neon.**~~ **Done 2026-09-24**: the `deploy` job's first run on `main` (run `35954626572`, `b8c21e6`) called the hook, saw `/api/health` report its SHA after 4m 27s — **so Render does expose `RENDER_GIT_COMMIT` at runtime** — and smoked through Vercel in 2s. The entry as it stood at close: **Started 2026-09-24**;
+      [the six steps](#session-log) (thirtieth entry) stand.
+      **Settled by the maintainer:** *one origin*, a Vercel rewrite to Render; *the sleeping
+      tier*, their own keep-alive bot, **which must ping `/api/health`** — it touches no
+      database; *Postgres on Neon*, because Render's free one expires (direct host, not
+      `-pooler`, Singapore, `?sslmode=require`). **Live since 2026-09-24:** Render at
+      `storm-almanac.onrender.com`, **PGR sequence 7 published into Neon at 02:56:41Z**, the page
+      at `storm-almanac.vercel.app` rewriting `/api/*`, `/oauth2/*`, `/login/oauth2/*` to Render
+      with an `index.html` fallback. **Found by running it:** `/actuator/health` 503 on an unused
+      Redis; a PWA worker answering sign-in navigations from its cache; and **Vercel forwards the
+      proto but not the host** — measured: Render passes `X-Forwarded-Host` through and Spring
+      honours it, yet through Vercel the redirect URI named Render. So the Google
+      `REDIRECT_URI` is **pinned in Render env**, and every redirect is **relative**
+      (`use-relative-redirects`, or a reader who had just signed in landed on Render). Each
+      has a test that failed first. **Unproven:** Hikari's pool may keep Neon awake —
+      `MINIMUM_IDLE=0`, `IDLE_TIMEOUT=60000`, `KEEPALIVE_TIME=0` are Render env only, to move
+      into `application.yml` once Neon is seen suspended. **The first real OAuth exchange ran
+      2026-09-24**, the maintainer signed in and created a profile — writes and CSRF through the
+      rewrite. **Production had no sign-out** (the only one was `/dev/sign-out`): `POST /logout`
+      now answers 204, with a button, driven in a browser. **`deploy` is gated to a push to
+      `main`**, calls a Render deploy hook (`RENDER_DEPLOY_HOOK` secret; Render's auto-deploy
+      off, so a red build never ships) and waits for `/api/health` to report its SHA — *that
+      Render exposes `RENDER_GIT_COMMIT` at runtime is unverified until it runs*. Phase 0's box
+      is ticked by that run. **Cut, on the record: `:modules:identity-dev` is not deleted**
+      ([ADR 0030](../adr/0030-the-development-sign-in-stays-because-the-hands-that-need-it-cannot-sign-in.md)) —
+      automated sessions cannot sign in to Google and drive every signed-in screen through it.
+      **B5 closes when `deploy` first goes green on `main`.**
+
 - [x] ~~**N37 — A demand line that is not a catalog item renders as a slug.**~~
       Done 2026-09-22, ADR 0028. The entry said the fix was "a bundle field, a
       parser change and a sequence 7 — the same five pieces N20 and N33 each
@@ -3177,7 +3205,24 @@ never issued. The safety 0017 bought is absence from the jar, which
 401). 0030 supersedes only 0017's reversal trigger, and replaces it with two:
 signed-in screens drivable without it, or absence no longer provable. The local
 OAuth wiring stays, optional and inert. **B5 now closes on the first green
-`deploy` run on `main`.** Then a session writes `vercel.json` against the
+`deploy` run on `main`.**
+
+**It did.** PR #42 merged at 04:11:53Z, after its last check at 04:11:19Z. Run
+`35954626572` on `main`: frontend and backend green, then `deploy` — the hook
+accepted at 04:13:38Z, `/api/health` still said `dev` a minute later (the old
+instance, built before the version fallback existed), and at 04:18:05Z it
+reported `b8c21e68137a…`: **Render does expose `RENDER_GIT_COMMIT` at runtime**,
+the one thing the job's design took on trust. Four minutes twenty-seven seconds
+from hook to new commit serving, two seconds of smoke through Vercel, and both
+origins report the SHA where they used to say `dev`.
+
+**Phase 0's box is ticked**, nineteen days after the phase closed by exception:
+its criterion was "a green pipeline deploying a health endpoint to a real URL",
+and that is now literally what happens on every merge. **B5 moved to *Completed
+next actions*** verbatim, and N40 — watching Neon suspend before the pool
+settings leave Render's environment — was split out of it, because it is the one
+claim in the entry nobody has measured. **Phase 4 has no items left, only its
+exit**: five strangers completing a plan, which is the maintainer's to arrange. Then a session writes `vercel.json` against the
 real Render URL, gates `deploy` to `main`, and runs the first exchange.
 
 **2026-09-22 (thirty-seventh) — one bundle sequence, two decisions that share

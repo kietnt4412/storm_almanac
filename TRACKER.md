@@ -67,16 +67,16 @@ being finished with is.
   and prices only the first, so **15 of 779 drop facts are declared and 764 sampled**, ~2% free. Two consolations:
   **gacha rates *are* disclosed**, and the grade is itself a free first-hand fact for all 595 pairs, with nowhere to
   live until Phase 6 ([the note](docs/game-facts/reverse-1999-drop-disclosure.md)).
-- **Phases 0–3 and 5 are closed; Phase 4 is open; Track B is gated.** Phase 0 closed *by exception*, box unticked until the pipeline deploys; Phase 5 closed **out of order on purpose** ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)) and **nothing calls either gacha engine**. [The board](#track-a--product).
+- **Phases 0–3 and 5 are closed; Phase 4 is open; Track B is gated.** Phase 0's box, unticked since 2026-09-05, was ticked 2026-09-24 when the pipeline deployed; Phase 5 closed **out of order on purpose** ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)) and **nothing calls either gacha engine**. [The board](#track-a--product).
 - **Deployed and signed into since 2026-09-24** ([D1 reversed](#d1--deployment-deferred-2026-09-02)) —
   `https://storm-almanac.vercel.app` rewrites to Render, which serves PGR sequence 7 from Neon; the first real OAuth
-  exchange and the first production write ran the same day. Free tier, still no money. **Phase 0's box waits on the
-  pipeline's first `deploy` run** — Render deployed the URL, not CI. The rest is **B5**.
+  exchange and the first production write ran the same day. Free tier, still no money. **CI deploys it:** a push to
+  `main` that passes calls Render's deploy hook and waits for `/api/health` to report its SHA (~4½ min).
   **`backend/Dockerfile`'s COPY list is B5's path and drifts in silence** — it omitted `adapters/` from Phase 1
   until 2026-09-09, every image build failing in six seconds while this file called it verified, so **anything added
   beside `modules`, `adapters`, `substrate`, `app` needs a line there**.
 - **The remote, last checked 2026-09-24 (thirty-eighth) — re-check it, do not trust it.**
-  **[PR #41](https://github.com/kietnt4412/storm_almanac/pull/41) is MERGED** (03:38Z, all runs green first);
+  **[PR #42](https://github.com/kietnt4412/storm_almanac/pull/42) is MERGED** (04:11Z, all runs green first);
   at session start this file named #37 while #38 had merged — **stale on five consecutive checks**, never once
   right, so re-check rather than read. B6 means a commit on `dev` with no PR open is still built.
   **What the trigger does not do is watch the merge** — PR #25 merged *before its own run finished*
@@ -166,7 +166,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 |------|-------|-----------------------|
 | Backend build | **Green** | **441 tests** in full 2026-09-24, 0 skipped locally with the 2026-09-22 snapshots present; the last *measured* gated run is still [the dated one](docs/benchmarks/snapshot-gated-runs.md) of 2026-09-22 — nothing in this session touched the model; **425 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares **two** directories outside every source set as inputs — `data/bundles`, without which `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed, and `build/upstream-snapshots`, without which fetching upstream left the task `UP-TO-DATE` (N36). **The second was the identical bug ten lines below the first's fix.** `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
 | Authored game data | **One bundle, sequence 7 published, first-hand** | **Sequence 7 added one item and one provenance entry** — the Event Construct R&D Ticket, **5★ off a tile on 2026-09-22**, which is the fourth currency graded that way where its own item card grades nothing. It carries the banner's pull price (250, credited to the 2026-09-18 pool-screen sitting) and the three EXP pool names, which are **not facts and declare no provenance** (ADR 0028) and so show in the diff as three `progress '<kind>'` subjects and in no provenance count. **117 facts over eight provenance entries.** Helentine: Lacrimosa (level to 80 as a **thirteen-link chain, every gated level priced**, 13-step Promote **all gated**, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, the weekly Phantom Pain Cage's nine tiers, and the game's **05:00 UTC** day boundary — which is a game-level field and so adds no fact, exactly why `Facts` had to learn to flatten `Game` (ADR 0025). **What each sequence added and when it published is [in the archive](docs/history/tracker-archive.md#session-log)**; every one read back as *no changes*. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) — or, for a reader who says they clear the whole Cage, **63 days and none at all** (ADR 0022) |
-| CI workflow | **Green, Node 24; triggers on `dev`** | Since B6 (2026-09-21) it runs on push to `main` **and `dev`** as well as `pull_request`, so a push to the working branch with no PR open is built rather than silently ignored. **One annotation, and it is GitHub's rather than ours:** `ubuntu-latest` migrates to Ubuntu 26 from 2026-10-19 — nothing to fix, worth knowing before a green run starts carrying a warning nobody placed. **A push to `dev` while a PR is open from `dev` runs twice, on purpose** — the concurrency group stays keyed by ref, because collapsing push and PR into one group lets `cancel-in-progress` cancel the run the PR needs green. **The `deploy` job is still `if: false` and must be gated to `refs/heads/main` when B5 turns it on**, or it ships every commit landing on `dev`. Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
+| CI workflow | **Green, Node 24; triggers on `dev`** | Since B6 (2026-09-21) it runs on push to `main` **and `dev`** as well as `pull_request`, so a push to the working branch with no PR open is built rather than silently ignored. **One annotation, and it is GitHub's rather than ours:** `ubuntu-latest` migrates to Ubuntu 26 from 2026-10-19 — nothing to fix, worth knowing before a green run starts carrying a warning nobody placed. **A push to `dev` while a PR is open from `dev` runs twice, on purpose** — the concurrency group stays keyed by ref, because collapsing push and PR into one group lets `cancel-in-progress` cancel the run the PR needs green. **Since 2026-09-24 `deploy` ships production**, gated to a push to `main` — ungated it would ship every commit on `dev` — via the `RENDER_DEPLOY_HOOK` secret; it fails loudly if the secret is gone, and waits for `/api/health` to report its SHA. First run `35954626572`, green. Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
 | Parser adapters | **One, demoted to a cross-check** | `:adapters:reverse-1999`, 25 tests. **Hard-codes `THIRD_PARTY`, so it fails a plain `publish`** — there is no call site to launder data through. Kept because diffing the first self-sourced bundle against it is worth more than it ever was as a source |
 | The MIP (`EnergyMip`) | **Stages, crafts, shops, rewards and fodder** | ojAlgo, integer runs, inventory subtracted, every variable bounded — the bound is what makes a real patch solvable. A purchase is a conversion capped at limit × *whole* periods, or the whole allowance of one that never resets, which the plan says it assumed unspent (ADR 0020); feeding fodder is a conversion into a `progress:<kind>` item, and paying one of a step's several prices a conversion into a `choice:` item (ADR 0021). Gates are not in the model: `DemandResolver` turns them into demand (ADR 0019). **A grant behind a score the reader has not cleared is dropped before the model** and reported in the notes, so the counts in a plan and in a refusal are the game *that reader* plays (ADR 0022) |
@@ -240,10 +240,10 @@ works". It does not mean that:
 
 ## Next actions
 
-**N37 and N28's modelling half closed 2026-09-22** (ADR 0028, ADR 0029) — with
-N30, N20, N33, B6, N34, N36 and N35's two load-bearing halves on 2026-09-21,
-[in the archive](docs/history/tracker-archive.md#completed-next-actions).
-**B5 is the only Phase 4 item left**, and it needs the maintainer's own accounts.
+**B5 closed 2026-09-24** — deployed, signed into, and shipped by the pipeline —
+after N37 and N28's modelling half on 2026-09-22 and N30, N20, N33, B6, N34, N36
+and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archive.md#completed-next-actions).
+**No Phase 4 item is left; its exit is.**
 
 **Every defect turned into an action on 2026-09-21 is now closed**, and the
 pattern from that batch held into this one: **an entry is wrong until somebody
@@ -253,9 +253,9 @@ that share a file and nothing else. **Three stale claims were corrected in this
 file and one in the research note as a side effect of doing the work** — which is
 the argument for doing it rather than re-reading it.
 
-### Before B5 — debt worth paying first
+### Before the next sequence — worth knowing
 
-**Nothing.** N37 was the last of it and closed 2026-09-22.
+**Production is a second database.** Publishing a sequence now means doing it twice: into the local volume, which `preview` diffs against, and into Neon, which readers see — the same `preview`, `ingest`, `publish` with `DATABASE_URL` pointed at Neon (the 2026-09-24 session log has the exact commands). Neon already holds sequence 7.
 
 **One thing worth knowing for the next sequence, learned doing this one:** the
 CLI needs a **live Postgres carrying every previous sequence** for `preview` to
@@ -267,39 +267,18 @@ Spring context and fails without a database.**
 
 ### Held — Phase 4 scope, and the maintainer decides
 
-**Phase 4 does not close until each is done or explicitly cut, on the record** —
-a cut is a decision and goes in the session log; a silence is not a cut. **B5 is
-the last one, started 2026-09-24**; the rest are
-[in the archive](docs/history/tracker-archive.md#completed-next-actions), planned
-in full on 2026-09-20 — read the plan rather than re-deriving one.
+**Every item is done or cut, on the record: N30, N33, N20 and B5**
+([in the archive](docs/history/tracker-archive.md#completed-next-actions)); B5 cut the
+dev sign-in's deletion (ADR 0030). **What is left of Phase 4 is its exit** — five
+strangers, which is the maintainer's to arrange, not a session's to build.
 
-- [ ] **B5 — Wire the real deploy: Vercel, Render and Neon.** **Started 2026-09-24**;
-      [the six steps](docs/history/tracker-archive.md#session-log) (thirtieth entry) stand.
-      **Settled by the maintainer:** *one origin*, a Vercel rewrite to Render; *the sleeping
-      tier*, their own keep-alive bot, **which must ping `/api/health`** — it touches no
-      database; *Postgres on Neon*, because Render's free one expires (direct host, not
-      `-pooler`, Singapore, `?sslmode=require`). **Live since 2026-09-24:** Render at
-      `storm-almanac.onrender.com`, **PGR sequence 7 published into Neon at 02:56:41Z**, the page
-      at `storm-almanac.vercel.app` rewriting `/api/*`, `/oauth2/*`, `/login/oauth2/*` to Render
-      with an `index.html` fallback. **Found by running it:** `/actuator/health` 503 on an unused
-      Redis; a PWA worker answering sign-in navigations from its cache; and **Vercel forwards the
-      proto but not the host** — measured: Render passes `X-Forwarded-Host` through and Spring
-      honours it, yet through Vercel the redirect URI named Render. So the Google
-      `REDIRECT_URI` is **pinned in Render env**, and every redirect is **relative**
-      (`use-relative-redirects`, or a reader who had just signed in landed on Render). Each
-      has a test that failed first. **Unproven:** Hikari's pool may keep Neon awake —
-      `MINIMUM_IDLE=0`, `IDLE_TIMEOUT=60000`, `KEEPALIVE_TIME=0` are Render env only, to move
-      into `application.yml` once Neon is seen suspended. **The first real OAuth exchange ran
-      2026-09-24**, the maintainer signed in and created a profile — writes and CSRF through the
-      rewrite. **Production had no sign-out** (the only one was `/dev/sign-out`): `POST /logout`
-      now answers 204, with a button, driven in a browser. **`deploy` is gated to a push to
-      `main`**, calls a Render deploy hook (`RENDER_DEPLOY_HOOK` secret; Render's auto-deploy
-      off, so a red build never ships) and waits for `/api/health` to report its SHA — *that
-      Render exposes `RENDER_GIT_COMMIT` at runtime is unverified until it runs*. Phase 0's box
-      is ticked by that run. **Cut, on the record: `:modules:identity-dev` is not deleted**
-      ([ADR 0030](docs/adr/0030-the-development-sign-in-stays-because-the-hands-that-need-it-cannot-sign-in.md)) —
-      automated sessions cannot sign in to Google and drive every signed-in screen through it.
-      **B5 closes when `deploy` first goes green on `main`.**
+- [ ] **N40 — See Neon suspend, then move the pool settings into `application.yml`.**
+      `/api/health` touches no database, so the keep-alive bot wakes Render and not
+      Neon — but Hikari's pool might. `MINIMUM_IDLE=0`, `IDLE_TIMEOUT=60000` and
+      `KEEPALIVE_TIME=0` are **Render environment only, and unproven**. Leave the site
+      idle ~10 minutes and read the compute status in Neon's console: *Idle* means
+      they work and belong in the config file with a comment; *Active* means find
+      what holds it awake before the free compute-hours run out.
 
 ### Held — later phases, not Phase 4's business
 
@@ -340,9 +319,9 @@ previous one's criterion is met. The "Landed" record for closed phases is
 
 ### Track A — product
 
-- [ ] **Phase 0 · Ground** — **closed by exception 2026-09-05, box deliberately
-      unticked** ([D1](#d1--deployment-deferred-2026-09-02)). Everything landed
-      except the deploy; the box is ticked when a real URL answers 200.
+- [x] **Phase 0 · Ground** — closed by exception 2026-09-05
+      ([D1](#d1--deployment-deferred-2026-09-02)); **box ticked 2026-09-24**, when
+      the pipeline's `deploy` job shipped `b8c21e6` and smoked it through the real URL.
 - [x] **Phase 1 · Game data foundation** — closed 2026-09-06, CI-confirmed (N10).
 - [x] **Phase 2 · Optimizer core** — closed 2026-09-08. **Stopped by its budget,
       not finished by it** (ADR 0010).
@@ -353,15 +332,15 @@ previous one's criterion is met. The "Landed" record for closed phases is
       **N25 is closed** (five screens driven in a browser, provenance read back
       onto the page, the PWA loaded with its server killed, a frontend suite in
       CI), and since 2026-09-21 there are **six**, every one of which has now
-      rendered PGR. **Only the backend is deployed.** Launch publicly even if ugly.
+      rendered PGR. **Deployed 2026-09-24** at `storm-almanac.vercel.app`, signed
+      into with Google. Launch publicly even if ugly.
       **Exit:** five strangers complete a plan without asking for help, and a
       logged-in character page shows what that reader is short of. *The second
-      clause is served; the first needs **B5**.*
+      clause is served; the first is now only a matter of finding five strangers.*
       **Closing condition, set 2026-09-20:** the exit is necessary and not
       sufficient — N30, N33, N20 and B5 are each done or explicitly cut before
-      this box is ticked, with the cut recorded in the session log. Nothing here
-      closes by having been forgotten. **The first three are done; B5 is the only
-      one left.**
+      this box is ticked, with the cut recorded in the session log. **All four are
+      done** (B5 with one cut, ADR 0030).
 - [x] **Phase 5 · Gacha engine** — closed 2026-09-12 out of order
       ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)); **one banner first-hand (Q4)**;
       income model landed 2026-09-22 (ADR 0029), shop exchange is **N38**.
@@ -541,7 +520,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-24 | thirty-eighth | B5 started, and **the backend went live** on Render and Neon with PGR sequence 7 published. The maintainer settled both decisions — one origin, and their own keep-alive bot for the sleeping free tier. **The image built and ran end to end for the first time**: 15 migrations on an empty Postgres, and PGR sequence 7 published into it from the same image's CLI. The "slow download" was a 500 MB build context with no `.dockerignore`. Running it as Render will found two bugs, each pinned by a test that failed first: `/actuator/health` 503 on an unused Redis, and an OAuth redirect URI of `http://<render-host>` behind the proxy. Then a third, in the page: the PWA worker answered sign-in navigations from its cache. Then **the first real OAuth exchange**, a sign-out production never had, and a `deploy` job CI triggers. 441 backend tests, 33 frontend |
+| 2026-09-24 | thirty-eighth | B5 started, and **the backend went live** on Render and Neon with PGR sequence 7 published. The maintainer settled both decisions — one origin, and their own keep-alive bot for the sleeping free tier. **The image built and ran end to end for the first time**: 15 migrations on an empty Postgres, and PGR sequence 7 published into it from the same image's CLI. The "slow download" was a 500 MB build context with no `.dockerignore`. Running it as Render will found two bugs, each pinned by a test that failed first: `/actuator/health` 503 on an unused Redis, and an OAuth redirect URI of `http://<render-host>` behind the proxy. Then a third, in the page: the PWA worker answered sign-in navigations from its cache. Then **the first real OAuth exchange**, a sign-out production never had, and a `deploy` job whose first run on `main` went green — **B5 closed, Phase 0 ticked**. The dev sign-in kept (ADR 0030). 441 backend tests, 33 frontend |
 | 2026-09-22 | thirty-seventh | N37 and N28 closed as one sequence 7, published and read back as *no changes*. **The EXP pool names are the bundle's own word, not the game's** — PGR calls all three pools "EXP" (ADR 0028) — and the pull price is 250 tickets, writable at last because the maintainer opened the ticket's tile and it grades 5★, so the format change the research note argued for was never needed (ADR 0029). `IncomeModel` written, and nothing calls it. **Three stale claims fell out of doing the work**, including "no bundle declares a banner at all", which had been false since sequence 0. Whole-graph equality caught an ordering bug the field-by-field assertions missed. 435 tests, 16 gated ones run; p95 1 812 ms and the plan 3 877 Activity, both recorded rather than smoothed |
 | 2026-09-21 | thirty-sixth | N35's two load-bearing halves closed, leaving N37. The plan form asks **how far do you get** and sends `reach`, off a new `/measures` route that collects the ladders ADR 0022 said were declared nowhere; answering nothing is refused *by name*, answering 1 100 000 plans **Evolve to SS in 63 days and 0 Serum** — the first plan a web client has ever asked for that counts a scored grant. The ladder summary computes **56 Scars a week**, agreeing with the figure ADR 0022 states in prose. A roster screen, sharing one state-editing component with Goals. 420 backend tests, frontend 16 → 28. ADR 0022 stands: the maintainer kept `reach` on the request, so its trigger is now a *second device*. **Do not run prettier here** — no config, and it reformatted 456 lines of a 269-line change |
 | 2026-09-21 | thirty-fifth | N36 closed, and it was not the paperwork it was scoped as. Every load-bearing figure held — nine agreements, 3 880 against 4 017, 419 tests and all 16 gated ones run — but **following the documented workflow proved nothing**: the property never reached the test worker and the snapshot directory was not a task input, so a fetch left `:app:test` `UP-TO-DATE`. The second is the identical bug to `data/bundles`, ten lines above its own fix. Both fixed, both proven by measurement; numbers now dated in `docs/benchmarks/snapshot-gated-runs.md` |
