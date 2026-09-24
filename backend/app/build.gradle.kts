@@ -61,6 +61,17 @@ tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
     archiveFileName.set("storm-almanac.jar")
 }
 
+// Local sign-in is the real Google client, so a developer needs its id and
+// secret, and neither may be committed. `bootRun` — and only `bootRun` — also
+// reads ~/.storm-almanac/, where a developer keeps an application.yml holding
+// the registration. `optional:` because a checkout with no file must still run,
+// signed out. Not the tests, which must never see a real secret, and not the
+// jar, which is configured by its host's environment.
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    val home = System.getProperty("user.home").replace('\\', '/')
+    systemProperty("spring.config.additional-location", "optional:file:$home/.storm-almanac/")
+}
+
 // DeployableJarTest opens the artifact and asserts what is and is not inside it
 // — the development sign-in must not be, SecurityConfig must be. That only means
 // anything against a jar built from the current sources, so the test task builds

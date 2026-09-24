@@ -100,6 +100,16 @@ export default defineConfig({
       // to succeed and leave the page anonymous. Same-origin here is also what
       // the deployed shape will be, via a rewrite (see D1 in TRACKER.md).
       '/dev': { target: 'http://localhost:8080', changeOrigin: true },
+      // Real sign-in, locally, against the same Google client production uses —
+      // ADR 0017's condition for deleting the development sign-in. The three
+      // keep the Host header (`changeOrigin: false`), because Spring builds the
+      // redirect URI it sends Google from it: rewritten to localhost:8080, the
+      // provider would be asked to return to an address the browser never
+      // visited, and no registration lists it.
+      // `http://localhost:5173/login/oauth2/code/google` is the URI to register.
+      '/oauth2': { target: 'http://localhost:8080', changeOrigin: false },
+      '/login/oauth2': { target: 'http://localhost:8080', changeOrigin: false },
+      '/logout': { target: 'http://localhost:8080', changeOrigin: false },
     },
   },
 });
