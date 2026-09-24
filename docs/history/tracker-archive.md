@@ -31,6 +31,14 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**N40 — See Neon suspend, then move the pool settings into `application.yml`.**~~ **Done 2026-09-24**, the same session it was opened: the maintainer read **SUSPENDED** in Neon's console with the keep-alive bot still pinging, and the first request after it took 2.06 s against 0.57–0.75 s warm — about 1.4 s per idle spell. The three settings moved into `spring.datasource.hikari` with that measurement beside them. The entry as it stood:
+      `/api/health` touches no database, so the keep-alive bot wakes Render and not
+      Neon — but Hikari's pool might. `MINIMUM_IDLE=0`, `IDLE_TIMEOUT=60000` and
+      `KEEPALIVE_TIME=0` are **Render environment only, and unproven**. Leave the site
+      idle ~10 minutes and read the compute status in Neon's console: *Idle* means
+      they work and belong in the config file with a comment; *Active* means find
+      what holds it awake before the free compute-hours run out.
+
 - [x] ~~**B5 — Wire the real deploy: Vercel, Render and Neon.**~~ **Done 2026-09-24**: the `deploy` job's first run on `main` (run `35954626572`, `b8c21e6`) called the hook, saw `/api/health` report its SHA after 4m 27s — **so Render does expose `RENDER_GIT_COMMIT` at runtime** — and smoked through Vercel in 2s. The entry as it stood at close: **Started 2026-09-24**;
       [the six steps](#session-log) (thirtieth entry) stand.
       **Settled by the maintainer:** *one origin*, a Vercel rewrite to Render; *the sleeping
@@ -3222,7 +3230,40 @@ and that is now literally what happens on every merge. **B5 moved to *Completed
 next actions*** verbatim, and N40 — watching Neon suspend before the pool
 settings leave Render's environment — was split out of it, because it is the one
 claim in the entry nobody has measured. **Phase 4 has no items left, only its
-exit**: five strangers completing a plan, which is the maintainer's to arrange. Then a session writes `vercel.json` against the
+exit**: five strangers completing a plan, which is the maintainer's to arrange.
+
+**N40 closed within the hour.** The maintainer left the site idle and read
+**SUSPENDED** on Neon's compute with UptimeRobot still pinging `/api/health` —
+so the bot wakes Render and not Neon, and the pool lets go. The cost, measured
+through Vercel right after: the first `/api/games` took **2.06 s**, the next two
+0.57 s and 0.75 s — about 1.4 s of Neon waking and a connection opening, paid
+once per idle spell. The three settings moved from Render's environment into
+`spring.datasource.hikari` with that measurement beside them; the Render
+variables are now redundant and harmless.
+
+**Asked whether Phase 4 could close: no, and not only because nobody has
+tried.** The plan route is `/api/me/profiles/{profile}/plan` — an anonymous POST
+is refused — and the Google client is still in *Testing*, where only listed test
+users can sign in. As things stand a stranger cannot reach a plan at all. The
+maintainer either lists each stranger or publishes the app; and one construct is
+the whole catalog, which satisfies the criterion's letter and is the likeliest
+first complaint.
+
+**The maintainer deferred the public launch (D4)**: they do not want strangers
+in until the site is more finished, and the Google client stays in *Testing*.
+It is recorded as a deferral against the plan's "launch publicly even if ugly",
+not a cut — the cut list forbids cutting it — with its cost named (Phase 4's
+exit, the Track B gate and Phase 6 all wait on users) and its trigger made a
+list rather than a feeling: **Q6** asks what "finished" means, seeded with what
+this session saw. Worth saying plainly because it is easy to miss: the URL is
+public and the catalog reads without an account; only signing in is held back.
+
+**The Docker engine died twice in this session**, both times between one test
+run and the next with nothing touching it, and both times Testcontainers
+reported it as "Could not find a valid Docker environment" before a single
+assertion ran. E4's recipe brought it back in three to six seconds each time.
+**A whole suite failing in five seconds is the engine, not the change** — read
+`Caused by` before reading the diff. Then a session writes `vercel.json` against the
 real Render URL, gates `deploy` to `main`, and runs the first exchange.
 
 **2026-09-22 (thirty-seventh) — one bundle sequence, two decisions that share

@@ -271,14 +271,11 @@ Spring context and fails without a database.**
 ([in the archive](docs/history/tracker-archive.md#completed-next-actions)); B5 cut the
 dev sign-in's deletion (ADR 0030). **What is left of Phase 4 is its exit** — five
 strangers, which is the maintainer's to arrange, not a session's to build.
-
-- [ ] **N40 — See Neon suspend, then move the pool settings into `application.yml`.**
-      `/api/health` touches no database, so the keep-alive bot wakes Render and not
-      Neon — but Hikari's pool might. `MINIMUM_IDLE=0`, `IDLE_TIMEOUT=60000` and
-      `KEEPALIVE_TIME=0` are **Render environment only, and unproven**. Leave the site
-      idle ~10 minutes and read the compute status in Neon's console: *Idle* means
-      they work and belong in the config file with a comment; *Active* means find
-      what holds it awake before the free compute-hours run out.
+**Deferred by the maintainer until the site is more finished — [D4](#d4--public-launch-deferred-until-the-site-is-more-finished-2026-09-24),
+and [Q6](#open-questions) asks what "finished" means.** When it comes: planning is under
+`/api/me`, so a stranger must sign in, and **the Google client is in *Testing***, where only
+listed users can — list each stranger or publish the app. Watch each session, answer
+nothing, and record where each one stalls; those notes are what closes the phase.
 
 ### Held — later phases, not Phase 4's business
 
@@ -336,7 +333,7 @@ previous one's criterion is met. The "Landed" record for closed phases is
       into with Google. Launch publicly even if ugly.
       **Exit:** five strangers complete a plan without asking for help, and a
       logged-in character page shows what that reader is short of. *The second
-      clause is served; the first is now only a matter of finding five strangers.*
+      clause is served; the first is **deferred by the maintainer** ([D4](#d4--public-launch-deferred-until-the-site-is-more-finished-2026-09-24)).*
       **Closing condition, set 2026-09-20:** the exit is necessary and not
       sufficient — N30, N33, N20 and B5 are each done or explicitly cut before
       this box is ticked, with the cut recorded in the session log. **All four are
@@ -412,6 +409,19 @@ is most likely to trip.
 
 Decision, cost, and what would reverse it. **The full accounts are
 [in the archive](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression).**
+
+### D4 · Public launch deferred until the site is more finished (2026-09-24)
+
+**The plan says launch publicly even if ugly; the maintainer chose not to yet**, the same day
+everything a launch needs went live — deployed, signed into, shipped by CI. The switch held
+back is Google's consent screen, left in *Testing*, so only listed accounts can sign in and so
+plan. **The URL is public and the catalog reads without an account**; that is not hidden.
+**This is a deferral, not a cut** — the cut list's "never cut the Phase 4 public launch"
+stands. **Cost:** the reason to launch ugly — strangers' feedback before effort goes into
+guessing — waits, and so does everything that needs users: Phase 4's exit, the Track B gate,
+and Phase 6's community data, which is the bootstrap problem (N26) itself. **Bought:** a first
+impression made on more than one construct. **Reversal trigger:** Q6's list, once written, is
+met — a list rather than a feeling, so the deferral cannot quietly become permanent.
 
 ### D3 · Launch title swapped to Punishing: Gray Raven (2026-09-13)
 
@@ -489,6 +499,12 @@ Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 ## Open questions
 
 Carry forward until answered, then move the entry [to the archive](docs/history/tracker-archive.md#answered-questions).
+
+- **Q6 — What makes the site finished enough to let strangers in?** *Open, and the maintainer's
+  (D4).* Candidates seen 2026-09-24, not a list anyone has agreed: **one construct is the whole
+  catalog**; a `choice:` line renders raw upgrade ids; **no shadow price has ever rendered**
+  against a real plan; sign-in lands on `/` rather than the page it was started from. Answering
+  this turns D4's trigger from a feeling into a checklist.
 
 - **Q5 — Is our "3.5" the same 3.5 anyone else means?** *Open for the existing
   data; **dissolved for everything after ADR 0015**.* `fetch-upstream.sh` pins a
