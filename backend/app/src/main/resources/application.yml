@@ -52,6 +52,16 @@ spring:
   # services rather than one.
 
 management:
+  health:
+    # The Redis starter is on the classpath for the solve cache's `redis`
+    # option, and its health indicator is installed whether or not that option
+    # is selected. With the cache in-process nothing talks to Redis, so a Redis
+    # that is not there made /actuator/health answer 503 on an application that
+    # was serving perfectly well — found by running the image the way Render
+    # runs it. Turn this back on in the change that selects `solve-cache: redis`,
+    # which is ADR 0012's trigger: a second node.
+    redis:
+      enabled: false
   endpoints:
     web:
       exposure:
@@ -74,6 +84,17 @@ storm-almanac:
 
 server:
   port: ${PORT:8080}
+  # Deployed, the reader talks to Vercel, which rewrites to Render (B5, one
+  # origin), so where they actually are arrives only as X-Forwarded-* headers.
+  # Honouring them is what makes {baseUrl} in an OAuth redirect URI the public
+  # https origin rather than Render's own host over http — ForwardedOriginTest.
+  #
+  # `framework` rather than `native`: Tomcat's valve trusts only proxies on
+  # private addresses, and whether Vercel's hop arrives looking like one is a
+  # fact about two hosts nobody here has measured. The cost is that anything
+  # can claim a forwarded client address, so **the remote address is not an
+  # identity** — Phase 6's abuse controls must not rate-limit on it as if it were.
+  forward-headers-strategy: framework
 
 logging:
   level:

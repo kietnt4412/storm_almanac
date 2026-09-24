@@ -2933,6 +2933,38 @@ than a wiki.
 
 ---
 
+## Session index rows collapsed on 2026-09-24
+
+The tracker reached **561 lines** in the thirty-eighth session, eleven over its
+limit, before that session's own row was added. Its rule says rewrite a section
+rather than shave one, so the session index was rewritten a second time: every
+row older than the thirty-fourth session became one row. **The rows are kept
+here verbatim** — the 2026-09-22 collapse of the first nineteen did not keep
+its one-liners, and this file's promise is that nothing is deleted. Each still
+has its full entry under [Session log](#session-log).
+
+| Date | Session | What it was |
+|---|---|---|
+| 2026-09-21 | thirty-third (cont.) | PR #33 opened and green. The deferred-defect list audited into *Next actions* as **B6, N34, N35, N36** — every one was already described somewhere in this file and none was an action anybody could pick up. One archived qualification found stale: a lifetime purchase limit has been expressible since ADR 0020 |
+| 2026-09-21 | thirty-third (cont.) | The roster flaw N33 widened, half closed the same day (ADR 0026): a crossed gate is a reached state, so `achieved` credits the `requires` of every upgrade behind the player. A reader at Promote 6 pays 90 Serum for step 7 where they were billed 180. No migration, no wire change — the other half, a reader *behind* the gate, still wants a set of states on `Roster` |
+| 2026-09-21 | thirty-third | N33 closed: the level ladder is priced end to end and all thirteen Promote gates are `requires`. Twenty-two Level Up previews on a Lv 1 construct, nothing spent and nobody levelled; thirteen cumulative figures, each pinned by the selection 1 000 below it falling short. The track became a chain because spokes from `level-1` would double-charge. Sequence 6 published 2026-09-21T02:49:27Z and read back as *no changes*; 411 tests, 0 skipped |
+| 2026-09-21 | thirty-second | N20 closed: the day boundary is a property of the game (ADR 0025, V12). A zone and an hour on `Game`, one `DayOfWeek` moved and no row written; null is *unstated*, not midnight. The preview found a sixth piece the plan never named — `Facts` flattened `Game` not at all, so the sequence that declares a boundary read as *no changes*. PGR sequence 5 published and read back clean |
+| 2026-09-21 | thirty-first | N30 closed: an expiring grant is a deadline the plan reports, not a schedule it builds (ADR 0024). No time index, no new variables — two lists, three notes and a refusal that names the window instead of blaming the cadence. The plan's `FEWEST_DAYS` sentence was backwards and the ADR carries the correction |
+| 2026-09-20 | thirtieth | N31: a drawn guarantee is a rate curve, not a state dimension (ADR 0023, V11). The exact chain gained nothing; the simulation draws anyway, and caught itself sampling the prior — 0.558 against the chain's right 0.382. Then all four Phase 4 items planned: N30 decided as a deadline, N33's premise found already recorded, three held |
+| 2026-09-20 | twenty-ninth | N32 closed by its fifth shape: a grant behind a score the reader supplies (ADR 0022, V10). Sequence 4, the Phantom Pain Cage: Evolve to SS in 63 days and no Serum. The EXP reading leaves as N33 |
+| 2026-09-19 | twenty-eighth | N32 (4): one step at several prices is a choice the solver makes (ADR 0021, V9). Sequence 3: Samantha's Resonance, 90 Serum |
+| 2026-09-19 | twenty-seventh | N32 (3): a shop limit that never resets (ADR 0020). Sequence 2, the shard shop, published; Evolve to SS plans |
+| 2026-09-19 | twenty-sixth | N32 (1)+(2): gates become demand and fodder feeds EXP (ADR 0019, V8). Sequence 1 published; plans 240 → 420 and 180 → 1 470 |
+| 2026-09-19 | twenty-fifth | Shops in the solver: the first-hand bundle plans, 150 and 240 Serum, worked out by hand first. Too cheap until N32 |
+| 2026-09-19 | twenty-fourth | N27 done: one character, weapon and Memory, first-hand. PGR is farmed through a shop, so N30 needs shops; five refused shapes become N32; the reset is 05:00 UTC |
+| 2026-09-18 | twenty-third | The first first-hand bundle — draft 0, nine facts — and the three *required* fields the format refused. `AuthoredBundlesTest` and the Gradle input hole it found. This file rewritten: 826 → 549 lines, 74 604 → 39 981 bytes, with the old one kept verbatim in the archive |
+| 2026-09-18 | twenty-second | PGR read off the client, and the guides wrong twice: a per-banner featured rate, and events with no shops. N28 unblocked, N30 rescoped, N31's cause found |
+| 2026-09-14 | twenty-first | The PGR survey D3 was missing. Nothing found plans PGR farming from an inventory; its one finding with teeth came from guides and was false |
+| 2026-09-13 | twentieth | Launch title swapped to PGR (D3) — Kornblume solves per player. Q4 answered for one banner off the client. N5: every CI action onto Node 24 |
+| 2026-09-02 – 09-12 | first to nineteenth | **Collapsed into one row on 2026-09-22, when this file passed 550 lines again.** Nineteen sessions from the scaffold to Phase 5 closing out of order: the first green build and CI, prior art and D1, the equipment question (ADR 0007), Phase 1's schema and the API answering its exit, ADR 0009, the community's answers and the stage table missing two thirds of the game (ADR 0010), yields learning their sample size (ADR 0011), the solve cache, the horizon as a scalar (ADR 0013), Phase 3, the sync debt (ADR 0014), **going first-hand (ADR 0015)** and provenance (ADR 0016), a browser signing in (ADR 0017), five screens driven in a browser, and two gacha engines agreeing (ADR 0018). **Each still has its own full entry [in the archive](docs/history/tracker-archive.md#session-log), newest first** — these one-liners were a second index over a file that is itself an index |
+
+---
+
 ## Session log
 
 **Append one entry per session, newest first, here — not in the tracker.** The
@@ -2943,6 +2975,86 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-24 (thirty-eighth) — B5 started: the image runs, and running it the
+way Render will found two bugs no test could.**
+
+**Session start, the remote check.** PR #38 merged; `dev`, `origin/dev` and
+`main` all held `4c693cd`, both runs green, no PR open. The tracker named #37 —
+**stale for the fifth consecutive check.**
+
+**Both B5 decisions, settled by the maintainer.** *One origin*: Vercel rewrites
+to Render, keeping the same-origin session, CSRF cookie and OAuth redirect the
+backend was built around. *The free tier sleeps*: the maintainer runs their own
+keep-alive bot, which the tracker now says must ping `/api/health`.
+
+**Step 1, the image, done for the first time.** The COPY list matched the
+module tree, and `:app:bootJar` reads nothing outside `backend/`. **What stalled
+the earlier attempt at 10% looked like the network and was the build context:**
+there was no `.dockerignore`, so every build uploaded ~500 MB (189 MB of
+`node_modules`, 217 MB of `backend/build` with the upstream snapshots, every
+module's `build/`). A whitelist cut it to 965 kB, after which the Gradle
+distribution downloaded in about three seconds and the jar built in 1m 46s.
+143 MB image.
+
+**Run as Render will run it**: a throwaway network, an **empty** Postgres,
+**no Redis**. 15 migrations in 0.58 s — the first time Flyway met an empty
+database outside Testcontainers — and started in 8.6 s. `/api/health` 200,
+liveness and readiness UP, `/api/me` and `/dev/sign-in` 401. **`/api/games`
+answered `[]`**, which is the step the archived six-step plan never named: a
+deployed database is empty until somebody publishes into it. The CLI from the
+same image ran `preview` (117 facts over eight provenance entries, matching the
+tracker), `ingest` and `publish` of sequence 7 against it, and the API served
+it. That is the rehearsal; the real publish is the maintainer's approval.
+
+**Two bugs, each written as a test that failed before the fix.**
+- **`/actuator/health` answered 503** because the Redis starter is on the
+  classpath for the solve cache's `redis` option, and its health indicator is
+  installed whether or not that option is selected. A platform health check
+  reads that as a dead service. `management.health.redis.enabled: false`, to be
+  reversed in the change that selects `solve-cache: redis` (ADR 0012's
+  trigger). `ApplicationBootTest` now points Redis at `localhost:1`, because a
+  developer running compose has one on 6379 and the test would pass there for
+  the wrong reason.
+- **The OAuth redirect URI would have been `http://<render-host>/…`.** Nothing
+  honoured `X-Forwarded-*`, so `{baseUrl}` came from the host the request
+  reached. `ForwardedOriginTest` registers a made-up Google client (Boot knows
+  Google's endpoints, so nothing is fetched) and reads `redirect_uri` off the
+  302: it failed with `http://localhost:54771/…` against
+  `https://almanac.example/…`, exactly the bug. `server.forward-headers-strategy:
+  framework`, not `native`, because Tomcat's valve trusts only private-address
+  proxies and nobody has measured what Vercel's hop looks like to Render. **The
+  cost is recorded in the config:** a forwarded client address can be claimed
+  by anyone, so Phase 6's abuse controls must not treat the remote address as
+  an identity. **Whether the two hosts actually deliver those headers is
+  unmeasured** until the first exchange.
+
+**What else the plan missed, now in the tracker's B5 entry:** the rewrite needs
+`/oauth2/*` and `/login/oauth2/*` as well as `/api/*` — the frontend sends
+sign-in to `/oauth2/authorization/google` — plus an `index.html` fallback,
+because the app uses `BrowserRouter`; and Render's `DATABASE_URL` must be
+written in `jdbc:postgresql://` form, since the one it displays is not.
+
+**Numbers:** 438 backend tests (435 + 3), 0 failed, 0 skipped with the
+2026-09-22 snapshots present; the gated suite was not re-dated, because nothing
+here touched the model. The rebuilt image answered `/actuator/health` 200 UP
+with no Redis. **Compose itself was not re-run.** The tracker passed 550 lines
+(561) before this entry's row, and its session index was rewritten — the rows
+are [verbatim above](#session-index-rows-collapsed-on-2026-09-24).
+
+**The database moved to Neon mid-session**, the maintainer's call once
+Render's free Postgres was found to expire. It needed no code: a JDBC URL with
+`?sslmode=require`, the direct host rather than the pooler. The open question it
+brings is whether the application keeps Neon awake. `/api/health` touches no
+database, so the keep-alive bot does not; Hikari's pool might, and the three
+settings that should let it go are Render environment variables until Neon is
+seen suspending. **No object store is needed before Phase 12** — no game assets
+by rule, OCR runs on the reader's device, and the first thing that wants one is
+an off-provider backup for the restore drill.
+
+**Now with the maintainer:** the Render service, Neon, the Vercel project, the
+Google client. Then a session writes `vercel.json` against the
+real Render URL, gates `deploy` to `main`, and runs the first exchange.
 
 **2026-09-22 (thirty-seventh) — one bundle sequence, two decisions that share
 nothing but a file.** N37 and N28, which the tracker said "should land together"
