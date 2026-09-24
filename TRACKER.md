@@ -246,6 +246,13 @@ after N37 and N28's modelling half on 2026-09-22 and N30, N20, N33, B6, N34, N36
 and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 **No Phase 4 item is left; its exit is.**
 
+> **Resume here (set by the maintainer, 2026-09-24):** continue **N41**. Open by asking the
+> maintainer for Selena: Pianissimo's and Karenina: Effulgence's **eight levelled skill names**
+> (4 Basic, 3 Special, the class skill on Common Effect), their **SS passive's name**, and their
+> **shard item** (exact name, star grade). Screenshots are the best source. Then add one climber
+> each to `s-rank-construct` and publish sequence 9 to both databases. **`dev` was 3 commits
+> ahead of `origin/dev` at the end of the thirty-ninth session, not pushed.**
+
 ### Before the next sequence — worth knowing
 
 **Production is a second database.** Publishing a sequence now means doing it twice: into the local volume, which `preview` diffs against, and into Neon, which readers see — the same `preview`, `ingest`, `publish` with `DATABASE_URL`, `DATABASE_USER` and `DATABASE_PASSWORD` pointed at Neon. **The password lives in `~/.neon-storm-almanac` on this machine, kept there on purpose** (maintainer, 2026-09-24): read it into the variable, never print it, don't delete it. The host and role are deliberately not in this repo; the session log never had them, and the thirty-ninth session recovered them from an earlier transcript and kept them in the agent's local notes. Neon holds sequence 8, published at 08:36:52Z on 2026-09-24.
