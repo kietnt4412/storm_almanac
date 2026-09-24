@@ -39,7 +39,7 @@ being finished with is.
   per-banner featured rate, events with no shops, a drawn wall, a `PityScope` inheriting across pools where R1999
   clears — the standing argument for the client over a wiki
   ([the four](docs/history/tracker-archive.md#what-status-carried-until-the-2026-09-21-rewrite)).
-- **Eleven decisions are live, and each is its own account — read the ADR, never a summary.**
+- **Twelve decisions are live, and each is its own account — read the ADR, never a summary.**
   [0019](docs/adr/0019-a-gate-is-a-goal-inside-a-goal-and-progress-is-demanded-as-an-item.md) gates ·
   [0020](docs/adr/0020-a-limit-that-never-resets-is-offered-whole.md) lifetime caps ·
   [0021](docs/adr/0021-one-step-at-several-prices-is-a-choice-the-solver-makes.md) choices ·
@@ -50,9 +50,9 @@ being finished with is.
   [0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md) ·
   [0027](docs/adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md) roster states ·
   [0028](docs/adr/0028-a-name-for-a-progress-kind-is-the-bundles-word-not-the-games.md) progress names ·
-  [0029](docs/adr/0029-income-is-what-the-bundle-declares-not-a-rate-per-day.md) income. **0022's trigger is
+  [0029](docs/adr/0029-income-is-what-the-bundle-declares-not-a-rate-per-day.md) income · [0030](docs/adr/0030-the-development-sign-in-stays-because-the-hands-that-need-it-cannot-sign-in.md) dev sign-in stays. **0022's trigger is
   live:** `reach` becomes player state the moment a reader answers twice, which since 2026-09-21 means *a second
-  device*. **Three loose ends sit outside all eleven:** the **Themed Construct archetype is expressible and not
+  device*. **Three loose ends sit outside all twelve:** the **Themed Construct archetype is expressible and not
   authored** — its wall is drawn 80–100 and ADR 0023 made that writable on 2026-09-20, but nobody has written it;
   **`Availability.opensAt` is read by nobody**, deliberately; and **`GameAgnosticismTest` is blind
   to a constant right for no game** — `UTC` is not a game name, and a javadoc caught 0025's bug where no test did.
@@ -296,10 +296,10 @@ in full on 2026-09-20 — read the plan rather than re-deriving one.
       `main`**, calls a Render deploy hook (`RENDER_DEPLOY_HOOK` secret; Render's auto-deploy
       off, so a red build never ships) and waits for `/api/health` to report its SHA — *that
       Render exposes `RENDER_GIT_COMMIT` at runtime is unverified until it runs*. Phase 0's box
-      is ticked by that run. **Left — ADR 0017's second condition, "a developer can sign in
-      locally"**: the Vite proxy and `bootRun`'s `~/.storm-almanac/` are ready; the maintainer
-      registers `http://localhost:5173/login/oauth2/code/google` and signs in. **Then delete
-      `:modules:identity-dev`** and supersede 0017.
+      is ticked by that run. **Cut, on the record: `:modules:identity-dev` is not deleted**
+      ([ADR 0030](docs/adr/0030-the-development-sign-in-stays-because-the-hands-that-need-it-cannot-sign-in.md)) —
+      automated sessions cannot sign in to Google and drive every signed-in screen through it.
+      **B5 closes when `deploy` first goes green on `main`.**
 
 ### Held — later phases, not Phase 4's business
 

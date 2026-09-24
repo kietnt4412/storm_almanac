@@ -3156,8 +3156,28 @@ deletion's size against the ADR's own budget** (one settings line, one
 dependency line, a directory, two tests): the backend fits; the frontend does
 not — four screens import `signInUrl`, and sign-out existed only there.
 
-**Now with the maintainer:** the deploy hook and secret, auto-deploy off, the
-localhost redirect URI, a local sign-in. Then `:modules:identity-dev` goes. Then a session writes `vercel.json` against the
+**The deploy hook went in** — Render's auto-deploy set to Off, `RENDER_DEPLOY_HOOK`
+set as a repository secret at 04:04:30Z (checked by name; GitHub never shows a
+value). The maintainer noticed Render also offers **"After CI Checks Pass"** and
+asked; it was not taken, because the `deploy` job is itself a check that waits
+for Render, and Render would wait for it. PR #42 opened; its workflow parsed and
+ran, `deploy` skipped off `main` as gated.
+
+**Cut, on the record: `:modules:identity-dev` is not deleted**
+([ADR 0030](../adr/0030-the-development-sign-in-stays-because-the-hands-that-need-it-cannot-sign-in.md)).
+The maintainer asked whether local sign-in was needed at all and said they would
+not use it. Following that through overturned B5's last step rather than just
+skipping it: ADR 0017's trigger pictured the developer as someone who can type a
+Google password, and the hands doing most of the signed-in work here are
+automated sessions that may not. Every signed-in screen, sign-out included,
+was driven through `/dev/sign-in` before it shipped, and `DevSignInTest` is the
+only socket-level authenticated test — the one that found the CSRF cookie was
+never issued. The safety 0017 bought is absence from the jar, which
+`DeployableJarTest` proves every build and Render confirmed from outside (`/dev/sign-in`
+401). 0030 supersedes only 0017's reversal trigger, and replaces it with two:
+signed-in screens drivable without it, or absence no longer provable. The local
+OAuth wiring stays, optional and inert. **B5 now closes on the first green
+`deploy` run on `main`.** Then a session writes `vercel.json` against the
 real Render URL, gates `deploy` to `main`, and runs the first exchange.
 
 **2026-09-22 (thirty-seventh) — one bundle sequence, two decisions that share
