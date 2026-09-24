@@ -3118,8 +3118,46 @@ the test sources is in every test context**; the probe is now a plain class
 arriving by `@Import`. Also on the way: the Docker engine died mid-session, and
 E4's recipe brought it back in six seconds.
 
-**Now with the maintainer:** the Render redirect-URI variable, then the first
-real sign-in. Then a session writes `vercel.json` against the
+**The first real OAuth exchange ran at about 03:40Z**, after PR #41 merged
+(03:38:36Z, the last check finished 03:37:57Z) and Render redeployed. With the
+pinned variable the authorization redirect through Vercel named
+`https://storm-almanac.vercel.app/login/oauth2/code/google`; the maintainer
+signed in with Google, landed back on `vercel.app` as themselves, and created a
+profile — **the first production write**, so the session cookie, the CSRF
+cookie and the CSRF header all survive Vercel's rewrite. The line this file
+carried since Phase 3, "the OAuth exchange has never run", is closed.
+
+**Production had no sign-out.** `signOutUrl()` returned `null` outside `DEV`, so
+the only sign-out that had ever existed was `/dev/sign-out`, in the module the
+jar does not contain. Spring Security's `POST /logout` was there all along and
+answered 302 to `/login?logout`, a page this application never had —
+`SignOutTest` failed on exactly that before `SecurityConfig` gave it a 204. The
+test holds the session in a real `MockHttpSession`, because the claim is about
+the session: an `oidcLogin()` principal would be there on the next request
+whatever sign-out did. The page's button POSTs with the CSRF header and then
+does a full navigation, so nothing fetched as the leaving reader stays on
+screen. Driven in a browser through the Vite proxy: 204, reload, `/api/me` 401.
+
+**The deploy job exists, and CI now ships.** The maintainer chose CI-triggered
+deploys over Render's own: auto-deploy off, `RENDER_DEPLOY_HOOK` as a GitHub
+secret, the job gated to a push to `main`, and it **fails loudly if the secret
+is missing** rather than skipping to green. It waits for `/api/health` to report
+its own SHA — the application's version now reads `RENDER_GIT_COMMIT` — then
+smokes through Vercel. **That Render exposes that variable at runtime is
+believed, not measured**, and the first run on `main` is the measurement.
+
+**ADR 0017's reversal has two conditions, and only one is met.** "A real
+provider configured against a deployed URL" — yes. "A developer can sign in
+locally against it" — not yet: the Vite proxy now forwards `/oauth2`,
+`/login/oauth2` and `/logout` keeping the Host header, and `bootRun` alone reads
+`~/.storm-almanac/` for the client secret, but the maintainer has to register
+`http://localhost:5173/login/oauth2/code/google` and sign in. **Measured the
+deletion's size against the ADR's own budget** (one settings line, one
+dependency line, a directory, two tests): the backend fits; the frontend does
+not — four screens import `signInUrl`, and sign-out existed only there.
+
+**Now with the maintainer:** the deploy hook and secret, auto-deploy off, the
+localhost redirect URI, a local sign-in. Then `:modules:identity-dev` goes. Then a session writes `vercel.json` against the
 real Render URL, gates `deploy` to `main`, and runs the first exchange.
 
 **2026-09-22 (thirty-seventh) — one bundle sequence, two decisions that share
