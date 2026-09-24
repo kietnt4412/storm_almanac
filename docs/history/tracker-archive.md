@@ -3082,6 +3082,21 @@ profile whose game it is showing, and should say something when a request fails.
 A stranger holds one PGR profile and will not meet it, so it is recorded rather
 than fixed. 464 backend tests.
 
+**A shadow price rendered against a real plan (Q6's third item), with no reading
+taken.** The tracker had said the bundle lacked a goal set with a farmable
+stage, and that was wrong. `simulated-battlefield` has been farmable since the
+skill-to-cap test, and nobody had driven such a goal in a browser. Nothing
+filters the section: `MipOptimizer` re-solves every demanded item, zero
+included, and the page draws the list whenever it is non-empty. Lacrimosa's
+seeker-system to 18 alone rendered Cogs and Skill Point at **0.00**, which is
+correct: 5 runs pay 410 Score against 379, and that slack buys one more of
+either. Adding Samantha's Resonance (246 Score, exactly 3 runs, no slack)
+rendered its line at **90.00**, under the new choice name. Checked at 375 px,
+where the name wraps to three lines, the price stays right, and the page does
+not scroll sideways. **All four Q6 items met, so D4's trigger has fired.**
+Seen and not on the list: stage names and the *craft and buy* rows still show
+raw ids (`simulation-shop-cogs × 172`).
+
 **The tracker reached 554, and *Held — Phase 4 scope* was rewritten** to four
 lines, since D4 and the resume note now say most of it. Its text until then:
 

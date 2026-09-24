@@ -224,10 +224,10 @@ works". It does not mean that:
   [ADR 0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md) inferred what sits *behind* a recorded state,
   [ADR 0027](docs/adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md) (`V13`) let a reader say
   what sits *beside* it — and since 2026-09-21 there is a roster screen and a plan form that sends `reach`.
-  **What is still wrong here:** **no shadow price has ever rendered against a real plan** — the
-  reason is known rather than suspected (on the Evolve to SS plan the one demanded item is at its
-  bound, so the list is legitimately empty and the notes say so), and what it wants is a goal set
-  with a farmable stage in it, which one PGR bundle does not yet have. The naming half is closed:
+  **Shadow prices first rendered against a real plan on 2026-09-24**, in a browser against sequence
+  10: Resonance at **90.00** Serum (3 more runs, no slack), Cogs and Skill Point at 0.00 (the runs'
+  slack covers one more). The stage was always there; nobody had driven such a goal. **Still raw
+  ids on the plan page:** stage names and the *craft and buy* list. The naming half is closed:
   a `progress:` line rendered as its bare slug beside a properly named `Cogs` until 2026-09-22
   (N37, ADR 0028), and a `choice:` line's on 2026-09-24, named by its prices rather than by
   upgrade ids. Every R1999 catalog and drop number in this file comes from Kornblume.
@@ -245,11 +245,11 @@ after N37 and N28's modelling half on 2026-09-22 and N30, N20, N33, B6, N34, N36
 and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 **No Phase 4 item is left; its exit is.**
 
-> **Resume here (2026-09-24, forty-first):** **Q6 has four agreed items and three are met** —
-> whole ladders, choice lines named by their prices, and sign-in's return (in code; the first
-> real sign-in after deploy is its check). **Left before launch: a shadow price rendering against
-> a real plan**, which needs a goal set with a farmable stage the bundle does not have yet — ask
-> the maintainer what to read. Then D4 reverses: Google client out of *Testing*, five strangers.
+> **Resume here (2026-09-24, forty-first):** **All four of Q6's items are met, so D4's trigger
+> has fired** — ladders, choice lines named by their prices, a shadow price driven in a browser
+> (90.00 on Resonance), and sign-in's return (in code; the first real sign-in after deploy is its
+> check). **Ask the maintainer: launch?** That means Google client out of *Testing*, five strangers.
+> Seen and not on the list: stage and *craft and buy* rows on the plan page still show raw ids.
 > **Found driving it:** the character page uses the stored profile whatever its game, so an
 > account with an R1999 profile selected asks for a PGR shortfall against it, gets a 400, and
 > retries under "Working it out…" forever. Strangers have one PGR profile and never meet it.
@@ -417,7 +417,7 @@ guessing — waits, and so does everything that needs users: Phase 4's exit, the
 and Phase 6's community data, which is the bootstrap problem (N26) itself. **Bought:** a first
 impression made on more than one construct. **Reversal trigger:** Q6's list, once written, is
 met — a list rather than a feeling, so the deferral cannot quietly become permanent. **Written
-2026-09-24: four items, one met.**
+2026-09-24 with four items; all four met the same day.** The trigger has fired; the launch is the maintainer's.
 
 ### D3 · Launch title swapped to Punishing: Gray Raven (2026-09-13)
 
@@ -503,11 +503,12 @@ Carry forward until answered, then move the entry [to the archive](docs/history/
   render raw upgrade ids — **met the same day by naming a choice by its prices** (`DemandNames`:
   "one of: 150 5★ Memory Shard · 234 Special Support Token · 246 Simulation Score"), which
   are facts already, so no upgrade needed a name of its own; browser-checked at 1280 and 375 px;
-  (3) no shadow price has ever rendered against a real plan — wants a goal set with a farmable
-  stage, which the bundle's one stage does not give; (4) sign-in lands on `/` rather than where
+  (3) no shadow price has ever rendered against a real plan — **met the same day by driving one**:
+  Lacrimosa's skill to 18 plus Samantha's Resonance renders 90.00 for the Resonance line; the bundle's
+  one stage was enough and no reading was needed; (4) sign-in lands on `/` rather than where
   the reader was — **done in code the same day** (`ReturnAfterSignIn`, `?then=` held in the
   session across Google), **not yet run against Google**: that is the first sign-in after it
-  deploys. **When all four are met, D4 reverses** — ask before adding a fifth.
+  deploys. **All four met, so D4's trigger has fired** — launching is the maintainer's call.
 
 - **Q5 — Is our "3.5" the same 3.5 anyone else means?** *Open for the existing
   data; **dissolved for everything after ADR 0015**.* `fetch-upstream.sh` pins a
@@ -539,7 +540,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-24 | forty-first | Q6 written: the maintainer agreed the three "seen, not agreed" items. **Sign-in now returns the reader to their page** — `?then=` held in the session across Google, one open-redirect check shared with the dev sign-in; untried against Google until deployed. **A choice line is named by its prices**, which are facts already. Three of four met. 464 backend tests |
+| 2026-09-24 | forty-first | Q6 written: the maintainer agreed the three "seen, not agreed" items. **Sign-in now returns the reader to their page** — `?then=` held in the session across Google, one open-redirect check shared with the dev sign-in; untried against Google until deployed. **A choice line is named by its prices**, which are facts already. **A shadow price rendered at last** — 90.00, driven, no reading needed. All four met. 464 backend tests |
 | 2026-09-24 | fortieth | **N41 closed**, with Lucia: Inverse Crown in Karenina's place (not owned). Sequence 9 put her and Selena on the ladder, +129 facts. Then the maintainer named the patch: today's readings were **4.8.0 "Anchored in Faith"**, live since that morning's maintenance, where sequences 8 and 9 said 4.7.0 — sequence 10 relabels, no fact changes. A test went red with sequence 9 unnoticed; run the full build. Both in both databases. 452 tests |
 | 2026-09-24 | thirty-ninth | N41's question answered first-hand: every S-rank construct shares Lacrimosa's EXP, Promote and skill costs. So the bundle writes that path **once** (`ladders`, ADR 0031) and expands it per construct in the parser; Lacrimosa's 57 rows became 30 entries and diff against sequence 7 as *no changes*, same provenance per fact. Then her four skill pages showed **eight** levelled skills where the bundle had seven, one of them a name on no page. Sequence 8 published locally and to Neon, −4/+8, each read back as *no changes*. 452 backend tests |
 | 2026-09-24 | thirty-eighth | B5 started, and **the backend went live** on Render and Neon with PGR sequence 7 published. The maintainer settled both decisions — one origin, and their own keep-alive bot for the sleeping free tier. **The image built and ran end to end for the first time**: 15 migrations on an empty Postgres, and PGR sequence 7 published into it from the same image's CLI. The "slow download" was a 500 MB build context with no `.dockerignore`. Running it as Render will found two bugs, each pinned by a test that failed first: `/actuator/health` 503 on an unused Redis, and an OAuth redirect URI of `http://<render-host>` behind the proxy. Then a third, in the page: the PWA worker answered sign-in navigations from its cache. Then **the first real OAuth exchange**, a sign-out production never had, and a `deploy` job whose first run on `main` went green — **B5 closed, Phase 0 ticked**. The dev sign-in kept (ADR 0030). 441 backend tests, 33 frontend |
