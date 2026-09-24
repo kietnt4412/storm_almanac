@@ -131,7 +131,15 @@
     "Signature Move (Allegory of the Wondrous Night) and the QTE (Fluid",
     "Emotions) are added. A plan to every skill cap costs one skill more than",
     "it did. The ladder itself moved nothing: written on its own, it diffed",
-    "against sequence 7 as no changes."
+    "against sequence 7 as no changes.",
+    "",
+    "Sequence 9 puts Selena: Pianissimo on the S-rank ladder: one climber,",
+    "her shard, and her shard's two Phantom Pain shop rows. Every number is",
+    "the ladder's, and what is hers is words, read off her skill pages and",
+    "her shard's card on 2026-09-24. The two rows ADR 0031 held back for",
+    "confirmation per climber, Evolve and the SS passive's unlock, the",
+    "maintainer confirmed for her. She had been an entity since sequence 0,",
+    "as the target of the Arrival Construct pool, with nothing to climb."
   ],
 
   "game": {
@@ -140,7 +148,7 @@
     "energyUnit": "Serum",
     "dayBoundary": { "zone": "UTC", "hour": 5 }
   },
-  "sequence": 8,
+  "sequence": 9,
   "label": "Steering By Light",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client, patch \"Steering By Light\", on 2026-09-18. Numbers and text only; no game assets.",
 
@@ -198,6 +206,12 @@
       "origin": "OBSERVED_IN_GAME",
       "detail": "Helentine: Lacrimosa's four skill pages, read whole: Basic Skill — Delusional Spin [Red Orb] at Lv 18 with 'Max Level Reached', Withering Spiral [Yellow Orb], Blight Excision [Blue Orb], Link Dissolution [Basic Attack]; Special Skill — Seeker System [Core Passive], Allegory of the Wondrous Night [Signature Move] and Fluid Emotions [QTE], each at Lv 1 with Consume 1 Skill Point + 2 000 Cogs; Common Effect — Leader - Fading Fern [Leader Skill] with Unlock 3 Skill Points + 25 000 Cogs, Amplifier at Lv 1, and Ultima Awaken, 'Awaken Lacrimosa's Ultima Rank', with no Skill Point or Cog cost; Evolution Effect — Vestige [SS Rank Passive Skill] at Lv 2, 'Max Level Reached', Styx Reflection [SSS Rank Passive Skill], 'Unlocked at SS3 Rank', and Mourning Heteronomy [SSS+ Rank Passive Skill], 'Unlocked at SSS3 / SSS6 / SSS+ Rank', both with their Unlock buttons greyed. Thirteen skills, eight on the level curve; the Yellow Orb's and the class skill's names were read by the maintainer on tapping them and reported in the same session. The curve beyond 1 -> 2 is the 2026-09-19 reading under 'character-screens' — the 1 -> 18 prompt at 44 Skill Points and 206 000 Cogs — and that the Signature Move and the QTE share it is the maintainer's report, as for the other six. This sitting removed 'Astral Armament', a name recorded on 2026-09-19 that is on none of the four pages; the maintainer reports it belongs to another construct, none of the three in this bundle. Screenshots taken by the maintainer on 2026-09-24 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch \"Steering By Light\".",
       "observedOn": "2026-09-24"
+    },
+    {
+      "id": "selena-pianissimo-screens",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "Selena: Pianissimo's skill pages, each at 'Max Level Reached': Flaming Chord [Red Orb], Thunderous Transposition [Yellow Orb], Rhythmic Piercing [Blue Orb] and Reverberating Legato [Basic Attack], each at Lv 18; Classical Romanticism [Core Passive] at Lv 24, shown as 18 (+6), Fugal Sonata [Signature Move] and Resplendent Symphony [QTE] at Lv 18; Attacker [Class Skill] at Lv 18; and Rainbow-Hued Melody [SS Rank Passive Skill] at Lv 2, its Lv 1 'Unlocked at S5 Rank' and its Lv 2 'Unlocked at SS Rank', the same shape as Lacrimosa's Vestige. Eight skills on the level curve, in the same slots as Lacrimosa's eight. The Core Passive's +6 is a bonus from an equipped Memory's Resonance (maintainer), not a level the curve prices, and is not modelled. Also the Inver-Shard - Pianissimo item card, 'Owned 2'; its five stars were read on its Phantom Pain shop tile (maintainer). That she climbs the S-rank ladder — the same EXP per level, Cogs per Promote step and Skill Points and Cogs per skill level as Lacrimosa — is the maintainer's comparison of her Level Up, Promote and Skill screens with Lacrimosa's on 2026-09-24 (ADR 0031). The two rows that comparison did not cover were confirmed by the maintainer in a later sitting the same day: Evolve S -> SS costs 30 Inver-Shard - Pianissimo, and the SS passive's Unlock costs 2 Skill Points + 20 000 Cogs, both as for Lacrimosa; and her shard's Phantom Pain shop tile sells 30 ever, 10 at 10 Scars then 20 at 20, which the maintainer reports holds for every S-rank construct. Screenshots taken by the maintainer on 2026-09-24 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch \"Steering By Light\".",
+      "observedOn": "2026-09-24"
     }
   ],
   "sourcedBy": "weapon-upgrade-screens",
@@ -232,6 +246,9 @@
     "shop:simulation-shop-overclock-material-box-alpha": "equipment-and-resource-screens",
     "craft:open-overclock-material-box-alpha": "equipment-and-resource-screens",
     "item:inver-shard-lacrimosa": "character-screens",
+    "item:inver-shard-pianissimo": "selena-pianissimo-screens",
+    "shop:phantom-pain-shop-inver-shard-pianissimo-discounted": "selena-pianissimo-screens",
+    "shop:phantom-pain-shop-inver-shard-pianissimo": "selena-pianissimo-screens",
     "item:phantom-pain-scar": "character-screens",
     "item:memory-enhancer-iv": "character-screens",
     "fodder:memory-exp-4-star": "character-screens",
@@ -340,6 +357,13 @@
       "_comment": "Five stars from its Phantom Pain shop tile; the item card shows none. Its card says Construct Memory recycles into Inver-Shards, which is the duplicate route.",
       "id": "inver-shard-lacrimosa",
       "displayName": "Inver-Shard - Lacrimosa",
+      "rarity": { "label": "5*", "rank": 5 },
+      "category": "construct-shard"
+    },
+    {
+      "_comment": "Named on its own item card, which shows no grade; five stars from its Phantom Pain shop tile (maintainer), as for Lacrimosa's. Its card says Construct Memory recycles into Inver-Shards, which is the duplicate route.",
+      "id": "inver-shard-pianissimo",
+      "displayName": "Inver-Shard - Pianissimo",
       "rarity": { "label": "5*", "rank": 5 },
       "category": "construct-shard"
     },
@@ -723,6 +747,23 @@
       "offer": { "item": "inver-shard-lacrimosa", "quantity": 1 },
       "periodLimit": 20,
       "period": "never"
+    },
+    {
+      "_comment": "Selena: Pianissimo's shard tile in the same shop: 30 ever, the first 10 at 10 Phantom Pain Scar and the next 20 at 20, the same split as Lacrimosa's. The maintainer's report of 2026-09-24 that every S-rank construct's tile is priced this way; the tile itself was read for its five-star grade.",
+      "id": "phantom-pain-shop-inver-shard-pianissimo-discounted",
+      "currency": "phantom-pain-scar",
+      "price": 10,
+      "offer": { "item": "inver-shard-pianissimo", "quantity": 1 },
+      "periodLimit": 10,
+      "period": "never"
+    },
+    {
+      "id": "phantom-pain-shop-inver-shard-pianissimo",
+      "currency": "phantom-pain-scar",
+      "price": 20,
+      "offer": { "item": "inver-shard-pianissimo", "quantity": 1 },
+      "periodLimit": 20,
+      "period": "never"
     }
   ],
   "rewards": [
@@ -1084,7 +1125,11 @@
             "Evolve S -> SS: 30 Inver-Shard - Lacrimosa in total (maintainer); one",
             "node inside it was read at 'Consume 2 / 9'. One row, because the nodes",
             "between are unread. Shards come from duplicates and from the Phantom",
-            "Pain shop, whose two rows (sequence 2) sell exactly these 30, ever."
+            "Pain shop, whose two rows (sequence 2) sell exactly these 30, ever.",
+            "",
+            "ADR 0031 held this row to be confirmed per climber, because the",
+            "comparison that put constructs on the ladder did not cover Evolve.",
+            "Selena: Pianissimo's 30 was confirmed by the maintainer on 2026-09-24."
           ],
           "id": "evolve-ss",
           "fromState": "evolve-s",
@@ -1160,7 +1205,7 @@
           ]
         },
         {
-          "_comment": "Vestige [SS Rank Passive Skill], Evolution Effect page: Unlock costs 2 Skill Points + 20 000 Cogs, read on its button. Its Lv 1 is 'Unlocked at S5 Rank' and its Lv 2 'at SS Rank' — gates on Evolve, which Upgrade cannot express, and the maintainer cannot reach them to read what follows the unlock.",
+          "_comment": "Vestige [SS Rank Passive Skill], Evolution Effect page: Unlock costs 2 Skill Points + 20 000 Cogs, read on its button. Its Lv 1 is 'Unlocked at S5 Rank' and its Lv 2 'at SS Rank' — gates on Evolve, which Upgrade cannot express, and the maintainer cannot reach them to read what follows the unlock. The same price for Selena: Pianissimo's Rainbow-Hued Melody is the maintainer's confirmation of 2026-09-24; hers was already unlocked, so no button showed it.",
           "id": "{ss-passive}-unlock",
           "fromState": "{ss-passive}-locked",
           "toState": "{ss-passive}-1",
@@ -1182,6 +1227,24 @@
               "allegory-of-the-wondrous-night",
               "fluid-emotions",
               "amplifier"
+            ]
+          }
+        },
+        {
+          "entity": "selena-pianissimo",
+          "sourcedBy": "selena-pianissimo-screens",
+          "with": {
+            "shard": "inver-shard-pianissimo",
+            "ss-passive": "rainbow-hued-melody",
+            "skill": [
+              "flaming-chord",
+              "thunderous-transposition",
+              "rhythmic-piercing",
+              "reverberating-legato",
+              "classical-romanticism",
+              "fugal-sonata",
+              "resplendent-symphony",
+              "attacker"
             ]
           }
         }
