@@ -39,3 +39,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0028](0028-a-name-for-a-progress-kind-is-the-bundles-word-not-the-games.md) | A name for a progress kind is the bundle's word, not the game's | Accepted |
 | [0029](0029-income-is-what-the-bundle-declares-not-a-rate-per-day.md) | Income is what the bundle declares, not a rate per day | Accepted |
 | [0030](0030-the-development-sign-in-stays-because-the-hands-that-need-it-cannot-sign-in.md) | The development sign-in stays, because the hands that need it cannot sign in | Accepted |
+| [0031](0031-a-shared-upgrade-path-is-written-once-and-expanded-in-the-file.md) | A shared upgrade path is written once, and expanded in the file | Accepted |

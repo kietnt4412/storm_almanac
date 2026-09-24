@@ -12,6 +12,7 @@ import io.stormalmanac.gamedata.Availability;
 import io.stormalmanac.gamedata.Craft;
 import io.stormalmanac.gamedata.DayBoundary;
 import io.stormalmanac.gamedata.Drop;
+import io.stormalmanac.gamedata.FactRef;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Game;
 import io.stormalmanac.gamedata.Item;
@@ -115,6 +116,20 @@ public final class CanonicalBundleParser {
 
         List<Sink> sinks = new ArrayList<>();
         sinks.addAll(each(root, "upgrades", CanonicalBundleParser::upgrade));
+        Map<String, String> factProvenance = new LinkedHashMap<>(factProvenance(root));
+        for (UpgradeLadders.Row laddered : UpgradeLadders.expand(root)) {
+            Upgrade upgrade = laddered(laddered);
+            sinks.add(upgrade);
+            if (laddered.sourcedBy() == null) continue;
+            // Said in one place or not at all: a ladder that sources a row and a
+            // factProvenance entry that sources it again can only agree by luck,
+            // and the one that loses is the one somebody believes.
+            String ref = FactRef.of(upgrade);
+            if (factProvenance.putIfAbsent(ref, laddered.sourcedBy()) != null) {
+                throw new BundleFormatException("factProvenance names '" + ref + "', which "
+                        + laddered.at() + " already sources; say it on the ladder or here, not both");
+            }
+        }
         sinks.addAll(each(root, "fodder", CanonicalBundleParser::fodder));
 
         return new GameDataBundle(
@@ -128,7 +143,7 @@ public final class CanonicalBundleParser {
                 text(root, "attribution", "attribution"),
                 each(root, "provenance", CanonicalBundleParser::provenance),
                 textOrEmpty(root, "sourcedBy"),
-                factProvenance(root),
+                factProvenance,
                 each(root, "items", CanonicalBundleParser::item),
                 sources,
                 sinks,
@@ -368,6 +383,17 @@ public final class CanonicalBundleParser {
                 each(node, "progress", (p, pAt) -> new Progress(
                         text(p, "kind", pAt + ".kind"),
                         (int) integer(p, "quantity", pAt + ".quantity")), at));
+    }
+
+    /** A row a ladder expanded, parsed exactly as a hand-written one and failing with its origin. */
+    private static Upgrade laddered(UpgradeLadders.Row laddered) {
+        try {
+            return upgrade(laddered.row(), laddered.at());
+        } catch (BundleFormatException e) {
+            throw e;
+        } catch (IllegalArgumentException e) {
+            throw new BundleFormatException(laddered.at() + ": " + e.getMessage(), e);
+        }
     }
 
     /**

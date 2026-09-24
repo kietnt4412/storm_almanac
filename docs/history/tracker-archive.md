@@ -2971,6 +2971,8 @@ than a wiki.
 
 ## Session index rows collapsed on 2026-09-24
 
+*The two thirty-fourth rows joined these later the same day, in the thirty-ninth session, when adding its row took the tracker to 551.*
+
 The tracker reached **561 lines** in the thirty-eighth session, eleven over its
 limit, before that session's own row was added. Its rule says rewrite a section
 rather than shave one, so the session index was rewritten a second time: every
@@ -2981,6 +2983,8 @@ has its full entry under [Session log](#session-log).
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-21 | thirty-fourth (cont.) | N34 closed: a roster entry holds a set of states (ADR 0027, `V13`). A reader at `promote-6` who says they are also at `level-80` pays 127 500 Cogs and **no EXP** where they were charged 90 000 over six steps. The merge unit stays the entity. **The frontend shipped wrong twice with 16 green tests each time** — a `select multiple` nobody could use, then chips styled as buttons the maintainer looked straight at and did not see. Two live claims died: a `progress:` line *has* rendered (as a bare slug), and PGR *has* been rendered, so N35 was rescoped rather than ticked |
+| 2026-09-21 | thirty-fourth | B6 closed the day after it was written: CI triggers on a push to `dev`, proven by a run on `cfa6fe4` with no PR open. The session-start check found the trap live — the previous session's own commit had sat on `dev` unbuilt. The concurrency group stays keyed by ref *on purpose*: deduping push and PR would let a push cancel the check the PR needs green. Deploy must be gated to `main` when B5 turns it on |
 | 2026-09-21 | thirty-third (cont.) | PR #33 opened and green. The deferred-defect list audited into *Next actions* as **B6, N34, N35, N36** — every one was already described somewhere in this file and none was an action anybody could pick up. One archived qualification found stale: a lifetime purchase limit has been expressible since ADR 0020 |
 | 2026-09-21 | thirty-third (cont.) | The roster flaw N33 widened, half closed the same day (ADR 0026): a crossed gate is a reached state, so `achieved` credits the `requires` of every upgrade behind the player. A reader at Promote 6 pays 90 Serum for step 7 where they were billed 180. No migration, no wire change — the other half, a reader *behind* the gate, still wants a set of states on `Roster` |
 | 2026-09-21 | thirty-third | N33 closed: the level ladder is priced end to end and all thirteen Promote gates are `requires`. Twenty-two Level Up previews on a Lv 1 construct, nothing spent and nobody levelled; thirteen cumulative figures, each pinned by the selection 1 000 below it falling short. The track became a chain because spokes from `level-1` would double-charge. Sequence 6 published 2026-09-21T02:49:27Z and read back as *no changes*; 411 tests, 0 skipped |
@@ -3011,6 +3015,84 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-24 (thirty-ninth) — N41's open question answered by the maintainer,
+and the answer turned into a ladder rather than 114 pasted rows.**
+
+**The question N41 was scoped to measure** — whether a second construct shares
+Lacrimosa's level, Promote and skill costs — **was answered in chat before a
+screen was transcribed.** The maintainer reports every S-rank construct pays the
+same EXP, Cogs and Skill Points. Asked how that was read (the standing memory
+note about relayed answers), they said: **opened Selena: Pianissimo's and
+Karenina: Effulgence's screens and compared them with Lacrimosa's**, plus
+levelling many constructs over a long time. First-hand, and recorded as such.
+The level curve had already been cross-checked on Luna: Oblivion (2026-09-21).
+
+**The maintainer asked whether dividing the data per construct was wise.** The
+answer split in two, and the split is ADR 0031. **The model keeps one row per
+construct:** goals, roster states (ADR 0027) and the solver are all per
+entity, and Evolve spends each construct's own shard. **The file stops copying
+it:** `ladders` writes an upgrade path once. Per-construct words are
+`{placeholders}` bound by each climber, and a list such as seven skill names is
+walked by an `each` group. `UpgradeLadders` expands the ladder into ordinary
+JSON rows before the existing `upgrade` parser sees them, so nothing downstream
+changed.
+
+**Provenance was the part with a real choice in it.** Each expanded row still
+gets its own `factProvenance` entry. The narrowest statement wins: climber, then
+row, then group, then ladder, then default. A `factProvenance` entry that *also*
+names a laddered row is refused rather than ordered. The climber wins because
+its claim is different: a row says where the numbers were read, and a climber
+says those numbers are *this construct's too*.
+
+**Lacrimosa converted, and proven not to move.** A one-off script rewrote her
+57 rows as 30 ladder entries: 13 Promote, 13 level links (each
+`sourcedBy: level-bracket-screens`), Evolve with `{shard}`, the leader unlock,
+one four-row skill group, and `{ss-passive}-unlock`. It also dropped her 57
+`factProvenance` lines. A throwaway test parsed the published sequence-7 file
+and the laddered one. `VersionDiff` reported **no changes**, the sink sets were
+equal, and all **117 facts had identical provenance**. The test was deleted
+after the run. The file still says sequence 7, because its content is sequence 7.
+
+**One bug, caught by the first test run:** the first expansion flattened a
+group into independent rows, so the output order was `slash-2, parry-2, slash-3,
+parry-3` rather than one skill's rows together. The diff compares as sets, so it
+would not have noticed. The test that asserts order did.
+
+**Then asking for the skill names found that Lacrimosa's own list was
+wrong.** The maintainer said there are 13 skills, not 7. They confirmed Evolve
+at 30 shards and the SS passive at 2 SP + 20 000 for all S-rank, and sent all
+four skill pages (Basic, Special, Common Effect, Evolution Effect). There are
+**eight skills on the level curve**, not seven. The **Signature Move** (Allegory
+of the Wondrous Night) and the **QTE** (Fluid Emotions) had never been
+recorded, and **"Astral Armament", recorded on 2026-09-19 as her Core Passive,
+is on no page**: the Core Passive reads Seeker System. The maintainer then
+identified it as **another construct's skill**, read off the wrong screen on
+2026-09-19. The lesson for readings: a skill screen doesn't say whose it is
+unless the name is in the text, so a transcription can't catch a screenshot
+from the wrong character. The other five are the
+leader unlock, the SS passive unlock, Ultima Awaken (no SP or Cog cost), and
+the SSS and SSS+ passives (gated on Evolve ranks the bundle does not model,
+prices hidden). The maintainer's first reaction, "why am I five short, did I
+duplicate something", was the right instinct pointed at the wrong list: the
+duplicate was ours.
+
+**Sequence 8 written, and the ladder earned its keep on its first day.** The
+fix was one edit to the climber's `skill` list, plus a `skill-pages` provenance
+entry for the group, now dated 2026-09-24. `preview` against the local volume
+showed −4 Astral Armament rows and +8 for the Signature Move and QTE, nothing
+else: 121 facts over nine provenance entries. The research note got a dated
+correction appended rather than its 2026-09-19 text rewritten. **Not
+published**, because publishing is the maintainer's approval. No local goal
+or roster entry names an Astral Armament state; production was not checked.
+
+**What N41 still needs is words, not numbers.** For each construct: eight
+levelled skill names, the SS passive's name, and the Evolve shard item.
+
+452 backend tests (441 + 11 in `UpgradeLaddersTest`), 0 skipped locally, 0
+failed. Docker Desktop had to be started first (E4). Nothing committed or
+pushed in this session unless the maintainer asks. The remote was not
+re-checked.
 
 **2026-09-24 (thirty-eighth) — B5 started: the image runs, and running it the
 way Render will found two bugs no test could.**

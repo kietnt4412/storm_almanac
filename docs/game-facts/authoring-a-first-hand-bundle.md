@@ -101,6 +101,41 @@ Suggested first pass, and it is deliberately small:
   the game grades `Common` and which `Possible`,
 - one character: rarity, element, and the material lines for Insight 1.
 
+## When several characters climb the same ladder
+
+Write the ladder once, under `ladders`, and list who climbs it
+([ADR 0031](../adr/0031-a-shared-upgrade-path-is-written-once-and-expanded-in-the-file.md)).
+Anything that differs per character is a `{placeholder}`, and each climber binds
+it:
+
+```json
+"ladders": [ {
+  "id": "s-rank-construct",
+  "sourcedBy": "character-screens",
+  "upgrades": [
+    { "id": "evolve-ss", "fromState": "evolve-s", "toState": "evolve-ss",
+      "costs": [ { "item": "{shard}", "quantity": 30 } ] },
+    { "each": "skill", "upgrades": [
+      { "id": "{skill}-2", "fromState": "{skill}-1", "toState": "{skill}-2",
+        "costs": [ { "item": "skill-point", "quantity": 1 }, { "item": "cogs", "quantity": 2000 } ] }
+    ] }
+  ],
+  "appliesTo": [
+    { "entity": "helentine-lacrimosa",
+      "with": { "shard": "inver-shard-lacrimosa", "skill": ["delusional-spin", "seeker-system"] } },
+    { "entity": "selena-pianissimo", "sourcedBy": "the-sitting-that-compared-her",
+      "with": { "shard": "...", "skill": ["...", "..."] } }
+  ]
+} ]
+```
+
+The parser turns this into ordinary rows (`selena-pianissimo-evolve-ss`, …)
+before it checks anything else, so nothing else changes. **A climber's
+`sourcedBy` is the first-hand claim that the numbers are that character's
+too.** Give each one its own provenance entry, saying how the comparison was
+made. If one row differs for one character, move that row out of the ladder and
+into `upgrades` for that character. There is deliberately no "except".
+
 ## The two things that will be tempting and are not allowed
 
 **Do not open Kornblume "just to check a number".** The adapter is kept as a
