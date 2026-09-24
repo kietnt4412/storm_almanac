@@ -22,6 +22,19 @@ export default defineConfig({
         theme_color: '#0D6F68',
       },
       workbox: {
+        // A navigation to a path the server answers must reach the server.
+        //
+        // The generated worker answers every navigation with the cached
+        // index.html, which is right for the app's own routes and wrong for
+        // these: signing in *is* a navigation, to /oauth2/authorization/google
+        // and back from the provider to /login/oauth2/code/google. Answered from
+        // the cache, a returning reader's sign-in renders the app shell instead
+        // of reaching Spring, and fails without an error anywhere — the first
+        // visit works, because no worker is in control yet. Invisible until B5,
+        // because sign-in had only ever run on the dev server, which registers
+        // no worker at all. /api and /dev are here for the same reason: a
+        // reader opening a route in the address bar gets the route.
+        navigateFallbackDenylist: [/^\/api\//, /^\/oauth2\//, /^\/login\//, /^\/dev\//],
         // Published game data is cached; anything player-specific is not.
         //
         // Two things were wrong with this rule until the screens that depend on
