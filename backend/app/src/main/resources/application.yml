@@ -95,6 +95,16 @@ server:
   # can claim a forwarded client address, so **the remote address is not an
   # identity** — Phase 6's abuse controls must not rate-limit on it as if it were.
   forward-headers-strategy: framework
+  # Measured against the deployment on 2026-09-24: Vercel's rewrite forwards
+  # the proto and not the host, so this application still believes it is on
+  # Render's. Two consequences, two fixes. The OAuth redirect URI is pinned on
+  # Render (SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI). And
+  # every redirect it issues is relative — Boot's default builds an absolute
+  # one on the believed host, so a reader who had just signed in was sent to
+  # Render, where there is no page and none of their cookies. A relative
+  # Location resolves against wherever the reader actually is.
+  tomcat:
+    use-relative-redirects: true
 
 logging:
   level:

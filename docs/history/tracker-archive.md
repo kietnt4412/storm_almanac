@@ -3077,7 +3077,49 @@ control, `/plan` got the app shell and `/dev/sign-in` reached the preview's
 proxy (logged `ECONNREFUSED`, no backend running). The failing half was read
 off the old `sw.js` rather than reproduced in the browser. 31 frontend tests.
 
-**Now with the maintainer:** the Vercel project, the Google client. Then a session writes `vercel.json` against the
+**The page went live at `https://storm-almanac.vercel.app`** after PR #40 merged
+(03:01Z, every run green first). Through Vercel: `/` and `/plan` the app,
+`/api/games` sequence 7, `/api/me` and `/oauth2/authorization/google` 401 from
+Spring — not the app shell, so the OAuth rewrite reaches Render — and
+`/actuator/health` and `/dev/sign-in` the app shell, by design. The CSRF cookie
+came back `Secure` through Vercel, so **the proto arrives**.
+
+**The host does not, and that was the one thing `ForwardedOriginTest` said it
+could not prove.** With the Google client registered, the authorization
+redirect through Vercel named `redirect_uri=https://storm-almanac.onrender.com/…`
+— the same as calling Render directly. Three hand-set requests to Render
+(`X-Forwarded-Host`, with and without the proto, and RFC 7239 `Forwarded`) each
+came back naming the host sent, so **Render passes the headers through and
+Spring honours them; Vercel's external rewrite does not send the original
+host.** The config from PR #39 was right and the assumption about Vercel was
+not. Nobody signed in before this was found.
+
+**Two fixes, because it breaks two things.** The redirect URI sent to Google is
+pinned as a Render environment variable
+(`SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_REDIRECT_URI`). Pinning is
+safe because Spring Security 6.5.5's `OAuth2AuthorizationCodeAuthenticationProvider`
+compares only `state` on the way back — read off its bytecode, where the one
+`String.equals` feeds `invalid_state_parameter` — and the token exchange reuses
+the stored URI. **The second break the pin does not reach:** the success
+handler's `sendRedirect("/")` is made absolute by Boot on the host the
+application believes it is on, so a reader who had just signed in would land
+on Render with no page and none of their cookies. `server.tomcat.use-relative-redirects:
+true`. A probe in `ForwardedOriginTest` redirects exactly as the success handler
+does; with Render's headers it failed as `https://localhost/` with the setting
+off and passed with it on. **Side effect, recorded in the test:** with forwarded
+headers present, Spring's relative redirect answers 303 rather than 302 —
+harmless, every redirect in these flows is a GET.
+
+**A trap found on the way:** `StormAlmanacApplication` declares
+`@ComponentScan("io.stormalmanac")`, whose scan does not apply Boot's filter
+that keeps test classes out. The probe's first version, a `@RestController`
+nested in a `@TestConfiguration`, registered twice. **Anything stereotyped in
+the test sources is in every test context**; the probe is now a plain class
+arriving by `@Import`. Also on the way: the Docker engine died mid-session, and
+E4's recipe brought it back in six seconds.
+
+**Now with the maintainer:** the Render redirect-URI variable, then the first
+real sign-in. Then a session writes `vercel.json` against the
 real Render URL, gates `deploy` to `main`, and runs the first exchange.
 
 **2026-09-22 (thirty-seventh) — one bundle sequence, two decisions that share

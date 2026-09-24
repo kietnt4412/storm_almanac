@@ -68,15 +68,15 @@ being finished with is.
   **gacha rates *are* disclosed**, and the grade is itself a free first-hand fact for all 595 pairs, with nowhere to
   live until Phase 6 ([the note](docs/game-facts/reverse-1999-drop-disclosure.md)).
 - **Phases 0–3 and 5 are closed; Phase 4 is open; Track B is gated.** Phase 0 closed *by exception*, box unticked until the pipeline deploys; Phase 5 closed **out of order on purpose** ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)) and **nothing calls either gacha engine**. [The board](#track-a--product).
-- **The backend is deployed and the page is not** ([D1 reversed](#d1--deployment-deferred-2026-09-02)) — since
-  2026-09-24 `https://storm-almanac.onrender.com` serves PGR sequence 7 from Neon; Vercel is next. Free tier, still no
+- **Deployed since 2026-09-24, and nobody has signed in yet** ([D1 reversed](#d1--deployment-deferred-2026-09-02)) —
+  `https://storm-almanac.vercel.app` rewrites to Render, which serves PGR sequence 7 from Neon. Free tier, still no
   money. **Phase 0's box stays unticked** — a URL answers 200, but Render deploys it and the pipeline's `deploy` job is
   still `if: false`. The rest of the wiring is **B5**, the only thing that can unblock a real OAuth exchange.
   **`backend/Dockerfile`'s COPY list is B5's path and drifts in silence** — it omitted `adapters/` from Phase 1
   until 2026-09-09, every image build failing in six seconds while this file called it verified, so **anything added
   beside `modules`, `adapters`, `substrate`, `app` needs a line there**.
 - **The remote, last checked 2026-09-24 (thirty-eighth) — re-check it, do not trust it.**
-  **[PR #39](https://github.com/kietnt4412/storm_almanac/pull/39) is MERGED** (02:39Z, all runs green first);
+  **[PR #40](https://github.com/kietnt4412/storm_almanac/pull/40) is MERGED** (03:01Z, all runs green first);
   at session start this file named #37 while #38 had merged — **stale on five consecutive checks**, never once
   right, so re-check rather than read.
   B6 means a commit on `dev` with no PR open is still built.
@@ -165,7 +165,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 
 | Area | State | The one thing to know |
 |------|-------|-----------------------|
-| Backend build | **Green** | **438 tests** in full 2026-09-24, 0 skipped locally with the 2026-09-22 snapshots present; the last *measured* gated run is still [the dated one](docs/benchmarks/snapshot-gated-runs.md) of 2026-09-22 — nothing in this session touched the model; **422 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares **two** directories outside every source set as inputs — `data/bundles`, without which `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed, and `build/upstream-snapshots`, without which fetching upstream left the task `UP-TO-DATE` (N36). **The second was the identical bug ten lines below the first's fix.** `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
+| Backend build | **Green** | **439 tests** in full 2026-09-24, 0 skipped locally with the 2026-09-22 snapshots present; the last *measured* gated run is still [the dated one](docs/benchmarks/snapshot-gated-runs.md) of 2026-09-22 — nothing in this session touched the model; **423 expected on CI**, where those 16 skip. `:app:test` depends on `:app:bootJar`, and declares **two** directories outside every source set as inputs — `data/bundles`, without which `AuthoredBundlesTest` came back `FROM-CACHE` after a bundle changed, and `build/upstream-snapshots`, without which fetching upstream left the task `UP-TO-DATE` (N36). **The second was the identical bug ten lines below the first's fix.** `api.version=1.44` — [E2](#environment-notes-this-machine-only) |
 | Authored game data | **One bundle, sequence 7 published, first-hand** | **Sequence 7 added one item and one provenance entry** — the Event Construct R&D Ticket, **5★ off a tile on 2026-09-22**, which is the fourth currency graded that way where its own item card grades nothing. It carries the banner's pull price (250, credited to the 2026-09-18 pool-screen sitting) and the three EXP pool names, which are **not facts and declare no provenance** (ADR 0028) and so show in the diff as three `progress '<kind>'` subjects and in no provenance count. **117 facts over eight provenance entries.** Helentine: Lacrimosa (level to 80 as a **thirteen-link chain, every gated level priced**, 13-step Promote **all gated**, 7 skills to 18, Evolve to SS), Hear the Bell, Samantha (Overclock, Upper Resonance at three prices), one stage, 11 shop rows, 2 box crafts, 5 fodder rules, the weekly Phantom Pain Cage's nine tiers, and the game's **05:00 UTC** day boundary — which is a game-level field and so adds no fact, exactly why `Facts` had to learn to flatten `Game` (ADR 0025). **What each sequence added and when it published is [in the archive](docs/history/tracker-archive.md#session-log)**; every one read back as *no changes*. Three Cage tiers are **written short** — a gold 5★ card, a 4★ chip and a portrait item were never opened, so those grants are absent, which makes plans dearer and never cheaper. `AuthoredBundlesTest` parses every file in `data/bundles` and fails on any fact the project may not publish, on a provenance mapping naming no fact, and on an **empty** directory. `AuthoredBundlePlanTest` plans from it, so a correction moves a plan: a skill to its cap is **150 Serum**, a Memory's Overclock **420**, her last rank **1 470**, Samantha's Resonance **90**, and Evolve to SS **30 shards from a stock that never resets** (ADR 0020) — or, for a reader who says they clear the whole Cage, **63 days and none at all** (ADR 0022) |
 | CI workflow | **Green, Node 24; triggers on `dev`** | Since B6 (2026-09-21) it runs on push to `main` **and `dev`** as well as `pull_request`, so a push to the working branch with no PR open is built rather than silently ignored. **One annotation, and it is GitHub's rather than ours:** `ubuntu-latest` migrates to Ubuntu 26 from 2026-10-19 — nothing to fix, worth knowing before a green run starts carrying a warning nobody placed. **A push to `dev` while a PR is open from `dev` runs twice, on purpose** — the concurrency group stays keyed by ref, because collapsing push and PR into one group lets `cancel-in-progress` cancel the run the PR needs green. **The `deploy` job is still `if: false` and must be gated to `refs/heads/main` when B5 turns it on**, or it ships every commit landing on `dev`. Last *executed* suite: run `34695206362`, 16 skipped, exactly the three snapshot-gated classes. **`gradle/actions` held at v5** — v6 needs Gradle's Terms of Use accepted, which is the maintainer's call. **Counting PASSED lines in a log undercounts**; read task outcomes |
 | Provenance | **Written, enforced, and read** | [ADR 0016](docs/adr/0016-provenance-is-a-property-of-the-data.md). `V7` stores one row per declared fact; `publish` refuses a version that is not first-hand and **names the facts**. **`ProvenanceRepository` is a second port** — the solver cannot see where a number came from, so it cannot be made to prefer one. Silence is `UNRECORDED`: parses, cannot publish |
@@ -282,22 +282,19 @@ in full on 2026-09-20 — read the plan rather than re-deriving one.
       **Settled by the maintainer:** *one origin*, a Vercel rewrite to Render; *the sleeping
       tier*, their own keep-alive bot, **which must ping `/api/health`** — it touches no
       database; *Postgres on Neon*, because Render's free one expires (direct host, not
-      `-pooler`, Singapore, `?sslmode=require`). **Step 1 is done** (the image, above), with
-      `/actuator/health` no longer waiting on an unused Redis and `X-Forwarded-*` honoured so
-      `{baseUrl}` is the public origin (`ForwardedOriginTest`; *whether the hosts deliver those
-      headers is unmeasured*). **What the plan missed:** the rewrite needs `/api/*`,
-      **`/oauth2/*` and `/login/oauth2/*`**, then an `index.html` fallback for `BrowserRouter`;
-      `DATABASE_URL` is `jdbc:postgresql://…` with user and password apart. **Step 2 is done:**
-      `https://storm-almanac.onrender.com` answers, `/actuator/health` UP through Neon, and
-      **PGR sequence 7 published into Neon 2026-09-24T02:56:41Z** at the maintainer's request,
-      after a preview identical to the local rehearsal. **The PWA would have broken sign-in:**
-      its worker answered *every* navigation with `index.html`, so a returning reader's
-      `/oauth2/…` never reached Spring — now denylisted, proven in a browser on the built
-      bundle. `frontend/vercel.json` carries the three rewrites and the fallback. **Unproven:**
-      Hikari's pool may keep Neon awake — `MINIMUM_IDLE=0`, `IDLE_TIMEOUT=60000`,
-      `KEEPALIVE_TIME=0` are Render env only, to move into `application.yml` once Neon is seen
-      suspended. **Left:** the Vercel project, the Google client, `deploy` gated to `main`, the
-      first exchange. **Ends with `:modules:identity-dev` deleted** (ADR 0017's trigger).
+      `-pooler`, Singapore, `?sslmode=require`). **Live since 2026-09-24:** Render at
+      `storm-almanac.onrender.com`, **PGR sequence 7 published into Neon at 02:56:41Z**, the page
+      at `storm-almanac.vercel.app` rewriting `/api/*`, `/oauth2/*`, `/login/oauth2/*` to Render
+      with an `index.html` fallback. **Found by running it:** `/actuator/health` 503 on an unused
+      Redis; a PWA worker answering sign-in navigations from its cache; and **Vercel forwards the
+      proto but not the host** — measured: Render passes `X-Forwarded-Host` through and Spring
+      honours it, yet through Vercel the redirect URI named Render. So the Google
+      `REDIRECT_URI` is **pinned in Render env**, and every redirect is **relative**
+      (`use-relative-redirects`, or a reader who had just signed in landed on Render). Each
+      has a test that failed first. **Unproven:** Hikari's pool may keep Neon awake —
+      `MINIMUM_IDLE=0`, `IDLE_TIMEOUT=60000`, `KEEPALIVE_TIME=0` are Render env only, to move
+      into `application.yml` once Neon is seen suspended. **Left:** the first real sign-in,
+      `deploy` gated to `main`. **Ends with `:modules:identity-dev` deleted** (ADR 0017's trigger).
 
 ### Held — later phases, not Phase 4's business
 
@@ -539,7 +536,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-24 | thirty-eighth | B5 started, and **the backend went live** on Render and Neon with PGR sequence 7 published. The maintainer settled both decisions — one origin, and their own keep-alive bot for the sleeping free tier. **The image built and ran end to end for the first time**: 15 migrations on an empty Postgres, and PGR sequence 7 published into it from the same image's CLI. The "slow download" was a 500 MB build context with no `.dockerignore`. Running it as Render will found two bugs, each pinned by a test that failed first: `/actuator/health` 503 on an unused Redis, and an OAuth redirect URI of `http://<render-host>` behind the proxy. Then a third, in the page: the PWA worker answered sign-in navigations from its cache. 438 backend tests, 31 frontend |
+| 2026-09-24 | thirty-eighth | B5 started, and **the backend went live** on Render and Neon with PGR sequence 7 published. The maintainer settled both decisions — one origin, and their own keep-alive bot for the sleeping free tier. **The image built and ran end to end for the first time**: 15 migrations on an empty Postgres, and PGR sequence 7 published into it from the same image's CLI. The "slow download" was a 500 MB build context with no `.dockerignore`. Running it as Render will found two bugs, each pinned by a test that failed first: `/actuator/health` 503 on an unused Redis, and an OAuth redirect URI of `http://<render-host>` behind the proxy. Then a third, in the page: the PWA worker answered sign-in navigations from its cache. 439 backend tests, 31 frontend |
 | 2026-09-22 | thirty-seventh | N37 and N28 closed as one sequence 7, published and read back as *no changes*. **The EXP pool names are the bundle's own word, not the game's** — PGR calls all three pools "EXP" (ADR 0028) — and the pull price is 250 tickets, writable at last because the maintainer opened the ticket's tile and it grades 5★, so the format change the research note argued for was never needed (ADR 0029). `IncomeModel` written, and nothing calls it. **Three stale claims fell out of doing the work**, including "no bundle declares a banner at all", which had been false since sequence 0. Whole-graph equality caught an ordering bug the field-by-field assertions missed. 435 tests, 16 gated ones run; p95 1 812 ms and the plan 3 877 Activity, both recorded rather than smoothed |
 | 2026-09-21 | thirty-sixth | N35's two load-bearing halves closed, leaving N37. The plan form asks **how far do you get** and sends `reach`, off a new `/measures` route that collects the ladders ADR 0022 said were declared nowhere; answering nothing is refused *by name*, answering 1 100 000 plans **Evolve to SS in 63 days and 0 Serum** — the first plan a web client has ever asked for that counts a scored grant. The ladder summary computes **56 Scars a week**, agreeing with the figure ADR 0022 states in prose. A roster screen, sharing one state-editing component with Goals. 420 backend tests, frontend 16 → 28. ADR 0022 stands: the maintainer kept `reach` on the request, so its trigger is now a *second device*. **Do not run prettier here** — no config, and it reformatted 456 lines of a 269-line change |
 | 2026-09-21 | thirty-fifth | N36 closed, and it was not the paperwork it was scoped as. Every load-bearing figure held — nine agreements, 3 880 against 4 017, 419 tests and all 16 gated ones run — but **following the documented workflow proved nothing**: the property never reached the test worker and the snapshot directory was not a task input, so a fetch left `:app:test` `UP-TO-DATE`. The second is the identical bug to `data/bundles`, ten lines above its own fix. Both fixed, both proven by measurement; numbers now dated in `docs/benchmarks/snapshot-gated-runs.md` |
