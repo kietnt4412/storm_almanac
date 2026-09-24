@@ -76,7 +76,7 @@ being finished with is.
   until 2026-09-09, every image build failing in six seconds while this file called it verified, so **anything added
   beside `modules`, `adapters`, `substrate`, `app` needs a line there**.
 - **The remote, last checked 2026-09-24 (thirty-eighth) — re-check it, do not trust it.**
-  **[PR #42](https://github.com/kietnt4412/storm_almanac/pull/42) is MERGED** (04:11Z, all runs green first);
+  **[PR #43](https://github.com/kietnt4412/storm_almanac/pull/43) is MERGED** (04:38Z);
   at session start this file named #37 while #38 had merged — **stale on five consecutive checks**, never once
   right, so re-check rather than read. B6 means a commit on `dev` with no PR open is still built.
   **What the trigger does not do is watch the merge** — PR #25 merged *before its own run finished*
@@ -174,7 +174,7 @@ committed wrapper. Remote is HTTPS at `github.com/kietnt4412/storm_almanac`.
 | `gacha` — engines | **Phase 5's criterion, and nothing calls them** | [ADR 0018](docs/adr/0018-the-gacha-engines-answer-one-question-about-one-rarity.md). An exact chain and 500 000 seeded trials sharing one validated `PullModel`, so both refuse the same banners for the same reasons. **53 tests, worst gap 0.110 points over 108 questions, at 2.22 standard errors.** Only the headline rarity is modelled. **Through a drawn guarantee they take different roads on purpose** — the chain integrates it out, the simulation draws it (ADR 0023) — which is what caught the simulation sampling the prior, 0.558 against the chain's right 0.382. **A generated question set is not automatically one that probes the band it generated:** every generic question for a wall of 100 lands below the drawn range or at certainty |
 | `gacha` — income model | **Written, and nothing calls it** | [ADR 0029](docs/adr/0029-income-is-what-the-bundle-declares-not-a-rate-per-day.md), 2026-09-22. `BannerModel.pullPrice` (`V15`, nullable — **unstated is not free**, and `pricedPull()` refuses rather than answering zero) plus `DeclaredIncomeModel`: balance from the inventory, accrual from the `Reward` rows that grant the currency at their own cadence, `reach` applied and every dropped grant **named**. **There is deliberately no pulls-per-day constant** — that number is on no screen. **PGR's bundle declares no reward paying a ticket, so accrual is zero and a test asserts it**: the assertion is a marker for a missing reading, and the reading to take is what the dailies pay in Black Cards. Still no route, no screen, no bean, and `PityState` stored nowhere — N28 closed the model, not the wiring |
 | Frontend | **Six screens, browser-driven, 33 tests** | Inventory editor, goal picker, plan view carrying **every one of the solver's notes**, catalog browse and search, the character page with the **personalized overlay**, and — since 2026-09-21 — a **roster screen**, so a construct with no goal can be recorded at all. The plan form **asks how far the reader gets and sends `reach`**, off `GET /api/games/{game}/measures`, remembered per profile in the store (persist v2) and **not stored server-side** — ADR 0022 stands, and its reversal trigger is now "a second device asks again". Same-origin locally via the Vite proxy. **There is no prettier or eslint config in the repo** and the files are hand-formatted — do not run a formatter here until somebody commits one |
-| The image | **Built end to end 2026-09-24, and run as Render will run it** | ~2 min, 143 MB. Against an **empty** Postgres with **no Redis**: 15 migrations in 0.58 s, started in 8.6 s, `/api/health` 200, `/dev/sign-in` 401. The CLI from the same image `preview` → `ingest` → `publish`ed PGR sequence 7 into it and `/api/games` served it — **a fresh deployed database is empty until somebody does that**. The download that stalled at 10% was the context, not the network: no `.dockerignore`, so ~500 MB (`node_modules`, every `build/`, the snapshots) went up on every build; now a whitelist, 965 kB. **Compose itself was not re-run** |
+| The image | **Starts in ~60 s at 0.1 CPU, since 2026-09-24** | **A deploy failed with no error**: 147 s to start on Render's 0.1 CPU, and Render stopped waiting ~30 s before Tomcat bound its port, keeping the old instance — `deploy` went red, correctly; a manual redeploy landed by luck. Measured at `--cpus 0.1 --memory 512m`: fat jar **175.7 s**, extracted 133.6 s, extracted + **CDS archive 59–65 s**, + C1-only JIT 29.4 s. **The image now extracts the jar and trains a CDS archive at build time under `RUN --network=none`** (Flyway and Hibernate validation off *for that run only*), so the build can never need a database. **C1-only is not taken** — it trades peak speed and the solver has a 2 s budget; measure the solver under it first. **E1 blocks the full image build on this machine** (Gradle-in-Docker meets Avast's TLS); test the runtime stage with `--build-context build=<dir holding src/app/build/libs/storm-almanac.jar>`. A fresh database is empty until somebody publishes into it |
 | Development sign-in | **Done, and absent from the artifact** | [ADR 0017](docs/adr/0017-the-development-sign-in-is-absent-from-the-artifact.md). `:modules:identity-dev` is `testAndDevelopmentOnly`, so **no property or profile can reach it**; `DeployableJarTest` opens the jar and proves the absence on every build. **Do not add a switch that turns it on** |
 
 ### Done and stable
@@ -245,14 +245,6 @@ after N37 and N28's modelling half on 2026-09-22 and N30, N20, N33, B6, N34, N36
 and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 **No Phase 4 item is left; its exit is.**
 
-**Every defect turned into an action on 2026-09-21 is now closed**, and the
-pattern from that batch held into this one: **an entry is wrong until somebody
-runs it.** N28 said "no bundle declares a banner at all" and one had since
-sequence 0; N37 was scoped as one sequence and turned out to be two decisions
-that share a file and nothing else. **Three stale claims were corrected in this
-file and one in the research note as a side effect of doing the work** — which is
-the argument for doing it rather than re-reading it.
-
 ### Before the next sequence — worth knowing
 
 **Production is a second database.** Publishing a sequence now means doing it twice: into the local volume, which `preview` diffs against, and into Neon, which readers see — the same `preview`, `ingest`, `publish` with `DATABASE_URL` pointed at Neon (the 2026-09-24 session log has the exact commands). Neon already holds sequence 7.
@@ -276,6 +268,14 @@ and [Q6](#open-questions) asks what "finished" means.** When it comes: planning 
 `/api/me`, so a stranger must sign in, and **the Google client is in *Testing***, where only
 listed users can — list each stranger or publish the app. Watch each session, answer
 nothing, and record where each one stalls; those notes are what closes the phase.
+
+- [ ] **N41 — Read Selena: Pianissimo and Karenina: Effulgence whole, first-hand** (Q6's
+      first item). Both are entities already, as banner featured units, with **no upgrades** —
+      Lacrimosa carries 57 of the bundle's 63. **The first of them measures what is shared**:
+      level brackets, skill costs and Promote gates may be the same ladder, which would make
+      every later construct cheap; nobody has read a second one to know. **Ask how every
+      value was read** before recording it first-hand (ADR 0015) — a search answer looks
+      identical to a screen reading in chat. Publish into the local volume *and* Neon.
 
 ### Held — later phases, not Phase 4's business
 
@@ -501,10 +501,9 @@ Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 Carry forward until answered, then move the entry [to the archive](docs/history/tracker-archive.md#answered-questions).
 
 - **Q6 — What makes the site finished enough to let strangers in?** *Open, and the maintainer's
-  (D4).* Candidates seen 2026-09-24, not a list anyone has agreed: **one construct is the whole
-  catalog**; a `choice:` line renders raw upgrade ids; **no shadow price has ever rendered**
-  against a real plan; sign-in lands on `/` rather than the page it was started from. Answering
-  this turns D4's trigger from a feeling into a checklist.
+  (D4).* **Agreed 2026-09-24: three constructs with whole ladders** — Lacrimosa, Selena:
+  Pianissimo, Karenina: Effulgence (**N41**). Seen, not agreed: `choice:` lines render raw ids;
+  no shadow price has ever rendered against a real plan; sign-in lands on `/`.
 
 - **Q5 — Is our "3.5" the same 3.5 anyone else means?** *Open for the existing
   data; **dissolved for everything after ADR 0015**.* `fetch-upstream.sh` pins a
