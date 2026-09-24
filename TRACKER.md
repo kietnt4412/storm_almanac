@@ -76,7 +76,7 @@ being finished with is.
   until 2026-09-09, every image build failing in six seconds while this file called it verified, so **anything added
   beside `modules`, `adapters`, `substrate`, `app` needs a line there**.
 - **The remote, last checked 2026-09-24 (thirty-eighth) — re-check it, do not trust it.**
-  **[PR #42](https://github.com/kietnt4412/storm_almanac/pull/42) is MERGED** (04:11Z, all runs green first);
+  **[PR #43](https://github.com/kietnt4412/storm_almanac/pull/43) is MERGED** (04:38Z);
   at session start this file named #37 while #38 had merged — **stale on five consecutive checks**, never once
   right, so re-check rather than read. B6 means a commit on `dev` with no PR open is still built.
   **What the trigger does not do is watch the merge** — PR #25 merged *before its own run finished*
@@ -245,14 +245,6 @@ after N37 and N28's modelling half on 2026-09-22 and N30, N20, N33, B6, N34, N36
 and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 **No Phase 4 item is left; its exit is.**
 
-**Every defect turned into an action on 2026-09-21 is now closed**, and the
-pattern from that batch held into this one: **an entry is wrong until somebody
-runs it.** N28 said "no bundle declares a banner at all" and one had since
-sequence 0; N37 was scoped as one sequence and turned out to be two decisions
-that share a file and nothing else. **Three stale claims were corrected in this
-file and one in the research note as a side effect of doing the work** — which is
-the argument for doing it rather than re-reading it.
-
 ### Before the next sequence — worth knowing
 
 **Production is a second database.** Publishing a sequence now means doing it twice: into the local volume, which `preview` diffs against, and into Neon, which readers see — the same `preview`, `ingest`, `publish` with `DATABASE_URL` pointed at Neon (the 2026-09-24 session log has the exact commands). Neon already holds sequence 7.
@@ -276,6 +268,14 @@ and [Q6](#open-questions) asks what "finished" means.** When it comes: planning 
 `/api/me`, so a stranger must sign in, and **the Google client is in *Testing***, where only
 listed users can — list each stranger or publish the app. Watch each session, answer
 nothing, and record where each one stalls; those notes are what closes the phase.
+
+- [ ] **N41 — Read Selena: Pianissimo and Karenina: Effulgence whole, first-hand** (Q6's
+      first item). Both are entities already, as banner featured units, with **no upgrades** —
+      Lacrimosa carries 57 of the bundle's 63. **The first of them measures what is shared**:
+      level brackets, skill costs and Promote gates may be the same ladder, which would make
+      every later construct cheap; nobody has read a second one to know. **Ask how every
+      value was read** before recording it first-hand (ADR 0015) — a search answer looks
+      identical to a screen reading in chat. Publish into the local volume *and* Neon.
 
 ### Held — later phases, not Phase 4's business
 
@@ -501,10 +501,9 @@ Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 Carry forward until answered, then move the entry [to the archive](docs/history/tracker-archive.md#answered-questions).
 
 - **Q6 — What makes the site finished enough to let strangers in?** *Open, and the maintainer's
-  (D4).* Candidates seen 2026-09-24, not a list anyone has agreed: **one construct is the whole
-  catalog**; a `choice:` line renders raw upgrade ids; **no shadow price has ever rendered**
-  against a real plan; sign-in lands on `/` rather than the page it was started from. Answering
-  this turns D4's trigger from a feeling into a checklist.
+  (D4).* **Agreed 2026-09-24: three constructs with whole ladders** — Lacrimosa, Selena:
+  Pianissimo, Karenina: Effulgence (**N41**). Seen, not agreed: `choice:` lines render raw ids;
+  no shadow price has ever rendered against a real plan; sign-in lands on `/`.
 
 - **Q5 — Is our "3.5" the same 3.5 anyone else means?** *Open for the existing
   data; **dissolved for everything after ADR 0015**.* `fetch-upstream.sh` pins a

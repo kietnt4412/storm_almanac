@@ -3258,6 +3258,24 @@ list rather than a feeling: **Q6** asks what "finished" means, seeded with what
 this session saw. Worth saying plainly because it is easy to miss: the URL is
 public and the catalog reads without an account; only signing in is held back.
 
+**Q6's first item was agreed within the session: three constructs with whole
+ladders** — Lacrimosa, and the two the bundle already names only as banner
+featured units, Selena: Pianissimo and Karenina: Effulgence (**N41**). Three was
+chosen over five or ten because the second construct read is the measurement
+that prices every later one: if the level brackets, skill costs and Promote
+gates turn out to be one shared ladder, constructs are cheap; nobody has read a
+second one to know. Lacrimosa alone is 57 of the bundle's 63 upgrades.
+
+**Moved out of the tracker's *Next actions* on 2026-09-24** to keep it under 550, verbatim — true when written, history now:
+
+> **Every defect turned into an action on 2026-09-21 is now closed**, and the
+> pattern from that batch held into this one: **an entry is wrong until somebody
+> runs it.** N28 said "no bundle declares a banner at all" and one had since
+> sequence 0; N37 was scoped as one sequence and turned out to be two decisions
+> that share a file and nothing else. **Three stale claims were corrected in this
+> file and one in the research note as a side effect of doing the work** — which is
+> the argument for doing it rather than re-reading it.
+
 **The Docker engine died twice in this session**, both times between one test
 run and the next with nothing touching it, and both times Testcontainers
 reported it as "Could not find a valid Docker environment" before a single
