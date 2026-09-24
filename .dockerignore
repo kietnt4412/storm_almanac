@@ -1,0 +1,10 @@
+# The build context is the repository root, because compose builds from there,
+# and backend/Dockerfile only ever COPYs out of backend/. So this is a whitelist:
+# everything is excluded, backend/ is let back in, and its build output is
+# excluded again. Without it every build uploaded ~500 MB — frontend/node_modules,
+# backend/build with its upstream snapshots, and the stale build/ directory of
+# every module, which COPY then carried into the build stage.
+*
+!backend/
+backend/.gradle/
+backend/**/build/

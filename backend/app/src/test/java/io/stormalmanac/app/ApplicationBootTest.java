@@ -43,6 +43,10 @@ class ApplicationBootTest {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
+        // Somewhere nothing listens, rather than the default localhost:6379 — a
+        // developer running compose has a Redis there, and the test below would
+        // pass on their machine for the wrong reason.
+        registry.add("spring.data.redis.url", () -> "redis://localhost:1");
     }
 
     @Autowired
@@ -57,6 +61,22 @@ class ApplicationBootTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).containsEntry("status", "ok").containsEntry("service", "storm-almanac");
+    }
+
+    @Test
+    @DisplayName("the actuator's health is UP with no Redis reachable, because nothing uses one")
+    void healthDoesNotWaitOnAnUnusedRedis() {
+        // The Redis starter is on the classpath for the solve cache's redis
+        // option, which is not the one selected (ADR 0012). Its health indicator
+        // was installed anyway, so the first time the image ran as Render will
+        // run it — empty Postgres, no Redis — this answered 503 while the
+        // application was serving perfectly well, and a platform health check
+        // reads that as a dead service.
+        ResponseEntity<Map<String, Object>> response =
+                http.exchange("/actuator/health", HttpMethod.GET, null, MAP);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).containsEntry("status", "UP");
     }
 
     @Test
