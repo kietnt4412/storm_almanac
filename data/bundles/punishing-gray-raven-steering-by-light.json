@@ -133,13 +133,16 @@
     "it did. The ladder itself moved nothing: written on its own, it diffed",
     "against sequence 7 as no changes.",
     "",
-    "Sequence 9 puts Selena: Pianissimo on the S-rank ladder: one climber,",
-    "her shard, and her shard's two Phantom Pain shop rows. Every number is",
-    "the ladder's, and what is hers is words, read off her skill pages and",
-    "her shard's card on 2026-09-24. The two rows ADR 0031 held back for",
-    "confirmation per climber, Evolve and the SS passive's unlock, the",
-    "maintainer confirmed for her. She had been an entity since sequence 0,",
-    "as the target of the Arrival Construct pool, with nothing to climb."
+    "Sequence 9 puts Selena: Pianissimo and Lucia: Inverse Crown on the",
+    "S-rank ladder: a climber each, a shard each, and each shard's two",
+    "Phantom Pain shop rows. Every number is the ladder's, and what is theirs",
+    "is words, read off their skill pages and shard cards on 2026-09-24. The",
+    "two rows ADR 0031 held back for confirmation per climber, Evolve and the",
+    "SS passive's unlock, the maintainer confirmed for every S-rank construct.",
+    "Selena had been an entity since sequence 0, as the target of the Arrival",
+    "Construct pool, with nothing to climb; Lucia is new. She takes the place",
+    "Karenina: Effulgence had in the plan, because the maintainer does not",
+    "own Karenina and so cannot read her."
   ],
 
   "game": {
@@ -212,6 +215,12 @@
       "origin": "OBSERVED_IN_GAME",
       "detail": "Selena: Pianissimo's skill pages, each at 'Max Level Reached': Flaming Chord [Red Orb], Thunderous Transposition [Yellow Orb], Rhythmic Piercing [Blue Orb] and Reverberating Legato [Basic Attack], each at Lv 18; Classical Romanticism [Core Passive] at Lv 24, shown as 18 (+6), Fugal Sonata [Signature Move] and Resplendent Symphony [QTE] at Lv 18; Attacker [Class Skill] at Lv 18; and Rainbow-Hued Melody [SS Rank Passive Skill] at Lv 2, its Lv 1 'Unlocked at S5 Rank' and its Lv 2 'Unlocked at SS Rank', the same shape as Lacrimosa's Vestige. Eight skills on the level curve, in the same slots as Lacrimosa's eight. The Core Passive's +6 is a bonus from an equipped Memory's Resonance (maintainer), not a level the curve prices, and is not modelled. Also the Inver-Shard - Pianissimo item card, 'Owned 2'; its five stars were read on its Phantom Pain shop tile (maintainer). That she climbs the S-rank ladder — the same EXP per level, Cogs per Promote step and Skill Points and Cogs per skill level as Lacrimosa — is the maintainer's comparison of her Level Up, Promote and Skill screens with Lacrimosa's on 2026-09-24 (ADR 0031). The two rows that comparison did not cover were confirmed by the maintainer in a later sitting the same day: Evolve S -> SS costs 30 Inver-Shard - Pianissimo, and the SS passive's Unlock costs 2 Skill Points + 20 000 Cogs, both as for Lacrimosa; and her shard's Phantom Pain shop tile sells 30 ever, 10 at 10 Scars then 20 at 20, which the maintainer reports holds for every S-rank construct. Screenshots taken by the maintainer on 2026-09-24 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch \"Steering By Light\".",
       "observedOn": "2026-09-24"
+    },
+    {
+      "id": "lucia-inverse-crown-screens",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "Lucia: Inverse Crown's character screen ('Lucia / Inverse Crown', Evolve SS, Lv 80 / 80) and her skill pages, each at 'Max Level Reached': Abyssal Lament [Red Orb], Dusklit Severance [Yellow Orb], Frosty Thorns [Blue Orb] and Malevolent March [Basic Attack], each at Lv 18; Sequence Traversal [Core Passive] and Savage Afterglow [QTE] at Lv 18, Silenced Abysslight [Signature Move] at Lv 24, shown as 18 (+6); Attacker [Class Skill] at Lv 18; and Bloomtide: Genesis [SS Rank Passive Skill] at Lv 2, its Lv 1 'Unlocked at S5 Rank' and its Lv 2 'Unlocked at SS Rank', the same shape as Lacrimosa's Vestige. Eight skills on the level curve, in the same slots as Lacrimosa's eight. The Signature Move's +6 is read as the same Memory Resonance bonus the maintainer named on Selena: Pianissimo's Core Passive, and is not modelled. Also the Inver-Shard - Inverse Crown item card, 'Owned 0'. That she is S-rank is the maintainer's report. That she climbs the S-rank ladder — EXP per level, Cogs per Promote step, Skill Points and Cogs per skill level, 30 shards to Evolve S -> SS, 2 Skill Points + 20 000 Cogs for the SS passive's unlock — and that her shard's Phantom Pain shop tile is five stars and sells 30 ever, 10 at 10 Scars then 20 at 20, are the maintainer's reports of 2026-09-24 that these hold for every S-rank construct; none of those numbers was read on her screens. She replaces Karenina: Effulgence as the third construct on the ladder because the maintainer does not own Karenina. Screenshots taken by the maintainer on 2026-09-24 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch \"Steering By Light\".",
+      "observedOn": "2026-09-24"
     }
   ],
   "sourcedBy": "weapon-upgrade-screens",
@@ -249,6 +258,10 @@
     "item:inver-shard-pianissimo": "selena-pianissimo-screens",
     "shop:phantom-pain-shop-inver-shard-pianissimo-discounted": "selena-pianissimo-screens",
     "shop:phantom-pain-shop-inver-shard-pianissimo": "selena-pianissimo-screens",
+    "entity:lucia-inverse-crown": "lucia-inverse-crown-screens",
+    "item:inver-shard-inverse-crown": "lucia-inverse-crown-screens",
+    "shop:phantom-pain-shop-inver-shard-inverse-crown-discounted": "lucia-inverse-crown-screens",
+    "shop:phantom-pain-shop-inver-shard-inverse-crown": "lucia-inverse-crown-screens",
     "item:phantom-pain-scar": "character-screens",
     "item:memory-enhancer-iv": "character-screens",
     "fodder:memory-exp-4-star": "character-screens",
@@ -368,6 +381,13 @@
       "category": "construct-shard"
     },
     {
+      "_comment": "Named on its own item card ('Owned 0'), which shows no grade. Five stars on the maintainer's report that every S-rank construct's shard tile in the Phantom Pain shop is the same as Lacrimosa's and Selena's; this one's tile was not itself read.",
+      "id": "inver-shard-inverse-crown",
+      "displayName": "Inver-Shard - Inverse Crown",
+      "rarity": { "label": "5*", "rank": 5 },
+      "category": "construct-shard"
+    },
+    {
       "_comment": "Three stars (blue) on the Phantom Pain Cage's weekly reward tiles and on its own owned-count panel; the item card shows none. Earned from the weekly Cage, up to 56 a week by score; spent in the Phantom Pain shop on shards, since sequence 2.",
       "id": "phantom-pain-scar",
       "displayName": "Phantom Pain Scar",
@@ -466,6 +486,13 @@
       "_comment": "Pulled at S rank (maintainer). The character every Level Up, Promote, Evolve, Skill and Awaken screen in this bundle was read on.",
       "id": "helentine-lacrimosa",
       "displayName": "Helentine: Lacrimosa",
+      "kind": "character",
+      "rarity": { "label": "S", "rank": 3 }
+    },
+    {
+      "_comment": "Named on her character screen, 'Lucia / Inverse Crown', at SS and Lv 80 / 80; S-rank is the maintainer's report. The third construct on the S-rank ladder, in place of Karenina: Effulgence, whom the maintainer does not own and so cannot read.",
+      "id": "lucia-inverse-crown",
+      "displayName": "Lucia: Inverse Crown",
       "kind": "character",
       "rarity": { "label": "S", "rank": 3 }
     },
@@ -762,6 +789,23 @@
       "currency": "phantom-pain-scar",
       "price": 20,
       "offer": { "item": "inver-shard-pianissimo", "quantity": 1 },
+      "periodLimit": 20,
+      "period": "never"
+    },
+    {
+      "_comment": "Lucia: Inverse Crown's shard tile, priced as every S-rank construct's is (maintainer, 2026-09-24): 30 ever, 10 at 10 Phantom Pain Scar then 20 at 20. This tile was not itself read.",
+      "id": "phantom-pain-shop-inver-shard-inverse-crown-discounted",
+      "currency": "phantom-pain-scar",
+      "price": 10,
+      "offer": { "item": "inver-shard-inverse-crown", "quantity": 1 },
+      "periodLimit": 10,
+      "period": "never"
+    },
+    {
+      "id": "phantom-pain-shop-inver-shard-inverse-crown",
+      "currency": "phantom-pain-scar",
+      "price": 20,
+      "offer": { "item": "inver-shard-inverse-crown", "quantity": 1 },
       "periodLimit": 20,
       "period": "never"
     }
@@ -1129,7 +1173,8 @@
             "",
             "ADR 0031 held this row to be confirmed per climber, because the",
             "comparison that put constructs on the ladder did not cover Evolve.",
-            "Selena: Pianissimo's 30 was confirmed by the maintainer on 2026-09-24."
+            "The maintainer confirmed Selena: Pianissimo's 30 on 2026-09-24, and",
+            "that it holds for every S-rank construct, Lucia: Inverse Crown included."
           ],
           "id": "evolve-ss",
           "fromState": "evolve-s",
@@ -1205,7 +1250,7 @@
           ]
         },
         {
-          "_comment": "Vestige [SS Rank Passive Skill], Evolution Effect page: Unlock costs 2 Skill Points + 20 000 Cogs, read on its button. Its Lv 1 is 'Unlocked at S5 Rank' and its Lv 2 'at SS Rank' — gates on Evolve, which Upgrade cannot express, and the maintainer cannot reach them to read what follows the unlock. The same price for Selena: Pianissimo's Rainbow-Hued Melody is the maintainer's confirmation of 2026-09-24; hers was already unlocked, so no button showed it.",
+          "_comment": "Vestige [SS Rank Passive Skill], Evolution Effect page: Unlock costs 2 Skill Points + 20 000 Cogs, read on its button. Its Lv 1 is 'Unlocked at S5 Rank' and its Lv 2 'at SS Rank' — gates on Evolve, which Upgrade cannot express, and the maintainer cannot reach them to read what follows the unlock. The same price for Selena: Pianissimo's Rainbow-Hued Melody is the maintainer's confirmation of 2026-09-24; hers was already unlocked, so no button showed it. Lucia: Inverse Crown's Bloomtide: Genesis is covered by the maintainer's report that the price holds for every S-rank construct.",
           "id": "{ss-passive}-unlock",
           "fromState": "{ss-passive}-locked",
           "toState": "{ss-passive}-1",
@@ -1244,6 +1289,24 @@
               "classical-romanticism",
               "fugal-sonata",
               "resplendent-symphony",
+              "attacker"
+            ]
+          }
+        },
+        {
+          "entity": "lucia-inverse-crown",
+          "sourcedBy": "lucia-inverse-crown-screens",
+          "with": {
+            "shard": "inver-shard-inverse-crown",
+            "ss-passive": "bloomtide-genesis",
+            "skill": [
+              "abyssal-lament",
+              "dusklit-severance",
+              "frosty-thorns",
+              "malevolent-march",
+              "sequence-traversal",
+              "silenced-abysslight",
+              "savage-afterglow",
               "attacker"
             ]
           }
