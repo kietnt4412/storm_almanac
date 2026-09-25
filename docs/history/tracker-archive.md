@@ -2980,6 +2980,24 @@ The tracker's D2, verbatim until 2026-09-25 (the fuller original is
 
 ---
 
+## The PGR status bullet until 2026-09-25
+
+Rewritten in the forty-second session when S4 had to be recorded with the
+tracker at 549 lines. Verbatim as it stood:
+
+> - **PGR is read first-hand** ([the note](docs/game-facts/punishing-gray-raven-research-disclosure.md)) and
+>   [its bundle](data/bundles/punishing-gray-raven-steering-by-light.json) is **published at sequence 10** (2026-09-24, **Global 4.8.0
+>   "Anchored in Faith"**) — 250 facts over eleven provenance entries, **three constructs on one S-rank ladder**, one weekly ladder, a
+>   **05:00 UTC** reset, and since 2026-09-22 a **pull price**. Every sequence has published and
+>   read back as *no changes*, sequence 10 included — in both databases. **Sequence 7 closed N37 and N28's modelling half** and is the
+>   first sequence carrying something that is not a fact at all (the EXP pool names, ADR 0028). What it holds is
+>   [in the table below](#what-the-next-work-touches). **Reading the client overruled the guides four times** — a
+>   per-banner featured rate, events with no shops, a drawn wall, a `PityScope` inheriting across pools where R1999
+>   clears — the standing argument for the client over a wiki
+>   ([the four](docs/history/tracker-archive.md#what-status-carried-until-the-2026-09-21-rewrite)).
+
+---
+
 ## What *Status* carried until the 2026-09-21 rewrite
 
 The four *Status* bullets the thirty-sixth session rewrote, as they stood.
@@ -3175,6 +3193,48 @@ the plan saving and landing on step 4. At 375 px nothing overflows on any of the
 five pages. **No screenshot**: the pane would not draw all session. 50 frontend
 tests. The tracker is at 549 lines, so the next session starts by rewriting a
 section.
+
+**S4: S2's fix was the right shape with the wrong words.** Looking at #49 live,
+the maintainer made two points. The game doesn't number rank: it shows ELITE
+with stars. And "sections" had meant the game's own groups, not one dropdown
+per track: Basic Skill, Special Skill, Evolution Effect and Common Effect, each
+skill tagged by its orb or kind, which is how players find a skill. **The
+plan went to them first** (a new memory records that they want that for every
+screen fix) and they answered from screenshots of Lacrimosa's Promote tab
+(fourteen panels, one per state) and her four skill pages. Both readings were
+already in the bundle as prose. The ladder's `character-screens` detail says
+"her Promote tab at every step from PRIVATE to HERO", and the skills group's
+comment lists every slot's tag from `skill-pages` (2026-09-24). **No new
+provenance entry was needed.** Today's screenshots and the maintainer's answers
+settled the star counts (Private starts with its star filled), that the Leader
+sits under Common Effect, and that the layout is shared by every S-rank
+construct. **ADR 0032:** the words ride on the step as `Upgrade.Labels`
+(fromName, toName, section, tag). They are facts covered by the step's
+provenance, unlike ADR 0028's progress names, because they are the game's text.
+The section *order* is the bundle's `sections` list, not a fact. "Growth" is
+the one bundle word, since Level, Promote and Evolve share no heading in the
+client. The leader's step arrives before the skills' and its heading comes
+after theirs, which is why the order couldn't come from the steps. A ladder
+group can now carry `positions`, one object per element of its list, so slot
+two is the Yellow Orb on every construct and is written once. `V16` adds four
+nullable columns to `gamedata.upgrade` and a `gamedata.section` table. The
+diff flattens all of it, the upgrades route serves it, and `GameDataBundle`
+refuses an undeclared or unused section and a state with two names. **Sequence
+11 previewed as 328 changes, all words** (checked by filtering the preview for
+anything else: nothing). It was published locally and read back as *no
+changes*. **Neon still holds 10**: that publish waits for the PR to deploy V16
+and for the maintainer's OK. The roster now shows Growth / Basic Skill /
+Special Skill / Evolution Effect / Common Effect, each skill row led by its tag
+with the skill name small beside it. A saved `promote-1` reads "Sergeant ★1",
+and a goal reads "Promote · Hero". Goals' targets follow the same section
+order; they had followed step order, putting the Leader before the skills. **A
+wrong assertion of mine** (`promote-5` as Elite ★2; states 3–5 are Elite ★1–3)
+was caught writing the test, not by it. The first screenshot of the session
+worked at the end. Skill names are still guessed from slugs ("Withering
+spiral"). The maintainer offered to read **Ultima Awaken**'s costs; the
+bundle's comment has it with no Skill Point or Cog cost on its screen, so the
+reading will say what it does cost. The PGR Status bullet was rewritten to
+make room (archived above). 475 backend tests, 53 frontend.
 
 **2026-09-24 (forty-first) — Q6 written down, and its smallest item done.**
 
