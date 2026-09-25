@@ -175,6 +175,15 @@ export interface UpgradeStep {
   fromState: string;
   toState: string;
   costs: Cost[];
+  /**
+   * What the game calls the two states, and the heading and tag the step's
+   * track sits under (ADR 0032). Null or absent when the bundle gave none —
+   * every version before sequence 11, and a server older than this page.
+   */
+  fromName?: string | null;
+  toName?: string | null;
+  section?: string | null;
+  tag?: string | null;
 }
 
 export interface UpgradesResponse {
@@ -184,6 +193,8 @@ export interface UpgradesResponse {
   steps: UpgradeStep[];
   totalCost: Cost[];
   sourcing?: Sourcing;
+  /** The game's order for the headings its steps name; absent before sequence 11. */
+  sections?: string[];
 }
 
 // ── Player state ───────────────────────────────────────────────────────────

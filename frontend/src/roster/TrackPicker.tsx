@@ -1,14 +1,22 @@
 import type { ReactElement } from 'react';
-import { placeOn, standingOn, type Track } from './tracks';
+import { placeOn, sectionsOf, standingOn, type Track } from './tracks';
 
 /**
- * Where one entity stands, edited: one dropdown per track.
+ * Where one entity stands, edited: one dropdown per track, under the game's own
+ * headings.
  *
  * <p><b>This replaced a row of chips and an "and also…" dropdown</b> holding
  * every state on every track, which the maintainer's rehearsal could not read
  * (S2, 2026-09-25). Before that it was a `select multiple`, which passed every
  * test and was unusable. jsdom computes no layout, so whether this one reads is
  * a person's job with a browser; what the tests pin is what it sends.
+ *
+ * <p><b>Grouped the way the game groups them, and led by the tag.</b> The first
+ * cut was one flat grid of thirteen tracks, and the maintainer asked for the
+ * game's sections instead — Growth, Basic Skill, Special Skill, Evolution
+ * Effect, Common Effect — because that is how a player finds a skill: by its orb
+ * and where it sits, not by a name most players never read. So a skill's row
+ * reads "Yellow Orb", with its name small beside it (ADR 0032).
  *
  * <p><b>One answer per track, and it is the furthest one.</b> Being at rank 5
  * means ranks 0 to 4 are behind you, and the planner already credits a crossed
@@ -26,44 +34,61 @@ import { placeOn, standingOn, type Track } from './tracks';
  * @param only   the tracks to show, when not all of them — a goal row shows the
  *               goal's own. Without the split, the goal row called the reader's
  *               other answers "on no track", which the first browser run caught
+ * @param order  the game's order for its headings, from the upgrades response
  */
 export function TrackPicker({
   subject,
   tracks,
   only,
+  order,
   states,
   onChange,
 }: {
   subject: string;
   tracks: Track[];
   only?: Track[];
+  order?: string[];
   states: string[];
   onChange: (states: string[]) => void;
 }): ReactElement {
   const known = new Set(tracks.flatMap((track) => track.states.map((candidate) => candidate.state)));
   const elsewhere = states.filter((state) => !known.has(state));
 
+  const row = (track: Track) => (
+    <label key={track.states[0]!.state} className="flex items-center justify-between gap-3 text-sm">
+      <span className="min-w-0">
+        <span>{track.tag ?? track.name}</span>
+        {track.tag && <span className="muted ml-2 text-xs">{track.name}</span>}
+      </span>
+      <select
+        className="input shrink-0"
+        value={standingOn(track, states) ?? track.states[0]!.state}
+        aria-label={`${track.tag ? `${track.tag}, ${track.name}` : track.name} for ${subject}`}
+        onChange={(event) => onChange(placeOn(track, states, event.target.value))}
+      >
+        {track.states.map((candidate) => (
+          <option key={candidate.state} value={candidate.state}>
+            {candidate.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+
+  if (only) {
+    return <div className="flex flex-wrap gap-2">{only.map(row)}</div>;
+  }
+
   return (
-    <div className={only ? 'flex flex-wrap gap-2' : 'grid grow gap-x-4 gap-y-2 sm:grid-cols-2 lg:grid-cols-3'}>
-      {(only ?? tracks).map((track) => (
-        <label key={track.states[0]!.state} className="flex items-center justify-between gap-2 text-sm">
-          <span className="muted">{track.name}</span>
-          <select
-            className="input"
-            value={standingOn(track, states) ?? track.states[0]!.state}
-            aria-label={`${track.name} for ${subject}`}
-            onChange={(event) => onChange(placeOn(track, states, event.target.value))}
-          >
-            {track.states.map((candidate) => (
-              <option key={candidate.state} value={candidate.state}>
-                {candidate.label}
-              </option>
-            ))}
-          </select>
-        </label>
+    <div className="grid gap-4 sm:grid-cols-2">
+      {sectionsOf(tracks, order).map((section) => (
+        <section key={section.name ?? ''} className="space-y-2">
+          {section.name && <h3 className="label">{section.name}</h3>}
+          {section.tracks.map(row)}
+        </section>
       ))}
       {elsewhere.length > 0 && (
-        <p className="muted text-xs sm:col-span-2 lg:col-span-3">
+        <p className="muted text-xs sm:col-span-2">
           Also recorded, on no track this patch publishes: {elsewhere.join(', ')}
         </p>
       )}

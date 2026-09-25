@@ -71,10 +71,13 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
   });
 
   const tracksOf = useMemo(() => {
-    const byEntity = new Map<string, Track[]>();
+    const byEntity = new Map<string, { tracks: Track[]; order: string[] }>();
     graphs.forEach((graph) => {
       if (!graph.data) return;
-      byEntity.set(graph.data.entity.id, tracksOfGraph(graph.data.steps));
+      byEntity.set(graph.data.entity.id, {
+        tracks: tracksOfGraph(graph.data.steps),
+        order: graph.data.sections ?? [],
+      });
     });
     return byEntity;
   }, [graphs]);
@@ -107,7 +110,8 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
         <ul className="space-y-2">
           {shown.map((slug) => {
             const states = roster[slug] ?? [];
-            const tracks = tracksOf.get(slug);
+            const graph = tracksOf.get(slug);
+            const tracks = graph?.tracks;
             return (
               <li key={slug} className="card space-y-3">
                 <div className="flex items-center gap-3">
@@ -143,6 +147,7 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
                   <TrackPicker
                     subject={nameOf(slug)}
                     tracks={tracks}
+                    order={graph?.order}
                     states={states}
                     onChange={(next) => editRosterState(profileId, slug, next)}
                   />

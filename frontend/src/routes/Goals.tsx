@@ -11,7 +11,7 @@ import {
 } from '../api/client';
 import { ProfileGate } from '../profile';
 import { TrackPicker } from '../roster/TrackPicker';
-import { statesOfGraph, trackOf, tracksOfGraph, type Track } from '../roster/tracks';
+import { sectionsOf, statesOfGraph, trackOf, tracksOfGraph, type Track } from '../roster/tracks';
 import { NextStep } from '../steps/Steps';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 
@@ -66,7 +66,12 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
     graphs.forEach((graph) => {
       const data = graph.data;
       if (!data) return;
-      byEntity.set(data.entity.id, { targets: statesOfGraph(data.steps).targets, tracks: tracksOfGraph(data.steps) });
+      // In the game's section order, the same order the roster shows them in,
+      // so a target is found where the reader already looked for it.
+      byEntity.set(data.entity.id, {
+        targets: statesOfGraph(data.steps).targets,
+        tracks: sectionsOf(tracksOfGraph(data.steps), data.sections).flatMap((section) => section.tracks),
+      });
     });
     return byEntity;
   }, [graphs]);
@@ -164,12 +169,15 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                     */}
                     {states
                       ? states.tracks.map((track) => (
-                          <optgroup key={track.states[0]!.state} label={track.name}>
+                          <optgroup
+                            key={track.states[0]!.state}
+                            label={track.tag ? `${track.tag} — ${track.name}` : track.name}
+                          >
                             {track.states
                               .filter((candidate) => states.targets.includes(candidate.state))
                               .map((candidate) => (
                                 <option key={candidate.state} value={candidate.state}>
-                                  {track.name} · {candidate.label}
+                                  {track.tag ?? track.name} · {candidate.label}
                                 </option>
                               ))}
                           </optgroup>

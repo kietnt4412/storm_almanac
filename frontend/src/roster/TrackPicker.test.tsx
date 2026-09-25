@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { TrackPicker } from './TrackPicker';
-import { statesOfGraph, tracksOfGraph } from './tracks';
+import { sectionsOf, statesOfGraph, tracksOfGraph } from './tracks';
 
 /**
  * Recording where an entity stands, on the rules that cost money when they are
@@ -64,6 +64,50 @@ describe('an upgrade graph read as tracks', () => {
 
     expect(graph.targets).toEqual(['promote-1', 'promote-2']);
     expect(graph.starts).toEqual(['promote-0', 'promote-1', 'promote-2']);
+  });
+});
+
+describe('the game\'s own words, where the bundle has them (ADR 0032)', () => {
+  // Cut down from sequence 11: a rank that names its states, a skill with a tag,
+  // and the leader, whose step arrives before the skills' and whose heading
+  // comes after theirs on the game's screen.
+  const NAMED = [
+    { fromState: 'promote-0', toState: 'promote-1', fromName: 'Private ★1', toName: 'Sergeant ★1', section: 'Growth' },
+    { fromState: 'promote-1', toState: 'promote-2', toName: 'Sergeant ★2', section: 'Growth' },
+    { fromState: 'leader-skill-locked', toState: 'leader-skill-1', section: 'Common Effect', tag: 'Leader' },
+    { fromState: 'withering-spiral-1', toState: 'withering-spiral-2', section: 'Basic Skill', tag: 'Yellow Orb' },
+    { fromState: 'weapon-1', toState: 'weapon-2' },
+  ];
+  const ORDER = ['Growth', 'Basic Skill', 'Common Effect'];
+
+  it('names a state as the game does, and guesses only where the bundle is silent', () => {
+    const [rank, , skill] = tracksOfGraph(NAMED);
+
+    expect(rank!.states.map((state) => state.label)).toEqual(['Private ★1', 'Sergeant ★1', 'Sergeant ★2']);
+    expect(skill!.states.map((state) => state.label)).toEqual(['1', '2']);
+    expect(skill).toMatchObject({ section: 'Basic Skill', tag: 'Yellow Orb', name: 'Withering spiral' });
+  });
+
+  it('puts the headings in the game\'s order, not the order the steps came in, and the unplaced last', () => {
+    const sections = sectionsOf(tracksOfGraph(NAMED), ORDER);
+
+    expect(sections.map((section) => section.name)).toEqual(['Growth', 'Basic Skill', 'Common Effect', undefined]);
+    expect(sections[3]!.tracks.map((track) => track.name)).toEqual(['Weapon']);
+  });
+
+  it('shows each heading, and leads a skill with its tag and its name small beside it', () => {
+    render(
+      <TrackPicker subject="Selena" tracks={tracksOfGraph(NAMED)} order={ORDER} states={[]} onChange={() => {}} />,
+    );
+
+    expect(screen.getAllByRole('heading').map((heading) => heading.textContent)).toEqual([
+      'Growth',
+      'Basic Skill',
+      'Common Effect',
+    ]);
+    const skill = screen.getByLabelText('Yellow Orb, Withering spiral for Selena');
+    expect(skill.closest('label')).toHaveTextContent('Yellow OrbWithering spiral');
+    expect(screen.getByLabelText('Promote for Selena')).toHaveDisplayValue('Private ★1');
   });
 });
 
