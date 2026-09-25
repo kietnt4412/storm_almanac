@@ -206,7 +206,9 @@ public class GameDataReadModel {
 
         List<UpgradeStepView> steps = upgrades.stream()
                 .map(upgrade -> new UpgradeStepView(
-                        upgrade.id(), upgrade.fromState(), upgrade.toState(), costs(upgrade.costs(), items)))
+                        upgrade.id(), upgrade.fromState(), upgrade.toState(), costs(upgrade.costs(), items),
+                        upgrade.labels().fromName(), upgrade.labels().toName(),
+                        upgrade.labels().section(), upgrade.labels().tag()))
                 .toList();
 
         // The entity, because the response carries its summary, and then every
@@ -224,7 +226,10 @@ public class GameDataReadModel {
                 summary(found),
                 steps,
                 total(upgrades, items),
-                sourcing(data, facts));
+                sourcing(data, facts),
+                // The game's order for every heading, not just this entity's:
+                // the page groups by it and needs nothing else to sort.
+                data.sections());
     }
 
     /**

@@ -84,6 +84,7 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
         writeSinks(version, bundle.sinks(), items, entities);
         writeBanners(version, bundle.banners(), items);
         writeProgressKinds(version, bundle.progressKinds());
+        writeSections(version, bundle.sections());
         writeProvenance(version, bundle);
         return version;
     }
@@ -521,13 +522,16 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
                     long id = jdbc.queryForObject(
                             """
                             INSERT INTO gamedata.upgrade
-                                (version_id, slug, entity_id, from_state, to_state)
-                            VALUES (?, ?, ?, ?, ?)
+                                (version_id, slug, entity_id, from_state, to_state,
+                                 from_name, to_name, section, tag)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                             RETURNING id
                             """,
                             Long.class,
                             version, upgrade.id(), entities.get(upgrade.entity()),
-                            upgrade.fromState(), upgrade.toState());
+                            upgrade.fromState(), upgrade.toState(),
+                            upgrade.labels().fromName(), upgrade.labels().toName(),
+                            upgrade.labels().section(), upgrade.labels().tag());
 
                     writeStacks(version, upgrade.costs(), items,
                             "INSERT INTO gamedata.upgrade_cost"
@@ -638,6 +642,18 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
                 kinds.stream()
                         .map(kind -> new Object[] {version, kind.kind(), kind.displayName()})
                         .toList());
+    }
+
+    /**
+     * The order sections are shown in, which is not a fact either. See
+     * {@code V16__a_step_says_what_the_game_calls_it.sql}.
+     */
+    private void writeSections(long version, List<String> sections) {
+        List<Object[]> rows = new ArrayList<>();
+        for (int position = 0; position < sections.size(); position++) {
+            rows.add(new Object[] {version, position, sections.get(position)});
+        }
+        jdbc.batchUpdate("INSERT INTO gamedata.section (version_id, position, name) VALUES (?, ?, ?)", rows);
     }
 
     // ── Shared ──────────────────────────────────────────────────────────────

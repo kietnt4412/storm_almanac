@@ -9,13 +9,15 @@
  * maintainer's rehearsal.
  *
  * <p><b>The tracks come from the graph, not from the names.</b> A track is a set
- * of states the steps connect, so this knows nothing about any game. <b>The
- * labels do come from the names</b>, and only because nothing else carries one:
- * the bundle names no track and no state, so "Flaming chord · 4" is read off
- * {@code flaming-chord-4} by taking the words every state on the track shares.
- * It is a display guess over opaque strings, it is never sent anywhere, and the
- * raw id is what every request still carries. When a bundle can name its tracks,
- * this is the one place to read that instead.
+ * of states the steps connect, so this knows nothing about any game.
+ *
+ * <p><b>The words come from the game where the bundle has them</b> (ADR 0032,
+ * since sequence 11): a state's name ("Elite ★3"), and the heading and tag its
+ * track sits under ("Basic Skill", "Yellow Orb") — which is how a player finds
+ * a skill, since most never read its name. <b>Where it has none, they are
+ * guessed from the ids</b>, "Flaming chord · 4" off {@code flaming-chord-4}, by
+ * taking the words every state on a track shares. The guess is display only and
+ * never sent anywhere; the raw id is what every request carries.
  */
 
 export interface TrackState {
@@ -27,6 +29,20 @@ export interface Track {
   name: string;
   /** In order along the track, the base first. */
   states: TrackState[];
+  /** The heading the game shows the track under, when the bundle says. */
+  section?: string;
+  /** The game's bracketed kind for the track, such as an orb colour. */
+  tag?: string;
+}
+
+/** A step as far as this file needs one: its edge, and the game's words if any. */
+export interface LabelledStep {
+  fromState: string;
+  toState: string;
+  fromName?: string | null;
+  toName?: string | null;
+  section?: string | null;
+  tag?: string | null;
 }
 
 /**
@@ -65,7 +81,7 @@ export function statesOfGraph(steps: { fromState: string; toState: string }[]): 
  * walked breadth-first, which keeps a branch's states together without
  * pretending the branch is a line.
  */
-export function tracksOfGraph(steps: { fromState: string; toState: string }[]): Track[] {
+export function tracksOfGraph(steps: LabelledStep[]): Track[] {
   const order = statesOfGraph(steps).starts;
   const next = new Map<string, string[]>();
   const arrivedAt = new Set<string>();
@@ -102,8 +118,60 @@ export function tracksOfGraph(steps: { fromState: string; toState: string }[]): 
     }
     // A cycle has no base; its states are still where the reader may stand.
     for (const state of piece) if (!walked.includes(state)) walked.push(state);
-    return named(walked);
+
+    const guessed = named(walked);
+    const mine = steps.filter((step) => walked.includes(step.fromState));
+    const said = mine.find((step) => step.section || step.tag);
+    return {
+      ...guessed,
+      states: guessed.states.map((candidate) => ({
+        state: candidate.state,
+        label: gameName(steps, candidate.state) ?? candidate.label,
+      })),
+      ...(said?.section ? { section: said.section } : {}),
+      ...(said?.tag ? { tag: said.tag } : {}),
+    };
   });
+}
+
+/** What the game calls a state, from whichever step says: arriving at it or leaving it. */
+function gameName(steps: LabelledStep[], state: string): string | undefined {
+  for (const step of steps) {
+    if (step.toState === state && step.toName) return step.toName;
+    if (step.fromState === state && step.fromName) return step.fromName;
+  }
+  return undefined;
+}
+
+/** A heading and the tracks under it; a heading of undefined holds the tracks the bundle placed nowhere. */
+export interface Section {
+  name?: string;
+  tracks: Track[];
+}
+
+/**
+ * The tracks under their headings, in the game's order.
+ *
+ * <p>Order comes from {@code order}, the bundle's list, and not from the order
+ * the steps arrive in: the leader skill's step comes before the skills', and its
+ * heading comes after theirs on the game's screen. Tracks with no heading — every
+ * track of every version before sequence 11, or a weapon nobody grouped — follow
+ * in one untitled group, so nothing a reader recorded disappears.
+ */
+export function sectionsOf(tracks: Track[], order: string[] = []): Section[] {
+  const headed = new Map<string, Track[]>();
+  const loose: Track[] = [];
+  for (const track of tracks) {
+    if (!track.section) {
+      loose.push(track);
+      continue;
+    }
+    headed.set(track.section, [...(headed.get(track.section) ?? []), track]);
+  }
+  const names = [...order.filter((name) => headed.has(name)), ...[...headed.keys()].filter((name) => !order.includes(name))];
+  const sections: Section[] = names.map((name) => ({ name, tracks: headed.get(name)! }));
+  if (loose.length > 0) sections.push({ tracks: loose });
+  return sections;
 }
 
 /** The track a state is on, if the graph has it. */

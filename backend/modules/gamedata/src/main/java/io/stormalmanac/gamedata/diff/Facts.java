@@ -83,6 +83,14 @@ final class Facts {
             subject(facts, Axis.PROGRESSION, "progress", kind.kind()).put("name", kind.displayName());
         }
 
+        // The order sections are shown in, which is not a fact either and moves
+        // every page that groups by it (ADR 0032). One subject for the whole
+        // order, so moving a heading is one change that says where it went.
+        if (!definition.sections().isEmpty()) {
+            subject(facts, Axis.PROGRESSION, "sections", "order")
+                    .put("order", String.join(" · ", definition.sections()));
+        }
+
         for (Item item : definition.items()) {
             Map<String, String> about = subject(facts, Axis.PROGRESSION, "item", item.id().value());
             about.put("name", item.displayName());
@@ -138,6 +146,14 @@ final class Facts {
                     stacks(about, "cost", upgrade.costs());
                     upgrade.requires().forEach(state -> about.put("requires " + state, "yes"));
                     upgrade.progress().forEach(p -> about.put("progress " + p.kind(), String.valueOf(p.quantity())));
+                    // What the game calls it: part of the step, so a rename is a
+                    // change on the step (ADR 0032). Absent fields are left out,
+                    // so every step published before sequence 11 flattens as it did.
+                    Upgrade.Labels labels = upgrade.labels();
+                    if (labels.fromName() != null) about.put("from name", labels.fromName());
+                    if (labels.toName() != null) about.put("to name", labels.toName());
+                    if (labels.section() != null) about.put("section", labels.section());
+                    if (labels.tag() != null) about.put("tag", labels.tag());
                 }
                 case Fodder fodder -> {
                     Map<String, String> about = subject(facts, Axis.PROGRESSION, "fodder", fodder.id());

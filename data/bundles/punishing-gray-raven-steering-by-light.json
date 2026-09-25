@@ -162,7 +162,7 @@
     "energyUnit": "Serum",
     "dayBoundary": { "zone": "UTC", "hour": 5 }
   },
-  "sequence": 10,
+  "sequence": 11,
   "label": "Anchored in Faith (Global 4.8.0)",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client: patch 4.7.0 \"Steering By Light\" from 2026-09-18 to 2026-09-22, and patch 4.8.0 \"Anchored in Faith\" on 2026-09-24. Numbers and text only; no game assets.",
 
@@ -1027,6 +1027,23 @@
         "construct is words: the shard Evolve spends, the SS passive's name and",
         "the skills' names.",
         "",
+        "Since sequence 11 a row also says what the game calls things (ADR 0032):",
+        "a Promote state's rank and stars, and the heading and tag its track sits",
+        "under. They are text read off the same screens as the row's numbers, so",
+        "the row's provenance covers them. The rank of every state is her Promote",
+        "tab, read at each step from PRIVATE to HERO in character-screens and",
+        "again in the maintainer's screenshots of 2026-09-25, which show one panel",
+        "per state and as many star icons as the rank has states; the maintainer",
+        "confirmed that PRIVATE already shows its one star filled. The headings",
+        "and tags are her skill pages (skill-pages, 2026-09-24), which the",
+        "screenshots of 2026-09-25 show again; that the Leader skill sits first",
+        "under Common Effect is the maintainer's reading of that screen, where it",
+        "shows locked. That the layout is the same for every S-rank construct,",
+        "only the skills' names differing, is the maintainer's report of",
+        "2026-09-25. 'Growth' is the one word here the game does not show: Level,",
+        "Promote and Evolve have no shared heading in the client, and like the EXP",
+        "pools' names below it is this bundle's word for its own grouping.",
+        "",
         "Provenance: a row's sourcedBy says where its numbers were read, the",
         "ladder's covers the rest, and a climber's sourcedBy, when it has one,",
         "covers every row it expands to — that is the sitting which says the",
@@ -1064,20 +1081,23 @@
           "fromState": "promote-0",
           "toState": "promote-1",
           "costs": [ { "item": "cogs", "quantity": 5000 } ],
-          "requires": [ "level-2" ]
+          "requires": [ "level-2" ],
+          "fromName": "Private ★1",
+          "toName": "Sergeant ★1",
+          "section": "Growth"
         },
-        { "id": "promote-2", "fromState": "promote-1", "toState": "promote-2", "costs": [ { "item": "cogs", "quantity": 10000 } ], "requires": [ "level-10" ] },
-        { "id": "promote-3", "fromState": "promote-2", "toState": "promote-3", "costs": [ { "item": "cogs", "quantity": 15000 } ], "requires": [ "level-20" ] },
-        { "id": "promote-4", "fromState": "promote-3", "toState": "promote-4", "costs": [ { "item": "cogs", "quantity": 20000 } ], "requires": [ "level-30" ] },
-        { "id": "promote-5", "fromState": "promote-4", "toState": "promote-5", "costs": [ { "item": "cogs", "quantity": 25000 } ], "requires": [ "level-40" ] },
-        { "id": "promote-6", "fromState": "promote-5", "toState": "promote-6", "costs": [ { "item": "cogs", "quantity": 30000 } ], "requires": [ "level-45" ] },
-        { "id": "promote-7", "fromState": "promote-6", "toState": "promote-7", "costs": [ { "item": "cogs", "quantity": 35000 } ], "requires": [ "level-50" ] },
-        { "id": "promote-8", "fromState": "promote-7", "toState": "promote-8", "costs": [ { "item": "cogs", "quantity": 42500 } ], "requires": [ "level-55" ] },
-        { "id": "promote-9", "fromState": "promote-8", "toState": "promote-9", "costs": [ { "item": "cogs", "quantity": 50000 } ], "requires": [ "level-60" ] },
-        { "id": "promote-10", "fromState": "promote-9", "toState": "promote-10", "costs": [ { "item": "cogs", "quantity": 60000 } ], "requires": [ "level-65" ] },
-        { "id": "promote-11", "fromState": "promote-10", "toState": "promote-11", "costs": [ { "item": "cogs", "quantity": 70000 } ], "requires": [ "level-70" ] },
-        { "id": "promote-12", "fromState": "promote-11", "toState": "promote-12", "costs": [ { "item": "cogs", "quantity": 80000 } ], "requires": [ "level-75" ] },
-        { "id": "promote-13", "fromState": "promote-12", "toState": "promote-13", "costs": [ { "item": "cogs", "quantity": 100000 } ], "requires": [ "level-80" ] },
+        { "id": "promote-2", "fromState": "promote-1", "toState": "promote-2", "costs": [ { "item": "cogs", "quantity": 10000 } ], "requires": [ "level-10" ], "toName": "Sergeant ★2", "section": "Growth" },
+        { "id": "promote-3", "fromState": "promote-2", "toState": "promote-3", "costs": [ { "item": "cogs", "quantity": 15000 } ], "requires": [ "level-20" ], "toName": "Elite ★1", "section": "Growth" },
+        { "id": "promote-4", "fromState": "promote-3", "toState": "promote-4", "costs": [ { "item": "cogs", "quantity": 20000 } ], "requires": [ "level-30" ], "toName": "Elite ★2", "section": "Growth" },
+        { "id": "promote-5", "fromState": "promote-4", "toState": "promote-5", "costs": [ { "item": "cogs", "quantity": 25000 } ], "requires": [ "level-40" ], "toName": "Elite ★3", "section": "Growth" },
+        { "id": "promote-6", "fromState": "promote-5", "toState": "promote-6", "costs": [ { "item": "cogs", "quantity": 30000 } ], "requires": [ "level-45" ], "toName": "Task Force ★1", "section": "Growth" },
+        { "id": "promote-7", "fromState": "promote-6", "toState": "promote-7", "costs": [ { "item": "cogs", "quantity": 35000 } ], "requires": [ "level-50" ], "toName": "Task Force ★2", "section": "Growth" },
+        { "id": "promote-8", "fromState": "promote-7", "toState": "promote-8", "costs": [ { "item": "cogs", "quantity": 42500 } ], "requires": [ "level-55" ], "toName": "Task Force ★3", "section": "Growth" },
+        { "id": "promote-9", "fromState": "promote-8", "toState": "promote-9", "costs": [ { "item": "cogs", "quantity": 50000 } ], "requires": [ "level-60" ], "toName": "Ace ★1", "section": "Growth" },
+        { "id": "promote-10", "fromState": "promote-9", "toState": "promote-10", "costs": [ { "item": "cogs", "quantity": 60000 } ], "requires": [ "level-65" ], "toName": "Ace ★2", "section": "Growth" },
+        { "id": "promote-11", "fromState": "promote-10", "toState": "promote-11", "costs": [ { "item": "cogs", "quantity": 70000 } ], "requires": [ "level-70" ], "toName": "Ace ★3", "section": "Growth" },
+        { "id": "promote-12", "fromState": "promote-11", "toState": "promote-12", "costs": [ { "item": "cogs", "quantity": 80000 } ], "requires": [ "level-75" ], "toName": "Ace ★4", "section": "Growth" },
+        { "id": "promote-13", "fromState": "promote-12", "toState": "promote-13", "costs": [ { "item": "cogs", "quantity": 100000 } ], "requires": [ "level-80" ], "toName": "Hero", "section": "Growth" },
         {
           "_comment": [
             "The level track, as a chain rather than as spokes from level-1. Every",
@@ -1148,19 +1168,20 @@
           "fromState": "level-1",
           "toState": "level-2",
           "costs": [],
-          "progress": [ { "kind": "character-exp", "quantity": 1000 } ]
+          "progress": [ { "kind": "character-exp", "quantity": 1000 } ],
+          "section": "Growth"
         },
-        { "id": "level-10", "sourcedBy": "level-bracket-screens", "fromState": "level-2", "toState": "level-10", "costs": [] },
-        { "id": "level-20", "sourcedBy": "level-bracket-screens", "fromState": "level-10", "toState": "level-20", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 3000 } ] },
-        { "id": "level-30", "sourcedBy": "level-bracket-screens", "fromState": "level-20", "toState": "level-30", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 6000 } ] },
-        { "id": "level-40", "sourcedBy": "level-bracket-screens", "fromState": "level-30", "toState": "level-40", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 15000 } ] },
-        { "id": "level-45", "sourcedBy": "level-bracket-screens", "fromState": "level-40", "toState": "level-45", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 15000 } ] },
-        { "id": "level-50", "sourcedBy": "level-bracket-screens", "fromState": "level-45", "toState": "level-50", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 20000 } ] },
-        { "id": "level-55", "sourcedBy": "level-bracket-screens", "fromState": "level-50", "toState": "level-55", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 29000 } ] },
-        { "id": "level-60", "sourcedBy": "level-bracket-screens", "fromState": "level-55", "toState": "level-60", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 41000 } ] },
-        { "id": "level-65", "sourcedBy": "level-bracket-screens", "fromState": "level-60", "toState": "level-65", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 56000 } ] },
-        { "id": "level-70", "sourcedBy": "level-bracket-screens", "fromState": "level-65", "toState": "level-70", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 77000 } ] },
-        { "id": "level-75", "sourcedBy": "level-bracket-screens", "fromState": "level-70", "toState": "level-75", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 102000 } ] },
+        { "id": "level-10", "sourcedBy": "level-bracket-screens", "fromState": "level-2", "toState": "level-10", "costs": [], "section": "Growth" },
+        { "id": "level-20", "sourcedBy": "level-bracket-screens", "fromState": "level-10", "toState": "level-20", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 3000 } ], "section": "Growth" },
+        { "id": "level-30", "sourcedBy": "level-bracket-screens", "fromState": "level-20", "toState": "level-30", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 6000 } ], "section": "Growth" },
+        { "id": "level-40", "sourcedBy": "level-bracket-screens", "fromState": "level-30", "toState": "level-40", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 15000 } ], "section": "Growth" },
+        { "id": "level-45", "sourcedBy": "level-bracket-screens", "fromState": "level-40", "toState": "level-45", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 15000 } ], "section": "Growth" },
+        { "id": "level-50", "sourcedBy": "level-bracket-screens", "fromState": "level-45", "toState": "level-50", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 20000 } ], "section": "Growth" },
+        { "id": "level-55", "sourcedBy": "level-bracket-screens", "fromState": "level-50", "toState": "level-55", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 29000 } ], "section": "Growth" },
+        { "id": "level-60", "sourcedBy": "level-bracket-screens", "fromState": "level-55", "toState": "level-60", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 41000 } ], "section": "Growth" },
+        { "id": "level-65", "sourcedBy": "level-bracket-screens", "fromState": "level-60", "toState": "level-65", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 56000 } ], "section": "Growth" },
+        { "id": "level-70", "sourcedBy": "level-bracket-screens", "fromState": "level-65", "toState": "level-70", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 77000 } ], "section": "Growth" },
+        { "id": "level-75", "sourcedBy": "level-bracket-screens", "fromState": "level-70", "toState": "level-75", "costs": [], "progress": [ { "kind": "character-exp", "quantity": 102000 } ], "section": "Growth" },
         {
           "_comment": [
             "The last link, 365 000 to 497 000. Sequence 1's figure of 497 000 was",
@@ -1173,7 +1194,8 @@
           "fromState": "level-75",
           "toState": "level-80",
           "costs": [],
-          "progress": [ { "kind": "character-exp", "quantity": 132000 } ]
+          "progress": [ { "kind": "character-exp", "quantity": 132000 } ],
+          "section": "Growth"
         },
         {
           "_comment": [
@@ -1190,14 +1212,17 @@
           "id": "evolve-ss",
           "fromState": "evolve-s",
           "toState": "evolve-ss",
-          "costs": [ { "item": "{shard}", "quantity": 30 } ]
+          "costs": [ { "item": "{shard}", "quantity": 30 } ],
+          "section": "Growth"
         },
         {
           "_comment": "Unlocking the leader skill, Leader - Fading Fern: 3 Skill Points and 25 000 Cogs, read on its Unlock button. The maintainer reports every skill unlock costs the same.",
           "id": "leader-skill-unlock",
           "fromState": "leader-skill-locked",
           "toState": "leader-skill-1",
-          "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 25000 } ]
+          "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 25000 } ],
+          "section": "Common Effect",
+          "tag": "Leader"
         },
         {
           "_comment": [
@@ -1218,6 +1243,16 @@
           ],
           "each": "skill",
           "sourcedBy": "skill-pages",
+          "positions": [
+            { "section": "Basic Skill", "tag": "Red Orb" },
+            { "section": "Basic Skill", "tag": "Yellow Orb" },
+            { "section": "Basic Skill", "tag": "Blue Orb" },
+            { "section": "Basic Skill", "tag": "Basic Attack" },
+            { "section": "Special Skill", "tag": "Core Passive" },
+            { "section": "Special Skill", "tag": "Signature Move" },
+            { "section": "Special Skill", "tag": "QTE" },
+            { "section": "Common Effect", "tag": "Class Skill" }
+          ],
           "upgrades": [
             {
               "_comment": [
@@ -1265,7 +1300,9 @@
           "id": "{ss-passive}-unlock",
           "fromState": "{ss-passive}-locked",
           "toState": "{ss-passive}-1",
-          "costs": [ { "item": "skill-point", "quantity": 2 }, { "item": "cogs", "quantity": 20000 } ]
+          "costs": [ { "item": "skill-point", "quantity": 2 }, { "item": "cogs", "quantity": 20000 } ],
+          "section": "Evolution Effect",
+          "tag": "SS Rank Passive Skill"
         }
       ],
       "appliesTo": [
@@ -1346,5 +1383,13 @@
     },
     { "kind": "weapon-exp", "displayName": "Weapon EXP" },
     { "kind": "memory-exp", "displayName": "Memory EXP" }
-  ]
+  ],
+
+  "_sectionsComment": [
+    "The headings an S-rank construct's tracks sit under, in the order the",
+    "client shows them (ADR 0032). Each step names its own heading, and that is",
+    "the reading; this list is only the order. 'Growth' is this bundle's word,",
+    "see the ladder."
+  ],
+  "sections": [ "Growth", "Basic Skill", "Special Skill", "Evolution Effect", "Common Effect" ]
 }
