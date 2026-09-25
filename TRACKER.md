@@ -17,7 +17,7 @@ being finished with is.
   *Status* [2026-09-21](docs/history/tracker-archive.md#what-status-carried-until-the-2026-09-21-rewrite) (614),
   the session index 2026-09-22 (566) and again 2026-09-24 (561). Anything it no longer carries is in the archive verbatim — go and
   decide whether it is still operative rather than assuming it was lost.
-- Last updated: **2026-09-24** (forty-first session)
+- Last updated: **2026-09-25** (forty-second session)
 
 ---
 
@@ -76,10 +76,12 @@ being finished with is.
   **`backend/Dockerfile`'s COPY list is B5's path and drifts in silence** — it omitted `adapters/` from Phase 1
   until 2026-09-09, every image build failing in six seconds while this file called it verified, so **anything added
   beside `modules`, `adapters`, `substrate`, `app` needs a line there**.
-- **The remote, last checked 2026-09-24 (forty-first) — re-check it, do not trust it.**
-  **[PR #45](https://github.com/kietnt4412/storm_almanac/pull/45) is MERGED** (12:47Z), and
-  `dev` has no commit `main` lacks, with no PR open. This file named #44 — **stale on seven consecutive checks**, never once
-  right, so re-check rather than read. B6 means a commit on `dev` with no PR open is still built.
+- **The remote, last checked 2026-09-25 (forty-second) — re-check it, do not trust it, and check three things:**
+  which PRs merged, **the last `main` run**, and **the SHA `/api/health` reports**.
+  [PR #46](https://github.com/kietnt4412/storm_almanac/pull/46) merged, but **its `main` run went red on a
+  flaky test, so `deploy` never ran** and production still served `fac0ce6` (PR #45) the next morning.
+  Nothing showed it until somebody looked. The fix is `4a931f4` on `dev`. This line has been stale on
+  eight consecutive checks, so re-check it rather than read it. B6 means a commit on `dev` with no PR open is still built.
   **What the trigger does not do is watch the merge** — PR #25 merged *before its own run finished*
   and was green by luck (archive, twenty-sixth) — so **wait for the run before merging** still
   stands, and is now the only half of this a person has to remember. `dev` sits behind `main` by
@@ -245,10 +247,11 @@ after N37 and N28's modelling half on 2026-09-22 and N30, N20, N33, B6, N34, N36
 and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 **No Phase 4 item is left; its exit is.**
 
-> **Resume here (2026-09-24, forty-first):** **All four of Q6's items are met, so D4's trigger
-> has fired** — ladders, choice lines named by their prices, a shadow price driven in a browser
-> (90.00 on Resonance), and sign-in's return (in code; the first real sign-in after deploy is its
-> check). **Ask the maintainer: launch?** That means Google client out of *Testing*, five strangers.
+> **Resume here (2026-09-25, forty-second):** **All four of Q6's items are met, so D4's trigger
+> has fired**, but **PR #46 is not in production** (its `main` run was red, flaky, fixed in
+> `4a931f4`). Once that lands and `/api/health` reports it, sign in once on the real site from a
+> catalog page: that checks Q6's fourth item. **Then ask the maintainer: launch?** That means taking the
+> Google client out of *Testing* and finding five strangers.
 > Seen and not on the list: stage and *craft and buy* rows on the plan page still show raw ids.
 
 ### Before the next sequence — worth knowing
@@ -537,6 +540,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-25 | forty-second | **PR #46 never deployed**: its `main` run went red on a `findBy` that took 1 320 ms where the same commit had taken 486. Production stayed on #45, and nothing showed it until somebody looked. `asyncUtilTimeout` is now 5 s for every test. The remote check now includes the last `main` run and the health SHA |
 | 2026-09-24 | forty-first | Q6 written: the maintainer agreed the three "seen, not agreed" items. **Sign-in now returns the reader to their page** — `?then=` held in the session across Google, one open-redirect check shared with the dev sign-in; untried against Google until deployed. **A choice line is named by its prices**, which are facts already. **A shadow price rendered at last** — 90.00, driven, no reading needed. All four met. Then the character page asks with **its own game's profile**, and the route refuses a mismatch by name. 466 backend tests, 39 frontend |
 | 2026-09-24 | fortieth | **N41 closed**, with Lucia: Inverse Crown in Karenina's place (not owned). Sequence 9 put her and Selena on the ladder, +129 facts. Then the maintainer named the patch: today's readings were **4.8.0 "Anchored in Faith"**, live since that morning's maintenance, where sequences 8 and 9 said 4.7.0 — sequence 10 relabels, no fact changes. A test went red with sequence 9 unnoticed; run the full build. Both in both databases. 452 tests |
 | 2026-09-24 | thirty-ninth | N41's question answered first-hand: every S-rank construct shares Lacrimosa's EXP, Promote and skill costs. So the bundle writes that path **once** (`ladders`, ADR 0031) and expands it per construct in the parser; Lacrimosa's 57 rows became 30 entries and diff against sequence 7 as *no changes*, same provenance per fact. Then her four skill pages showed **eight** levelled skills where the bundle had seven, one of them a name on no page. Sequence 8 published locally and to Neon, −4/+8, each read back as *no changes*. 452 backend tests |
