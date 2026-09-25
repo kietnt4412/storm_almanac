@@ -77,6 +77,13 @@ import java.util.Set;
  *                        required — see {@link ProgressKind} — so they appear in
  *                        no {@code factRef} and a kind nobody names renders as
  *                        its slug
+ * @param sections        the headings the game's screens group an entity's
+ *                        tracks under, in the order it shows them. Not facts:
+ *                        each step says which heading its track is under, and
+ *                        that is the reading; this is the order, and it may hold
+ *                        the bundle's own word for a group the game leaves
+ *                        untitled (ADR 0032). Empty for every bundle before
+ *                        sequence 11
  */
 public record GameDataBundle(
         Game game,
@@ -91,8 +98,28 @@ public record GameDataBundle(
         List<Sink> sinks,
         List<BannerModel> banners,
         List<Entity> entities,
-        List<ProgressKind> progressKinds
+        List<ProgressKind> progressKinds,
+        List<String> sections
 ) {
+
+    /** A bundle from before a step could name the section its track sits under. */
+    public GameDataBundle(
+            Game game,
+            long sequence,
+            String label,
+            String attribution,
+            List<Provenance> provenance,
+            String sourcedBy,
+            Map<String, String> factProvenance,
+            List<Item> items,
+            List<Source> sources,
+            List<Sink> sinks,
+            List<BannerModel> banners,
+            List<Entity> entities,
+            List<ProgressKind> progressKinds) {
+        this(game, sequence, label, attribution, provenance, sourcedBy, factProvenance,
+                items, sources, sinks, banners, entities, progressKinds, List.of());
+    }
 
     /** A bundle from before a progress kind could be named. */
     public GameDataBundle(
@@ -109,7 +136,7 @@ public record GameDataBundle(
             List<BannerModel> banners,
             List<Entity> entities) {
         this(game, sequence, label, attribution, provenance, sourcedBy, factProvenance,
-                items, sources, sinks, banners, entities, List.of());
+                items, sources, sinks, banners, entities, List.of(), List.of());
     }
 
     public GameDataBundle {
@@ -125,6 +152,7 @@ public record GameDataBundle(
         sinks = List.copyOf(sinks);
         banners = List.copyOf(banners);
         entities = List.copyOf(entities);
+        sections = List.copyOf(sections);
         // Sorted, like GameDefinition's: names have no order, and a bundle that
         // lists them in reading order has to equal the one the database returns.
         progressKinds = progressKinds.stream()
@@ -148,6 +176,7 @@ public record GameDataBundle(
         // approving a publish can act on; "stage '1-1' drops unknown item
         // 'sulfr'" is. See ADR 0008.
         validate(items, sources, sinks, entities, banners, progressKinds);
+        validateLabels(sinks, sections);
         validateProvenance(provenance, sourcedBy, factProvenance,
                 refsOf(items, sources, sinks, banners, entities));
     }
@@ -167,7 +196,71 @@ public record GameDataBundle(
                 sinks,
                 banners,
                 entities,
-                progressKinds);
+                progressKinds,
+                sections);
+    }
+
+    // ── What the game calls things ──────────────────────────────────────────
+
+    /**
+     * Two rules, each refusing a label that would render as something other
+     * than what the author wrote (ADR 0032).
+     *
+     * <p>A section a step names must be declared, and every declared section
+     * must be named by a step: the declaration is only an order, so a typo on
+     * either side would put a track under a heading of its own, or leave a
+     * heading nothing sits under, and the page would show it without complaint.
+     *
+     * <p>One state has one name. Two steps of an entity may both name a state —
+     * one arriving at it and one leaving it, or two prices of one step (ADR
+     * 0021) — and when they disagree there is no right one to show.
+     */
+    private static void validateLabels(List<Sink> sinks, List<String> sections) {
+        List<String> problems = new ArrayList<>();
+        Set<String> declared = new LinkedHashSet<>();
+        for (String section : sections) {
+            if (section == null || section.isBlank()) {
+                throw new BundleFormatException("sections must not hold a blank heading");
+            }
+            if (!declared.add(section)) {
+                throw new BundleFormatException("duplicate section '" + section + "'");
+            }
+        }
+
+        Set<String> used = new LinkedHashSet<>();
+        Map<String, String> nameOf = new HashMap<>();
+        for (Sink sink : sinks) {
+            if (!(sink instanceof Upgrade upgrade)) continue;
+            Upgrade.Labels labels = upgrade.labels();
+            if (labels.section() != null) {
+                used.add(labels.section());
+                if (!declared.contains(labels.section())) {
+                    problems.add("upgrade '" + upgrade.id() + "' sits under section '" + labels.section()
+                            + "', which sections does not declare; declared: " + declared);
+                }
+            }
+            name(nameOf, upgrade, upgrade.fromState(), labels.fromName(), problems);
+            name(nameOf, upgrade, upgrade.toState(), labels.toName(), problems);
+        }
+        for (String section : declared) {
+            if (!used.contains(section)) {
+                problems.add("section '" + section + "' is declared but no upgrade sits under it");
+            }
+        }
+        if (!problems.isEmpty()) {
+            throw new BundleFormatException(String.join(System.lineSeparator(), problems));
+        }
+    }
+
+    private static void name(Map<String, String> nameOf, Upgrade upgrade, String state, String name,
+            List<String> problems) {
+        if (name == null) return;
+        String key = upgrade.entity().value() + " " + state;
+        String earlier = nameOf.putIfAbsent(key, name);
+        if (earlier != null && !earlier.equals(name)) {
+            problems.add("state '" + state + "' of '" + upgrade.entity().value() + "' is called both '"
+                    + earlier + "' and '" + name + "' (upgrade '" + upgrade.id() + "')");
+        }
     }
 
     // ── Provenance ──────────────────────────────────────────────────────────

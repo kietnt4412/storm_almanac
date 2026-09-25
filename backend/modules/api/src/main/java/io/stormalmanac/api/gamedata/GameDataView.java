@@ -126,8 +126,22 @@ public final class GameDataView {
             List<SkillView> skills,
             List<TalentView> talents) {}
 
-    /** One deterministic step of an entity's upgrade graph, and what it costs. */
-    public record UpgradeStepView(String id, String fromState, String toState, List<CostView> costs) {}
+    /**
+     * One deterministic step of an entity's upgrade graph, and what it costs.
+     *
+     * <p>The four words are what the game calls the step's states and where its
+     * track sits (ADR 0032). Each is null when the bundle gave none, which is
+     * every step before sequence 11; a page falls back to the ids.
+     */
+    public record UpgradeStepView(
+            String id,
+            String fromState,
+            String toState,
+            List<CostView> costs,
+            String fromName,
+            String toName,
+            String section,
+            String tag) {}
 
     /** One change in a patch diff, flattened the way {@code Change} already is. */
     public record ChangeView(String axis, String kind, String subject, String detail, String before, String after) {}
@@ -191,7 +205,8 @@ public final class GameDataView {
             EntitySummaryView entity,
             List<UpgradeStepView> steps,
             List<CostView> totalCost,
-            SourcingView sourcing) {}
+            SourcingView sourcing,
+            List<String> sections) {}
 
     public record DiffResponse(
             String game, VersionView from, VersionView to, List<ChangeView> changes) {}

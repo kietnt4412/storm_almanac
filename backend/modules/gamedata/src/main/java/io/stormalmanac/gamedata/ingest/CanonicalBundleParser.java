@@ -149,7 +149,8 @@ public final class CanonicalBundleParser {
                 sinks,
                 each(root, "banners", CanonicalBundleParser::banner),
                 each(root, "entities", CanonicalBundleParser::entity),
-                each(root, "progressKinds", CanonicalBundleParser::progressKind));
+                each(root, "progressKinds", CanonicalBundleParser::progressKind),
+                strings(root, "sections"));
     }
 
     // ── The domain shapes, one method each ──────────────────────────────────
@@ -382,7 +383,21 @@ public final class CanonicalBundleParser {
                 strings(node, "requires"),
                 each(node, "progress", (p, pAt) -> new Progress(
                         text(p, "kind", pAt + ".kind"),
-                        (int) integer(p, "quantity", pAt + ".quantity")), at));
+                        (int) integer(p, "quantity", pAt + ".quantity")), at),
+                labels(node, at));
+    }
+
+    /**
+     * What the game calls a step's states and where its track sits, all
+     * optional and read from the step itself (ADR 0032). Absent is
+     * {@link Upgrade.Labels#NONE}, which is every step before sequence 11.
+     */
+    private static Upgrade.Labels labels(JsonNode node, String at) {
+        return new Upgrade.Labels(
+                optionalText(node, "fromName", at + ".fromName"),
+                optionalText(node, "toName", at + ".toName"),
+                optionalText(node, "section", at + ".section"),
+                optionalText(node, "tag", at + ".tag"));
     }
 
     /** A row a ladder expanded, parsed exactly as a hand-written one and failing with its origin. */
@@ -565,6 +580,11 @@ public final class CanonicalBundleParser {
         String value = node.textValue();
         if (value.isBlank()) throw new BundleFormatException(at + " must not be blank");
         return value;
+    }
+
+    private static String optionalText(JsonNode parent, String field, String at) {
+        JsonNode node = parent.get(field);
+        return node == null || node.isNull() ? null : text(parent, field, at);
     }
 
     private static String textOrEmpty(JsonNode parent, String field) {

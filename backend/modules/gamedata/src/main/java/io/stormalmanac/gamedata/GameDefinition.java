@@ -29,10 +29,31 @@ public record GameDefinition(
         List<Sink> sinks,
         List<BannerModel> banners,
         List<Entity> entities,
-        List<ProgressKind> progressKinds
+        List<ProgressKind> progressKinds,
+        List<String> sections
 ) {
 
+    /**
+     * A version whose steps name no sections, which is every version published
+     * before sequence 11.
+     */
+    public GameDefinition(
+            Game game,
+            GameDataVersion version,
+            List<Item> items,
+            List<Source> sources,
+            List<Sink> sinks,
+            List<BannerModel> banners,
+            List<Entity> entities,
+            List<ProgressKind> progressKinds) {
+        this(game, version, items, sources, sinks, banners, entities, progressKinds, List.of());
+    }
+
     public GameDefinition {
+        // Copied, not sorted, unlike the names below: the order is the content.
+        // It is the order the game's screens show the sections in, and a reader
+        // finds their place by it (ADR 0032).
+        sections = List.copyOf(sections);
         items = List.copyOf(items);
         sources = List.copyOf(sources);
         sinks = List.copyOf(sinks);

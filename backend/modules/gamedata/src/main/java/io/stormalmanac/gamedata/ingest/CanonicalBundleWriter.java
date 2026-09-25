@@ -112,6 +112,10 @@ public final class CanonicalBundleWriter {
         array(root, "fodder", sinksOf(bundle.sinks(), Fodder.class), this::fodder);
         array(root, "banners", bundle.banners(), this::banner);
         array(root, "progressKinds", bundle.progressKinds(), this::progressKind);
+        if (!bundle.sections().isEmpty()) {
+            ArrayNode sections = root.putArray("sections");
+            bundle.sections().forEach(sections::add);
+        }
         return root;
     }
 
@@ -232,6 +236,13 @@ public final class CanonicalBundleWriter {
             p.put("kind", progress.kind());
             p.put("quantity", progress.quantity());
         });
+        // Absent rather than null, like every optional field here, so a step
+        // with no words writes exactly what it did before ADR 0032.
+        Upgrade.Labels labels = upgrade.labels();
+        if (labels.fromName() != null) node.put("fromName", labels.fromName());
+        if (labels.toName() != null) node.put("toName", labels.toName());
+        if (labels.section() != null) node.put("section", labels.section());
+        if (labels.tag() != null) node.put("tag", labels.tag());
     }
 
     private void fodder(ObjectNode node, Fodder fodder) {

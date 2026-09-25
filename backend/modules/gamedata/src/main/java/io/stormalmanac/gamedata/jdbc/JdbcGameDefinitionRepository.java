@@ -222,7 +222,15 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
 
         return new GameDefinition(
                 header.game(), header.version(), items, sources, sinks,
-                banners(version, itemSlugs), entities(version, itemSlugs), progressKinds(version));
+                banners(version, itemSlugs), entities(version, itemSlugs), progressKinds(version),
+                sections(version));
+    }
+
+    /** The headings in the order the game shows them; none, for every version before V16. */
+    private List<String> sections(long version) {
+        return jdbc.queryForList(
+                "SELECT name FROM gamedata.section WHERE version_id = ? ORDER BY position",
+                String.class, version);
     }
 
     /**
@@ -460,7 +468,8 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
 
         return jdbc.query(
                 """
-                SELECT u.id, u.slug, e.slug AS entity_slug, u.from_state, u.to_state
+                SELECT u.id, u.slug, e.slug AS entity_slug, u.from_state, u.to_state,
+                       u.from_name, u.to_name, u.section, u.tag
                   FROM gamedata.upgrade u
                   JOIN gamedata.entity e ON e.id = u.entity_id AND e.version_id = u.version_id
                  WHERE u.version_id = ? ORDER BY u.id
@@ -471,7 +480,9 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
                         rs.getString("from_state"), rs.getString("to_state"),
                         costs.getOrDefault(rs.getLong("id"), List.of()),
                         requires.getOrDefault(rs.getLong("id"), List.of()),
-                        progress.getOrDefault(rs.getLong("id"), List.of())),
+                        progress.getOrDefault(rs.getLong("id"), List.of()),
+                        new Upgrade.Labels(rs.getString("from_name"), rs.getString("to_name"),
+                                rs.getString("section"), rs.getString("tag"))),
                 version);
     }
 

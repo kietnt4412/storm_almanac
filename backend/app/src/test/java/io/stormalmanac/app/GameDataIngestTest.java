@@ -93,6 +93,20 @@ class GameDataIngestTest extends SharedDatabaseTest {
                 .isEqualTo(new io.stormalmanac.gamedata.DayBoundary(java.time.ZoneId.of("UTC"), 5));
         Upgrade lastRank = upgradeOf(loaded, "helentine-lacrimosa-promote-13");
         assertThat(lastRank.requires()).containsExactly("level-80");
+        // Since sequence 11 a step says what the game calls things (ADR 0032),
+        // in four nullable columns and a table of its own. Equality above covers
+        // them; these say which readings, so a failure names the rehearsal's
+        // complaint rather than a record's toString.
+        assertThat(lastRank.labels())
+                .isEqualTo(new Upgrade.Labels(null, "Hero", "Growth", null));
+        assertThat(upgradeOf(loaded, "selena-pianissimo-promote-5").labels().toName()).isEqualTo("Elite ★3");
+        assertThat(upgradeOf(loaded, "selena-pianissimo-promote-1").labels().fromName()).isEqualTo("Private ★1");
+        assertThat(upgradeOf(loaded, "selena-pianissimo-thunderous-transposition-2").labels())
+                .isEqualTo(new Upgrade.Labels(null, null, "Basic Skill", "Yellow Orb"));
+        assertThat(upgradeOf(loaded, "lucia-inverse-crown-attacker-18").labels())
+                .isEqualTo(new Upgrade.Labels(null, null, "Common Effect", "Class Skill"));
+        assertThat(loaded.sections())
+                .containsExactly("Growth", "Basic Skill", "Special Skill", "Evolution Effect", "Common Effect");
         // Since sequence 6 the level track is a chain, not one row, so no single
         // upgrade carries the ladder. What has to survive the schema is every
         // link — and their sum is the EXP to Lv 80, which stays 497 000 however

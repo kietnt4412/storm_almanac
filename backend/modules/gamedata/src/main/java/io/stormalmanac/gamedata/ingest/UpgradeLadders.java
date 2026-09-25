@@ -36,6 +36,14 @@ import java.util.regex.Pattern;
  *   <li>a list binding is spent only inside an {@code each} group that walks
  *       it, one copy of the group per element, in order.</li>
  * </ul>
+ *
+ * <p>A group may also say what differs by <em>position</em> rather than by word:
+ * {@code positions} holds one object per element of the list, and its fields
+ * are set on every row of that element's copy. The skill in slot two is a Yellow
+ * Orb on every S-rank construct whatever it is called, so the slot's section and
+ * tag are written once here rather than once per construct (ADR 0032). A
+ * {@code positions} list whose length is not the list's, or a field a row
+ * already sets, is refused — either would label a skill with another's words.
  */
 final class UpgradeLadders {
 
@@ -106,12 +114,22 @@ final class UpgradeLadders {
                             + climbAt + " (" + entity + ") does not bind to a list");
                 }
                 used.add(block.each());
+                if (block.positions() != null && block.positions().size() != values.size()) {
+                    throw new BundleFormatException(block.at() + ".positions has " + block.positions().size()
+                            + " entries and " + climbAt + " (" + entity + ") binds " + values.size() + " '"
+                            + block.each() + "'; one entry per position, or the words land on the wrong rows");
+                }
                 // The whole group per word, so one skill's rows sit together
                 // the way an author writing them out would have put them.
-                for (JsonNode value : values) {
+                for (int v = 0; v < values.size(); v++) {
+                    Map<String, String> current = Map.of(block.each(), values.get(v).textValue());
                     for (Step step : block.steps()) {
-                        rows.add(row(step, entity, Map.of(block.each(), value.textValue()),
-                                bindings, used, climbAt, climbSource, ladderSource));
+                        Row made = row(step, entity, current, bindings, used, climbAt, climbSource, ladderSource);
+                        if (block.positions() != null) {
+                            place((ObjectNode) made.row(), block.positions().get(v), current, bindings, used,
+                                    made.at());
+                        }
+                        rows.add(made);
                     }
                 }
             }
@@ -129,8 +147,11 @@ final class UpgradeLadders {
     /** One ladder row, and the provenance its group gives it if it is in one. */
     private record Step(ObjectNode row, String at, String groupSource) {}
 
-    /** A plain row, as a block of one with no list; or an {@code each} group and the list it walks. */
-    private record Block(String each, String at, List<Step> steps) {}
+    /**
+     * A plain row, as a block of one with no list; or an {@code each} group, the
+     * list it walks, and what each position adds, if anything.
+     */
+    private record Block(String each, String at, List<Step> steps, List<ObjectNode> positions) {}
 
     private static List<Block> blocks(JsonNode ladder, String at) {
         JsonNode upgrades = ladder.get("upgrades");
@@ -143,7 +164,7 @@ final class UpgradeLadders {
             JsonNode node = object(upgrades.get(u), rowAt);
             JsonNode each = node.get("each");
             if (each == null || each.isNull()) {
-                blocks.add(new Block(null, rowAt, List.of(step(node, rowAt, null))));
+                blocks.add(new Block(null, rowAt, List.of(step(node, rowAt, null)), null));
                 continue;
             }
             String walks = text(node, "each", rowAt + ".each");
@@ -163,9 +184,35 @@ final class UpgradeLadders {
                 }
                 steps.add(step(inner, groupAt, groupSource));
             }
-            blocks.add(new Block(walks, rowAt, steps));
+            blocks.add(new Block(walks, rowAt, steps, positions(node, rowAt)));
         }
         return blocks;
+    }
+
+    private static List<ObjectNode> positions(JsonNode group, String at) {
+        JsonNode positions = group.get("positions");
+        if (positions == null || positions.isNull()) return null;
+        if (!positions.isArray() || positions.isEmpty()) {
+            throw new BundleFormatException(at + ".positions must be a non-empty array, one object per position");
+        }
+        List<ObjectNode> each = new ArrayList<>();
+        for (int p = 0; p < positions.size(); p++) {
+            each.add((ObjectNode) object(positions.get(p), at + ".positions[" + p + "]"));
+        }
+        return each;
+    }
+
+    /** One position's fields onto one row, placeholders filled, never over a field the row sets. */
+    private static void place(ObjectNode row, ObjectNode position, Map<String, String> current,
+            Map<String, JsonNode> bindings, Set<String> used, String where) {
+        position.properties().forEach(field -> {
+            if (field.getKey().startsWith("_")) return;
+            if (row.has(field.getKey())) {
+                throw new BundleFormatException(where + " sets '" + field.getKey()
+                        + "' itself and its position sets it too; say it in one place");
+            }
+            row.set(field.getKey(), substitute(field.getValue(), current, bindings, used, where));
+        });
     }
 
     private static Step step(JsonNode node, String at, String groupSource) {
