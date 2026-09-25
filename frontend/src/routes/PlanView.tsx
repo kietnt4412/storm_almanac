@@ -3,6 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { ApiError, getGames, getGoals, getMeasures, solve, type Measure, type Plan } from '../api/client';
 import { ProfileGate } from '../profile';
+import { NextStep } from '../steps/Steps';
 import { reachOf, usePlannerStore } from '../store/plannerStore';
 
 /**
@@ -160,6 +161,8 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
 
       {run.isError && <Refusal error={run.error} />}
       {run.data && <Answer plan={run.data} energyUnit={energyUnit} />}
+
+      <NextStep from="/plan" />
     </div>
   );
 }

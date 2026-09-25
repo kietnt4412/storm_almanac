@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'react-router-dom';
 import { ApiError, getGames, getMe, signInUrl } from '../api/client';
 import { useCreateProfile } from '../profile';
+import { STEPS } from '../steps/Steps';
 import { usePlannerStore } from '../store/plannerStore';
 
 /**
@@ -163,16 +164,12 @@ export function Home() {
         </section>
       )}
 
-      <section className="grid gap-3 sm:grid-cols-3">
-        <Step to="/inventory" n={1} title="Say what you own">
-          Bulk entry, searchable, and it keeps working with no signal.
-        </Step>
-        <Step to="/goals" n={2} title="Say what you want">
-          A character and a state to get her to. Order them by what matters.
-        </Step>
-        <Step to="/plan" n={3} title="Get the plan">
-          Stages and runs, with what the answer cost and what it could not prove.
-        </Step>
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {STEPS.map((step, index) => (
+          <Step key={step.to} to={step.to} n={index + 1} title={step.title}>
+            {step.blurb}
+          </Step>
+        ))}
       </section>
     </div>
   );
