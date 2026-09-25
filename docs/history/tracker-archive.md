@@ -3236,6 +3236,26 @@ bundle's comment has it with no Skill Point or Cog cost on its screen, so the
 reading will say what it does cost. The PGR Status bullet was rewritten to
 make room (archived above). 475 backend tests, 53 frontend.
 
+**Sequence 11 published to Neon** at 11:32:55Z, on the maintainer's word in chat,
+after #50 had deployed (`61929c1`, V16 applied by its startup). The Neon preview showed the same
+328 changes, none of them a number; it read back as *no changes*, and the live
+upgrades route serves Selena's `promote-5` as "Elite ★3" and her second skill as
+Basic Skill / Yellow Orb. **Ultima Awaken**, the maintainer reports, costs the same
+as the leader unlock. That contradicts the skills group's note of 2026-09-24,
+"reached by the Ultima awakening, with no Skill Point or Cog cost on its
+screen", so it went back as a question rather than into the bundle. **The maintainer's answer was to put
+it in now and come back to it later** — every construct has it, it opens after
+the fourth Awaken — so **sequence 12** adds three hand-written rows (`ultima-awaken-locked`
+→ `ultima-awaken-1`, 3 SP + 25 000 Cogs, Common Effect, no tag), credited to a new
+provenance entry `ultima-awaken-report` whose detail says it is a report from
+playing, read on no screen, and names the note it contradicts. Hand-written
+rather than laddered because a climber's `sourcedBy` beats a row's on a ladder,
+which would have credited Selena's and Lucia's rows to their screen sittings.
+The Awaken gate is not expressible — no Awaken track exists — and the row says so.
+Preview: three additions and nothing else, locally and on Neon; published to both
+(Neon at 11:41:06Z) and read back as *no changes*; the live route serves it
+credited to the report. N42 holds the re-reading.
+
 **2026-09-24 (forty-first) — Q6 written down, and its smallest item done.**
 
 The session opened as the fortieth's handoff asked: is Q6's list complete, or

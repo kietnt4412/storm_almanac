@@ -162,7 +162,7 @@
     "energyUnit": "Serum",
     "dayBoundary": { "zone": "UTC", "hour": 5 }
   },
-  "sequence": 11,
+  "sequence": 12,
   "label": "Anchored in Faith (Global 4.8.0)",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client: patch 4.7.0 \"Steering By Light\" from 2026-09-18 to 2026-09-22, and patch 4.8.0 \"Anchored in Faith\" on 2026-09-24. Numbers and text only; no game assets.",
 
@@ -232,6 +232,12 @@
       "origin": "OBSERVED_IN_GAME",
       "detail": "Lucia: Inverse Crown's character screen ('Lucia / Inverse Crown', Evolve SS, Lv 80 / 80) and her skill pages, each at 'Max Level Reached': Abyssal Lament [Red Orb], Dusklit Severance [Yellow Orb], Frosty Thorns [Blue Orb] and Malevolent March [Basic Attack], each at Lv 18; Sequence Traversal [Core Passive] and Savage Afterglow [QTE] at Lv 18, Silenced Abysslight [Signature Move] at Lv 24, shown as 18 (+6); Attacker [Class Skill] at Lv 18; and Bloomtide: Genesis [SS Rank Passive Skill] at Lv 2, its Lv 1 'Unlocked at S5 Rank' and its Lv 2 'Unlocked at SS Rank', the same shape as Lacrimosa's Vestige. Eight skills on the level curve, in the same slots as Lacrimosa's eight. The Signature Move's +6 is read as the same Memory Resonance bonus the maintainer named on Selena: Pianissimo's Core Passive, and is not modelled. Also the Inver-Shard - Inverse Crown item card, 'Owned 0'. That she is S-rank is the maintainer's report. That she climbs the S-rank ladder — EXP per level, Cogs per Promote step, Skill Points and Cogs per skill level, 30 shards to Evolve S -> SS, 2 Skill Points + 20 000 Cogs for the SS passive's unlock — and that her shard's Phantom Pain shop tile is five stars and sells 30 ever, 10 at 10 Scars then 20 at 20, are the maintainer's reports of 2026-09-24 that these hold for every S-rank construct; none of those numbers was read on her screens. She replaces Karenina: Effulgence as the third construct on the ladder because the maintainer does not own Karenina. Screenshots taken by the maintainer on 2026-09-24 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch 4.8.0 \"Anchored in Faith\", after that day's maintenance (the maintainer); sequence 9 said \"Steering By Light\", which was wrong.",
       "observedOn": "2026-09-24"
+    },
+    {
+      "id": "ultima-awaken-report",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "The maintainer's report of 2026-09-25, from playing, and NOT read off a screen in any sitting: every S-rank construct has an Ultima Awaken under Common Effect, it opens once the construct has been awakened four times, and unlocking it costs what the leader skill's unlock does (3 Skill Points and 25 000 Cogs). It contradicts skill-pages (2026-09-24), which recorded Ultima Awaken as reached by the Ultima awakening with no Skill Point or Cog cost on its screen. Recorded at the maintainer's request to have it on the roster now, and marked in TRACKER.md to be read on its own screen; until it is, this entry is the whole of the claim.",
+      "observedOn": "2026-09-25"
     }
   ],
   "sourcedBy": "weapon-upgrade-screens",
@@ -294,7 +300,10 @@
     "reward:phantom-pain-cage-700000": "phantom-pain-cage-screen",
     "reward:phantom-pain-cage-900000": "phantom-pain-cage-screen",
     "reward:phantom-pain-cage-1000000": "phantom-pain-cage-screen",
-    "reward:phantom-pain-cage-1100000": "phantom-pain-cage-screen"
+    "reward:phantom-pain-cage-1100000": "phantom-pain-cage-screen",
+    "upgrade:helentine-lacrimosa-ultima-awaken-unlock": "ultima-awaken-report",
+    "upgrade:selena-pianissimo-ultima-awaken-unlock": "ultima-awaken-report",
+    "upgrade:lucia-inverse-crown-ultima-awaken-unlock": "ultima-awaken-report"
   },
 
   "items": [
@@ -1006,6 +1015,43 @@
       "costs": [
         { "item": "harmony-accelerator", "quantity": 25 }
       ]
+    },
+    {
+      "_comment": [
+        "Ultima Awaken, one per S-rank construct, written by hand rather than on",
+        "the ladder: a climber's sourcedBy beats a row's there (ADR 0031), so a",
+        "laddered row would be credited to Selena's and Lucia's screen sittings,",
+        "and this is not a screen reading at all. See ultima-awaken-report, which",
+        "says what it is and what it contradicts.",
+        "",
+        "It opens only after the fourth Awaken (maintainer). This bundle has no",
+        "Awaken track, so that is not a gate here: a gate must name a state some",
+        "step reaches, and a plan to unlock it does not count the awakenings it",
+        "stands behind. Its tag on the Common Effect page is unread, so it has",
+        "none, and the roster names it from its ids."
+      ],
+      "id": "helentine-lacrimosa-ultima-awaken-unlock",
+      "entity": "helentine-lacrimosa",
+      "fromState": "ultima-awaken-locked",
+      "toState": "ultima-awaken-1",
+      "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 25000 } ],
+      "section": "Common Effect"
+    },
+    {
+      "id": "selena-pianissimo-ultima-awaken-unlock",
+      "entity": "selena-pianissimo",
+      "fromState": "ultima-awaken-locked",
+      "toState": "ultima-awaken-1",
+      "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 25000 } ],
+      "section": "Common Effect"
+    },
+    {
+      "id": "lucia-inverse-crown-ultima-awaken-unlock",
+      "entity": "lucia-inverse-crown",
+      "fromState": "ultima-awaken-locked",
+      "toState": "ultima-awaken-1",
+      "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 25000 } ],
+      "section": "Common Effect"
     }
   ],
 
