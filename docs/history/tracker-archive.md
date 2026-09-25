@@ -3236,6 +3236,15 @@ bundle's comment has it with no Skill Point or Cog cost on its screen, so the
 reading will say what it does cost. The PGR Status bullet was rewritten to
 make room (archived above). 475 backend tests, 53 frontend.
 
+**Sequence 11 published to Neon** at 11:32:55Z, on the maintainer's word in chat,
+after #50 had deployed (`61929c1`, V16 applied by its startup). The Neon preview showed the same
+328 changes, none of them a number; it read back as *no changes*, and the live
+upgrades route serves Selena's `promote-5` as "Elite ★3" and her second skill as
+Basic Skill / Yellow Orb. **Ultima Awaken**, the maintainer reports, costs the same
+as the leader unlock. That contradicts the skills group's note of 2026-09-24,
+"reached by the Ultima awakening, with no Skill Point or Cog cost on its
+screen", so it went back as a question rather than into the bundle.
+
 **2026-09-24 (forty-first) — Q6 written down, and its smallest item done.**
 
 The session opened as the fortieth's handoff asked: is Q6's list complete, or
