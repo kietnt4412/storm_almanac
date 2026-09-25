@@ -34,6 +34,12 @@ export function Home() {
 
   const signedOut = me.error instanceof ApiError && me.error.isSignedOut;
   const published = games.data?.games ?? [];
+  const chosen = game || published[0]?.id || '';
+  // One profile per game per server is the server's rule. The defaults are the
+  // first game on "global", which is the profile a reader with one already has,
+  // so the form says so rather than letting the server refuse it.
+  const taken = me.data?.profiles.find((profile) => profile.game === chosen && profile.region === region);
+  const chosenName = published.find((published) => published.id === chosen)?.displayName ?? chosen;
 
   return (
     <div className="space-y-6">
@@ -96,7 +102,7 @@ export function Home() {
             className="card flex flex-wrap items-end gap-3"
             onSubmit={(event) => {
               event.preventDefault();
-              add.mutate({ game: game || games.data?.games[0]?.id || '', region, displayName });
+              add.mutate({ game: chosen, region, displayName });
             }}
           >
             <div>
@@ -106,7 +112,7 @@ export function Home() {
               <select
                 id="game"
                 className="input"
-                value={game || published[0]?.id || ''}
+                value={chosen}
                 onChange={(event) => setGame(event.target.value)}
                 disabled={published.length === 0}
               >
@@ -139,9 +145,14 @@ export function Home() {
                 onChange={(event) => setDisplayName(event.target.value)}
               />
             </div>
-            <button type="submit" className="btn" disabled={add.isPending || published.length === 0}>
+            <button type="submit" className="btn" disabled={add.isPending || published.length === 0 || Boolean(taken)}>
               {add.isPending ? 'Creating…' : 'Add a profile'}
             </button>
+            {taken && (
+              <p className="muted text-sm">
+                You already have a {chosenName} profile on {region}: {taken.displayName}.
+              </p>
+            )}
             {published.length === 0 && !games.isPending && (
               <p className="muted text-sm">
                 Nothing is published on this installation yet, so there is no game to plan for.
