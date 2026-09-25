@@ -3123,6 +3123,27 @@ a deviation needs one and following D4's "a list, not a feeling". The maintainer
 may still change it. Making room for D5 took the tracker from 555 lines to under
 550, by carrying less rather than rewrapping (see the ledger).
 
+**The rehearsal began and found S1 within minutes.** The maintainer signed in on
+the live site from a catalog page and reported it done. That is Q6's fourth item
+run against Google, on their word; the screenshot they sent shows them signed in,
+not the landing page. The same screenshot showed *"Could not create it:
+/api/me/profiles responded 500"*. They had one profile, "Thel" on PGR/global, and
+the add form's defaults are **the first published game on "global"**, which is
+exactly that place. V5's `profile_unique_per_account UNIQUE (account_id, game_id,
+region)` refused the second, correctly and deliberately (its comment: a second
+"main" on one server splits an inventory in half). But nothing mapped
+`DuplicateKeyException`, so the refusal arrived as a 500 with no sentence. **Fixed
+at both ends.** The controller checks `profilesOf` before saving and throws a new
+`ConflictException`, which `ApiExceptionHandler` makes a 409 naming the holder. It
+checks rather than catching the key violation because the api module has no
+spring-tx on its classpath. Two requests for one place at the same instant still
+reach the constraint and a 500, which the javadoc says, and the button is disabled
+while one is in flight. The form says *"You already have a Punishing: Gray Raven
+profile on global: Thel."* and disables Add until the game or server changes.
+Both tests failed first, the backend one with the production `DuplicateKeyException`.
+Driven in a browser against a local API: the sentence, the disabled button, and a
+forced POST answered 409 with the server's sentence. 467 backend tests, 41 frontend.
+
 **2026-09-24 (forty-first) — Q6 written down, and its smallest item done.**
 
 The session opened as the fortieth's handoff asked: is Q6's list complete, or
