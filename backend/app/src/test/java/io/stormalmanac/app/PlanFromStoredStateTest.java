@@ -271,6 +271,49 @@ class PlanFromStoredStateTest extends SharedDatabaseTest {
     }
 
     /**
+     * Found in the maintainer's rehearsal on 2026-09-25: the form defaults to the
+     * one game and server they already had, and the second profile came back as
+     * a bare 500 from the unique constraint. The refusal is right, and it must
+     * say so.
+     */
+    @Test
+    @DisplayName("a second profile for the same game and server is refused by name, not with a 500")
+    void aSecondProfileOnTheSameServerIsAConflict() throws Exception {
+        publish("proving-ground-1.0.json");
+        RequestPostProcessor player = signedIn("google", "sub-vertin", "Vertin");
+        Map<String, String> thel = Map.of("game", "proving-ground", "region", "global", "displayName", "Thel");
+        body(mvc.perform(post("/api/me/profiles")
+                .with(player)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(thel))));
+
+        var refused = mvc.perform(post("/api/me/profiles")
+                        .with(player)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(
+                                Map.of("game", "proving-ground", "region", "global", "displayName", "Main"))))
+                .andReturn()
+                .getResponse();
+
+        assertThat(refused.getStatus()).isEqualTo(409);
+        assertThat(json.readTree(refused.getContentAsString()).get("detail").asText())
+                .isEqualTo("You already have a proving-ground profile on global: Thel. "
+                        + "One profile per game per server, so an inventory is never split in two.");
+        assertThat(body(mvc.perform(get("/api/me").with(player))).get("profiles")).hasSize(1);
+
+        // Another server is another profile.
+        mvc.perform(post("/api/me/profiles")
+                        .with(player)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(
+                                Map.of("game", "proving-ground", "region", "cn", "displayName", "Thel"))))
+                .andExpect(status -> assertThat(status.getResponse().getStatus()).isEqualTo(201));
+    }
+
+    /**
      * A signed-in caller whose account really exists.
      *
      * <p>The principal is the one {@code AccountUserServices} mints, built over

@@ -1,5 +1,6 @@
 package io.stormalmanac.api.player;
 
+import io.stormalmanac.api.ConflictException;
 import io.stormalmanac.api.ResourceNotFoundException;
 import io.stormalmanac.api.player.PlayerView.CreateProfileRequest;
 import io.stormalmanac.api.player.PlayerView.GoalView;
@@ -118,6 +119,12 @@ public class PlayerController {
      * "conflict" — which is a leak of the fact that the id is taken. It is also
      * simply not the client's to choose: nothing about a profile is derivable
      * from anything the client knows.
+     *
+     * <p>One profile per game per server is the schema's rule, and it is checked
+     * here first so the refusal can name the profile already holding the place;
+     * reaching the constraint instead was a bare 500. Two requests for the same
+     * place at the same instant still reach it — the page disables its button
+     * while one is in flight, and the constraint is what keeps the data right.
      */
     @PostMapping("/profiles")
     @ResponseStatus(HttpStatus.CREATED)
@@ -128,6 +135,14 @@ public class PlayerController {
                 GameId.of(request.game()),
                 request.displayName() == null || request.displayName().isBlank() ? "Main" : request.displayName(),
                 request.region());
+        players.profilesOf(profile.owner()).stream()
+                .filter(held -> held.game().equals(profile.game()) && held.region().equals(profile.region()))
+                .findFirst()
+                .ifPresent(held -> {
+                    throw new ConflictException(("You already have a %s profile on %s: %s. "
+                                    + "One profile per game per server, so an inventory is never split in two.")
+                            .formatted(held.game().value(), held.region(), held.displayName()));
+                });
         players.saveProfile(profile);
         return ProfileResponse.of(profile);
     }
