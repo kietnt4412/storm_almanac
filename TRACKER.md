@@ -78,10 +78,10 @@ being finished with is.
   beside `modules`, `adapters`, `substrate`, `app` needs a line there**.
 - **The remote, last checked 2026-09-25 (forty-second) — re-check it, do not trust it, and check three things:**
   which PRs merged, **the last `main` run**, and **the SHA `/api/health` reports**.
-  [PR #46](https://github.com/kietnt4412/storm_almanac/pull/46) merged, but **its `main` run went red on a
-  flaky test, so `deploy` never ran** and production still served `fac0ce6` (PR #45) the next morning.
-  Nothing showed it until somebody looked. The fix is `4a931f4` on `dev`. This line has been stale on
-  eight consecutive checks, so re-check it rather than read it. B6 means a commit on `dev` with no PR open is still built.
+  [PR #46](https://github.com/kietnt4412/storm_almanac/pull/46)'s `main` run went red on a flaky test, so
+  **`deploy` never ran** and nothing showed it. [PR #47](https://github.com/kietnt4412/storm_almanac/pull/47)
+  fixed it, merged 03:10Z, `main` green, and **production reports `63a45b3`**. `dev` is one D5 doc
+  commit ahead, no PR open. Stale on eight consecutive checks, so re-check it rather than read it. B6 means a commit on `dev` with no PR open is still built.
   **What the trigger does not do is watch the merge** — PR #25 merged *before its own run finished*
   and was green by luck (archive, twenty-sixth) — so **wait for the run before merging** still
   stands, and is now the only half of this a person has to remember. `dev` sits behind `main` by
@@ -244,9 +244,8 @@ and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archiv
 **No Phase 4 item is left; its exit is.**
 
 > **Resume here (2026-09-25, forty-second):** **All four of Q6's items are met, so D4's trigger
-> has fired**, but **PR #46 is not in production** (its `main` run was red, flaky, fixed in
-> `4a931f4`). Once that lands and `/api/health` reports it, sign in once on the real site from a
-> catalog page: that checks Q6's fourth item. **Then D5's rehearsal**: the maintainer plans one construct
+> has fired**, and since 03:16Z on 2026-09-25 all of it is in production (`63a45b3`). Sign in once on
+> the real site from a catalog page: that checks Q6's fourth item. **Then D5's rehearsal**: the maintainer plans one construct
 > from the home page in a private window; every stall becomes a line here, fixed or cut on the record.
 > Seen and not on the list: stage and *craft and buy* rows on the plan page still show raw ids.
 
