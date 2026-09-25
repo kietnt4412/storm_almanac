@@ -3025,6 +3025,36 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-25 (forty-second) — The launch question waited on a red `main`.**
+
+The handoff said to ask the maintainer about launch. Checking the remote first
+found **PR #46's merge run on `main` red** (run `36009244866`), and so **`deploy`
+never ran**: `/api/health` reported `fac0ce6`, PR #45's merge, the morning after.
+Nothing #46 carried was live: not return-after-sign-in, not choices named by
+price, not the character page's own-game profile. **The forty-first's "not yet run
+against Google: that is the first sign-in after it deploys" was waiting on a
+deploy that had not happened**, and nothing in the tracker would have shown it.
+The fourth Q6 item stays met in code and unchecked against Google.
+
+**The failure was a flake, measured rather than assumed.** One test,
+`EntityPage.test.tsx` › *asks for the shortfall with the profile for the game on the
+page*, could not find the `Cogs` cell. The DOM dump showed "Working it out…". The
+same commit passed on `dev` push (whole file 366 ms) and on the PR run (that test
+486 ms), then took **1 320 ms** on `main`, past Testing Library's 1 000 ms `findBy`
+limit. It is the file's first test to mount the whole shell, so it pays the cold
+imports on top of a chain of requests: account, profiles, roster, then the shortfall,
+whose key moves when the roster lands. Locally the whole file runs in ~330 ms, three
+times out of three. **Fix: `configure({ asyncUtilTimeout: 5000 })` in
+`src/test/setup.ts`**, for every test rather than this one, because every test that
+mounts `App` pays the same cold start. A passing query still returns as soon as its
+element appears. 39 frontend tests, green.
+
+**What this says about the pipeline:** the rule "wait for the run before merging"
+held and still was not enough, because the run that failed was the one *after* the
+merge, on `main`. A red `main` blocks the deploy without a sound, so the remote check
+at session start now has to include **the last `main` run, and the SHA
+`/api/health` reports**, not only which PRs merged.
+
 **2026-09-24 (forty-first) — Q6 written down, and its smallest item done.**
 
 The session opened as the fortieth's handoff asked: is Q6's list complete, or
