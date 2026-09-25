@@ -2848,6 +2848,32 @@ model rather than a measurement of real traffic.
 
 ---
 
+## D3 — the full account
+
+Compressed out of the live tracker on 2026-09-25 (forty-second session), to make
+room for D5 when the tracker stood at 550 lines. Verbatim as it stood; the
+operative half — the reversal trigger that can still fire — stays there.
+
+### D3 · Launch title swapped to Punishing: Gray Raven (2026-09-13)
+
+**The plan launched on R1999 and brought PGR in at Phase 11; the maintainer
+swapped them**, after reading Kornblume's source to answer "is this a clone?"
+showed **`prior-art.md`'s central claim was wrong** — it *does* solve per player,
+in the browser, since 2024-03, with OCR inventory import. The wedge left is
+narrower: whole runs, explanations, sample-size-aware yields, provenance, two
+games on one model. **Cost:** PGR starts with no data, no benchmark and
+second-hand gacha fixtures, and fodder and the first real calendar move from
+Phase 11 to before launch (**N30**, **N20**) — the launch gets further away, not
+closer. **Bought:** a launch that is not a second copy of a tool players already
+use, with the abstraction's hardest shapes load-bearing from day one.
+
+**Reversal trigger, and half of it can no longer fire** (2026-09-18): the *timed*
+PGR reading shows sourcing is not feasible for one maintainer — **that pass was
+cut**, so this half has no measurement behind it — or an established PGR planner
+that solves per player turns up.
+
+---
+
 ## The line-count ledger
 
 Moved out of the tracker's *How to use this file* on 2026-09-18 (twenty-third
@@ -2922,6 +2948,35 @@ holds the line count, and a session that follows it expecting the number to move
 will be disappointed by 60 lines. The cheap lever is the column width, it is
 worth about 12% of the file, and **it can only be pulled once** — after which
 the only thing left is genuinely carrying less.
+
+**555 on 2026-09-25 (forty-second), and carried less.** D5 went in at 550, and
+moving D3's full text here was not enough. So the tracker stopped carrying two
+things that already lived here in substance: the ledger's own history inside the
+line-limit rule, and the tracker's compressed D2. Both are kept below as they
+stood.
+
+The line-limit rule, verbatim until 2026-09-25:
+
+> - **Keep it under 550 lines, measured with `wc -l`** rather than carried forward.
+>   Six sessions trimmed and it still went 747 → 742 → 749 → 769 → 790 → 826
+>   ([the ledger](docs/history/tracker-archive.md#the-line-count-ledger)): trimming
+>   cannot beat a document that has to absorb every session's findings, so **the
+>   twenty-third rewrote it instead. If this file passes 550 again, rewrite a
+>   section — do not shave it**, and suspect the row nobody can read in one breath,
+>   which `wc -l` cannot see.
+
+The tracker's D2, verbatim until 2026-09-25 (the fuller original is
+[above](#d2--the-full-account)):
+
+> ### D2 · Phase 5 entered before Phase 4 closed (2026-09-12)
+>
+> **The rule broken is this file's own.** Phase 4 needs a deployment (**B5**) and
+> **N27** is the maintainer's, so the choice was put to them and Phase 5 taken
+> knowingly: it bought the one large piece of Track A a session can finish alone and
+> cost nothing on the launch. [In full](docs/history/tracker-archive.md#d2--the-full-account).
+> **Reversal trigger:** none, a phase cannot be un-entered. The one that matters is
+> on the next: **do not take Phase 6 early on this precedent** — it needs users,
+> where Phase 5's criterion was a proof about a model.
 
 ---
 
@@ -3054,6 +3109,19 @@ held and still was not enough, because the run that failed was the one *after* t
 merge, on `main`. A red `main` blocks the deploy without a sound, so the remote check
 at session start now has to include **the last `main` run, and the SHA
 `/api/health` reports**, not only which PRs merged.
+
+**D5: the launch question answered with a question.** Asked about launch, the
+maintainer said they know few people who play and asked whether they could test
+it themselves. The answer given: a self-test is a good rehearsal and cannot meet
+the exit. The exit tests whether a newcomer can plan without help, and the builder
+is the one tester who cannot stall where a newcomer would. It also leaves the
+Track B gate and Phase 6's community data (N26) with nothing to open them. The
+maintainer chose to write that up as D5: rehearse first, strangers after. **Its
+reversal trigger, "the rehearsal's stall list is empty, then strangers from the
+game's subreddit and Discord servers", was Claude's proposal**, written in because
+a deviation needs one and following D4's "a list, not a feeling". The maintainer
+may still change it. Making room for D5 took the tracker from 555 lines to under
+550, by carrying less rather than rewrapping (see the ledger).
 
 **2026-09-24 (forty-first) — Q6 written down, and its smallest item done.**
 

@@ -127,13 +127,9 @@ Rules that keep this file honest:
   wrong. **When an item closes, move it to the archive** rather than striking it
   through in place: this file reached 2 412 lines by keeping every corpse in the
   room, and a handoff nobody reads is worse than none.
-- **Keep it under 550 lines, measured with `wc -l`** rather than carried forward.
-  Six sessions trimmed and it still went 747 → 742 → 749 → 769 → 790 → 826
-  ([the ledger](docs/history/tracker-archive.md#the-line-count-ledger)): trimming
-  cannot beat a document that has to absorb every session's findings, so **the
-  twenty-third rewrote it instead. If this file passes 550 again, rewrite a
-  section — do not shave it**, and suspect the row nobody can read in one breath,
-  which `wc -l` cannot see.
+- **Keep it under 550 lines, measured with `wc -l`** rather than carried forward. Trimming loses to a
+  file that absorbs every session ([the ledger](docs/history/tracker-archive.md#the-line-count-ledger)):
+  **past 550, rewrite a section or carry less — do not shave**, and suspect the row nobody can read in one breath.
 
 ---
 
@@ -250,8 +246,8 @@ and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archiv
 > **Resume here (2026-09-25, forty-second):** **All four of Q6's items are met, so D4's trigger
 > has fired**, but **PR #46 is not in production** (its `main` run was red, flaky, fixed in
 > `4a931f4`). Once that lands and `/api/health` reports it, sign in once on the real site from a
-> catalog page: that checks Q6's fourth item. **Then ask the maintainer: launch?** That means taking the
-> Google client out of *Testing* and finding five strangers.
+> catalog page: that checks Q6's fourth item. **Then D5's rehearsal**: the maintainer plans one construct
+> from the home page in a private window; every stall becomes a line here, fixed or cut on the record.
 > Seen and not on the list: stage and *craft and buy* rows on the plan page still show raw ids.
 
 ### Before the next sequence — worth knowing
@@ -269,7 +265,7 @@ Spring context and fails without a database.**
 ### Held — Phase 4 scope, and the maintainer decides
 
 **N30, N33, N20, B5 and N41 are done or cut** ([archive](docs/history/tracker-archive.md#completed-next-actions)); what is left is the exit, held by
-[D4](#d4--public-launch-deferred-until-the-site-is-more-finished-2026-09-24) until [Q6](#open-questions)'s list is met. **At launch:** a stranger must sign in and the Google client
+[D5](#d5--the-maintainer-rehearses-the-stranger-test-before-strangers-are-found-2026-09-25) until the rehearsal's stall list is empty. **With strangers:** the Google client
 is in *Testing* — list each one or publish the app. Watch, answer nothing, record where each stalls; those notes close the phase.
 
 ### Held — later phases, not Phase 4's business
@@ -328,7 +324,7 @@ previous one's criterion is met. The "Landed" record for closed phases is
       into with Google. Launch publicly even if ugly.
       **Exit:** five strangers complete a plan without asking for help, and a
       logged-in character page shows what that reader is short of. *The second
-      clause is served; the first is **deferred by the maintainer** ([D4](#d4--public-launch-deferred-until-the-site-is-more-finished-2026-09-24)).*
+      clause is served; the first is **deferred by the maintainer** ([D4](#d4--public-launch-deferred-until-the-site-is-more-finished-2026-09-24), then [D5](#d5--the-maintainer-rehearses-the-stranger-test-before-strangers-are-found-2026-09-25)).*
       **Closing condition, set 2026-09-20:** the exit is necessary and not
       sufficient — N30, N33, N20 and B5 are each done or explicitly cut before
       this box is ticked, with the cut recorded in the session log. **All four are
@@ -405,6 +401,21 @@ is most likely to trip.
 Decision, cost, and what would reverse it. **The full accounts are
 [in the archive](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression).**
 
+### D5 · The maintainer rehearses the stranger test before strangers are found (2026-09-25)
+
+**Phase 4's exit asks for five strangers, and the maintainer knows few people who play**, so asked
+whether testing it themselves would do. **It cannot meet the exit, and this does not change the
+exit:** the test is whether someone who has never seen the site plans without help, and the one
+tester who cannot stall where a stranger would is the one who built it. **What is taken instead, for
+now, is a rehearsal** — a private window, one construct planned from the home page, every hesitation
+written down, each fixed or cut on the record; friends who do not play count as rehearsal, not as
+strangers. Google's client stays in *Testing*. **A deferral, not a cut;** the Phase 4 box stays
+unticked. **Cost:** D4's, and sharper — D4 waited on the site, which work fixes; this waits on an
+audience, which no work on the site produces, so the Track B gate and Phase 6's data (N26) have no
+date. **Bought:** the stalls a builder can find are gone before a stranger's first impression.
+**Reversal trigger:** the rehearsal's stall list is empty — then strangers are found where players
+already are, the game's subreddit and Discord servers, rather than among people the maintainer knows.
+
 ### D4 · Public launch deferred until the site is more finished (2026-09-24)
 
 **The plan says launch publicly even if ugly; the maintainer chose not to yet**, the same day
@@ -417,35 +428,21 @@ guessing — waits, and so does everything that needs users: Phase 4's exit, the
 and Phase 6's community data, which is the bootstrap problem (N26) itself. **Bought:** a first
 impression made on more than one construct. **Reversal trigger:** Q6's list, once written, is
 met — a list rather than a feeling, so the deferral cannot quietly become permanent. **Written
-2026-09-24 with four items; all four met the same day.** The trigger has fired; the launch is the maintainer's.
+2026-09-24 with four items; all four met the same day.** The trigger fired; the maintainer's answer is [D5](#d5--the-maintainer-rehearses-the-stranger-test-before-strangers-are-found-2026-09-25).
 
 ### D3 · Launch title swapped to Punishing: Gray Raven (2026-09-13)
 
-**The plan launched on R1999 and brought PGR in at Phase 11; the maintainer
-swapped them**, after reading Kornblume's source to answer "is this a clone?"
-showed **`prior-art.md`'s central claim was wrong** — it *does* solve per player,
-in the browser, since 2024-03, with OCR inventory import. The wedge left is
-narrower: whole runs, explanations, sample-size-aware yields, provenance, two
-games on one model. **Cost:** PGR starts with no data, no benchmark and
-second-hand gacha fixtures, and fodder and the first real calendar move from
-Phase 11 to before launch (**N30**, **N20**) — the launch gets further away, not
-closer. **Bought:** a launch that is not a second copy of a tool players already
-use, with the abstraction's hardest shapes load-bearing from day one.
-
-**Reversal trigger, and half of it can no longer fire** (2026-09-18): the *timed*
-PGR reading shows sourcing is not feasible for one maintainer — **that pass was
-cut**, so this half has no measurement behind it — or an established PGR planner
-that solves per player turns up.
+**The plan launched on R1999; the maintainer swapped in PGR** once Kornblume's source showed it
+*does* solve per player, which `prior-art.md` had denied. **Cost:** PGR started with no data, and
+fodder and the calendar moved before launch. **Bought:** a launch that is not a second copy of a tool
+players use. **Reversal trigger, half dead since 2026-09-18:** an established PGR planner that solves
+per player turns up. [In full](docs/history/tracker-archive.md#d3--the-full-account).
 
 ### D2 · Phase 5 entered before Phase 4 closed (2026-09-12)
 
-**The rule broken is this file's own.** Phase 4 needs a deployment (**B5**) and
-**N27** is the maintainer's, so the choice was put to them and Phase 5 taken
-knowingly: it bought the one large piece of Track A a session can finish alone and
-cost nothing on the launch. [In full](docs/history/tracker-archive.md#d2--the-full-account).
-**Reversal trigger:** none, a phase cannot be un-entered. The one that matters is
-on the next: **do not take Phase 6 early on this precedent** — it needs users,
-where Phase 5's criterion was a proof about a model.
+**The rule broken is this file's own**, knowingly, by the maintainer's choice. [In full](docs/history/tracker-archive.md#d2--the-full-account).
+**Reversal trigger:** none, a phase cannot be un-entered. The one that matters is on the next: **do not
+take Phase 6 early on this precedent** — it needs users, where Phase 5's criterion was a proof about a model.
 
 ### D1 · Deployment deferred (2026-09-02)
 
@@ -540,7 +537,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-25 | forty-second | **PR #46 never deployed**: its `main` run went red on a `findBy` that took 1 320 ms where the same commit had taken 486. Production stayed on #45, and nothing showed it until somebody looked. `asyncUtilTimeout` is now 5 s for every test. The remote check now includes the last `main` run and the health SHA |
+| 2026-09-25 | forty-second | **PR #46 never deployed**: its `main` run went red on a `findBy` that took 1 320 ms where the same commit had taken 486. Production stayed on #45, and nothing showed it until somebody looked. `asyncUtilTimeout` is now 5 s for every test. The remote check now includes the last `main` run and the health SHA. **D5**: the maintainer rehearses the stranger test first, and strangers wait until the stall list is empty |
 | 2026-09-24 | forty-first | Q6 written: the maintainer agreed the three "seen, not agreed" items. **Sign-in now returns the reader to their page** — `?then=` held in the session across Google, one open-redirect check shared with the dev sign-in; untried against Google until deployed. **A choice line is named by its prices**, which are facts already. **A shadow price rendered at last** — 90.00, driven, no reading needed. All four met. Then the character page asks with **its own game's profile**, and the route refuses a mismatch by name. 466 backend tests, 39 frontend |
 | 2026-09-24 | fortieth | **N41 closed**, with Lucia: Inverse Crown in Karenina's place (not owned). Sequence 9 put her and Selena on the ladder, +129 facts. Then the maintainer named the patch: today's readings were **4.8.0 "Anchored in Faith"**, live since that morning's maintenance, where sequences 8 and 9 said 4.7.0 — sequence 10 relabels, no fact changes. A test went red with sequence 9 unnoticed; run the full build. Both in both databases. 452 tests |
 | 2026-09-24 | thirty-ninth | N41's question answered first-hand: every S-rank construct shares Lacrimosa's EXP, Promote and skill costs. So the bundle writes that path **once** (`ladders`, ADR 0031) and expands it per construct in the parser; Lacrimosa's 57 rows became 30 entries and diff against sequence 7 as *no changes*, same provenance per fact. Then her four skill pages showed **eight** levelled skills where the bundle had seven, one of them a name on no page. Sequence 8 published locally and to Neon, −4/+8, each read back as *no changes*. 452 backend tests |
