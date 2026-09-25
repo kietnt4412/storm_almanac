@@ -80,8 +80,8 @@ being finished with is.
   which PRs merged, **the last `main` run**, and **the SHA `/api/health` reports**.
   [PR #46](https://github.com/kietnt4412/storm_almanac/pull/46)'s `main` run went red on a flaky test, so
   **`deploy` never ran** and nothing showed it. [PR #47](https://github.com/kietnt4412/storm_almanac/pull/47)
-  fixed it, merged 03:10Z, `main` green, and **production reports `63a45b3`**. `dev` is one D5 doc
-  commit ahead, no PR open. Stale on eight consecutive checks, so re-check it rather than read it. B6 means a commit on `dev` with no PR open is still built.
+  fixed it, merged 03:10Z, `main` green, and **production reports `63a45b3`**. `dev` carries D5 and
+  S1's fix to `main` as PR #48. Stale on eight consecutive checks, so re-check it rather than read it. B6 means a commit on `dev` with no PR open is still built.
   **What the trigger does not do is watch the merge** — PR #25 merged *before its own run finished*
   and was green by luck (archive, twenty-sixth) — so **wait for the run before merging** still
   stands, and is now the only half of this a person has to remember. `dev` sits behind `main` by
