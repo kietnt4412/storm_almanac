@@ -10,7 +10,9 @@ import {
   type Goal,
 } from '../api/client';
 import { ProfileGate } from '../profile';
-import { StateChips, statesOfGraph } from '../roster/StateChips';
+import { TrackPicker } from '../roster/TrackPicker';
+import { statesOfGraph, trackOf, tracksOfGraph, type Track } from '../roster/tracks';
+import { NextStep } from '../steps/Steps';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 
 /**
@@ -60,11 +62,11 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
   // conflating them was a real bug — see statesOfGraph, which is where the
   // distinction now lives, shared with the roster screen.
   const statesOf = useMemo(() => {
-    const byEntity = new Map<string, { targets: string[]; starts: string[] }>();
+    const byEntity = new Map<string, { targets: string[]; tracks: Track[] }>();
     graphs.forEach((graph) => {
       const data = graph.data;
       if (!data) return;
-      byEntity.set(data.entity.id, statesOfGraph(data.steps));
+      byEntity.set(data.entity.id, { targets: statesOfGraph(data.steps).targets, tracks: tracksOfGraph(data.steps) });
     });
     return byEntity;
   }, [graphs]);
@@ -129,7 +131,9 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
         <ol className="space-y-2">
           {goals.map((goal, index) => {
             const entity = catalog.find((candidate) => candidate.id === goal.entity);
-            const states = statesOf.get(goal.entity) ?? { targets: [goal.targetState], starts: [] };
+            const states = statesOf.get(goal.entity);
+            const name = entity?.displayName ?? goal.entity;
+            const onTrack = states && trackOf(states.tracks, goal.targetState);
             return (
               <li key={`${goal.entity}-${index}`} className="card flex flex-wrap items-center gap-3">
                 <span className="count muted w-6 text-right">{index + 1}</span>
@@ -143,7 +147,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                   <select
                     className="input"
                     value={goal.targetState}
-                    aria-label={`Target state for ${entity?.displayName ?? goal.entity}`}
+                    aria-label={`Target state for ${name}`}
                     onChange={(event) =>
                       setDraft(
                         goals.map((candidate, at) =>
@@ -152,15 +156,31 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                       )
                     }
                   >
-                    {states.targets.map((state) => (
-                      <option key={state} value={state}>
-                        {state}
-                      </option>
-                    ))}
+                    {/*
+                      Grouped by track and named by it, because "promote-7" is
+                      the bundle's id and "Promote · 7" is what the reader is
+                      choosing. Until the graph arrives the saved target is the
+                      only option, as it was.
+                    */}
+                    {states
+                      ? states.tracks.map((track) => (
+                          <optgroup key={track.states[0]!.state} label={track.name}>
+                            {track.states
+                              .filter((candidate) => states.targets.includes(candidate.state))
+                              .map((candidate) => (
+                                <option key={candidate.state} value={candidate.state}>
+                                  {track.name} · {candidate.label}
+                                </option>
+                              ))}
+                          </optgroup>
+                        ))
+                      : (
+                          <option value={goal.targetState}>{goal.targetState}</option>
+                        )}
                   </select>
                 </label>
 
-                <label className="flex items-center gap-2 text-sm">
+                <div className="flex items-center gap-2 text-sm">
                   <span className="muted">from</span>
                   {/*
                     The roster, edited where the goal is. A target without a
@@ -171,15 +191,26 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                     The same component the roster screen uses, and that is the
                     point of it being one: two editors of one aggregate that
                     drift apart is how a reader gets two answers to "where am I".
+
+                    Only the goal's own track, since S2: every track here made a
+                    goal row thirteen dropdowns long. The rest still count — a
+                    gate on another track is charged too — and are one link away.
                   */}
-                  <StateChips
-                    subject={entity?.displayName ?? goal.entity}
-                    states={roster[goal.entity] ?? []}
-                    choices={states.starts}
-                    emptyWord="not owned"
-                    onChange={(next) => editRosterState(profileId, goal.entity, next)}
-                  />
-                </label>
+                  {onTrack ? (
+                    <TrackPicker
+                      subject={name}
+                      tracks={states.tracks}
+                      only={[onTrack]}
+                      states={roster[goal.entity] ?? []}
+                      onChange={(next) => editRosterState(profileId, goal.entity, next)}
+                    />
+                  ) : (
+                    <span className="muted">reading her tracks…</span>
+                  )}
+                  <Link to="/roster" className="text-xs">
+                    other tracks
+                  </Link>
+                </div>
 
                 <div className="ml-auto flex items-center gap-1">
                   <button
@@ -239,11 +270,15 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
           className="btn"
           disabled={!adding}
           onClick={() => {
-            const targets = statesOf.get(adding)?.targets ?? [];
-            const furthest = targets[targets.length - 1];
+            const first = statesOf.get(adding)?.tracks[0]?.states;
+            const furthest = first?.[first.length - 1]?.state;
             if (!furthest) return;
-            // The last state on the track is the default target: a player adding
-            // a goal is almost never aiming at the first rung of it.
+            // The end of the first track is the default target: a player adding
+            // a goal is almost never aiming at the first rung of it. The first
+            // track and not the last listed state, because with a construct's
+            // thirteen tracks the last state listed is the end of the least
+            // likely one — the browser run caught a goal defaulting to a skill
+            // unlock.
             setDraft([
               ...goals,
               { entity: adding, targetState: furthest, priority: goals.length },
@@ -259,6 +294,16 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
           </p>
         )}
       </div>
+
+      {/*
+        The list is a draft until it is saved, and leaving would lose it, so the
+        way on saves first when there is anything to save.
+      */}
+      <NextStep
+        from="/goals"
+        before={dirty ? () => save.mutateAsync() : undefined}
+        label={dirty ? 'Save and get the plan →' : undefined}
+      />
     </div>
   );
 }

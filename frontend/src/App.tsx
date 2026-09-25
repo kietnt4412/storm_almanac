@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { ApiError, getHealth, getMe, signInUrl, signOut } from './api/client';
+import { isStep, StepBar } from './steps/Steps';
 import { usePlannerStore } from './store/plannerStore';
 import { useOutboxFlush } from './sync/useOutboxFlush';
 
@@ -75,10 +76,11 @@ export function App() {
           </NavLink>
 
           <nav className="flex gap-4 text-sm">
-            <Tab to="/plan">Plan</Tab>
+            {/* In the order of the steps, so the menu reads as the way through. */}
             <Tab to="/inventory">Inventory</Tab>
             <Tab to="/roster">Roster</Tab>
             <Tab to="/goals">Goals</Tab>
+            <Tab to="/plan">Plan</Tab>
             <Tab to="/catalog">Catalog</Tab>
           </nav>
 
@@ -117,6 +119,7 @@ export function App() {
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-6">
+        {isStep(location.pathname) && <StepBar />}
         <Outlet />
       </main>
 

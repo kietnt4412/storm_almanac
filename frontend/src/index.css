@@ -84,27 +84,32 @@ a {
   }
 
   /*
-   * A value the reader has recorded, with a way to take it back. Not a button,
-   * though it is one: a `btn-quiet` here reads as another control in a row that
-   * already ends in three of them, and the first reader shown it looked straight
-   * at one and reported seeing no chip at all. So it is filled rather than
-   * outlined, and the × is dimmed until hover — the state is the content and
-   * removing it is the afterthought, which is the opposite of what a button says.
+   * One step of the four, in the bar at the top of each. The one the reader is
+   * on is filled, the way a recorded value was when these were chips: where you
+   * are is the content, and the others are ways to go.
    */
-  .chip {
-    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm font-medium;
+  .step {
+    @apply inline-flex items-center gap-2 rounded-full border px-3 py-1 no-underline;
+    border-color: var(--line);
+    color: var(--muted);
+  }
+
+  .step-here {
+    @apply font-medium;
     background: color-mix(in srgb, var(--brand) 18%, transparent);
-    border: 1px solid color-mix(in srgb, var(--brand) 45%, transparent);
+    border-color: color-mix(in srgb, var(--brand) 45%, transparent);
     color: var(--ink);
   }
 
-  .chip > .chip-x {
-    @apply text-xs leading-none opacity-50 transition-opacity;
+  .step-n {
+    @apply inline-flex h-5 w-5 items-center justify-center rounded-full text-xs;
+    background: var(--line);
+    color: var(--ink);
   }
 
-  .chip:hover > .chip-x,
-  .chip:focus-visible > .chip-x {
-    @apply opacity-100;
+  .step-here > .step-n {
+    background: var(--brand);
+    color: var(--ground);
   }
 
   .input {

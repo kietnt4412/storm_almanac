@@ -3144,6 +3144,38 @@ Both tests failed first, the backend one with the production `DuplicateKeyExcept
 Driven in a browser against a local API: the sentence, the disabled button, and a
 forced POST answered 409 with the server's sentence. 467 backend tests, 41 frontend.
 
+**S2 and S3, from two screenshots of #48 live (`8430fae`).** The maintainer
+asked what "and also…" was, and why saving goals led nowhere. **S2:** the roster
+and goal screens' `StateChips` offered every state of every track in one
+dropdown. From the live data, Selena alone has **13 tracks and ~70 states**
+(promote 0–13, level 1–80, evolve S→SS, leader skill, eight skills 1→18, one
+unlock), shown as raw ids beside chips. The maintainer asked for a tick list and
+sections. **The plan was put to them before building, and they chose one
+dropdown per track over ticks.** Ticks would be ~70 per construct, and a crossed
+gate already counts as reached (ADR 0026), so one answer per track says the same.
+`roster/tracks.ts` splits the upgrade graph into its connected pieces, each walked
+from its base. **The tracks come from the graph, so no game is named. The labels
+are a guess from the ids** (the words every state on a track shares), because no
+bundle names a track and neither the entity nor the step carries a name. Naming
+them properly is data work, left for when a bundle can. `TrackPicker` replaces
+`StateChips` and the `.chip` styles. It shows the furthest recorded state per
+track, records the base when chosen, and keeps (and names) states on no track. A
+goal row shows only its own track, with a link to the roster. **S3:** the four
+steps (Inventory, Roster, Goals, Plan; Roster had not been one of the home page's
+three) are one list in `steps/Steps.tsx`, read by a step bar in the shell, a
+back/Next strip on each page, and the home cards. The menu now follows the same
+order. Goals' Next is "Save and get the plan →" when there is a draft, and stays
+put if the save fails. **The first browser run found two defects in the new
+code:** the goal row passed only its own track, so it called the reader's other
+answers "on no track" (pinned by a test shown failing against the old behaviour);
+and a new goal defaulted to the last listed state, a skill unlock, and now takes
+the end of the first track. Driven against a local API: 13 labelled tracks, both
+answers stored one per track, a goal defaulting to Promote · 13, and Save and get
+the plan saving and landing on step 4. At 375 px nothing overflows on any of the
+five pages. **No screenshot**: the pane would not draw all session. 50 frontend
+tests. The tracker is at 549 lines, so the next session starts by rewriting a
+section.
+
 **2026-09-24 (forty-first) — Q6 written down, and its smallest item done.**
 
 The session opened as the fortieth's handoff asked: is Q6's list complete, or

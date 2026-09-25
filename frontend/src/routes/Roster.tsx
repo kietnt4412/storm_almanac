@@ -3,7 +3,9 @@ import { useQueries, useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { getEntities, getRoster, getUpgrades } from '../api/client';
 import { ProfileGate } from '../profile';
-import { StateChips, statesOfGraph } from '../roster/StateChips';
+import { TrackPicker } from '../roster/TrackPicker';
+import { tracksOfGraph, type Track } from '../roster/tracks';
+import { NextStep } from '../steps/Steps';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 
 /**
@@ -68,11 +70,11 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
     })),
   });
 
-  const startsOf = useMemo(() => {
-    const byEntity = new Map<string, string[]>();
+  const tracksOf = useMemo(() => {
+    const byEntity = new Map<string, Track[]>();
     graphs.forEach((graph) => {
       if (!graph.data) return;
-      byEntity.set(graph.data.entity.id, statesOfGraph(graph.data.steps).starts);
+      byEntity.set(graph.data.entity.id, tracksOfGraph(graph.data.steps));
     });
     return byEntity;
   }, [graphs]);
@@ -105,44 +107,45 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
         <ul className="space-y-2">
           {shown.map((slug) => {
             const states = roster[slug] ?? [];
-            const starts = startsOf.get(slug);
+            const tracks = tracksOf.get(slug);
             return (
-              <li key={slug} className="card flex flex-wrap items-center gap-3">
-                <Link to={`/catalog/${game}/${slug}`} className="font-medium">
-                  {nameOf(slug)}
-                </Link>
+              <li key={slug} className="card space-y-3">
+                <div className="flex items-center gap-3">
+                  <Link to={`/catalog/${game}/${slug}`} className="font-medium">
+                    {nameOf(slug)}
+                  </Link>
 
-                {starts === undefined ? (
-                  <span className="muted text-sm">reading their track…</span>
-                ) : starts.length === 0 ? (
-                  <span className="muted text-sm">
-                    This patch publishes no upgrade graph for them, so there is no state to record.
-                  </span>
-                ) : (
-                  <StateChips
-                    subject={nameOf(slug)}
-                    states={states}
-                    choices={starts}
-                    emptyWord="not owned"
-                    onChange={(next) => editRosterState(profileId, slug, next)}
-                  />
-                )}
-
-                {/*
-                  Closing a row the reader has said nothing about is a local
-                  tidy-up, not an edit: there is nothing stored to remove. A row
-                  with states is cleared by taking its last chip off, which is
-                  the one action that means "not owned" on the wire.
-                */}
-                {states.length === 0 && (
+                  {/*
+                    Closing a row the reader has said nothing about is a local
+                    tidy-up: there is nothing stored to remove. Removing one with
+                    states sends null, the one answer that means "not owned" on
+                    the wire (V13).
+                  */}
                   <button
                     type="button"
-                    className="btn-quiet ml-auto"
-                    aria-label={`Close ${nameOf(slug)}`}
-                    onClick={() => setOpened(opened.filter((candidate) => candidate !== slug))}
+                    className="btn-quiet ml-auto text-sm"
+                    onClick={() => {
+                      if (states.length > 0) editRosterState(profileId, slug, null);
+                      setOpened(opened.filter((candidate) => candidate !== slug));
+                    }}
                   >
-                    ×
+                    {states.length > 0 ? `Remove ${nameOf(slug)} from the roster` : `Close ${nameOf(slug)}`}
                   </button>
+                </div>
+
+                {tracks === undefined ? (
+                  <p className="muted text-sm">reading their tracks…</p>
+                ) : tracks.length === 0 ? (
+                  <p className="muted text-sm">
+                    This patch publishes no upgrade graph for them, so there is no state to record.
+                  </p>
+                ) : (
+                  <TrackPicker
+                    subject={nameOf(slug)}
+                    tracks={tracks}
+                    states={states}
+                    onChange={(next) => editRosterState(profileId, slug, next)}
+                  />
                 )}
               </li>
             );
@@ -184,6 +187,8 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
           <p className="muted text-sm">Everyone this patch publishes is already on the list.</p>
         )}
       </div>
+
+      <NextStep from="/roster" />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getInventory, getItems, type Item } from '../api/client';
 import { ProfileGate } from '../profile';
+import { NextStep } from '../steps/Steps';
 import { effectiveInventory, outboxOf, usePlannerStore } from '../store/plannerStore';
 
 /**
@@ -174,6 +175,8 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
           ))}
         </div>
       )}
+
+      <NextStep from="/inventory" />
     </div>
   );
 }
