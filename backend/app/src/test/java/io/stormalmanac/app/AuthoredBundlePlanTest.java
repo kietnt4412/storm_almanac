@@ -372,6 +372,35 @@ class AuthoredBundlePlanTest {
     }
 
     @Test
+    @DisplayName("a line done many times says its totals, and a purchase says how it is made up")
+    void planLinesSayTheirTotals() {
+        // S9 of D5's third run: "Buy 1,200 Cogs for 1 Simulation Score × 429"
+        // read as one cheap buy. The total is what the reader spends and gets;
+        // the repeat is the number of buys they make in the shop.
+        PlanResponse overclock = PlanResponse.of(solve(Goal.deterministic(SAMANTHA, "overclock-1")), definition);
+
+        ConversionView enhancers = overclock.conversions().stream()
+                .filter(line -> line.step().equals("simulation-shop-memory-enhancer-iv"))
+                .findFirst().orElseThrow();
+        int buys = enhancers.times();
+        assertThat(buys).as("bought more than once, or there is nothing to total").isGreaterThan(1);
+        assertThat(enhancers.displayName()).isEqualTo("Buy 10 Memory Enhancer IV for 87 Simulation Score");
+        assertThat(enhancers.total()).isEqualTo("Buy %s Memory Enhancer IV for %s Simulation Score"
+                .formatted(StepNames.quantity(10L * buys), StepNames.quantity(87L * buys)));
+        assertThat(enhancers.repeat()).isEqualTo(buys + " × 10 for 87");
+
+        ConversionView fed = overclock.conversions().stream()
+                .filter(line -> line.step().equals("memory-exp-4-star"))
+                .findFirst().orElseThrow();
+        assertThat(fed.total()).isEqualTo("Feed " + StepNames.quantity(fed.times()) + " Memory Enhancer IV into Memory EXP");
+        assertThat(fed.repeat()).as("a feed's count is in its total").isNull();
+
+        PlanResponse resonance = PlanResponse.of(solve(Goal.deterministic(SAMANTHA, "upper-resonance-1")), definition);
+        assertThat(resonance.conversions()).extracting(ConversionView::total, ConversionView::repeat)
+                .containsExactly(tuple("Pay 246 Simulation Score", null));
+    }
+
+    @Test
     @DisplayName("the Cage is named by the bundle's word, in the grants a plan counts and in the ones it does not")
     void theCageIsNamed() {
         // S8 of D5's second rehearsal: nine "phantom-pain-cage-90000 (needs

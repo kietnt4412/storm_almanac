@@ -71,6 +71,58 @@ describe('the lines of a plan', () => {
     expect(screen.queryByText(/phantom-pain-cage-90000/)).not.toBeInTheDocument();
   });
 
+  it('says a purchase done many times by its totals, and how it is made up', () => {
+    // S9: "Buy 1,200 Cogs for 1 Simulation Score × 429" read as one cheap buy.
+    render(
+      <Answer
+        plan={plan({
+          stages: [],
+          conversions: [
+            {
+              step: 'simulation-shop-cogs',
+              displayName: 'Buy 1,200 Cogs for 1 Simulation Score',
+              times: 429,
+              total: 'Buy 514,800 Cogs for 429 Simulation Score',
+              repeat: '429 × 1,200 for 1',
+            },
+            {
+              step: 'memory-exp-4-star',
+              displayName: 'Feed Memory Enhancer IV into Memory EXP',
+              times: 40,
+              total: 'Feed 40 Memory Enhancer IV into Memory EXP',
+              repeat: null,
+            },
+          ],
+          rewards: [],
+          bindingStages: [],
+        })}
+        energyUnit="Serum"
+      />,
+    );
+
+    const [buy, feed] = screen.getAllByRole('listitem').map((line) => line.textContent);
+    expect(buy).toBe('Buy 514,800 Cogs for 429 Simulation Score · 429 × 1,200 for 1');
+    expect(feed).toBe('Feed 40 Memory Enhancer IV into Memory EXP');
+  });
+
+  it('keeps the old line when a server from before the totals sends none', () => {
+    render(
+      <Answer
+        plan={plan({
+          stages: [],
+          conversions: [
+            { step: 'simulation-shop-cogs', displayName: 'Buy 1,200 Cogs for 1 Simulation Score', times: 429 },
+          ],
+          rewards: [],
+          bindingStages: [],
+        })}
+        energyUnit="Serum"
+      />,
+    );
+
+    expect(screen.getByRole('listitem').textContent).toBe('Buy 1,200 Cogs for 1 Simulation Score × 429');
+  });
+
   it('falls back to the id when the server sent no name', () => {
     render(
       <Answer

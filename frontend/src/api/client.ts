@@ -279,7 +279,14 @@ export interface Plan {
     blank row.
   */
   stages: { stage: string; displayName?: string; runs: number; energyCost: number; totalEnergy: number }[];
-  conversions: { step: string; displayName?: string; times: number }[];
+  /*
+    `displayName` names one purchase and `total` all `times` of them, "Buy
+    514,800 Cogs for 429 Simulation Score"; `repeat` is how a purchase is made
+    up, "429 × 1,200 for 1", and null for anything that is not one (S9). The
+    total is a new field rather than a new meaning for the name, so a page and a
+    server a deploy apart never print a total beside "× 429".
+  */
+  conversions: { step: string; displayName?: string; times: number; total?: string; repeat?: string | null }[];
   rewards: { reward: string; displayName?: string; times: number }[];
   totalEnergy: number;
   etaDays: number;
