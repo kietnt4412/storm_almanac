@@ -207,7 +207,9 @@ class PlannerAcceptanceTest {
         Plan plan = solve(goal(AMULET, "level-30"), Inventory.empty(PROFILE), Map.of());
 
         assertThat(plan.explanation().notes())
-                .anySatisfy(note -> assertThat(note).contains("amulet-level-30"));
+                // Named by the entity and the state it reaches, not by the
+                // step's id, since 2026-09-26.
+                .anySatisfy(note -> assertThat(note).contains("Paying for 1 upgrade step(s): Ember Amulet to level-30"));
         // One more refined ore is one more craft, so 3 more ore-rough. Nine runs
         // of pg-1-1 yield 12.6 and the five crafts want 15, so it is two more
         // runs — the lump, not the average.

@@ -4,12 +4,12 @@ import io.stormalmanac.common.id.EntityId;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.Goal;
-import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.identity.Account;
 import io.stormalmanac.player.MergeOutcome;
 import io.stormalmanac.planner.Objective;
 import io.stormalmanac.planner.Plan;
 import io.stormalmanac.planner.SolveRequest;
+import io.stormalmanac.planner.StepNames;
 import io.stormalmanac.player.Goals;
 import io.stormalmanac.player.Inventory;
 import io.stormalmanac.player.PlayerProfile;
@@ -268,12 +268,12 @@ public final class PlayerView {
             Instant computedAt) {
 
         public static PlanResponse of(Plan plan, GameDefinition definition) {
-            Map<ItemId, Item> items = definition.itemsById();
+            StepNames names = StepNames.of(definition);
             List<ShadowPriceView> prices = plan.explanation().shadowPrice().entrySet().stream()
                     .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemId::value)))
                     .map(priced -> new ShadowPriceView(
                             priced.getKey().value(),
-                            DemandNames.of(definition, items, priced.getKey()),
+                            names.demand(priced.getKey()),
                             priced.getValue()))
                     .toList();
 
@@ -287,13 +287,19 @@ public final class PlayerView {
                     plan.objective().name(),
                     plan.stageRuns().stream()
                             .map(run -> new StageRunView(
-                                    run.stage().value(), run.runs(), run.energyCost(), run.totalEnergy()))
+                                    run.stage().value(), names.stage(run.stage()),
+                                    run.runs(), run.energyCost(), run.totalEnergy()))
                             .toList(),
+                    // Read order, not id order: buy, open, feed, pay; a ladder's
+                    // tiers bottom rung up. Still one order per plan, so two
+                    // reads of it stay byte-identical.
                     plan.conversions().stream()
-                            .map(c -> new ConversionView(c.sourceOrSinkId(), c.times()))
+                            .sorted(Comparator.comparing(c -> c.sourceOrSinkId(), names.stepOrder()))
+                            .map(c -> new ConversionView(c.sourceOrSinkId(), names.step(c.sourceOrSinkId()), c.times()))
                             .toList(),
                     plan.rewardClaims().stream()
-                            .map(c -> new RewardClaimView(c.reward(), c.times()))
+                            .sorted(Comparator.comparing(c -> c.reward(), names.rewardOrder()))
+                            .map(c -> new RewardClaimView(c.reward(), names.reward(c.reward()), c.times()))
                             .toList(),
                     plan.totalEnergy(),
                     plan.etaDays(),
@@ -322,9 +328,17 @@ public final class PlayerView {
      */
     public record ShadowPriceView(String item, String displayName, double price) {}
 
-    public record StageRunView(String stage, int runs, int energyCost, int totalEnergy) {}
+    /**
+     * A plan's lines carry a name beside their id, for the reason
+     * {@link ShadowPriceView} does: the id is what a bug report quotes and what
+     * {@code bindingStages} is matched against, and the name is what a reader
+     * does. Until 2026-09-26 these three sent the id alone, and the page printed
+     * {@code simulation-shop-weapon-enhancer-iv}. The words are
+     * {@link StepNames}'s, built only from facts already published.
+     */
+    public record StageRunView(String stage, String displayName, int runs, int energyCost, int totalEnergy) {}
 
-    public record ConversionView(String step, int times) {}
+    public record ConversionView(String step, String displayName, int times) {}
 
-    public record RewardClaimView(String reward, int times) {}
+    public record RewardClaimView(String reward, String displayName, int times) {}
 }

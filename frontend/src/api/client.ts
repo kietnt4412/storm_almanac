@@ -264,9 +264,15 @@ export interface Plan {
   versionLabel: string;
   attribution: string;
   objective: string;
-  stages: { stage: string; runs: number; energyCost: number; totalEnergy: number }[];
-  conversions: { step: string; times: number }[];
-  rewards: { reward: string; times: number }[];
+  /*
+    Each line's name sits beside its id, as a shadow price's does. The name is
+    optional on the wire because the page and the API deploy at different
+    instants, and a page that meets an older server shows the id rather than a
+    blank row.
+  */
+  stages: { stage: string; displayName?: string; runs: number; energyCost: number; totalEnergy: number }[];
+  conversions: { step: string; displayName?: string; times: number }[];
+  rewards: { reward: string; displayName?: string; times: number }[];
   totalEnergy: number;
   etaDays: number;
   shadowPrice: ShadowPrice[];
