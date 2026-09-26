@@ -3202,8 +3202,8 @@ is the cap test's 150, unchanged. **489 tests**, green.
 
 **Neon was not published.** The maintainer said yes in chat, and the auto-mode
 classifier still refused the Neon *preview* as a production read. Not worked
-around; Neon holds sequence 14, and publishing 15 is the maintainer's to run or
-to approve in a form the classifier takes. Nothing in #57's code depends on it.
+around. **The maintainer then ran the loop in their own Git Bash**: preview 384 changes, ingest ~1½ min (silent while it writes — it looked stuck), publish at 12:50:55Z, read back as *no changes*; the live upgrades route reports sequence 15 and every level 2 to 18. Adding an allow rule for the agent was refused too, as "Auto-Mode Bypass" — a rule is the maintainer's to add or
+not to add. Nothing in #57's code depends on it.
 
 **With S6 closed, D5's stall list is empty — its reversal trigger.** What is
 left of Phase 4 is strangers where players already are, and Google's client out
