@@ -46,6 +46,7 @@ entry was met, not that the code exists.
 - [x] ~~**S9 and S10 — D5's rehearsal, its third run.**~~ **Done 2026-09-26 (forty-sixth session)**, both as proposed; the account is the forty-sixth session-log entry. S9's totals are a new wire field beside the old name, so a page and a server a deploy apart cannot disagree by a factor. The lines as they stood:
       - [x] **S9 — a purchase reads as one cheap buy.** "Buy 1,200 Cogs for 1 Simulation Score × 429" is 514 800 Cogs for 429 Score; the reader has to multiply. Say the total (or the times first).
       - [x] **S10 — "What each material is costing you" all 0.00.** Every price is zero when nothing binds but the stage, and a panel of zeros reads as broken. Say why, or hide it when every price is zero.
+      - [x] **Smaller** (the same session, asked for before closing): the notes open with solver-speak ("7 item constraint(s)"); rarity reads "6*" where the game draws ★; EXP Pods list L, XL, M. *Fixed in the run:* "Add a character" over a list with a weapon in it, and step 3's blurb. — Now plain words and last; ★ by sequence 14, on Neon; Pods XL, L, M by what they feed.
 
 - [x] ~~**N41 — Put Selena: Pianissimo and Karenina: Effulgence on the S-rank ladder.**~~ **Done 2026-09-24 (fortieth session), with Lucia: Inverse Crown in Karenina's place** — the maintainer does not own Karenina and so cannot read her. Selena and Lucia each climb `s-rank-construct` with their own eight skill names, SS passive and shard, and each shard has the two Phantom Pain shop rows (10 at 10 Scars, 20 at 20). Published as sequence 9, locally and to Neon, each read back as *no changes*; the live API serves 61 upgrade rows for each of the three. The entry as it stood:
       **Every number is shared and confirmed** for all S-rank (maintainer, screens compared
@@ -3167,7 +3168,7 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
-**2026-09-26 (forty-sixth) — S9 and S10: a purchase says its totals, and a zero says why.**
+**2026-09-26 (forty-sixth) — S9 and S10: a purchase says its totals, and a zero says why; then the smaller three, and sequence 14.**
 
 **The remote, checked first:** PR #55 (the forty-fifth's docs and S7's wording)
 merged at 11:07Z, its `main` run `36238224339` green, `/api/health` reporting
@@ -3212,9 +3213,40 @@ now one unbreakable unit. **A cached plan showed the totals too**: the names
 are built when the plan is served, not when it is solved, so plans solved
 before the change read the new way. 486 backend tests (+1), 74 frontend (+4).
 
-**Still open from the rehearsal:** S6 (a reading) and the smaller items —
-solver-speak opening the notes, "6*" for ★, EXP Pods listed L, XL, M — which
-are C2's once Phase 4 closes, or cut now if the maintainer would rather.
+**Then the smaller three, at the maintainer's ask before closing.** Two had a
+choice in them, so both were asked first; they took the recommended option each
+time.
+
+- **Solver-speak.** The first note, "Minimised energy over 1 stage(s), 3
+  craft(s), 3 shop offer(s) and 0 reward(s), against 7 item constraint(s), inside
+  a 14-day horizon at 240 energy a day", is now "Worked out from 1 stage, 3 shop
+  offers and 3 recipes that could help, over 14 days at 240 Serum a day." — the
+  game's energy word, kinds with none left out, the constraint count dropped
+  (it described the model; no reader can move it). **It and the drop-rate note
+  now come last**, after the notes about this reader's plan. "Recipe" because a
+  fodder rule and a step's price are recipes to the model, and "craft" read as
+  crafting.
+- **Pods L, XL, M.** The items route sorted rarest first, then by name, and L
+  and XL are both 4★. The tie-break is now **what an item feeds at its best
+  fodder rule** (`GameDataReadModel.inventoryOrder`), the one number a bundle
+  gives that ranks two items of one grade — XL, L, M, with no word of any game in
+  the rule. Tested against the real bundle; the API test's synthetic game has no
+  fodder and cannot show it.
+- **"6*" for ★ — sequence 14.** The bundle's grades were ASCII `4*` while its
+  item names said `5★ Memory Shard`. The maintainer chose the data fix over the
+  page redrawing `*`, so the bundle says it. **31 changes in the diff, every one
+  a label, every rank equal** — the ranks are what every rule compares. Published
+  locally at 11:53Z and, with the maintainer's yes in chat, **to Neon at
+  12:06:14Z**, each read back as *no changes*; production's `/items` served
+  sequence 14 with ★ at once, ahead of #56's code, which nothing in it needs.
+
+488 backend tests (+3 in the session), 74 frontend. The window stopped drawing
+partway through the second browser check, so clicks timed out and a screenshot
+came back blank; the form was submitted from script and read back as text, which
+is what the evidence was anyway. **PR #56 opened** from `dev`, CI running.
+
+**Left from the rehearsal: S6 alone**, a reading. When it closes the stall list is
+empty and D5's trigger fires.
 
 **2026-09-26 (forty-fifth) — S7 and S8: one goal row per construct, and every id on screen named.**
 
