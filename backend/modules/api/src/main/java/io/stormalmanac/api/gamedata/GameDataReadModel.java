@@ -32,6 +32,7 @@ import io.stormalmanac.common.id.EntityId;
 import io.stormalmanac.common.id.GameId;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.FactRef;
+import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.GameDefinitionRepository;
 import io.stormalmanac.gamedata.Item;
@@ -49,6 +50,7 @@ import io.stormalmanac.gamedata.catalog.Talent;
 import io.stormalmanac.gamedata.diff.VersionDiff;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,14 +146,7 @@ public class GameDataReadModel {
      */
     public ItemsResponse items(GameId game, Long sequence) {
         GameDefinition data = load(game, sequence);
-        List<Item> sorted = data.items().stream()
-                // Rarest first, then by name. An inventory screen is read
-                // top-down and the expensive materials are the ones a player is
-                // actually counting.
-                .sorted(Comparator.comparingInt((Item item) -> item.rarity().rank())
-                        .reversed()
-                        .thenComparing(Item::displayName))
-                .toList();
+        List<Item> sorted = data.items().stream().sorted(inventoryOrder(data)).toList();
 
         return new ItemsResponse(
                 game.value(),
@@ -382,6 +377,41 @@ public class GameDataReadModel {
                 entity.id().value(), entity.displayName(), entity.kind(),
                 rarity(entity.rarity()), entity.element(), entity.tags(),
                 data.nameOf(Word.Subject.ENTITY_KIND, entity.kind()));
+    }
+
+    /**
+     * Rarest first, then what it feeds, then by name. An inventory screen is
+     * read top-down and the expensive materials are the ones a player is
+     * actually counting. The middle key is D5's third run: two Pod sizes of one
+     * grade read "L, XL" by name, and the bundle already says which is worth
+     * more.
+     */
+    public static Comparator<Item> inventoryOrder(GameDefinition data) {
+        Map<Item, Integer> fed = feeds(data);
+        return Comparator.comparingInt((Item item) -> item.rarity().rank())
+                .reversed()
+                .thenComparing(Comparator.comparingInt((Item item) -> fed.getOrDefault(item, 0)).reversed())
+                .thenComparing(Item::displayName);
+    }
+
+    /**
+     * What one of each item feeds into a progress kind, at the best rule that
+     * takes it: the only number a bundle gives that says one fodder item is
+     * worth more than another of the same grade. Absent for anything no rule
+     * takes, which sorts as zero.
+     */
+    private static Map<Item, Integer> feeds(GameDefinition data) {
+        Map<Item, Integer> fed = new HashMap<>();
+        for (var sink : data.sinks()) {
+            if (!(sink instanceof Fodder rule)) continue;
+            for (Item item : data.items()) {
+                if (item.category().equals(rule.consumesCategory())
+                        && item.rarity().rank() >= rule.minimumRarity().rank()) {
+                    fed.merge(item, rule.progressPerUnit(), Math::max);
+                }
+            }
+        }
+        return fed;
     }
 
     private static RarityView rarity(Rarity rarity) {

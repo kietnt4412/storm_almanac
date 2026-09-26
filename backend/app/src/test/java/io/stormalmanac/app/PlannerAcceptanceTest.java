@@ -182,7 +182,7 @@ class PlannerAcceptanceTest {
         assertThat(plan.stageRuns()).singleElement()
                 .satisfies(run -> assertThat(run.stage().value()).isEqualTo("pg-1-1"));
         assertThat(plan.explanation().notes()).anySatisfy(note ->
-                assertThat(note).contains("1 shop offer(s)"));
+                assertThat(note).startsWith("Worked out from").contains("1 shop offer"));
     }
 
     @Test

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 
+import io.stormalmanac.api.gamedata.GameDataReadModel;
 import io.stormalmanac.api.player.PlayerView.ConversionView;
 import io.stormalmanac.api.player.PlayerView.PlanResponse;
 import io.stormalmanac.api.player.PlayerView.RewardClaimView;
@@ -398,6 +399,40 @@ class AuthoredBundlePlanTest {
         PlanResponse resonance = PlanResponse.of(solve(Goal.deterministic(SAMANTHA, "upper-resonance-1")), definition);
         assertThat(resonance.conversions()).extracting(ConversionView::total, ConversionView::repeat)
                 .containsExactly(tuple("Pay 246 Simulation Score", null));
+    }
+
+    @Test
+    @DisplayName("how a plan was worked out is said in words, in the game's energy, after the notes a reader acts on")
+    void howItWasWorkedOutComesLast() {
+        // D5's third run: the notes opened "Minimised energy over 1 stage(s), …
+        // against 7 item constraint(s)". Scars in hand so there is a note worth
+        // reading first — the one about a limit that never resets.
+        Plan plan = solve(Goal.deterministic(HELENTINE, "evolve-ss"),
+                Inventory.empty(PROFILE)
+                        .with(new ItemId("inver-shard-lacrimosa"), 2)
+                        .with(new ItemId("phantom-pain-scar"), 460));
+        List<String> notes = plan.explanation().notes();
+
+        String workedOut = notes.stream().filter(note -> note.startsWith("Worked out from")).findFirst().orElseThrow();
+        assertThat(workedOut).contains("2 shop offers").contains("Serum a day")
+                .doesNotContain("constraint").doesNotContain("(s)");
+        assertThat(notes.indexOf(workedOut))
+                .as("after every note about this reader's plan")
+                .isGreaterThan(notes.indexOf(notes.stream()
+                        .filter(note -> note.startsWith("Buying from a limit")).findFirst().orElseThrow()));
+    }
+
+    @Test
+    @DisplayName("the inventory lists the EXP Pods largest first: rarest, then what each one feeds")
+    void podsAreInSizeOrder() {
+        // D5's third run: "EXP Pod (L), EXP Pod (XL), EXP Pod (M)" — rarity
+        // first, then the name, and L and XL are both four stars. The fodder
+        // rules say what each feeds, which is the size.
+        assertThat(definition.items().stream()
+                .sorted(GameDataReadModel.inventoryOrder(definition))
+                .map(item -> item.id().value())
+                .filter(id -> id.startsWith("exp-pod-")))
+                .containsExactly("exp-pod-xl", "exp-pod-l", "exp-pod-m");
     }
 
     @Test
