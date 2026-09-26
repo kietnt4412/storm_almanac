@@ -1,0 +1,284 @@
+package io.stormalmanac.planner;
+
+import io.stormalmanac.common.id.EntityId;
+import io.stormalmanac.common.id.ItemId;
+import io.stormalmanac.common.id.StageId;
+import io.stormalmanac.gamedata.Fodder;
+import io.stormalmanac.gamedata.GameDefinition;
+import io.stormalmanac.gamedata.Item;
+import io.stormalmanac.gamedata.ItemStack;
+import io.stormalmanac.gamedata.Reward;
+import io.stormalmanac.gamedata.Stage;
+import io.stormalmanac.gamedata.Upgrade;
+import io.stormalmanac.gamedata.catalog.Entity;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+/**
+ * What to call a line of a plan: a stage to run, a thing to craft, buy, feed or
+ * pay, a grant to claim, a step being paid for, a line of demand.
+ *
+ * <p>Each of these is reported by id, and until 2026-09-26 the plan page printed
+ * the id — {@code simulation-shop-weapon-enhancer-iv} where a player would say
+ * "buy ten Weapon Enhancer IV". D5's rehearsal named it before a stranger
+ * could.
+ *
+ * <p><b>Every word here is a fact already, never a new one.</b> A stage, an
+ * item and an entity have names read off the game, and since ADR 0032 so do
+ * some states. A shop row, a craft, a fodder rule and a price have none, and
+ * giving them one would be a new word read off a screen, with its own
+ * provenance. So they are named by what they do, in the quantities and item
+ * names the bundle has already published: "Buy 10 Weapon Enhancer IV for 262
+ * Simulation Score" says more than any label would, and cannot disagree with the
+ * numbers beside it. A state with no word of the game's keeps its id, rather
+ * than one guessed from it; guessing is the page's business ({@code tracks.ts}),
+ * and the page says it is guessing.
+ *
+ * <p>A grant behind a score is named by its bar and not by the thing scored,
+ * because the measure is an opaque label (ADR 0022) that no screen was read for.
+ *
+ * <p>An id this version does not know falls back to itself, so a line can be
+ * ugly and never missing.
+ */
+public final class StepNames {
+
+    private final GameDefinition definition;
+    private final Map<ItemId, Item> items;
+    private final Map<EntityId, Entity> entities;
+
+    private StepNames(GameDefinition definition) {
+        this.definition = definition;
+        this.items = definition.itemsById();
+        this.entities = definition.entitiesById();
+    }
+
+    public static StepNames of(GameDefinition definition) {
+        return new StepNames(definition);
+    }
+
+    public String stage(StageId id) {
+        return definition.stages().stream()
+                .filter(stage -> stage.stageId().equals(id))
+                .map(Stage::displayName)
+                .findFirst()
+                .orElse(id.value());
+    }
+
+    /**
+     * A {@link Conversion}'s instruction. Its id is a shop row's, a craft's, a
+     * price's (one of a step's several, ADR 0021), or a fodder rule's — with
+     * {@code :<item>} after it when the rule takes more than one item, since
+     * each is a separate thing to do.
+     */
+    public String step(String id) {
+        return shop(id).or(() -> craft(id)).or(() -> price(id)).or(() -> fodder(id)).orElse(id);
+    }
+
+    /**
+     * The order a reader works through {@link #step}s in: buy, then open what
+     * was bought, then feed it, then pay. Id order was the order before names,
+     * and read as no order at all once the names showed.
+     */
+    public Comparator<String> stepOrder() {
+        return Comparator.comparingInt(this::kindOf).thenComparing(this::step).thenComparing(Function.identity());
+    }
+
+    /** A grant and everything it pays: "Weekly, score 90,000+: 5 Phantom Pain Scar + 6,000 Cogs". */
+    public String reward(String id) {
+        return rewardById(id).map(reward -> when(reward) + ": " + stacks(reward.grants())).orElse(id);
+    }
+
+    /**
+     * A grant said briefly, for a sentence that lists many: its bar when it has
+     * one, which is what tells two tiers of one ladder apart, and what it pays
+     * when it has none.
+     */
+    public String rewardBrief(String id) {
+        return rewardById(id)
+                .map(reward -> reward.requires() == null ? reward(id) : when(reward))
+                .orElse(id);
+    }
+
+    /** By cadence, then by bar, so a ladder reads from its bottom rung up. */
+    public Comparator<String> rewardOrder() {
+        Comparator<Optional<Reward>> byReward = Comparator.comparing(
+                (Optional<Reward> reward) -> reward.map(Reward::cadence).orElse(null),
+                Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparingInt(reward -> reward
+                        .map(r -> r.requires() == null ? 0 : r.requires().atLeast())
+                        .orElse(Integer.MAX_VALUE));
+        return Comparator.comparing(this::rewardById, byReward).thenComparing(Function.identity());
+    }
+
+    /**
+     * A step a goal is paying for, as {@link Demand#steps()} lists it — one id,
+     * or a step's several prices joined by {@code " or "}, which all reach the
+     * same state and so are the same step to a reader: "Samantha to
+     * upper-resonance-1". Which price is paid is the plan's "Pay …" line.
+     */
+    public String upgrade(String entry) {
+        String first = entry.split(" or ", 2)[0];
+        return definition.sinks().stream()
+                .filter(sink -> sink instanceof Upgrade upgrade && upgrade.id().equals(first))
+                .map(Upgrade.class::cast)
+                .findFirst()
+                .map(step -> entity(step.entity()) + " to " + state(step.entity(), step.toState()))
+                .orElse(entry);
+    }
+
+    /** Where a goal points: "Helentine: Lacrimosa at Hero". */
+    public String goal(EntityId entity, String state) {
+        return entity(entity) + " at " + state(entity, state);
+    }
+
+    /**
+     * A line of demand. One of three things, and only one of them has a name
+     * in the item table: a catalog item; a progress kind such as EXP, named by
+     * the bundle (ADR 0028); or <b>one step offered at several prices</b> (ADR
+     * 0021), named by its prices — "one of: 150 5★ Memory Shard · 234 Special
+     * Support Token" — which are what the reader is choosing between, and are
+     * facts already where a name for each upgrade would be a new one.
+     */
+    public String demand(ItemId id) {
+        if (Demand.isChoiceItem(id)) {
+            List<String> prices = definition.sinks().stream()
+                    .filter(sink -> sink instanceof Upgrade upgrade && Demand.choiceItem(upgrade).equals(id))
+                    .map(sink -> price((Upgrade) sink))
+                    .toList();
+            return prices.isEmpty() ? id.value() : "one of: " + String.join(" · ", prices);
+        }
+        if (Demand.isProgressItem(id)) {
+            return definition.nameOfProgress(Demand.progressKind(id));
+        }
+        return item(id);
+    }
+
+    /**
+     * One price, every part of it: "10 Cogs + 18,000 Memory EXP". A gate is not
+     * a price and is left out; the step's other prices share it.
+     */
+    public String price(Upgrade price) {
+        return Stream.concat(
+                        price.costs().stream().map(this::stack),
+                        price.progress().stream()
+                                .map(p -> quantity(p.quantity()) + " " + definition.nameOfProgress(p.kind())))
+                .reduce((a, b) -> a + " + " + b)
+                .orElse(price.id());
+    }
+
+    private int kindOf(String id) {
+        if (shop(id).isPresent()) return 0;
+        if (craft(id).isPresent()) return 1;
+        if (fodder(id).isPresent()) return 2;
+        if (price(id).isPresent()) return 3;
+        return 4;
+    }
+
+    private Optional<String> shop(String id) {
+        return definition.shops().stream()
+                .filter(shop -> shop.id().equals(id))
+                .findFirst()
+                .map(shop -> "Buy " + stack(shop.offer())
+                        + (shop.price() == 0
+                                ? ", free"
+                                : " for " + stack(new ItemStack(shop.currency(), shop.price()))));
+    }
+
+    private Optional<String> craft(String id) {
+        return definition.crafts().stream()
+                .filter(craft -> craft.id().equals(id))
+                .findFirst()
+                .map(craft -> "Open " + stacks(craft.consumes()) + " → " + stacks(craft.produces()));
+    }
+
+    private Optional<String> price(String id) {
+        return definition.sinks().stream()
+                .filter(sink -> sink instanceof Upgrade upgrade && upgrade.id().equals(id))
+                .findFirst()
+                .map(sink -> "Pay " + price((Upgrade) sink));
+    }
+
+    private Optional<String> fodder(String id) {
+        int split = id.indexOf(':');
+        String ruleId = split < 0 ? id : id.substring(0, split);
+        return definition.sinks().stream()
+                .filter(sink -> sink instanceof Fodder rule && rule.id().equals(ruleId) && rule.progress() != null)
+                .map(Fodder.class::cast)
+                .findFirst()
+                .flatMap(rule -> fed(rule, split < 0 ? null : new ItemId(id.substring(split + 1)))
+                        .map(item -> "Feed " + item + " into " + definition.nameOfProgress(rule.progress())
+                                + (rule.costs().isEmpty() ? "" : ", with " + stacks(rule.costs()))));
+    }
+
+    /** The item a fodder line feeds: named in its id, or the rule's only eligible one. */
+    private Optional<String> fed(Fodder rule, ItemId named) {
+        if (named != null) return Optional.of(item(named));
+        List<Item> eligible = definition.items().stream()
+                .filter(item -> item.category().equals(rule.consumesCategory()))
+                .filter(item -> item.rarity().rank() >= rule.minimumRarity().rank())
+                .toList();
+        return eligible.size() == 1 ? Optional.of(eligible.get(0).displayName()) : Optional.empty();
+    }
+
+    private Optional<Reward> rewardById(String id) {
+        return definition.rewards().stream().filter(reward -> reward.id().equals(id)).findFirst();
+    }
+
+    private static String when(Reward reward) {
+        return cadence(reward.cadence())
+                + (reward.requires() == null ? "" : ", score " + quantity(reward.requires().atLeast()) + "+");
+    }
+
+    private static String cadence(Reward.Cadence cadence) {
+        return switch (cadence) {
+            case DAILY -> "Daily";
+            case WEEKLY -> "Weekly";
+            case MONTHLY -> "Monthly";
+            case EVENT -> "Event";
+            case ONE_OFF -> "Once";
+        };
+    }
+
+    private String entity(EntityId id) {
+        Entity known = entities.get(id);
+        return known == null ? id.value() : known.displayName();
+    }
+
+    /** The game's word for a state if any step carries one (ADR 0032), else the state itself. */
+    private String state(EntityId entity, String state) {
+        return definition.sinks().stream()
+                .filter(sink -> sink instanceof Upgrade upgrade && upgrade.entity().equals(entity))
+                .map(Upgrade.class::cast)
+                .map(step -> step.toState().equals(state) ? step.labels().toName()
+                        : step.fromState().equals(state) ? step.labels().fromName()
+                        : null)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(state);
+    }
+
+    private String stacks(List<ItemStack> stacks) {
+        return stacks.stream().map(this::stack).collect(Collectors.joining(" + "));
+    }
+
+    private String stack(ItemStack stack) {
+        return quantity(stack.quantity()) + " " + item(stack.item());
+    }
+
+    private String item(ItemId id) {
+        Item known = items.get(id);
+        return known == null ? id.value() : known.displayName();
+    }
+
+    /** Grouped, and the same on every server whatever its locale. */
+    private static String quantity(int quantity) {
+        return String.format(Locale.ROOT, "%,d", quantity);
+    }
+}

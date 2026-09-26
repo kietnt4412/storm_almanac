@@ -17,6 +17,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -269,6 +270,9 @@ public final class MipOptimizer implements Optimizer {
             EnergyMip.Outcome outcome,
             long startedAtNanos) {
 
+        // Named for a reader, not by id: until 2026-09-26 these notes printed
+        // "samantha-overclock-1" and "phantom-pain-cage-90000" on the plan page.
+        StepNames names = StepNames.of(inputs.definition());
         List<String> notes = new ArrayList<>();
         notes.add(("Minimised energy over %d stage(s), %d craft(s), %d shop offer(s) and %d"
                 + " reward(s), against %d item")
@@ -290,11 +294,13 @@ public final class MipOptimizer implements Optimizer {
             notes.add("Nothing to do: the roster already satisfies every goal.");
         } else {
             notes.add("Paying for %d upgrade step(s): %s."
-                    .formatted(demand.steps().size(), String.join(", ", demand.steps())));
+                    .formatted(demand.steps().size(), demand.steps().stream()
+                            .map(names::upgrade)
+                            .collect(Collectors.joining(", "))));
         }
         if (!demand.alreadyMet().isEmpty()) {
             notes.add("Already met, and not costed: " + demand.alreadyMet().stream()
-                    .map(goal -> goal.entity().value() + " " + goal.targetState())
+                    .map(goal -> names.goal(goal.entity(), goal.targetState()))
                     .reduce((a, b) -> a + ", " + b).orElse(""));
         }
 
@@ -323,7 +329,8 @@ public final class MipOptimizer implements Optimizer {
             // logs in. Saying which grants and how many turns that from an
             // assumption into something a reader can check against their own week.
             notes.add("Counting on free income over the horizon: " + outcome.rewardClaims().stream()
-                    .map(claim -> claim.reward() + " ×" + claim.times())
+                    .sorted(Comparator.comparing(RewardClaim::reward, names.rewardOrder()))
+                    .map(claim -> names.rewardBrief(claim.reward()) + " ×" + claim.times())
                     .reduce((a, b) -> a + ", " + b).orElse("")
                     + ". Miss those and the plan costs more energy than it says.");
         }
@@ -371,7 +378,7 @@ public final class MipOptimizer implements Optimizer {
                 .filter(Shop::neverResets).map(Shop::id).collect(Collectors.toSet());
         List<String> spendsLifetime = outcome.conversions().stream()
                 .filter(conversion -> lifetime.contains(conversion.sourceOrSinkId()))
-                .map(conversion -> conversion.sourceOrSinkId() + " ×" + conversion.times())
+                .map(conversion -> names.step(conversion.sourceOrSinkId()) + " ×" + conversion.times())
                 .toList();
         if (!spendsLifetime.isEmpty()) {
             // The same kind of assumption as the rewards above, pointing the
@@ -424,7 +431,7 @@ public final class MipOptimizer implements Optimizer {
                     + " the data, not about the model.");
         }
 
-        Map<ItemId, Double> shadowPrices = shadowPrices(demand, inputs, outcome, notes, startedAtNanos);
+        Map<ItemId, Double> shadowPrices = shadowPrices(demand, inputs, outcome, notes, names, startedAtNanos);
         List<StageId> binding = outcome.stageRuns().stream().map(StageRun::stage).toList();
         return new Explanation(shadowPrices, binding, List.copyOf(notes));
     }
@@ -454,6 +461,7 @@ public final class MipOptimizer implements Optimizer {
             EnergyMip.Inputs inputs,
             EnergyMip.Outcome base,
             List<String> notes,
+            StepNames names,
             long startedAtNanos) {
 
         long deadline = startedAtNanos + (long) (budget.toNanos() * ANSWER_DEADLINE_SHARE);
@@ -487,7 +495,7 @@ public final class MipOptimizer implements Optimizer {
             } catch (Optimizer.InfeasibleGoalException e) {
                 // One more unit put the goal set out of reach, which is worth
                 // saying and is not worth failing the whole plan over.
-                notes.add("One more " + item.value() + " is not obtainable: " + e.getMessage());
+                notes.add("One more " + names.demand(item) + " is not obtainable: " + e.getMessage());
             }
         }
         return prices;

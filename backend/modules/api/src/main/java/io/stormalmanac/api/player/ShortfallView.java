@@ -8,11 +8,11 @@ import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.Sink;
 import io.stormalmanac.gamedata.Upgrade;
 import io.stormalmanac.planner.Demand;
+import io.stormalmanac.planner.StepNames;
 import io.stormalmanac.player.Inventory;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * "What am I still short of for her?" — the catalog's personalized overlay.
@@ -80,7 +80,7 @@ public final class ShortfallView {
                 Demand demand,
                 Inventory inventory) {
 
-            Map<ItemId, Item> items = definition.itemsById();
+            StepNames names = StepNames.of(definition);
             List<ShortfallLine> lines = new ArrayList<>();
             demand.quantities().forEach((item, required) -> {
                 if (Demand.isChoiceItem(item)) {
@@ -88,7 +88,7 @@ public final class ShortfallView {
                     int owned = prices.stream().anyMatch(price -> covers(definition, price, inventory)) ? required : 0;
                     lines.add(new ShortfallLine(
                             item.value(),
-                            DemandNames.of(definition, items, item),
+                            names.demand(item),
                             required,
                             owned,
                             required - owned));
@@ -100,7 +100,7 @@ public final class ShortfallView {
                         : inventory.quantityOf(item);
                 lines.add(new ShortfallLine(
                         item.value(),
-                        DemandNames.of(definition, items, item),
+                        names.demand(item),
                         required,
                         owned,
                         Math.max(0, required - owned)));

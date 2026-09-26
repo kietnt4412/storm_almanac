@@ -146,7 +146,10 @@ class MipOptimizerTest {
 
         assertThat(plan.explanation().notes())
                 .anySatisfy(note -> assertThat(note).contains("declared yield"))
-                .anySatisfy(note -> assertThat(note).contains("i1"));
+                // The step paid for, by entity and the state it reaches rather
+                // than by its id; this test game has no catalog entry, so the
+                // entity keeps its id too.
+                .anySatisfy(note -> assertThat(note).contains("Paying for 1 upgrade step(s): hero to insight-1"));
     }
 
     @Test

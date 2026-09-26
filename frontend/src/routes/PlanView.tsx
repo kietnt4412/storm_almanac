@@ -315,8 +315,8 @@ export function Answer({ plan, energyUnit }: { plan: Plan; energyUnit: string })
               <tbody>
                 {plan.stages.map((run) => (
                   <tr key={run.stage} className="border-t" style={{ borderColor: 'var(--line)' }}>
-                    <td className="py-1">
-                      {run.stage}
+                    <td className="py-1" title={run.stage}>
+                      {run.displayName ?? run.stage}
                       {plan.bindingStages.includes(run.stage) && (
                         <span className="ml-2 text-xs" style={{ color: 'var(--signal)' }}>
                           binding
@@ -345,8 +345,9 @@ export function Answer({ plan, energyUnit }: { plan: Plan; energyUnit: string })
           <h2 className="mb-2 font-medium">What to craft and buy</h2>
           <ul className="space-y-1 text-sm">
             {plan.conversions.map((conversion) => (
-              <li key={conversion.step}>
-                {conversion.step} <span className="count muted">× {conversion.times}</span>
+              <li key={conversion.step} title={conversion.step}>
+                {conversion.displayName ?? conversion.step}{' '}
+                <span className="count muted">× {conversion.times}</span>
               </li>
             ))}
           </ul>
@@ -358,8 +359,8 @@ export function Answer({ plan, energyUnit }: { plan: Plan; energyUnit: string })
           <h2 className="mb-2 font-medium">What to claim</h2>
           <ul className="space-y-1 text-sm">
             {plan.rewards.map((claim) => (
-              <li key={claim.reward}>
-                {claim.reward} <span className="count muted">× {claim.times}</span>
+              <li key={claim.reward} title={claim.reward}>
+                {claim.displayName ?? claim.reward} <span className="count muted">× {claim.times}</span>
               </li>
             ))}
           </ul>

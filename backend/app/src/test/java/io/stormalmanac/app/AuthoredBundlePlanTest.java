@@ -2,7 +2,12 @@ package io.stormalmanac.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
+import io.stormalmanac.api.player.PlayerView.ConversionView;
+import io.stormalmanac.api.player.PlayerView.PlanResponse;
+import io.stormalmanac.api.player.PlayerView.RewardClaimView;
+import io.stormalmanac.api.player.PlayerView.StageRunView;
 import io.stormalmanac.api.player.ShortfallView.ShortfallLine;
 import io.stormalmanac.api.player.ShortfallView.ShortfallResponse;
 import io.stormalmanac.common.id.EntityId;
@@ -197,7 +202,8 @@ class AuthoredBundlePlanTest {
                 new Conversion("phantom-pain-shop-inver-shard-lacrimosa-discounted", 10));
         assertThat(plan.explanation().notes()).anySatisfy(note -> assertThat(note)
                 .startsWith("Buying from a limit that never resets")
-                .contains("phantom-pain-shop-inver-shard-lacrimosa-discounted ×10")
+                .contains("Buy 1 Inver-Shard - Lacrimosa for 10 Phantom Pain Scar ×10")
+                .doesNotContain("phantom-pain-shop")
                 .contains("assumes none of that allowance has been bought yet"));
     }
 
@@ -226,7 +232,9 @@ class AuthoredBundlePlanTest {
                 .isEqualTo(500);
         assertThat(plan.explanation().notes()).anySatisfy(note -> assertThat(note)
                 .startsWith("Counting on free income over the horizon")
-                .contains("phantom-pain-cage-1100000 ×9"));
+                .containsSubsequence("Weekly, score 30,000+ ×", "Weekly, score 90,000+ ×9",
+                        "Weekly, score 1,100,000+ ×9")
+                .doesNotContain("phantom-pain-cage-"));
     }
 
     /** What the tiers the plan claims pay in Scars, read back off the bundle. */
@@ -326,6 +334,78 @@ class AuthoredBundlePlanTest {
 
         assertThat(page.items()).extracting(ShortfallLine::displayName).containsExactly(
                 "one of: 150 5★ Memory Shard · 234 Special Support Token · 246 Simulation Score");
+    }
+
+    @Test
+    @DisplayName("every line of a plan is named from published facts: a stage, a purchase, a box, a feed, a price, a tier")
+    void planLinesAreNamed() {
+        // D5's rehearsal: the plan page printed "simulation-shop-memory-enhancer-iv"
+        // until 2026-09-26. Only the stage has a name read off the game; every
+        // other line is named by what it does, in quantities and item names the
+        // bundle already publishes, so no word here is a new fact.
+        PlanResponse overclock = PlanResponse.of(solve(Goal.deterministic(SAMANTHA, "overclock-1")), definition);
+        assertThat(overclock.stages()).extracting(StageRunView::displayName)
+                .containsExactly("Simulated Battlefield");
+        assertThat(overclock.conversions()).extracting(ConversionView::step, ConversionView::displayName)
+                .contains(
+                        tuple("simulation-shop-memory-enhancer-iv",
+                                "Buy 10 Memory Enhancer IV for 87 Simulation Score"),
+                        tuple("open-overclock-material-box-beta",
+                                "Open 10 Overclock Material Box (β) → 4 Major Overclock Alloy"
+                                        + " + 3 Weapon Overclock Core II + 3 Memory Overclock Circuit II"),
+                        tuple("memory-exp-4-star",
+                                "Feed Memory Enhancer IV into Memory EXP"));
+
+        PlanResponse resonance = PlanResponse.of(solve(Goal.deterministic(SAMANTHA, "upper-resonance-1")), definition);
+        assertThat(resonance.conversions()).extracting(ConversionView::displayName)
+                .containsExactly("Pay 246 Simulation Score");
+
+        PlanResponse cage = PlanResponse.of(solve(Goal.deterministic(HELENTINE, "evolve-ss"), Inventory.empty(PROFILE),
+                63, Map.of("phantom-pain-cage-score", 1_100_000)), definition);
+        assertThat(cage.rewards()).extracting(RewardClaimView::reward, RewardClaimView::displayName)
+                .contains(tuple("phantom-pain-cage-90000",
+                        "Weekly, score 90,000+: 5 Phantom Pain Scar + 1 Major Overclock Alloy"
+                                + " + 1 EXP Pod (M) + 6,000 Cogs"));
+    }
+
+    @Test
+    @DisplayName("a plan's lines are in reading order: buy, open, feed, pay, and a ladder bottom rung up")
+    void planLinesAreInReadingOrder() {
+        // Sorted by id they read as no order once they had names: "Feed" before
+        // "Open" before "Buy", and a tier at 1 000 000 before one at 120 000.
+        PlanResponse overclock = PlanResponse.of(solve(Goal.deterministic(SAMANTHA, "overclock-1")), definition);
+        assertThat(overclock.conversions()).extracting(ConversionView::displayName)
+                .map(name -> name.substring(0, name.indexOf(' ')))
+                .containsExactly("Buy", "Buy", "Buy", "Buy", "Open", "Open", "Feed");
+
+        PlanResponse cage = PlanResponse.of(solve(Goal.deterministic(HELENTINE, "evolve-ss"), Inventory.empty(PROFILE),
+                63, Map.of("phantom-pain-cage-score", 1_100_000)), definition);
+        assertThat(cage.rewards()).extracting(RewardClaimView::reward).containsExactly(
+                "phantom-pain-cage-30000", "phantom-pain-cage-90000", "phantom-pain-cage-120000",
+                "phantom-pain-cage-360000", "phantom-pain-cage-500000", "phantom-pain-cage-700000",
+                "phantom-pain-cage-900000", "phantom-pain-cage-1000000", "phantom-pain-cage-1100000");
+    }
+
+    @Test
+    @DisplayName("the plan's notes name the steps paid for and a material one more of cannot be had")
+    void notesAreNamed() {
+        // Her Promote ladder names its ranks (ADR 0032), so its last step is
+        // "to Hero"; Evolve's states have no word of the game's, and keep their id.
+        Plan promote = solve(Goal.deterministic(HELENTINE, "promote-13"),
+                Inventory.empty(PROFILE).with(new ItemId("exp-pod-xl"), 25));
+        assertThat(promote.explanation().notes()).anySatisfy(note -> assertThat(note)
+                .startsWith("Paying for ")
+                .contains("Helentine: Lacrimosa to Hero")
+                .doesNotContain("helentine-lacrimosa-promote"));
+
+        Plan evolve = solve(Goal.deterministic(HELENTINE, "evolve-ss"),
+                Inventory.empty(PROFILE)
+                        .with(new ItemId("inver-shard-lacrimosa"), 2)
+                        .with(new ItemId("phantom-pain-scar"), 460));
+        assertThat(evolve.explanation().notes())
+                .anySatisfy(note -> assertThat(note).contains("Helentine: Lacrimosa to evolve-ss"))
+                .anySatisfy(note -> assertThat(note)
+                        .startsWith("One more Inver-Shard - Lacrimosa is not obtainable"));
     }
 
     @Test
