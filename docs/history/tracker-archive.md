@@ -48,6 +48,9 @@ entry was met, not that the code exists.
       - [x] **S10 — "What each material is costing you" all 0.00.** Every price is zero when nothing binds but the stage, and a panel of zeros reads as broken. Say why, or hide it when every price is zero.
       - [x] **Smaller** (the same session, asked for before closing): the notes open with solver-speak ("7 item constraint(s)"); rarity reads "6*" where the game draws ★; EXP Pods list L, XL, M. *Fixed in the run:* "Add a character" over a list with a weapon in it, and step 3's blurb. — Now plain words and last; ★ by sequence 14, on Neon; Pods XL, L, M by what they feed.
 
+- [x] ~~**S6 — D5's rehearsal, its last stall.**~~ **Done 2026-09-26 (forty-seventh session)** — a reading, as the line said, and then sequence 15. The maintainer read the upgrade prompt on Seeker System at Lv 1 to each target from 5 to 17; the fourteen rows sum to exactly the 41 SP and 197 000 Cogs the derived row carried. **With it the rehearsal's stall list is empty, which is D5's reversal trigger.** The line as it stood:
+      - [x] **S6 — a skill at Lv 10 cannot be recorded.** Skill tracks offer 1, 2, 3, 4, 18: `{skill}-18` is one row *derived* from the 1 → 18 prompt, because levels 5–17 are unread. A mid-curve player must pick 4 and is charged for levels already paid. **A reading, not code:** Skill Points and Cogs per level 4 → 18. Level is milder (only gated levels are states).
+
 - [x] ~~**N41 — Put Selena: Pianissimo and Karenina: Effulgence on the S-rank ladder.**~~ **Done 2026-09-24 (fortieth session), with Lucia: Inverse Crown in Karenina's place** — the maintainer does not own Karenina and so cannot read her. Selena and Lucia each climb `s-rank-construct` with their own eight skill names, SS passive and shard, and each shard has the two Phantom Pain shop rows (10 at 10 Scars, 20 at 20). Published as sequence 9, locally and to Neon, each read back as *no changes*; the live API serves 61 upgrade rows for each of the three. The entry as it stood:
       **Every number is shared and confirmed** for all S-rank (maintainer, screens compared
       2026-09-24), so the path is written once ([ADR 0031](../adr/0031-a-shared-upgrade-path-is-written-once-and-expanded-in-the-file.md)).
@@ -3167,6 +3170,44 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-26 (forty-seventh) — S6 closed by a reading: the skill curve 4 → 18, sequence 15. The stall list is empty.**
+
+**The remote, checked first:** PR #56 (S9, S10, the smaller hesitations) had
+merged at 12:10Z with its `main` run `36241114992` still going; it went green
+through `deploy`, and `/api/health` reported `03199cb`, #56's merge. Every commit
+on `dev` was on `main`.
+
+**The reading.** S6 needed Skill Points and Cogs per level from 4 to 18. The
+first idea was fourteen single-step screenshots, which means a skill standing at
+every level; the maintainer proposed running totals instead — the upgrade prompt
+on **Seeker System at Lv 1**, stepped to each target from 5 to 17 — which needs
+one skill and spends nothing. Thirteen screenshots, patch 4.8.0, transcribed and
+not committed. Each row is one total less the one before; 4 → 5 is 1 → 5 less
+the three single steps already read, 17 → 18 the 2026-09-19 1 → 18 total less
+1 → 17. **The check held exactly: the fourteen sum to 41 SP and 197 000 Cogs**,
+the remainder sequences 0 to 14 wrote as one derived row. Cogs climb 1 000 a
+level to 10, then 2 000; Skill Points go 1, 2 ×5, 3 ×5, 5 ×3.
+
+**Sequence 15** writes them in place of the one row, sourced by a new provenance
+entry `skill-curve-prompts` (row-level `sourcedBy`; the climbers' own sources
+still win for Selena and Lucia, whose sharing of the curve is the maintainer's
+report under their entries). Preview against the local database: **384
+progression changes and nothing else** — three constructs × eight skills × (13
+new rows + the old 18 row's two costs and edge). Published locally, read back as
+*no changes*, and a jar served on a spare port offers Abyssal Lament at every
+level 2 to 18. A new `AuthoredBundlePlanTest` case pins S6: a reader recorded at
+`seeker-system-10` is charged 30 SP and 152 000 Cogs, **120 Serum**, where Lv 4
+is the cap test's 150, unchanged. **489 tests**, green.
+
+**Neon was not published.** The maintainer said yes in chat, and the auto-mode
+classifier still refused the Neon *preview* as a production read. Not worked
+around; Neon holds sequence 14, and publishing 15 is the maintainer's to run or
+to approve in a form the classifier takes. Nothing in #57's code depends on it.
+
+**With S6 closed, D5's stall list is empty — its reversal trigger.** What is
+left of Phase 4 is strangers where players already are, and Google's client out
+of *Testing* (list each tester or publish the app).
 
 **2026-09-26 (forty-sixth) — S9 and S10: a purchase says its totals, and a zero says why; then the smaller three, and sequence 14.**
 
