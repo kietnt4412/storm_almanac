@@ -124,13 +124,22 @@ public final class StepNames {
      * upper-resonance-1". Which price is paid is the plan's "Pay …" line.
      */
     public String upgrade(String entry) {
+        return upgradeOf(entry)
+                .map(step -> entity(step.entity()) + " to " + state(step.entity(), step.toState()))
+                .orElse(entry);
+    }
+
+    /**
+     * The step an entry of {@link Demand#steps()} stands for — its first price
+     * when it lists several, since they share both states — or empty when this
+     * version has no such step.
+     */
+    public Optional<Upgrade> upgradeOf(String entry) {
         String first = entry.split(" or ", 2)[0];
         return definition.sinks().stream()
                 .filter(sink -> sink instanceof Upgrade upgrade && upgrade.id().equals(first))
                 .map(Upgrade.class::cast)
-                .findFirst()
-                .map(step -> entity(step.entity()) + " to " + state(step.entity(), step.toState()))
-                .orElse(entry);
+                .findFirst();
     }
 
     /** Where a goal points: "Helentine: Lacrimosa at Hero". */
@@ -246,7 +255,8 @@ public final class StepNames {
         };
     }
 
-    private String entity(EntityId id) {
+    /** What the catalog calls an entity, or its id when this version does not know it. */
+    public String entity(EntityId id) {
         Entity known = entities.get(id);
         return known == null ? id.value() : known.displayName();
     }

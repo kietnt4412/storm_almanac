@@ -265,6 +265,7 @@ public final class PlayerView {
             List<ShadowPriceView> shadowPrice,
             List<String> bindingStages,
             List<String> notes,
+            List<PayingForView> payingFor,
             Instant computedAt) {
 
         public static PlanResponse of(Plan plan, GameDefinition definition) {
@@ -308,7 +309,45 @@ public final class PlayerView {
                             .map(id -> id.value())
                             .toList(),
                     plan.explanation().notes(),
+                    plan.explanation().payingFor().stream()
+                            .map(entry -> PayingForView.of(entry, names))
+                            .toList(),
                     plan.computedAt());
+        }
+    }
+
+    /**
+     * One upgrade step the goals pay for, as the entity and the two states it
+     * joins rather than as a sentence.
+     *
+     * <p>The page names a state the way the goal and roster screens already
+     * do — the game's word where the bundle has one, a guess off the track's
+     * ids where it has none, "Red Orb · 18" — and it cannot do that to a
+     * sentence. The server does not guess ({@link StepNames}), so
+     * {@code displayName} is its unguessed form, "Lucia: Inverse Crown to
+     * abyssal-lament-18", for a client that names nothing itself.
+     *
+     * <p>The states are null only for an entry this version has no step for,
+     * which a plan solved against it cannot produce; {@code step} then carries it.
+     */
+    public record PayingForView(
+            String step,
+            String entity,
+            String entityName,
+            String fromState,
+            String toState,
+            String displayName) {
+
+        static PayingForView of(String entry, StepNames names) {
+            return names.upgradeOf(entry)
+                    .map(step -> new PayingForView(
+                            entry,
+                            step.entity().value(),
+                            names.entity(step.entity()),
+                            step.fromState(),
+                            step.toState(),
+                            names.upgrade(entry)))
+                    .orElseGet(() -> new PayingForView(entry, null, null, null, null, entry));
         }
     }
 

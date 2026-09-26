@@ -11,7 +11,7 @@ import {
 } from '../api/client';
 import { ProfileGate } from '../profile';
 import { TrackPicker } from '../roster/TrackPicker';
-import { sectionsOf, statesOfGraph, trackOf, tracksOfGraph, type Track } from '../roster/tracks';
+import { sectionsOf, stateLabel, statesOfGraph, trackOf, tracksOfGraph, type Track } from '../roster/tracks';
 import { NextStep } from '../steps/Steps';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 
@@ -177,7 +177,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                               .filter((candidate) => states.targets.includes(candidate.state))
                               .map((candidate) => (
                                 <option key={candidate.state} value={candidate.state}>
-                                  {track.tag ?? track.name} · {candidate.label}
+                                  {stateLabel(states.tracks, candidate.state)}
                                 </option>
                               ))}
                           </optgroup>

@@ -19,6 +19,7 @@ import io.stormalmanac.planner.Optimizer;
 import io.stormalmanac.planner.Plan;
 import io.stormalmanac.planner.SolveRequest;
 import io.stormalmanac.planner.StageRun;
+import io.stormalmanac.planner.StepNames;
 import io.stormalmanac.player.Inventory;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -252,8 +253,11 @@ class RealUpstreamPlanTest {
                 assertThat(definition.crafts()).extracting(Craft::id).contains(made.sourceOrSinkId()));
 
         assertThat(plan.explanation().notes())
-                .anySatisfy(note -> assertThat(note).contains("declared yield"))
-                .anySatisfy(note -> assertThat(note).contains("insight-2"));
+                .anySatisfy(note -> assertThat(note).contains("declared yield"));
+        // The steps paid for travel as data since S8, and each resolves too.
+        assertThat(plan.explanation().payingFor()).isNotEmpty()
+                .allSatisfy(step -> assertThat(StepNames.of(definition).upgradeOf(step)).isPresent())
+                .anySatisfy(step -> assertThat(StepNames.of(definition).upgrade(step)).contains("insight-2"));
     }
 
     // ── the goal sets ───────────────────────────────────────────────────────

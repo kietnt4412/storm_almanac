@@ -62,8 +62,15 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
     return slugs;
   }, [roster, opened]);
 
+  // Every entity's graph, not only the shown ones': the add list offers only
+  // someone with a track to stand on. Karenina was offered with nothing to
+  // record, which the second rehearsal found. Cached for as long as the patch.
+  const everyone = useMemo(
+    () => [...new Set([...(entities.data?.entities ?? []).map((entity) => entity.id), ...shown])],
+    [entities.data, shown],
+  );
   const graphs = useQueries({
-    queries: shown.map((slug) => ({
+    queries: everyone.map((slug) => ({
       queryKey: ['upgrades', game, slug],
       queryFn: () => getUpgrades(game, slug),
       staleTime: Infinity,
@@ -87,7 +94,9 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
   const catalog = entities.data?.entities ?? [];
   const nameOf = (slug: string) =>
     catalog.find((candidate) => candidate.id === slug)?.displayName ?? slug;
-  const addable = catalog.filter((entity) => !shown.includes(entity.id));
+  const addable = catalog.filter(
+    (entity) => !shown.includes(entity.id) && (tracksOf.get(entity.id)?.tracks.length ?? 0) > 0,
+  );
 
   return (
     <div className="space-y-4">
@@ -189,7 +198,7 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
           Add
         </button>
         {addable.length === 0 && catalog.length > 0 && (
-          <p className="muted text-sm">Everyone this patch publishes is already on the list.</p>
+          <p className="muted text-sm">Everyone this patch gives something to record is already on the list.</p>
         )}
       </div>
 

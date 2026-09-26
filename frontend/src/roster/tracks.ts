@@ -180,6 +180,18 @@ export function trackOf(tracks: Track[], state: string): Track | undefined {
 }
 
 /**
+ * A state named with its track, "Red Orb · 18" or "Promote · Ace ★1": what a
+ * goal's target reads as, and what the plan's "paying for" line reads as, so the
+ * reader meets one name for one state on every screen. The state itself when
+ * the graph does not have it.
+ */
+export function stateLabel(tracks: Track[], state: string): string {
+  const track = trackOf(tracks, state);
+  const candidate = track?.states.find((known) => known.state === state);
+  return track && candidate ? `${track.tag ?? track.name} · ${candidate.label}` : state;
+}
+
+/**
  * Where the reader stands on one track: the furthest state recorded on it.
  *
  * <p>Furthest, because a roster may already hold two states of one track — the

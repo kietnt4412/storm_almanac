@@ -278,7 +278,24 @@ export interface Plan {
   shadowPrice: ShadowPrice[];
   bindingStages: string[];
   notes: string[];
+  /*
+    The upgrade steps the goals pay for, as data so the page can name each
+    state the way the goal and roster screens do. Absent from a server older
+    than this page, which said it as a note instead; the notes still render.
+  */
+  payingFor?: PayingFor[];
   computedAt: string;
+}
+
+export interface PayingFor {
+  step: string;
+  /** Null only for a step the plan's version does not know, which it cannot produce. */
+  entity: string | null;
+  entityName: string | null;
+  fromState: string | null;
+  toState: string | null;
+  /** The server's unguessed name, "Lucia: Inverse Crown to abyssal-lament-18". */
+  displayName: string;
 }
 
 export interface ShortfallLine {

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Profile } from '../api/client';
-import { Home } from './Home';
+import { Home, localPath } from './Home';
 
 /**
  * Found in the maintainer's rehearsal on 2026-09-25: the form's defaults are the
@@ -38,6 +38,22 @@ describe('the add-a-profile form', () => {
     expect(screen.queryByText(/You already have/)).not.toBeInTheDocument();
     expect(add).toBeEnabled();
     expect(posted()).toBe(0);
+  });
+
+  it("names a profile's game as the game does, not by its id", async () => {
+    serve([THEL]);
+    renderHome();
+
+    expect(await screen.findByText('Punishing: Gray Raven · global')).toBeInTheDocument();
+    expect(screen.queryByText(/punishing-gray-raven · global/)).not.toBeInTheDocument();
+  });
+
+  it('goes back only to a path on this site', () => {
+    expect(localPath('/inventory')).toBe('/inventory');
+    expect(localPath('//evil.example')).toBeNull();
+    expect(localPath('/\\evil.example')).toBeNull();
+    expect(localPath('https://evil.example')).toBeNull();
+    expect(localPath(null)).toBeNull();
   });
 
   it('offers the form as before when the place is free', async () => {

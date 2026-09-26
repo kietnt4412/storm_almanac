@@ -24,6 +24,7 @@ import io.stormalmanac.planner.Objective;
 import io.stormalmanac.planner.Optimizer;
 import io.stormalmanac.planner.Plan;
 import io.stormalmanac.planner.SolveRequest;
+import io.stormalmanac.planner.StepNames;
 import io.stormalmanac.player.Inventory;
 import io.stormalmanac.player.Roster;
 import java.io.IOException;
@@ -387,23 +388,24 @@ class AuthoredBundlePlanTest {
     }
 
     @Test
-    @DisplayName("the plan's notes name the steps paid for and a material one more of cannot be had")
+    @DisplayName("a plan names the steps it pays for, and a note names a material one more of cannot be had")
     void notesAreNamed() {
         // Her Promote ladder names its ranks (ADR 0032), so its last step is
         // "to Hero"; Evolve's states have no word of the game's, and keep their id.
         Plan promote = solve(Goal.deterministic(HELENTINE, "promote-13"),
                 Inventory.empty(PROFILE).with(new ItemId("exp-pod-xl"), 25));
-        assertThat(promote.explanation().notes()).anySatisfy(note -> assertThat(note)
-                .startsWith("Paying for ")
+        StepNames names = StepNames.of(definition);
+        assertThat(promote.explanation().payingFor()).map(names::upgrade)
                 .contains("Helentine: Lacrimosa to Hero")
-                .doesNotContain("helentine-lacrimosa-promote"));
+                .noneSatisfy(named -> assertThat(named).contains("helentine-lacrimosa-promote"));
 
         Plan evolve = solve(Goal.deterministic(HELENTINE, "evolve-ss"),
                 Inventory.empty(PROFILE)
                         .with(new ItemId("inver-shard-lacrimosa"), 2)
                         .with(new ItemId("phantom-pain-scar"), 460));
+        assertThat(evolve.explanation().payingFor()).map(names::upgrade)
+                .contains("Helentine: Lacrimosa to evolve-ss");
         assertThat(evolve.explanation().notes())
-                .anySatisfy(note -> assertThat(note).contains("Helentine: Lacrimosa to evolve-ss"))
                 .anySatisfy(note -> assertThat(note)
                         .startsWith("One more Inver-Shard - Lacrimosa is not obtainable"));
     }

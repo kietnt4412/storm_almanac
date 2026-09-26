@@ -1,8 +1,19 @@
-import { useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ApiError, getGames, getGoals, getMeasures, solve, type Measure, type Plan } from '../api/client';
+import {
+  ApiError,
+  getGames,
+  getGoals,
+  getMeasures,
+  getUpgrades,
+  solve,
+  type Measure,
+  type PayingFor,
+  type Plan,
+} from '../api/client';
 import { ProfileGate } from '../profile';
+import { stateLabel, tracksOfGraph, type Track } from '../roster/tracks';
 import { NextStep } from '../steps/Steps';
 import { reachOf, usePlannerStore } from '../store/plannerStore';
 
@@ -56,6 +67,24 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
   const run = useMutation<Plan, Error>({
     mutationFn: () => solve(profileId, { energyPerDay, horizonDays, objective, reach }),
   });
+
+  // The tracks of whoever the plan pays for, so each step reads as the goal
+  // screen named it. The same query key as there, so they are usually cached.
+  const paidFor = [...new Set((run.data?.payingFor ?? []).flatMap((paying) => (paying.entity ? [paying.entity] : [])))];
+  const graphs = useQueries({
+    queries: paidFor.map((entity) => ({
+      queryKey: ['upgrades', game, entity],
+      queryFn: () => getUpgrades(game, entity),
+      staleTime: Infinity,
+    })),
+  });
+  const tracks = useMemo(() => {
+    const byEntity = new Map<string, Track[]>();
+    graphs.forEach((graph) => {
+      if (graph.data) byEntity.set(graph.data.entity.id, tracksOfGraph(graph.data.steps));
+    });
+    return byEntity;
+  }, [graphs]);
 
   const energyUnit = games.data?.games.find((published) => published.id === game)?.energyUnit ?? 'energy';
   const hasGoals = (goals.data?.goals.length ?? 0) > 0;
@@ -160,7 +189,7 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
       </form>
 
       {run.isError && <Refusal error={run.error} />}
-      {run.data && <Answer plan={run.data} energyUnit={energyUnit} />}
+      {run.data && <Answer plan={run.data} energyUnit={energyUnit} tracks={tracks} />}
 
       <NextStep from="/plan" />
     </div>
@@ -259,7 +288,17 @@ function Refusal({ error }: { error: Error }) {
   );
 }
 
-export function Answer({ plan, energyUnit }: { plan: Plan; energyUnit: string }) {
+export function Answer({
+  plan,
+  energyUnit,
+  tracks = new Map(),
+}: {
+  plan: Plan;
+  energyUnit: string;
+  /** Each paid-for entity's tracks, by id; a step whose entity is missing keeps the server's name. */
+  tracks?: Map<string, Track[]>;
+}) {
+  const paying = plan.payingFor ?? [];
   return (
     <div className="space-y-4">
       <section className="card">
@@ -284,8 +323,11 @@ export function Answer({ plan, energyUnit }: { plan: Plan; energyUnit: string })
           </div>
         </div>
 
-        {plan.notes.length > 0 && (
+        {(plan.notes.length > 0 || paying.length > 0) && (
           <ul className="mt-3 space-y-1 border-t pt-3 text-sm" style={{ borderColor: 'var(--line)' }}>
+            {paying.length > 0 && (
+              <li style={{ color: 'var(--signal)' }}>{payingForSentence(paying, tracks)}</li>
+            )}
             {plan.notes.map((note) => (
               <li key={note} style={{ color: 'var(--signal)' }}>
                 {note}
@@ -390,4 +432,29 @@ export function Answer({ plan, energyUnit }: { plan: Plan; energyUnit: string })
       <p className="text-xs muted">{plan.attribution}</p>
     </div>
   );
+}
+
+/**
+ * "Paying for 3 upgrade steps: Lucia: Inverse Crown — Level · 65, Red Orb · 18,
+ * Promote · Ace ★1." One entity named once, and each state named by its track as
+ * the goal screen names it. Until S8 this was the server's sentence, which could
+ * only print a state the game gives no word for as its id.
+ */
+export function payingForSentence(paying: PayingFor[], tracks: Map<string, Track[]>): string {
+  const byEntity = new Map<string, { name: string; states: string[] }>();
+  for (const step of paying) {
+    const known = step.entity && step.toState ? tracks.get(step.entity) : undefined;
+    if (!step.entity || !step.toState || !known) {
+      // No graph (yet) to name it from: the server's own name, whole.
+      byEntity.set(step.step, { name: step.displayName, states: [] });
+      continue;
+    }
+    const entry = byEntity.get(step.entity) ?? { name: step.entityName ?? step.entity, states: [] };
+    entry.states.push(stateLabel(known, step.toState));
+    byEntity.set(step.entity, entry);
+  }
+  const parts = [...byEntity.values()].map((entry) =>
+    entry.states.length === 0 ? entry.name : `${entry.name} — ${entry.states.join(', ')}`,
+  );
+  return `Paying for ${paying.length} upgrade step${paying.length === 1 ? '' : 's'}: ${parts.join('; ')}.`;
 }

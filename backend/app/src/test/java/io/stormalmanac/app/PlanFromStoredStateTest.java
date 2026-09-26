@@ -144,6 +144,14 @@ class PlanFromStoredStateTest extends SharedDatabaseTest {
         assertThat(plan.get("totalEnergy").asInt()).isZero();
         assertThat(plan.get("stages")).isEmpty();
 
+        // What it pays for is the step itself, entity and both states, so the
+        // page can name a state the game gave no word for (S8).
+        JsonNode paying = plan.get("payingFor").get(0);
+        assertThat(paying.get("entity").asText()).isEqualTo("warden");
+        assertThat(paying.get("fromState").asText()).isEqualTo("insight-0");
+        assertThat(paying.get("toState").asText()).isEqualTo("insight-1");
+        assertThat(paying.get("displayName").asText()).endsWith(" to insight-1");
+
         // And the account it hangs off is the one the sign-in created.
         assertThat(accounts.find(AccountId.of(accountId))).isPresent();
     }
