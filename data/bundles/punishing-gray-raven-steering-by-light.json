@@ -163,7 +163,14 @@
     "'4*', an ASCII stand-in for the star the game draws, and D5's third",
     "rehearsal read '6*' on the inventory as a typo. The 31 labels now say",
     "'4★', as the item names in this file already did ('5★ Memory Shard').",
-    "The ranks are untouched, and the ranks are what every rule compares."
+    "The ranks are untouched, and the ranks are what every rule compares.",
+    "",
+    "Sequence 15 reads the skill curve between Lv 4 and 18, which every",
+    "sequence before it wrote as one derived 4 -> 18 row, so a reader at Lv 10",
+    "could only record 4 and was charged for levels already paid (D5's S6).",
+    "Fourteen rows replace the one, sourced by 'skill-curve-prompts', and sum",
+    "to the same 41 Skill Points and 197 000 Cogs: a plan to the cap is",
+    "unchanged, and a plan from a mid-curve level is cheaper."
   ],
 
   "game": {
@@ -172,9 +179,9 @@
     "energyUnit": "Serum",
     "dayBoundary": { "zone": "UTC", "hour": 5 }
   },
-  "sequence": 14,
+  "sequence": 15,
   "label": "Anchored in Faith (Global 4.8.0)",
-  "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client: patch 4.7.0 \"Steering By Light\" from 2026-09-18 to 2026-09-22, and patch 4.8.0 \"Anchored in Faith\" on 2026-09-24. Numbers and text only; no game assets.",
+  "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client: patch 4.7.0 \"Steering By Light\" from 2026-09-18 to 2026-09-22, and patch 4.8.0 \"Anchored in Faith\" from 2026-09-24. Numbers and text only; no game assets.",
 
   "provenance": [
     {
@@ -228,7 +235,7 @@
     {
       "id": "skill-pages",
       "origin": "OBSERVED_IN_GAME",
-      "detail": "Helentine: Lacrimosa's four skill pages, read whole: Basic Skill — Delusional Spin [Red Orb] at Lv 18 with 'Max Level Reached', Withering Spiral [Yellow Orb], Blight Excision [Blue Orb], Link Dissolution [Basic Attack]; Special Skill — Seeker System [Core Passive], Allegory of the Wondrous Night [Signature Move] and Fluid Emotions [QTE], each at Lv 1 with Consume 1 Skill Point + 2 000 Cogs; Common Effect — Leader - Fading Fern [Leader Skill] with Unlock 3 Skill Points + 25 000 Cogs, Amplifier at Lv 1, and Ultima Awaken, 'Awaken Lacrimosa's Ultima Rank', with no Skill Point or Cog cost; Evolution Effect — Vestige [SS Rank Passive Skill] at Lv 2, 'Max Level Reached', Styx Reflection [SSS Rank Passive Skill], 'Unlocked at SS3 Rank', and Mourning Heteronomy [SSS+ Rank Passive Skill], 'Unlocked at SSS3 / SSS6 / SSS+ Rank', both with their Unlock buttons greyed. Thirteen skills, eight on the level curve; the Yellow Orb's and the class skill's names were read by the maintainer on tapping them and reported in the same session. The curve beyond 1 -> 2 is the 2026-09-19 reading under 'character-screens' — the 1 -> 18 prompt at 44 Skill Points and 206 000 Cogs — and that the Signature Move and the QTE share it is the maintainer's report, as for the other six. This sitting removed 'Astral Armament', a name recorded on 2026-09-19 that is on none of the four pages; the maintainer reports it belongs to another construct, none of the three in this bundle. Screenshots taken by the maintainer on 2026-09-24 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch 4.8.0 \"Anchored in Faith\", after that day's maintenance (the maintainer); sequences 8 and 9 said \"Steering By Light\", which was wrong.",
+      "detail": "Helentine: Lacrimosa's four skill pages, read whole: Basic Skill — Delusional Spin [Red Orb] at Lv 18 with 'Max Level Reached', Withering Spiral [Yellow Orb], Blight Excision [Blue Orb], Link Dissolution [Basic Attack]; Special Skill — Seeker System [Core Passive], Allegory of the Wondrous Night [Signature Move] and Fluid Emotions [QTE], each at Lv 1 with Consume 1 Skill Point + 2 000 Cogs; Common Effect — Leader - Fading Fern [Leader Skill] with Unlock 3 Skill Points + 25 000 Cogs, Amplifier at Lv 1, and Ultima Awaken, 'Awaken Lacrimosa's Ultima Rank', with no Skill Point or Cog cost; Evolution Effect — Vestige [SS Rank Passive Skill] at Lv 2, 'Max Level Reached', Styx Reflection [SSS Rank Passive Skill], 'Unlocked at SS3 Rank', and Mourning Heteronomy [SSS+ Rank Passive Skill], 'Unlocked at SSS3 / SSS6 / SSS+ Rank', both with their Unlock buttons greyed. Thirteen skills, eight on the level curve; the Yellow Orb's and the class skill's names were read by the maintainer on tapping them and reported in the same session. The curve's 2 -> 3 and 3 -> 4 are the 2026-09-19 readings under 'character-screens', and its rows from 4 -> 5 up are read under 'skill-curve-prompts' since sequence 15, where until then one row derived from the 1 -> 18 prompt (44 Skill Points and 206 000 Cogs) stood for them; and that the Signature Move and the QTE share it is the maintainer's report, as for the other six. This sitting removed 'Astral Armament', a name recorded on 2026-09-19 that is on none of the four pages; the maintainer reports it belongs to another construct, none of the three in this bundle. Screenshots taken by the maintainer on 2026-09-24 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch 4.8.0 \"Anchored in Faith\", after that day's maintenance (the maintainer); sequences 8 and 9 said \"Steering By Light\", which was wrong.",
       "observedOn": "2026-09-24"
     },
     {
@@ -248,6 +255,12 @@
       "origin": "OBSERVED_IN_GAME",
       "detail": "The maintainer's report of 2026-09-25, from playing, and NOT read off a screen in any sitting: every S-rank construct has an Ultima Awaken under Common Effect, it opens once the construct has been awakened four times, and unlocking it costs what the leader skill's unlock does (3 Skill Points and 25 000 Cogs). It contradicts skill-pages (2026-09-24), which recorded Ultima Awaken as reached by the Ultima awakening with no Skill Point or Cog cost on its screen. Recorded at the maintainer's request to have it on the roster now, and marked in TRACKER.md to be read on its own screen; until it is, this entry is the whole of the claim.",
       "observedOn": "2026-09-25"
+    },
+    {
+      "id": "skill-curve-prompts",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "The skill upgrade prompt ('Tips — Upgrade requires Cogs x… Skill Point x… After upgrade, the new skill level is: n. Would you like to proceed?') on Helentine: Lacrimosa's Seeker System [Core Passive] at Lv 1, stepped to each target level from 5 to 17 in turn, every prompt taken from Lv 1 (the maintainer). Thirteen running totals from Lv 1, Skill Points then Cogs: to 5, 4 + 14 000; 6, 6 + 20 000; 7, 8 + 27 000; 8, 10 + 35 000; 9, 12 + 44 000; 10, 14 + 54 000; 11, 17 + 66 000; 12, 20 + 80 000; 13, 23 + 96 000; 14, 26 + 114 000; 15, 29 + 134 000; 16, 34 + 156 000; 17, 39 + 180 000. Each row from 4 -> 5 to 16 -> 17 is one total less the one before, 4 -> 5 less the three single steps read under 'character-screens' (3 + 9 000); 17 -> 18 is the 1 -> 18 prompt's 44 + 206 000, read on 2026-09-19 and not re-read in this sitting, less the 1 -> 17 total. The fourteen sum to 41 Skill Points and 197 000 Cogs, the remainder earlier sequences wrote as one derived row, which is the check that no total was misread. That Selena: Pianissimo's and Lucia: Inverse Crown's skills share the curve is the maintainer's report under their own entries. Screenshots taken by the maintainer on 2026-09-26 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch 4.8.0 \"Anchored in Faith\" (the maintainer).",
+      "observedOn": "2026-09-26"
     }
   ],
   "sourcedBy": "weapon-upgrade-screens",
@@ -1320,11 +1333,18 @@
                 "Seeker System at Lv 1 reads 1 -> 18 (Max) for 44 Skill Points and",
                 "206 000 Cogs, the same total an earlier prompt showed.",
                 "",
-                "4 -> 18 is DERIVED, not read: the prompt's total minus the three steps",
-                "read one at a time, 41 SP and 197 000 Cogs. It is one row because the",
-                "curve between 4 and 18 is unread, and because the planner refuses a",
-                "state two routes reach, so a 1 -> 18 shortcut beside the single steps",
-                "would break every goal on the skill. That every basic, special and",
+                "4 -> 5 to 17 -> 18 are read, since sequence 15 (2026-09-26): the same",
+                "prompt on Seeker System at Lv 1, stepped to each target from 5 to 17,",
+                "reads a running total, and each row is one total minus the one before",
+                "- 1 -> 5 at 4 SP + 14 000 less the three single steps' 3 + 9 000. The",
+                "last row is the 1 -> 18 total less 1 -> 17 (39 + 180 000). Cogs climb",
+                "1 000 a level to Lv 10 and 2 000 after; Skill Points go 1, 2 (x5),",
+                "3 (x5), 5 (x3). The fourteen sum to 41 SP and 197 000 Cogs, exactly",
+                "the remainder sequences 0 to 14 wrote as one derived 4 -> 18 row, so",
+                "a plan to the cap costs what it did and a plan from Lv 10 no longer",
+                "charges levels 5 to 10 twice. No shortcut row sits beside the single",
+                "steps: the planner refuses a state two routes reach, so a 1 -> 18",
+                "shortcut would break every goal on the skill. That every basic, special and",
                 "common-effect skill shares this curve is the maintainer's report, which",
                 "the four 1 -> 2 readings and the two identical prompts support. An",
                 "earlier report that every level costs 1 + 2 000 was contradicted by",
@@ -1348,7 +1368,20 @@
             },
             { "id": "{skill}-3", "fromState": "{skill}-2", "toState": "{skill}-3", "costs": [ { "item": "skill-point", "quantity": 1 }, { "item": "cogs", "quantity": 3000 } ] },
             { "id": "{skill}-4", "fromState": "{skill}-3", "toState": "{skill}-4", "costs": [ { "item": "skill-point", "quantity": 1 }, { "item": "cogs", "quantity": 4000 } ] },
-            { "id": "{skill}-18", "fromState": "{skill}-4", "toState": "{skill}-18", "costs": [ { "item": "skill-point", "quantity": 41 }, { "item": "cogs", "quantity": 197000 } ] }
+            { "id": "{skill}-5", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-4", "toState": "{skill}-5", "costs": [ { "item": "skill-point", "quantity": 1 }, { "item": "cogs", "quantity": 5000 } ] },
+            { "id": "{skill}-6", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-5", "toState": "{skill}-6", "costs": [ { "item": "skill-point", "quantity": 2 }, { "item": "cogs", "quantity": 6000 } ] },
+            { "id": "{skill}-7", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-6", "toState": "{skill}-7", "costs": [ { "item": "skill-point", "quantity": 2 }, { "item": "cogs", "quantity": 7000 } ] },
+            { "id": "{skill}-8", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-7", "toState": "{skill}-8", "costs": [ { "item": "skill-point", "quantity": 2 }, { "item": "cogs", "quantity": 8000 } ] },
+            { "id": "{skill}-9", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-8", "toState": "{skill}-9", "costs": [ { "item": "skill-point", "quantity": 2 }, { "item": "cogs", "quantity": 9000 } ] },
+            { "id": "{skill}-10", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-9", "toState": "{skill}-10", "costs": [ { "item": "skill-point", "quantity": 2 }, { "item": "cogs", "quantity": 10000 } ] },
+            { "id": "{skill}-11", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-10", "toState": "{skill}-11", "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 12000 } ] },
+            { "id": "{skill}-12", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-11", "toState": "{skill}-12", "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 14000 } ] },
+            { "id": "{skill}-13", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-12", "toState": "{skill}-13", "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 16000 } ] },
+            { "id": "{skill}-14", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-13", "toState": "{skill}-14", "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 18000 } ] },
+            { "id": "{skill}-15", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-14", "toState": "{skill}-15", "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 20000 } ] },
+            { "id": "{skill}-16", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-15", "toState": "{skill}-16", "costs": [ { "item": "skill-point", "quantity": 5 }, { "item": "cogs", "quantity": 22000 } ] },
+            { "id": "{skill}-17", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-16", "toState": "{skill}-17", "costs": [ { "item": "skill-point", "quantity": 5 }, { "item": "cogs", "quantity": 24000 } ] },
+            { "id": "{skill}-18", "sourcedBy": "skill-curve-prompts", "fromState": "{skill}-17", "toState": "{skill}-18", "costs": [ { "item": "skill-point", "quantity": 5 }, { "item": "cogs", "quantity": 26000 } ] }
           ]
         },
         {

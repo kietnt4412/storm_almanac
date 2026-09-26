@@ -80,8 +80,10 @@ class AuthoredBundlePlanTest {
     @Test
     @DisplayName("a skill taken to its cap is two shop offers and one stage, and costs 150 Serum")
     void aSkillToItsCap() {
-        // seeker-system 1 -> 18 is four rows: 1+2 000, 1+3 000, 1+4 000, then
-        // 41+197 000, so 44 Skill Points and 206 000 Cogs.
+        // seeker-system 1 -> 18 is seventeen rows, read one step or one running
+        // total at a time, which sum to 44 Skill Points and 206 000 Cogs — the
+        // prompt's own 1 -> 18 total, and what the single derived 4 -> 18 row
+        // charged before sequence 15.
         //   Skill Points: 15 for 69 Score, so 3 purchases (45) = 207 Score
         //   Cogs: 1 200 for 1 Score, 206 000 / 1 200 = 171.7, so 172 = 172 Score
         // 379 Score at 82 a run of Simulated Battlefield is 4.6, so 5 runs at 30
@@ -97,6 +99,27 @@ class AuthoredBundlePlanTest {
         assertThat(plan.conversions()).containsExactly(
                 new Conversion("simulation-shop-cogs", 172),
                 new Conversion("simulation-shop-skill-point", 3));
+    }
+
+    @Test
+    @DisplayName("a reader with a skill at Lv 10 is charged 10 to 18, not 4 to 18: 120 Serum")
+    void aSkillFromMidCurve() {
+        // D5's S6: until sequence 15 the curve had no state between 4 and 18, so
+        // this reader had to record Lv 4 and was charged six levels twice.
+        // 10 -> 18 is 44 - 14 = 30 Skill Points and 206 000 - 54 000 = 152 000
+        // Cogs, the prompt's totals to 18 and to 10.
+        //   Skill Points: 15 for 69 Score, so 2 purchases (30) = 138 Score
+        //   Cogs: 152 000 / 1 200 = 126.7, so 127 = 127 Score
+        // 265 Score at 82 a run is 3.2, so 4 runs at 30 Serum = 120. From Lv 4
+        // it is the cap test's 5 runs.
+        Plan plan = solve(
+                Goal.deterministic(HELENTINE, "seeker-system-18"), Inventory.empty(PROFILE), 30, Map.of(),
+                new Roster(PROFILE, Map.of(HELENTINE, Set.of("seeker-system-10"))));
+
+        assertThat(plan.totalEnergy()).isEqualTo(120);
+        assertThat(plan.conversions()).containsExactly(
+                new Conversion("simulation-shop-cogs", 127),
+                new Conversion("simulation-shop-skill-point", 2));
     }
 
     @Test

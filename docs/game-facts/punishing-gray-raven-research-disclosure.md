@@ -955,7 +955,7 @@ derived as the remainder — 41 SP and 197 000 Cogs**. Not a 1 → 18 shortcut
 beside the single steps: `DemandResolver` throws when two upgrades reach one
 state, so a shortcut would have made every goal on that skill unanswerable. Her
 blue-orb skill and a fourth basic skill were seen but not named, so they have no
-rows.
+rows. **The 4 → 18 remainder is read row by row since 2026-09-26** — [below](#2026-09-26--the-skill-curve-between-4-and-18-read).
 
 **The last two skills named.** *Blight Excision* [Blue Orb] and *Link
 Dissolution* [Basic Attack], both Lv 1, both 1 SP + 2 000 for 1 → 2 — so all
@@ -1152,3 +1152,44 @@ published version records that this reading came from
 `equipment-and-resource-screens`. The bundle's own comment says it, and ADR 0025
 admits it. **The banner's opening time is still unread**, so the window on
 `Availability.opensAt` is not closed by this and was never going to be.
+
+---
+
+## 2026-09-26 — the skill curve between 4 and 18, read
+
+**Read on patch 4.8.0 "Anchored in Faith"**, the same client and account. The
+upgrade prompt on **Seeker System** [Core Passive] at Lv 1 — *"Upgrade requires
+Cogs x… Skill Point x… After upgrade, the new skill level is: n"* — stepped to
+each target from 5 to 17, every total taken from Lv 1. Thirteen screenshots,
+transcribed here and not committed. The row for each step is one running total
+less the one before; 4 → 5 is the 1 → 5 total less the three single steps
+[above](#2026-09-19--the-character-and-the-two-upgrade-axes-the-model-cannot-hold)
+(3 SP + 9 000), and 17 → 18 is the 2026-09-19 1 → 18 total less 1 → 17.
+
+| Step | Skill Points | Cogs | Total from Lv 1 |
+|---|---|---|---|
+| 4 → 5 | 1 | 5 000 | 4 · 14 000 |
+| 5 → 6 | 2 | 6 000 | 6 · 20 000 |
+| 6 → 7 | 2 | 7 000 | 8 · 27 000 |
+| 7 → 8 | 2 | 8 000 | 10 · 35 000 |
+| 8 → 9 | 2 | 9 000 | 12 · 44 000 |
+| 9 → 10 | 2 | 10 000 | 14 · 54 000 |
+| 10 → 11 | 3 | 12 000 | 17 · 66 000 |
+| 11 → 12 | 3 | 14 000 | 20 · 80 000 |
+| 12 → 13 | 3 | 16 000 | 23 · 96 000 |
+| 13 → 14 | 3 | 18 000 | 26 · 114 000 |
+| 14 → 15 | 3 | 20 000 | 29 · 134 000 |
+| 15 → 16 | 5 | 22 000 | 34 · 156 000 |
+| 16 → 17 | 5 | 24 000 | 39 · 180 000 |
+| 17 → 18 | 5 | 26 000 | *44 · 206 000, read 2026-09-19* |
+
+**The check: the fourteen sum to 41 SP and 197 000 Cogs**, exactly the
+remainder sequences 0 to 14 wrote as one derived 4 → 18 row. A misread total
+would have moved it. What 2026-09-19 guessed — *both costs steepen somewhere
+above Lv 4* — has its shape: Cogs climb 1 000 a level to Lv 10 and 2 000 after,
+Skill Points go 1, then 2 five times, 3 five times, 5 three times.
+
+**Sequence 15** writes the fourteen rows in place of the one. A plan to the cap
+costs what it did; a plan from a level between 5 and 17 can now be asked for at
+all, which is what D5's rehearsal stalled on (S6) — a reader at Lv 10 had to
+record 4 and was charged for six levels already paid.
