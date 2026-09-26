@@ -39,6 +39,20 @@ describe('asking how far the reader gets', () => {
     ],
   };
 
+  it("asks by the bundle's word for the measure when it has one, and by the slug when not", () => {
+    // S8 of the second rehearsal: the question sat over `phantom-pain-cage-score`.
+    const { unmount } = render(
+      <Ladder ladder={{ ...cage, displayName: 'Phantom Pain Cage' }} score={0} onPick={() => {}} />,
+    );
+    expect(screen.getByText('Phantom Pain Cage')).toBeInTheDocument();
+    expect(screen.getByLabelText('How far you get in Phantom Pain Cage')).toBeInTheDocument();
+    expect(screen.queryByText('phantom-pain-cage-score')).not.toBeInTheDocument();
+    unmount();
+
+    render(<Ladder ladder={cage} score={0} onPick={() => {}} />);
+    expect(screen.getByText('phantom-pain-cage-score')).toBeInTheDocument();
+  });
+
   it('counts nothing until the reader says otherwise, and says so', () => {
     render(<Ladder ladder={cage} score={0} onPick={() => {}} />);
 

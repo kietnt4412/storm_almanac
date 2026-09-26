@@ -38,6 +38,11 @@ entry was met, not that the code exists.
       - [x] **S5 — the plan page said what to do in ids** (2026-09-26). Every row and four notes now read "Buy 10 Memory Enhancer IV for 87 Simulation Score", named from facts already published (`StepNames`); rows in reading order. Still raw: three grant notes, the refusal text, the ladder's slug.
       - [x] **S3 — no way on from one step to the next** (2026-09-25). Four steps now — Inventory, Roster, Goals, Plan — in one list the step bar, each page's Next and the home page all read; the menu follows it. Goals' Next saves first.
 
+- [x] ~~**S7, S8 and the four smaller hesitations — D5's rehearsal, its second run.**~~ **Done 2026-09-26 (forty-fifth session)**, in [PR #54](https://github.com/kietnt4412/storm_almanac/pull/54); the account is the forty-fifth session-log entry. S8's first and last halves were named from facts already published (the plan's steps travel as data, the home page reads the game's name); the Cage's and the categories' took a bundle word, sequence 13 and [ADR 0033](../adr/0033-a-key-the-bundle-invents-may-be-given-a-word.md). S7 was agreed as proposed. S6 stays open: it is a reading. The lines as they stood:
+      - [x] **S7 — one goal row holds one target.** "Lucia fully built" is ~12 rows, each picked from one flat list of 61. **Proposed, not agreed:** one target per track on a row, reusing the roster's `TrackPicker` — a screen change, so plan first.
+      - [x] **S8 — raw ids still on screen.** The plan's *Paying for* note ("to Ace ★1" beside "to level-65", "to abyssal-lament-18"); the reach label `phantom-pain-cage-score` and the *Not counted* tier ids; inventory headings (`HARMONY-MATERIAL`, one `CHARACTER-EXP-POD-*` heading per size); the home page's `punishing-gray-raven · global`. The first and last are named from facts already published; the Cage's and the categories' want a bundle word.
+      - [x] **Smaller, not yet stalls:** "(character)" where the game says construct; Karenina offered on the roster with nothing to record; "Weekly, score 30,000+" names no weekly; *Make one* from Inventory lands on home, not back.
+
 - [x] ~~**N41 — Put Selena: Pianissimo and Karenina: Effulgence on the S-rank ladder.**~~ **Done 2026-09-24 (fortieth session), with Lucia: Inverse Crown in Karenina's place** — the maintainer does not own Karenina and so cannot read her. Selena and Lucia each climb `s-rank-construct` with their own eight skill names, SS passive and shard, and each shard has the two Phantom Pain shop rows (10 at 10 Scars, 20 at 20). Published as sequence 9, locally and to Neon, each read back as *no changes*; the live API serves 61 upgrade rows for each of the three. The entry as it stood:
       **Every number is shared and confirmed** for all S-rank (maintainer, screens compared
       2026-09-24), so the path is written once ([ADR 0031](../adr/0031-a-shared-upgrade-path-is-written-once-and-expanded-in-the-file.md)).
@@ -3005,6 +3010,10 @@ The tracker's D2, verbatim until 2026-09-25 (the fuller original is
 > on the next: **do not take Phase 6 early on this precedent** — it needs users,
 > where Phase 5's criterion was a proof about a model.
 
+**550 on 2026-09-26 (forty-fifth), measured with `wc -l`.** S7, S8 and the four smaller
+hesitations moved here verbatim under *Completed next actions*; the rehearsal
+list shrank to S6 and a pointer to the third run.
+
 **555 on 2026-09-26 (forty-fourth), and carried less again.** Track C and D6
 went in at 549 alongside S6–S8, with S1–S5 and the answered Q6 already moved
 here. Two more finished things left the tracker, kept below as they stood.
@@ -3144,6 +3153,70 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-26 (forty-fifth) — S7 and S8: one goal row per construct, and every id on screen named.**
+
+**The remote, checked first:** PR #53 (the forty-fourth's docs) merged at
+01:10Z, its `main` run `36207626344` green, and `/api/health` reporting
+`8470ddf`, #53's merge. No PR open. Neon not re-checked.
+
+**The plan was put to the maintainer before any code** (the standing rule for
+screen changes): S8 in two halves, the first from facts already published and
+the second wanting a bundle word; S7 as one row per construct reusing the
+roster's picker; S6 as a reading only the maintainer can take; the four smaller
+hesitations as one-answer fixes. **They said proceed**, which agreed the S7
+row shape and the S8 split. They did not answer whether "Phantom Pain Cage" is
+the mode's exact name; it is written as the bundle's word, not a reading, so a
+correction is a new sequence and not a provenance change.
+
+**S8, first half — the page names what it already could.** The plan's *Paying
+for* note printed `level-65` and `abyssal-lament-18` because `StepNames`
+deliberately guesses no name the game never gave. **The fix moves the guess, not
+the rule:** the steps now travel as data (`Explanation#payingFor`,
+`PlanResponse.payingFor`) and the page names each state the way the goal screen
+already did, "Level · 65, Red Orb · 18, Promote · Ace ★1", through one shared
+`stateLabel`. The server's own unguessed sentence rides along as
+`displayName` for anything else. **A snapshot-gated test caught the one caller
+still reading the old note** — `RealUpstreamPlanTest`, which CI never runs;
+the first full local build went red on it and nothing else did. Also: the home
+page names a profile's game, the roster offers only someone with a track
+(Karenina was offered with nothing), and *Make one* returns through `?then=`
+with a local-path check.
+
+**S8, second half — sequence 13 and ADR 0033.** Three keys the bundle invents
+had nothing but themselves to show: a measure, an item category, an entity
+kind. ADR 0028 had settled the same question for progress kinds, so this
+follows it: a `Word` (subject, key, display name), one table for all three
+(`V17`), no provenance, optional, refused when it names a key nothing uses,
+flattened into the diff. **Several keys may share a word, and for categories
+that is the point** — three Pod sizes are three categories to a fodder rule and
+one heading to a reader. Progress names were deliberately not folded in. The
+Cage now reads "Phantom Pain Cage, weekly, score 90,000+", and *Not counted*
+reads "Phantom Pain Cage at 30,000, 90,000, … (this plan was asked for 0)"
+instead of nine tier ids; the inventory went from 13 headings to 11. **Sequence
+13 previewed as exactly 17 word subjects and no fact**, published locally, read
+back as *no changes*. **Not on Neon**: that needs #54 deployed and the
+maintainer's go-ahead.
+
+**S7 — one goal row per construct.** A row is every track under the game's
+headings, "leave as is" by default, offering only states ahead of where the
+reader stands; saving writes one goal per track set, in track order, so the API
+and the stored list are unchanged. Adding someone opens an empty row rather than
+guessing a target. Where they stand is a button on the row, the roster's own
+`TrackPicker`. **One thing decided without asking:** two old goals on one
+track collapse to the further on save — the same plan, since the further pays
+for the nearer.
+
+**Driven locally** with the dev sign-in, as `rehearsal-s6` and a fresh
+`rehearsal-s8`: the named *Paying for* line, the Cage's question and note, 11
+inventory headings, "(construct)", the roster without Karenina, *Make one* back
+to Inventory, four goals saved from one row and a plan from them (1 320 Serum),
+and the Goals screen at 375 px with no horizontal scroll. **The pane twice
+refused a click because the window was not drawing**; those steps went through
+the DOM instead, which proves the handler and not the hit target.
+
+**Tests:** 485 backend (0 skipped, snapshots present; 469 expected on CI), 70
+frontend. PR #54 carries three commits.
 
 **2026-09-26 (forty-fourth) — the rehearsal's second run, and Track C.**
 

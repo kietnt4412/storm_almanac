@@ -145,11 +145,13 @@ class MipOptimizerTest {
                 .solve(request(definition, Objective.LEAST_ENERGY));
 
         assertThat(plan.explanation().notes())
-                .anySatisfy(note -> assertThat(note).contains("declared yield"))
-                // The step paid for, by entity and the state it reaches rather
-                // than by its id; this test game has no catalog entry, so the
-                // entity keeps its id too.
-                .anySatisfy(note -> assertThat(note).contains("Paying for 1 upgrade step(s): hero to insight-1"));
+                .anySatisfy(note -> assertThat(note).contains("declared yield"));
+        // The step paid for travels as data, and names as the entity and the
+        // state it reaches rather than as its id; this test game has no catalog
+        // entry, so the entity keeps its id too.
+        assertThat(plan.explanation().payingFor())
+                .map(StepNames.of(definition)::upgrade)
+                .containsExactly("hero to insight-1");
     }
 
     @Test

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ApiError, getGames, getMe, signInUrl } from '../api/client';
 import { useCreateProfile } from '../profile';
 import { STEPS } from '../steps/Steps';
@@ -17,6 +17,11 @@ import { usePlannerStore } from '../store/plannerStore';
  */
 export function Home() {
   const location = useLocation();
+  const navigate = useNavigate();
+  // Where a screen that needed a profile sent the reader from, so making one
+  // goes back there rather than stranding them here. A path on this site only.
+  const [search] = useSearchParams();
+  const then = localPath(search.get('then'));
   const me = useQuery({
     queryKey: ['me'],
     queryFn: getMe,
@@ -40,7 +45,8 @@ export function Home() {
   // first game on "global", which is the profile a reader with one already has,
   // so the form says so rather than letting the server refuse it.
   const taken = me.data?.profiles.find((profile) => profile.game === chosen && profile.region === region);
-  const chosenName = published.find((published) => published.id === chosen)?.displayName ?? chosen;
+  const gameName = (id: string) => published.find((candidate) => candidate.id === id)?.displayName ?? id;
+  const chosenName = gameName(chosen);
 
   return (
     <div className="space-y-6">
@@ -81,7 +87,7 @@ export function Home() {
                     <div className="grow">
                       <div className="font-medium">{profile.displayName}</div>
                       <div className="muted text-sm">
-                        {profile.game} · {profile.region}
+                        {gameName(profile.game)} · {profile.region}
                       </div>
                     </div>
                     {active ? (
@@ -103,7 +109,10 @@ export function Home() {
             className="card flex flex-wrap items-end gap-3"
             onSubmit={(event) => {
               event.preventDefault();
-              add.mutate({ game: chosen, region, displayName });
+              add.mutate(
+                { game: chosen, region, displayName },
+                { onSuccess: () => then && navigate(then) },
+              );
             }}
           >
             <div>
@@ -193,4 +202,9 @@ function Step({
       <p className="muted mt-1 text-sm">{children}</p>
     </Link>
   );
+}
+
+/** A path on this site, or null: never another origin, which is what "//host" would be. */
+export function localPath(then: string | null): string | null {
+  return then && then.startsWith('/') && !then.startsWith('//') && !then.startsWith('/\\') ? then : null;
 }

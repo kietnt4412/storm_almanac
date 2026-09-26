@@ -18,6 +18,7 @@ import io.stormalmanac.gamedata.Sink;
 import io.stormalmanac.gamedata.Source;
 import io.stormalmanac.gamedata.Stage;
 import io.stormalmanac.gamedata.Upgrade;
+import io.stormalmanac.gamedata.Word;
 import io.stormalmanac.gamedata.banner.BannerModel;
 import io.stormalmanac.gamedata.banner.PityRule;
 import io.stormalmanac.gamedata.catalog.Entity;
@@ -116,6 +117,7 @@ public final class CanonicalBundleWriter {
             ArrayNode sections = root.putArray("sections");
             bundle.sections().forEach(sections::add);
         }
+        array(root, "words", bundle.words(), this::word);
         return root;
     }
 
@@ -131,6 +133,12 @@ public final class CanonicalBundleWriter {
     private void progressKind(ObjectNode node, ProgressKind kind) {
         node.put("kind", kind.kind());
         node.put("displayName", kind.displayName());
+    }
+
+    private void word(ObjectNode node, Word word) {
+        node.put("subject", word.subject().spelled());
+        node.put("key", word.key());
+        node.put("displayName", word.displayName());
     }
 
     private void item(ObjectNode node, Item item) {

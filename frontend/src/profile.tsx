@@ -125,7 +125,8 @@ export function ProfileGate({
     <div className="card">
       <p>
         You have no profile yet. One profile is one game on one server.{' '}
-        <Link to="/">Make one</Link> and this screen has something to be about.
+        <Link to={`/?then=${encodeURIComponent(location.pathname)}`}>Make one</Link> and you come
+        back here with something for this screen to be about.
       </p>
     </div>
   );

@@ -10,8 +10,10 @@ import {
   type Goal,
 } from '../api/client';
 import { ProfileGate } from '../profile';
+import { moveRow, removeRow, rowsOf, setTarget, type GoalRow } from '../roster/goalRows';
+import { TargetPicker } from '../roster/TargetPicker';
 import { TrackPicker } from '../roster/TrackPicker';
-import { sectionsOf, statesOfGraph, trackOf, tracksOfGraph, type Track } from '../roster/tracks';
+import { sectionsOf, statesOfGraph, tracksOfGraph, type Track } from '../roster/tracks';
 import { NextStep } from '../steps/Steps';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 
@@ -29,6 +31,11 @@ import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStor
  * state reachable for that entity, read off the steps the catalog serves. Nothing
  * here knows what "insight-2" means, and a free-text box would let a player name
  * a state the solver can only refuse.
+ *
+ * <p><b>One row per entity, one target per track</b> (S7, 2026-09-26): "Lucia
+ * fully built" was about twelve rows, each from one flat list of 61. A row is how
+ * this screen groups the list; the list saved is the one the server always kept.
+ * See {@code goalRows.ts}.
  *
  * <p>Saving needs a connection, unlike the inventory. That is the honest
  * consequence of the paragraph above rather than an omission: a queued
@@ -62,7 +69,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
   // conflating them was a real bug — see statesOfGraph, which is where the
   // distinction now lives, shared with the roster screen.
   const statesOf = useMemo(() => {
-    const byEntity = new Map<string, { targets: string[]; tracks: Track[] }>();
+    const byEntity = new Map<string, { targets: string[]; tracks: Track[]; order: string[] }>();
     graphs.forEach((graph) => {
       const data = graph.data;
       if (!data) return;
@@ -71,6 +78,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
       byEntity.set(data.entity.id, {
         targets: statesOfGraph(data.steps).targets,
         tracks: sectionsOf(tracksOfGraph(data.steps), data.sections).flatMap((section) => section.tracks),
+        order: data.sections ?? [],
       });
     });
     return byEntity;
@@ -90,6 +98,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
     mutationFn: () => saveGoals(profileId, goals.map((goal, index) => ({ ...goal, priority: index }))),
     onSuccess: (response) => {
       setDraft(null);
+      setOpened([]);
       queries.setQueryData(['goals', profileId], response);
       // A plan is about these goals, so it is no longer about the right thing.
       queries.invalidateQueries({ queryKey: ['plan', profileId] });
@@ -97,11 +106,27 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
   });
 
   const [adding, setAdding] = useState('');
+  // Rows the reader has opened and set nothing on yet. They cannot live in the
+  // list, because a goal needs a target; the roster screen keeps its opened
+  // entities the same way. Nothing is saved for them.
+  const [opened, setOpened] = useState<string[]>([]);
+  // The entity whose "where they stand" is open, one at a time.
+  const [standing, setStanding] = useState<string | null>(null);
 
   if (entities.isPending || saved.isPending) return <p className="muted">Loading…</p>;
 
   const catalog = entities.data?.entities ?? [];
-  const addable = catalog.filter((entity) => (statesOf.get(entity.id)?.targets.length ?? 0) > 0);
+  const savedRows = rowsOf(goals);
+  const rows: GoalRow[] = [
+    ...savedRows,
+    ...opened
+      .filter((entity) => !savedRows.some((row) => row.entity === entity))
+      .map((entity) => ({ entity, goals: [] })),
+  ];
+  const addable = catalog.filter(
+    (entity) =>
+      (statesOf.get(entity.id)?.targets.length ?? 0) > 0 && !rows.some((row) => row.entity === entity.id),
+  );
 
   return (
     <div className="space-y-4">
@@ -109,7 +134,8 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
         <div>
           <h1 className="text-xl font-semibold">Goals</h1>
           <p className="muted text-sm">
-            Highest first. Every goal has to be paid for, so the order is what gets dropped when a
+            One row per character, highest first. Set a target on each track you want to move and
+            leave the rest. Every goal has to be paid for, so the order is what gets dropped when a
             budget runs out — not what gets planned.
           </p>
         </div>
@@ -127,127 +153,105 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
 
       {save.isError && <p className="card text-sm">Could not save: {(save.error as Error).message}</p>}
 
-      {goals.length === 0 ? (
+      {rows.length === 0 ? (
         <p className="muted">
-          Nothing yet. Add a character and the state you are taking her to — or start from her{' '}
+          Nothing yet. Add a character below and set where you are taking her — or start from her{' '}
           <Link to={`/catalog/${game}`}>catalog page</Link>, which also says what you are short of.
         </p>
       ) : (
         <ol className="space-y-2">
-          {goals.map((goal, index) => {
-            const entity = catalog.find((candidate) => candidate.id === goal.entity);
-            const states = statesOf.get(goal.entity);
-            const name = entity?.displayName ?? goal.entity;
-            const onTrack = states && trackOf(states.tracks, goal.targetState);
+          {rows.map((row, index) => {
+            const entity = catalog.find((candidate) => candidate.id === row.entity);
+            const graph = statesOf.get(row.entity);
+            const name = entity?.displayName ?? row.entity;
+            const isSaved = index < savedRows.length;
             return (
-              <li key={`${goal.entity}-${index}`} className="card flex flex-wrap items-center gap-3">
-                <span className="count muted w-6 text-right">{index + 1}</span>
-
-                <Link to={`/catalog/${game}/${goal.entity}`} className="font-medium">
-                  {entity?.displayName ?? goal.entity}
-                </Link>
-
-                <label className="flex items-center gap-2 text-sm">
-                  <span className="muted">to</span>
-                  <select
-                    className="input"
-                    value={goal.targetState}
-                    aria-label={`Target state for ${name}`}
-                    onChange={(event) =>
-                      setDraft(
-                        goals.map((candidate, at) =>
-                          at === index ? { ...candidate, targetState: event.target.value } : candidate,
-                        ),
-                      )
-                    }
-                  >
-                    {/*
-                      Grouped by track and named by it, because "promote-7" is
-                      the bundle's id and "Promote · 7" is what the reader is
-                      choosing. Until the graph arrives the saved target is the
-                      only option, as it was.
-                    */}
-                    {states
-                      ? states.tracks.map((track) => (
-                          <optgroup
-                            key={track.states[0]!.state}
-                            label={track.tag ? `${track.tag} — ${track.name}` : track.name}
-                          >
-                            {track.states
-                              .filter((candidate) => states.targets.includes(candidate.state))
-                              .map((candidate) => (
-                                <option key={candidate.state} value={candidate.state}>
-                                  {track.tag ?? track.name} · {candidate.label}
-                                </option>
-                              ))}
-                          </optgroup>
-                        ))
-                      : (
-                          <option value={goal.targetState}>{goal.targetState}</option>
-                        )}
-                  </select>
-                </label>
-
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="muted">from</span>
-                  {/*
-                    The roster, edited where the goal is. A target without a
-                    starting point is the difference between "6 Greater Sigils"
-                    and "the whole track twice over", and asking for it only on
-                    another screen is how it ends up never being set.
-
-                    The same component the roster screen uses, and that is the
-                    point of it being one: two editors of one aggregate that
-                    drift apart is how a reader gets two answers to "where am I".
-
-                    Only the goal's own track, since S2: every track here made a
-                    goal row thirteen dropdowns long. The rest still count — a
-                    gate on another track is charged too — and are one link away.
-                  */}
-                  {onTrack ? (
-                    <TrackPicker
-                      subject={name}
-                      tracks={states.tracks}
-                      only={[onTrack]}
-                      states={roster[goal.entity] ?? []}
-                      onChange={(next) => editRosterState(profileId, goal.entity, next)}
-                    />
-                  ) : (
-                    <span className="muted">reading her tracks…</span>
-                  )}
-                  <Link to="/roster" className="text-xs">
-                    other tracks
+              <li key={row.entity} className="card space-y-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="count muted w-6 text-right">{index + 1}</span>
+                  <Link to={`/catalog/${game}/${row.entity}`} className="font-medium">
+                    {name}
                   </Link>
+                  <span className="muted text-sm">
+                    {row.goals.length === 0
+                      ? 'nothing set yet'
+                      : `${row.goals.length} track${row.goals.length === 1 ? '' : 's'} to move`}
+                  </span>
+                  {/*
+                    The roster, edited where the goal is: a target without a
+                    starting point is "the whole track twice over". One entity's
+                    at a time, because every entity's at once is the roster
+                    screen, which is one link away as well.
+                  */}
+                  <button
+                    type="button"
+                    className="btn-quiet text-sm"
+                    aria-expanded={standing === row.entity}
+                    onClick={() => setStanding(standing === row.entity ? null : row.entity)}
+                  >
+                    {standing === row.entity ? 'Done' : 'Where they stand'}
+                  </button>
+
+                  <div className="ml-auto flex items-center gap-1">
+                    <button
+                      type="button"
+                      className="btn-quiet"
+                      disabled={!isSaved || index === 0}
+                      aria-label={`Move ${name} up`}
+                      onClick={() => setDraft(moveRow(goals, index, index - 1))}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-quiet"
+                      disabled={!isSaved || index >= savedRows.length - 1}
+                      aria-label={`Move ${name} down`}
+                      onClick={() => setDraft(moveRow(goals, index, index + 1))}
+                    >
+                      ↓
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-quiet"
+                      aria-label={`Remove ${name}`}
+                      onClick={() => {
+                        setOpened(opened.filter((candidate) => candidate !== row.entity));
+                        if (isSaved) setDraft(removeRow(goals, row.entity));
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
                 </div>
 
-                <div className="ml-auto flex items-center gap-1">
-                  <button
-                    type="button"
-                    className="btn-quiet"
-                    disabled={index === 0}
-                    aria-label="Move up"
-                    onClick={() => setDraft(move(goals, index, index - 1))}
-                  >
-                    ↑
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-quiet"
-                    disabled={index === goals.length - 1}
-                    aria-label="Move down"
-                    onClick={() => setDraft(move(goals, index, index + 1))}
-                  >
-                    ↓
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-quiet"
-                    aria-label="Remove"
-                    onClick={() => setDraft(goals.filter((_, at) => at !== index))}
-                  >
-                    ×
-                  </button>
-                </div>
+                {!graph ? (
+                  <p className="muted text-sm">reading her tracks…</p>
+                ) : (
+                  <>
+                    {standing === row.entity && (
+                      <div className="border-l-2 pl-3" style={{ borderColor: 'var(--line)' }}>
+                        <p className="label mb-2">Where they stand now</p>
+                        <TrackPicker
+                          subject={name}
+                          tracks={graph.tracks}
+                          order={graph.order}
+                          states={roster[row.entity] ?? []}
+                          onChange={(next) => editRosterState(profileId, row.entity, next)}
+                        />
+                      </div>
+                    )}
+                    <TargetPicker
+                      subject={name}
+                      tracks={graph.tracks}
+                      order={graph.order}
+                      targets={graph.targets}
+                      roster={roster[row.entity] ?? []}
+                      row={row}
+                      onChange={(track, state) => setDraft(setTarget(goals, row.entity, graph.tracks, track, state))}
+                    />
+                  </>
+                )}
               </li>
             );
           })}
@@ -257,7 +261,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
       <div className="card flex flex-wrap items-end gap-3">
         <div>
           <label className="label" htmlFor="add-goal">
-            Add a goal
+            Add a character
           </label>
           <select
             id="add-goal"
@@ -268,7 +272,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
             <option value="">Choose someone…</option>
             {addable.map((entity) => (
               <option key={entity.id} value={entity.id}>
-                {entity.displayName} ({entity.kind})
+                {entity.displayName} ({(entity.kindName ?? entity.kind).toLowerCase()})
               </option>
             ))}
           </select>
@@ -278,27 +282,20 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
           className="btn"
           disabled={!adding}
           onClick={() => {
-            const first = statesOf.get(adding)?.tracks[0]?.states;
-            const furthest = first?.[first.length - 1]?.state;
-            if (!furthest) return;
-            // The end of the first track is the default target: a player adding
-            // a goal is almost never aiming at the first rung of it. The first
-            // track and not the last listed state, because with a construct's
-            // thirteen tracks the last state listed is the end of the least
-            // likely one — the browser run caught a goal defaulting to a skill
-            // unlock.
-            setDraft([
-              ...goals,
-              { entity: adding, targetState: furthest, priority: goals.length },
-            ]);
+            // A row with every track left as it is, for the reader to set the
+            // ones they want. The old screen guessed a target — the end of the
+            // first track — which was one goal of twelve and usually not the one.
+            setOpened([...opened, adding]);
             setAdding('');
           }}
         >
           Add
         </button>
-        {addable.length === 0 && (
+        {addable.length === 0 && catalog.length > 0 && (
           <p className="muted text-sm">
-            This patch publishes no upgrade graph for anyone, so there is no state to aim at.
+            {rows.length > 0
+              ? 'Everyone with something ahead of them already has a row.'
+              : 'This patch publishes no upgrade graph for anyone, so there is no state to aim at.'}
           </p>
         )}
       </div>
@@ -316,10 +313,3 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
   );
 }
 
-function move<T>(list: T[], from: number, to: number): T[] {
-  const copy = [...list];
-  const [item] = copy.splice(from, 1);
-  if (item === undefined) return list;
-  copy.splice(to, 0, item);
-  return copy;
-}

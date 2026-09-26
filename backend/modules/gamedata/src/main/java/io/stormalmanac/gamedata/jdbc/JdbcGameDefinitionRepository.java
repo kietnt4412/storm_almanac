@@ -17,6 +17,7 @@ import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.Progress;
 import io.stormalmanac.gamedata.ProgressKind;
+import io.stormalmanac.gamedata.Word;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
@@ -223,7 +224,18 @@ public class JdbcGameDefinitionRepository implements GameDefinitionRepository {
         return new GameDefinition(
                 header.game(), header.version(), items, sources, sinks,
                 banners(version, itemSlugs), entities(version, itemSlugs), progressKinds(version),
-                sections(version));
+                sections(version), words(version));
+    }
+
+    /** The bundle's words for its keys; none, for every version before V17. Sorted by the definition. */
+    private List<Word> words(long version) {
+        return jdbc.query(
+                "SELECT subject, key, display_name FROM gamedata.word WHERE version_id = ?",
+                (rs, row) -> new Word(
+                        Word.Subject.spelled(rs.getString("subject")),
+                        rs.getString("key"),
+                        rs.getString("display_name")),
+                version);
     }
 
     /** The headings in the order the game shows them; none, for every version before V16. */

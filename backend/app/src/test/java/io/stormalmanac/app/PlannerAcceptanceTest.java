@@ -16,6 +16,7 @@ import io.stormalmanac.planner.Optimizer;
 import io.stormalmanac.planner.Plan;
 import io.stormalmanac.planner.RewardClaim;
 import io.stormalmanac.planner.SolveRequest;
+import io.stormalmanac.planner.StepNames;
 import io.stormalmanac.player.Inventory;
 import io.stormalmanac.player.PlayerStateRepository;
 import io.stormalmanac.player.Roster;
@@ -206,10 +207,11 @@ class PlannerAcceptanceTest {
     void theExplanationIsUsable() {
         Plan plan = solve(goal(AMULET, "level-30"), Inventory.empty(PROFILE), Map.of());
 
-        assertThat(plan.explanation().notes())
-                // Named by the entity and the state it reaches, not by the
-                // step's id, since 2026-09-26.
-                .anySatisfy(note -> assertThat(note).contains("Paying for 1 upgrade step(s): Ember Amulet to level-30"));
+        // Named by the entity and the state it reaches, not by the step's id,
+        // and carried as data for the page to name rather than as a note.
+        assertThat(plan.explanation().payingFor())
+                .map(StepNames.of(provingGround)::upgrade)
+                .containsExactly("Ember Amulet to level-30");
         // One more refined ore is one more craft, so 3 more ore-rough. Nine runs
         // of pg-1-1 yield 12.6 and the five crafts want 15, so it is two more
         // runs — the lump, not the average.

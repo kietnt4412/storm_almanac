@@ -18,6 +18,7 @@ import io.stormalmanac.gamedata.Sink;
 import io.stormalmanac.gamedata.Source;
 import io.stormalmanac.gamedata.Stage;
 import io.stormalmanac.gamedata.Upgrade;
+import io.stormalmanac.gamedata.Word;
 import io.stormalmanac.gamedata.banner.BannerModel;
 import io.stormalmanac.gamedata.catalog.Entity;
 import io.stormalmanac.gamedata.catalog.Skill;
@@ -84,6 +85,10 @@ import java.util.Set;
  *                        the bundle's own word for a group the game leaves
  *                        untitled (ADR 0032). Empty for every bundle before
  *                        sequence 11
+ * @param words           what to call the bundle's own keys — a measure, an item
+ *                        category, an entity kind. Not facts, like progress kind
+ *                        names (ADR 0033), and every one has to name a key the
+ *                        bundle uses. Empty for every bundle before sequence 13
  */
 public record GameDataBundle(
         Game game,
@@ -99,8 +104,29 @@ public record GameDataBundle(
         List<BannerModel> banners,
         List<Entity> entities,
         List<ProgressKind> progressKinds,
-        List<String> sections
+        List<String> sections,
+        List<Word> words
 ) {
+
+    /** A bundle from before its keys could be given words. */
+    public GameDataBundle(
+            Game game,
+            long sequence,
+            String label,
+            String attribution,
+            List<Provenance> provenance,
+            String sourcedBy,
+            Map<String, String> factProvenance,
+            List<Item> items,
+            List<Source> sources,
+            List<Sink> sinks,
+            List<BannerModel> banners,
+            List<Entity> entities,
+            List<ProgressKind> progressKinds,
+            List<String> sections) {
+        this(game, sequence, label, attribution, provenance, sourcedBy, factProvenance,
+                items, sources, sinks, banners, entities, progressKinds, sections, List.of());
+    }
 
     /** A bundle from before a step could name the section its track sits under. */
     public GameDataBundle(
@@ -118,7 +144,7 @@ public record GameDataBundle(
             List<Entity> entities,
             List<ProgressKind> progressKinds) {
         this(game, sequence, label, attribution, provenance, sourcedBy, factProvenance,
-                items, sources, sinks, banners, entities, progressKinds, List.of());
+                items, sources, sinks, banners, entities, progressKinds, List.of(), List.of());
     }
 
     /** A bundle from before a progress kind could be named. */
@@ -136,7 +162,7 @@ public record GameDataBundle(
             List<BannerModel> banners,
             List<Entity> entities) {
         this(game, sequence, label, attribution, provenance, sourcedBy, factProvenance,
-                items, sources, sinks, banners, entities, List.of(), List.of());
+                items, sources, sinks, banners, entities, List.of(), List.of(), List.of());
     }
 
     public GameDataBundle {
@@ -158,6 +184,7 @@ public record GameDataBundle(
         progressKinds = progressKinds.stream()
                 .sorted(Comparator.comparing(ProgressKind::kind))
                 .toList();
+        words = GameDefinition.sortedWords(words);
         // Silence is given a meaning rather than left as a hole: a bundle that
         // declares nothing is a bundle whose facts came from nowhere anybody
         // recorded, which is not first-hand and so cannot be published. See
@@ -177,6 +204,7 @@ public record GameDataBundle(
         // 'sulfr'" is. See ADR 0008.
         validate(items, sources, sinks, entities, banners, progressKinds);
         validateLabels(sinks, sections);
+        validateWords(words, items, sources, entities);
         validateProvenance(provenance, sourcedBy, factProvenance,
                 refsOf(items, sources, sinks, banners, entities));
     }
@@ -197,7 +225,42 @@ public record GameDataBundle(
                 banners,
                 entities,
                 progressKinds,
-                sections);
+                sections,
+                words);
+    }
+
+    /**
+     * Every word names a key some fact uses, and no key has two: a word for a
+     * measure no bar asks for is a typo that would rename nothing and fail
+     * nowhere, which is the check {@link ProgressKind} names get for the same
+     * reason. See {@link Word}.
+     */
+    private static void validateWords(List<Word> words, List<Item> items, List<Source> sources,
+            List<Entity> entities) {
+        Map<Word.Subject, Set<String>> inUse = new HashMap<>();
+        for (Word.Subject subject : Word.Subject.values()) inUse.put(subject, new LinkedHashSet<>());
+        items.forEach(item -> inUse.get(Word.Subject.CATEGORY).add(item.category()));
+        entities.forEach(entity -> inUse.get(Word.Subject.ENTITY_KIND).add(entity.kind()));
+        for (Source source : sources) {
+            if (source instanceof Reward reward && reward.requires() != null) {
+                inUse.get(Word.Subject.MEASURE).add(reward.requires().measure());
+            }
+        }
+
+        List<String> problems = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        for (Word word : words) {
+            String spelled = word.subject().spelled() + " '" + word.key() + "'";
+            if (!seen.add(spelled)) {
+                problems.add(spelled + " has two words");
+            } else if (!inUse.get(word.subject()).contains(word.key())) {
+                problems.add(spelled + " has a word but nothing in this bundle uses it; in use: "
+                        + inUse.get(word.subject()));
+            }
+        }
+        if (!problems.isEmpty()) {
+            throw new BundleFormatException(String.join(System.lineSeparator(), problems));
+        }
     }
 
     // ── What the game calls things ──────────────────────────────────────────

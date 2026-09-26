@@ -93,6 +93,8 @@ export interface Item {
   displayName: string;
   rarity: Rarity;
   category: string;
+  /** The bundle's word for the category, which several categories may share (ADR 0033). */
+  categoryName?: string;
 }
 
 export interface ItemsResponse {
@@ -109,6 +111,8 @@ export interface EntitySummary {
   rarity: Rarity;
   element: string | null;
   tags: string[];
+  /** The bundle's word for the kind, "Construct" for character (ADR 0033). */
+  kindName?: string;
 }
 
 export interface EntitiesResponse {
@@ -135,6 +139,8 @@ export interface EntityDetail extends EntitySummary {
   statCurves: { stat: string; breakpoints: { ascensionTier: number; level: number; value: number }[] }[];
   skills: { id: string; displayName: string; ranks: SkillRank[] }[];
   talents: { id: string; displayName: string; unlockCondition: string; effect: string }[];
+  /** The bundle's word for the kind (ADR 0033); absent from an older server. */
+  kindName?: string;
 }
 
 export interface EntityResponse {
@@ -161,6 +167,8 @@ export interface MeasureBar {
 
 export interface Measure {
   measure: string;
+  /** The bundle's word for it (ADR 0033); absent from an older server, the measure itself before sequence 13. */
+  displayName?: string;
   bars: MeasureBar[];
 }
 
@@ -278,7 +286,24 @@ export interface Plan {
   shadowPrice: ShadowPrice[];
   bindingStages: string[];
   notes: string[];
+  /*
+    The upgrade steps the goals pay for, as data so the page can name each
+    state the way the goal and roster screens do. Absent from a server older
+    than this page, which said it as a note instead; the notes still render.
+  */
+  payingFor?: PayingFor[];
   computedAt: string;
+}
+
+export interface PayingFor {
+  step: string;
+  /** Null only for a step the plan's version does not know, which it cannot produce. */
+  entity: string | null;
+  entityName: string | null;
+  fromState: string | null;
+  toState: string | null;
+  /** The server's unguessed name, "Lucia: Inverse Crown to abyssal-lament-18". */
+  displayName: string;
 }
 
 export interface ShortfallLine {

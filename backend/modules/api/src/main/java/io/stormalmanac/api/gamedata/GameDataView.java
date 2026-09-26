@@ -90,12 +90,22 @@ public final class GameDataView {
      * read rather than how it is stored: a player entering a few hundred
      * quantities goes down a list ordered the way the game's own bag is, and a
      * client that had only slugs would have to invent an order of its own.
+     *
+     * <p>{@code categoryName} is the bundle's word for the category (ADR 0033),
+     * or the category itself when it has none. Several categories may share a
+     * word — three EXP Pod sizes are three categories to a fodder rule and one
+     * heading to a reader — so a client groups by the name, and matches by the key.
      */
-    public record ItemView(String id, String displayName, RarityView rarity, String category) {}
+    public record ItemView(String id, String displayName, RarityView rarity, String category, String categoryName) {}
 
-    /** Enough of an entity to list it; the catalog index does not need its skills. */
+    /**
+     * Enough of an entity to list it; the catalog index does not need its skills.
+     * {@code kindName} is the bundle's word for its kind, "Construct" for
+     * {@code character}, or the kind itself (ADR 0033).
+     */
     public record EntitySummaryView(
-            String id, String displayName, String kind, RarityView rarity, String element, List<String> tags) {}
+            String id, String displayName, String kind, RarityView rarity, String element, List<String> tags,
+            String kindName) {}
 
     public record BreakpointView(int ascensionTier, int level, double value) {}
 
@@ -124,7 +134,8 @@ public final class GameDataView {
             List<String> tags,
             List<StatCurveView> statCurves,
             List<SkillView> skills,
-            List<TalentView> talents) {}
+            List<TalentView> talents,
+            String kindName) {}
 
     /**
      * One deterministic step of an entity's upgrade graph, and what it costs.
@@ -223,17 +234,17 @@ public final class GameDataView {
      * per client, and no client can ask the question without it: the whole
      * difficulty is that there is no list of the questions.
      *
-     * <p><b>The measure stays a slug, and that stays the trade.</b> It has no
-     * declaration to hang a display name on, so {@code phantom-pain-cage-score}
-     * is what a reader sees — the same trade an opaque state makes. The bars are
-     * what makes it survivable rather than a fix for it.
+     * <p><b>The measure is a slug, and since sequence 13 it can have a word</b>
+     * (ADR 0033): {@code displayName} is "Phantom Pain Cage" where the bundle
+     * says so, and the slug where it does not — which is every version before,
+     * and what a reader saw over this question until D5's second rehearsal.
      *
      * <p>Ordered by bar, lowest first, which is the order a ladder is climbed
      * and therefore the order a reader picks their own rung out of. An empty
      * list is a 200: a game whose grants all turn up for everybody has no
      * measures, which is an answer and not an absence.
      */
-    public record MeasureView(String measure, List<BarView> bars) {}
+    public record MeasureView(String measure, String displayName, List<BarView> bars) {}
 
     public record MeasuresResponse(String game, VersionView version, List<MeasureView> measures) {}
 }

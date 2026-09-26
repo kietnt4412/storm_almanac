@@ -10,6 +10,7 @@ import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Stage;
 import io.stormalmanac.gamedata.Upgrade;
+import io.stormalmanac.gamedata.Word;
 import io.stormalmanac.gamedata.catalog.Entity;
 import java.util.Comparator;
 import java.util.List;
@@ -41,8 +42,10 @@ import java.util.stream.Stream;
  * than one guessed from it; guessing is the page's business ({@code tracks.ts}),
  * and the page says it is guessing.
  *
- * <p>A grant behind a score is named by its bar and not by the thing scored,
- * because the measure is an opaque label (ADR 0022) that no screen was read for.
+ * <p>A grant behind a score is named by its bar, and by the thing scored when
+ * the bundle has a word for the measure (ADR 0033, sequence 13): "Phantom Pain
+ * Cage, weekly, score 90,000+". Without one it is the bar alone, since the
+ * measure is an opaque label (ADR 0022) and printing it would print a slug.
  *
  * <p>An id this version does not know falls back to itself, so a line can be
  * ugly and never missing.
@@ -90,7 +93,7 @@ public final class StepNames {
         return Comparator.comparingInt(this::kindOf).thenComparing(this::step).thenComparing(Function.identity());
     }
 
-    /** A grant and everything it pays: "Weekly, score 90,000+: 5 Phantom Pain Scar + 6,000 Cogs". */
+    /** A grant and everything it pays: "Phantom Pain Cage, weekly, score 90,000+: 5 Phantom Pain Scar". */
     public String reward(String id) {
         return rewardById(id).map(reward -> when(reward) + ": " + stacks(reward.grants())).orElse(id);
     }
@@ -124,13 +127,22 @@ public final class StepNames {
      * upper-resonance-1". Which price is paid is the plan's "Pay …" line.
      */
     public String upgrade(String entry) {
+        return upgradeOf(entry)
+                .map(step -> entity(step.entity()) + " to " + state(step.entity(), step.toState()))
+                .orElse(entry);
+    }
+
+    /**
+     * The step an entry of {@link Demand#steps()} stands for — its first price
+     * when it lists several, since they share both states — or empty when this
+     * version has no such step.
+     */
+    public Optional<Upgrade> upgradeOf(String entry) {
         String first = entry.split(" or ", 2)[0];
         return definition.sinks().stream()
                 .filter(sink -> sink instanceof Upgrade upgrade && upgrade.id().equals(first))
                 .map(Upgrade.class::cast)
-                .findFirst()
-                .map(step -> entity(step.entity()) + " to " + state(step.entity(), step.toState()))
-                .orElse(entry);
+                .findFirst();
     }
 
     /** Where a goal points: "Helentine: Lacrimosa at Hero". */
@@ -231,9 +243,19 @@ public final class StepNames {
         return definition.rewards().stream().filter(reward -> reward.id().equals(id)).findFirst();
     }
 
-    private static String when(Reward reward) {
-        return cadence(reward.cadence())
-                + (reward.requires() == null ? "" : ", score " + quantity(reward.requires().atLeast()) + "+");
+    private String when(Reward reward) {
+        if (reward.requires() == null) return cadence(reward.cadence());
+        String measure = reward.requires().measure();
+        String named = definition.nameOf(Word.Subject.MEASURE, measure);
+        String bar = "score " + quantity(reward.requires().atLeast()) + "+";
+        return named.equals(measure)
+                ? cadence(reward.cadence()) + ", " + bar
+                : named + ", " + cadence(reward.cadence()).toLowerCase(Locale.ROOT) + ", " + bar;
+    }
+
+    /** What a scored mode is called, or its measure when the bundle gives it no word. */
+    public String measure(String measure) {
+        return definition.nameOf(Word.Subject.MEASURE, measure);
     }
 
     private static String cadence(Reward.Cadence cadence) {
@@ -246,7 +268,8 @@ public final class StepNames {
         };
     }
 
-    private String entity(EntityId id) {
+    /** What the catalog calls an entity, or its id when this version does not know it. */
+    public String entity(EntityId id) {
         Entity known = entities.get(id);
         return known == null ? id.value() : known.displayName();
     }
@@ -278,7 +301,7 @@ public final class StepNames {
     }
 
     /** Grouped, and the same on every server whatever its locale. */
-    private static String quantity(int quantity) {
+    public static String quantity(int quantity) {
         return String.format(Locale.ROOT, "%,d", quantity);
     }
 }

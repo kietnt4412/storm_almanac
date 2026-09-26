@@ -63,7 +63,8 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
       return (
         item.displayName.toLowerCase().includes(needle) ||
         item.id.includes(needle) ||
-        item.category.toLowerCase().includes(needle)
+        item.category.toLowerCase().includes(needle) ||
+        (item.categoryName ?? '').toLowerCase().includes(needle)
       );
     });
   }, [filter, held, items.data, onlyHeld]);
@@ -182,16 +183,20 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
 }
 
 /**
- * Grouped by the game's own category, in the order the item list arrived.
+ * Grouped by the category's name, in the order the item list arrived.
+ *
+ * By name and not by key since sequence 13 (ADR 0033): three EXP Pod sizes are
+ * three categories, because a fodder rule tells them apart, and one heading,
+ * because a reader does not. A category with no word is its own key, as before.
  *
  * The categories are strings a bundle supplies — this project does not know what
  * they mean and must not: an enum of them here would be the first game-specific
  * branch in the client, which is the same invariant the backend holds itself to.
  */
-function groupByCategory(items: Item[]): [string, Item[]][] {
+export function groupByCategory(items: Item[]): [string, Item[]][] {
   const groups = new Map<string, Item[]>();
   for (const item of items) {
-    const key = item.category || 'other';
+    const key = item.categoryName || item.category || 'other';
     const existing = groups.get(key);
     if (existing) existing.push(item);
     else groups.set(key, [item]);

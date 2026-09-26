@@ -85,6 +85,10 @@ class GameDataIngestTest extends SharedDatabaseTest {
         GameDefinition loaded = definitions.findLatest(pgr).orElseThrow();
 
         assertThat(loaded).isEqualTo(bundle.definitionApprovedAt(published.publishedAt()));
+        // Words for its keys since sequence 13 (V17), which the equality above
+        // covers only while the bundle declares some; this says it does.
+        assertThat(loaded.nameOf(io.stormalmanac.gamedata.Word.Subject.MEASURE, "phantom-pain-cage-score"))
+                .isEqualTo("Phantom Pain Cage");
         // Two more nullable columns on a row that is not versioned, and the only
         // proof they come back as one object is reading them back. A zone read
         // without its hour, or an hour read as getInt's zero, would both spell

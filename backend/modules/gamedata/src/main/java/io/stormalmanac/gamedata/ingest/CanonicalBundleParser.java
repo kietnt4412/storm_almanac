@@ -27,6 +27,7 @@ import io.stormalmanac.gamedata.Sink;
 import io.stormalmanac.gamedata.Source;
 import io.stormalmanac.gamedata.Stage;
 import io.stormalmanac.gamedata.Upgrade;
+import io.stormalmanac.gamedata.Word;
 import io.stormalmanac.gamedata.banner.BannerModel;
 import io.stormalmanac.gamedata.banner.FeaturedRule;
 import io.stormalmanac.gamedata.banner.Floor;
@@ -150,7 +151,8 @@ public final class CanonicalBundleParser {
                 each(root, "banners", CanonicalBundleParser::banner),
                 each(root, "entities", CanonicalBundleParser::entity),
                 each(root, "progressKinds", CanonicalBundleParser::progressKind),
-                strings(root, "sections"));
+                strings(root, "sections"),
+                each(root, "words", CanonicalBundleParser::word));
     }
 
     // ── The domain shapes, one method each ──────────────────────────────────
@@ -210,6 +212,18 @@ public final class CanonicalBundleParser {
     private static ProgressKind progressKind(JsonNode node, String at) {
         return new ProgressKind(
                 text(node, "kind", at + ".kind"),
+                text(node, "displayName", at + ".displayName"));
+    }
+
+    /**
+     * A word for one of the bundle's keys: {@code {"subject": "measure", "key":
+     * "phantom-pain-cage-score", "displayName": "Phantom Pain Cage"}}. Not a
+     * fact, like a progress kind's name. See {@link Word}.
+     */
+    private static Word word(JsonNode node, String at) {
+        return new Word(
+                Word.Subject.spelled(text(node, "subject", at + ".subject")),
+                text(node, "key", at + ".key"),
                 text(node, "displayName", at + ".displayName"));
     }
 

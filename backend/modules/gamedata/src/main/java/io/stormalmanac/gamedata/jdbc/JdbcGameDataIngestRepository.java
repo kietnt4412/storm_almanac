@@ -10,6 +10,7 @@ import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.ProgressKind;
+import io.stormalmanac.gamedata.Word;
 import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
@@ -85,6 +86,7 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
         writeBanners(version, bundle.banners(), items);
         writeProgressKinds(version, bundle.progressKinds());
         writeSections(version, bundle.sections());
+        writeWords(version, bundle.words());
         writeProvenance(version, bundle);
         return version;
     }
@@ -654,6 +656,15 @@ public class JdbcGameDataIngestRepository implements GameDataIngestRepository {
             rows.add(new Object[] {version, position, sections.get(position)});
         }
         jdbc.batchUpdate("INSERT INTO gamedata.section (version_id, position, name) VALUES (?, ?, ?)", rows);
+    }
+
+    /** The bundle's words for its keys, not facts either. See {@code V17__a_key_may_be_given_a_word.sql}. */
+    private void writeWords(long version, List<Word> words) {
+        jdbc.batchUpdate(
+                "INSERT INTO gamedata.word (version_id, subject, key, display_name) VALUES (?, ?, ?, ?)",
+                words.stream()
+                        .map(word -> new Object[] {version, word.subject().spelled(), word.key(), word.displayName()})
+                        .toList());
     }
 
     // ── Shared ──────────────────────────────────────────────────────────────

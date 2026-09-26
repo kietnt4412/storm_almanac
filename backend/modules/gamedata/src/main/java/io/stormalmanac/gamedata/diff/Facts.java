@@ -9,6 +9,7 @@ import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.ItemStack;
 import io.stormalmanac.gamedata.ProgressKind;
+import io.stormalmanac.gamedata.Word;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Shop;
@@ -81,6 +82,12 @@ final class Facts {
         // rather than a field on a subject nobody would look under.
         for (ProgressKind kind : definition.progressKinds()) {
             subject(facts, Axis.PROGRESSION, "progress", kind.kind()).put("name", kind.displayName());
+        }
+
+        // Words for the bundle's keys, for the same reason (ADR 0033): one
+        // subject per key, "measure 'phantom-pain-cage-score'".
+        for (Word word : definition.words()) {
+            subject(facts, Axis.PROGRESSION, word.subject().spelled(), word.key()).put("name", word.displayName());
         }
 
         // The order sections are shown in, which is not a fact either and moves

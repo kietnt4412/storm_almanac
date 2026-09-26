@@ -41,3 +41,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0030](0030-the-development-sign-in-stays-because-the-hands-that-need-it-cannot-sign-in.md) | The development sign-in stays, because the hands that need it cannot sign in | Accepted |
 | [0031](0031-a-shared-upgrade-path-is-written-once-and-expanded-in-the-file.md) | A shared upgrade path is written once, and expanded in the file | Accepted |
 | [0032](0032-a-step-carries-what-the-game-calls-it.md) | A step carries what the game calls it | Accepted |
+| [0033](0033-a-key-the-bundle-invents-may-be-given-a-word.md) | A key the bundle invents may be given a word | Accepted |

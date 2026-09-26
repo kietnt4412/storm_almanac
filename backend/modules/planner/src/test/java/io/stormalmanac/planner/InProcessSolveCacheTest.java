@@ -27,7 +27,7 @@ class InProcessSolveCacheTest {
                 List.of(),
                 0,
                 0.0,
-                new Explanation(Map.of(), List.of(), List.of()),
+                new Explanation(Map.of(), List.of(), List.of(), List.of()),
                 Instant.EPOCH);
     }
 
