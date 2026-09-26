@@ -134,8 +134,8 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
         <div>
           <h1 className="text-xl font-semibold">Goals</h1>
           <p className="muted text-sm">
-            One row per character, highest first. Set a target on each track you want to move and
-            leave the rest. Every goal has to be paid for, so the order is what gets dropped when a
+            One row for everyone you are building, highest first. Set a target on each track you want
+            to move and leave the rest. Every goal has to be paid for, so the order is what gets dropped when a
             budget runs out — not what gets planned.
           </p>
         </div>
@@ -155,7 +155,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
 
       {rows.length === 0 ? (
         <p className="muted">
-          Nothing yet. Add a character below and set where you are taking her — or start from her{' '}
+          Nothing yet. Add someone below and set where you are taking them — or start from a{' '}
           <Link to={`/catalog/${game}`}>catalog page</Link>, which also says what you are short of.
         </p>
       ) : (
@@ -261,7 +261,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
       <div className="card flex flex-wrap items-end gap-3">
         <div>
           <label className="label" htmlFor="add-goal">
-            Add a character
+            Add someone
           </label>
           <select
             id="add-goal"

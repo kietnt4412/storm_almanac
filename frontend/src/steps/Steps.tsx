@@ -28,7 +28,7 @@ export const STEPS = [
   {
     to: '/goals',
     title: 'What you want',
-    blurb: 'A character and a state to get her to. Order them by what matters.',
+    blurb: 'For each of them, how far on each track. Order them by what matters.',
   },
   {
     to: '/plan',

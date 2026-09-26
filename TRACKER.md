@@ -216,11 +216,9 @@ works". It does not mean that:
   what sits *beside* it — and since 2026-09-21 there is a roster screen and a plan form that sends `reach`.
   **Shadow prices first rendered against a real plan on 2026-09-24**, in a browser against sequence
   10: Resonance at **90.00** Serum (3 more runs, no slack), Cogs and Skill Point at 0.00 (the runs'
-  slack covers one more). The stage was always there; nobody had driven such a goal. **The plan
-  page's rows stopped being raw ids on 2026-09-26** (S5). The naming half is closed:
-  a `progress:` line rendered as its bare slug beside a properly named `Cogs` until 2026-09-22
-  (N37, ADR 0028), and a `choice:` line's on 2026-09-24, named by its prices rather than by
-  upgrade ids. Every R1999 catalog and drop number in this file comes from Kornblume.
+  slack covers one more). The stage was always there; nobody had driven such a goal. **Naming is
+  closed** — ids off the plan page since S5 and S8 (2026-09-26); its history is in the archive.
+  Every R1999 catalog and drop number in this file comes from Kornblume.
 - **Eight qualifications of the closed phases are
   [in the archive](docs/history/tracker-archive.md#qualifications-moved-out-of-the-live-tracker-2026-09-11-seventeenth-session)**
   — the benchmark being one guide, the two community disagreements, the three
@@ -235,14 +233,16 @@ after N37 and N28's modelling half on 2026-09-22 and N30, N20, N33, B6, N34, N36
 and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 **No Phase 4 item is left; its exit is.**
 
-> **Resume here (2026-09-26, forty-fifth):** **S7 and S8 are live** (#54, production `c5bd578`, sequence 13 on Neon). **Next: the rehearsal's third run**, then fix or cut what it finds. **S6 waits on a reading** (below). **Open:** N42 below.
+> **Resume here (2026-09-26, forty-fifth):** S7 and S8 are live (#54, `c5bd578`, sequence 13 on Neon). **The third run found S9 and S10** below — both screen changes, so **put a plan to the maintainer first**. **S6 waits on a reading.** **Open:** N42 below.
 
 ### D5's rehearsal — each stall, fixed or cut
 
-**S1–S5 closed 2026-09-25/26, S7–S8 and the four smaller ones 2026-09-26** ([archive](docs/history/tracker-archive.md#completed-next-actions)). The second run (forty-fourth) went home → sign-in → profile → inventory → Lucia on the roster → two goals → a plan (1 140 Serum, 38 runs, every buy and claim named): **it completes, and stalls three ways.** Run locally with the dev sign-in as a fresh account; production signs in only through Google.
+**S1–S5 closed 2026-09-25/26, S7–S8 2026-09-26** ([archive](docs/history/tracker-archive.md#completed-next-actions)). **The third run** (forty-fifth, fresh account `rehearsal-3`, local, dev sign-in) went home → profile → inventory → Lucia on the roster → **one goal row, three targets** → a plan (180 Serum, 0.8 days, every line named): **it completes, and two things still read wrong.**
 
 - [ ] **S6 — a skill at Lv 10 cannot be recorded.** Skill tracks offer 1, 2, 3, 4, 18: `{skill}-18` is one row *derived* from the 1 → 18 prompt, because levels 5–17 are unread. A mid-curve player must pick 4 and is charged for levels already paid. **A reading, not code:** Skill Points and Cogs per level 4 → 18. Level is milder (only gated levels are states).
-- **Next:** a third run over the whole flow, as a fresh account; #54 is live. Whatever it finds goes here as S9 on.
+- [ ] **S9 — a purchase reads as one cheap buy.** "Buy 1,200 Cogs for 1 Simulation Score × 429" is 514 800 Cogs for 429 Score; the reader has to multiply. Say the total (or the times first).
+- [ ] **S10 — "What each material is costing you" all 0.00.** Every price is zero when nothing binds but the stage, and a panel of zeros reads as broken. Say why, or hide it when every price is zero.
+- **Smaller:** the notes open with solver-speak ("7 item constraint(s)"); rarity reads "6*" where the game draws ★; EXP Pods list L, XL, M. *Fixed in the run:* "Add a character" over a list with a weapon in it, and step 3's blurb.
 
 ### Before the next sequence — worth knowing
 
@@ -536,7 +536,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-26 | forty-fifth | Production on `8470ddf` (#53). **S8**: the plan's steps travel as data and read "Level · 65, Red Orb · 18"; **sequence 13** gives the bundle's keys words (ADR 0033, `V17`) — "Phantom Pain Cage", one "Character EXP" heading. **S7**: one goal row per construct. Four smaller hesitations fixed. PR #54 merged and deployed; sequence 13 on Neon |
+| 2026-09-26 | forty-fifth | Production on `8470ddf` (#53). **S8**: the plan's steps travel as data and read "Level · 65, Red Orb · 18"; **sequence 13** gives the bundle's keys words (ADR 0033, `V17`) — "Phantom Pain Cage", one "Character EXP" heading. **S7**: one goal row per construct. Four smaller hesitations fixed. #54 deployed, sequence 13 on Neon. **Third run completes**; S9, S10 found |
 | 2026-09-26 | forty-fourth | Production on `32cd5b0` (#52). **The rehearsal's second run completes and stalls three ways**: S6 skills 5–17 unread, S7 one target per goal row, S8 raw ids left. **Track C (D6)**: pull planner, UI polish, account features, after launch and before Track B; C2 tested by ourselves |
 | 2026-09-26 | forty-third | Remote checked: #51 merged, production on `1ee33fa`. **S5**: the plan page's rows and four notes named from published facts — "Buy 10 Memory Enhancer IV for 87 Simulation Score" — in reading order; no new reading. `StepNames` absorbed `DemandNames` |
 | 2026-09-25 | forty-second | **PR #46 never deployed**: its `main` run went red on a `findBy` that took 1 320 ms where the same commit had taken 486. Production stayed on #45, and nothing showed it until somebody looked. `asyncUtilTimeout` is now 5 s for every test. The remote check now includes the last `main` run and the health SHA. **D5**: the maintainer rehearses the stranger test first, and strangers wait until the stall list is empty. **S1**, found in minutes: a second profile on one server was a bare 500 — now a 409 by name, and the form says so first. **S2** and **S3** the same day: a dropdown per track instead of ~70 raw ids, and four steps with a way on from each. **S4**: the game's rank names and skill sections, carried by the step (ADR 0032, sequence 11) |
