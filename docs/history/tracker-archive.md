@@ -3218,6 +3218,14 @@ the DOM instead, which proves the handler and not the hit target.
 **Tests:** 485 backend (0 skipped, snapshots present; 469 expected on CI), 70
 frontend. PR #54 carries three commits.
 
+**Then the maintainer merged #54** (10:58Z) and said to proceed. Its `main` run
+`36237367444` went green with `deploy`, and `/api/health` reported
+`c5bd578` before anything touched Neon — the old server does not know `V17`,
+and waiting for the new one meant the migration never met it. **Sequence 13 was
+then previewed against Neon** as the same 17 word subjects and no fact,
+ingested, published at 11:06:47Z, and read back as *no changes*; the live
+`/measures` route answers "Phantom Pain Cage" and `/items` the 11 headings.
+
 **2026-09-26 (forty-fourth) — the rehearsal's second run, and Track C.**
 
 **The remote, checked first:** PR #52 (S5) merged at 00:44Z, its `main` run
