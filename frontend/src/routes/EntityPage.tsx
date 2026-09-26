@@ -67,7 +67,7 @@ export function EntityPage() {
         </Link>
         <h1 className="mt-1 text-2xl font-semibold">{page.displayName}</h1>
         <p className="muted text-sm">
-          {[page.rarity.label, page.kind, page.element, ...page.tags].filter(Boolean).join(' · ')}
+          {[page.rarity.label, page.kindName ?? page.kind, page.element, ...page.tags].filter(Boolean).join(' · ')}
         </p>
       </header>
 

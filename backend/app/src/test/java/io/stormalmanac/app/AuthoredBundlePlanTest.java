@@ -3,6 +3,7 @@ package io.stormalmanac.app;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 
 import io.stormalmanac.api.player.PlayerView.ConversionView;
 import io.stormalmanac.api.player.PlayerView.PlanResponse;
@@ -233,8 +234,9 @@ class AuthoredBundlePlanTest {
                 .isEqualTo(500);
         assertThat(plan.explanation().notes()).anySatisfy(note -> assertThat(note)
                 .startsWith("Counting on free income over the horizon")
-                .containsSubsequence("Weekly, score 30,000+ ×", "Weekly, score 90,000+ ×9",
-                        "Weekly, score 1,100,000+ ×9")
+                .containsSubsequence("Phantom Pain Cage, weekly, score 30,000+ ×",
+                        "Phantom Pain Cage, weekly, score 90,000+ ×9",
+                        "Phantom Pain Cage, weekly, score 1,100,000+ ×9")
                 .doesNotContain("phantom-pain-cage-"));
     }
 
@@ -365,8 +367,33 @@ class AuthoredBundlePlanTest {
                 63, Map.of("phantom-pain-cage-score", 1_100_000)), definition);
         assertThat(cage.rewards()).extracting(RewardClaimView::reward, RewardClaimView::displayName)
                 .contains(tuple("phantom-pain-cage-90000",
-                        "Weekly, score 90,000+: 5 Phantom Pain Scar + 1 Major Overclock Alloy"
+                        "Phantom Pain Cage, weekly, score 90,000+: 5 Phantom Pain Scar + 1 Major Overclock Alloy"
                                 + " + 1 EXP Pod (M) + 6,000 Cogs"));
+    }
+
+    @Test
+    @DisplayName("the Cage is named by the bundle's word, in the grants a plan counts and in the ones it does not")
+    void theCageIsNamed() {
+        // S8 of D5's second rehearsal: nine "phantom-pain-cage-90000 (needs
+        // 90000 of phantom-pain-cage-score; …)" in id order, and grant lines
+        // reading "Weekly, score 90,000+" that named no weekly. Sequence 13
+        // gives the measure a word (ADR 0033).
+        // Scars enough in hand to evolve without the Cage, so the plan exists
+        // and the Cage's tiers are what it leaves out.
+        Plan unanswered = solve(Goal.deterministic(HELENTINE, "evolve-ss"),
+                Inventory.empty(PROFILE)
+                        .with(new ItemId("inver-shard-lacrimosa"), 2)
+                        .with(new ItemId("phantom-pain-scar"), 460));
+        assertThat(unanswered.explanation().notes()).anySatisfy(note -> assertThat(note)
+                .startsWith("Not counted, because nothing says this account gets that far: Phantom Pain Cage at"
+                        + " 30,000, 90,000, 120,000, 360,000, 500,000, 700,000, 900,000, 1,000,000, 1,100,000"
+                        + " (this plan was asked for 0).")
+                .doesNotContain("phantom-pain-cage"));
+
+        PlanResponse answered = PlanResponse.of(solve(Goal.deterministic(HELENTINE, "evolve-ss"),
+                Inventory.empty(PROFILE), 63, Map.of("phantom-pain-cage-score", 1_100_000)), definition);
+        assertThat(answered.rewards()).extracting(RewardClaimView::displayName).first(STRING)
+                .startsWith("Phantom Pain Cage, weekly, score 30,000+: ");
     }
 
     @Test

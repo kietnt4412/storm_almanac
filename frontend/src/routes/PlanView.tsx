@@ -206,11 +206,12 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
  * real figure and then wonder why the plan did not move. The rungs are the
  * question's whole domain.
  *
- * <p><b>The measure is a slug, and what carries it is the payout.</b> Nobody has
- * ever seen `phantom-pain-cage-score` written down; what a player recognises is
- * the Scars. So what the chosen rung is worth sits beside it — which is also the
- * number that makes the choice worth making, since a ladder pays every rung at
- * or below where you stop rather than only the one you reached.
+ * <p><b>Named by the bundle's word for the measure</b> (ADR 0033, since sequence
+ * 13) — "Phantom Pain Cage" — and by the slug where it has none, which nobody
+ * has ever seen written down. Either way what a player recognises is the Scars,
+ * so what the chosen rung is worth sits beside it — which is also the number
+ * that makes the choice worth making, since a ladder pays every rung at or
+ * below where you stop rather than only the one you reached.
  */
 export function Ladder({
   ladder,
@@ -235,11 +236,11 @@ export function Ladder({
   return (
     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
       <label className="flex items-center gap-2 text-sm">
-        <span className="count">{ladder.measure}</span>
+        <span>{ladder.displayName ?? ladder.measure}</span>
         <select
           className="input"
           value={score}
-          aria-label={`How far you get in ${ladder.measure}`}
+          aria-label={`How far you get in ${ladder.displayName ?? ladder.measure}`}
           onChange={(event) => onPick(Number(event.target.value))}
         >
           {/*

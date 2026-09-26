@@ -53,6 +53,7 @@ function Browser({ game }: { game: string }) {
         entity.displayName.toLowerCase().includes(needle) ||
         entity.id.includes(needle) ||
         entity.kind.toLowerCase().includes(needle) ||
+        (entity.kindName ?? '').toLowerCase().includes(needle) ||
         (entity.element ?? '').toLowerCase().includes(needle) ||
         entity.tags.some((tag) => tag.toLowerCase().includes(needle)),
     );
@@ -102,7 +103,7 @@ function Browser({ game }: { game: string }) {
                   <span className="muted text-xs">{entity.rarity.label}</span>
                 </div>
                 <div className="muted mt-1 text-sm">
-                  {[entity.kind, entity.element, ...entity.tags].filter(Boolean).join(' · ')}
+                  {[entity.kindName ?? entity.kind, entity.element, ...entity.tags].filter(Boolean).join(' · ')}
                 </div>
               </Link>
             </li>

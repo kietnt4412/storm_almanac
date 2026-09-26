@@ -181,7 +181,7 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
             <option value="">Choose someone…</option>
             {addable.map((entity) => (
               <option key={entity.id} value={entity.id}>
-                {entity.displayName} ({entity.kind})
+                {entity.displayName} ({(entity.kindName ?? entity.kind).toLowerCase()})
               </option>
             ))}
           </select>

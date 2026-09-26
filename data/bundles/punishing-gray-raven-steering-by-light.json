@@ -153,7 +153,11 @@
     "carries the 4.7.0 readings across is the maintainer's report of noticing",
     "no cost change in 4.8.0, plus one point measured on both sides: a skill's",
     "1 -> 2 at 1 Skill Point + 2 000 Cogs, read on 2026-09-19 and again on",
-    "2026-09-24. The file keeps its name; a file name is not a label."
+    "2026-09-24. The file keeps its name; a file name is not a label.",
+    "",
+    "Sequence 13 changes no fact and reads nothing: it gives the bundle's own",
+    "keys words a reader can read (ADR 0033), which D5's second rehearsal asked",
+    "for — the Cage's score, the item categories, the entity kinds. See 'words'."
   ],
 
   "game": {
@@ -162,7 +166,7 @@
     "energyUnit": "Serum",
     "dayBoundary": { "zone": "UTC", "hour": 5 }
   },
-  "sequence": 12,
+  "sequence": 13,
   "label": "Anchored in Faith (Global 4.8.0)",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client: patch 4.7.0 \"Steering By Light\" from 2026-09-18 to 2026-09-22, and patch 4.8.0 \"Anchored in Faith\" on 2026-09-24. Numbers and text only; no game assets.",
 
@@ -1437,5 +1441,36 @@
     "the reading; this list is only the order. 'Growth' is this bundle's word,",
     "see the ladder."
   ],
-  "sections": [ "Growth", "Basic Skill", "Special Skill", "Evolution Effect", "Common Effect" ]
+  "sections": [ "Growth", "Basic Skill", "Special Skill", "Evolution Effect", "Common Effect" ],
+
+  "_wordsComment": [
+    "What to show instead of a key the bundle invents (ADR 0033). Not facts, and",
+    "no factProvenance row, like the progress kind names above: a word renames",
+    "a key and changes no number. 'Phantom Pain Cage' and 'Construct' are also",
+    "what the game calls them; the category headings are this bundle's words,",
+    "plural because they head lists. The three EXP Pod sizes are three",
+    "categories because a fodder rule has to tell them apart, and one word",
+    "because a reader does not."
+  ],
+  "words": [
+    { "subject": "measure", "key": "phantom-pain-cage-score", "displayName": "Phantom Pain Cage" },
+
+    { "subject": "category", "key": "character-exp-pod-m", "displayName": "Character EXP" },
+    { "subject": "category", "key": "character-exp-pod-l", "displayName": "Character EXP" },
+    { "subject": "category", "key": "character-exp-pod-xl", "displayName": "Character EXP" },
+    { "subject": "category", "key": "weapon-exp-fodder-4-star", "displayName": "Weapon EXP" },
+    { "subject": "category", "key": "memory-exp-fodder-4-star", "displayName": "Memory EXP" },
+    { "subject": "category", "key": "overclock-material", "displayName": "Overclock Materials" },
+    { "subject": "category", "key": "harmony-material", "displayName": "Harmony Materials" },
+    { "subject": "category", "key": "material-box", "displayName": "Material Boxes" },
+    { "subject": "category", "key": "skill-material", "displayName": "Skill Materials" },
+    { "subject": "category", "key": "construct-shard", "displayName": "Construct Shards" },
+    { "subject": "category", "key": "memory-shard", "displayName": "Memory Shards" },
+    { "subject": "category", "key": "support-token", "displayName": "Support Tokens" },
+    { "subject": "category", "key": "currency", "displayName": "Currencies" },
+
+    { "subject": "entity-kind", "key": "character", "displayName": "Construct" },
+    { "subject": "entity-kind", "key": "weapon", "displayName": "Weapon" },
+    { "subject": "entity-kind", "key": "memory", "displayName": "Memory" }
+  ]
 }

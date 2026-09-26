@@ -93,6 +93,8 @@ export interface Item {
   displayName: string;
   rarity: Rarity;
   category: string;
+  /** The bundle's word for the category, which several categories may share (ADR 0033). */
+  categoryName?: string;
 }
 
 export interface ItemsResponse {
@@ -109,6 +111,8 @@ export interface EntitySummary {
   rarity: Rarity;
   element: string | null;
   tags: string[];
+  /** The bundle's word for the kind, "Construct" for character (ADR 0033). */
+  kindName?: string;
 }
 
 export interface EntitiesResponse {
@@ -135,6 +139,8 @@ export interface EntityDetail extends EntitySummary {
   statCurves: { stat: string; breakpoints: { ascensionTier: number; level: number; value: number }[] }[];
   skills: { id: string; displayName: string; ranks: SkillRank[] }[];
   talents: { id: string; displayName: string; unlockCondition: string; effect: string }[];
+  /** The bundle's word for the kind (ADR 0033); absent from an older server. */
+  kindName?: string;
 }
 
 export interface EntityResponse {
@@ -161,6 +167,8 @@ export interface MeasureBar {
 
 export interface Measure {
   measure: string;
+  /** The bundle's word for it (ADR 0033); absent from an older server, the measure itself before sequence 13. */
+  displayName?: string;
   bars: MeasureBar[];
 }
 

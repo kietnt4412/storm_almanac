@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
@@ -338,11 +339,22 @@ public final class MipOptimizer implements Optimizer {
             // says what it refused to assume. A reader who does clear the weekly
             // is holding a cheaper plan than the one in front of them, and the
             // only way they find that out is if the plan says so.
-            notes.add("Not counted, because nothing says this account can collect them: "
-                    + outcome.withheldGrants().stream()
-                            .map(grant -> grant.reward() + " (needs " + grant.atLeast() + " of "
-                                    + grant.measure() + "; this plan was asked for " + grant.said() + ")")
-                            .collect(Collectors.joining(", "))
+            //
+            // By measure and then by bar, and named: until sequence 13 it was
+            // nine "phantom-pain-cage-90000 (needs 90000 of phantom-pain-cage-
+            // score; …)" in id order, which D5's second rehearsal read as noise.
+            Map<String, List<EnergyMip.Withheld>> byMeasure = outcome.withheldGrants().stream()
+                    .collect(Collectors.groupingBy(EnergyMip.Withheld::measure, TreeMap::new, Collectors.toList()));
+            notes.add("Not counted, because nothing says this account gets that far: "
+                    + byMeasure.values().stream()
+                            .map(bars -> names.measure(bars.get(0).measure()) + " at "
+                                    + bars.stream()
+                                            .map(EnergyMip.Withheld::atLeast)
+                                            .sorted()
+                                            .map(StepNames::quantity)
+                                            .collect(Collectors.joining(", "))
+                                    + " (this plan was asked for " + StepNames.quantity(bars.get(0).said()) + ")")
+                            .collect(Collectors.joining("; "))
                     + ". Say what you reach and the plan gets cheaper, never dearer.");
         }
         if (!outcome.expiringClaims().isEmpty()) {

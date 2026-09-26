@@ -41,6 +41,7 @@ import io.stormalmanac.gamedata.ProvenanceRepository.Sourcing;
 import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Upgrade;
+import io.stormalmanac.gamedata.Word;
 import io.stormalmanac.gamedata.catalog.Entity;
 import io.stormalmanac.gamedata.catalog.Skill;
 import io.stormalmanac.gamedata.catalog.StatCurve;
@@ -127,7 +128,7 @@ public class GameDataReadModel {
         return new EntitiesResponse(
                 game.value(),
                 version(data.version()),
-                data.entities().stream().map(GameDataReadModel::summary).toList(),
+                data.entities().stream().map(entity -> summary(entity, data)).toList(),
                 sourcing(data, data.entities().stream().map(FactRef::of).toList()));
     }
 
@@ -160,7 +161,8 @@ public class GameDataReadModel {
                                 item.id().value(),
                                 item.displayName(),
                                 rarity(item.rarity()),
-                                item.category()))
+                                item.category(),
+                                data.nameOf(Word.Subject.CATEGORY, item.category())))
                         .toList(),
                 // In the order the list is rendered, not the order the bundle
                 // declared them, so a reader scanning the two together is
@@ -183,7 +185,8 @@ public class GameDataReadModel {
                 found.tags(),
                 found.statCurves().stream().map(GameDataReadModel::curve).toList(),
                 found.skills().stream().map(skill -> skill(skill, items)).toList(),
-                found.talents().stream().map(GameDataReadModel::talent).toList()),
+                found.talents().stream().map(GameDataReadModel::talent).toList(),
+                data.nameOf(Word.Subject.ENTITY_KIND, found.kind())),
                 // One fact. Everything on this page — the curve, every rank of
                 // every skill, the talents — is the entity record, read in one
                 // sitting off one set of screens. The items named inside a skill's
@@ -223,7 +226,7 @@ public class GameDataReadModel {
         return new UpgradesResponse(
                 game.value(),
                 version(data.version()),
-                summary(found),
+                summary(found, data),
                 steps,
                 total(upgrades, items),
                 sourcing(data, facts),
@@ -277,7 +280,10 @@ public class GameDataReadModel {
                 game.value(),
                 version(data.version()),
                 ladders.entrySet().stream()
-                        .map(ladder -> new MeasureView(ladder.getKey(), List.copyOf(ladder.getValue())))
+                        .map(ladder -> new MeasureView(
+                                ladder.getKey(),
+                                data.nameOf(Word.Subject.MEASURE, ladder.getKey()),
+                                List.copyOf(ladder.getValue())))
                         .toList());
     }
 
@@ -371,10 +377,11 @@ public class GameDataReadModel {
         return new VersionView(version.sequence(), version.label(), version.publishedAt(), version.attribution());
     }
 
-    private static EntitySummaryView summary(Entity entity) {
+    private static EntitySummaryView summary(Entity entity, GameDefinition data) {
         return new EntitySummaryView(
                 entity.id().value(), entity.displayName(), entity.kind(),
-                rarity(entity.rarity()), entity.element(), entity.tags());
+                rarity(entity.rarity()), entity.element(), entity.tags(),
+                data.nameOf(Word.Subject.ENTITY_KIND, entity.kind()));
     }
 
     private static RarityView rarity(Rarity rarity) {

@@ -30,8 +30,23 @@ public record GameDefinition(
         List<BannerModel> banners,
         List<Entity> entities,
         List<ProgressKind> progressKinds,
-        List<String> sections
+        List<String> sections,
+        List<Word> words
 ) {
+
+    /** A version whose keys have no words, which is every version published before sequence 13. */
+    public GameDefinition(
+            Game game,
+            GameDataVersion version,
+            List<Item> items,
+            List<Source> sources,
+            List<Sink> sinks,
+            List<BannerModel> banners,
+            List<Entity> entities,
+            List<ProgressKind> progressKinds,
+            List<String> sections) {
+        this(game, version, items, sources, sinks, banners, entities, progressKinds, sections, List.of());
+    }
 
     /**
      * A version whose steps name no sections, which is every version published
@@ -69,6 +84,26 @@ public record GameDefinition(
         progressKinds = progressKinds.stream()
                 .sorted(Comparator.comparing(ProgressKind::kind))
                 .toList();
+        words = sortedWords(words);
+    }
+
+    /** By subject, then key: words have no order either, for the reason progress names have none. */
+    public static List<Word> sortedWords(List<Word> words) {
+        return words.stream()
+                .sorted(Comparator.comparing(Word::subject).thenComparing(Word::key))
+                .toList();
+    }
+
+    /**
+     * What to call one of the bundle's keys, falling back to the key itself —
+     * the normal path for every version before sequence 13. See {@link Word}.
+     */
+    public String nameOf(Word.Subject subject, String key) {
+        return words.stream()
+                .filter(word -> word.subject() == subject && word.key().equals(key))
+                .map(Word::displayName)
+                .findFirst()
+                .orElse(key);
     }
 
     /**
