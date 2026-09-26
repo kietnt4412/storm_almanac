@@ -10,14 +10,10 @@ full text of everything this file has stopped carrying. Nothing is ever deleted;
 it moves. What stays here is what is still *operative*: age is not the criterion,
 being finished with is.
 
-- The plan is [plan.html](plan.html) (13 phases, two tracks); [README.md](README.md)
+- The plan is [plan.html](plan.html) (13 phases, two tracks, plus Track C by [D6](#d6--a-third-track-for-the-product-after-launch-2026-09-26)); [README.md](README.md)
   is the public face and [CLAUDE.md](CLAUDE.md) the working agreement.
-- **Rewritten four times when it passed 550 lines** — end to end
-  [2026-09-18](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression) (826),
-  *Status* [2026-09-21](docs/history/tracker-archive.md#what-status-carried-until-the-2026-09-21-rewrite) (614),
-  the session index 2026-09-22 (566) and again 2026-09-24 (561). Anything it no longer carries is in the archive verbatim — go and
-  decide whether it is still operative rather than assuming it was lost.
-- Last updated: **2026-09-26** (forty-third session)
+- **Cut back whenever it passes 550 lines** ([the ledger](docs/history/tracker-archive.md#the-line-count-ledger)); anything it no longer carries is in the archive verbatim — decide whether it is still operative rather than assuming it was lost.
+- Last updated: **2026-09-26** (forty-fourth session)
 
 ---
 
@@ -71,11 +67,11 @@ being finished with is.
   **`backend/Dockerfile`'s COPY list is B5's path and drifts in silence** — it omitted `adapters/` from Phase 1
   until 2026-09-09, every image build failing in six seconds while this file called it verified, so **anything added
   beside `modules`, `adapters`, `substrate`, `app` needs a line there**.
-- **The remote, last checked 2026-09-26 (forty-third) — re-check it, do not trust it, and check three things:**
+- **The remote, last checked 2026-09-26 (forty-fourth) — re-check it, do not trust it, and check three things:**
   which PRs merged, **the last `main` run**, and **the SHA `/api/health` reports**.
   [PR #46](https://github.com/kietnt4412/storm_almanac/pull/46)'s `main` run went red on a flaky test, so
   **`deploy` never ran** and nothing showed it. [PR #47](https://github.com/kietnt4412/storm_almanac/pull/47)
-  fixed it; #48 (D5, S1), #49 (S2, S3), #50 (S4, V16) and #51 (sequence 12) followed, and **production reports `1ee33fa`**, #51's merge.
+  fixed it; #48 (D5, S1), #49 (S2, S3), #50 (S4, V16), #51 (sequence 12) and #52 (S5) followed, and **production reports `32cd5b0`**, #52's merge, its `main` run green.
   **Neon holds sequence 12** since 11:41Z on 2026-09-25, read back as *no changes*. Stale on eight of nine checks, so re-check it rather than read it. B6 means a commit on `dev` with no PR open is still built.
   **What the trigger does not do is watch the merge** — PR #25 merged *before its own run finished*
   and was green by luck (archive, twenty-sixth) — so **wait for the run before merging** still
@@ -238,15 +234,16 @@ after N37 and N28's modelling half on 2026-09-22 and N30, N20, N33, B6, N34, N36
 and N35's halves on 2026-09-21, all [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 **No Phase 4 item is left; its exit is.**
 
-> **Resume here (2026-09-26, forty-third):** **D5's rehearsal is under way**; every stall is a line below, and the list is empty again — **run the rehearsal once more** to find S6 or to close it. **Open:** N42 below.
+> **Resume here (2026-09-26, forty-fourth):** **the rehearsal's second run found S6–S8** below; the maintainer has one more plan to add before work starts. Fix or cut each, then run it again. **Open:** N42 below.
 
 ### D5's rehearsal — each stall, fixed or cut
 
-- [x] **S1 — a second profile on one game and server answered a bare 500** (2026-09-25). The rule is right; the refusal is now a 409 naming the holder, and the form says so before the click.
-- [x] **S2 — "where she stands" was one dropdown of ~70 raw ids across 13 tracks** (2026-09-25). Now one dropdown per track, tracks read off the upgrade graph; a goal row shows its own track. **The labels ("Flaming chord · 4") are guessed from the ids**, because no bundle names a track — naming them is data work, and `roster/tracks.ts` is the one place to read it from.
-- [x] **S4 — rank read as numbers, and the skills as one flat list** (2026-09-25). The game says "Elite ★3" and groups skills under Basic Skill, Special Skill, Evolution Effect and Common Effect, tagged by orb; players find a skill by its tag. Now the bundle carries those words on each step (ADR 0032, `V16`, sequence 11) and the roster shows the game's sections, tag first. Skill names are still guessed from ids.
-- [x] **S5 — the plan page said what to do in ids** (2026-09-26). Every row and four notes now read "Buy 10 Memory Enhancer IV for 87 Simulation Score", named from facts already published (`StepNames`); rows in reading order. Still raw: three grant notes, the refusal text, the ladder's slug.
-- [x] **S3 — no way on from one step to the next** (2026-09-25). Four steps now — Inventory, Roster, Goals, Plan — in one list the step bar, each page's Next and the home page all read; the menu follows it. Goals' Next saves first.
+**S1–S5 closed 2026-09-25/26** ([archive](docs/history/tracker-archive.md#completed-next-actions)). The second run (forty-fourth) went home → sign-in → profile → inventory → Lucia on the roster → two goals → a plan (1 140 Serum, 38 runs, every buy and claim named): **it completes, and stalls three ways.** Run locally with the dev sign-in as a fresh account; production signs in only through Google.
+
+- [ ] **S6 — a skill at Lv 10 cannot be recorded.** Skill tracks offer 1, 2, 3, 4, 18: `{skill}-18` is one row *derived* from the 1 → 18 prompt, because levels 5–17 are unread. A mid-curve player must pick 4 and is charged for levels already paid. **A reading, not code:** Skill Points and Cogs per level 4 → 18. Level is milder (only gated levels are states).
+- [ ] **S7 — one goal row holds one target.** "Lucia fully built" is ~12 rows, each picked from one flat list of 61. **Proposed, not agreed:** one target per track on a row, reusing the roster's `TrackPicker` — a screen change, so plan first.
+- [ ] **S8 — raw ids still on screen.** The plan's *Paying for* note ("to Ace ★1" beside "to level-65", "to abyssal-lament-18"); the reach label `phantom-pain-cage-score` and the *Not counted* tier ids; inventory headings (`HARMONY-MATERIAL`, one `CHARACTER-EXP-POD-*` heading per size); the home page's `punishing-gray-raven · global`. The first and last are named from facts already published; the Cage's and the categories' want a bundle word.
+- **Smaller, not yet stalls:** "(character)" where the game says construct; Karenina offered on the roster with nothing to record; "Weekly, score 30,000+" names no weekly; *Make one* from Inventory lands on home, not back.
 
 ### Before the next sequence — worth knowing
 
@@ -325,10 +322,7 @@ previous one's criterion is met. The "Landed" record for closed phases is
       **Exit:** five strangers complete a plan without asking for help, and a
       logged-in character page shows what that reader is short of. *The second
       clause is served; the first is **deferred by the maintainer** ([D4](#d4--public-launch-deferred-until-the-site-is-more-finished-2026-09-24), then [D5](#d5--the-maintainer-rehearses-the-stranger-test-before-strangers-are-found-2026-09-25)).*
-      **Closing condition, set 2026-09-20:** the exit is necessary and not
-      sufficient — N30, N33, N20 and B5 are each done or explicitly cut before
-      this box is ticked, with the cut recorded in the session log. **All four are
-      done** (B5 with one cut, ADR 0030).
+      **Closing condition (2026-09-20) met:** N30, N33, N20 and B5 all done, B5 with one cut (ADR 0030).
 - [x] **Phase 5 · Gacha engine** — closed 2026-09-12 out of order
       ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)); **one banner first-hand (Q4)**;
       income model landed 2026-09-22 (ADR 0029), shop exchange is **N38**.
@@ -340,6 +334,18 @@ previous one's criterion is met. The "Landed" record for closed phases is
       a published snapshot can stop being loadable without anything touching it —
       [it has happened here](docs/history/tracker-archive.md#a-published-version-that-stopped-being-readable).
       **Exit:** a community-derived estimate supersedes a seeded one in a live plan.
+
+### Track C — the product after launch ([D6](#d6--a-third-track-for-the-product-after-launch-2026-09-26))
+
+**Starts when Phase 4's box is ticked, never before; runs beside Phase 6; closes before Track B starts.** Not in
+[plan.html](plan.html). The invariants hold here too — a pull planner is `gacha`, so no `if (game == …)`. **The
+exits are proposed, not yet agreed** — C2's tester was settled by the maintainer 2026-09-26; no estimates yet.
+
+| | Phase | Shape | **Exit** |
+|---|---|---|---|
+| [ ] | **C1 · Pull planner** | A route and a screen over the two gacha engines and `DeclaredIncomeModel`, and `PityState` stored — the gap Phase 5 left is "a schema and a screen rather than an engine". N39's Black Cards reading makes income say something; N38 stays with Phase 11 | A signed-in reader's stored pity and declared income answer "how likely by when" for a live banner, on their own account |
+| [ ] | **C2 · UI polish** | A visual pass over every screen, mobile first; the rehearsal's smaller hesitations. **Tested by the maintainer and Claude, not strangers** (maintainer, 2026-09-26) — a rehearsal like D5's | Every screen driven at 375 and 1280 px, and a self-run rehearsal over every screen leaves no stall unfixed or uncut |
+| [ ] | **C3 · Account features** | What a returning player wants: saved plans, progress over time, more than one goal set, what a new patch changed for *their* goals | A reader returning after a new sequence sees what it changed for their goals and plan, without asking |
 
 ### The gate
 
@@ -401,6 +407,14 @@ is most likely to trip.
 Decision, cost, and what would reverse it. **The full accounts are
 [in the archive](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression).**
 
+### D6 · A third track for the product after launch (2026-09-26)
+
+**The plan has two tracks and goes from Phase 6 to Track B; the maintainer added Track C** between them — the pull
+planner, UI polish and account features. **It sits after the launch on purpose:** before it, it would be a third
+launch deferral after D4 and D5. **Cost:** Track B starts later by however long C takes, beyond its own gate.
+**Bought:** product work while the first users arrive, steered by what they stall on. **Reversal trigger:** any C
+item taken before Phase 4's box is ticked — that is a deferral of the launch and needs its own entry.
+
 ### D5 · The maintainer rehearses the stranger test before strangers are found (2026-09-25)
 
 **Phase 4's exit asks for five strangers, and the maintainer knows few people who play**, so asked
@@ -426,7 +440,7 @@ plan. **The URL is public and the catalog reads without an account**; that is no
 stands. **Cost:** the reason to launch ugly — strangers' feedback before effort goes into
 guessing — waits, and so does everything that needs users: Phase 4's exit, the Track B gate,
 and Phase 6's community data, which is the bootstrap problem (N26) itself. **Bought:** a first
-impression made on more than one construct. **Reversal trigger:** Q6's list, once written, is
+impression made on more than one construct. **Reversal trigger:** [Q6](docs/history/tracker-archive.md#q6--what-makes-the-site-finished-enough-to-let-strangers-in)'s list, once written, is
 met — a list rather than a feeling, so the deferral cannot quietly become permanent. **Written
 2026-09-24 with four items; all four met the same day.** The trigger fired; the maintainer's answer is [D5](#d5--the-maintainer-rehearses-the-stranger-test-before-strangers-are-found-2026-09-25).
 
@@ -493,20 +507,6 @@ Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 
 Carry forward until answered, then move the entry [to the archive](docs/history/tracker-archive.md#answered-questions).
 
-- **Q6 — What makes the site finished enough to let strangers in?** *Open, and the maintainer's
-  (D4).* **Four items, all agreed:** (1) three constructs with whole ladders — **met 2026-09-24**
-  by Lacrimosa, Selena: Pianissimo and Lucia: Inverse Crown (N41; Lucia replaced Karenina, whom the
-  maintainer does not own). **Added 2026-09-24 (forty-first):** (2) `choice:` lines
-  render raw upgrade ids — **met the same day by naming a choice by its prices** (`DemandNames`:
-  "one of: 150 5★ Memory Shard · 234 Special Support Token · 246 Simulation Score"), which
-  are facts already, so no upgrade needed a name of its own; browser-checked at 1280 and 375 px;
-  (3) no shadow price has ever rendered against a real plan — **met the same day by driving one**:
-  Lacrimosa's skill to 18 plus Samantha's Resonance renders 90.00 for the Resonance line; the bundle's
-  one stage was enough and no reading was needed; (4) sign-in lands on `/` rather than where
-  the reader was — **done in code the same day** (`ReturnAfterSignIn`, `?then=` held in the
-  session across Google), **run against Google on 2026-09-25** once `63a45b3` deployed, by the
-  maintainer's report. **All four met, so D4's trigger fired** — the maintainer's answer is D5.
-
 - **Q5 — Is our "3.5" the same 3.5 anyone else means?** *Open for the existing
   data; **dissolved for everything after ADR 0015**.* `fetch-upstream.sh` pins a
   commit dated **2026-03-17** while Global 3.5 ran **2026-05-28 to 2026-07-02**,
@@ -537,6 +537,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-26 | forty-fourth | Production on `32cd5b0` (#52). **The rehearsal's second run completes and stalls three ways**: S6 skills 5–17 unread, S7 one target per goal row, S8 raw ids left. **Track C (D6)**: pull planner, UI polish, account features, after launch and before Track B; C2 tested by ourselves |
 | 2026-09-26 | forty-third | Remote checked: #51 merged, production on `1ee33fa`. **S5**: the plan page's rows and four notes named from published facts — "Buy 10 Memory Enhancer IV for 87 Simulation Score" — in reading order; no new reading. `StepNames` absorbed `DemandNames` |
 | 2026-09-25 | forty-second | **PR #46 never deployed**: its `main` run went red on a `findBy` that took 1 320 ms where the same commit had taken 486. Production stayed on #45, and nothing showed it until somebody looked. `asyncUtilTimeout` is now 5 s for every test. The remote check now includes the last `main` run and the health SHA. **D5**: the maintainer rehearses the stranger test first, and strangers wait until the stall list is empty. **S1**, found in minutes: a second profile on one server was a bare 500 — now a 409 by name, and the form says so first. **S2** and **S3** the same day: a dropdown per track instead of ~70 raw ids, and four steps with a way on from each. **S4**: the game's rank names and skill sections, carried by the step (ADR 0032, sequence 11) |
 | 2026-09-24 | forty-first | Q6 written: the maintainer agreed the three "seen, not agreed" items. **Sign-in now returns the reader to their page** — `?then=` held in the session across Google, one open-redirect check shared with the dev sign-in; untried against Google until deployed. **A choice line is named by its prices**, which are facts already. **A shadow price rendered at last** — 90.00, driven, no reading needed. All four met. Then the character page asks with **its own game's profile**, and the route refuses a mismatch by name. 466 backend tests, 39 frontend |
