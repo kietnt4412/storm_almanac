@@ -296,7 +296,10 @@ public final class PlayerView {
                     // reads of it stay byte-identical.
                     plan.conversions().stream()
                             .sorted(Comparator.comparing(c -> c.sourceOrSinkId(), names.stepOrder()))
-                            .map(c -> new ConversionView(c.sourceOrSinkId(), names.step(c.sourceOrSinkId()), c.times()))
+                            .map(c -> new ConversionView(
+                                    c.sourceOrSinkId(), names.step(c.sourceOrSinkId()), c.times(),
+                                    names.step(c.sourceOrSinkId(), c.times()),
+                                    names.repeat(c.sourceOrSinkId(), c.times()).orElse(null)))
                             .toList(),
                     plan.rewardClaims().stream()
                             .sorted(Comparator.comparing(c -> c.reward(), names.rewardOrder()))
@@ -377,7 +380,22 @@ public final class PlayerView {
      */
     public record StageRunView(String stage, String displayName, int runs, int energyCost, int totalEnergy) {}
 
-    public record ConversionView(String step, String displayName, int times) {}
+    /**
+     * A thing to craft, buy, feed or pay, {@code times} over.
+     *
+     * <p>{@code displayName} names one of them — "Buy 1,200 Cogs for 1 Simulation
+     * Score" — and {@code total} all of them, "Buy 514,800 Cogs for 429
+     * Simulation Score", which is the line a reader acts on: D5's third run read
+     * the first beside "× 429" as one cheap buy (S9). {@code repeat} is how a
+     * purchase is made up, "429 × 1,200 for 1", and null for anything else.
+     *
+     * <p><b>{@code total} is a new field rather than a new meaning for
+     * {@code displayName}</b>, because the page and this server deploy at
+     * different instants: a page from before it would print a total beside
+     * "× 429", wrong by a factor of 429, where this way it prints what it
+     * always did.
+     */
+    public record ConversionView(String step, String displayName, int times, String total, String repeat) {}
 
     public record RewardClaimView(String reward, String displayName, int times) {}
 }

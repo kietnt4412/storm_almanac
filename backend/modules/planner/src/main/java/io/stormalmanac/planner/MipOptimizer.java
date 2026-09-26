@@ -276,12 +276,6 @@ public final class MipOptimizer implements Optimizer {
         // "samantha-overclock-1" and "phantom-pain-cage-90000" on the plan page.
         StepNames names = StepNames.of(inputs.definition());
         List<String> notes = new ArrayList<>();
-        notes.add(("Minimised energy over %d stage(s), %d craft(s), %d shop offer(s) and %d"
-                + " reward(s), against %d item")
-                .formatted(outcome.stageVariables(), outcome.craftVariables(),
-                        outcome.shopVariables(), outcome.rewardVariables(), outcome.constraints())
-                + " constraint(s), inside a %d-day horizon at %d energy a day."
-                        .formatted(outcome.horizonUsed(), request.energyPerDay()));
         if (!outcome.provenOptimal()) {
             notes.add(Double.isNaN(outcome.optimalityGap())
                     ? "The search stopped on its time budget, so this is the cheapest plan found"
@@ -302,13 +296,6 @@ public final class MipOptimizer implements Optimizer {
                     .map(goal -> names.goal(goal.entity(), goal.targetState()))
                     .reduce((a, b) -> a + ", " + b).orElse(""));
         }
-
-        int measured = yields.measuredCount();
-        notes.add(measured == 0
-                ? "Every drop rate here is the bundle's declared yield. No player reports have"
-                        + " been aggregated yet, so these numbers are the upstream's claim rather"
-                        + " than a measurement."
-                : measured + " drop coefficient(s) came from player reports; the rest are declared.");
 
         int discounted = yields.discountedCount();
         if (discounted > 0) {
@@ -442,8 +429,46 @@ public final class MipOptimizer implements Optimizer {
         }
 
         Map<ItemId, Double> shadowPrices = shadowPrices(demand, inputs, outcome, notes, names, startedAtNanos);
+
+        // How the answer was worked out, last: true of every plan, and so read
+        // past on every plan. Until D5's third run it opened the list as
+        // "Minimised energy over … against 7 item constraint(s)", solver-speak
+        // above the notes a reader acts on. The constraint count went with it;
+        // it described the model, and nothing a reader could do changes it.
+        notes.add(workedOut(outcome, inputs.definition().game().energyUnit(), request.energyPerDay()));
+        int measured = yields.measuredCount();
+        notes.add(measured == 0
+                ? "Every drop rate here is the bundle's declared yield. No player reports have"
+                        + " been aggregated yet, so these numbers are the upstream's claim rather"
+                        + " than a measurement."
+                : measured + " drop coefficient(s) came from player reports; the rest are declared.");
+
         List<StageId> binding = outcome.stageRuns().stream().map(StageRun::stage).toList();
         return new Explanation(shadowPrices, binding, List.copyOf(notes), demand.steps());
+    }
+
+    /**
+     * "Worked out from 1 stage, 3 shop offers and 3 recipes that could help,
+     * over 14 days at 240 Serum a day." A kind with none is left out, and a
+     * fodder rule or a step's price counts as a recipe, which is what the model
+     * treats it as.
+     */
+    static String workedOut(EnergyMip.Outcome outcome, String energyUnit, int energyPerDay) {
+        List<String> parts = new ArrayList<>();
+        counted(parts, outcome.stageVariables(), "stage", "stages");
+        counted(parts, outcome.shopVariables(), "shop offer", "shop offers");
+        counted(parts, outcome.craftVariables(), "recipe", "recipes");
+        counted(parts, outcome.rewardVariables(), "reward", "rewards");
+        String from = parts.isEmpty() ? "nothing"
+                : parts.size() == 1 ? parts.get(0)
+                : String.join(", ", parts.subList(0, parts.size() - 1)) + " and " + parts.get(parts.size() - 1);
+        int days = outcome.horizonUsed();
+        return "Worked out from " + from + " that could help, over " + days + (days == 1 ? " day" : " days")
+                + " at " + StepNames.quantity(energyPerDay) + " " + energyUnit + " a day.";
+    }
+
+    private static void counted(List<String> parts, int count, String one, String many) {
+        if (count > 0) parts.add(count + " " + (count == 1 ? one : many));
     }
 
     /**

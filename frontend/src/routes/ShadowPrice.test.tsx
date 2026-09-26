@@ -40,8 +40,8 @@ describe('what each material is costing you', () => {
     render(
       <Answer
         plan={plan([
-          { item: 'progress:character-exp', displayName: 'Character EXP', price: 0.12 },
-          { item: 'cogs', displayName: 'Cogs', price: 0.004 },
+          { item: 'progress:character-exp', displayName: 'Character EXP', price: 30 },
+          { item: 'cogs', displayName: 'Cogs', price: 1 },
         ])}
         energyUnit="Serum"
       />,
@@ -57,8 +57,8 @@ describe('what each material is costing you', () => {
     render(
       <Answer
         plan={plan([
-          { item: 'cogs', displayName: 'Cogs', price: 0.004 },
-          { item: 'progress:character-exp', displayName: 'Character EXP', price: 0.12 },
+          { item: 'cogs', displayName: 'Cogs', price: 1 },
+          { item: 'progress:character-exp', displayName: 'Character EXP', price: 30 },
         ])}
         energyUnit="Serum"
       />,
@@ -67,6 +67,35 @@ describe('what each material is costing you', () => {
     const names = screen.getAllByRole('listitem').map((item) => item.textContent);
     expect(names[0]).toContain('Character EXP');
     expect(names[1]).toContain('Cogs');
+  });
+
+  it('says why a material costs nothing, rather than listing 0.00', () => {
+    // S10: a panel of zeros read as broken. A zero is a real answer — one more
+    // costs no extra Serum — and the sentence says so.
+    render(
+      <Answer
+        plan={plan([
+          { item: 'cogs', displayName: 'Cogs', price: 0 },
+          { item: 'progress:character-exp', displayName: 'Character EXP', price: 30 },
+          { item: 'skill-point', displayName: 'Skill Point', price: 0 },
+        ])}
+        energyUnit="Serum"
+      />,
+    );
+
+    expect(screen.getAllByRole('listitem').map((item) => item.textContent)).toEqual(['Character EXP30.00']);
+    expect(screen.queryByText('0.00')).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/No extra serum for one more of Cogs, Skill Point — this plan already makes a spare/),
+    ).toBeInTheDocument();
+  });
+
+  it('is one sentence and no list when every price is zero', () => {
+    render(<Answer plan={plan([{ item: 'cogs', displayName: 'Cogs', price: 0 }])} energyUnit="Serum" />);
+
+    expect(screen.queryByRole('listitem')).not.toBeInTheDocument();
+    expect(screen.queryByText(/per extra unit/)).not.toBeInTheDocument();
+    expect(screen.getByText(/one more of Cogs — .* gets it without spending serum/)).toBeInTheDocument();
   });
 
   it('shows no section at all when the plan priced nothing', () => {

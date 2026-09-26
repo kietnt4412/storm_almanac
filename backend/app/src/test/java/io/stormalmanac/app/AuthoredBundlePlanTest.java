@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 
+import io.stormalmanac.api.gamedata.GameDataReadModel;
 import io.stormalmanac.api.player.PlayerView.ConversionView;
 import io.stormalmanac.api.player.PlayerView.PlanResponse;
 import io.stormalmanac.api.player.PlayerView.RewardClaimView;
@@ -369,6 +370,69 @@ class AuthoredBundlePlanTest {
                 .contains(tuple("phantom-pain-cage-90000",
                         "Phantom Pain Cage, weekly, score 90,000+: 5 Phantom Pain Scar + 1 Major Overclock Alloy"
                                 + " + 1 EXP Pod (M) + 6,000 Cogs"));
+    }
+
+    @Test
+    @DisplayName("a line done many times says its totals, and a purchase says how it is made up")
+    void planLinesSayTheirTotals() {
+        // S9 of D5's third run: "Buy 1,200 Cogs for 1 Simulation Score × 429"
+        // read as one cheap buy. The total is what the reader spends and gets;
+        // the repeat is the number of buys they make in the shop.
+        PlanResponse overclock = PlanResponse.of(solve(Goal.deterministic(SAMANTHA, "overclock-1")), definition);
+
+        ConversionView enhancers = overclock.conversions().stream()
+                .filter(line -> line.step().equals("simulation-shop-memory-enhancer-iv"))
+                .findFirst().orElseThrow();
+        int buys = enhancers.times();
+        assertThat(buys).as("bought more than once, or there is nothing to total").isGreaterThan(1);
+        assertThat(enhancers.displayName()).isEqualTo("Buy 10 Memory Enhancer IV for 87 Simulation Score");
+        assertThat(enhancers.total()).isEqualTo("Buy %s Memory Enhancer IV for %s Simulation Score"
+                .formatted(StepNames.quantity(10L * buys), StepNames.quantity(87L * buys)));
+        assertThat(enhancers.repeat()).isEqualTo(buys + " × 10 for 87");
+
+        ConversionView fed = overclock.conversions().stream()
+                .filter(line -> line.step().equals("memory-exp-4-star"))
+                .findFirst().orElseThrow();
+        assertThat(fed.total()).isEqualTo("Feed " + StepNames.quantity(fed.times()) + " Memory Enhancer IV into Memory EXP");
+        assertThat(fed.repeat()).as("a feed's count is in its total").isNull();
+
+        PlanResponse resonance = PlanResponse.of(solve(Goal.deterministic(SAMANTHA, "upper-resonance-1")), definition);
+        assertThat(resonance.conversions()).extracting(ConversionView::total, ConversionView::repeat)
+                .containsExactly(tuple("Pay 246 Simulation Score", null));
+    }
+
+    @Test
+    @DisplayName("how a plan was worked out is said in words, in the game's energy, after the notes a reader acts on")
+    void howItWasWorkedOutComesLast() {
+        // D5's third run: the notes opened "Minimised energy over 1 stage(s), …
+        // against 7 item constraint(s)". Scars in hand so there is a note worth
+        // reading first — the one about a limit that never resets.
+        Plan plan = solve(Goal.deterministic(HELENTINE, "evolve-ss"),
+                Inventory.empty(PROFILE)
+                        .with(new ItemId("inver-shard-lacrimosa"), 2)
+                        .with(new ItemId("phantom-pain-scar"), 460));
+        List<String> notes = plan.explanation().notes();
+
+        String workedOut = notes.stream().filter(note -> note.startsWith("Worked out from")).findFirst().orElseThrow();
+        assertThat(workedOut).contains("2 shop offers").contains("Serum a day")
+                .doesNotContain("constraint").doesNotContain("(s)");
+        assertThat(notes.indexOf(workedOut))
+                .as("after every note about this reader's plan")
+                .isGreaterThan(notes.indexOf(notes.stream()
+                        .filter(note -> note.startsWith("Buying from a limit")).findFirst().orElseThrow()));
+    }
+
+    @Test
+    @DisplayName("the inventory lists the EXP Pods largest first: rarest, then what each one feeds")
+    void podsAreInSizeOrder() {
+        // D5's third run: "EXP Pod (L), EXP Pod (XL), EXP Pod (M)" — rarity
+        // first, then the name, and L and XL are both four stars. The fodder
+        // rules say what each feeds, which is the size.
+        assertThat(definition.items().stream()
+                .sorted(GameDataReadModel.inventoryOrder(definition))
+                .map(item -> item.id().value())
+                .filter(id -> id.startsWith("exp-pod-")))
+                .containsExactly("exp-pod-xl", "exp-pod-l", "exp-pod-m");
     }
 
     @Test

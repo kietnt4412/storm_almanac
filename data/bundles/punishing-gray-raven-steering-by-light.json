@@ -157,7 +157,13 @@
     "",
     "Sequence 13 changes no fact and reads nothing: it gives the bundle's own",
     "keys words a reader can read (ADR 0033), which D5's second rehearsal asked",
-    "for — the Cage's score, the item categories, the entity kinds. See 'words'."
+    "for — the Cage's score, the item categories, the entity kinds. See 'words'.",
+    "",
+    "Sequence 14 changes no number and reads nothing: every grade was written",
+    "'4*', an ASCII stand-in for the star the game draws, and D5's third",
+    "rehearsal read '6*' on the inventory as a typo. The 31 labels now say",
+    "'4★', as the item names in this file already did ('5★ Memory Shard').",
+    "The ranks are untouched, and the ranks are what every rule compares."
   ],
 
   "game": {
@@ -166,7 +172,7 @@
     "energyUnit": "Serum",
     "dayBoundary": { "zone": "UTC", "hour": 5 }
   },
-  "sequence": 13,
+  "sequence": 14,
   "label": "Anchored in Faith (Global 4.8.0)",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client: patch 4.7.0 \"Steering By Light\" from 2026-09-18 to 2026-09-22, and patch 4.8.0 \"Anchored in Faith\" on 2026-09-24. Numbers and text only; no game assets.",
 
@@ -314,134 +320,134 @@
     {
       "id": "major-overclock-alloy",
       "displayName": "Major Overclock Alloy",
-      "rarity": { "label": "4*", "rank": 4 },
+      "rarity": { "label": "4★", "rank": 4 },
       "category": "overclock-material"
     },
     {
       "id": "weapon-overclock-core-ii",
       "displayName": "Weapon Overclock Core II",
-      "rarity": { "label": "4*", "rank": 4 },
+      "rarity": { "label": "4★", "rank": 4 },
       "category": "overclock-material"
     },
     {
       "id": "minor-overclock-alloy",
       "displayName": "Minor Overclock Alloy",
-      "rarity": { "label": "3*", "rank": 3 },
+      "rarity": { "label": "3★", "rank": 3 },
       "category": "overclock-material"
     },
     {
       "id": "weapon-overclock-core-i",
       "displayName": "Weapon Overclock Core I",
-      "rarity": { "label": "3*", "rank": 3 },
+      "rarity": { "label": "3★", "rank": 3 },
       "category": "overclock-material"
     },
     {
       "id": "harmony-accelerator",
       "displayName": "Harmony Accelerator",
-      "rarity": { "label": "6*", "rank": 6 },
+      "rarity": { "label": "6★", "rank": 6 },
       "category": "harmony-material"
     },
     {
       "_comment": "Four stars from its Simulation Shop tile; the item card itself shows no grade. The card's 'Owned 999' is a display cap per stack, not the holding — the maintainer reports stacks split at 999, which is how the 2026-09-18 picker read 1679.",
       "id": "weapon-enhancer-iv",
       "displayName": "Weapon Enhancer IV",
-      "rarity": { "label": "4*", "rank": 4 },
+      "rarity": { "label": "4★", "rank": 4 },
       "category": "weapon-exp-fodder-4-star"
     },
     {
       "_comment": "The first currency this bundle can carry, because it is the first one a screen graded: four stars on the Battle Results tile. The item card itself shows no grade.",
       "id": "simulation-score",
       "displayName": "Simulation Score",
-      "rarity": { "label": "4*", "rank": 4 },
+      "rarity": { "label": "4★", "rank": 4 },
       "category": "currency"
     },
     {
       "_comment": "Four stars from its tile on the box-opening reward screen. Its card says 'Useful for high-rank Memory'.",
       "id": "memory-overclock-circuit-ii",
       "displayName": "Memory Overclock Circuit II",
-      "rarity": { "label": "4*", "rank": 4 },
+      "rarity": { "label": "4★", "rank": 4 },
       "category": "overclock-material"
     },
     {
       "_comment": "Four stars from its Simulation Shop tile. A box, not a material: nothing consumes it except the craft that opens it.",
       "id": "overclock-material-box-beta",
       "displayName": "Overclock Material Box (β)",
-      "rarity": { "label": "4*", "rank": 4 },
+      "rarity": { "label": "4★", "rank": 4 },
       "category": "material-box"
     },
     {
       "_comment": "Three stars from its Simulation Shop tile.",
       "id": "overclock-material-box-alpha",
       "displayName": "Overclock Material Box (α)",
-      "rarity": { "label": "3*", "rank": 3 },
+      "rarity": { "label": "3★", "rank": 3 },
       "category": "material-box"
     },
     {
       "_comment": "Four stars from its Simulation Shop tile and its tiles on the Memory Enhancement Cost picker. Its card's 'Owned 999' is the per-stack display cap; the picker read 1 096.",
       "id": "memory-enhancer-iv",
       "displayName": "Memory Enhancer IV",
-      "rarity": { "label": "4*", "rank": 4 },
+      "rarity": { "label": "4★", "rank": 4 },
       "category": "memory-exp-fodder-4-star"
     },
     {
       "_comment": "Three stars from its tile on the alpha box's reward screen. Named from its icon and confirmed by the maintainer, not read off its card.",
       "id": "memory-overclock-circuit-i",
       "displayName": "Memory Overclock Circuit I",
-      "rarity": { "label": "3*", "rank": 3 },
+      "rarity": { "label": "3★", "rank": 3 },
       "category": "overclock-material"
     },
     {
       "_comment": "Five stars from its Phantom Pain shop tile; the item card shows none. Its card says Construct Memory recycles into Inver-Shards, which is the duplicate route.",
       "id": "inver-shard-lacrimosa",
       "displayName": "Inver-Shard - Lacrimosa",
-      "rarity": { "label": "5*", "rank": 5 },
+      "rarity": { "label": "5★", "rank": 5 },
       "category": "construct-shard"
     },
     {
       "_comment": "Named on its own item card, which shows no grade; five stars from its Phantom Pain shop tile (maintainer), as for Lacrimosa's. Its card says Construct Memory recycles into Inver-Shards, which is the duplicate route.",
       "id": "inver-shard-pianissimo",
       "displayName": "Inver-Shard - Pianissimo",
-      "rarity": { "label": "5*", "rank": 5 },
+      "rarity": { "label": "5★", "rank": 5 },
       "category": "construct-shard"
     },
     {
       "_comment": "Named on its own item card ('Owned 0'), which shows no grade. Five stars on the maintainer's report that every S-rank construct's shard tile in the Phantom Pain shop is the same as Lacrimosa's and Selena's; this one's tile was not itself read.",
       "id": "inver-shard-inverse-crown",
       "displayName": "Inver-Shard - Inverse Crown",
-      "rarity": { "label": "5*", "rank": 5 },
+      "rarity": { "label": "5★", "rank": 5 },
       "category": "construct-shard"
     },
     {
       "_comment": "Three stars (blue) on the Phantom Pain Cage's weekly reward tiles and on its own owned-count panel; the item card shows none. Earned from the weekly Cage, up to 56 a week by score; spent in the Phantom Pain shop on shards, since sequence 2.",
       "id": "phantom-pain-scar",
       "displayName": "Phantom Pain Scar",
-      "rarity": { "label": "3*", "rank": 3 },
+      "rarity": { "label": "3★", "rank": 3 },
       "category": "currency"
     },
     {
       "_comment": "Character EXP. Each Pod size gets a category of its own because L and XL are both four stars and worth different amounts, so for character EXP the grade does not decide the value the way it does for weapon fodder.",
       "id": "exp-pod-m",
       "displayName": "EXP Pod (M)",
-      "rarity": { "label": "3*", "rank": 3 },
+      "rarity": { "label": "3★", "rank": 3 },
       "category": "character-exp-pod-m"
     },
     {
       "id": "exp-pod-l",
       "displayName": "EXP Pod (L)",
-      "rarity": { "label": "4*", "rank": 4 },
+      "rarity": { "label": "4★", "rank": 4 },
       "category": "character-exp-pod-l"
     },
     {
       "id": "exp-pod-xl",
       "displayName": "EXP Pod (XL)",
-      "rarity": { "label": "4*", "rank": 4 },
+      "rarity": { "label": "4★", "rank": 4 },
       "category": "character-exp-pod-xl"
     },
     {
       "_comment": "Three stars from its Simulation Shop tile (x1200). The second currency a screen has graded, after Simulation Score.",
       "id": "cogs",
       "displayName": "Cogs",
-      "rarity": { "label": "3*", "rank": 3 },
+      "rarity": { "label": "3★", "rank": 3 },
       "category": "currency"
     },
     {
@@ -459,28 +465,28 @@
       ],
       "id": "event-construct-rd-ticket",
       "displayName": "Event Construct R&D Ticket",
-      "rarity": { "label": "5*", "rank": 5 },
+      "rarity": { "label": "5★", "rank": 5 },
       "category": "currency"
     },
     {
       "_comment": "Three stars from its Simulation Shop tile. Spent with Cogs to unlock a skill: 3 and 25 000 for Helentine: Lacrimosa's leader skill.",
       "id": "skill-point",
       "displayName": "Skill Point",
-      "rarity": { "label": "3*", "rank": 3 },
+      "rarity": { "label": "3★", "rank": 3 },
       "category": "skill-material"
     },
     {
       "_comment": "Named on its own item card; five stars from the Resonance screen's price tile. Made by recycling 5-star Memory Chips, which nothing in this bundle models, so a plan can spend it only if the reader holds it.",
       "id": "memory-shard-5-star",
       "displayName": "5★ Memory Shard",
-      "rarity": { "label": "5*", "rank": 5 },
+      "rarity": { "label": "5★", "rank": 5 },
       "category": "memory-shard"
     },
     {
       "_comment": "Named and graded four stars on the Resonance screen's price tile. Its own card and its sources are unread, so a plan can spend it only if the reader holds it.",
       "id": "special-support-token",
       "displayName": "Special Support Token",
-      "rarity": { "label": "4*", "rank": 4 },
+      "rarity": { "label": "4★", "rank": 4 },
       "category": "support-token"
     }
   ],
@@ -504,7 +510,7 @@
       "id": "hear-the-bell",
       "displayName": "Hear the Bell",
       "kind": "weapon",
-      "rarity": { "label": "6*", "rank": 6 }
+      "rarity": { "label": "6★", "rank": 6 }
     },
     {
       "_comment": "Pulled at S rank (maintainer). The character every Level Up, Promote, Evolve, Skill and Awaken screen in this bundle was read on.",
@@ -525,7 +531,7 @@
       "id": "samantha",
       "displayName": "Samantha",
       "kind": "memory",
-      "rarity": { "label": "5*", "rank": 5 }
+      "rarity": { "label": "5★", "rank": 5 }
     }
   ],
 
@@ -595,7 +601,7 @@
       ],
       "id": "weapon-exp-4-star",
       "consumesCategory": "weapon-exp-fodder-4-star",
-      "minimumRarity": { "label": "4*", "rank": 4 },
+      "minimumRarity": { "label": "4★", "rank": 4 },
       "progress": "weapon-exp",
       "progressPerUnit": 300,
       "costs": []
@@ -604,7 +610,7 @@
       "_comment": "Memory EXP: one Memory Enhancer IV reads 'Obtained EXP 300' (estimated Lv 9) on the Memory Enhancement Cost picker — the same as the weapon's 4-star fodder, as the maintainer reports. Its own category, because it only feeds Memories.",
       "id": "memory-exp-4-star",
       "consumesCategory": "memory-exp-fodder-4-star",
-      "minimumRarity": { "label": "4*", "rank": 4 },
+      "minimumRarity": { "label": "4★", "rank": 4 },
       "progress": "memory-exp",
       "progressPerUnit": 300,
       "costs": []
@@ -619,7 +625,7 @@
       ],
       "id": "character-exp-pod-m",
       "consumesCategory": "character-exp-pod-m",
-      "minimumRarity": { "label": "3*", "rank": 3 },
+      "minimumRarity": { "label": "3★", "rank": 3 },
       "progress": "character-exp",
       "progressPerUnit": 1000,
       "costs": []
@@ -627,7 +633,7 @@
     {
       "id": "character-exp-pod-l",
       "consumesCategory": "character-exp-pod-l",
-      "minimumRarity": { "label": "4*", "rank": 4 },
+      "minimumRarity": { "label": "4★", "rank": 4 },
       "progress": "character-exp",
       "progressPerUnit": 3000,
       "costs": []
@@ -635,7 +641,7 @@
     {
       "id": "character-exp-pod-xl",
       "consumesCategory": "character-exp-pod-xl",
-      "minimumRarity": { "label": "4*", "rank": 4 },
+      "minimumRarity": { "label": "4★", "rank": 4 },
       "progress": "character-exp",
       "progressPerUnit": 20000,
       "costs": []

@@ -11,6 +11,7 @@ import {
   type Measure,
   type PayingFor,
   type Plan,
+  type ShadowPrice,
 } from '../api/client';
 import { ProfileGate } from '../profile';
 import { stateLabel, tracksOfGraph, type Track } from '../roster/tracks';
@@ -387,10 +388,30 @@ export function Answer({
         <section className="card">
           <h2 className="mb-2 font-medium">What to craft and buy</h2>
           <ul className="space-y-1 text-sm">
+            {/*
+              The totals first, since they are what the reader spends and gets;
+              "× 429" beside one purchase read as one cheap buy (S9). A server
+              from before the totals sends none, and gets the line it always did.
+            */}
             {plan.conversions.map((conversion) => (
               <li key={conversion.step} title={conversion.step}>
-                {conversion.displayName ?? conversion.step}{' '}
-                <span className="count muted">× {conversion.times}</span>
+                {conversion.total ? (
+                  <>
+                    {conversion.total}
+                    {/* One unit when it wraps: "429 ×" alone at a line's end reads as a stray number. */}
+                    {conversion.repeat && (
+                      <>
+                        {' '}
+                        <span className="count muted whitespace-nowrap">· {conversion.repeat}</span>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {conversion.displayName ?? conversion.step}{' '}
+                    <span className="count muted">× {conversion.times}</span>
+                  </>
+                )}
               </li>
             ))}
           </ul>
@@ -410,28 +431,56 @@ export function Answer({
         </section>
       )}
 
-      {plan.shadowPrice.length > 0 && (
-        <section className="card">
-          <h2 className="mb-1 font-medium">What each material is costing you</h2>
+      {plan.shadowPrice.length > 0 && <Prices prices={plan.shadowPrice} energyUnit={energyUnit} />}
+
+      <p className="text-xs muted">{plan.attribution}</p>
+    </div>
+  );
+}
+
+/**
+ * What one more of each material would cost, dearest first.
+ *
+ * <p><b>A zero is named, not listed.</b> Each price is a re-solve with one more
+ * unit asked for, so 0.00 is a real answer: one more costs no extra energy,
+ * because the plan's runs already make a spare or the material comes from
+ * something that is not bought with energy. A column of 0.00 said none of that
+ * and read as broken (S10), so the zeros are one sentence that says it and the
+ * list keeps the prices that are not.
+ */
+function Prices({ prices, energyUnit }: { prices: ShadowPrice[]; energyUnit: string }) {
+  // A price is the difference of two whole plans' energy, so it is 0 or at
+  // least 1; the tolerance only keeps a float from printing as 0.00.
+  const free = (priced: ShadowPrice) => Math.abs(priced.price) < 0.005;
+  const priced = prices.filter((price) => !free(price)).sort((a, b) => b.price - a.price);
+  const spare = prices.filter(free).map((price) => price.displayName);
+
+  return (
+    <section className="card">
+      <h2 className="mb-1 font-medium">What each material is costing you</h2>
+      {priced.length > 0 && (
+        <>
           <p className="muted mb-2 text-xs">
             {energyUnit} per extra unit, at this answer. It is what the plan would pay to get one more
             — so it is also what a material is worth when a banner or an event hands you some.
           </p>
           <ul className="grid gap-1 text-sm sm:grid-cols-2">
-            {[...plan.shadowPrice]
-              .sort((a, b) => b.price - a.price)
-              .map((priced) => (
-                <li key={priced.item} className="flex justify-between gap-4">
-                  <span>{priced.displayName}</span>
-                  <span className="count muted">{priced.price.toFixed(2)}</span>
-                </li>
-              ))}
+            {priced.map((price) => (
+              <li key={price.item} className="flex justify-between gap-4">
+                <span>{price.displayName}</span>
+                <span className="count muted">{price.price.toFixed(2)}</span>
+              </li>
+            ))}
           </ul>
-        </section>
+        </>
       )}
-
-      <p className="text-xs muted">{plan.attribution}</p>
-    </div>
+      {spare.length > 0 && (
+        <p className={`text-sm ${priced.length > 0 ? 'muted mt-2' : ''}`}>
+          No extra {energyUnit.toLowerCase()} for one more of {spare.join(', ')} — this plan already makes a
+          spare, or gets {spare.length === 1 ? 'it' : 'them'} without spending {energyUnit.toLowerCase()}.
+        </p>
+      )}
+    </section>
   );
 }
 
