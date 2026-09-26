@@ -43,6 +43,10 @@ entry was met, not that the code exists.
       - [x] **S8 — raw ids still on screen.** The plan's *Paying for* note ("to Ace ★1" beside "to level-65", "to abyssal-lament-18"); the reach label `phantom-pain-cage-score` and the *Not counted* tier ids; inventory headings (`HARMONY-MATERIAL`, one `CHARACTER-EXP-POD-*` heading per size); the home page's `punishing-gray-raven · global`. The first and last are named from facts already published; the Cage's and the categories' want a bundle word.
       - [x] **Smaller, not yet stalls:** "(character)" where the game says construct; Karenina offered on the roster with nothing to record; "Weekly, score 30,000+" names no weekly; *Make one* from Inventory lands on home, not back.
 
+- [x] ~~**S9 and S10 — D5's rehearsal, its third run.**~~ **Done 2026-09-26 (forty-sixth session)**, both as proposed; the account is the forty-sixth session-log entry. S9's totals are a new wire field beside the old name, so a page and a server a deploy apart cannot disagree by a factor. The lines as they stood:
+      - [x] **S9 — a purchase reads as one cheap buy.** "Buy 1,200 Cogs for 1 Simulation Score × 429" is 514 800 Cogs for 429 Score; the reader has to multiply. Say the total (or the times first).
+      - [x] **S10 — "What each material is costing you" all 0.00.** Every price is zero when nothing binds but the stage, and a panel of zeros reads as broken. Say why, or hide it when every price is zero.
+
 - [x] ~~**N41 — Put Selena: Pianissimo and Karenina: Effulgence on the S-rank ladder.**~~ **Done 2026-09-24 (fortieth session), with Lucia: Inverse Crown in Karenina's place** — the maintainer does not own Karenina and so cannot read her. Selena and Lucia each climb `s-rank-construct` with their own eight skill names, SS passive and shard, and each shard has the two Phantom Pain shop rows (10 at 10 Scars, 20 at 20). Published as sequence 9, locally and to Neon, each read back as *no changes*; the live API serves 61 upgrade rows for each of the three. The entry as it stood:
       **Every number is shared and confirmed** for all S-rank (maintainer, screens compared
       2026-09-24), so the path is written once ([ADR 0031](../adr/0031-a-shared-upgrade-path-is-written-once-and-expanded-in-the-file.md)).
@@ -3162,6 +3166,55 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-26 (forty-sixth) — S9 and S10: a purchase says its totals, and a zero says why.**
+
+**The remote, checked first:** PR #55 (the forty-fifth's docs and S7's wording)
+merged at 11:07Z, its `main` run `36238224339` green, `/api/health` reporting
+`3bfa8a9`, #55's merge. No PR open. Neon not re-checked; nothing here publishes.
+
+**The plan was put to the maintainer before any code**, and they said proceed
+on both as proposed.
+
+**S9 — "Buy 1,200 Cogs for 1 Simulation Score × 429".** The line named one
+purchase and left 429 of them to arithmetic. `StepNames.step(id, times)` now
+says the totals — "Buy 514,800 Cogs for 429 Simulation Score" — and
+`repeat(id, times)` how a purchase is made up, "429 × 1,200 for 1", for a shop
+row bought more than once and nothing else: a box opened, an item fed ("Feed 19
+EXP Pod (XL) into Character EXP") and a price paid carry their count in the
+total. **The total is a new field on `ConversionView` (`total`, `repeat`), not a
+new meaning for `displayName`**, because Vercel and Render deploy at different
+instants: a page from before it would print a total beside "× 429", wrong by a
+factor of 429; this way an old page prints what it always did and a new page
+meeting an old server does too. A price paid more than once multiplies each part
+rather than prefixing "2 ×" to a sum. Quantities are formatted from a `long` now
+— a stack times a count can pass an `int`. **Adding the overload made
+`this::step` ambiguous in `stepOrder()`**, and the first test run reported a
+stale green: `| tail` swallowed the exit code and the result XML was the last
+run's. Read the exit code, not the XML's age.
+
+**S10 — "What each material is costing you" all 0.00.** A price is
+`marginal.totalEnergy() - base.totalEnergy()` over two proven-optimal integer
+solves (`MipOptimizer`), so it is **0 or at least 1, never 0.004** — the
+fixtures that said 0.004 and 0.12 were ones no server could send, and one
+failed the new rule; they are whole numbers now rather than the rule loosened.
+The zeros are one sentence — "No extra serum for one more of Cogs, Character
+EXP, Skill Point — this plan already makes a spare, or gets them without
+spending serum" — and the list keeps the prices that are not zero; when all
+are, the panel is the sentence.
+
+**Driven in a browser** as `rehearsal-3` against its third-run plan (180 Serum,
+0.8 days), at 1280 and 375 px. **Another session held 8080 and 5173**, so this
+one ran an API on 8081 and Vite on 5174 through a scratch config that reuses
+the project's with the proxy moved; launch entries for it were added and
+removed, not committed. At 375 the repeat broke as "429 / × 1,200 for 1" and is
+now one unbreakable unit. **A cached plan showed the totals too**: the names
+are built when the plan is served, not when it is solved, so plans solved
+before the change read the new way. 486 backend tests (+1), 74 frontend (+4).
+
+**Still open from the rehearsal:** S6 (a reading) and the smaller items —
+solver-speak opening the notes, "6*" for ★, EXP Pods listed L, XL, M — which
+are C2's once Phase 4 closes, or cut now if the maintainer would rather.
 
 **2026-09-26 (forty-fifth) — S7 and S8: one goal row per construct, and every id on screen named.**
 
