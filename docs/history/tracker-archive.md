@@ -3098,6 +3098,57 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-26 (forty-third) — S5: the plan page said what to do in ids.**
+
+**The remote, checked first:** PR #51 (sequence 12) merged at 11:43Z on
+2026-09-25, its `main` run `36130990100` green, and `/api/health` reporting
+`1ee33fa`, #51's merge. `dev` level with `main`, no PR open. Neon was not
+re-checked.
+
+**S5, the stall the forty-second saw and had not counted.** *What to run*, *What to
+craft and buy* and *What to claim* printed their ids —
+`simulation-shop-memory-enhancer-iv`, `phantom-pain-cage-90000` — and so did four of
+the solver's notes. **No word was read off the game to fix it.** A stage's name was
+in the bundle all along and the view dropped it; everything else is named by what it
+does, in item names and quantities already published: *Buy 10 Memory Enhancer IV for
+87 Simulation Score*, *Open 10 Overclock Material Box (α) → 5 Minor Overclock Alloy +
+…*, *Feed Memory Enhancer IV into Memory EXP*, *Pay 246 Simulation Score*, *Weekly,
+score 90,000+: 5 Phantom Pain Scar + …*. **The maintainer agreed the wording before
+any code** ("Open" for a box craft included). Two things the plan proposed and the
+facts would not carry: a claim tier is **not** called "Phantom Pain Cage", because
+the measure is an opaque slug nobody read a name for (ADR 0022) — it is named by its
+cadence, bar and payout instead; and a step's state keeps its id where the bundle has
+no word of the game's (*Helentine: Lacrimosa to evolve-ss*, but *… to Hero* on the
+Promote ladder), because guessing a name from an id is the page's business and the
+page says it is guessing (`roster/tracks.ts`).
+
+**Where the naming lives, and why there.** `StepNames`, in `planner`, because the
+notes are written there and `planner` cannot see `api`. It absorbed `DemandNames`
+whole — the choice line's "one of: …" and the plan's "Pay …" now share one price
+formatter rather than two that could drift. The wire carries a `displayName` beside
+every id (the id is still what a bug report quotes and what `bindingStages` matches),
+optional on the page's side because Vercel and Render deploy at different instants.
+
+**Then the order, which the names exposed.** Rows came sorted by id, which read as
+no order once they had names: *Feed* before *Open* before *Buy*, and a tier at
+1 000 000 above one at 120 000, because the id sorts as text. `PlanResponse` now
+sorts buy, open, feed, pay, and a ladder bottom rung up — still one order per plan,
+so two reads stay byte-identical. **`Plan` itself is untouched**: the planner's
+tests pin its id order, and a sort a reader wants is the view's.
+
+**Two tests pinned an id and moved with it, correctly:** `MipOptimizerTest` looked for
+`i1` in the "Paying for" note and `PlannerAcceptanceTest` for `amulet-level-30`; both
+now assert the named step. **Still raw, deliberately left:** the deadline, lapsed and
+withheld-grant notes (they carry the bar and dates, and their tests pin the ids), the
+solver's refusal text (it names `punishing-gray-raven` and item ids), and the ladder's
+own `phantom-pain-cage-score` label on the plan form.
+
+**Driven in a browser** against sequence 12 on the local stack, a goal set producing
+every row kind — Samantha's Overclock and Resonance, Lacrimosa's Evolve, the Cage
+cleared — at 1280 and 375 px: every row named, the ladder bottom-up, no horizontal
+scroll at 375. **478 backend tests** in full (475 + 3), 0 skipped with the snapshots present;
+55 frontend (53 + 2).
+
 **2026-09-25 (forty-second) — The launch question waited on a red `main`.**
 
 The handoff said to ask the maintainer about launch. Checking the remote first
