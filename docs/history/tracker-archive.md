@@ -31,6 +31,13 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**S1–S5 — D5's rehearsal, its first five stalls.**~~ **Moved out of the tracker 2026-09-26 (forty-fourth session)** to make room for S6–S8, which the second run found. Each closed in the session named in its line; the full accounts are in the session log, forty-second and forty-third. The lines as they stood:
+      - [x] **S1 — a second profile on one game and server answered a bare 500** (2026-09-25). The rule is right; the refusal is now a 409 naming the holder, and the form says so before the click.
+      - [x] **S2 — "where she stands" was one dropdown of ~70 raw ids across 13 tracks** (2026-09-25). Now one dropdown per track, tracks read off the upgrade graph; a goal row shows its own track. **The labels ("Flaming chord · 4") are guessed from the ids**, because no bundle names a track — naming them is data work, and `roster/tracks.ts` is the one place to read it from.
+      - [x] **S4 — rank read as numbers, and the skills as one flat list** (2026-09-25). The game says "Elite ★3" and groups skills under Basic Skill, Special Skill, Evolution Effect and Common Effect, tagged by orb; players find a skill by its tag. Now the bundle carries those words on each step (ADR 0032, `V16`, sequence 11) and the roster shows the game's sections, tag first. Skill names are still guessed from ids.
+      - [x] **S5 — the plan page said what to do in ids** (2026-09-26). Every row and four notes now read "Buy 10 Memory Enhancer IV for 87 Simulation Score", named from facts already published (`StepNames`); rows in reading order. Still raw: three grant notes, the refusal text, the ladder's slug.
+      - [x] **S3 — no way on from one step to the next** (2026-09-25). Four steps now — Inventory, Roster, Goals, Plan — in one list the step bar, each page's Next and the home page all read; the menu follows it. Goals' Next saves first.
+
 - [x] ~~**N41 — Put Selena: Pianissimo and Karenina: Effulgence on the S-rank ladder.**~~ **Done 2026-09-24 (fortieth session), with Lucia: Inverse Crown in Karenina's place** — the maintainer does not own Karenina and so cannot read her. Selena and Lucia each climb `s-rank-construct` with their own eight skill names, SS passive and shard, and each shard has the two Phantom Pain shop rows (10 at 10 Scars, 20 at 20). Published as sequence 9, locally and to Neon, each read back as *no changes*; the live API serves 61 upgrade rows for each of the three. The entry as it stood:
       **Every number is shared and confirmed** for all S-rank (maintainer, screens compared
       2026-09-24), so the path is written once ([ADR 0031](../adr/0031-a-shared-upgrade-path-is-written-once-and-expanded-in-the-file.md)).
@@ -1754,6 +1761,26 @@ where somebody about to do it will be looking.
 Struck through with the answer, as the tracker's rule requires. Kept in full
 because how an answer was reached is what tells the next reader whether it still applies.
 
+### Q6 — what makes the site finished enough to let strangers in
+
+*Answered 2026-09-25, moved here 2026-09-26 (forty-fourth session) to make room for Track C.*
+All four items were met and D4's trigger fired; the maintainer's answer to that was D5, a
+rehearsal before strangers, which the tracker still carries. The entry as it stood:
+
+- ~~**Q6 — What makes the site finished enough to let strangers in?**~~ *Open, and the maintainer's
+  (D4).* **Four items, all agreed:** (1) three constructs with whole ladders — **met 2026-09-24**
+  by Lacrimosa, Selena: Pianissimo and Lucia: Inverse Crown (N41; Lucia replaced Karenina, whom the
+  maintainer does not own). **Added 2026-09-24 (forty-first):** (2) `choice:` lines
+  render raw upgrade ids — **met the same day by naming a choice by its prices** (`DemandNames`:
+  "one of: 150 5★ Memory Shard · 234 Special Support Token · 246 Simulation Score"), which
+  are facts already, so no upgrade needed a name of its own; browser-checked at 1280 and 375 px;
+  (3) no shadow price has ever rendered against a real plan — **met the same day by driving one**:
+  Lacrimosa's skill to 18 plus Samantha's Resonance renders 90.00 for the Resonance line; the bundle's
+  one stage was enough and no reading was needed; (4) sign-in lands on `/` rather than where
+  the reader was — **done in code the same day** (`ReturnAfterSignIn`, `?then=` held in the
+  session across Google), **run against Google on 2026-09-25** once `63a45b3` deployed, by the
+  maintainer's report. **All four met, so D4's trigger fired** — the maintainer's answer is D5.
+
 ### Q2 and Q3 — where the data comes from, and whether it may be redistributed
 
 *Both closed 2026-09-09 by [ADR 0015](../adr/0015-game-data-is-sourced-first-hand-not-adapted.md),
@@ -2978,6 +3005,26 @@ The tracker's D2, verbatim until 2026-09-25 (the fuller original is
 > on the next: **do not take Phase 6 early on this precedent** — it needs users,
 > where Phase 5's criterion was a proof about a model.
 
+**555 on 2026-09-26 (forty-fourth), and carried less again.** Track C and D6
+went in at 549 alongside S6–S8, with S1–S5 and the answered Q6 already moved
+here. Two more finished things left the tracker, kept below as they stood.
+
+The header bullet on the tracker's own rewrites, verbatim until 2026-09-26:
+
+> - **Rewritten four times when it passed 550 lines** — end to end
+>   [2026-09-18](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression) (826),
+>   *Status* [2026-09-21](docs/history/tracker-archive.md#what-status-carried-until-the-2026-09-21-rewrite) (614),
+>   the session index 2026-09-22 (566) and again 2026-09-24 (561). Anything it no longer carries is in the archive verbatim — go and
+>   decide whether it is still operative rather than assuming it was lost.
+
+Phase 4's closing condition on the board, verbatim until 2026-09-26 (met, so
+the tracker now says only that):
+
+> **Closing condition, set 2026-09-20:** the exit is necessary and not
+> sufficient — N30, N33, N20 and B5 are each done or explicitly cut before
+> this box is ticked, with the cut recorded in the session log. **All four are
+> done** (B5 with one cut, ADR 0030).
+
 ---
 
 ## The PGR status bullet until 2026-09-25
@@ -3097,6 +3144,53 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-26 (forty-fourth) — the rehearsal's second run, and Track C.**
+
+**The remote, checked first:** PR #52 (S5) merged at 00:44Z, its `main` run
+`36206127418` green in 5m53s, and `/api/health` reporting `32cd5b0`, #52's
+merge. So S5 is live.
+
+**The rehearsal ran a second time, and it did not close.** It ran locally, as
+the earlier sittings did: Postgres from the volume, `api` and `web` from
+`launch.json`, and the dev sign-in as a new account, `rehearsal-s6`. Production
+signs in only through Google, which Claude cannot do. The run went from home to
+sign-in, a profile, inventory (150 000 Cogs), Lucia: Inverse Crown on the roster
+(Elite ★3, Lv 60, two skills at 4), and two goals (Promote to Hero, Red Orb to
+18). The plan came back at 1 140 Serum and 38 runs of Simulated Battlefield,
+with every buy and claim named, reach answered at 360 000. **The flow
+completes, and it stalls three ways.** **S6:** skill tracks offer only 1, 2, 3,
+4 and 18, because `{skill}-18` is one row *derived* from the 1 → 18 prompt with
+levels 5–17 unread. A mid-curve player has to pick 4 and is charged for levels
+already paid. It needs a reading, not code. **S7:** a goal row holds one target
+from a flat list of 61, so "Lucia fully built" is about twelve rows. One target
+per track on a row, reusing `TrackPicker`, was proposed and is not agreed.
+**S8:** raw ids are left in the plan's *Paying for* note (`level-65`,
+`abyssal-lament-18` beside "Ace ★1"), in the reach label and the *Not counted*
+tier ids, in the inventory headings (`HARMONY-MATERIAL`, one heading per EXP Pod
+size) and in the home page's profile line. Smaller hesitations went in as one
+line. **"The Proving Ground" as the default game is local only**: production
+publishes PGR alone. The pane twice drew nothing after a scroll, and
+`get_page_text` read the page correctly, so this was the pane and not the app.
+
+**Track C, by the maintainer (D6).** After Track B was explained, the maintainer
+asked for a track before it for UI and new features. The one question put back
+was *before or after the launch*. Before, it would be the third launch deferral
+after D4 and D5. **They chose after:** it starts when Phase 4's box is ticked,
+runs beside Phase 6, and closes before Track B. It is named Track C, with phases
+C1–C3 rather than renumbering 6–12, because the archive links phase numbers
+hundreds of times. Of four offered scopes they took three: **C1 pull planner**
+(route, screen and stored `PityState` over the engines nothing calls), **C2 UI
+polish**, and **C3 account features**. They declined "more constructs". The
+exits are Claude's proposals and are marked not yet agreed, except that **C2
+has no strangers**: the maintainer said "we will test ourself", so its exit is
+a self-run rehearsal plus every screen at 375 and 1280 px. Phase 4's
+five-stranger exit is unchanged. `plan.html` was not edited; the change is D6,
+as D2 and D3 were.
+
+**Line count:** 548, then 555 with Track C and D6. S1–S5, the answered Q6, the
+header's rewrite history and Phase 4's met closing condition moved here
+verbatim; see the ledger. No code changed and no build was run.
 
 **2026-09-26 (forty-third) — S5: the plan page said what to do in ids.**
 
