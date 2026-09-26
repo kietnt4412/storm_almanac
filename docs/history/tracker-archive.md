@@ -3200,7 +3200,7 @@ level 2 to 18. A new `AuthoredBundlePlanTest` case pins S6: a reader recorded at
 `seeker-system-10` is charged 30 SP and 152 000 Cogs, **120 Serum**, where Lv 4
 is the cap test's 150, unchanged. **489 tests**, green.
 
-**Neon was not published.** The maintainer said yes in chat, and the auto-mode
+**Neon was not published by the agent.** The maintainer said yes in chat, and the auto-mode
 classifier still refused the Neon *preview* as a production read. Not worked
 around. **The maintainer then ran the loop in their own Git Bash**: preview 384 changes, ingest ~1½ min (silent while it writes — it looked stuck), publish at 12:50:55Z, read back as *no changes*; the live upgrades route reports sequence 15 and every level 2 to 18. Adding an allow rule for the agent was refused too, as "Auto-Mode Bypass" — a rule is the maintainer's to add or
 not to add. Nothing in #57's code depends on it.
