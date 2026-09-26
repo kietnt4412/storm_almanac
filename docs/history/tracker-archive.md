@@ -3010,6 +3010,15 @@ The tracker's D2, verbatim until 2026-09-25 (the fuller original is
 > on the next: **do not take Phase 6 early on this precedent** — it needs users,
 > where Phase 5's criterion was a proof about a model.
 
+**Then 551 the same day, after the third run's S9 and S10 went in, and 549 after carrying less:**
+the unverified bullet on naming stopped retelling it. As it stood:
+
+> slack covers one more). The stage was always there; nobody had driven such a goal. **The plan
+> page's rows stopped being raw ids on 2026-09-26** (S5). The naming half is closed:
+> a `progress:` line rendered as its bare slug beside a properly named `Cogs` until 2026-09-22
+> (N37, ADR 0028), and a `choice:` line's on 2026-09-24, named by its prices rather than by
+> upgrade ids. Every R1999 catalog and drop number in this file comes from Kornblume.
+
 **550 on 2026-09-26 (forty-fifth), measured with `wc -l`.** S7, S8 and the four smaller
 hesitations moved here verbatim under *Completed next actions*; the rehearsal
 list shrank to S6 and a pointer to the third run.
@@ -3217,6 +3226,29 @@ the DOM instead, which proves the handler and not the hit target.
 
 **Tests:** 485 backend (0 skipped, snapshots present; 469 expected on CI), 70
 frontend. PR #54 carries three commits.
+
+**Then the maintainer merged #54** (10:58Z) and said to proceed. Its `main` run
+`36237367444` went green with `deploy`, and `/api/health` reported
+`c5bd578` before anything touched Neon — the old server does not know `V17`,
+and waiting for the new one meant the migration never met it. **Sequence 13 was
+then previewed against Neon** as the same 17 word subjects and no fact,
+ingested, published at 11:06:47Z, and read back as *no changes*; the live
+`/measures` route answers "Phantom Pain Cage" and `/items` the 11 headings.
+
+**The rehearsal's third run**, locally with the dev sign-in as a fresh
+`rehearsal-3`: a PGR profile, three counts in the inventory (150 000 Cogs, 60
+Skill Points, 20 EXP Pod XL), Lucia on the roster at Elite ★3, Lv 60, two
+skills at 4, then **one goal row with three targets** (Hero, Lv 80, Red Orb 18)
+saved through "Save and get the plan", and a plan: 180 Serum, 0.8 days, six runs
+of Simulated Battlefield, every line and note named. **It completes.** Two things
+still read wrong and are screen changes, so they went in as S9 (a purchase line
+reads as one cheap buy — "Buy 1,200 Cogs for 1 Simulation Score × 429") and S10
+(the shadow-price panel is all 0.00) for the maintainer to agree a fix. Three
+wording slips from S7 itself were one-answer fixes and were made in the run:
+"Add a character" over a list holding a weapon and a memory, "her catalog page"
+with nobody chosen, and step 3's blurb still describing one goal per row. The
+pane stayed hidden (a 0×0 viewport) for the whole run, so every step went
+through the DOM; the flow is proven, the hit targets are not.
 
 **2026-09-26 (forty-fourth) — the rehearsal's second run, and Track C.**
 
