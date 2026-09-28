@@ -31,6 +31,10 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**D5's rehearsal and Phase 4's exit.**~~ **Moved out of the tracker 2026-09-28 (forty-eighth session)**, when Phase 4 closed. The two sections as they stood:
+      - **D5's rehearsal — each stall, fixed or cut.** All ten closed: S1–S5 2026-09-25/26, S7–S10 and the smaller hesitations 2026-09-26, S6 2026-09-26 by a reading (sequence 15). The third run (forty-fifth, `rehearsal-3`) completed; nothing it found is open. The list is empty — D5's reversal trigger.
+      - **Held — Phase 4 scope, and the maintainer decides.** N30, N33, N20, B5 and N41 are done or cut; what is left is the exit, held by D5 until the rehearsal's stall list is empty — which it is since 2026-09-26, so the exit is live. With strangers: found where players already are (the game's subreddit, Discord servers), not among people the maintainer knows; the Google client is in *Testing* — list each one or publish the app. Watch, answer nothing, record where each stalls; those notes close the phase.
+
 - [x] ~~**S1–S5 — D5's rehearsal, its first five stalls.**~~ **Moved out of the tracker 2026-09-26 (forty-fourth session)** to make room for S6–S8, which the second run found. Each closed in the session named in its line; the full accounts are in the session log, forty-second and forty-third. The lines as they stood:
       - [x] **S1 — a second profile on one game and server answered a bare 500** (2026-09-25). The rule is right; the refusal is now a 409 naming the holder, and the form says so before the click.
       - [x] **S2 — "where she stands" was one dropdown of ~70 raw ids across 13 tracks** (2026-09-25). Now one dropdown per track, tracks read off the upgrade graph; a goal row shows its own track. **The labels ("Flaming chord · 4") are guessed from the ids**, because no bundle names a track — naming them is data work, and `roster/tracks.ts` is the one place to read it from.
@@ -1646,6 +1650,30 @@ was written when each closed.
       publisher's disclosure (**Q4**). What the acceptance fixtures prove is that
       the model reproduces the figures it was given.
 
+- [x] **Phase 4 · Frontend v1 — and launch** — 2.5 weeks — **closed 2026-09-28**,
+      opened 2026-09-09. Nineteen days, most of them spent after the site was
+      deployed and before anyone was let in — D4, then D5.
+      **The entry as the tracker carried it when the phase closed:**
+      Landed: the app is served, hosting decided, a browser has signed in (N24),
+      **N25 is closed** (five screens driven in a browser, provenance read back
+      onto the page, the PWA loaded with its server killed, a frontend suite in
+      CI), and since 2026-09-21 there are **six**, every one of which has now
+      rendered PGR. **Deployed 2026-09-24** at `storm-almanac.vercel.app`, signed
+      into with Google. Launch publicly even if ugly.
+      **Exit:** five strangers complete a plan without asking for help, and a
+      logged-in character page shows what that reader is short of. *The second
+      clause is served; the first is **deferred by the maintainer** (D4, then D5).*
+      **Closing condition (2026-09-20) met:** N30, N33, N20 and B5 all done, B5 with one cut (ADR 0030).
+      **How the exit was met:** the second clause since 2026-09-24; the first on
+      2026-09-28, on the maintainer's report — five strangers, each signing in with
+      their own Google account, each completing a plan without help while the
+      maintainer watched. Where they were found is not recorded. **Nobody stalled;
+      they left five notes**, carried into the tracker as T1–T5 and Track C's first
+      input. **The qualification that travels with this phase:** the maintainer's
+      screenshots of those notes came from a browser serving pre-sequence-11 game
+      data out of the service worker (T1, fixed the same day), so which version of
+      the roster and goal screens each stranger saw is not known.
+
 ### Qualifications moved out of the live tracker, 2026-09-11 (seventeenth session)
 
 Verbatim, and still true. They left *What is still unverified* because they
@@ -3170,6 +3198,99 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-28 (forty-eighth) — Phase 4 closes on five strangers, and the first thing their notes found was a cache.**
+
+**The remote, checked first:** PR #57 had merged at 12:44Z on 2026-09-26, its
+`main` run `36242880447` green through `deploy`; `/api/health` reported
+`2e147d0`, #57's merge. No PR open.
+
+**Phase 4's exit.** The maintainer reports five strangers, each signing in with
+their own Google account, each completing a plan without help while the
+maintainer watched. Where they were found is not recorded; the first clause of
+the exit is met on that report, the second has been since 2026-09-24. Nobody
+stalled. They left five notes: no way to delete or manage a profile; no plain
+names for the skills (Blue Orb, Signature Move, leader skill) on roster or
+goals; the plan's summary too dense to read; no sections to navigate by (Basic
+Skill, Special Skill); and one long column where two would do. Two screenshots
+came with them.
+
+**The screenshots showed a site that does not exist any more.** The roster
+had no section headings and no tags, "Leader skill" guessed from its id, and the
+plan's "paying for" line read `fugal-sonata-5` … `fugal-sonata-17` between a
+"Fugal sonata · 4" and a "Fugal sonata · 18". The live route, fetched the same
+morning, serves sequence 15 with every one of those states, each tagged
+"Special Skill" / "Signature Move", and the current code groups by section and
+leads with the tag — S4, 2026-09-25. So two of the five notes describe what the
+site already does, in the browser that took the screenshots. **The response
+headers ruled out HTTP caching** (`no-store`, Vercel MISS), which left the
+service worker: `StaleWhileRevalidate` over all of `/api/games/`, justified in
+a comment as "a published version is immutable … a different `?version=`" —
+but every screen asks for *the latest*, with no version in the URL at all, and
+React Query then holds the answer with `staleTime: Infinity`. A browser that
+had visited before sequence 11 kept those tracks. The plan names its steps from
+the tracks, so a sequence 15 plan's new states had no name to be found.
+
+**Fixed (T1):** the rules move to `src/gameDataCaching.ts`, where a test holds
+them against real URLs — a named version is cached, the latest goes to the
+network first and falls back to the cache only offline, `/api/me` stays
+uncached; and the plan page fetches its tracks **at the plan's own version**.
+Three new frontend tests, 77 in all; the generated `sw.js` carries both rules in
+order. **Not driven in a browser**: the worker only exists in a built bundle with
+a backend behind it, and nothing short of a returning browser across a publish
+reproduces the bug. The old `game-data` cache stays in returning browsers,
+unread.
+
+**What is not known:** which data each stranger saw. On a fresh device they got
+sequence 15; the screenshots came from one that was not fresh. So T4 (tags and
+sections) is to be confirmed on a fresh browser, not built again.
+
+**Then T2 and T5, on the maintainer's go-ahead.** **T2:** `PATCH` and `DELETE
+/api/me/profiles/{id}`. Every player table already cascaded from the profile row
+(V5, V6), so the delete is one statement, and `ProfileManagementTest` counts the
+five tables empty for the deleted profile and untouched for its sibling; a
+blank rename is a 400 rather than a silent "Main"; another account's profile is
+404 for both. The page offers Rename and Delete on each home-page row, the
+delete asking once in the row and naming what goes. **Two bugs fell out of the
+client on the way:** `request()` sent the XSRF token only with a body, so any
+DELETE would have been refused, and parsed JSON unconditionally, so a 204 would
+have thrown. And a deleted profile's unsent outbox would have sat in storage
+forever — the outbox flushes only for the selected profile — so the store now
+forgets it. Driven locally through the dev sign-in: two profiles made, the
+wrong-server one deleted (204 through the real CSRF filter, its place freed),
+the other renamed. 494 backend tests, 80 frontend.
+
+**T5 needed no code, and neither did T4.** Driving the roster and goals on
+sequence 15 showed both already in two columns at 1280 px, one at 375 with no
+sideways scroll, under the five headings, tag first — `sm:grid-cols-2` over the
+sections since S4. The strangers' single long column was the stale data: with
+no sections, all thirteen tracks fell into one untitled group, which is one
+grid cell. **So T1 alone accounts for three of the five notes** in the browser
+that took the screenshots.
+
+**Found while driving, not fixed:** a roster entry added and left at every
+default is not recorded, so it is gone on reload; and the public character page
+lists every step by raw id. **Track C opens with Phase 4's box.** The Track B
+gate stays closed: five testers are users, not traffic.
+
+**Then T3, T6 and T7, on the maintainer's go-ahead.** **T3:** a note now carries
+its kind (`Note`: warning, assumption, done, detail), because the optimizer
+knows which notes change what an answer means and the page did not; the wire
+sends `remarks` beside the old `notes`, so a page and a server a deploy apart
+still agree. The page shows what a plan pays for as ranges under the game's
+headings ("Growth: Promote · Private ★1 → Task Force ★2 · Level · 1 → 50"),
+warnings in the signal colour, assumptions plainly, and folds how it was
+worked out. **A warning is never folded** — a stopped search is one. The
+free-income note joins a ladder's tiers claimed alike ("score 30,000+ to
+1,100,000+ (6 tiers) ×2"). Driven locally on the screenshot's own plan: 240
+Serum, 14 days, 31 steps, now four short lines and a fold. **T6:** Add records
+every track's base, "owned, untouched" — the on-screen-only row is gone;
+driven through a reload. **T7:** the character page groups its steps by section
+and track, folded to each track's range. **T8 found and not fixed:** level
+steps are priced in EXP, which the upgrades route does not send, so those rows
+show no cost. **The full backend build was not run after T3** — stopped by the
+maintainer to open the PR; the planner and API modules and the three plan test
+classes ran green, and CI runs the rest. 86 frontend tests.
 
 **2026-09-26 (forty-seventh) — S6 closed by a reading: the skill curve 4 → 18, sequence 15. The stall list is empty.**
 

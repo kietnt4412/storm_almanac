@@ -299,7 +299,18 @@ export interface Plan {
     than this page, which said it as a note instead; the notes still render.
   */
   payingFor?: PayingFor[];
+  /*
+    The notes again, each with its kind, so the page can weigh them (T3).
+    Absent from a server older than this page, which sends `notes` alone.
+  */
+  remarks?: Remark[];
   computedAt: string;
+}
+
+export interface Remark {
+  /** WARNING changes what the answer means; ASSUMPTION is taken on trust; DONE needs nothing; DETAIL is how. */
+  kind: 'WARNING' | 'ASSUMPTION' | 'DONE' | 'DETAIL';
+  text: string;
 }
 
 export interface PayingFor {
@@ -352,11 +363,15 @@ function csrfToken(): string {
 }
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  // The token goes with every write, body or not: a DELETE has none, and keying
+  // the header on the body sent it without one to be refused.
+  const writes = (init.method ?? 'GET') !== 'GET';
   const response = await fetch(`${BASE}${path}`, {
     ...init,
     headers: {
       Accept: 'application/json',
-      ...(init.body ? { 'Content-Type': 'application/json', 'X-XSRF-TOKEN': csrfToken() } : {}),
+      ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(writes ? { 'X-XSRF-TOKEN': csrfToken() } : {}),
       ...init.headers,
     },
     credentials: 'include',
@@ -364,6 +379,8 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!response.ok) {
     throw new ApiError(path, response.status, await detailOf(response));
   }
+  // 204 has no body to parse; its callers are typed to expect nothing.
+  if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
 }
 
@@ -427,6 +444,17 @@ export const createProfile = (game: string, region: string, displayName: string)
     method: 'POST',
     body: JSON.stringify({ game, region, displayName }),
   });
+
+/** The name only: game and server are what a profile is, not something it has. */
+export const renameProfile = (profile: string, displayName: string) =>
+  request<Profile>(`/api/me/profiles/${profile}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ displayName }),
+  });
+
+/** The profile and everything it owns — inventory, roster, goals. There is no undo. */
+export const deleteProfile = (profile: string) =>
+  request<void>(`/api/me/profiles/${profile}`, { method: 'DELETE' });
 
 export const getGames = () => request<GamesResponse>('/api/games');
 

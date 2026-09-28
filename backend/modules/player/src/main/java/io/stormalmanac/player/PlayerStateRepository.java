@@ -24,6 +24,21 @@ public interface PlayerStateRepository {
      */
     void saveProfile(PlayerProfile profile);
 
+    /**
+     * Delete a profile and everything that hangs off it — inventory, roster,
+     * goals and their sync clocks — in one statement, because the schema
+     * cascades every one of them from the profile row.
+     *
+     * <p>Whether the caller may is not this module's question; it is asked at
+     * the edge, as for every other write. Nothing outside this schema holds a
+     * profile's data yet. Phase 6's drop reports will name the profile that
+     * reported them, and that change has to decide what a deletion does to a
+     * report already counted — it is a fact about a stage, not about the player.
+     *
+     * @return whether there was a profile to delete
+     */
+    boolean deleteProfile(ProfileId id);
+
     Inventory inventoryOf(ProfileId profile);
 
     Roster rosterOf(ProfileId profile);

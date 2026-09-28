@@ -11,8 +11,10 @@ import {
   getUpgrades,
   signInUrl,
   type Shortfall,
+  type UpgradeStep,
 } from '../api/client';
 import { Sourcing, merge } from '../catalog/Sourcing';
+import { sectionsOf, tracksOfGraph } from '../roster/tracks';
 import { useCreateProfile, useProfileFor } from '../profile';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 
@@ -73,23 +75,7 @@ export function EntityPage() {
 
       <Overlay game={game} entity={entity} states={statesOf(steps)} />
 
-      {steps.length > 0 && (
-        <section className="card">
-          <h2 className="mb-2 font-medium">What each step costs</h2>
-          <ul className="space-y-2 text-sm">
-            {steps.map((step) => (
-              <li key={step.id} className="flex flex-wrap items-baseline gap-x-3">
-                <span className="font-medium">
-                  {step.fromState} → {step.toState}
-                </span>
-                <span className="muted">
-                  {step.costs.map((cost) => `${cost.quantity.toLocaleString()} ${cost.displayName}`).join(', ')}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {steps.length > 0 && <StepCosts steps={steps} order={upgrades.data?.sections} />}
 
       {page.skills.length > 0 && (
         <section className="card">
@@ -164,6 +150,66 @@ export function EntityPage() {
         attribution={detail.data.version.attribution}
       />
     </div>
+  );
+}
+
+/**
+ * What each step costs, under the game's headings and by each track's own name
+ * — "Signature Move · Fugal sonata", then "4 → 5: 1 Skill Point, 5,000 Cogs" —
+ * as the roster and goal screens name them.
+ *
+ * <p>Until 2026-09-28 this was every step by id, `flaming-chord-4 →
+ * flaming-chord-5`, 166 of them in one list for one construct (T7). Each track
+ * is folded to its range, because eight skills on one curve are 136 rows and a
+ * reader looking for one skill should not scroll past the other seven.
+ */
+export function StepCosts({ steps, order }: { steps: UpgradeStep[]; order?: string[] }) {
+  const tracks = tracksOfGraph(steps);
+  return (
+    <section className="card">
+      <h2 className="mb-2 font-medium">What each step costs</h2>
+      <div className="space-y-3 text-sm">
+        {sectionsOf(tracks, order).map((section) => (
+          <div key={section.name ?? ''}>
+            {section.name && <h3 className="label mb-1">{section.name}</h3>}
+            <div className="space-y-1">
+              {section.tracks.map((track) => {
+                const label = (state: string) =>
+                  track.states.find((candidate) => candidate.state === state)?.label ?? state;
+                const mine = steps.filter((step) => track.states.some((candidate) => candidate.state === step.fromState));
+                const first = track.states[0]!.label;
+                const last = track.states[track.states.length - 1]!.label;
+                return (
+                  <details key={track.states[0]!.state}>
+                    <summary className="cursor-pointer">
+                      <span>{track.tag ?? track.name}</span>
+                      {track.tag && <span className="muted ml-2 text-xs">{track.name}</span>}
+                      <span className="muted ml-2 text-xs">
+                        {first} → {last}
+                      </span>
+                    </summary>
+                    <ul className="mb-2 ml-4 mt-1 space-y-0.5">
+                      {mine.map((step) => (
+                        <li key={step.id} className="flex flex-wrap items-baseline gap-x-3">
+                          <span>
+                            {label(step.fromState)} → {label(step.toState)}
+                          </span>
+                          <span className="muted">
+                            {step.costs
+                              .map((cost) => `${cost.quantity.toLocaleString()} ${cost.displayName}`)
+                              .join(', ')}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 

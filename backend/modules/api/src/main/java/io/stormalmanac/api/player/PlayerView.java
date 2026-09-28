@@ -67,6 +67,9 @@ public final class PlayerView {
      */
     public record CreateProfileRequest(String game, String region, String displayName) {}
 
+    /** The one thing about a profile its owner may change; game and server are what it is. */
+    public record RenameProfileRequest(String displayName) {}
+
     // ── What the profile owns ───────────────────────────────────────────────
 
     public record InventoryResponse(String profile, Map<String, Integer> items) {
@@ -265,6 +268,7 @@ public final class PlayerView {
             List<ShadowPriceView> shadowPrice,
             List<String> bindingStages,
             List<String> notes,
+            List<RemarkView> remarks,
             List<PayingForView> payingFor,
             Instant computedAt) {
 
@@ -312,12 +316,25 @@ public final class PlayerView {
                             .map(id -> id.value())
                             .toList(),
                     plan.explanation().notes(),
+                    plan.explanation().remarks().stream()
+                            .map(note -> new RemarkView(note.kind().name(), note.text()))
+                            .toList(),
                     plan.explanation().payingFor().stream()
                             .map(entry -> PayingForView.of(entry, names))
                             .toList(),
                     plan.computedAt());
         }
     }
+
+    /**
+     * A note with its kind — {@code WARNING}, {@code ASSUMPTION}, {@code DONE} or
+     * {@code DETAIL} ({@link io.stormalmanac.planner.Note}) — so the page can put
+     * what changes the answer first and how it was worked out behind a toggle
+     * (T3). Beside {@code notes} rather than instead of it: the page and the API
+     * deploy at different instants, and a page older than this reads the plain
+     * list it always did.
+     */
+    public record RemarkView(String kind, String text) {}
 
     /**
      * One upgrade step the goals pay for, as the entity and the two states it

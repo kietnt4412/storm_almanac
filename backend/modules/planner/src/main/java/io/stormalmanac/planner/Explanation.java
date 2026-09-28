@@ -14,7 +14,8 @@ import java.util.Map;
  *
  * @param shadowPrice   marginal energy cost of one more unit of each item
  * @param bindingStages the constraints actually holding the solution back
- * @param notes         rendered verbatim under the plan
+ * @param remarks       what the plan says about itself, each with its kind
+ *                      ({@link Note}), in the order written
  * @param payingFor     the upgrade steps the goals are paying for, as
  *                      {@link Demand#steps()} lists them. Data rather than a
  *                      note: until 2026-09-26 it was the sentence "Paying for 3
@@ -26,13 +27,18 @@ import java.util.Map;
 public record Explanation(
         Map<ItemId, Double> shadowPrice,
         List<StageId> bindingStages,
-        List<String> notes,
+        List<Note> remarks,
         List<String> payingFor
 ) {
     public Explanation {
         shadowPrice = Map.copyOf(shadowPrice);
         bindingStages = List.copyOf(bindingStages);
-        notes = List.copyOf(notes);
+        remarks = List.copyOf(remarks);
         payingFor = List.copyOf(payingFor);
+    }
+
+    /** The remarks' sentences alone, in order: what a page older than the kinds renders. */
+    public List<String> notes() {
+        return remarks.stream().map(Note::text).toList();
     }
 }

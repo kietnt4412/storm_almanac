@@ -65,6 +65,12 @@ interface PlannerState {
   settle: (profileId: string, flushed: ProfileOutbox, rejected: string[]) => void;
   /** The reader has seen which keys lost; stop saying so. */
   acknowledgeRejected: () => void;
+  /**
+   * A deleted profile's unsent edits and reach, dropped. The outbox flushes only
+   * for the selected profile, so nothing would ever send them — they would sit
+   * in storage for good, addressed to a profile the server no longer has.
+   */
+  forgetProfile: (profileId: string) => void;
 }
 
 const emptyOutbox = (): ProfileOutbox => ({ inventory: {}, roster: {} });
@@ -141,6 +147,13 @@ export const usePlannerStore = create<PlannerState>()(
       // tab before seeing is exactly the one worth still telling them about.
       // Which is also why it takes an explicit dismissal rather than a timeout.
       acknowledgeRejected: () => set({ rejected: [] }),
+
+      forgetProfile: (profileId) =>
+        set((state) => {
+          const { [profileId]: _outbox, ...outbox } = state.outbox;
+          const { [profileId]: _reach, ...reach } = state.reach;
+          return { outbox, reach, profileId: state.profileId === profileId ? null : state.profileId };
+        }),
 
       settle: (profileId, flushed, rejected) =>
         set((state) => {

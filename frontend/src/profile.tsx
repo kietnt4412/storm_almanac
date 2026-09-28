@@ -1,6 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation } from 'react-router-dom';
-import { ApiError, createProfile, getMe, signInUrl, type Me, type Profile } from './api/client';
+import {
+  ApiError,
+  createProfile,
+  deleteProfile,
+  getMe,
+  renameProfile,
+  signInUrl,
+  type Me,
+  type Profile,
+} from './api/client';
 import { usePlannerStore } from './store/plannerStore';
 
 /**
@@ -67,6 +76,47 @@ export function useCreateProfile() {
     onSuccess: (profile) => {
       queries.setQueryData<Me>(['me'], (me) => (me ? { ...me, profiles: [...me.profiles, profile] } : me));
       selectProfile(profile.id);
+      queries.invalidateQueries({ queryKey: ['me'] });
+    },
+  });
+}
+
+/** Renames a profile, and puts the new name wherever the account is cached. */
+export function useRenameProfile() {
+  const queries = useQueryClient();
+  return useMutation({
+    mutationFn: ({ profile, displayName }: { profile: string; displayName: string }) =>
+      renameProfile(profile, displayName),
+    onSuccess: (renamed) => {
+      queries.setQueryData<Me>(['me'], (me) =>
+        me ? { ...me, profiles: me.profiles.map((held) => (held.id === renamed.id ? renamed : held)) } : me,
+      );
+    },
+  });
+}
+
+/**
+ * Deletes a profile and forgets it on this device.
+ *
+ * <p>Out of the cached account first, for the same reason {@link useCreateProfile}
+ * puts one in first: the shell re-selects the first profile it holds whenever
+ * the selected one is missing, and it should find the profiles that are left.
+ * What was cached about the profile — its inventory, roster, goals, plan — goes
+ * with it, so no screen can render a profile the server no longer has.
+ */
+export function useDeleteProfile() {
+  const queries = useQueryClient();
+  const forgetProfile = usePlannerStore((state) => state.forgetProfile);
+  return useMutation({
+    mutationFn: (profile: string) => deleteProfile(profile),
+    onSuccess: (_nothing, profile) => {
+      queries.setQueryData<Me>(['me'], (me) =>
+        me ? { ...me, profiles: me.profiles.filter((held) => held.id !== profile) } : me,
+      );
+      forgetProfile(profile);
+      for (const key of ['inventory', 'roster', 'goals', 'plan', 'shortfall']) {
+        queries.removeQueries({ queryKey: [key, profile] });
+      }
       queries.invalidateQueries({ queryKey: ['me'] });
     },
   });

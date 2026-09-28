@@ -11,10 +11,11 @@ import {
   type Measure,
   type PayingFor,
   type Plan,
+  type Remark,
   type ShadowPrice,
 } from '../api/client';
 import { ProfileGate } from '../profile';
-import { stateLabel, tracksOfGraph, type Track } from '../roster/tracks';
+import { sectionsOf, trackOf, tracksOfGraph, type Track } from '../roster/tracks';
 import { NextStep } from '../steps/Steps';
 import { reachOf, usePlannerStore } from '../store/plannerStore';
 
@@ -70,19 +71,30 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
   });
 
   // The tracks of whoever the plan pays for, so each step reads as the goal
-  // screen named it. The same query key as there, so they are usually cached.
+  // screen named it — at the plan's own version. Asked for as "the latest",
+  // they could come from an older sequence than the plan: a returning reader's
+  // Signature Move levels 5–17 printed as ids beside a sequence 15 plan, because
+  // the graph they were named from had no such states.
   const paidFor = [...new Set((run.data?.payingFor ?? []).flatMap((paying) => (paying.entity ? [paying.entity] : [])))];
+  const planVersion = run.data?.version;
   const graphs = useQueries({
     queries: paidFor.map((entity) => ({
-      queryKey: ['upgrades', game, entity],
-      queryFn: () => getUpgrades(game, entity),
+      queryKey: ['upgrades', game, entity, planVersion],
+      queryFn: () => getUpgrades(game, entity, planVersion),
       staleTime: Infinity,
     })),
   });
   const tracks = useMemo(() => {
     const byEntity = new Map<string, Track[]>();
     graphs.forEach((graph) => {
-      if (graph.data) byEntity.set(graph.data.entity.id, tracksOfGraph(graph.data.steps));
+      // In the game's section order, so what the plan pays for reads in the
+      // order the roster and goal screens show it.
+      if (graph.data) {
+        byEntity.set(
+          graph.data.entity.id,
+          sectionsOf(tracksOfGraph(graph.data.steps), graph.data.sections).flatMap((section) => section.tracks),
+        );
+      }
     });
     return byEntity;
   }, [graphs]);
@@ -325,18 +337,8 @@ export function Answer({
           </div>
         </div>
 
-        {(plan.notes.length > 0 || paying.length > 0) && (
-          <ul className="mt-3 space-y-1 border-t pt-3 text-sm" style={{ borderColor: 'var(--line)' }}>
-            {paying.length > 0 && (
-              <li style={{ color: 'var(--signal)' }}>{payingForSentence(paying, tracks)}</li>
-            )}
-            {plan.notes.map((note) => (
-              <li key={note} style={{ color: 'var(--signal)' }}>
-                {note}
-              </li>
-            ))}
-          </ul>
-        )}
+        {paying.length > 0 && <PaysFor steps={paying.length} groups={payingForGroups(paying, tracks)} />}
+        <Remarks plan={plan} />
       </section>
 
       {plan.stages.length === 0 ? (
@@ -484,27 +486,161 @@ function Prices({ prices, energyUnit }: { prices: ShadowPrice[]; energyUnit: str
   );
 }
 
+function PaysFor({ steps, groups }: { steps: number; groups: PaidFor[] }) {
+  return (
+    <div className="mt-3 border-t pt-3" style={{ borderColor: 'var(--line)' }}>
+      <h2 className="label">
+        What this pays for · {steps} step{steps === 1 ? '' : 's'}
+      </h2>
+      <div className="mt-1 space-y-2 text-sm">
+        {groups.map((group) => (
+          <div key={group.name}>
+            <div className="font-medium">{group.name}</div>
+            {group.sections.length > 0 && (
+              <ul className="mt-0.5 space-y-0.5">
+                {group.sections.map((section, index) => (
+                  <li key={section.name ?? `loose-${index}`}>
+                    {section.name && <span className="muted">{section.name}: </span>}
+                    {section.lines.join(' · ')}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /**
- * "Paying for 3 upgrade steps: Lucia: Inverse Crown — Level · 65, Red Orb · 18,
- * Promote · Ace ★1." One entity named once, and each state named by its track as
- * the goal screen names it. Until S8 this was the server's sentence, which could
- * only print a state the game gives no word for as its id.
+ * What the plan says about itself, by weight rather than in the order written
+ * (T3). What changes the answer is shown first and in the signal colour; what
+ * the plan takes on trust about the reader is shown plainly, because only the
+ * reader can check it; how it was worked out is folded, because it is true of
+ * every plan and was most of the wall the strangers could not read. <b>A warning
+ * is never folded</b> — a stopped search is one, and a plan shown without its
+ * gap is the one thing this page must not be.
+ *
+ * <p>A server older than the kinds sends only {@code notes}, and each is shown
+ * as a warning: visible, exactly as it always was.
  */
-export function payingForSentence(paying: PayingFor[], tracks: Map<string, Track[]>): string {
-  const byEntity = new Map<string, { name: string; states: string[] }>();
+export function Remarks({ plan }: { plan: Plan }) {
+  const remarks = plan.remarks ?? plan.notes.map((text) => ({ kind: 'WARNING' as const, text }));
+  const of = (kind: Remark['kind']) => remarks.filter((remark) => remark.kind === kind).map((remark) => remark.text);
+  const warnings = of('WARNING');
+  const done = of('DONE');
+  const assumed = of('ASSUMPTION');
+  const detail = of('DETAIL');
+  if (remarks.length === 0) return null;
+
+  return (
+    <div className="mt-3 space-y-3 border-t pt-3 text-sm" style={{ borderColor: 'var(--line)' }}>
+      {(warnings.length > 0 || done.length > 0) && (
+        <ul className="space-y-1">
+          {warnings.map((text) => (
+            <li key={text} style={{ color: 'var(--signal)' }}>
+              {text}
+            </li>
+          ))}
+          {done.map((text) => (
+            <li key={text}>{text}</li>
+          ))}
+        </ul>
+      )}
+      {assumed.length > 0 && (
+        <div>
+          <h2 className="label">What it assumes</h2>
+          <ul className="mt-1 space-y-1">
+            {assumed.map((text) => (
+              <li key={text}>{text}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {detail.length > 0 && (
+        <details>
+          <summary className="muted cursor-pointer">How this was worked out</summary>
+          <ul className="muted mt-1 space-y-1">
+            {detail.map((text) => (
+              <li key={text}>{text}</li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
+  );
+}
+
+/** One entity a plan pays for, its steps as ranges under the game's headings. */
+export interface PaidFor {
+  name: string;
+  /** In the game's order; a section with no name holds steps no track could name. */
+  sections: { name?: string; lines: string[] }[];
+}
+
+/**
+ * What a plan pays for, as a reader would say it: "Selena: Pianissimo — Growth:
+ * Level · 1 → 50, Promote · Private ★1 → Task Force ★2; Special Skill:
+ * Signature Move · 1 → 18".
+ *
+ * <p>Until 2026-09-28 this was one sentence naming every step — thirty-one for
+ * one construct, "Level · 2, Promote · 1, Level · 10, …, Fugal sonata · 18" —
+ * and the strangers who closed Phase 4 read the plan as a wall (T3). A track
+ * climbed step by step is one climb, so it is said once, from where the plan
+ * starts it to where it ends, under the heading the roster and goal screens put
+ * it under, with its states named exactly as those screens name them. Until S8
+ * the sentence was the server's, which could only print a state the game gives
+ * no word for as its id.
+ *
+ * @param tracks each entity's tracks in the game's section order; a step whose
+ *               entity has none yet keeps the server's name, whole
+ */
+export function payingForGroups(paying: PayingFor[], tracks: Map<string, Track[]>): PaidFor[] {
+  interface Building {
+    name: string;
+    known?: Track[];
+    spans: Map<Track, { from: number; to: number }>;
+    loose: string[];
+  }
+  const byEntity = new Map<string, Building>();
   for (const step of paying) {
-    const known = step.entity && step.toState ? tracks.get(step.entity) : undefined;
+    const known = step.entity ? tracks.get(step.entity) : undefined;
     if (!step.entity || !step.toState || !known) {
       // No graph (yet) to name it from: the server's own name, whole.
-      byEntity.set(step.step, { name: step.displayName, states: [] });
+      byEntity.set(step.step, { name: step.displayName, spans: new Map(), loose: [] });
       continue;
     }
-    const entry = byEntity.get(step.entity) ?? { name: step.entityName ?? step.entity, states: [] };
-    entry.states.push(stateLabel(known, step.toState));
+    const entry: Building = byEntity.get(step.entity) ?? {
+      name: step.entityName ?? step.entity,
+      known,
+      spans: new Map(),
+      loose: [],
+    };
     byEntity.set(step.entity, entry);
+    const track = trackOf(known, step.toState);
+    const to = track ? track.states.findIndex((candidate) => candidate.state === step.toState) : -1;
+    if (!track || to < 0) {
+      entry.loose.push(step.displayName);
+      continue;
+    }
+    const at = step.fromState ? track.states.findIndex((candidate) => candidate.state === step.fromState) : -1;
+    const from = at >= 0 ? at : Math.max(0, to - 1);
+    const span = entry.spans.get(track);
+    entry.spans.set(track, span ? { from: Math.min(span.from, from), to: Math.max(span.to, to) } : { from, to });
   }
-  const parts = [...byEntity.values()].map((entry) =>
-    entry.states.length === 0 ? entry.name : `${entry.name} — ${entry.states.join(', ')}`,
-  );
-  return `Paying for ${paying.length} upgrade step${paying.length === 1 ? '' : 's'}: ${parts.join('; ')}.`;
+
+  return [...byEntity.values()].map((entry) => {
+    const sections: PaidFor['sections'] = [];
+    for (const track of entry.known ?? []) {
+      const span = entry.spans.get(track);
+      if (!span) continue;
+      const line = `${track.tag ?? track.name} · ${track.states[span.from]!.label} → ${track.states[span.to]!.label}`;
+      const last = sections[sections.length - 1];
+      if (last && last.name === track.section) last.lines.push(line);
+      else sections.push({ name: track.section, lines: [line] });
+    }
+    if (entry.loose.length > 0) sections.push({ lines: entry.loose });
+    return { name: entry.name, sections };
+  });
 }

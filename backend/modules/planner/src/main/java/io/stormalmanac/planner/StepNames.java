@@ -139,6 +139,56 @@ public final class StepNames {
                 .orElse(id);
     }
 
+    /**
+     * The grants a plan claims, said briefly, with the rungs of one ladder that
+     * are claimed alike said once: "Phantom Pain Cage, weekly, score 90,000+ to
+     * 1,100,000+ (8 tiers) ×9" where there were eight entries differing only in
+     * their bar. A ladder pays every rung at or below where the reader stops, so
+     * a plan that reaches the top claims them all, and eight near-identical
+     * entries were most of the sentence the strangers who closed Phase 4 could
+     * not read (T3).
+     *
+     * <p>Rungs join when they sit next to each other among the plan's claims
+     * and are claimed the same number of times; the count says how many were
+     * joined, since a plan need not claim every rung it passes. A rung the plan
+     * leans on once less is its own entry, because that difference is the plan
+     * saying which week it can skip.
+     */
+    public List<String> claimsBrief(List<RewardClaim> claims) {
+        List<RewardClaim> ordered = claims.stream()
+                .sorted(Comparator.comparing(RewardClaim::reward, rewardOrder()))
+                .toList();
+        List<String> said = new java.util.ArrayList<>();
+        int at = 0;
+        while (at < ordered.size()) {
+            RewardClaim first = ordered.get(at);
+            Optional<Reward> reward = rewardById(first.reward());
+            int end = at + 1;
+            while (reward.isPresent() && reward.get().requires() != null && end < ordered.size()
+                    && sameLadder(reward.get(), first.times(), ordered.get(end))) {
+                end++;
+            }
+            if (end - at == 1) {
+                said.add(rewardBrief(first.reward()) + " ×" + first.times());
+            } else {
+                Reward top = rewardById(ordered.get(end - 1).reward()).orElseThrow();
+                said.add(when(reward.get()) + " to " + quantity(top.requires().atLeast()) + "+ ("
+                        + (end - at) + " tiers) ×" + first.times());
+            }
+            at = end;
+        }
+        return said;
+    }
+
+    /** Whether {@code next} is another rung of {@code rung}'s ladder, at its cadence, claimed as often. */
+    private boolean sameLadder(Reward rung, int times, RewardClaim next) {
+        return next.times() == times && rewardById(next.reward())
+                .filter(other -> other.requires() != null)
+                .filter(other -> other.cadence() == rung.cadence())
+                .filter(other -> other.requires().measure().equals(rung.requires().measure()))
+                .isPresent();
+    }
+
     /** By cadence, then by bar, so a ladder reads from its bottom rung up. */
     public Comparator<String> rewardOrder() {
         Comparator<Optional<Reward>> byReward = Comparator.comparing(

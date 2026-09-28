@@ -209,12 +209,12 @@ public final class MipOptimizer implements Optimizer {
      */
     private Plan served(Plan cached, ProfileId asker) {
         Duration age = Duration.between(cached.computedAt(), clock.instant());
-        List<String> notes = new ArrayList<>(cached.explanation().notes());
-        notes.add(("Served from cache: this plan was computed %s ago, against the same game"
+        List<Note> notes = new ArrayList<>(cached.explanation().remarks());
+        notes.add(Note.detail(("Served from cache: this plan was computed %s ago, against the same game"
                 + " version, goals, inventory and roster. It was not re-solved. A patch"
                 + " publishes a new version and so a different question, which is not in"
                 + " this cache.")
-                .formatted(readable(age)));
+                .formatted(readable(age))));
 
         return new Plan(
                 cached.id(),
@@ -275,26 +275,26 @@ public final class MipOptimizer implements Optimizer {
         // Named for a reader, not by id: until 2026-09-26 these notes printed
         // "samantha-overclock-1" and "phantom-pain-cage-90000" on the plan page.
         StepNames names = StepNames.of(inputs.definition());
-        List<String> notes = new ArrayList<>();
+        List<Note> notes = new ArrayList<>();
         if (!outcome.provenOptimal()) {
-            notes.add(Double.isNaN(outcome.optimalityGap())
+            notes.add(Note.warning(Double.isNaN(outcome.optimalityGap())
                     ? "The search stopped on its time budget, so this is the cheapest plan found"
                             + " rather than the cheapest plan, and how much cheaper one could be is"
                             + " not known."
                     : "The search stopped on its time budget: this is the cheapest plan found, and"
                             + " no plan can be more than %.2f%% cheaper."
-                                    .formatted(outcome.optimalityGap() * 100));
+                                    .formatted(outcome.optimalityGap() * 100)));
         }
 
         // The steps paid for are Explanation#payingFor and not a note, so the
         // page can name each state the way it names them everywhere else.
         if (demand.steps().isEmpty()) {
-            notes.add("Nothing to do: the roster already satisfies every goal.");
+            notes.add(Note.done("Nothing to do: the roster already satisfies every goal."));
         }
         if (!demand.alreadyMet().isEmpty()) {
-            notes.add("Already met, and not costed: " + demand.alreadyMet().stream()
+            notes.add(Note.done("Already met, and not costed: " + demand.alreadyMet().stream()
                     .map(goal -> names.goal(goal.entity(), goal.targetState()))
-                    .reduce((a, b) -> a + ", " + b).orElse(""));
+                    .reduce((a, b) -> a + ", " + b).orElse("")));
         }
 
         int discounted = yields.discountedCount();
@@ -302,11 +302,11 @@ public final class MipOptimizer implements Optimizer {
             // Said out loud because it makes this plan cost more than the naive
             // arithmetic would, and a player comparing it against a community
             // guide deserves to know why rather than to find it out.
-            notes.add(discounted + " drop rate(s) carry the number of runs they were sampled"
+            notes.add(Note.detail(discounted + " drop rate(s) carry the number of runs they were sampled"
                     + " over, and are used at the conservative end of a 95% interval rather than"
                     + " at face value. A stage sampled a hundred times has to beat one sampled"
                     + " ten thousand times by more than luck before this plan will send you"
-                    + " there.");
+                    + " there."));
         }
 
         if (!outcome.rewardClaims().isEmpty()) {
@@ -314,11 +314,9 @@ public final class MipOptimizer implements Optimizer {
             // is not the solver's fault: a plan is cheap partly because somebody
             // logs in. Saying which grants and how many turns that from an
             // assumption into something a reader can check against their own week.
-            notes.add("Counting on free income over the horizon: " + outcome.rewardClaims().stream()
-                    .sorted(Comparator.comparing(RewardClaim::reward, names.rewardOrder()))
-                    .map(claim -> names.rewardBrief(claim.reward()) + " ×" + claim.times())
-                    .reduce((a, b) -> a + ", " + b).orElse("")
-                    + ". Miss those and the plan costs more energy than it says.");
+            notes.add(Note.assumption("Counting on free income over the horizon: "
+                    + String.join(", ", names.claimsBrief(outcome.rewardClaims()))
+                    + ". Miss those and the plan costs more energy than it says."));
         }
         if (!outcome.withheldGrants().isEmpty()) {
             // The mirror of the note above, and the more actionable of the two:
@@ -332,7 +330,7 @@ public final class MipOptimizer implements Optimizer {
             // score; …)" in id order, which D5's second rehearsal read as noise.
             Map<String, List<EnergyMip.Withheld>> byMeasure = outcome.withheldGrants().stream()
                     .collect(Collectors.groupingBy(EnergyMip.Withheld::measure, TreeMap::new, Collectors.toList()));
-            notes.add("Not counted, because nothing says this account gets that far: "
+            notes.add(Note.assumption("Not counted, because nothing says this account gets that far: "
                     + byMeasure.values().stream()
                             .map(bars -> names.measure(bars.get(0).measure()) + " at "
                                     + bars.stream()
@@ -342,34 +340,34 @@ public final class MipOptimizer implements Optimizer {
                                             .collect(Collectors.joining(", "))
                                     + " (this plan was asked for " + StepNames.quantity(bars.get(0).said()) + ")")
                             .collect(Collectors.joining("; "))
-                    + ". Say what you reach and the plan gets cheaper, never dearer.");
+                    + ". Say what you reach and the plan gets cheaper, never dearer."));
         }
         if (!outcome.expiringClaims().isEmpty()) {
             // The supply is already right — occurrences truncates against the
             // close — so this note adds nothing to the arithmetic and everything
             // to whether it happens. A plan cannot collect a grant; a reader on
             // a Thursday can (ADR 0024).
-            notes.add("On a deadline, and this plan is counting on them: "
+            notes.add(Note.warning("On a deadline, and this plan is counting on them: "
                     + outcome.expiringClaims().stream()
                             .map(claim -> claim.reward() + " ×" + claim.times() + ", which closes "
                                     + claim.closesAt() + ", " + claim.daysLeft() + " day(s) in")
                             .collect(Collectors.joining("; "))
                     + ". The counts above already stop at those dates; what this plan cannot do is"
-                    + " remind you on the day.");
+                    + " remind you on the day."));
         }
         if (!outcome.lapsedGrants().isEmpty()) {
             // The mirror of the deadline note, pointing at the past. Nothing is
             // actionable here and it is still worth a line: without it, a plan
             // made dearer by an event that ended is indistinguishable from a
             // plan that was always that dear.
-            notes.add("Closed too early to pay out once, and this goal set needed what they grant: "
+            notes.add(Note.warning("Closed too early to pay out once, and this goal set needed what they grant: "
                     + outcome.lapsedGrants().stream()
                             .map(grant -> grant.reward() + " (window ends " + grant.closesAt()
                                     + "; this horizon would otherwise have allowed "
                                     + grant.missedClaims() + ")")
                             .collect(Collectors.joining(", "))
                     + ". Nothing can be done about a window that has shut — this is here so the"
-                    + " price of the plan is not a mystery.");
+                    + " price of the plan is not a mystery."));
         }
         Set<String> lifetime = inputs.definition().shops().stream()
                 .filter(Shop::neverResets).map(Shop::id).collect(Collectors.toSet());
@@ -382,30 +380,29 @@ public final class MipOptimizer implements Optimizer {
             // other way: nothing a player records says how much of an allowance
             // that never refills they have already bought, so the plan assumes
             // none, and a reader who has bought some is the one who can tell.
-            notes.add("Buying from a limit that never resets: " + String.join(", ", spendsLifetime)
+            notes.add(Note.assumption("Buying from a limit that never resets: " + String.join(", ", spendsLifetime)
                     + ". This assumes none of that allowance has been bought yet; whatever has been"
-                    + " must come from elsewhere.");
+                    + " must come from elsewhere."));
         }
         if (outcome.daysNeeded() > 0) {
-            notes.add(("This plan cannot be finished in less than %d day(s) however much energy is"
-                    + " spare, because it waits on a reward cadence or on a stage that is only open"
-                    + " some weekdays.").formatted(outcome.daysNeeded()));
+            notes.add(Note.warning(("This takes at least %d day(s) however much energy is spare: it waits on a"
+                    + " reward that pays on a cadence, or on a stage open only some weekdays.").formatted(outcome.daysNeeded())));
         }
         if (!outcome.rotationExact()) {
-            notes.add("This game declares more distinct weekday restrictions than are checked"
+            notes.add(Note.detail("This game declares more distinct weekday restrictions than are checked"
                     + " jointly, so the schedule was checked one restriction at a time. Two sets of"
                     + " stages competing for the same weekday may between them want more of it than"
-                    + " the horizon holds.");
+                    + " the horizon holds."));
         }
 
         if (request.objective() == Objective.FEWEST_DAYS) {
-            notes.add(outcome.horizonUsed() < request.horizonDays()
+            notes.add(Note.detail(outcome.horizonUsed() < request.horizonDays()
                     ? ("The shortest horizon this goal set fits into is %d day(s), against the %d"
                             + " asked for; this is the cheapest plan inside it.")
                                     .formatted(outcome.horizonUsed(), request.horizonDays())
                     : ("This goal set needs the whole %d-day horizon, so fewest days and least"
                             + " energy are asking the same question of it.")
-                                    .formatted(request.horizonDays()));
+                                    .formatted(request.horizonDays())));
         }
         if (request.objective() == Objective.FEWEST_DAYS && !outcome.expiringClaims().isEmpty()) {
             // The one thing a reader might reasonably try after reading the
@@ -416,16 +413,16 @@ public final class MipOptimizer implements Optimizer {
             // the horizon it settles on ends before the window does. That is the
             // whole trade, and reporting it is what ADR 0024 does instead of
             // giving the claim a day index (ADR 0013).
-            notes.add(("Fewest days was asked for, and %d of the grant(s) above close inside the"
+            notes.add(Note.detail(("Fewest days was asked for, and %d of the grant(s) above close inside the"
                     + " %d-day horizon this search settled on. Their supply is fixed by their own"
                     + " end date rather than by how long the plan runs: a longer plan collects no"
                     + " more of them, and a shorter one may collect fewer.")
-                    .formatted(outcome.expiringClaims().size(), outcome.horizonUsed()));
+                    .formatted(outcome.expiringClaims().size(), outcome.horizonUsed())));
         }
         if (outcome.rewardVariables() == 0 && request.objective() == Objective.FEWEST_DAYS) {
-            notes.add("Nothing in this game's data accrues on a cadence, so days here buy nothing"
+            notes.add(Note.detail("Nothing in this game's data accrues on a cadence, so days here buy nothing"
                     + " but energy and the fastest plan is the cheapest one. That is a fact about"
-                    + " the data, not about the model.");
+                    + " the data, not about the model."));
         }
 
         Map<ItemId, Double> shadowPrices = shadowPrices(demand, inputs, outcome, notes, names, startedAtNanos);
@@ -435,13 +432,13 @@ public final class MipOptimizer implements Optimizer {
         // "Minimised energy over … against 7 item constraint(s)", solver-speak
         // above the notes a reader acts on. The constraint count went with it;
         // it described the model, and nothing a reader could do changes it.
-        notes.add(workedOut(outcome, inputs.definition().game().energyUnit(), request.energyPerDay()));
+        notes.add(Note.detail(workedOut(outcome, inputs.definition().game().energyUnit(), request.energyPerDay())));
         int measured = yields.measuredCount();
-        notes.add(measured == 0
+        notes.add(Note.detail(measured == 0
                 ? "Every drop rate here is the bundle's declared yield. No player reports have"
                         + " been aggregated yet, so these numbers are the upstream's claim rather"
                         + " than a measurement."
-                : measured + " drop coefficient(s) came from player reports; the rest are declared.");
+                : measured + " drop coefficient(s) came from player reports; the rest are declared."));
 
         List<StageId> binding = outcome.stageRuns().stream().map(StageRun::stage).toList();
         return new Explanation(shadowPrices, binding, List.copyOf(notes), demand.steps());
@@ -495,7 +492,7 @@ public final class MipOptimizer implements Optimizer {
             Demand demand,
             EnergyMip.Inputs inputs,
             EnergyMip.Outcome base,
-            List<String> notes,
+            List<Note> notes,
             StepNames names,
             long startedAtNanos) {
 
@@ -511,9 +508,9 @@ public final class MipOptimizer implements Optimizer {
             // a plan that arrives late.
             long remaining = (deadline - System.nanoTime()) / 1_000_000;
             if (remaining < MINIMUM_RESOLVE_MILLIS) {
-                notes.add("Shadow prices stopped at %d of %d item(s): pricing one more of each costs"
+                notes.add(Note.detail("Shadow prices stopped at %d of %d item(s): pricing one more of each costs"
                         .formatted(prices.size(), demand.quantities().size())
-                        + " a re-solve, and the budget for this answer ran out.");
+                        + " a re-solve, and the budget for this answer ran out."));
                 break;
             }
             Map<ItemId, Integer> raised = new HashMap<>(demand.quantities());
@@ -530,7 +527,7 @@ public final class MipOptimizer implements Optimizer {
             } catch (Optimizer.InfeasibleGoalException e) {
                 // One more unit put the goal set out of reach, which is worth
                 // saying and is not worth failing the whole plan over.
-                notes.add("One more " + names.demand(item) + " is not obtainable: " + e.getMessage());
+                notes.add(Note.detail("One more " + names.demand(item) + " is not obtainable: " + e.getMessage()));
             }
         }
         return prices;

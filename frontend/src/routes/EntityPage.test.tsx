@@ -7,7 +7,7 @@ import { App } from '../App';
 import type { Profile } from '../api/client';
 import { profileForGame } from '../profile';
 import { usePlannerStore } from '../store/plannerStore';
-import { EntityPage } from './EntityPage';
+import { EntityPage, StepCosts } from './EntityPage';
 
 /**
  * The character page asks about its own game.
@@ -210,3 +210,43 @@ function problem(status: number, detail: string): Response {
     headers: { 'Content-Type': 'application/problem+json' },
   });
 }
+
+/**
+ * T7, found driving the site on 2026-09-28: the public character page listed
+ * every step by id — `flaming-chord-4 → flaming-chord-5` — 166 of them in one
+ * list, where the roster and goal screens say "Red Orb · Flaming chord".
+ */
+describe("the character page's step costs", () => {
+  it('names each track as the roster does, under the game’s headings, and each step by its states', () => {
+    render(
+      <StepCosts
+        order={['Growth', 'Basic Skill']}
+        steps={[
+          {
+            id: 'flaming-chord-5',
+            fromState: 'flaming-chord-4',
+            toState: 'flaming-chord-5',
+            section: 'Basic Skill',
+            tag: 'Red Orb',
+            costs: [
+              { item: 'skill-point', displayName: 'Skill Point', quantity: 1 },
+              { item: 'cogs', displayName: 'Cogs', quantity: 5000 },
+            ],
+          },
+          { id: 'promote-1', fromState: 'promote-0', toState: 'promote-1', toName: 'Private ★2', fromName: 'Private ★1', section: 'Growth', costs: [] },
+        ]}
+      />,
+    );
+
+    expect(screen.getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent)).toEqual([
+      'Growth',
+      'Basic Skill',
+    ]);
+    expect(screen.getByText('Red Orb')).toBeInTheDocument();
+    expect(screen.getByText('Flaming chord')).toBeInTheDocument();
+    // Each row: the two states as the track names them, then what it costs.
+    const rows = screen.getAllByRole('listitem').map((row) => row.textContent);
+    expect(rows).toEqual(['Private ★1 → Private ★2', '4 → 51 Skill Point, 5,000 Cogs']);
+    expect(screen.queryByText(/flaming-chord-/)).not.toBeInTheDocument();
+  });
+});

@@ -4,6 +4,7 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { gameDataCaching } from './src/gameDataCaching';
 
 // These users are on a phone, next to the game. Offline inventory editing is
 // not a nice-to-have: bulk entry is where companion tools live or die, and it
@@ -44,19 +45,10 @@ export default defineConfig({
         // against the full request URL, so an anchored path matches nothing at
         // all. Both were invisible because nothing was reading from the cache.
         //
-        // Safe to cache because a published version is immutable: the only way
-        // a response under this prefix changes is a new patch, which is a
-        // different `?version=`. Nothing under `/api/me` is here, and that is
-        // the line that matters — a stale inventory served from a service
-        // worker is a plan computed against numbers the player has moved on
-        // from.
-        runtimeCaching: [
-          {
-            urlPattern: /\/api\/games\//,
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'game-data' },
-          },
-        ],
+        // The third was believing every URL under the prefix named a version:
+        // "the latest" does not, and was served stale for weeks. The rules and
+        // their account are in src/gameDataCaching.ts, where a test holds them.
+        runtimeCaching: gameDataCaching,
       },
     }),
   ],
