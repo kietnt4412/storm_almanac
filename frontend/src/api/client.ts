@@ -170,6 +170,93 @@ export interface Measure {
   /** The bundle's word for it (ADR 0033); absent from an older server, the measure itself before sequence 13. */
   displayName?: string;
   bars: MeasureBar[];
+  /**
+   * Whether the ladder pays anything a pull is bought with (ADR 0034), and
+   * whether it pays anything else. Each screen asks only the ladders that move
+   * its own answer; absent from an older server, which every screen reads as yes.
+   */
+  paysForPulls?: boolean;
+  paysForPlans?: boolean;
+}
+
+export interface PullPrice {
+  currency: string;
+  currencyName: string;
+  perPull: number;
+}
+
+/** One banner as the catalog serves it, before anybody asks it anything. */
+export interface Banner {
+  id: string;
+  displayName: string;
+  bannerType: string;
+  headline: Rarity;
+  baseRate: number | null;
+  hardAt: number;
+  /** The bottom of a drawn guarantee's range; null for a wall that is fixed. */
+  drawnFrom: number | null;
+  featuredChance: number;
+  guaranteeAfterLoss: number;
+  worstCasePulls: number | null;
+  /** Null when nobody read what a pull costs; the planner refuses such a banner. */
+  pullPrice: PullPrice | null;
+  opensAt: string | null;
+  closesAt: string | null;
+  open: boolean;
+}
+
+export interface BannersResponse {
+  game: string;
+  version: Version;
+  banners: Banner[];
+}
+
+/** What the reader says their counter shows, under the key the banner carries it by. */
+export interface Pity {
+  banner: string;
+  scopeKey: string;
+  pullsSinceHit: number;
+  consecutiveLosses: number;
+  guaranteedNext: boolean;
+  hardAt: number;
+}
+
+export interface Converted {
+  item: string;
+  displayName: string;
+  held: number;
+  accruing: number;
+  via: string[];
+}
+
+export interface PullBudget {
+  currency: string;
+  currencyName: string;
+  held: number;
+  accruing: number;
+  perPull: number;
+  pulls: number;
+  uncounted: string[];
+  converted: Converted[];
+}
+
+/** "How likely by when", answered from the reader's own pity and income. */
+export interface Odds {
+  banner: string;
+  bannerName: string;
+  versionSequence: number;
+  versionLabel: string;
+  daysAsked: number;
+  days: number;
+  cappedAtClose: boolean;
+  closesAt: string | null;
+  copies: number;
+  pity: Pity;
+  budget: PullBudget;
+  chance: number;
+  expectedPulls: number;
+  worstCasePulls: number;
+  method: string;
 }
 
 export interface MeasuresResponse {
@@ -484,6 +571,37 @@ export const getEntities = (game: string, version?: number) =>
  */
 export const getMeasures = (game: string, version?: number) =>
   request<MeasuresResponse>(versioned(`/api/games/${game}/measures`, version));
+
+/** The game's banners: rates, wall, price, window. Anonymous, like the rest of the catalog. */
+export const getBanners = (game: string, version?: number) =>
+  request<BannersResponse>(versioned(`/api/games/${game}/banners`, version));
+
+export const getPity = (profile: string, banner: string) =>
+  request<Pity>(`/api/me/profiles/${profile}/pity?banner=${encodeURIComponent(banner)}`);
+
+/**
+ * What the reader's counter shows now. Addressed by banner and stored by the
+ * banner's scope, so every pool of one type reads the same counter back.
+ */
+export const savePity = (profile: string, banner: string, pullsSinceHit: number, consecutiveLosses: number) =>
+  request<Pity>(`/api/me/profiles/${profile}/pity?banner=${encodeURIComponent(banner)}`, {
+    method: 'PUT',
+    body: JSON.stringify({ pullsSinceHit, consecutiveLosses }),
+  });
+
+/**
+ * The odds on one banner, from the stored pity, the saved inventory and the
+ * game's declared income over `days`. `reach` is the same answer the plan
+ * takes (ADR 0022), and a banner that closes first stops the horizon there.
+ */
+export const getOdds = (
+  profile: string,
+  body: { banner: string; days: number; copies?: number; reach?: Record<string, number> },
+) =>
+  request<Odds>(`/api/me/profiles/${profile}/pulls`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 
 export const getEntity = (game: string, entity: string, version?: number) =>
   request<EntityResponse>(versioned(`/api/games/${game}/entities/${entity}`, version));

@@ -81,6 +81,7 @@ export function App() {
             <Tab to="/roster">Roster</Tab>
             <Tab to="/goals">Goals</Tab>
             <Tab to="/plan">Plan</Tab>
+            <Tab to="/pulls">Pulls</Tab>
             <Tab to="/catalog">Catalog</Tab>
           </nav>
 

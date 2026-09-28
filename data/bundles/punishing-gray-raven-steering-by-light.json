@@ -178,7 +178,23 @@
     "also gains its tag, [Ultima Awaken], and is confirmed one level. So a",
     "plan to it is 3 Skill Points and 25 000 Cogs cheaper per construct, and",
     "still does not count Ultimate, which the model cannot express yet.",
-    "'ultima-awaken-screen' replaces 'ultima-awaken-report' on all three rows."
+    "'ultima-awaken-screen' replaces 'ultima-awaken-report' on all three rows.",
+    "",
+    "Sequence 17 reads the Black Card for the pull planner (C1): the item,",
+    "graded 5★ on the mission screens; Direct Exchange, one Black Card for one",
+    "Event Construct R&D Ticket, written as a craft the income model walks",
+    "(ADR 0034); and the gold card the Phantom Pain Cage's 500 000 and",
+    "1 000 000 tiers pay, which is the Black Card, x10 and x15. Those two tiers",
+    "were written short and now pay 25 Black Cards a week at the top. It also",
+    "writes what the missions pay (30 Black Cards a day over three points on",
+    "the daily bar, 1 000 a week for all twelve weeklies, each behind the",
+    "reader's answer) and the live banner, Adelyde: Anabasis on the Crucible",
+    "Event Construct pool, closing 2026-11-04 23:00 UTC. No plan moves:",
+    "nothing a goal demands is paid in Black Cards or tickets.",
+    "",
+    "Sequence 18 gives Selena's pool its close, 2026-10-01 06:59 UTC: the",
+    "dates were read on 2026-09-18 and the zone on 2026-09-28, so the pull",
+    "planner stops offering it when it closes. 'selena-pool-window' sources it."
   ],
 
   "game": {
@@ -187,7 +203,7 @@
     "energyUnit": "Serum",
     "dayBoundary": { "zone": "UTC", "hour": 5 }
   },
-  "sequence": 16,
+  "sequence": 18,
   "label": "Anchored in Faith (Global 4.8.0)",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client: patch 4.7.0 \"Steering By Light\" from 2026-09-18 to 2026-09-22, and patch 4.8.0 \"Anchored in Faith\" from 2026-09-24. Numbers and text only; no game assets.",
 
@@ -269,13 +285,37 @@
       "origin": "OBSERVED_IN_GAME",
       "detail": "The skill upgrade prompt ('Tips — Upgrade requires Cogs x… Skill Point x… After upgrade, the new skill level is: n. Would you like to proceed?') on Helentine: Lacrimosa's Seeker System [Core Passive] at Lv 1, stepped to each target level from 5 to 17 in turn, every prompt taken from Lv 1 (the maintainer). Thirteen running totals from Lv 1, Skill Points then Cogs: to 5, 4 + 14 000; 6, 6 + 20 000; 7, 8 + 27 000; 8, 10 + 35 000; 9, 12 + 44 000; 10, 14 + 54 000; 11, 17 + 66 000; 12, 20 + 80 000; 13, 23 + 96 000; 14, 26 + 114 000; 15, 29 + 134 000; 16, 34 + 156 000; 17, 39 + 180 000. Each row from 4 -> 5 to 16 -> 17 is one total less the one before, 4 -> 5 less the three single steps read under 'character-screens' (3 + 9 000); 17 -> 18 is the 1 -> 18 prompt's 44 + 206 000, read on 2026-09-19 and not re-read in this sitting, less the 1 -> 17 total. The fourteen sum to 41 Skill Points and 197 000 Cogs, the remainder earlier sequences wrote as one derived row, which is the check that no total was misread. That Selena: Pianissimo's and Lucia: Inverse Crown's skills share the curve is the maintainer's report under their own entries. Screenshots taken by the maintainer on 2026-09-26 and sent to a Claude Code session; not committed, because game assets are not allowed in this repository. Same client and account, patch 4.8.0 \"Anchored in Faith\" (the maintainer).",
       "observedOn": "2026-09-26"
+    },
+    {
+      "id": "black-card-readings",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "Three readings of the Black Card, all on 2026-09-28, asked for by a Claude Code session building the pull planner (C1) and answered by the maintainer. (1) Its grade, five stars, off its reward tiles on the daily and weekly mission screens (the maintainer: 'read off the screen from the mission'). (2) Direct Exchange, the button on the research pool screen beside the pool's own pull buttons, trades one Black Card for one Event Construct R&D Ticket: the maintainer's answer when asked what it trades, which settles the 1:1 the 2026-09-18 note carried only as a report. (3) The gold five-star card on the Phantom Pain Cage's 500 000 tier (x10) and 1 000 000 tier (x15) is the Black Card: the maintainer's identification of a card read by its icon on 2026-09-19 and not opened then. Those two tiers' other grants are as read on 2026-09-19 under 'phantom-pain-cage-screen'; this entry sources them now only because a fact carries one provenance entry and the Black Card is what changed. The 4-star chip on the same tiers is still unopened and still not written. Same client and account, patch 4.8.0 \"Anchored in Faith\" (the maintainer). No screenshot is committed, because game assets are not allowed in this repository.",
+      "observedOn": "2026-09-28"
+    },
+    {
+      "id": "mission-screens",
+      "origin": "OBSERVED_IN_GAME",
+      "detail": "The daily and weekly mission screens, read by the maintainer on 2026-09-28 and reported to a Claude Code session building the pull planner (C1). Daily: one progress bar to 100, paying Black Cards at three points, 5 at 60, 10 at 80 and 15 at 100, 30 in all. Weekly: twelve missions, each paying its own Black Card amount, 1 000 for all twelve; the per-mission amounts were not transcribed. Same client and account, patch 4.8.0 \"Anchored in Faith\" (the maintainer). No screenshot is committed, because game assets are not allowed in this repository.",
+      "observedOn": "2026-09-28"
+    },
+    {
+      "id": "crucible-pool-panels",
+      "origin": "PUBLISHER_DISCLOSURE",
+      "detail": "The Crucible Event Construct pool on Adelyde: Anabasis, 2026-09-28. One screenshot of the pool screen, transcribed in a Claude Code session: research type Crucible, pools Crucible Event Construct and Fate Crucible Event Construct, the window 09/24 - 11/04 beside 'TIME 23:00', the counter 'S-Rank Character Researched 0/60', 'Guaranteed A-Rank or above character in 10 pulls', and pull buttons at 250 and 2 500 on the Event Construct R&D Ticket (which ticket it is, the maintainer, having opened it). Then the maintainer's readings of the same pool's panels: the S-Rank base rate 0.50% off Drop Details (1.50% on the Fate pool, not written), the rate in S-Rank pool 100%, and that its guarantee is carried only between Crucible pools; and that the close is in UTC, the server's clock. Same client and account, patch 4.8.0 \"Anchored in Faith\" (the maintainer). No screenshot is committed, because game assets are not allowed in this repository.",
+      "observedOn": "2026-09-28"
+    },
+    {
+      "id": "selena-pool-window",
+      "origin": "PUBLISHER_DISCLOSURE",
+      "detail": "Selena: Pianissimo's pool as 'research-pool-panels' read it on 2026-09-18 (0.50% base, a wall of 60, 70% in the S-Rank pool, 250 a pull), now with its close in a zone. One screenshot of the Fate Arrival Target pool screen on 2026-09-28, transcribed in a Claude Code session: Selena: Pianissimo, '70% rate in S-Rank pool', 09/17 - 10/01 beside 'TIME 06:59', the same window read on 2026-09-18; the zone is UTC on the maintainer's answer the same day that the pool screens show the server's clock (see 'crucible-pool-panels'). The same screen shows the Fate Arrival Construct pool counting 'S-Rank Character Researched 12/80~100', a floating guarantee, which is not this banner and is not written. Same client and account, patch 4.8.0 \"Anchored in Faith\" (the maintainer). No screenshot is committed, because game assets are not allowed in this repository.",
+      "observedOn": "2026-09-28"
     }
   ],
   "sourcedBy": "weapon-upgrade-screens",
   "factProvenance": {
     "entity:selena-pianissimo": "research-pool-panels",
     "entity:karenina-effulgence": "research-pool-panels",
-    "banner:pgr-selena-pianissimo": "research-pool-panels",
+    "banner:pgr-selena-pianissimo": "selena-pool-window",
     "item:event-construct-rd-ticket": "research-ticket-tile",
     "entity:hear-the-bell": "equipment-and-resource-screens",
     "item:weapon-enhancer-iv": "equipment-and-resource-screens",
@@ -327,14 +367,21 @@
     "reward:phantom-pain-cage-90000": "phantom-pain-cage-screen",
     "reward:phantom-pain-cage-120000": "phantom-pain-cage-screen",
     "reward:phantom-pain-cage-360000": "phantom-pain-cage-screen",
-    "reward:phantom-pain-cage-500000": "phantom-pain-cage-screen",
+    "reward:phantom-pain-cage-500000": "black-card-readings",
     "reward:phantom-pain-cage-700000": "phantom-pain-cage-screen",
     "reward:phantom-pain-cage-900000": "phantom-pain-cage-screen",
-    "reward:phantom-pain-cage-1000000": "phantom-pain-cage-screen",
+    "reward:phantom-pain-cage-1000000": "black-card-readings",
     "reward:phantom-pain-cage-1100000": "phantom-pain-cage-screen",
     "upgrade:helentine-lacrimosa-ultima-awaken-unlock": "ultima-awaken-screen",
     "upgrade:selena-pianissimo-ultima-awaken-unlock": "ultima-awaken-screen",
-    "upgrade:lucia-inverse-crown-ultima-awaken-unlock": "ultima-awaken-screen"
+    "upgrade:lucia-inverse-crown-ultima-awaken-unlock": "ultima-awaken-screen",
+    "item:black-card": "black-card-readings",
+    "craft:direct-exchange-black-card": "black-card-readings",
+    "reward:daily-missions-60": "mission-screens",
+    "reward:daily-missions-80": "mission-screens",
+    "reward:daily-missions-100": "mission-screens",
+    "reward:weekly-missions-12": "mission-screens",
+    "banner:pgr-adelyde-anabasis": "crucible-pool-panels"
   },
 
   "items": [
@@ -509,6 +556,19 @@
       "displayName": "Special Support Token",
       "rarity": { "label": "4★", "rank": 4 },
       "category": "support-token"
+    },
+    {
+      "_comment": [
+        "Five stars off its tiles on the mission screens, 2026-09-28. The",
+        "currency the missions pay, and the gold card the Phantom Pain Cage's",
+        "500 000 and 1 000 000 tiers pay, which nobody had opened until the",
+        "maintainer named it. It pulls nothing itself: Direct Exchange turns it",
+        "into the Event Construct R&D Ticket one for one (ADR 0034)."
+      ],
+      "id": "black-card",
+      "displayName": "Black Card",
+      "rarity": { "label": "5★", "rank": 5 },
+      "category": "currency"
     }
   ],
 
@@ -571,8 +631,10 @@
         "the bucket is the type; and the per-10 A-Rank-or-above floor is here but",
         "both engines ignore floors below the headline by design.",
         "",
-        "No availability window: the dates 09/17 - 10/01 06:59 were read, the zone",
-        "they are in was not, and Availability takes instants. That is N20.",
+        "Closes 10/01 06:59 UTC since sequence 18: the dates were read on",
+        "2026-09-18 with no zone, and on 2026-09-28 the maintainer confirmed",
+        "the pool screens show the server's clock, which is UTC. Its opening",
+        "hour on 09/17 was never read, so opensAt is absent.",
         "",
         "The stated overall S-Rank rate including the guarantee is 1.90%, which",
         "does not reproduce from 0.50% and a wall at 60 (it computes 1.925%). The",
@@ -584,6 +646,7 @@
       "displayName": "Selena: Pianissimo — Arrival Construct",
       "bannerType": "arrival-construct",
       "pityScope": "BANNER_TYPE",
+      "availability": { "closesAt": "2026-10-01T06:59:00Z" },
       "baseRates": [
         { "rarity": { "label": "S", "rank": 3 }, "rate": 0.005 }
       ],
@@ -594,6 +657,45 @@
         { "everyN": 10, "minimumRarity": { "label": "A", "rank": 2 } }
       ],
       "featured": { "chanceAtHit": 0.70, "guaranteeAfterLoss": 1 },
+      "pullPrice": { "currency": "event-construct-rd-ticket", "perPull": 250 }
+    },
+    {
+      "_comment": [
+        "The Crucible Event Construct pool, read on Adelyde: Anabasis on",
+        "2026-09-28: 0.50% base off its Drop Details panel, a hard wall at 60",
+        "('S-Rank Character Researched 0/60'), and 100% in the S-Rank pool, so",
+        "the featured unit comes on the first S-Rank and the worst case is 60",
+        "pulls, not 120. That pairs the Arrival pool's wall with the Themed",
+        "pool's split, which the 2026-09-18 note said did not happen.",
+        "",
+        "Its guarantee is carried between Crucible pools only, hence its own",
+        "bannerType. Its sibling, Fate Crucible Event Construct, is 1.50% base",
+        "and is not written: nobody read its guarantee.",
+        "",
+        "Closes 11/04 23:00, UTC by the maintainer's reading of the server",
+        "clock; it opened 09/24 at an hour nobody read, so opensAt is absent.",
+        "",
+        "Not here, because the model has nowhere to put it: the pull-count",
+        "track, 1 500 tickets back at every 20th pull except each 60k+40th,",
+        "which pays an item, to 900 pulls, reset with the pool. That is twelve",
+        "pulls back in every sixty. Leaving it out makes a budget dearer than",
+        "the truth, never cheaper."
+      ],
+      "id": "pgr-adelyde-anabasis",
+      "displayName": "Adelyde: Anabasis — Crucible Event Construct",
+      "bannerType": "crucible-event-construct",
+      "pityScope": "BANNER_TYPE",
+      "availability": { "closesAt": "2026-11-04T23:00:00Z" },
+      "baseRates": [
+        { "rarity": { "label": "S", "rank": 3 }, "rate": 0.005 }
+      ],
+      "pityRules": [
+        { "rarity": { "label": "S", "rank": 3 }, "hardAt": 60 }
+      ],
+      "floors": [
+        { "everyN": 10, "minimumRarity": { "label": "A", "rank": 2 } }
+      ],
+      "featured": { "chanceAtHit": 1.0, "guaranteeAfterLoss": 1 },
       "pullPrice": { "currency": "event-construct-rd-ticket", "perPull": 250 }
     }
   ],
@@ -724,6 +826,21 @@
       "produces": [
         { "item": "minor-overclock-alloy", "quantity": 5 },
         { "item": "memory-overclock-circuit-i", "quantity": 5 }
+      ]
+    },
+    {
+      "_comment": [
+        "Direct Exchange on the research pool screen: one Black Card for one",
+        "Event Construct R&D Ticket. A conversion rather than a recipe, so the",
+        "income model counts Black Cards as tickets through it (ADR 0034). No",
+        "cap was reported; a capped exchange would be a shop row instead."
+      ],
+      "id": "direct-exchange-black-card",
+      "consumes": [
+        { "item": "black-card", "quantity": 1 }
+      ],
+      "produces": [
+        { "item": "event-construct-rd-ticket", "quantity": 1 }
       ]
     }
   ],
@@ -926,11 +1043,12 @@
       "requires": { "measure": "phantom-pain-cage-score", "atLeast": 360000 }
     },
     {
-      "_comment": "Also 10 of a gold 5-star card and 5 of a 4-star chip, neither of them opened and so neither of them here.",
+      "_comment": "Also 5 of a 4-star chip, not opened and so not here. The gold card is the Black Card (sequence 17).",
       "id": "phantom-pain-cage-500000",
       "cadence": "WEEKLY",
       "grants": [
         { "item": "phantom-pain-scar", "quantity": 10 },
+        { "item": "black-card", "quantity": 10 },
         { "item": "skill-point", "quantity": 2 }
       ],
       "requires": { "measure": "phantom-pain-cage-score", "atLeast": 500000 }
@@ -956,11 +1074,12 @@
       "requires": { "measure": "phantom-pain-cage-score", "atLeast": 900000 }
     },
     {
-      "_comment": "Also 15 of the same gold 5-star card and 5 of the same 4-star chip.",
+      "_comment": "Also 5 of the same 4-star chip, not opened and so not here. The gold card is the Black Card (sequence 17).",
       "id": "phantom-pain-cage-1000000",
       "cadence": "WEEKLY",
       "grants": [
         { "item": "phantom-pain-scar", "quantity": 6 },
+        { "item": "black-card", "quantity": 15 },
         { "item": "skill-point", "quantity": 2 }
       ],
       "requires": { "measure": "phantom-pain-cage-score", "atLeast": 1000000 }
@@ -973,6 +1092,50 @@
         { "item": "cogs", "quantity": 50000 }
       ],
       "requires": { "measure": "phantom-pain-cage-score", "atLeast": 1100000 }
+    },
+    {
+      "_comment": [
+        "The daily missions fill one progress bar to 100 and pay Black Cards",
+        "at three points on it: 5 at 60, 10 at 80, 15 at 100, 30 a day in",
+        "all. One reward per point, each behind the bar, so a reader says how",
+        "far they fill it (ADR 0022) and silence counts none of it."
+      ],
+      "id": "daily-missions-60",
+      "cadence": "DAILY",
+      "grants": [
+        { "item": "black-card", "quantity": 5 }
+      ],
+      "requires": { "measure": "daily-missions", "atLeast": 60 }
+    },
+    {
+      "id": "daily-missions-80",
+      "cadence": "DAILY",
+      "grants": [
+        { "item": "black-card", "quantity": 10 }
+      ],
+      "requires": { "measure": "daily-missions", "atLeast": 80 }
+    },
+    {
+      "id": "daily-missions-100",
+      "cadence": "DAILY",
+      "grants": [
+        { "item": "black-card", "quantity": 15 }
+      ],
+      "requires": { "measure": "daily-missions", "atLeast": 100 }
+    },
+    {
+      "_comment": [
+        "Twelve weekly missions, each paying its own Black Card amount, 1 000",
+        "for all twelve. The amounts per mission were not transcribed, so only",
+        "all twelve is written: a reader who finishes eleven is owed a share",
+        "this file cannot say, and counting none of it is dearer, not cheaper."
+      ],
+      "id": "weekly-missions-12",
+      "cadence": "WEEKLY",
+      "grants": [
+        { "item": "black-card", "quantity": 1000 }
+      ],
+      "requires": { "measure": "weekly-missions", "atLeast": 12 }
     }
   ],
   "upgrades": [
@@ -1507,6 +1670,8 @@
   ],
   "words": [
     { "subject": "measure", "key": "phantom-pain-cage-score", "displayName": "Phantom Pain Cage" },
+    { "subject": "measure", "key": "daily-missions", "displayName": "Daily missions" },
+    { "subject": "measure", "key": "weekly-missions", "displayName": "Weekly missions" },
 
     { "subject": "category", "key": "character-exp-pod-m", "displayName": "Character EXP" },
     { "subject": "category", "key": "character-exp-pod-l", "displayName": "Character EXP" },

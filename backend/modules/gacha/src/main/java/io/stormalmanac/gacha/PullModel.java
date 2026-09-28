@@ -158,4 +158,22 @@ public record PullModel(Rarity headline, double baseRate, PityRule pity, Feature
         long hitsNeeded = featured.chanceAtHit() >= 1.0 ? 1L : featured.guaranteeAfterLoss() + 1L;
         return (long) hardAt() * hitsNeeded;
     }
+
+    /**
+     * The same bound from where a reader actually stands: the pulls left to
+     * this cycle's wall, every hit after it at the wall, and the losses already
+     * carried counted towards the guarantee. Each further copy starts fresh and
+     * costs {@link #worstCasePulls()}.
+     *
+     * <p>A drawn guarantee's worst case is still the top of its range, since the
+     * reader is not told which value they drew.
+     */
+    public long worstCasePullsFrom(PityState from, int copies) {
+        if (copies < 1) throw new IllegalArgumentException("copies must be >= 1, was " + copies);
+        long toThisWall = Math.max(1, hardAt() - from.pullsSinceHit());
+        long hitsNeeded = featured.chanceAtHit() >= 1.0 || from.isGuaranteed(featured)
+                ? 1L
+                : featured.guaranteeAfterLoss() - from.consecutiveLosses() + 1L;
+        return toThisWall + (hitsNeeded - 1) * hardAt() + (copies - 1L) * worstCasePulls();
+    }
 }

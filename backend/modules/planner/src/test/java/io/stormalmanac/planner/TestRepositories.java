@@ -153,5 +153,15 @@ final class TestRepositories {
         public MergeOutcome<EntityId> mergeRoster(ProfileId profile, Collection<RosterEdit> edits) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public io.stormalmanac.player.CarriedPity pityOf(ProfileId profile, String scopeKey) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void savePity(io.stormalmanac.player.CarriedPity pity) {
+            throw new UnsupportedOperationException();
+        }
     }
 }

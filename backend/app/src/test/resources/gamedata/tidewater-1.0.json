@@ -1,0 +1,118 @@
+{
+  "_comment": [
+    "A synthetic title for the pull planner's routes (C1), invented here and not",
+    "any real game. Its banners close in 2099 or closed in 2020, so no test",
+    "that reads it depends on the day it runs, which a real banner's window",
+    "would. The shapes are the ones the launch title has: a ticket a pull",
+    "spends, a card that exchanges into it one for one (ADR 0034), grants of",
+    "that card behind a bar the reader answers (ADR 0022), and two pools of",
+    "one type sharing a pity counter."
+  ],
+
+  "game": { "id": "tidewater", "displayName": "Tidewater", "energyUnit": "Stamina" },
+  "sequence": 0,
+  "label": "1.0",
+  "attribution": "Synthetic fixture authored for Storm Almanac. Not derived from any published game data.",
+
+  "provenance": [
+    {
+      "id": "invented",
+      "origin": "AUTHORED_FIXTURE",
+      "detail": "Written by hand for the pull planner's route tests. Not observed anywhere, because there is nowhere to observe it.",
+      "observedOn": "2026-09-28"
+    }
+  ],
+  "sourcedBy": "invented",
+
+  "items": [
+    { "id": "tide-ticket", "displayName": "Tide Ticket", "rarity": { "label": "5*", "rank": 5 }, "category": "currency" },
+    { "id": "tide-card",   "displayName": "Tide Card",   "rarity": { "label": "5*", "rank": 5 }, "category": "currency" },
+    { "id": "shell",       "displayName": "Shell",       "rarity": { "label": "3*", "rank": 3 }, "category": "material" }
+  ],
+
+  "entities": [],
+
+  "banners": [
+    {
+      "id": "tide-certain",
+      "displayName": "The Certain Tide",
+      "bannerType": "tide",
+      "pityScope": "BANNER_TYPE",
+      "baseRates": [ { "rarity": { "label": "S", "rank": 3 }, "rate": 0.005 } ],
+      "pityRules": [ { "rarity": { "label": "S", "rank": 3 }, "hardAt": 60 } ],
+      "floors": [],
+      "featured": { "chanceAtHit": 1.0, "guaranteeAfterLoss": 1 },
+      "pullPrice": { "currency": "tide-ticket", "perPull": 250 },
+      "availability": { "closesAt": "2099-01-01T00:00:00Z" }
+    },
+    {
+      "id": "tide-split",
+      "displayName": "The Split Tide",
+      "bannerType": "tide",
+      "pityScope": "BANNER_TYPE",
+      "baseRates": [ { "rarity": { "label": "S", "rank": 3 }, "rate": 0.005 } ],
+      "pityRules": [ { "rarity": { "label": "S", "rank": 3 }, "hardAt": 60 } ],
+      "floors": [],
+      "featured": { "chanceAtHit": 0.7, "guaranteeAfterLoss": 1 },
+      "pullPrice": { "currency": "tide-ticket", "perPull": 250 },
+      "availability": { "closesAt": "2099-01-01T00:00:00Z" }
+    },
+    {
+      "id": "tide-gone",
+      "displayName": "The Tide That Went Out",
+      "bannerType": "tide",
+      "pityScope": "BANNER_TYPE",
+      "baseRates": [ { "rarity": { "label": "S", "rank": 3 }, "rate": 0.005 } ],
+      "pityRules": [ { "rarity": { "label": "S", "rank": 3 }, "hardAt": 60 } ],
+      "floors": [],
+      "featured": { "chanceAtHit": 1.0, "guaranteeAfterLoss": 1 },
+      "pullPrice": { "currency": "tide-ticket", "perPull": 250 },
+      "availability": { "closesAt": "2020-01-01T00:00:00Z" }
+    },
+    {
+      "id": "tide-unpriced",
+      "displayName": "The Unpriced Tide",
+      "bannerType": "other",
+      "pityScope": "BANNER_TYPE",
+      "baseRates": [ { "rarity": { "label": "S", "rank": 3 }, "rate": 0.005 } ],
+      "pityRules": [ { "rarity": { "label": "S", "rank": 3 }, "hardAt": 60 } ],
+      "floors": [],
+      "featured": { "chanceAtHit": 1.0, "guaranteeAfterLoss": 1 }
+    }
+  ],
+
+  "stages": [],
+
+  "crafts": [
+    {
+      "id": "exchange-card",
+      "consumes": [ { "item": "tide-card", "quantity": 1 } ],
+      "produces": [ { "item": "tide-ticket", "quantity": 1 } ]
+    }
+  ],
+
+  "shops": [],
+
+  "rewards": [
+    {
+      "id": "daily-bar-100",
+      "cadence": "DAILY",
+      "grants": [ { "item": "tide-card", "quantity": 30 } ],
+      "requires": { "measure": "daily-bar", "atLeast": 100 }
+    },
+    {
+      "id": "arena-10",
+      "cadence": "WEEKLY",
+      "grants": [ { "item": "tide-card", "quantity": 100 }, { "item": "shell", "quantity": 5 } ],
+      "requires": { "measure": "arena", "atLeast": 10 }
+    },
+    {
+      "id": "chores-1",
+      "cadence": "WEEKLY",
+      "grants": [ { "item": "shell", "quantity": 3 } ],
+      "requires": { "measure": "chores", "atLeast": 1 }
+    }
+  ],
+
+  "upgrades": []
+}

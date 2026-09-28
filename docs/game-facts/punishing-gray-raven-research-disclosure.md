@@ -1193,3 +1193,124 @@ Skill Points go 1, then 2 five times, 3 five times, 5 three times.
 costs what it did; a plan from a level between 5 and 17 can now be asked for at
 all, which is what D5's rehearsal stalled on (S6) — a reader at Lv 10 had to
 record 4 and was charged for six levels already paid.
+
+## 2026-09-28 — the live banner, and what the dailies pay
+
+**C1 needs a live banner and Selena's closes 10/01.** One screenshot, taken by
+the maintainer on 2026-09-28 on 4.8.0 "Anchored in Faith", research type
+**Crucible** ("Crucible Event Research"), marked NORMAL, headed "Crucible
+Research".
+
+| | Read off the screen |
+|---|---|
+| Pools in the sidebar | **Crucible Event Construct** (selected), **Fate Crucible Event Construct**, Rerun · Previous Characters, Weapon · Weapon Target, CUB |
+| Featured | **Adelyde: Anabasis**, "Dark Overlinker" |
+| Window | **09/24 – 11/04**, beside a clock marked TIME **23:00** |
+| Counter | "S-Rank Character Researched **0/60**" |
+| Floor | "Guaranteed A-Rank or above character in 10 pulls" |
+| Price | Research ×1 **250**, ×10 **2500**, both on a ticket icon |
+| Also on the screen | "Total Pulls: 0" over a track of rewards at 20 / 40 / 60 / 80 / … pulls; a **Direct Exchange** button; an INFO button |
+
+**What it settles, and what it only suggests:**
+
+- **It runs to 11/04**, which is long enough for C1's exit to be checked against it.
+- **`0/60` is the Arrival archetype's counter shape**, a hard wall at 60, not the
+  Themed one's `x/80~100`. That is an inference from the counter, not a reading
+  of the rates: the base rate and the *rate in S-Rank pool* are on panels this
+  screenshot does not show.
+- **"Crucible" is a pool name this note has not seen before.** Whether it is
+  the same *type* as Arrival Construct for inheritance is not read.
+- **The ticket is not named.** Its icon matches the second balance in the top
+  bar; nobody opened it.
+- **23:00 is presumably the close, in UTC.** The format matches Karenina's
+  "09/23 23:00", and the server clock is UTC (2026-09-19). The zone is not
+  printed on this screen.
+- **The pull-count track is new and nothing models it.** Its items are marked
+  *Limited* and *SUPPLY*, ×1500 at 20, 60 and 80, one item at 40; none opened.
+  If they are 1 500 of the pull ticket, every twenty pulls refunds six, which
+  changes the odds and not only the income.
+
+**Answered by the maintainer the same day, asked how each was read:**
+
+- **The dailies pay 30 Black Cards and the weeklies 1 000**, read off the
+  mission screens. Each mission carries its own Black Card amount; the 30 and
+  the 1 000 are what **all** of them pay together. The per-mission amounts were
+  not transcribed, so a reader who finishes some of them is owed a share
+  nobody has written down.
+- **The Black Card grades 5★**, read off the same mission screens.
+- **The Crucible pool's rate in S-Rank pool is 100%.** Its **S-Rank base rate
+  is not yet read.**
+- **The pull ticket is the Event Construct R&D Ticket**, the one Selena's pool
+  spends.
+- **The pull-count track pays 1 500 Event Construct R&D Tickets** at 20, 60
+  and 80 pulls, i.e. six pulls back each time. The item at 40 and anything
+  past 80 are not read.
+- **Direct Exchange trades Black Cards for Event Construct R&D Tickets 1:1**,
+  the maintainer's answer when asked what it trades. That settles the 1:1 the
+  2026-09-18 note carried only as a report.
+- **The gold 5★ card on the Phantom Pain Cage's 1 000 000 tier is the Black
+  Card**, ×15 a week, the maintainer's identification. The tier was written
+  short until now.
+
+**One contradiction, recorded rather than smoothed over.** The 2026-09-18
+reading said the two axes pair: a wall of 60 went with 70% and a floating
+80–100 went with 100%, so there were *two archetypes and not four*. Crucible
+shows a counter of `0/60` **and** 100%. Either Crucible is a third archetype
+or the pairing was a coincidence of the two banners read. The base rate will
+say which it looks like; the pairing claim above stands only for those two.
+
+### Answered later the same day
+
+- **The Crucible pool's S-Rank base rate is 0.50%, read off its Drop Details
+  panel**, and the Fate Crucible pool's 1.50%. Its guarantee is carried
+  **between Crucible pools only**. With the 100% above, the Crucible pool is a
+  wall of 60 that hands the featured unit over on the first S-Rank, so the
+  worst case is **60 pulls, not 120**. Written in sequence 17 as its own
+  `bannerType`; the Fate pool is not written, because nobody has read its
+  guarantee.
+- **The close, 11/04 23:00, is UTC**, the server's clock (the maintainer). The
+  opening hour on 09/24 was not read.
+- **The daily missions fill one progress bar to 100**, and it pays Black Cards
+  at three points: **5 at 60, 10 at 80, 15 at 100**, the 30 above.
+- **The weeklies are twelve missions**; all twelve together pay the 1 000.
+
+**The pull-count track, off two more screenshots.** It resets with the pool
+and runs to **900 pulls**. As read, tier by tier:
+
+| Pulls | 20 | 40 | 60 | 80 | 100 | 120 | 140 | 160 | 180 | 200 | 220 | 240 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Pays | ticket ×1500 | her weapon ×1 | ticket ×1500 | ticket ×1500 | item ×1 | ticket ×1500 | ticket ×1500 | item ×1 | ticket ×1500 | ticket ×1500 | item ×1 | ticket ×1500 |
+
+The "ticket" is the Event Construct R&D Ticket, marked *Limited*. The items at
+100 and 220 look the same (a red piece, six stars), and the one at 160 is gold
+and labelled *WEAPON…*; none of the three was opened.
+
+**The pattern repeats every 60 pulls, not every 40.** The maintainer
+described it as "every 40 pulls", and the screenshots show something else:
+tickets at every 20th pull except the 40th of each 60 (40, 100, 160, 220),
+which pays an item. **The screens are what is recorded.** Taken to 900, that
+is **30 ticket tiers, 45 000 tickets, 180 pulls back**, i.e. twelve pulls back
+in every sixty. Only 20 to 240 were seen; that it repeats to 900 is the
+maintainer's report.
+
+Nothing models this yet. It needs a track on the banner and a "Total Pulls"
+counter per reader per pool. Leaving it out makes a budget dearer than the
+truth, never cheaper.
+
+### Selena's close, and what the Fate Arrival pool counts
+
+**One more screenshot, 2026-09-28:** the Fate Arrival Target pool on Selena:
+Pianissimo — *70% rate in S-Rank pool*, **09/17 – 10/01, TIME 06:59**, the
+window read on 2026-09-18, and now in a zone: the pool screens show the
+server's clock, UTC (the maintainer's answer above). **Sequence 18** writes
+the close, `2026-10-01T06:59:00Z`, on the Arrival Construct banner.
+
+**The Fate Arrival Construct pool counts `12/80~100`** — a floating guarantee
+— **at 70%.** So the Fate pools carry the floating guarantee (Fate Crucible,
+1.50% base; Fate Arrival, 80–100) and the plain pools the wall of 60, while
+the featured rate is set per banner (70% Arrival, 100% Crucible). **That
+reading supersedes the 2026-09-18 table's pairing of "Arrival" with "Themed"**,
+which may have been a plain pool and a Fate pool read side by side; the
+Themed pool's own label was not re-read, so this is recorded as a likely
+explanation, not a finding. The Fate Arrival pool is not written: its base
+rate was not read on this screen, and it closes in three days.

@@ -101,6 +101,10 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
 
   const energyUnit = games.data?.games.find((published) => published.id === game)?.energyUnit ?? 'energy';
   const hasGoals = (goals.data?.goals.length ?? 0) > 0;
+  // Only the ladders that pay for something a plan can spend. The daily
+  // missions pay only Black Cards, and asking about them here would be a
+  // question that moves no plan; the pull screen asks it instead.
+  const planLadders = (measures.data?.measures ?? []).filter((ladder) => ladder.paysForPlans !== false);
 
   return (
     <div className="space-y-4">
@@ -175,7 +179,7 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
           heading. Most games have no ladder at all and a question with no answers
           under it reads as something broken.
         */}
-        {(measures.data?.measures.length ?? 0) > 0 && (
+        {planLadders.length > 0 && (
           <section className="card space-y-3">
             <div>
               <h2 className="font-medium">How far do you get?</h2>
@@ -185,7 +189,7 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
                 the plan dearer than the truth rather than cheaper, and it will say so.
               </p>
             </div>
-            {measures.data?.measures.map((ladder) => (
+            {planLadders.map((ladder) => (
               <Ladder
                 key={ladder.measure}
                 ladder={ladder}

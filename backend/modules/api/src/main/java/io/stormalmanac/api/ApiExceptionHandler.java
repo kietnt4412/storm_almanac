@@ -29,6 +29,11 @@ public class ApiExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
     }
 
+    @ExceptionHandler(UnanswerableException.class)
+    ProblemDetail unanswerable(UnanswerableException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
+    }
+
     /**
      * A malformed identifier is the caller's mistake, not a server fault.
      *

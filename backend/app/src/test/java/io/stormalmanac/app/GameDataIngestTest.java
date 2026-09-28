@@ -152,14 +152,21 @@ class GameDataIngestTest extends SharedDatabaseTest {
         // zero, would turn a tier only some readers collect into one everybody
         // does, and nothing else in the pipeline would notice.
         assertThat(loaded.rewards())
-                .hasSize(9)
-                .allSatisfy(reward -> assertThat(reward.requires().measure())
-                        .isEqualTo("phantom-pain-cage-score"));
-        assertThat(loaded.rewards())
-                .extracting(reward -> reward.requires().atLeast())
+                .extracting(reward -> reward.requires().measure(), reward -> reward.requires().atLeast())
                 .containsExactlyInAnyOrder(
-                        30_000, 90_000, 120_000, 360_000, 500_000,
-                        700_000, 900_000, 1_000_000, 1_100_000);
+                        org.assertj.core.groups.Tuple.tuple("phantom-pain-cage-score", 30_000),
+                        org.assertj.core.groups.Tuple.tuple("phantom-pain-cage-score", 90_000),
+                        org.assertj.core.groups.Tuple.tuple("phantom-pain-cage-score", 120_000),
+                        org.assertj.core.groups.Tuple.tuple("phantom-pain-cage-score", 360_000),
+                        org.assertj.core.groups.Tuple.tuple("phantom-pain-cage-score", 500_000),
+                        org.assertj.core.groups.Tuple.tuple("phantom-pain-cage-score", 700_000),
+                        org.assertj.core.groups.Tuple.tuple("phantom-pain-cage-score", 900_000),
+                        org.assertj.core.groups.Tuple.tuple("phantom-pain-cage-score", 1_000_000),
+                        org.assertj.core.groups.Tuple.tuple("phantom-pain-cage-score", 1_100_000),
+                        org.assertj.core.groups.Tuple.tuple("daily-missions", 60),
+                        org.assertj.core.groups.Tuple.tuple("daily-missions", 80),
+                        org.assertj.core.groups.Tuple.tuple("daily-missions", 100),
+                        org.assertj.core.groups.Tuple.tuple("weekly-missions", 12));
     }
 
     private static Upgrade upgradeOf(GameDefinition definition, String id) {
