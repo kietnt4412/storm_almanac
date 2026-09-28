@@ -162,6 +162,12 @@ export function EntityPage() {
  * flaming-chord-5`, 166 of them in one list for one construct (T7). Each track
  * is folded to its range, because eight skills on one curve are 136 rows and a
  * reader looking for one skill should not scroll past the other seven.
+ *
+ * <p>A step's EXP comes first, because on a level step it is the price, and
+ * until T8 such a row said nothing at all: the route served item costs only.
+ * A step with no price at all says "Free" (T9), because a bare row reads as
+ * one nobody priced — and a step with no row is the unread kind, not this. The
+ * plan treats it as free too, so the page and the solver say the same thing.
  */
 export function StepCosts({ steps, order }: { steps: UpgradeStep[]; order?: string[] }) {
   const tracks = tracksOfGraph(steps);
@@ -195,9 +201,9 @@ export function StepCosts({ steps, order }: { steps: UpgradeStep[]; order?: stri
                             {label(step.fromState)} → {label(step.toState)}
                           </span>
                           <span className="muted">
-                            {step.costs
+                            {[...(step.progress ?? []), ...step.costs]
                               .map((cost) => `${cost.quantity.toLocaleString()} ${cost.displayName}`)
-                              .join(', ')}
+                              .join(', ') || 'Free'}
                           </span>
                         </li>
                       ))}

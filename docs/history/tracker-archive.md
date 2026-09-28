@@ -31,6 +31,17 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**The strangers' notes, T1–T9.**~~ **Moved out of the tracker 2026-09-28 (forty-ninth session)**, when T8 and T9 closed the last of them. T1–T3, T6 and T7 shipped in [PR #58](https://github.com/kietnt4412/storm_almanac/pull/58); T8 and T9 are the forty-ninth session-log entry. The section as it stood:
+      - Five strangers completed a plan unhelped (the maintainer's report). **Nobody stalled, so the notes are Track C's input.** The screenshots came from a returning browser serving **pre-sequence-11 data**; what each stranger saw is unknown.
+      - [x] **T1 — Stale game data (a bug).** The worker served "the latest" from cache, and the plan named its steps from that stale graph. Fixed 2026-09-28 (`gameDataCaching.ts`, tested against real URLs).
+      - [x] **T2 — Profiles can be renamed and deleted** (note 1), 2026-09-28: `PATCH`/`DELETE /api/me/profiles/{id}`, the schema cascades the rest, another account's is 404; a row control on the home page. Driven locally.
+      - [x] **T3 — The plan's summary** (note 3), 2026-09-28: a note carries its kind (`Note`, wire `remarks`); steps as ranges by section, a ladder's tiers joined, warnings shown, the workings folded. Driven on the screenshot's plan.
+      - [x] **T4, T5 — tags, sections, two columns** (notes 2, 4, 5): **already there, hidden by T1.** Driven 2026-09-28 on sequence 15: five headings, tag first, two columns at 1280, one at 375. No code.
+      - [x] **T6 — Adding someone records them at every track's base** (found driving T5); survived a reload, driven.
+      - [x] **T7 — The character page names its steps** by section and track, each folded to its range. Driven.
+      - [x] **T8 — A level step's EXP price is not on the upgrades route**, so those rows show no cost on the character page. Fixed 2026-09-28 (forty-ninth): `UpgradeStepView.progress`, EXP first on the row.
+      - [x] **T9 — A free step and an unread one look the same** (found driving T8). A step with no price now says "Free", 2026-09-28 (forty-ninth), agreed by the maintainer.
+
 - [x] ~~**D5's rehearsal and Phase 4's exit.**~~ **Moved out of the tracker 2026-09-28 (forty-eighth session)**, when Phase 4 closed. The two sections as they stood:
       - **D5's rehearsal — each stall, fixed or cut.** All ten closed: S1–S5 2026-09-25/26, S7–S10 and the smaller hesitations 2026-09-26, S6 2026-09-26 by a reading (sequence 15). The third run (forty-fifth, `rehearsal-3`) completed; nothing it found is open. The list is empty — D5's reversal trigger.
       - **Held — Phase 4 scope, and the maintainer decides.** N30, N33, N20, B5 and N41 are done or cut; what is left is the exit, held by D5 until the rehearsal's stall list is empty — which it is since 2026-09-26, so the exit is live. With strangers: found where players already are (the game's subreddit, Discord servers), not among people the maintainer knows; the Google client is in *Testing* — list each one or publish the app. Watch, answer nothing, record where each stalls; those notes close the phase.
@@ -3198,6 +3209,41 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-28 (forty-ninth) — T8: a level step's price was on the server all along, and the route dropped it.**
+
+**The remote, checked first:** PR #58 (T1–T3, T6, T7) merged at 02:55Z; its
+`main` run `36371657237` green; `/api/health` reported `07ff98a`, #58's merge.
+No PR open. The one unreproduced `:app:test` failure of the forty-eighth did not
+recur on CI.
+
+**T8.** Every PGR level step is priced only in EXP — `costs: []`, `progress:
+[{ character-exp, … }]` — and `GameDataReadModel.upgrades` mapped `costs` and
+the four words and nothing else, so the character page's Level track read
+"1 → 2" and then nothing, for all thirteen links. The shortfall route already
+counted EXP (`ShortfallProgressTest`); only the catalog half was blind.
+`UpgradeStepView` now carries `progress`, a `ProgressView(kind, displayName,
+quantity)` named by `nameOfProgress` (ADR 0028) — **a separate list, not folded
+into `costs`**, because nothing holds EXP and a client that summed it into a bag
+would be wrong. `totalCost` is unchanged and still items only. The page puts
+EXP first on the row, since on a level step it *is* the price; the wire type
+marks the field optional so a page a deploy ahead of its server renders as
+before. Test-first in `GameDataApiTest`, publishing the authored bundle over
+HTTP and asking Lacrimosa's `level-2`: 1 000 Character EXP.
+
+**Driven** against sequence 15 locally: "1 → 2 · 1,000 Character EXP" through
+"75 → 80 · 132,000 Character EXP". **"2 → 10" still reads bare, and that is
+correct** — the bundle records it free (one Pod (M) already carries a construct
+to Lv 10), a reading and not a hole. A bare row saying *free* and a bare row
+saying *unread* look identical on the page, which is the next thing a stranger
+could stall on; asked of the maintainer rather than decided (plan first).
+
+**T9, agreed the same session:** a step with no price at all now says "Free".
+That is the right word rather than a guess because an *unread* step has no row
+— the bundle keeps the nine unpriced levels as prose precisely so that a row
+always means a reading — and because the solver already plans it as free, so the
+page and the plan now say the same thing. Driven: of Lacrimosa's 166 rows,
+exactly one reads "Free", and it is 2 → 10. Frontend 87 tests, backend 495.
 
 **2026-09-28 (forty-eighth) — Phase 4 closes on five strangers, and the first thing their notes found was a cache.**
 

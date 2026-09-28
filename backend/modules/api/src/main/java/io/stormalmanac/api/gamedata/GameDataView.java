@@ -143,6 +143,11 @@ public final class GameDataView {
      * <p>The four words are what the game calls the step's states and where its
      * track sits (ADR 0032). Each is null when the bundle gave none, which is
      * every step before sequence 11; a page falls back to the ids.
+     *
+     * <p>{@code progress} is what the step needs that no inventory holds — EXP —
+     * and is separate from {@code costs} because it is not an item: nobody has
+     * a stack of it, and a client that summed it into a bag would be wrong. A
+     * PGR level step has no item cost at all, so until T8 its row said nothing.
      */
     public record UpgradeStepView(
             String id,
@@ -152,7 +157,14 @@ public final class GameDataView {
             String fromName,
             String toName,
             String section,
-            String tag) {}
+            String tag,
+            List<ProgressView> progress) {}
+
+    /**
+     * An amount of a progress kind, named by the bundle's word for it (ADR 0028)
+     * or by the kind itself when it has none.
+     */
+    public record ProgressView(String kind, String displayName, int quantity) {}
 
     /** One change in a patch diff, flattened the way {@code Change} already is. */
     public record ChangeView(String axis, String kind, String subject, String detail, String before, String after) {}

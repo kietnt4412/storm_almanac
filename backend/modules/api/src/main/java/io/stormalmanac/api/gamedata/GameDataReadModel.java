@@ -16,6 +16,7 @@ import io.stormalmanac.api.gamedata.GameDataView.ItemView;
 import io.stormalmanac.api.gamedata.GameDataView.ItemsResponse;
 import io.stormalmanac.api.gamedata.GameDataView.MeasureView;
 import io.stormalmanac.api.gamedata.GameDataView.MeasuresResponse;
+import io.stormalmanac.api.gamedata.GameDataView.ProgressView;
 import io.stormalmanac.api.gamedata.GameDataView.ProvenanceView;
 import io.stormalmanac.api.gamedata.GameDataView.RankView;
 import io.stormalmanac.api.gamedata.GameDataView.RarityView;
@@ -206,7 +207,10 @@ public class GameDataReadModel {
                 .map(upgrade -> new UpgradeStepView(
                         upgrade.id(), upgrade.fromState(), upgrade.toState(), costs(upgrade.costs(), items),
                         upgrade.labels().fromName(), upgrade.labels().toName(),
-                        upgrade.labels().section(), upgrade.labels().tag()))
+                        upgrade.labels().section(), upgrade.labels().tag(),
+                        upgrade.progress().stream()
+                                .map(p -> new ProgressView(p.kind(), data.nameOfProgress(p.kind()), p.quantity()))
+                                .toList()))
                 .toList();
 
         // The entity, because the response carries its summary, and then every
