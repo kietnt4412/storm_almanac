@@ -72,8 +72,9 @@ being finished with is.
 - **The remote, last checked 2026-09-28 (fiftieth) — re-check it, do not trust it, and check three things:**
   which PRs merged, **the last `main` run**, and **the SHA `/api/health` reports** — a red `main` run once kept
   #46 off production with nothing showing it (archive, forty-second).
-  [PR #59](https://github.com/kietnt4412/storm_almanac/pull/59) (T8, T9) merged 2026-09-28 03:36Z; its
-  `main` run `36376650286` green; **production reports `59c6d1f`**, #59's merge. C1 is committed on `dev`, not pushed.
+  [PR #60](https://github.com/kietnt4412/storm_almanac/pull/60) (C1, sequences 17–18) merged 2026-09-28 10:05Z; its
+  `main` run `36407578470` green; **production reports `5df07e7`**, #60's merge — `/banners`, `/measures` flags and
+  `/pulls` checked live the same hour. No PR open.
   **Both databases hold sequence 18** since 2026-09-28 (Neon 10:01:03Z, local 10:02:13Z), each read back as *no changes*;
   **Neon skipped 17** (16 → 18, twelve changes). Production on `59c6d1f` serves 18 and was healthy right after.
   Stale on eight of nine checks, so re-check it rather than read it. B6 means a commit on `dev` with no PR open is still built.
@@ -231,7 +232,7 @@ works". It does not mean that:
 **Phase 4 closed 2026-09-28**, after D5's rehearsal closed all ten stalls (S1–S10, archive) — every Phase 4 item
 [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-> **Resume here (2026-09-28, fiftieth):** **C1 is built and driven locally, and its exit is not met yet.** Commits on `dev` (ADR 0034, sequences 17 and 18, the pull planner), not pushed. In order: (1) ~~sequence 18 on Neon~~ **done**; (2) a PR from `dev`, merged after its run is green; (3) a signed-in reader asks `/pulls` on production for Adelyde's banner — that is the exit. **N39 closed by the readings.** Worth doing in C1 if the maintainer agrees: model the Crucible pull track. N38, N18, N19, N43 held.
+> **Resume here (2026-09-28, fiftieth):** **C1 is deployed (#60, `5df07e7`) with sequence 18 in both databases; its exit waits on one thing:** the maintainer, signed in on production, asks `/pulls` for Adelyde's banner and reports what it said. Tick C1 only on that report. **N39 closed by the readings.** Worth doing in C1 if the maintainer agrees: model the Crucible pull track. N38, N18, N19, N43 held.
 
 **The strangers' notes, T1–T9, are all closed** and [in the archive](docs/history/tracker-archive.md#completed-next-actions)
 — five strangers, nobody stalled, so the notes were Track C's input.
@@ -322,7 +323,7 @@ pool; twelve pulls back in sixty.
 
 | | Phase | Shape | **Exit** |
 |---|---|---|---|
-| [ ] | **C1 · Pull planner** | **Built and driven locally 2026-09-28 (fiftieth); not deployed.** `GET /banners`, `V18` pity per scope key, `GET/PUT /pity`, `POST /pulls` answered by the exact chain alone (maintainer), `/pulls`. **N39 closed** by the readings (sequence 17); Black Cards count through Direct Exchange (ADR 0034). Not modelled: the Crucible pull track, paid income, copy exchanges (N38, Phase 11) | A signed-in reader's stored pity and declared income answer "how likely by when" for a live banner, on their own account |
+| [ ] | **C1 · Pull planner** | **Built, driven locally, and deployed 2026-09-28 (#60); the exit awaits a signed-in reader on production.** `GET /banners`, `V18` pity per scope key, `GET/PUT /pity`, `POST /pulls` answered by the exact chain alone (maintainer), `/pulls`. **N39 closed** by the readings (sequence 17); Black Cards count through Direct Exchange (ADR 0034). Not modelled: the Crucible pull track, paid income, copy exchanges (N38, Phase 11) | A signed-in reader's stored pity and declared income answer "how likely by when" for a live banner, on their own account |
 | [ ] | **C2 · UI polish** | A visual pass over every screen, mobile first; the rehearsal's smaller hesitations. **Tested by the maintainer and Claude, not strangers** (maintainer, 2026-09-26) — a rehearsal like D5's | Every screen driven at 375 and 1280 px, and a self-run rehearsal over every screen leaves no stall unfixed or uncut |
 | [ ] | **C3 · Account features** | What a returning player wants: saved plans, progress over time, more than one goal set, what a new patch changed for *their* goals | A reader returning after a new sequence sees what it changed for their goals and plan, without asking |
 
