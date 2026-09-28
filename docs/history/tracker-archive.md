@@ -3213,6 +3213,70 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-28 (fiftieth) — C1 opens: the readings, ADR 0034, sequence 17, and a pull planner driven end to end.**
+
+**The remote, checked first:** PR #59 (T8, T9) merged at 03:36Z; its `main` run
+`36376650286` green; `/api/health` reported `59c6d1f`, #59's merge. `dev` one doc
+commit ahead, its run green. No PR open.
+
+**Track C: the maintainer chose C1 first and agreed its exit as written.** The
+plan was agreed with two changes: the readings first, and — later — a scored
+ladder asked only on the screens it moves (option *b*).
+
+**The readings, over three rounds, each asked how it was read.** The live banner
+is **Adelyde: Anabasis, Crucible Event Construct**, 09/24 – 11/04 23:00 **UTC**:
+0.50% off Drop Details, a wall of 60 (`0/60`), and **100% in the S-Rank pool** —
+so its worst case is 60, not 120, and **the 2026-09-18 note's claim that a 60
+wall always pairs with 70% was two banners' coincidence**; recorded, not
+smoothed. Its pity is carried between Crucible pools only (its own
+`bannerType`); the Fate Crucible pool (1.50%) is not written, its guarantee
+unread. The pull currency is the same Event Construct R&D Ticket. **Income:** the
+daily bar pays 5 / 10 / 15 Black Cards at 60 / 80 / 100; twelve weeklies pay
+1 000; Direct Exchange is 1 Black Card → 1 ticket; the Black Card grades 5★; and
+the Cage's unopened gold card is the Black Card, ×10 at 500 000 **and** ×15 at
+1 000 000 — the maintainer named the second, the 2026-09-19 table showed the same
+card on the first. **The pull-count track** (Crucible pools only): 1 500 tickets
+back at every 20th pull except each 60k+40th, which pays an item, to 900, reset
+per pool. **The maintainer described it as repeating every 40; the two
+screenshots show every 60, and the screens are what is recorded.** Not modelled.
+
+**ADR 0034 supersedes ADR 0029's decision 4**, whose own trigger named this
+chain: a craft with one input, one output, two items and no close is a
+conversion, and an item with a chain of them to the currency counts as currency,
+held and granted, in whole lots at every step. A recipe, a closing exchange and
+a round trip are not income, each tested.
+
+**Sequence 17**, eleven changes: the Black Card, the exchange craft, the two Cage
+tiers, three daily and one weekly reward behind `daily-missions` /
+`weekly-missions`, and the Crucible banner with its close. Provenance
+`black-card-readings`, `mission-screens`, `crucible-pool-panels`. **Published
+locally, read back as *no changes*. Neon refused** — the classifier's
+"Production Reads" on the preview, as for sequence 15 — so the commands went to
+the maintainer. **Forty days of every mission and the top of the Cage is 6 325
+Black Cards, 25 pulls**; silence is none, with six questions named.
+
+**The build.** `GET /banners` (anonymous: rate, wall, featured, worst case,
+price, window); `MeasureView.paysForPulls` / `paysForPlans`, so the plan page
+dropped the mission ladders and the pull page asks only pull income; **`V18`
+`player.pity`**, one row per profile per scope key (`type:<bannerType>` for
+PGR), last write wins because the value is the reader's screen; `GET/PUT
+/pity?banner=`; `POST /pulls` — stored counter, saved inventory, declared income
+→ chance, expected pulls, worst case from where the reader stands, horizon
+capped at the close, 422 by name for a closed or unpriced banner. **The exact
+chain answers alone** (maintainer): `EngineAgreementTest` already proves the two
+agree, and 500 000 trials a request on 0.1 CPU would re-prove it slowly. Tested
+on a synthetic `tidewater` game whose banners close in 2099 and 2020, because a
+test reading Adelyde's banner would fail from 2026-11-05. **/pulls driven**
+against sequence 17 at 1280 and 375 px: 21 893 Black Cards, counter 45, every
+mission and the top of the Cage, 37 days → **112 pulls, 100%, certain in 15**;
+three copies **31.7%, worst case 135**. The counter survives a reload; the
+Arrival counter stays apart. 513 backend tests, 90 frontend.
+
+**What is left for C1's exit:** sequence 17 on Neon (the maintainer's hand), a
+PR merged and deployed, and a signed-in reader asking on production. **Selena's
+banner has no window** (its zone was never read), so it is offered as open after
+it closes on 10/01; writing its close is a one-line reading.
+
 **2026-09-28 (forty-ninth) — T8: a level step's price was on the server all along, and the route dropped it.**
 
 **The remote, checked first:** PR #58 (T1–T3, T6, T7) merged at 02:55Z; its
