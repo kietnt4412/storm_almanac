@@ -190,7 +190,11 @@
     "the daily bar, 1 000 a week for all twelve weeklies, each behind the",
     "reader's answer) and the live banner, Adelyde: Anabasis on the Crucible",
     "Event Construct pool, closing 2026-11-04 23:00 UTC. No plan moves:",
-    "nothing a goal demands is paid in Black Cards or tickets."
+    "nothing a goal demands is paid in Black Cards or tickets.",
+    "",
+    "Sequence 18 gives Selena's pool its close, 2026-10-01 06:59 UTC: the",
+    "dates were read on 2026-09-18 and the zone on 2026-09-28, so the pull",
+    "planner stops offering it when it closes. 'selena-pool-window' sources it."
   ],
 
   "game": {
@@ -199,7 +203,7 @@
     "energyUnit": "Serum",
     "dayBoundary": { "zone": "UTC", "hour": 5 }
   },
-  "sequence": 17,
+  "sequence": 18,
   "label": "Anchored in Faith (Global 4.8.0)",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client: patch 4.7.0 \"Steering By Light\" from 2026-09-18 to 2026-09-22, and patch 4.8.0 \"Anchored in Faith\" from 2026-09-24. Numbers and text only; no game assets.",
 
@@ -299,13 +303,19 @@
       "origin": "PUBLISHER_DISCLOSURE",
       "detail": "The Crucible Event Construct pool on Adelyde: Anabasis, 2026-09-28. One screenshot of the pool screen, transcribed in a Claude Code session: research type Crucible, pools Crucible Event Construct and Fate Crucible Event Construct, the window 09/24 - 11/04 beside 'TIME 23:00', the counter 'S-Rank Character Researched 0/60', 'Guaranteed A-Rank or above character in 10 pulls', and pull buttons at 250 and 2 500 on the Event Construct R&D Ticket (which ticket it is, the maintainer, having opened it). Then the maintainer's readings of the same pool's panels: the S-Rank base rate 0.50% off Drop Details (1.50% on the Fate pool, not written), the rate in S-Rank pool 100%, and that its guarantee is carried only between Crucible pools; and that the close is in UTC, the server's clock. Same client and account, patch 4.8.0 \"Anchored in Faith\" (the maintainer). No screenshot is committed, because game assets are not allowed in this repository.",
       "observedOn": "2026-09-28"
+    },
+    {
+      "id": "selena-pool-window",
+      "origin": "PUBLISHER_DISCLOSURE",
+      "detail": "Selena: Pianissimo's pool as 'research-pool-panels' read it on 2026-09-18 (0.50% base, a wall of 60, 70% in the S-Rank pool, 250 a pull), now with its close in a zone. One screenshot of the Fate Arrival Target pool screen on 2026-09-28, transcribed in a Claude Code session: Selena: Pianissimo, '70% rate in S-Rank pool', 09/17 - 10/01 beside 'TIME 06:59', the same window read on 2026-09-18; the zone is UTC on the maintainer's answer the same day that the pool screens show the server's clock (see 'crucible-pool-panels'). The same screen shows the Fate Arrival Construct pool counting 'S-Rank Character Researched 12/80~100', a floating guarantee, which is not this banner and is not written. Same client and account, patch 4.8.0 \"Anchored in Faith\" (the maintainer). No screenshot is committed, because game assets are not allowed in this repository.",
+      "observedOn": "2026-09-28"
     }
   ],
   "sourcedBy": "weapon-upgrade-screens",
   "factProvenance": {
     "entity:selena-pianissimo": "research-pool-panels",
     "entity:karenina-effulgence": "research-pool-panels",
-    "banner:pgr-selena-pianissimo": "research-pool-panels",
+    "banner:pgr-selena-pianissimo": "selena-pool-window",
     "item:event-construct-rd-ticket": "research-ticket-tile",
     "entity:hear-the-bell": "equipment-and-resource-screens",
     "item:weapon-enhancer-iv": "equipment-and-resource-screens",
@@ -621,8 +631,10 @@
         "the bucket is the type; and the per-10 A-Rank-or-above floor is here but",
         "both engines ignore floors below the headline by design.",
         "",
-        "No availability window: the dates 09/17 - 10/01 06:59 were read, the zone",
-        "they are in was not, and Availability takes instants. That is N20.",
+        "Closes 10/01 06:59 UTC since sequence 18: the dates were read on",
+        "2026-09-18 with no zone, and on 2026-09-28 the maintainer confirmed",
+        "the pool screens show the server's clock, which is UTC. Its opening",
+        "hour on 09/17 was never read, so opensAt is absent.",
         "",
         "The stated overall S-Rank rate including the guarantee is 1.90%, which",
         "does not reproduce from 0.50% and a wall at 60 (it computes 1.925%). The",
@@ -634,6 +646,7 @@
       "displayName": "Selena: Pianissimo — Arrival Construct",
       "bannerType": "arrival-construct",
       "pityScope": "BANNER_TYPE",
+      "availability": { "closesAt": "2026-10-01T06:59:00Z" },
       "baseRates": [
         { "rarity": { "label": "S", "rank": 3 }, "rate": 0.005 }
       ],

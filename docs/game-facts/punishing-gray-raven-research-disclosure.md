@@ -1296,3 +1296,21 @@ maintainer's report.
 Nothing models this yet. It needs a track on the banner and a "Total Pulls"
 counter per reader per pool. Leaving it out makes a budget dearer than the
 truth, never cheaper.
+
+### Selena's close, and what the Fate Arrival pool counts
+
+**One more screenshot, 2026-09-28:** the Fate Arrival Target pool on Selena:
+Pianissimo — *70% rate in S-Rank pool*, **09/17 – 10/01, TIME 06:59**, the
+window read on 2026-09-18, and now in a zone: the pool screens show the
+server's clock, UTC (the maintainer's answer above). **Sequence 18** writes
+the close, `2026-10-01T06:59:00Z`, on the Arrival Construct banner.
+
+**The Fate Arrival Construct pool counts `12/80~100`** — a floating guarantee
+— **at 70%.** So the Fate pools carry the floating guarantee (Fate Crucible,
+1.50% base; Fate Arrival, 80–100) and the plain pools the wall of 60, while
+the featured rate is set per banner (70% Arrival, 100% Crucible). **That
+reading supersedes the 2026-09-18 table's pairing of "Arrival" with "Themed"**,
+which may have been a plain pool and a Fate pool read side by side; the
+Themed pool's own label was not re-read, so this is recorded as a likely
+explanation, not a finding. The Fate Arrival pool is not written: its base
+rate was not read on this screen, and it closes in three days.
