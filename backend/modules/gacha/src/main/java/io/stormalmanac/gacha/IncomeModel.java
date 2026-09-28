@@ -54,12 +54,26 @@ public interface IncomeModel {
      *                  cannot be checked
      * @param uncounted the grants dropped for standing behind a bar the reader
      *                  has not answered for, named rather than silently omitted
+     * @param converted what else was counted as pull currency, through which
+     *                  conversions, in its own units — {@code held} and
+     *                  {@code accruing} already include it (ADR 0034)
      */
     record PullBudget(
-            String currency, long held, long accruing, int perPull, List<String> uncounted) {
+            String currency,
+            long held,
+            long accruing,
+            int perPull,
+            List<String> uncounted,
+            List<Converted> converted) {
 
         public PullBudget {
             uncounted = List.copyOf(uncounted);
+            converted = List.copyOf(converted);
+        }
+
+        /** A budget counted from the pull currency alone. */
+        public PullBudget(String currency, long held, long accruing, int perPull, List<String> uncounted) {
+            this(currency, held, accruing, perPull, uncounted, List.of());
         }
 
         /**
@@ -69,6 +83,22 @@ public interface IncomeModel {
          */
         public long pulls() {
             return (held + accruing) / perPull;
+        }
+    }
+
+    /**
+     * One item counted towards a budget by converting it, so a reader can see
+     * that "26 pulls" includes their Black Cards and at what rate.
+     *
+     * @param item     the item converted, not the pull currency
+     * @param via      the crafts it goes through, in order, ending at the currency
+     * @param held     how much of the item the inventory holds, in its own units
+     * @param accruing how much of it the counted grants pay over the horizon
+     */
+    record Converted(String item, List<String> via, long held, long accruing) {
+
+        public Converted {
+            via = List.copyOf(via);
         }
     }
 }
