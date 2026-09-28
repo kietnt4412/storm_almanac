@@ -31,6 +31,9 @@ criterion; being finished with is.
 Ordered as they were done. A ticked box here means the exit criterion in the
 entry was met, not that the code exists.
 
+- [x] ~~**N42 — Read Ultima Awaken on its own screen.**~~ **Done 2026-09-28 (forty-ninth session)**, by three sittings of screenshots; sequence 16. It is **free** — the third Awaken unlocks it — which overrules the maintainer's 2026-09-25 report and agrees with `skill-pages`. The Awaken track it stands behind became N43. The line as it stood:
+      - [ ] **N42 — Read Ultima Awaken on its own screen; the maintainer will come back to it.** Sequence 12 (2026-09-25) put it on every S-rank construct at the leader unlock's price, **3 Skill Points + 25 000 Cogs, on the maintainer's report and no screen** — its own provenance entry, `ultima-awaken-report`, says so and that it contradicts `skill-pages` (no cost on its screen). Read: its button's price, whether it is one unlock or levels, and its bracket tag. **Its gate, the fourth Awaken, is not in the model** — the bundle has no Awaken track — so a plan to unlock it does not count the awakenings.
+
 - [x] ~~**The strangers' notes, T1–T9.**~~ **Moved out of the tracker 2026-09-28 (forty-ninth session)**, when T8 and T9 closed the last of them. T1–T3, T6 and T7 shipped in [PR #58](https://github.com/kietnt4412/storm_almanac/pull/58); T8 and T9 are the forty-ninth session-log entry. The section as it stood:
       - Five strangers completed a plan unhelped (the maintainer's report). **Nobody stalled, so the notes are Track C's input.** The screenshots came from a returning browser serving **pre-sequence-11 data**; what each stranger saw is unknown.
       - [x] **T1 — Stale game data (a bug).** The worker served "the latest" from cache, and the plan named its steps from that stale graph. Fixed 2026-09-28 (`gameDataCaching.ts`, tested against real URLs).
@@ -3244,6 +3247,34 @@ That is the right word rather than a guess because an *unread* step has no row
 always means a reading — and because the solver already plans it as free, so the
 page and the plan now say the same thing. Driven: of Lacrimosa's 166 rows,
 exactly one reads "Free", and it is 2 → 10. Frontend 87 tests, backend 495.
+
+**Then N42, and a report overruled by the reporter's own screens.** The
+maintainer asked what N42 needed; the answer was the button's price, whether it
+levels, and its tag. Three sittings of screenshots followed. Selena's Common
+Effect page: `[Ultima Awaken]`, Lv 1, "Max Level Reached" — and no price, because
+an unlocked page shows none, **which is exactly what `skill-pages` saw on
+2026-09-24**: the "contradiction" sequence 12 recorded was two readings of an
+unlocked page and a report. Lacrimosa's four Awaken tiers: conditions only (a
+level, a BP, and from Ultimate on twelve Resonance skills), no price, and
+**Ultimate — the third, not the fourth the report said — is the one that grants
+the Ultima item**; the maintainer corrected that on seeing it. Then the maintainer
+completed Lacrimosa's Ultimate and her Ultima Awaken was already unlocked, **with
+nothing spent**. So the 3 SP + 25 000 Cogs sequences 12–15 charged was never the
+price. The fifth time reading the client overruled an outside account, and the
+first where the account was the maintainer's own.
+
+**Sequence 16** keeps the three rows at `costs: []` rather than removing them —
+T6 records every track's base, so rosters already hold `ultima-awaken-locked`, and
+a state that vanished from the graph would strand them. The page now reads "Free"
+there (T9), which is what the game charges for the unlock; what it does not say
+is that Ultimate stands in front of it, which the row comment and N43 do.
+**Modelling the Awaken track was offered and declined on purpose** (the
+maintainer agreed): level gates alone would make Ultimate look like Lv 65 and
+nothing else, hiding twelve 6★ Resonance skills; BP is gear, not a cost; and
+Lv 35 is not a state the level chain has. `preview` against sequence 15: nine
+changes — per row, Skill Point and Cogs to none and the tag — all on
+`ultima-awaken-screen`, which replaces `ultima-awaken-report`. Bundle, plan and
+shortfall tests green.
 
 **2026-09-28 (forty-eighth) — Phase 4 closes on five strangers, and the first thing their notes found was a cache.**
 
