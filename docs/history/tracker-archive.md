@@ -3288,9 +3288,17 @@ every track's base, "owned, untouched" — the on-screen-only row is gone;
 driven through a reload. **T7:** the character page groups its steps by section
 and track, folded to each track's range. **T8 found and not fixed:** level
 steps are priced in EXP, which the upgrades route does not send, so those rows
-show no cost. **The full backend build was not run after T3** — stopped by the
-maintainer to open the PR; the planner and API modules and the three plan test
-classes ran green, and CI runs the rest. 86 frontend tests.
+show no cost. 86 frontend tests.
+
+**One `:app:test` failure nobody can name.** The full build after T3 was first
+refused as a tool call — not by the maintainer, as this entry first said — and
+when run it failed in `:app:test`, but wrote no results: the files on disk were
+the three classes of the earlier targeted run. A plain rerun passed, and a
+`--rerun` forced from scratch passed (200 app tests, 3 m 52 s); the full build
+then reported **494 tests, 0 failures, 0 skipped**. So it is a flake or an
+ordering fault, not reproduced, and the output that would name it is gone. If CI
+goes red in `:app:test` on #58, it is the same one — read the report before
+re-running.
 
 **2026-09-26 (forty-seventh) — S6 closed by a reading: the skill curve 4 → 18, sequence 15. The stall list is empty.**
 

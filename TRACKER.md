@@ -233,7 +233,7 @@ works". It does not mean that:
 **Phase 4 closed 2026-09-28**, after D5's rehearsal closed all ten stalls (S1–S10, archive) — every Phase 4 item
 [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-> **Resume here (2026-09-28, forty-eighth):** T1–T3, T6 and T7 are in a PR from `dev` — check it merged and deployed. **The full backend build was not run after T3** (the maintainer stopped it); the planner, API and plan tests were, and CI runs the rest. **Track C is open.** **Open:** T8, N42.
+> **Resume here (2026-09-28, forty-eighth):** T1–T3, T6 and T7 are in a PR from `dev` — check it merged and deployed. Full build green after T3 (494 tests), but **one `:app:test` run failed and left no report**; two forced reruns passed — if CI goes red there, it is that. **Track C is open.** **Open:** T8, N42.
 
 ### The strangers' notes (2026-09-28)
 
