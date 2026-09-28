@@ -216,6 +216,29 @@ class DeclaredIncomeModelTest {
         assertThat(answered.accruing()).isEqualTo(2_000);
     }
 
+    @Test
+    @DisplayName("a pity counter is keyed by what the banner says it is carried by")
+    void pityIsKeyedByTheBannersScope() {
+        // Two pools of one type share a counter because they share a key, and
+        // that is the whole of how the game's inheritance is expressed here.
+        assertThat(PityState.scopeKeyOf(banner(250))).isEqualTo("type:event");
+    }
+
+    @Test
+    @DisplayName("the worst case from a stored counter counts the pulls already made and the loss already carried")
+    void theWorstCaseStartsWhereTheReaderIs() {
+        PullModel split = PullModel.of(banner(250));
+        PityState fresh = PityState.fresh(PityScope.BANNER_TYPE, "type:event");
+
+        assertThat(split.worstCasePullsFrom(fresh, 1)).isEqualTo(120);
+        // 45 in: 15 to this wall, then one more wall if that hit is lost.
+        assertThat(split.worstCasePullsFrom(new PityState(PityScope.BANNER_TYPE, "k", 45, 0), 1)).isEqualTo(75);
+        // A loss already carried makes the next hit certain, so only this wall.
+        assertThat(split.worstCasePullsFrom(new PityState(PityScope.BANNER_TYPE, "k", 45, 1), 1)).isEqualTo(15);
+        // Each further copy starts fresh.
+        assertThat(split.worstCasePullsFrom(fresh, 3)).isEqualTo(360);
+    }
+
     // ── Fixtures ────────────────────────────────────────────────────────────
 
     private static Inventory holding(int tickets) {

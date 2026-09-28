@@ -1,5 +1,6 @@
 package io.stormalmanac.api.gamedata;
 
+import io.stormalmanac.api.gamedata.GameDataView.BannersResponse;
 import io.stormalmanac.api.gamedata.GameDataView.DiffResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntitiesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntityResponse;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * GET /api/games/{game}/entities                    [?version=N]
  * GET /api/games/{game}/items                       [?version=N]
  * GET /api/games/{game}/measures                    [?version=N]
+ * GET /api/games/{game}/banners                     [?version=N]
  * GET /api/games/{game}/entities/{entity}           [?version=N]
  * GET /api/games/{game}/entities/{entity}/upgrades  [?version=N]
  * GET /api/games/{game}/diff?from=N&amp;to=M
@@ -97,6 +99,15 @@ public class GameDataController {
     @GetMapping("/measures")
     public MeasuresResponse measures(@PathVariable String game, @RequestParam(required = false) Long version) {
         return readModel.measures(new GameId(game), version);
+    }
+
+    /**
+     * "What is on the banner?" — its rates, its wall, its price and its window.
+     * The reader's odds on it are {@code PullController}'s, signed in.
+     */
+    @GetMapping("/banners")
+    public BannersResponse banners(@PathVariable String game, @RequestParam(required = false) Long version) {
+        return readModel.banners(new GameId(game), version);
     }
 
     /** "What does Insight 2 cost?" — the other half. */

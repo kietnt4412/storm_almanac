@@ -6,6 +6,7 @@ import io.stormalmanac.common.id.GameId;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.gamedata.Goal;
+import io.stormalmanac.player.CarriedPity;
 import io.stormalmanac.player.Goals;
 import io.stormalmanac.player.Inventory;
 import io.stormalmanac.player.InventoryEdit;
@@ -299,6 +300,42 @@ public class JdbcPlayerStateRepository implements PlayerStateRepository {
                 VALUES (?, ?, ?, ?, ?, ?)
                 """,
                 rows);
+    }
+
+    // ── Pity ────────────────────────────────────────────────────────────────
+
+    @Override
+    @Transactional(readOnly = true)
+    public CarriedPity pityOf(ProfileId profile, String scopeKey) {
+        List<CarriedPity> rows = jdbc.query(
+                """
+                SELECT pulls_since_hit, consecutive_losses
+                  FROM player.pity
+                 WHERE profile_id = ? AND scope_key = ?
+                """,
+                (rs, row) -> new CarriedPity(
+                        profile, scopeKey, rs.getInt("pulls_since_hit"), rs.getInt("consecutive_losses")),
+                profile.value(),
+                scopeKey);
+        return rows.isEmpty() ? CarriedPity.fresh(profile, scopeKey) : rows.getFirst();
+    }
+
+    @Override
+    @Transactional
+    public void savePity(CarriedPity pity) {
+        jdbc.update(
+                """
+                INSERT INTO player.pity (profile_id, scope_key, pulls_since_hit, consecutive_losses, updated_at)
+                VALUES (?, ?, ?, ?, now())
+                ON CONFLICT (profile_id, scope_key)
+                DO UPDATE SET pulls_since_hit = EXCLUDED.pulls_since_hit,
+                              consecutive_losses = EXCLUDED.consecutive_losses,
+                              updated_at = EXCLUDED.updated_at
+                """,
+                pity.profile().value(),
+                pity.scopeKey(),
+                pity.pullsSinceHit(),
+                pity.consecutiveLosses());
     }
 
     // ── Offline sync ────────────────────────────────────────────────────────

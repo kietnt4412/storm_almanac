@@ -1,5 +1,6 @@
 package io.stormalmanac.gacha;
 
+import io.stormalmanac.gamedata.banner.BannerModel;
 import io.stormalmanac.gamedata.banner.FeaturedRule;
 import io.stormalmanac.gamedata.banner.PityScope;
 
@@ -35,6 +36,20 @@ public record PityState(PityScope scope, String scopeKey, int pullsSinceHit, int
 
     public static PityState fresh(PityScope scope, String scopeKey) {
         return new PityState(scope, scopeKey, 0, 0);
+    }
+
+    /**
+     * The key a reader's pity on this banner is carried under, as the banner's
+     * scope says: one counter for the whole game, one per banner type, or one
+     * per banner. Two banners with the same key share a counter, which for
+     * Punishing: Gray Raven is every pool of one type across its instances.
+     */
+    public static String scopeKeyOf(BannerModel banner) {
+        return switch (banner.pityScope()) {
+            case GLOBAL -> "global";
+            case BANNER_TYPE -> "type:" + banner.bannerType();
+            case BANNER -> "banner:" + banner.id().value();
+        };
     }
 
     /** True when the next hit on this rarity must hand over the featured unit. */

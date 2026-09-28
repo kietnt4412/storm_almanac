@@ -112,6 +112,18 @@ public final class DeclaredIncomeModel implements IncomeModel {
     }
 
     /**
+     * The currency and every item this model would count as it, so a screen can
+     * tell which of a game's grants are pull income without a second copy of
+     * what a conversion is.
+     */
+    public static Set<ItemId> countedAs(ItemId currency, List<Craft> crafts) {
+        Set<ItemId> counted = new java.util.LinkedHashSet<>();
+        counted.add(currency);
+        counted.addAll(routesInto(currency, crafts).keySet());
+        return counted;
+    }
+
+    /**
      * Every item with a chain of one-for-one-item conversions ending at the
      * currency, mapped to the chain that yields the most currency per unit.
      *

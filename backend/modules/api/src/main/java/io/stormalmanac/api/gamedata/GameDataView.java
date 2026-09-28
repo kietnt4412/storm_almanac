@@ -256,7 +256,47 @@ public final class GameDataView {
      * list is a 200: a game whose grants all turn up for everybody has no
      * measures, which is an answer and not an absence.
      */
-    public record MeasureView(String measure, String displayName, List<BarView> bars) {}
+    public record MeasureView(
+            String measure, String displayName, List<BarView> bars, boolean paysForPulls, boolean paysForPlans) {}
 
     public record MeasuresResponse(String game, VersionView version, List<MeasureView> measures) {}
+
+    /** What a pull costs, with the currency named so a screen need not join the catalog. */
+    public record PullPriceView(String currency, String currencyName, int perPull) {}
+
+    /**
+     * One banner, as the pull planner shows it before anybody asks it anything.
+     *
+     * <p>The numbers a reader checks against their own pool screen — the base
+     * rate, the wall, the featured split — travel as they are in the bundle,
+     * and {@code worstCasePulls} is computed by the same model both engines
+     * use, so the screen never does its own arithmetic about a guarantee.
+     *
+     * @param headline       the rarity this banner is pulled for
+     * @param drawnFrom      the bottom of a drawn guarantee's range, or null for
+     *                       a wall that is fixed
+     * @param worstCasePulls the most pulls that can pass without the featured
+     *                       unit, or null where the model refuses the banner
+     * @param pullPrice      null when nobody read what a pull costs, which the
+     *                       planner then refuses rather than answering zero
+     * @param open           whether the banner's window contains now; a banner
+     *                       with no window is open
+     */
+    public record BannerView(
+            String id,
+            String displayName,
+            String bannerType,
+            RarityView headline,
+            Double baseRate,
+            int hardAt,
+            Integer drawnFrom,
+            double featuredChance,
+            int guaranteeAfterLoss,
+            Long worstCasePulls,
+            PullPriceView pullPrice,
+            Instant opensAt,
+            Instant closesAt,
+            boolean open) {}
+
+    public record BannersResponse(String game, VersionView version, List<BannerView> banners, SourcingView sourcing) {}
 }

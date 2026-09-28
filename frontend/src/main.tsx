@@ -8,6 +8,7 @@ import { Inventory } from './routes/Inventory';
 import { Goals } from './routes/Goals';
 import { Roster } from './routes/Roster';
 import { PlanView } from './routes/PlanView';
+import { Pulls } from './routes/Pulls';
 import { Catalog } from './routes/Catalog';
 import { EntityPage } from './routes/EntityPage';
 import './index.css';
@@ -39,6 +40,7 @@ createRoot(document.getElementById('root')!).render(
             <Route path="roster" element={<Roster />} />
             <Route path="goals" element={<Goals />} />
             <Route path="plan" element={<PlanView />} />
+            <Route path="pulls" element={<Pulls />} />
             {/*
               The game is in the path for the catalog and nowhere else. A catalog
               page is the one thing here a stranger can be sent a link to, and a

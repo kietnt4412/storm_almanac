@@ -103,4 +103,17 @@ public interface PlayerStateRepository {
 
     /** Merge roster edits one key at a time, on the same three rules. */
     MergeOutcome<EntityId> mergeRoster(ProfileId profile, Collection<RosterEdit> edits);
+
+    /**
+     * The counter stored under this key, or a fresh one when the reader has
+     * never reported it — which is what a counter nobody has pulled on shows.
+     */
+    CarriedPity pityOf(ProfileId profile, String scopeKey);
+
+    /**
+     * Replace one counter. Last write wins, and deliberately: the value is the
+     * number on the reader's screen, so the latest report of it is the truth,
+     * and a device that has been offline has nothing newer to say about it.
+     */
+    void savePity(CarriedPity pity);
 }

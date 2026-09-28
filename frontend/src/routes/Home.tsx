@@ -167,6 +167,16 @@ export function Home() {
           </Step>
         ))}
       </section>
+
+      {/* Not a fifth step: a pull is not something a plan leads to, it is a
+          question asked beside one. */}
+      <Link to="/pulls" className="card block no-underline" style={{ color: 'var(--ink)' }}>
+        <span className="font-medium">Pulls</span>
+        <span className="muted block text-sm">
+          How likely you are to get the featured unit on a banner, and by when — from your own pity counter
+          and what the game pays you.
+        </span>
+      </Link>
     </div>
   );
 }

@@ -11,7 +11,10 @@ import io.stormalmanac.api.gamedata.GameDataView.EntitySummaryView;
 import io.stormalmanac.api.gamedata.GameDataView.EntityView;
 import io.stormalmanac.api.gamedata.GameDataView.GameSummaryView;
 import io.stormalmanac.api.gamedata.GameDataView.GamesResponse;
+import io.stormalmanac.api.gamedata.GameDataView.BannerView;
+import io.stormalmanac.api.gamedata.GameDataView.BannersResponse;
 import io.stormalmanac.api.gamedata.GameDataView.BarView;
+import io.stormalmanac.api.gamedata.GameDataView.PullPriceView;
 import io.stormalmanac.api.gamedata.GameDataView.ItemView;
 import io.stormalmanac.api.gamedata.GameDataView.ItemsResponse;
 import io.stormalmanac.api.gamedata.GameDataView.MeasureView;
@@ -32,6 +35,9 @@ import io.stormalmanac.common.GameDataVersion;
 import io.stormalmanac.common.id.EntityId;
 import io.stormalmanac.common.id.GameId;
 import io.stormalmanac.common.id.ItemId;
+import io.stormalmanac.gacha.DeclaredIncomeModel;
+import io.stormalmanac.gacha.PullModel;
+import io.stormalmanac.gamedata.Availability;
 import io.stormalmanac.gamedata.FactRef;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.GameDefinition;
@@ -44,17 +50,23 @@ import io.stormalmanac.gamedata.Rarity;
 import io.stormalmanac.gamedata.Reward;
 import io.stormalmanac.gamedata.Upgrade;
 import io.stormalmanac.gamedata.Word;
+import io.stormalmanac.gamedata.banner.BannerModel;
+import io.stormalmanac.gamedata.banner.PityRule;
+import io.stormalmanac.gamedata.banner.PullPrice;
 import io.stormalmanac.gamedata.catalog.Entity;
 import io.stormalmanac.gamedata.catalog.Skill;
 import io.stormalmanac.gamedata.catalog.StatCurve;
 import io.stormalmanac.gamedata.catalog.Talent;
 import io.stormalmanac.gamedata.diff.VersionDiff;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 
 /**
@@ -275,6 +287,12 @@ public class GameDataReadModel {
         }
         ladders.values().forEach(bars -> bars.sort(Comparator.comparingInt(BarView::atLeast)));
 
+        // Which ladders are pull income and which feed a plan, so each screen
+        // asks only the questions that move its own answer: "how far do you get
+        // in the daily missions" changes no plan, and asking it on the plan page
+        // is a question with no consequence. A ladder can be both — the Cage
+        // pays Scars and Black Cards — and then both screens ask it.
+        Set<ItemId> pullIncome = pullIncome(data);
         return new MeasuresResponse(
                 game.value(),
                 version(data.version()),
@@ -282,8 +300,79 @@ public class GameDataReadModel {
                         .map(ladder -> new MeasureView(
                                 ladder.getKey(),
                                 data.nameOf(Word.Subject.MEASURE, ladder.getKey()),
-                                List.copyOf(ladder.getValue())))
+                                List.copyOf(ladder.getValue()),
+                                ladder.getValue().stream()
+                                        .flatMap(bar -> bar.grants().stream())
+                                        .anyMatch(grant -> pullIncome.contains(new ItemId(grant.item()))),
+                                ladder.getValue().stream()
+                                        .flatMap(bar -> bar.grants().stream())
+                                        .anyMatch(grant -> !pullIncome.contains(new ItemId(grant.item())))))
                         .toList());
+    }
+
+    /**
+     * Every banner in one version, with what the pull planner needs to show it
+     * before it is asked anything.
+     *
+     * <p>Anonymous with the rest of the catalog: a banner's rates are the
+     * publisher's own disclosure, and only the reader's pity and balance are
+     * theirs. The odds are asked of {@code PullController}, signed in.
+     */
+    public BannersResponse banners(GameId game, Long sequence) {
+        GameDefinition data = load(game, sequence);
+        Map<ItemId, Item> items = data.itemsById();
+        Instant now = Instant.now();
+
+        return new BannersResponse(
+                game.value(),
+                version(data.version()),
+                data.banners().stream().map(banner -> banner(banner, items, now)).toList(),
+                sourcing(data, data.banners().stream().map(FactRef::of).toList()));
+    }
+
+    private static BannerView banner(BannerModel banner, Map<ItemId, Item> items, Instant now) {
+        Rarity headline = banner.headlineRarity();
+        PityRule wall = banner.pityRules().get(headline);
+        Long worstCase;
+        try {
+            worstCase = PullModel.of(banner).worstCasePulls();
+        } catch (IllegalArgumentException refused) {
+            worstCase = null;
+        }
+        PullPrice price = banner.pullPrice();
+        Availability window = banner.window();
+
+        return new BannerView(
+                banner.id().value(),
+                banner.displayName(),
+                banner.bannerType(),
+                rarity(headline),
+                banner.baseRates().get(headline),
+                wall.hardAt(),
+                wall.drawnFrom(),
+                banner.featuredRule().chanceAtHit(),
+                banner.featuredRule().guaranteeAfterLoss(),
+                worstCase,
+                price == null
+                        ? null
+                        : new PullPriceView(
+                                price.currency().value(),
+                                cost(price.currency(), price.perPull(), items).displayName(),
+                                price.perPull()),
+                window.opensAt(),
+                window.closesAt(),
+                (window.opensAt() == null || !now.isBefore(window.opensAt()))
+                        && (window.closesAt() == null || now.isBefore(window.closesAt())));
+    }
+
+    /** Every item any priced banner in this version would count as a pull (ADR 0034). */
+    private static Set<ItemId> pullIncome(GameDefinition data) {
+        Set<ItemId> counted = new HashSet<>();
+        for (BannerModel banner : data.banners()) {
+            if (banner.pullPrice() == null) continue;
+            counted.addAll(DeclaredIncomeModel.countedAs(banner.pullPrice().currency(), data.crafts()));
+        }
+        return counted;
     }
 
     /**
