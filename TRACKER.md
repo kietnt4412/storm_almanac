@@ -233,7 +233,7 @@ works". It does not mean that:
 **Phase 4 closed 2026-09-28**, after D5's rehearsal closed all ten stalls (S1–S10, archive) — every Phase 4 item
 [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-> **Resume here (2026-09-28, forty-ninth):** T8 and T9 are in a PR from `dev` — check it merged and deployed. **Track C is open**, and each phase's exit wants the maintainer's agreement before it starts. **Open:** N42 and N39, both readings only the maintainer can take (N39 is what C1's income needs); N38, N18, N19 are held for their phases.
+> **Resume here (2026-09-28, forty-ninth):** T8 and T9 are in a PR from `dev` — check it merged and deployed. **Track C is open**, and each phase's exit wants the maintainer's agreement before it starts. **Open:** N42, a reading only the maintainer can take. N39 moved into C1; N38, N18, N19 are held for their phases.
 
 **The strangers' notes, T1–T9, are all closed** and [in the archive](docs/history/tracker-archive.md#completed-next-actions)
 — five strangers, nobody stalled, so the notes were Track C's input.
@@ -265,13 +265,6 @@ Spring context and fails without a database.**
       the reading is R1999's, R1999 has no first-hand bundle, and a column no
       bundle can fill is `Availability.opensAt` again. **Do it with Phase 11's
       R1999 sourcing**, or earlier if a PGR pool turns out to sell copies.
-- [ ] **N39 — Read what the dailies and weeklies pay in Black Cards.** The one
-      reading that would make `DeclaredIncomeModel` say something. PGR's bundle
-      declares no reward granting a research ticket, so accrual is **zero and a
-      test asserts it** — an honest answer and a visibly incomplete one. Two
-      shapes to watch for: the chain is **Rainbow Card → 10 Black Cards → 1
-      ticket**, and ADR 0029 says a conversion chain may want `Craft` rather than
-      a grant; and paid income is not income this project should model at all.
 - [ ] **N18 — Put drop estimates into `SolveKey` in the same change that first
       publishes one.** The moment Phase 6 does, a plan cached against yesterday's
       rates is served as today's — the one staleness bug the key's design cannot
@@ -325,7 +318,7 @@ exits are proposed, not yet agreed** — C2's tester was settled by the maintain
 
 | | Phase | Shape | **Exit** |
 |---|---|---|---|
-| [ ] | **C1 · Pull planner** | A route and a screen over the two gacha engines and `DeclaredIncomeModel`, and `PityState` stored — the gap Phase 5 left is "a schema and a screen rather than an engine". N39's Black Cards reading makes income say something; N38 stays with Phase 11 | A signed-in reader's stored pity and declared income answer "how likely by when" for a live banner, on their own account |
+| [ ] | **C1 · Pull planner** | A route and a screen over the two gacha engines and `DeclaredIncomeModel`, and `PityState` stored — the gap Phase 5 left is "a schema and a screen rather than an engine". **N39 is C1's** (moved from *Held* 2026-09-28): read what the dailies and weeklies pay in Black Cards — until then accrual is **zero and a test asserts it**. The chain is **Rainbow Card → 10 Black Cards → 1 ticket**, which ADR 0029 says may want `Craft` rather than a grant; paid income is not modelled. N38 stays with Phase 11 | A signed-in reader's stored pity and declared income answer "how likely by when" for a live banner, on their own account |
 | [ ] | **C2 · UI polish** | A visual pass over every screen, mobile first; the rehearsal's smaller hesitations. **Tested by the maintainer and Claude, not strangers** (maintainer, 2026-09-26) — a rehearsal like D5's | Every screen driven at 375 and 1280 px, and a self-run rehearsal over every screen leaves no stall unfixed or uncut |
 | [ ] | **C3 · Account features** | What a returning player wants: saved plans, progress over time, more than one goal set, what a new patch changed for *their* goals | A reader returning after a new sequence sees what it changed for their goals and plan, without asking |
 
