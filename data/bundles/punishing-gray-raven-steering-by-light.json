@@ -170,7 +170,15 @@
     "could only record 4 and was charged for levels already paid (D5's S6).",
     "Fourteen rows replace the one, sourced by 'skill-curve-prompts', and sum",
     "to the same 41 Skill Points and 197 000 Cogs: a plan to the cap is",
-    "unchanged, and a plan from a mid-curve level is cheaper."
+    "unchanged, and a plan from a mid-curve level is cheaper.",
+    "",
+    "Sequence 16 reads Ultima Awaken on its own screens (N42) and finds it",
+    "free: the third Awaken, Ultimate, unlocks it with nothing spent, where",
+    "sequences 12 to 15 charged 3 Skill Points + 25 000 Cogs on a report. It",
+    "also gains its tag, [Ultima Awaken], and is confirmed one level. So a",
+    "plan to it is 3 Skill Points and 25 000 Cogs cheaper per construct, and",
+    "still does not count Ultimate, which the model cannot express yet.",
+    "'ultima-awaken-screen' replaces 'ultima-awaken-report' on all three rows."
   ],
 
   "game": {
@@ -179,7 +187,7 @@
     "energyUnit": "Serum",
     "dayBoundary": { "zone": "UTC", "hour": 5 }
   },
-  "sequence": 15,
+  "sequence": 16,
   "label": "Anchored in Faith (Global 4.8.0)",
   "attribution": "Punishing: Gray Raven is published by Kuro Game. These numbers were read from the English-language (Global) client: patch 4.7.0 \"Steering By Light\" from 2026-09-18 to 2026-09-22, and patch 4.8.0 \"Anchored in Faith\" from 2026-09-24. Numbers and text only; no game assets.",
 
@@ -251,10 +259,10 @@
       "observedOn": "2026-09-24"
     },
     {
-      "id": "ultima-awaken-report",
+      "id": "ultima-awaken-screen",
       "origin": "OBSERVED_IN_GAME",
-      "detail": "The maintainer's report of 2026-09-25, from playing, and NOT read off a screen in any sitting: every S-rank construct has an Ultima Awaken under Common Effect, it opens once the construct has been awakened four times, and unlocking it costs what the leader skill's unlock does (3 Skill Points and 25 000 Cogs). It contradicts skill-pages (2026-09-24), which recorded Ultima Awaken as reached by the Ultima awakening with no Skill Point or Cog cost on its screen. Recorded at the maintainer's request to have it on the roster now, and marked in TRACKER.md to be read on its own screen; until it is, this entry is the whole of the claim.",
-      "observedOn": "2026-09-25"
+      "detail": "Three sittings on 2026-09-28, all screenshots by the maintainer. (1) Selena: Pianissimo's Common Effect page (that it is Selena's is the maintainer's word; the page does not name her): 'Ultima Awaken [Ultima Awaken]', Lv 1, 'Total Level 1', 'Max Level Reached', 'Gains 3 Signal Orbs when entering battle.' So its tag is Ultima Awaken and it is one unlock of a single level. (2) Helentine: Lacrimosa's Awaken screens, four tiers, each a set of conditions with no price on its button: Elementary (Member Lv.35, Member reaches 1800 BP; a coating; 'Awakened'), Advanced (Lv.50, 3500 BP; a coating), Ultimate ('Obtain ultimate skill: 3 Signal Orbs will be obtained on debut'; Lv.65, 5000 BP, Equip 6★ Resonance Skills x12, read at 0/12; a portrait item and the item 'Ultima: Lacrimosa', whose card reads 'Constructs that have awakened their Ultima rank get 3 Signal Orbs at the start of battle', Owned 0) and Infinitas (Lv.80, 6500 BP, Equip Hypertuned Resonance Skill x12, 0/12; a locked Halo reward). (3) Helentine: Lacrimosa's Common Effect page just after the maintainer completed her Ultimate: Ultima Awaken at Lv 1, 'Max Level Reached', unlocked by the Awaken itself with no Skill Point or Cog spent (the maintainer, who did it). So Ultima Awaken costs nothing and opens with the third Awaken. That overrules the maintainer's report of 2026-09-25 (ultima-awaken-report, the sole source of sequences 12 to 15), which priced it at 3 Skill Points + 25 000 Cogs and put it after the fourth Awaken, and agrees with skill-pages (2026-09-24), which recorded no cost. That every S-rank construct has it, and so Lucia: Inverse Crown's row, rests on that report and on Selena's and Helentine's pages. Screenshots sent to a Claude Code session and not committed, because game assets are not allowed in this repository. Same client and account, patch 4.8.0 \"Anchored in Faith\" (the maintainer).",
+      "observedOn": "2026-09-28"
     },
     {
       "id": "skill-curve-prompts",
@@ -324,9 +332,9 @@
     "reward:phantom-pain-cage-900000": "phantom-pain-cage-screen",
     "reward:phantom-pain-cage-1000000": "phantom-pain-cage-screen",
     "reward:phantom-pain-cage-1100000": "phantom-pain-cage-screen",
-    "upgrade:helentine-lacrimosa-ultima-awaken-unlock": "ultima-awaken-report",
-    "upgrade:selena-pianissimo-ultima-awaken-unlock": "ultima-awaken-report",
-    "upgrade:lucia-inverse-crown-ultima-awaken-unlock": "ultima-awaken-report"
+    "upgrade:helentine-lacrimosa-ultima-awaken-unlock": "ultima-awaken-screen",
+    "upgrade:selena-pianissimo-ultima-awaken-unlock": "ultima-awaken-screen",
+    "upgrade:lucia-inverse-crown-ultima-awaken-unlock": "ultima-awaken-screen"
   },
 
   "items": [
@@ -1044,37 +1052,43 @@
         "Ultima Awaken, one per S-rank construct, written by hand rather than on",
         "the ladder: a climber's sourcedBy beats a row's there (ADR 0031), so a",
         "laddered row would be credited to Selena's and Lucia's screen sittings,",
-        "and this is not a screen reading at all. See ultima-awaken-report, which",
-        "says what it is and what it contradicts.",
+        "which never read it. See ultima-awaken-screen.",
         "",
-        "It opens only after the fourth Awaken (maintainer). This bundle has no",
-        "Awaken track, so that is not a gate here: a gate must name a state some",
-        "step reaches, and a plan to unlock it does not count the awakenings it",
-        "stands behind. Its tag on the Common Effect page is unread, so it has",
-        "none, and the roster names it from its ids."
+        "It costs nothing: completing the third Awaken, Ultimate, unlocks it at",
+        "its one level with no Skill Point or Cog spent (read 2026-09-28).",
+        "Sequences 12 to 15 priced it at 3 Skill Points + 25 000 Cogs on a report",
+        "the screens overruled. This bundle has no Awaken track, so Ultimate is",
+        "not a gate here: a gate must name a state some step reaches, and",
+        "Ultimate's conditions (Lv 65, 5000 BP, twelve 6-star Resonance skills)",
+        "are two thirds outside the model. So a plan reaches this state for",
+        "nothing and does not count the Awaken it stands behind; the rows stay",
+        "because rosters already record 'ultima-awaken-locked'."
       ],
       "id": "helentine-lacrimosa-ultima-awaken-unlock",
       "entity": "helentine-lacrimosa",
       "fromState": "ultima-awaken-locked",
       "toState": "ultima-awaken-1",
-      "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 25000 } ],
-      "section": "Common Effect"
+      "costs": [],
+      "section": "Common Effect",
+      "tag": "Ultima Awaken"
     },
     {
       "id": "selena-pianissimo-ultima-awaken-unlock",
       "entity": "selena-pianissimo",
       "fromState": "ultima-awaken-locked",
       "toState": "ultima-awaken-1",
-      "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 25000 } ],
-      "section": "Common Effect"
+      "costs": [],
+      "section": "Common Effect",
+      "tag": "Ultima Awaken"
     },
     {
       "id": "lucia-inverse-crown-ultima-awaken-unlock",
       "entity": "lucia-inverse-crown",
       "fromState": "ultima-awaken-locked",
       "toState": "ultima-awaken-1",
-      "costs": [ { "item": "skill-point", "quantity": 3 }, { "item": "cogs", "quantity": 25000 } ],
-      "section": "Common Effect"
+      "costs": [],
+      "section": "Common Effect",
+      "tag": "Ultima Awaken"
     }
   ],
 

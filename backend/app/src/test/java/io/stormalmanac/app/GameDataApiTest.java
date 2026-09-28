@@ -10,6 +10,7 @@ import io.stormalmanac.api.gamedata.GameDataView.EntityResponse;
 import io.stormalmanac.api.gamedata.GameDataView.GamesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.ItemsResponse;
 import io.stormalmanac.api.gamedata.GameDataView.MeasuresResponse;
+import io.stormalmanac.api.gamedata.GameDataView.ProgressView;
 import io.stormalmanac.api.gamedata.GameDataView.RankView;
 import io.stormalmanac.api.gamedata.GameDataView.UpgradeStepView;
 import io.stormalmanac.api.gamedata.GameDataView.UpgradesResponse;
@@ -21,6 +22,8 @@ import io.stormalmanac.gamedata.ingest.GameDataBundle;
 import io.stormalmanac.gamedata.ingest.GameDataIngestRepository;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +89,31 @@ class GameDataApiTest extends SharedDatabaseTest {
                 new CostView("gold", "Gold", 25000),
                 new CostView("sigil-greater", "Greater Sigil", 6),
                 new CostView("ore-refined", "Refined Ore", 8));
+    }
+
+    @Test
+    @DisplayName("a step priced in EXP says so, by the bundle's name for the pool")
+    void aLevelStepCarriesItsExp() throws IOException {
+        // T8, the strangers' notes of 2026-09-28: a PGR level step costs no item
+        // at all, only EXP, so a route that served costs and nothing else put a
+        // row reading "1 → 2" and then nothing on the character page.
+        GameDataBundle bundle;
+        try (InputStream in = Files.newInputStream(
+                Path.of("..", "..", "data", "bundles", "punishing-gray-raven-steering-by-light.json"))) {
+            bundle = new CanonicalBundleParser().parse(in);
+        }
+        ingest.ingestDraft(bundle);
+        ingest.publish(new GameId("punishing-gray-raven"), bundle.sequence());
+
+        UpgradesResponse upgrades = ok(http.getForEntity(
+                "/api/games/punishing-gray-raven/entities/helentine-lacrimosa/upgrades", UpgradesResponse.class));
+
+        UpgradeStepView levelTwo = upgrades.steps().stream()
+                .filter(step -> step.toState().equals("level-2"))
+                .findFirst().orElseThrow();
+
+        assertThat(levelTwo.costs()).isEmpty();
+        assertThat(levelTwo.progress()).containsExactly(new ProgressView("character-exp", "Character EXP", 1000));
     }
 
     @Test

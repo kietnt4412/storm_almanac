@@ -192,6 +192,17 @@ export interface UpgradeStep {
   toName?: string | null;
   section?: string | null;
   tag?: string | null;
+  /**
+   * What the step needs that no inventory holds, such as EXP, by the bundle's
+   * name for the pool. Absent from a server older than this page (T8).
+   */
+  progress?: ProgressCost[];
+}
+
+export interface ProgressCost {
+  kind: string;
+  displayName: string;
+  quantity: number;
 }
 
 export interface UpgradesResponse {

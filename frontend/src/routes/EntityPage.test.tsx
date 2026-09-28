@@ -246,7 +246,39 @@ describe("the character page's step costs", () => {
     expect(screen.getByText('Flaming chord')).toBeInTheDocument();
     // Each row: the two states as the track names them, then what it costs.
     const rows = screen.getAllByRole('listitem').map((row) => row.textContent);
-    expect(rows).toEqual(['Private ★1 → Private ★2', '4 → 51 Skill Point, 5,000 Cogs']);
+    // A step with no price says so, rather than reading as one nobody priced (T9).
+    expect(rows).toEqual(['Private ★1 → Private ★2Free', '4 → 51 Skill Point, 5,000 Cogs']);
     expect(screen.queryByText(/flaming-chord-/)).not.toBeInTheDocument();
+  });
+
+  // T8: a level step costs no item, only EXP, and its row said nothing.
+  it('prices a step in EXP when that is all it costs, and puts EXP first when it is not', () => {
+    render(
+      <StepCosts
+        steps={[
+          {
+            id: 'level-2',
+            fromState: 'level-1',
+            toState: 'level-2',
+            section: 'Growth',
+            costs: [],
+            progress: [{ kind: 'character-exp', displayName: 'Character EXP', quantity: 1000 }],
+          },
+          {
+            id: 'level-3',
+            fromState: 'level-2',
+            toState: 'level-3',
+            section: 'Growth',
+            costs: [{ item: 'cogs', displayName: 'Cogs', quantity: 500 }],
+            progress: [{ kind: 'character-exp', displayName: 'Character EXP', quantity: 1200 }],
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getAllByRole('listitem').map((row) => row.textContent)).toEqual([
+      '1 → 21,000 Character EXP',
+      '2 → 31,200 Character EXP, 500 Cogs',
+    ]);
   });
 });
