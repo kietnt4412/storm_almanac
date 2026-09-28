@@ -313,8 +313,15 @@ previous one's criterion is met. The "Landed" record for closed phases is
 ### Track C — the product after launch ([D6](#d6--a-third-track-for-the-product-after-launch-2026-09-26))
 
 **Open since 2026-09-28, when Phase 4's box was ticked; runs beside Phase 6; closes before Track B starts.** Not in
-[plan.html](plan.html). The invariants hold here too — a pull planner is `gacha`, so no `if (game == …)`. **The
-exits are proposed, not yet agreed** — C2's tester was settled by the maintainer 2026-09-26; no estimates yet.
+[plan.html](plan.html). The invariants hold here too — a pull planner is `gacha`, so no `if (game == …)`. **C1 was
+chosen first and its exit agreed as written** (maintainer, 2026-09-28); C2's and C3's are proposed, not agreed — C2's
+tester was settled 2026-09-26. **C1's readings are taken and sequence 17 is written, previewed and not published**
+(2026-09-28): the Black Card and Direct Exchange 1:1 (ADR 0034), the daily bar (5/10/15 at 60/80/100), the twelve
+weeklies (1 000), the Cage's Black Cards (10 + 15), and the live banner — Adelyde: Anabasis, Crucible Event Construct,
+0.50%, wall 60, **100% featured**, closing 2026-11-04 23:00 UTC
+([the note](docs/game-facts/punishing-gray-raven-research-disclosure.md#2026-09-28--the-live-banner-and-what-the-dailies-pay)).
+**Not modelled: the Crucible pull track** — 1 500 tickets at every 20th pull except each 60k+40th, to 900, reset per
+pool; twelve pulls back in sixty.
 
 | | Phase | Shape | **Exit** |
 |---|---|---|---|

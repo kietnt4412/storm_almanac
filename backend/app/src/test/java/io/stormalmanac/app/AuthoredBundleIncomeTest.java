@@ -7,6 +7,9 @@ import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.gacha.DeclaredIncomeModel;
 import io.stormalmanac.gacha.IncomeModel;
 import io.stormalmanac.gacha.IncomeModel.PullBudget;
+import io.stormalmanac.gacha.MarkovBannerEngine;
+import io.stormalmanac.gacha.PityState;
+import io.stormalmanac.gacha.PullModel;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.banner.BannerModel;
 import io.stormalmanac.gamedata.ingest.CanonicalBundleParser;
@@ -16,6 +19,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +40,7 @@ class AuthoredBundleIncomeTest {
 
     private static final ProfileId PROFILE = new ProfileId("income");
     private static final ItemId TICKET = new ItemId("event-construct-rd-ticket");
+    private static final ItemId BLACK_CARD = new ItemId("black-card");
 
     private final GameDefinition definition = load();
     private final IncomeModel income = new DeclaredIncomeModel();
@@ -66,26 +71,74 @@ class AuthoredBundleIncomeTest {
     }
 
     @Test
-    @DisplayName("nothing in this bundle grants a ticket, so forty days accrue nothing and say so")
-    void thisBundleDeclaresNoIncome() {
-        // The honest answer and a visibly incomplete one. PGR hands out research
-        // tickets — the maintainer plays daily — and no reading in this
-        // repository says how many, so the model reports zero rather than
-        // inventing a rate. A sequence that reads one will fail this test, which
-        // is the right way round: the assertion is a marker for a missing
-        // reading, not a claim that the game is stingy.
+    @DisplayName("Black Cards are tickets through Direct Exchange, held and granted alike")
+    void blackCardsAreCountedAsTickets() {
+        // One for one, 21 893 Black Cards is 87 pulls at 250 with 143 over,
+        // and the 143 buy nothing.
         PullBudget budget = income.affordableWithin(
                 definition,
                 definition.banners().getFirst(),
+                Inventory.empty(PROFILE).with(BLACK_CARD, 21_893),
+                0,
+                Map.of());
+
+        assertThat(budget.held()).isEqualTo(21_893);
+        assertThat(budget.pulls()).isEqualTo(87);
+        assertThat(budget.converted())
+                .containsExactly(new IncomeModel.Converted(
+                        "black-card", List.of("direct-exchange-black-card"), 21_893, 0));
+    }
+
+    @Test
+    @DisplayName("forty days of every mission and the top of the Cage pay 6 325 Black Cards, and silence pays none")
+    void everyBlackCardGrantStandsBehindTheReadersAnswer() {
+        // The daily bar's three points are 30 a day, forty of them 1 200; the
+        // twelve weeklies are 1 000 a week and the Cage's two tiers 25, over
+        // five whole weeks 5 125. That is 25 pulls with 75 over — and every
+        // one of those grants is behind a bar, so a reader who says nothing
+        // is told which six questions would move it.
+        BannerModel banner = definition.banners().getFirst();
+
+        PullBudget silent = income.affordableWithin(definition, banner, Inventory.empty(PROFILE), 40, Map.of());
+        PullBudget everything = income.affordableWithin(
+                definition,
+                banner,
                 Inventory.empty(PROFILE),
                 40,
-                Map.of("phantom-pain-cage-score", 1_100_000));
+                Map.of("phantom-pain-cage-score", 1_100_000, "daily-missions", 100, "weekly-missions", 12));
 
-        assertThat(budget.accruing()).isZero();
-        assertThat(budget.uncounted())
-                .as("no ticket grant is declared at all, so none can have been dropped for a bar")
-                .isEmpty();
-        assertThat(budget.pulls()).isZero();
+        assertThat(silent.accruing()).isZero();
+        assertThat(silent.uncounted()).containsExactly(
+                "phantom-pain-cage-500000 (needs phantom-pain-cage-score >= 500000)",
+                "phantom-pain-cage-1000000 (needs phantom-pain-cage-score >= 1000000)",
+                "daily-missions-60 (needs daily-missions >= 60)",
+                "daily-missions-80 (needs daily-missions >= 80)",
+                "daily-missions-100 (needs daily-missions >= 100)",
+                "weekly-missions-12 (needs weekly-missions >= 12)");
+        assertThat(everything.accruing()).isEqualTo(6_325);
+        assertThat(everything.pulls()).isEqualTo(25);
+        assertThat(everything.uncounted()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("the Crucible pool hands the featured unit over on its first S-Rank, so sixty pulls are certain")
+    void theCruciblePoolIsCertainAtItsWall() {
+        // 0.50% and a wall at 60, as the Arrival pool, but 100% in the S-Rank
+        // pool: one hit is enough, so the worst case is the wall and not 120.
+        // Its pity is its own bucket, so an Arrival counter does not leak in.
+        BannerModel crucible = definition.banners().stream()
+                .filter(banner -> banner.id().value().equals("pgr-adelyde-anabasis"))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(crucible.bannerType()).isEqualTo("crucible-event-construct");
+        assertThat(crucible.pricedPull().perPull()).isEqualTo(250);
+        assertThat(crucible.window().closesAt()).isEqualTo(Instant.parse("2026-11-04T23:00:00Z"));
+        assertThat(PullModel.of(crucible).worstCasePulls()).isEqualTo(60);
+        assertThat(new MarkovBannerEngine()
+                        .probabilityOfFeatured(crucible, PityState.fresh(
+                                crucible.pityScope(), crucible.bannerType()), 60, 1))
+                .isEqualTo(1.0);
     }
 
     @Test
