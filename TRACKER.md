@@ -233,7 +233,7 @@ works". It does not mean that:
 **Phase 4 closed 2026-09-28**, after D5's rehearsal closed all ten stalls (S1–S10, archive) — every Phase 4 item
 [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-> **Resume here (2026-09-28, forty-ninth):** T8 and T9 are in a PR from `dev` — check it merged and deployed. **Track C is open**, and each phase's exit wants the maintainer's agreement before it starts. **Open:** N42.
+> **Resume here (2026-09-28, forty-ninth):** T8 and T9 are in a PR from `dev` — check it merged and deployed. **Track C is open**, and each phase's exit wants the maintainer's agreement before it starts. **Open:** N42 and N39, both readings only the maintainer can take (N39 is what C1's income needs); N38, N18, N19 are held for their phases.
 
 **The strangers' notes, T1–T9, are all closed** and [in the archive](docs/history/tracker-archive.md#completed-next-actions)
 — five strangers, nobody stalled, so the notes were Track C's input.
