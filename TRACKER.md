@@ -209,7 +209,7 @@ works". It does not mean that:
   from a stored counter (`V18`) and the declared income, driven against sequence 17 — **not yet on production**. Two
   things make its answers dearer than the truth, never cheaper: **the Crucible pull-count track is not modelled**
   (twelve pulls back in sixty), and **multi-copy answers ignore copy exchanges** (**N38**). **Four banners are
-  first-hand and five are not (Q4).** Selena's banner has no window, so it stays offered after 10/01.
+  first-hand and five are not (Q4).** Selena's close is written in sequence 18 (10/01 06:59 UTC).
 - **One character is not a catalog.** The overcharge that made its plans wrong is closed at both ends —
   [ADR 0026](docs/adr/0026-a-crossed-gate-is-a-reached-state.md) inferred what sits *behind* a recorded state,
   [ADR 0027](docs/adr/0027-a-roster-entry-holds-the-states-an-entity-has-reached.md) (`V13`) let a reader say
@@ -231,7 +231,7 @@ works". It does not mean that:
 **Phase 4 closed 2026-09-28**, after D5's rehearsal closed all ten stalls (S1–S10, archive) — every Phase 4 item
 [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-> **Resume here (2026-09-28, fiftieth):** **C1 is built and driven locally, and its exit is not met yet.** Three commits on `dev` (ADR 0034, sequence 17, the pull planner), not pushed. In order: (1) **sequence 17 on Neon** — refused to the agent, handed to the maintainer; check which sequence Neon holds; (2) a PR from `dev`, merged after its run is green; (3) a signed-in reader asks `/pulls` on production for Adelyde's banner — that is the exit. **N39 closed by the readings.** Worth doing in C1 if the maintainer agrees: model the Crucible pull track, and write Selena's close. N38, N18, N19, N43 held.
+> **Resume here (2026-09-28, fiftieth):** **C1 is built and driven locally, and its exit is not met yet.** Commits on `dev` (ADR 0034, sequences 17 and 18, the pull planner), not pushed. In order: (1) **sequence 18 on Neon** (17 plus Selena's close; Neon may skip 17) — the maintainer is adding an auto-mode rule so the agent can publish it; check which sequence Neon holds; (2) a PR from `dev`, merged after its run is green; (3) a signed-in reader asks `/pulls` on production for Adelyde's banner — that is the exit. **N39 closed by the readings.** Worth doing in C1 if the maintainer agrees: model the Crucible pull track. N38, N18, N19, N43 held.
 
 **The strangers' notes, T1–T9, are all closed** and [in the archive](docs/history/tracker-archive.md#completed-next-actions)
 — five strangers, nobody stalled, so the notes were Track C's input.
