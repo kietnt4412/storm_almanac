@@ -161,6 +161,13 @@ public class JdbcPlayerStateRepository implements PlayerStateRepository {
                 profile.region());
     }
 
+    /** One row, and V5 and V6 cascade the rest; see the port. */
+    @Override
+    @Transactional
+    public boolean deleteProfile(ProfileId id) {
+        return jdbc.update("DELETE FROM player.profile WHERE id = ?", id.value()) > 0;
+    }
+
     @Override
     @Transactional(readOnly = true)
     public Inventory inventoryOf(ProfileId profile) {

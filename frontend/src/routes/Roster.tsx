@@ -47,20 +47,14 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
 
   const roster = effectiveRoster(stored.data?.entities ?? {}, outbox.roster);
 
-  // Entities the reader has opened but not yet said anything about. They cannot
-  // live in the roster itself, because an entity with no states *is* one that is
-  // not on the roster — that is the meaning V13 gave the absent row, and putting
-  // a placeholder there would invent a third state between owned and not.
-  const [opened, setOpened] = useState<string[]>([]);
+  // Adding someone records them, at the base of every track (T6). Until
+  // 2026-09-28 it only opened a row on screen: an entity with no states is one
+  // not on the roster (V13), so nothing was stored until a dropdown changed —
+  // and the dropdowns already showed the base, so a reader who owns her
+  // untouched had nothing to change, and lost her on reload.
   const [adding, setAdding] = useState('');
 
-  const shown = useMemo(() => {
-    const slugs = Object.keys(roster);
-    for (const slug of opened) {
-      if (!slugs.includes(slug)) slugs.push(slug);
-    }
-    return slugs;
-  }, [roster, opened]);
+  const shown = useMemo(() => Object.keys(roster), [roster]);
 
   // Every entity's graph, not only the shown ones': the add list offers only
   // someone with a track to stand on. Karenina was offered with nothing to
@@ -128,21 +122,13 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
                     {nameOf(slug)}
                   </Link>
 
-                  {/*
-                    Closing a row the reader has said nothing about is a local
-                    tidy-up: there is nothing stored to remove. Removing one with
-                    states sends null, the one answer that means "not owned" on
-                    the wire (V13).
-                  */}
+                  {/* Null is the one answer that means "not owned" on the wire (V13). */}
                   <button
                     type="button"
                     className="btn-quiet ml-auto text-sm"
-                    onClick={() => {
-                      if (states.length > 0) editRosterState(profileId, slug, null);
-                      setOpened(opened.filter((candidate) => candidate !== slug));
-                    }}
+                    onClick={() => editRosterState(profileId, slug, null)}
                   >
-                    {states.length > 0 ? `Remove ${nameOf(slug)} from the roster` : `Close ${nameOf(slug)}`}
+                    Remove {nameOf(slug)} from the roster
                   </button>
                 </div>
 
@@ -191,7 +177,9 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
           className="btn"
           disabled={!adding}
           onClick={() => {
-            setOpened([...opened, adding]);
+            // Only someone with tracks is offered, so there is always a base to stand on.
+            const tracks = tracksOf.get(adding)?.tracks ?? [];
+            editRosterState(profileId, adding, basesOf(tracks));
             setAdding('');
           }}
         >
@@ -205,4 +193,12 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
       <NextStep from="/roster" />
     </div>
   );
+}
+
+/**
+ * "Owned, untouched": the first state of every track, which is what the planner
+ * charges from and what each dropdown shows before anything is chosen.
+ */
+export function basesOf(tracks: Track[]): string[] {
+  return tracks.map((track) => track.states[0]!.state);
 }

@@ -12,6 +12,7 @@ import io.stormalmanac.api.player.PlayerView.InventoryRequest;
 import io.stormalmanac.api.player.PlayerView.InventoryResponse;
 import io.stormalmanac.api.player.PlayerView.MeResponse;
 import io.stormalmanac.api.player.PlayerView.ProfileResponse;
+import io.stormalmanac.api.player.PlayerView.RenameProfileRequest;
 import io.stormalmanac.api.player.PlayerView.RosterPatchRequest;
 import io.stormalmanac.api.player.PlayerView.RosterPatchResponse;
 import io.stormalmanac.api.player.PlayerView.RosterRequest;
@@ -39,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,7 +58,9 @@ import org.springframework.web.bind.annotation.RestController;
  * <pre>
  * GET  /api/me
  * POST /api/me/profiles
- * GET  /api/me/profiles/{profile}
+ * GET    /api/me/profiles/{profile}
+ * PATCH  /api/me/profiles/{profile}
+ * DELETE /api/me/profiles/{profile}
  * GET   /api/me/profiles/{profile}/inventory
  * PUT   /api/me/profiles/{profile}/inventory
  * PATCH /api/me/profiles/{profile}/inventory
@@ -150,6 +154,45 @@ public class PlayerController {
     @GetMapping("/profiles/{profile}")
     public ProfileResponse profile(@PathVariable String profile) {
         return ProfileResponse.of(owned.require(profile));
+    }
+
+    /**
+     * Rename a profile — the name only. Game and server are what the profile
+     * <em>is</em>: an inventory counted on one server means nothing on another,
+     * so moving one is a new profile, not an edit.
+     *
+     * <p>A blank name is refused rather than defaulted. Creating one defaults to
+     * "Main" because the reader has not said anything yet; here they have, and
+     * turning "" into "Main" would be answering a question they did not ask.
+     */
+    @PatchMapping("/profiles/{profile}")
+    public ProfileResponse renameProfile(@PathVariable String profile, @RequestBody RenameProfileRequest request) {
+        PlayerProfile held = owned.require(profile);
+        if (request.displayName() == null || request.displayName().isBlank()) {
+            throw new IllegalArgumentException("A profile needs a name; send the one to show.");
+        }
+        PlayerProfile renamed = new PlayerProfile(
+                held.id(), held.owner(), held.game(), request.displayName().strip(), held.region());
+        players.saveProfile(renamed);
+        return ProfileResponse.of(renamed);
+    }
+
+    /**
+     * Delete a profile and everything it owns. Stranger feedback on 2026-09-28:
+     * a profile made by mistake, on the wrong server, could not be taken back,
+     * and one profile per game per server meant the right one could not be made
+     * either.
+     *
+     * <p>Another account's profile is a 404 here as everywhere ({@link
+     * OwnedProfiles}), so a delete cannot be used to learn that an id exists.
+     * There is no undo and no soft delete: what goes is a player's own record of
+     * their own game, which they can type again, and keeping it after they asked
+     * for it gone would be keeping it for nobody.
+     */
+    @DeleteMapping("/profiles/{profile}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteProfile(@PathVariable String profile) {
+        players.deleteProfile(owned.require(profile).id());
     }
 
     @GetMapping("/profiles/{profile}/inventory")

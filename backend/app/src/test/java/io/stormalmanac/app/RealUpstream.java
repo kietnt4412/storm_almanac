@@ -167,6 +167,11 @@ final class RealUpstream {
         }
 
         @Override
+        public boolean deleteProfile(ProfileId id) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public void saveInventory(Inventory value) {
             throw new UnsupportedOperationException();
         }

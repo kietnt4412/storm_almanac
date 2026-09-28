@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { ApiError, getGames, getMe, signInUrl } from '../api/client';
-import { useCreateProfile } from '../profile';
+import { ApiError, getGames, getMe, signInUrl, type Profile } from '../api/client';
+import { useCreateProfile, useDeleteProfile, useRenameProfile } from '../profile';
 import { STEPS } from '../steps/Steps';
 import { usePlannerStore } from '../store/plannerStore';
 
@@ -80,28 +80,15 @@ export function Home() {
             <p className="muted">None yet.</p>
           ) : (
             <ul className="space-y-2">
-              {me.data.profiles.map((profile) => {
-                const active = profile.id === profileId;
-                return (
-                  <li key={profile.id} className="card flex items-center gap-3">
-                    <div className="grow">
-                      <div className="font-medium">{profile.displayName}</div>
-                      <div className="muted text-sm">
-                        {gameName(profile.game)} · {profile.region}
-                      </div>
-                    </div>
-                    {active ? (
-                      <span className="text-sm" style={{ color: 'var(--brand)' }}>
-                        planning for this one
-                      </span>
-                    ) : (
-                      <button type="button" className="btn-quiet" onClick={() => selectProfile(profile.id)}>
-                        Plan for this one
-                      </button>
-                    )}
-                  </li>
-                );
-              })}
+              {me.data.profiles.map((profile) => (
+                <ProfileRow
+                  key={profile.id}
+                  profile={profile}
+                  gameName={gameName(profile.game)}
+                  active={profile.id === profileId}
+                  onSelect={() => selectProfile(profile.id)}
+                />
+              ))}
             </ul>
           )}
 
@@ -181,6 +168,141 @@ export function Home() {
         ))}
       </section>
     </div>
+  );
+}
+
+/**
+ * One profile, and what its owner can do with it: plan for it, rename it,
+ * delete it. Until 2026-09-28 only the first — the first note the strangers who
+ * closed Phase 4 left, since a profile made on the wrong server could be neither
+ * fixed nor removed, and blocked the right one from being made.
+ *
+ * <p><b>Delete asks once, in the row, and says what goes.</b> Not a browser
+ * dialog, which reads as the browser asking; and not a vague "are you sure",
+ * because the thing worth knowing is that the inventory and roster typed into
+ * this profile go too, on every device.
+ */
+function ProfileRow({
+  profile,
+  gameName,
+  active,
+  onSelect,
+}: {
+  profile: Profile;
+  gameName: string;
+  active: boolean;
+  onSelect: () => void;
+}) {
+  const [mode, setMode] = useState<'idle' | 'renaming' | 'deleting'>('idle');
+  const [name, setName] = useState(profile.displayName);
+  const rename = useRenameProfile();
+  const remove = useDeleteProfile();
+  const where = `${gameName} · ${profile.region}`;
+
+  if (mode === 'renaming') {
+    return (
+      <li className="card">
+        <form
+          className="flex flex-wrap items-end gap-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            rename.mutate({ profile: profile.id, displayName: name.trim() }, { onSuccess: () => setMode('idle') });
+          }}
+        >
+          <div className="grow">
+            <label className="label" htmlFor={`rename-${profile.id}`}>
+              New name for {where}
+            </label>
+            <input
+              id={`rename-${profile.id}`}
+              className="input w-full"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              autoFocus
+            />
+          </div>
+          <button type="submit" className="btn" disabled={rename.isPending || name.trim() === ''}>
+            {rename.isPending ? 'Saving…' : 'Save'}
+          </button>
+          <button
+            type="button"
+            className="btn-quiet"
+            onClick={() => {
+              setName(profile.displayName);
+              rename.reset();
+              setMode('idle');
+            }}
+          >
+            Cancel
+          </button>
+          {rename.isError && <p className="w-full text-sm">Could not rename it: {rename.error.message}</p>}
+        </form>
+      </li>
+    );
+  }
+
+  if (mode === 'deleting') {
+    return (
+      <li className="card space-y-3" role="group" aria-label={`Delete ${profile.displayName}`}>
+        <p>
+          Delete <strong>{profile.displayName}</strong> ({where})? Its inventory, roster and goals go
+          with it, on every device, and cannot be brought back.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <button type="button" className="btn" disabled={remove.isPending} onClick={() => remove.mutate(profile.id)}>
+            {remove.isPending ? 'Deleting…' : 'Delete it'}
+          </button>
+          <button
+            type="button"
+            className="btn-quiet"
+            onClick={() => {
+              remove.reset();
+              setMode('idle');
+            }}
+          >
+            Keep it
+          </button>
+        </div>
+        {remove.isError && <p className="text-sm">Could not delete it: {remove.error.message}</p>}
+      </li>
+    );
+  }
+
+  return (
+    <li className="card flex flex-wrap items-center gap-3">
+      <div className="grow">
+        <div className="font-medium">{profile.displayName}</div>
+        <div className="muted text-sm">{where}</div>
+      </div>
+      {active ? (
+        <span className="text-sm" style={{ color: 'var(--brand)' }}>
+          planning for this one
+        </span>
+      ) : (
+        <button type="button" className="btn-quiet" onClick={onSelect}>
+          Plan for this one
+        </button>
+      )}
+      <button
+        type="button"
+        className="btn-quiet"
+        aria-label={`Rename ${profile.displayName}`}
+        onClick={() => {
+          setName(profile.displayName);
+          setMode('renaming');
+        }}
+      >
+        Rename
+      </button>
+      <button
+        type="button"
+        className="btn-quiet"
+        aria-label={`Delete ${profile.displayName}`}
+        onClick={() => setMode('deleting')}
+      >
+        Delete
+      </button>
+    </li>
   );
 }
 

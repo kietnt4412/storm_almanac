@@ -22,6 +22,7 @@ import io.stormalmanac.planner.Conversion;
 import io.stormalmanac.planner.Demand;
 import io.stormalmanac.planner.DemandResolver;
 import io.stormalmanac.planner.MipOptimizer;
+import io.stormalmanac.planner.Note;
 import io.stormalmanac.planner.Objective;
 import io.stormalmanac.planner.Optimizer;
 import io.stormalmanac.planner.Plan;
@@ -256,12 +257,29 @@ class AuthoredBundlePlanTest {
         assertThat(scarsClaimedBy(plan))
                 .as("the Scars claimed are the Scars spent, to the one")
                 .isEqualTo(500);
-        assertThat(plan.explanation().notes()).anySatisfy(note -> assertThat(note)
-                .startsWith("Counting on free income over the horizon")
-                .containsSubsequence("Phantom Pain Cage, weekly, score 30,000+ ×",
-                        "Phantom Pain Cage, weekly, score 90,000+ ×9",
-                        "Phantom Pain Cage, weekly, score 1,100,000+ ×9")
-                .doesNotContain("phantom-pain-cage-"));
+        // The rungs claimed alike are said once (T3): nine entries differing
+        // only in their bar were most of a sentence nobody could read. The
+        // bottom rung is claimed once less, so it stands apart — that
+        // difference is the plan saying which week it skips.
+        assertThat(plan.explanation().remarks()).anySatisfy(note -> {
+            assertThat(note.kind()).isEqualTo(Note.Kind.ASSUMPTION);
+            assertThat(note.text())
+                    .startsWith("Counting on free income over the horizon: "
+                            + "Phantom Pain Cage, weekly, score 30,000+ ×8, "
+                            + "Phantom Pain Cage, weekly, score 90,000+ to 1,100,000+ (8 tiers) ×9.")
+                    .doesNotContain("phantom-pain-cage-");
+        });
+        // Nine weeks of waiting is what the answer means, so it is a warning;
+        // how the answer was worked out is detail. The page shows the first
+        // and folds the second.
+        assertThat(plan.explanation().remarks())
+                .filteredOn(note -> note.text().startsWith("This takes at least 63 day(s)"))
+                .extracting(Note::kind)
+                .containsExactly(Note.Kind.WARNING);
+        assertThat(plan.explanation().remarks())
+                .filteredOn(note -> note.text().startsWith("Worked out from"))
+                .extracting(Note::kind)
+                .containsExactly(Note.Kind.DETAIL);
     }
 
     /** What the tiers the plan claims pay in Scars, read back off the bundle. */
