@@ -4,8 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -192,6 +197,38 @@ class DevSignInTest extends SharedDatabaseTest {
         assertThat(http.exchange("/api/me", HttpMethod.GET, new HttpEntity<>(browser.headers()), String.class)
                         .getStatusCode())
                 .isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * The write above passes only while the server checks the token the way
+     * production does, and Spring Security's MockMvc {@code csrf()} breaks that
+     * for every socket test sharing its context: its first use replaces the
+     * product chain's cookie repository with a session-backed one, for good.
+     * It failed this class on 2026-09-29, when a class using it first sorted
+     * before this one. {@link BrowserCsrf} is the replacement; this keeps the
+     * original out of every test source tree.
+     */
+    @Test
+    @DisplayName("no test swaps out the CSRF policy the socket tests are checked against")
+    void noTestReplacesTheCsrfRepository() throws IOException {
+        String banned = "SecurityMockMvcRequestPostProcessors" + ".csrf";
+        List<Path> roots = new ArrayList<>(List.of(Path.of("src", "test", "java")));
+        try (Stream<Path> modules = Files.list(Path.of("..", "modules"))) {
+            modules.map(module -> module.resolve(Path.of("src", "test", "java")))
+                    .filter(Files::isDirectory)
+                    .forEach(roots::add);
+        }
+        assertThat(roots.getFirst()).as("run from backend/app").isDirectory();
+
+        List<Path> offenders = new ArrayList<>();
+        for (Path root : roots) {
+            try (Stream<Path> sources = Files.walk(root)) {
+                for (Path source : sources.filter(path -> path.toString().endsWith(".java")).toList()) {
+                    if (Files.readString(source).contains(banned)) offenders.add(source);
+                }
+            }
+        }
+        assertThat(offenders).as("use BrowserCsrf.csrf() instead").isEmpty();
     }
 
     private String accountIdOf(String who) throws Exception {

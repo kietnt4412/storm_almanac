@@ -39,7 +39,7 @@ class GameDataDiffTest {
     @DisplayName("a stage that disappeared is one line, not one line per drop it had")
     void aRemovedSubjectIsASingleChange() {
         assertThat(diff.on(Axis.PROGRESSION))
-                .contains(new Change(Axis.PROGRESSION, Change.Kind.REMOVED, "stage 'pg-event-1'", null, null, null));
+                .contains(new Change(Axis.PROGRESSION, Change.Kind.REMOVED, "stage", "pg-event-1", null, null, null));
 
         // The event stage had a name, an energy cost, a window and a drop. Six
         // facts, one line — that is the whole reason subjects are diffed before
@@ -60,7 +60,7 @@ class GameDataDiffTest {
     void aChangedDropRate() {
         assertThat(diff.on(Axis.PROGRESSION))
                 .contains(new Change(Axis.PROGRESSION, Change.Kind.CHANGED,
-                        "stage 'pg-1-1'", "drop ore-rough", "1.4", "1.6"));
+                        "stage", "pg-1-1", "drop ore-rough", "1.4", "1.6"));
     }
 
     @Test
@@ -68,7 +68,7 @@ class GameDataDiffTest {
     void aChangedUpgradeCost() {
         assertThat(diff.on(Axis.PROGRESSION))
                 .contains(new Change(Axis.PROGRESSION, Change.Kind.CHANGED,
-                        "upgrade 'warden-insight-2'", "cost gold", "20000", "18000"));
+                        "upgrade", "warden-insight-2", "cost gold", "20000", "18000"));
     }
 
     @Test
@@ -79,7 +79,7 @@ class GameDataDiffTest {
         // the bundle to find out what.
         assertThat(diff.on(Axis.CATALOG))
                 .contains(new Change(Axis.CATALOG, Change.Kind.CHANGED,
-                        "entity 'warden'", "skill warden-strike rank 2 damage", "1.32", "1.28"));
+                        "entity", "warden", "skill warden-strike rank 2 damage", "1.32", "1.28"));
 
         assertThat(diff.on(Axis.CATALOG)).extracting(Change::detail)
                 .doesNotContain("skill warden-strike rank 2 cost", "skill warden-strike rank 1 damage");
@@ -90,7 +90,7 @@ class GameDataDiffTest {
     void aChangedStatCurve() {
         assertThat(diff.on(Axis.CATALOG))
                 .contains(new Change(Axis.CATALOG, Change.Kind.CHANGED,
-                        "entity 'warden'", "atk at tier 1 level 40", "415.0", "430.0"));
+                        "entity", "warden", "atk at tier 1 level 40", "415.0", "430.0"));
     }
 
     @Test
@@ -125,7 +125,7 @@ class GameDataDiffTest {
 
         assertThat(VersionDiff.between(before, after).on(Axis.PROGRESSION))
                 .containsExactly(new Change(Axis.PROGRESSION, Change.Kind.CHANGED,
-                        "game 'proving-ground'", "day rollover", "unstated", "05:00 UTC"));
+                        "game", "proving-ground", "day rollover", "unstated", "05:00 UTC"));
     }
 
     @Test

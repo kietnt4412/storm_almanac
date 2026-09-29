@@ -3352,6 +3352,106 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-29 (fifty-third, continued) — the `DevSignInTest` flake was not a flake: MockMvc's `csrf()` rewired the live server.**
+
+**What the entry below got wrong.** It called the failure "timing" and gave
+"4 of 7 full runs" and "clean `dev` passed". **Most of the passing runs never
+executed.** Environment variables and a changed `--tests` filter do not stop
+Gradle restoring `:app:test` from the build cache, so a result file could be an
+hour old and still read as a run. Once every run was forced with `--rerun`, the
+failure was **deterministic** in any run where a class using `csrf()` sorted
+before `DevSignInTest`. **Read a result file's `timestamp` before counting it
+as a run.**
+
+**The cause, from Spring Security 6.5.5's source.** The first use of
+`SecurityMockMvcRequestPostProcessors.csrf()` in an application context calls
+`WebTestUtils.setCsrfTokenRepository`. That replaces the product chain's
+`CookieCsrfTokenRepository` with `new TestCsrfTokenRepository(new
+HttpSessionCsrfTokenRepository())` on the shared `CsrfFilter` bean, and the
+replacement is permanent. In a `RANDOM_PORT` context the real Tomcat runs
+through that filter too. From then on a socket request's token is looked for in
+the HTTP session: none is found, one is generated with no `Set-Cookie`, and the
+request is refused. **A Tomcat access log showed it exactly.** The POST carried
+`XSRF-TOKEN=47c362a7-…` and `X-XSRF-TOKEN: 47c362a7-…`, matching, and was
+answered 403 with no cookie set. The dev sign-in chain is a separate
+`CsrfFilter` that nothing touched, so sign-in kept issuing cookies. **Nothing
+tripped it before C3.2**, because no class using `csrf()` sorted before `Dev…`
+until `ChangesSinceTest` did.
+
+**The fix is at the cause.** A test helper, `BrowserCsrf.csrf()`, sends an
+`XSRF-TOKEN` cookie and the same value in `X-XSRF-TOKEN`, the way a browser
+does. It replaced Spring's post-processor in all seven classes. **MockMvc
+writes now meet the real policy**, `SecurityConfig.browserCsrf()`'s
+double-submit check, where before they met a session stand-in.
+`DevSignInTest` now scans every test source tree for the old import. It was
+checked both ways: it names `SignOutTest.java` when that file's import is put
+back, and passes once the import is removed again.
+
+**Measured.** 533 backend tests (the guard is new). Green on a full `build` and
+on forced `:app:test --rerun` runs, each confirmed as executed by its
+`DevSignInTest` result timestamp.
+
+**Then the C3.3 plan was drafted**, in [docs/plans/c3.3-the-notice.md](../plans/c3.3-the-notice.md), and left for the maintainer. It proposes a line on Home's profile row and a panel above the saved plan, with upgrade changes grouped by entity and track and the raw lines behind a toggle, re-planning as the only way to clear it, and a new optional `entity`/`toState` on an upgrade change. It asks four questions. **Not agreed and not built.**
+
+**2026-09-29 (fifty-third) — C3.2 built: `/since`, what a new sequence changed for one reader.**
+
+**The remote, checked first:** PR #62 (C3.1) merged 02:37Z; its `main` run
+`36513494458` green; `/api/health` reported `6f532c6`, #62's merge, so `V19`
+and the saved plan are on production. No PR open.
+
+**C3.2.** `GET /api/me/profiles/{p}/since` answers 204 when the profile has
+never planned. When the saved sequence is the latest, it answers with an empty
+report and **solves nothing**, because Home will read it on every visit.
+Otherwise it follows ADR 0037's decision 5. The saved request is solved twice
+against today's inventory, roster and goals, once on the saved sequence and
+once on the latest. It reports both sides' energy and days, or the refusal
+either side met. Beside them it reports the progression changes that touch
+something one of the two plans uses, named in the words of the version where
+the thing still exists. Nothing is saved, so asking changes no plan.
+
+**Which changes concern a reader is read off the plans, not the goals.** The
+solver's demand resolution already walks from the roster to the target, and a
+second walk in the api module would be a second answer to disagree with. A
+change concerns the reader when it touches:
+- a stage either plan runs;
+- a shop row, craft, fodder rule or price either plan converts through;
+- a grant either plan claims;
+- an upgrade step either plan pays for, plus that step's cost items and
+  progress pool;
+- the game itself, whose day boundary moves every rotating stage.
+
+Both plans count, because a patch can remove a stage the older plan ran or add
+one only the newer plan runs. Catalog and gacha changes are left out, for the
+reasons `Axis`'s javadoc gives. **For this, `Change` now carries `about` and
+`slug`** in place of the one label, and the label is derived from them, so
+`/diff` and the CLI report read exactly as before.
+
+**Measured on real data.** Measured locally as `rehearsal-s6`, whose goals are
+Lucia to Promote 13, Lv 80 and both skills to 18. A plan was pinned with
+`?version=14` and `/since` then asked for **14 → 18**. That span holds **405
+changes, and 32 concerned this reader**: the two skills whose single derived
+4 → 18 row sequence 15 replaced with fourteen read rows. That is 28 steps added
+and 4 changed, `cogs 197000 → 26000` and `skill-point 41 → 5` on each
+skill's last step. Both solves came to **1 230 Serum over 28 days**, which
+agrees with sequence 15's own record that a plan to the cap did not move.
+Ultima Awaken (16), the Black Card readings (17) and the banners (18) were all
+left out, because this reader's plans use none of them. The answer took 0.2 s
+with both solves cached. The account's plan was then re-solved on 18, so the
+local rehearsal state is as it was. **A lesson for C3.3:** a correct report can
+be 28 lines of one reading. The notice has to group changes by the step's
+entity and track, not list them.
+
+**A flake found and not fixed.** `DevSignInTest`'s *a signed-in browser can
+write* returned 403 in **4 of 7** full runs with this change present. Security's
+debug log says `Invalid CSRF token found`. It passes alone, and in the subset of
+classes that run before it. Clean `dev` passed the one full run tried, and the
+last two runs with the change passed back to back. Nothing in C3.2 touches
+sign-in or CSRF, so this is timing. It was handed to its own task rather than
+fixed here. **If CI goes red on it, that is this flake and not C3.2.**
+
+**Measured.** 532 backend tests (527 + 5 in `ChangesSinceTest`), all green on
+the final full build. The diff tests were rewritten for the split subject.
+
 **2026-09-29 (fifty-second) — C3 chosen, its exit agreed, and C3.1 built: a saved plan.**
 
 **The remote, checked first:** PR #61 (P7.1, D7, D8) merged 02:04Z; its `main`

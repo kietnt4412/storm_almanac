@@ -49,9 +49,9 @@ public record VersionDiff(GameDataVersion from, GameDataVersion to, List<Change>
             Map<String, String> now = after.get(subject);
 
             if (was == null) {
-                changes.add(Change.added(subject.axis(), subject.label()));
+                changes.add(Change.added(subject.axis(), subject.about(), subject.slug()));
             } else if (now == null) {
-                changes.add(Change.removed(subject.axis(), subject.label()));
+                changes.add(Change.removed(subject.axis(), subject.about(), subject.slug()));
             } else {
                 compareFields(subject, was, now, changes);
             }
@@ -76,7 +76,7 @@ public record VersionDiff(GameDataVersion from, GameDataVersion to, List<Change>
             String before = was.getOrDefault(field, "(none)");
             String after = now.getOrDefault(field, "(none)");
             if (!before.equals(after)) {
-                changes.add(Change.changed(subject.axis(), subject.label(), field, before, after));
+                changes.add(Change.changed(subject.axis(), subject.about(), subject.slug(), field, before, after));
             }
         }
     }
