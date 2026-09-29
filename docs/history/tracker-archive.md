@@ -3352,6 +3352,45 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-29 (fifty-third, continued) — the `DevSignInTest` flake was not a flake: MockMvc's `csrf()` rewired the live server.**
+
+**What the entry below got wrong.** It called the failure "timing" and gave
+"4 of 7 full runs" and "clean `dev` passed". **Most of the passing runs never
+executed.** Environment variables and a changed `--tests` filter do not stop
+Gradle restoring `:app:test` from the build cache, so a result file could be an
+hour old and still read as a run. Once every run was forced with `--rerun`, the
+failure was **deterministic** in any run where a class using `csrf()` sorted
+before `DevSignInTest`. **Read a result file's `timestamp` before counting it
+as a run.**
+
+**The cause, from Spring Security 6.5.5's source.** The first use of
+`SecurityMockMvcRequestPostProcessors.csrf()` in an application context calls
+`WebTestUtils.setCsrfTokenRepository`. That replaces the product chain's
+`CookieCsrfTokenRepository` with `new TestCsrfTokenRepository(new
+HttpSessionCsrfTokenRepository())` on the shared `CsrfFilter` bean, and the
+replacement is permanent. In a `RANDOM_PORT` context the real Tomcat runs
+through that filter too. From then on a socket request's token is looked for in
+the HTTP session: none is found, one is generated with no `Set-Cookie`, and the
+request is refused. **A Tomcat access log showed it exactly.** The POST carried
+`XSRF-TOKEN=47c362a7-…` and `X-XSRF-TOKEN: 47c362a7-…`, matching, and was
+answered 403 with no cookie set. The dev sign-in chain is a separate
+`CsrfFilter` that nothing touched, so sign-in kept issuing cookies. **Nothing
+tripped it before C3.2**, because no class using `csrf()` sorted before `Dev…`
+until `ChangesSinceTest` did.
+
+**The fix is at the cause.** A test helper, `BrowserCsrf.csrf()`, sends an
+`XSRF-TOKEN` cookie and the same value in `X-XSRF-TOKEN`, the way a browser
+does. It replaced Spring's post-processor in all seven classes. **MockMvc
+writes now meet the real policy**, `SecurityConfig.browserCsrf()`'s
+double-submit check, where before they met a session stand-in.
+`DevSignInTest` now scans every test source tree for the old import. It was
+checked both ways: it names `SignOutTest.java` when that file's import is put
+back, and passes once the import is removed again.
+
+**Measured.** 533 backend tests (the guard is new). Green on a full `build` and
+on forced `:app:test --rerun` runs, each confirmed as executed by its
+`DevSignInTest` result timestamp.
+
 **2026-09-29 (fifty-third) — C3.2 built: `/since`, what a new sequence changed for one reader.**
 
 **The remote, checked first:** PR #62 (C3.1) merged 02:37Z; its `main` run
