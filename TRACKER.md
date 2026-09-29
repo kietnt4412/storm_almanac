@@ -235,6 +235,8 @@ works". It does not mean that:
 
 > **Resume here (2026-09-29, fifty-fourth):** **C3.3 built**, on the plan the maintainer agreed ([docs/plans/c3.3-the-notice.md](docs/plans/c3.3-the-notice.md), all four answers the recommendation; *As built* says where the build differs). Home says "New since your plan: … · 32 changes in it touch your plan · See what changed →". The plan screen puts a panel above the saved plan, with the cost on both sides, the changes grouped by track ("Lucia: Inverse Crown · Red Orb — 14 steps: 13 new, 1 changed"), every line behind a toggle, and one button, *Re-plan*, the only thing that clears it. Driven locally at 375 and 1280 px. **C3's exit is not met until production shows it**, and on production every saved plan is already on 18. The exit's own words need **a reader returning after a new sequence**, so the proof comes with the next publish (sequence 19). **C3.3 deployed in #64 (checked 2026-09-30, production `5ca20f5`)** — nothing stands between C3 and its exit but a first-hand reading worth publishing. **Agreed 2026-09-30: sequence 19 is the banner that replaces Selena's**, read by the maintainer once it opens after 10-01 06:59 UTC. Pinning a plan with `?version=` would show the screen, but it would not be the exit. **Selena's pool closes 2026-10-01 06:59 UTC.**
 
+> **Phase 6 taken 2026-09-30 (fifty-fifth), plan drafted and not agreed:** [docs/plans/phase-6-drop-statistics.md](docs/plans/phase-6-drop-statistics.md) — four slices (report intake, estimates into the solver, the screens, the exit on production) and six questions. **Production has nothing to supersede:** PGR's only stage pays a *declared* 82 Simulation Score and the Kornblume seeds never ship (ADR 0015), so **the exit needs a first-hand run count on a PGR stage with a random drop** — question 1, the maintainer's reading. **No code until the plan is agreed.**
+
 **The strangers' notes, T1–T9, are all closed** and [in the archive](docs/history/tracker-archive.md#completed-next-actions)
 — five strangers, nobody stalled, so the notes were Track C's input.
 
@@ -466,8 +468,9 @@ Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 
 Carry forward until answered, then move the entry [to the archive](docs/history/tracker-archive.md#answered-questions).
 
-- **Q7 — What does `DropReportStore.scan(stage, item, version)` return?** *Open since 2026-09-29; Phase 6's to answer,
-  before its Postgres store is written (and before parked P7.5, if Track B returns).* A report is one stage's runs with the drops it saw, so a run where the item did **not** drop is
+- **Q7 — What does `DropReportStore.scan(stage, item, version)` return?** *Open since 2026-09-29; **answer proposed
+  2026-09-30 in [the Phase 6 plan](docs/plans/phase-6-drop-statistics.md#q7-answered)** — every report for the stage,
+  so `item` goes; closes when the plan is agreed.* A report is one stage's runs with the drops it saw, so a run where the item did **not** drop is
   still a trial for it. If `scan` returns only reports that saw the item, every rate built on it is too high. If it
   returns every report for `(stage, version)`, then `item` does nothing and the port should say so. **Answer it on the
   Postgres side, not the LSM side** (ADR 0035, decision 4).
@@ -501,6 +504,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-30 | fifty-fifth | C3.3 found live (#64, `5ca20f5`); C3 waits on sequence 19, the banner after Selena's. **Phase 6 taken, plan drafted, not agreed**: Q7 answered in it; production has nothing to supersede, so the exit needs a first-hand run count on a random-drop PGR stage |
 | 2026-09-29 | fifty-fourth | **C3.3 agreed (all four recommendations) and built**: Home's line and the plan screen's panel, grouped by track, cleared only by a re-plan. Driven locally at 375/1280 on the real 14 → 18 report. The exit waits on production and sequence 19 |
 | 2026-09-29 | fifty-third | **C3.2 built**: `/since` re-solves the saved request on the saved sequence and the latest, and keeps the changes either plan uses. `Change` carries kind and slug. Real data: 14 → 18 is 405 changes, 32 for the rehearsal account, 1 230 both sides. Then the `DevSignInTest` "flake": MockMvc's `csrf()` rewired the live server's CSRF repository; replaced by `BrowserCsrf`, guarded |
 | 2026-09-29 | fifty-second | **C3 chosen and its exit agreed**, scope cut to saved plan + change report. **C3.1 built**: `V19` keeps each profile's last plan as shown with its request; the plan screen opens on it. ADR 0037. Driven in a browser with the local store cleared, as a second device would be |

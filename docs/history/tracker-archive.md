@@ -3352,6 +3352,29 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-30 (fifty-fifth) — C3.3 found live; Phase 6 taken and its plan drafted.**
+
+**The remote, checked first:** [PR #64](https://github.com/kietnt4412/storm_almanac/pull/64)
+(C3.3) merged 2026-09-29 10:50:52Z, its `main` run `36558089363` green, and
+production reports `5ca20f5`. The page's served JavaScript carries "New since
+your plan:", so the frontend half is live too, not only the merge. The
+maintainer thought only C3.2 had shipped. **C3 now waits on nothing but a
+sequence 19**, agreed to be the banner that replaces Selena's once it opens
+after 10-01 06:59 UTC.
+
+**Phase 6 chosen over C2.** [The plan](../plans/phase-6-drop-statistics.md) is
+drafted and not agreed. It answers Q7: `scan` returns every report for the
+stage, because a report without the item is still trials of it, so the `item`
+parameter goes. **The finding that shapes it: production has nothing to
+supersede.** PGR's one stage pays a declared 82 Simulation Score, and
+plan.html's seeds were Kornblume's, which ADR 0015 keeps out. So the exit needs
+a first-hand run count on a PGR stage with a random drop the planner can use.
+That is question 1, left without a recommendation because it is a game fact.
+Also found: `DropEstimate` still carries a Wilson proportion where ADR 0011
+asked for a mean per run, so the plan proposes ADR 0038. And
+`storm-almanac.substrate.drop-report-store` has been in `application.yml`
+since the scaffold, waiting for the implementation.
+
 **2026-09-29 (fifty-fourth) — C3.3 agreed and built: the notice on Home and the plan screen.**
 
 **The remote, checked first:** [PR #63](https://github.com/kietnt4412/storm_almanac/pull/63)
