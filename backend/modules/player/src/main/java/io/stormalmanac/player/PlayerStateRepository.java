@@ -26,7 +26,7 @@ public interface PlayerStateRepository {
 
     /**
      * Delete a profile and everything that hangs off it — inventory, roster,
-     * goals and their sync clocks — in one statement, because the schema
+     * goals, their sync clocks, pity and the saved plan — in one statement, because the schema
      * cascades every one of them from the profile row.
      *
      * <p>Whether the caller may is not this module's question; it is asked at
@@ -116,4 +116,13 @@ public interface PlayerStateRepository {
      * and a device that has been offline has nothing newer to say about it.
      */
     void savePity(CarriedPity pity);
+
+    /** The last plan this profile was shown, or empty when it has never run one. */
+    Optional<SavedPlan> savedPlanOf(ProfileId profile);
+
+    /**
+     * Replace the profile's saved plan. Last write wins: a plan is not edited,
+     * it is re-run, and the one run last anywhere is the one the reader last saw.
+     */
+    void savePlan(SavedPlan plan);
 }

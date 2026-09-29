@@ -1,7 +1,10 @@
 package io.stormalmanac.api.player;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.stormalmanac.api.player.PlayerView.PlanRequest;
 import io.stormalmanac.api.player.PlayerView.PlanResponse;
+import io.stormalmanac.api.player.PlayerView.SavedPlanResponse;
 import io.stormalmanac.common.GameDataVersion;
 import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.gamedata.GameDefinition;
@@ -12,6 +15,10 @@ import io.stormalmanac.planner.SolveRequest;
 import io.stormalmanac.player.Goals;
 import io.stormalmanac.player.PlayerProfile;
 import io.stormalmanac.player.PlayerStateRepository;
+import io.stormalmanac.player.SavedPlan;
+import java.time.Instant;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * <pre>
  * POST /api/me/profiles/{profile}/plan  [?version=N]
+ * GET  /api/me/profiles/{profile}/plan
  * </pre>
  *
  * <p><b>The goals come from the database, not from the body.</b> That is the
@@ -44,6 +52,11 @@ import org.springframework.web.bind.annotation.RestController;
  * one, which is what a player wants. Naming one is what makes a plan reproducible
  * after the next patch lands, and it is the same parameter the catalog routes
  * take, for the same reason.
+ *
+ * <p><b>Every plan answered is saved, and {@code GET} reads it back</b> (C3.1,
+ * ADR 0037). One per profile, replaced by the next: the reader's last plan is the
+ * one a returning reader is shown, and its sequence is what C3 measures "what has
+ * changed since" from. A refusal saves nothing and leaves the last plan standing.
  */
 @RestController
 public class PlanController {
@@ -52,16 +65,19 @@ public class PlanController {
     private final PlayerStateRepository players;
     private final GameDefinitionRepository definitions;
     private final OwnedProfiles owned;
+    private final ObjectMapper json;
 
     public PlanController(
             Optimizer optimizer,
             PlayerStateRepository players,
             GameDefinitionRepository definitions,
-            OwnedProfiles owned) {
+            OwnedProfiles owned,
+            ObjectMapper json) {
         this.optimizer = optimizer;
         this.players = players;
         this.definitions = definitions;
         this.owned = owned;
+        this.json = json;
     }
 
     @PostMapping("/api/me/profiles/{profile}/plan")
@@ -103,7 +119,25 @@ public class PlanController {
                 body.resolvedHorizonDays(),
                 body.resolvedReach());
 
-        return PlanResponse.of(optimizer.solve(solve), definition);
+        PlanResponse answer = PlanResponse.of(optimizer.solve(solve), definition);
+        players.savePlan(new SavedPlan(
+                owner.id(), gameVersion.sequence(), write(body.resolved()), write(answer), Instant.now()));
+        return answer;
+    }
+
+    /**
+     * The last plan this profile was shown, or 204 when it has never run one —
+     * "no plan yet" is an answer for a returning reader, not a missing resource.
+     */
+    @GetMapping("/api/me/profiles/{profile}/plan")
+    public ResponseEntity<SavedPlanResponse> saved(@PathVariable String profile) {
+        PlayerProfile owner = owned.require(profile);
+        return players.savedPlanOf(owner.id())
+                .map(saved -> ResponseEntity.ok(new SavedPlanResponse(
+                        read(saved.request(), PlanRequest.class),
+                        read(saved.plan(), PlanResponse.class),
+                        saved.savedAt())))
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     private GameDefinition definitionFor(PlayerProfile profile, Long version) {
@@ -114,5 +148,27 @@ public class PlanController {
                                 ? "no published version of " + profile.game().value()
                                 : "no published version " + version + " of "
                                         + profile.game().value()));
+    }
+
+    private String write(Object value) {
+        try {
+            return json.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("a plan this server built could not be written as JSON", e);
+        }
+    }
+
+    /**
+     * Read with the application's own mapper, which ignores a field it does not
+     * know and leaves one it does not find null — so a plan saved by an older
+     * build reads under a newer wire shape, the same rule the page's wire types
+     * keep by marking new fields optional (ADR 0037).
+     */
+    private <T> T read(String document, Class<T> type) {
+        try {
+            return json.readValue(document, type);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("a saved plan could not be read back as " + type.getSimpleName(), e);
+        }
     }
 }

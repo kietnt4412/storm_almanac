@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react';
-import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
   ApiError,
   getGames,
   getGoals,
   getMeasures,
+  getSavedPlan,
   getUpgrades,
   solve,
   type Measure,
@@ -40,6 +41,11 @@ import { reachOf, usePlannerStore } from '../store/plannerStore';
  * of it. That makes a plan dearer than the truth rather than cheaper, and every
  * grant left out is named in the notes. ADR 0022.
  *
+ * <p><b>A returning reader starts from their last plan.</b> The server keeps the
+ * last plan it answered for each profile, and the request that asked for it
+ * (C3.1, ADR 0037); the screen opens on that plan, says when it was worked out,
+ * and fills the form from its request.
+ *
  * <p>A 422 is rendered as an answer, not a failure. "No plan exists for these
  * goals" is a real reply with the reason in it — an item nothing sources, a state
  * nothing reaches — and the sentence the server wrote is more use than anything
@@ -66,17 +72,49 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
   const reach = usePlannerStore((state) => reachOf(state, profileId));
   const setReach = usePlannerStore((state) => state.setReach);
 
+  // The last plan this profile was shown, saved by the server with every plan
+  // it answers (ADR 0037). Null rather than undefined for "never planned",
+  // because a query may not resolve to undefined.
+  const queryClient = useQueryClient();
+  const saved = useQuery({
+    queryKey: ['savedPlan', profileId],
+    queryFn: async () => (await getSavedPlan(profileId)) ?? null,
+  });
+
+  // The form starts from what was asked last time, once. A reader coming back
+  // — or on another device — should not have to retype their energy and how
+  // far they get to see where they stood. Reach is seeded only when this
+  // browser holds no answer of its own for the profile: a local answer is newer
+  // than any plan it has not been sent with yet.
+  const seeded = useRef(false);
+  useEffect(() => {
+    if (seeded.current || !saved.data) return;
+    seeded.current = true;
+    const asked = saved.data.request;
+    setEnergyPerDay(asked.energyPerDay);
+    setHorizonDays(asked.horizonDays);
+    setObjective(asked.objective);
+    if (usePlannerStore.getState().reach[profileId] === undefined) {
+      Object.entries(asked.reach ?? {}).forEach(([measure, score]) => setReach(profileId, measure, score));
+    }
+  }, [saved.data, profileId, setReach]);
+
   const run = useMutation<Plan, Error>({
     mutationFn: () => solve(profileId, { energyPerDay, horizonDays, objective, reach }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['savedPlan', profileId] }),
   });
+
+  // What is on screen: the plan just worked out, or else the last one saved.
+  const shown = run.data ?? saved.data?.plan;
+  const fromBefore = !run.data && !run.isError && saved.data ? saved.data : null;
 
   // The tracks of whoever the plan pays for, so each step reads as the goal
   // screen named it — at the plan's own version. Asked for as "the latest",
   // they could come from an older sequence than the plan: a returning reader's
   // Signature Move levels 5–17 printed as ids beside a sequence 15 plan, because
   // the graph they were named from had no such states.
-  const paidFor = [...new Set((run.data?.payingFor ?? []).flatMap((paying) => (paying.entity ? [paying.entity] : [])))];
-  const planVersion = run.data?.version;
+  const paidFor = [...new Set((shown?.payingFor ?? []).flatMap((paying) => (paying.entity ? [paying.entity] : [])))];
+  const planVersion = shown?.version;
   const graphs = useQueries({
     queries: paidFor.map((entity) => ({
       queryKey: ['upgrades', game, entity, planVersion],
@@ -206,7 +244,14 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
       </form>
 
       {run.isError && <Refusal error={run.error} />}
-      {run.data && <Answer plan={run.data} energyUnit={energyUnit} tracks={tracks} />}
+      {fromBefore && (
+        <p className="muted text-sm">
+          Your last plan, worked out {new Date(fromBefore.savedAt).toLocaleString()} on patch{' '}
+          {fromBefore.plan.versionLabel} (v{fromBefore.plan.version}). It counts what you owned then —
+          work it out again to plan from what you own now.
+        </p>
+      )}
+      {shown && !run.isError && <Answer plan={shown} energyUnit={energyUnit} tracks={tracks} />}
 
       <NextStep from="/plan" />
     </div>

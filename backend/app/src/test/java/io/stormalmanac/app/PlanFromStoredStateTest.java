@@ -3,6 +3,7 @@ package io.stormalmanac.app;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -177,6 +178,94 @@ class PlanFromStoredStateTest extends SharedDatabaseTest {
             assertThat(stage.get("stage").asText()).isNotBlank();
             assertThat(stage.get("runs").asInt()).isPositive();
         }
+    }
+
+    @Test
+    @DisplayName("a profile that has never planned has no saved plan, and says so with a 204")
+    void noPlanYet() throws Exception {
+        publish("proving-ground-1.0.json");
+        RequestPostProcessor player = signedIn("google", "sub-vertin", "Vertin");
+        String profile = profileWithGoal(player, Map.of());
+
+        mvc.perform(get("/api/me/profiles/" + profile + "/plan").with(player))
+                .andExpect(status -> assertThat(status.getResponse().getStatus()).isEqualTo(204));
+    }
+
+    @Test
+    @DisplayName("the plan a reader was shown is saved as they saw it, with the request that asked for it")
+    void thePlanShownIsThePlanSaved() throws Exception {
+        publish("proving-ground-1.0.json");
+        RequestPostProcessor player = signedIn("google", "sub-vertin", "Vertin");
+        String profile = profileWithGoal(player, Map.of());
+
+        JsonNode shown = body(mvc.perform(post("/api/me/profiles/" + profile + "/plan")
+                .with(player)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(
+                        Map.of("energyPerDay", 240, "reach", Map.of("weekly-score", 120_000))))));
+
+        JsonNode saved = body(mvc.perform(get("/api/me/profiles/" + profile + "/plan").with(player)));
+
+        // Byte for byte what the POST answered — not a re-solve, which could land
+        // on a different plan of equal cost (ADR 0037).
+        assertThat(saved.get("plan")).isEqualTo(shown);
+        assertThat(saved.get("plan").get("version").asLong()).isEqualTo(shown.get("version").asLong());
+
+        // The request with its defaults filled in, reach included: what C3.2
+        // re-solves with, and what the form is filled from on another device.
+        JsonNode request = saved.get("request");
+        assertThat(request.get("energyPerDay").asInt()).isEqualTo(240);
+        assertThat(request.get("horizonDays").asInt()).isPositive();
+        assertThat(request.get("objective").asText()).isEqualTo("LEAST_ENERGY");
+        assertThat(request.get("reach").get("weekly-score").asInt()).isEqualTo(120_000);
+        assertThat(saved.get("savedAt").asText()).isNotBlank();
+    }
+
+    @Test
+    @DisplayName("the next plan replaces the saved one, and a refusal leaves it standing")
+    void theLastPlanRunIsTheOneKept() throws Exception {
+        publish("proving-ground-1.0.json");
+        RequestPostProcessor player = signedIn("google", "sub-vertin", "Vertin");
+        String profile = profileWithGoal(player, Map.of());
+
+        planWith(player, profile, Map.of("energyPerDay", 240, "horizonDays", 7));
+        JsonNode second = planWith(player, profile, Map.of("energyPerDay", 90, "horizonDays", 30));
+
+        JsonNode saved = body(mvc.perform(get("/api/me/profiles/" + profile + "/plan").with(player)));
+        assertThat(saved.get("plan")).isEqualTo(second);
+        assertThat(saved.get("request").get("energyPerDay").asInt()).isEqualTo(90);
+
+        // No energy a day is refused before anything is solved — and the plan the
+        // reader last saw is still the one they come back to.
+        mvc.perform(post("/api/me/profiles/" + profile + "/plan")
+                        .with(player)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status -> assertThat(status.getResponse().getStatus()).isEqualTo(400));
+
+        JsonNode after = body(mvc.perform(get("/api/me/profiles/" + profile + "/plan").with(player)));
+        assertThat(after.get("plan")).isEqualTo(second);
+    }
+
+    @Test
+    @DisplayName("another account's saved plan is not found, and deleting the profile deletes it")
+    void aSavedPlanIsTheProfilesAlone() throws Exception {
+        publish("proving-ground-1.0.json");
+        RequestPostProcessor mine = signedIn("google", "sub-vertin", "Vertin");
+        String profile = profileWithGoal(mine, Map.of());
+        planWith(mine, profile, Map.of("energyPerDay", 240));
+
+        RequestPostProcessor theirs = signedIn("google", "sub-someone-else", "Someone Else");
+        mvc.perform(get("/api/me/profiles/" + profile + "/plan").with(theirs))
+                .andExpect(status -> assertThat(status.getResponse().getStatus()).isEqualTo(404));
+
+        mvc.perform(delete("/api/me/profiles/" + profile).with(mine).with(csrf()))
+                .andExpect(status -> assertThat(status.getResponse().getStatus()).isEqualTo(204));
+        assertThat(jdbc.queryForObject(
+                        "SELECT count(*) FROM player.saved_plan WHERE profile_id = ?", Integer.class, profile))
+                .isZero();
     }
 
     @Test
@@ -377,6 +466,15 @@ class PlanFromStoredStateTest extends SharedDatabaseTest {
                         Map.of("goals", List.of(Map.of("entity", "warden", "targetState", "insight-1"))))));
 
         return profile;
+    }
+
+    private JsonNode planWith(RequestPostProcessor player, String profile, Map<String, Object> request)
+            throws Exception {
+        return body(mvc.perform(post("/api/me/profiles/" + profile + "/plan")
+                .with(player)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(request))));
     }
 
     private JsonNode body(org.springframework.test.web.servlet.ResultActions actions) throws Exception {
