@@ -1688,6 +1688,24 @@ was written when each closed.
       data out of the service worker (T1, fixed the same day), so which version of
       the roster and goal screens each stranger saw is not known.
 
+- [x] **C1 · Pull planner** (Track C, D6) — **closed 2026-09-29**, opened 2026-09-28
+      `GET /banners`, `V18` pity per scope key, `GET/PUT /pity`, `POST /pulls`
+      answered by the exact chain alone, the `/pulls` screen; Black Cards count as
+      tickets through Direct Exchange (ADR 0034); sequences 17–18; deployed in #60.
+      **Exit:** a signed-in reader's stored pity and declared income answer "how
+      likely by when" for a live banner, on their own account.
+      **How the exit was met:** the maintainer, signed in on production (`5df07e7`,
+      sequence 18), asked `/pulls` for **Selena: Pianissimo's** Arrival banner — not
+      Adelyde's, which the resume line had named; the exit asks for *a* live banner.
+      Counter 0, last S featured, 19 000 Black Cards saved, the Cage's top, every
+      daily and weekly mission, 2 days: **75.0%, 76 pulls** (19 000 held + 60 to
+      come, 250 each), **certain in 120, first copy ~68 on average**. Checked by
+      hand the same day: 0.7 + 0.3 × P(a second S in what is left of 76) = 0.7497;
+      E[pulls to an S] = (1 − 0.995⁶⁰) / 0.005 = 51.9, × 1.3 = 67.5. **What
+      travels with it:** the Crucible pull-count track, paid income and copy
+      exchanges (N38) are not modelled, so answers are dearer than the truth and
+      never cheaper; whether 0 was the maintainer's real counter was not asked.
+
 ### Qualifications moved out of the live tracker, 2026-09-11 (seventeenth session)
 
 Verbatim, and still true. They left *What is still unverified* because they
@@ -3212,6 +3230,27 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-29 (fifty-first) — C1 closes on a reader's screen.**
+
+**The remote, checked first:** PR #60 merged 2026-09-28 10:05Z; its `main` run
+`36407578470` green; `/api/health` reported `5df07e7`, #60's merge. `dev` one doc
+commit ahead. No PR open. Production's `/banners` served both pools at sequence
+18, Adelyde's open to 11/04 23:00 UTC and Selena's to 10/01 06:59 UTC.
+
+**C1's exit met.** The maintainer sent a screenshot of `/pulls` on production,
+signed in: Selena's banner (the 120-pull certainty identifies it), counter 0,
+19 000 Black Cards, 2 days → **75.0%, 76 pulls, certain in 120, ~68 on
+average**. All three figures re-derived by hand and agree (the arithmetic is in
+[C1's closed record](#closed-phases-in-full)). Asking past the close cannot
+overstate it: `PullController` caps the horizon at `closesAt`. **The resume line
+named Adelyde's banner and the reader asked Selena's** — the exit says *a* live
+banner, so it counts; Adelyde's worst case of 60 was driven only locally
+(fiftieth). Code unchanged this session.
+
+**Offered and not yet answered:** modelling the Crucible pull track — a refund
+by pull count, not by outcome, so the chain is untouched and only the ticket →
+pulls mapping changes (a banner field, a migration, likely an ADR, sequence 19).
 
 **2026-09-28 (fiftieth) — C1 opens: the readings, ADR 0034, sequence 17, and a pull planner driven end to end.**
 

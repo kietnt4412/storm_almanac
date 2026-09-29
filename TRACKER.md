@@ -13,7 +13,7 @@ being finished with is.
 - The plan is [plan.html](plan.html) (13 phases, two tracks, plus Track C by [D6](#d6--a-third-track-for-the-product-after-launch-2026-09-26)); [README.md](README.md)
   is the public face and [CLAUDE.md](CLAUDE.md) the working agreement.
 - **Cut back whenever it passes 550 lines** ([the ledger](docs/history/tracker-archive.md#the-line-count-ledger)); anything it no longer carries is in the archive verbatim — decide whether it is still operative rather than assuming it was lost.
-- Last updated: **2026-09-28** (fiftieth session)
+- Last updated: **2026-09-29** (fifty-first session)
 
 ---
 
@@ -69,14 +69,14 @@ being finished with is.
   **`backend/Dockerfile`'s COPY list is B5's path and drifts in silence** — it omitted `adapters/` from Phase 1
   until 2026-09-09, every image build failing in six seconds while this file called it verified, so **anything added
   beside `modules`, `adapters`, `substrate`, `app` needs a line there**.
-- **The remote, last checked 2026-09-28 (fiftieth) — re-check it, do not trust it, and check three things:**
+- **The remote, last checked 2026-09-29 (fifty-first) — re-check it, do not trust it, and check three things:**
   which PRs merged, **the last `main` run**, and **the SHA `/api/health` reports** — a red `main` run once kept
   #46 off production with nothing showing it (archive, forty-second).
   [PR #60](https://github.com/kietnt4412/storm_almanac/pull/60) (C1, sequences 17–18) merged 2026-09-28 10:05Z; its
   `main` run `36407578470` green; **production reports `5df07e7`**, #60's merge — `/banners`, `/measures` flags and
-  `/pulls` checked live the same hour. No PR open.
+  `/pulls` checked live the same hour, and on 2026-09-29 it answered a signed-in reader (C1's exit). No PR open.
   **Both databases hold sequence 18** since 2026-09-28 (Neon 10:01:03Z, local 10:02:13Z), each read back as *no changes*;
-  **Neon skipped 17** (16 → 18, twelve changes). Production on `59c6d1f` serves 18 and was healthy right after.
+  **Neon skipped 17** (16 → 18, twelve changes).
   Stale on eight of nine checks, so re-check it rather than read it. B6 means a commit on `dev` with no PR open is still built.
   **What the trigger does not do is watch the merge** — PR #25 merged *before its own run finished*
   and was green by luck (archive, twenty-sixth) — so **wait for the run before merging** still
@@ -206,8 +206,8 @@ works". It does not mean that:
 - **No two real devices have ever synced.** One browser's stale edit has lost to a newer value and said so; two
   requests interleaving on the same key at the same instant is argued rather than measured. And **a merge publishes
   nothing**, so a cached plan survives the inventory under it moving — harmless until Phase 6.
-- **The gacha engines have answered a player only locally.** Since 2026-09-28 (fiftieth) `/pulls` asks the chain
-  from a stored counter (`V18`) and the declared income, driven against sequence 17 — **not yet on production**. Two
+- **The gacha engines have answered one reader on production** (2026-09-29, Selena's banner, C1's exit): `/pulls`
+  asks the chain from a stored counter (`V18`) and the declared income. Two
   things make its answers dearer than the truth, never cheaper: **the Crucible pull-count track is not modelled**
   (twelve pulls back in sixty), and **multi-copy answers ignore copy exchanges** (**N38**). **Four banners are
   first-hand and five are not (Q4).** Selena's close is written in sequence 18 (10/01 06:59 UTC).
@@ -232,7 +232,7 @@ works". It does not mean that:
 **Phase 4 closed 2026-09-28**, after D5's rehearsal closed all ten stalls (S1–S10, archive) — every Phase 4 item
 [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-> **Resume here (2026-09-28, fiftieth):** **C1 is deployed (#60, `5df07e7`) with sequence 18 in both databases; its exit waits on one thing:** the maintainer, signed in on production, asks `/pulls` for Adelyde's banner and reports what it said. Tick C1 only on that report. **N39 closed by the readings.** Worth doing in C1 if the maintainer agrees: model the Crucible pull track. N38, N18, N19, N43 held.
+> **Resume here (2026-09-29, fifty-first):** **C1 closed.** The maintainer, signed in on production, got 75.0% / 76 pulls / certain in 120 on Selena's banner, and the numbers check out by hand. **Two questions for the maintainer:** should the Crucible pull track be modelled now (a refund by pull count: a banner field and sequence 19, with the chain untouched), and which of C2 or C3 comes next? C2's and C3's exits are proposed, not agreed. **Selena's pool closes 2026-10-01 06:59 UTC.** N38, N18, N19, N43 held.
 
 **The strangers' notes, T1–T9, are all closed** and [in the archive](docs/history/tracker-archive.md#completed-next-actions)
 — five strangers, nobody stalled, so the notes were Track C's input.
@@ -314,7 +314,7 @@ previous one's criterion is met. The "Landed" record for closed phases is
 **Open since 2026-09-28, when Phase 4's box was ticked; runs beside Phase 6; closes before Track B starts.** Not in
 [plan.html](plan.html). The invariants hold here too — a pull planner is `gacha`, so no `if (game == …)`. **C1 was
 chosen first and its exit agreed as written** (maintainer, 2026-09-28); C2's and C3's are proposed, not agreed — C2's
-tester was settled 2026-09-26. **C1's readings are taken; sequence 17 is published locally, not on Neon** (2026-09-28): the Black Card and Direct Exchange 1:1 (ADR 0034), the daily bar (5/10/15 at 60/80/100), the twelve
+tester was settled 2026-09-26. **C1 closed 2026-09-29** ([its record](docs/history/tracker-archive.md#closed-phases-in-full)). Its readings (sequence 17, in both databases via 18): the Black Card and Direct Exchange 1:1 (ADR 0034), the daily bar (5/10/15 at 60/80/100), the twelve
 weeklies (1 000), the Cage's Black Cards (10 + 15), and the live banner — Adelyde: Anabasis, Crucible Event Construct,
 0.50%, wall 60, **100% featured**, closing 2026-11-04 23:00 UTC
 ([the note](docs/game-facts/punishing-gray-raven-research-disclosure.md#2026-09-28--the-live-banner-and-what-the-dailies-pay)).
@@ -323,7 +323,7 @@ pool; twelve pulls back in sixty.
 
 | | Phase | Shape | **Exit** |
 |---|---|---|---|
-| [ ] | **C1 · Pull planner** | **Built, driven locally, and deployed 2026-09-28 (#60); the exit awaits a signed-in reader on production.** `GET /banners`, `V18` pity per scope key, `GET/PUT /pity`, `POST /pulls` answered by the exact chain alone (maintainer), `/pulls`. **N39 closed** by the readings (sequence 17); Black Cards count through Direct Exchange (ADR 0034). Not modelled: the Crucible pull track, paid income, copy exchanges (N38, Phase 11) | A signed-in reader's stored pity and declared income answer "how likely by when" for a live banner, on their own account |
+| [x] | **C1 · Pull planner** | **Closed 2026-09-29** on the maintainer's production screen ([record](docs/history/tracker-archive.md#closed-phases-in-full)); deployed in #60. Not modelled: the Crucible pull track, paid income, copy exchanges (N38, Phase 11) | A signed-in reader's stored pity and declared income answer "how likely by when" for a live banner, on their own account |
 | [ ] | **C2 · UI polish** | A visual pass over every screen, mobile first; the rehearsal's smaller hesitations. **Tested by the maintainer and Claude, not strangers** (maintainer, 2026-09-26) — a rehearsal like D5's | Every screen driven at 375 and 1280 px, and a self-run rehearsal over every screen leaves no stall unfixed or uncut |
 | [ ] | **C3 · Account features** | What a returning player wants: saved plans, progress over time, more than one goal set, what a new patch changed for *their* goals | A reader returning after a new sequence sees what it changed for their goals and plan, without asking |
 
@@ -517,6 +517,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-29 | fifty-first | **C1 closed**: signed in on production, Selena's banner, 75.0% / 76 pulls / certain in 120, re-derived by hand. Adelyde's was named; the exit asks for *a* live banner. No code |
 | 2026-09-28 | fiftieth | **C1 chosen, exit agreed, built.** Readings: Adelyde's Crucible banner (0.50%, wall 60, **100%**), the missions' and Cage's Black Cards, Direct Exchange 1:1. **ADR 0034**: income walks conversions. **Sequence 17** local; Neon refused, handed over. `/pulls` driven: 112 pulls, certain in 15. Not deployed |
 | 2026-09-28 | forty-ninth | Production on `07ff98a` (#58). **T8**: a PGR level step is priced only in EXP, and the upgrades route served item costs only, so the character page's Level rows read bare; now `progress` on the wire, EXP first on the row. **T9**: a step with no price says "Free". **N42 closed by screens**: Ultima Awaken is free, unlocked by the third Awaken — the maintainer's own report overruled; sequence 16, the Awaken track held as N43 |
 | 2026-09-28 | forty-eighth | Production on `2e147d0` (#57). **Phase 4 closed**: five strangers completed a plan without help. **T1 was a bug** — the worker served "the latest" game data from cache, so a returning browser saw tracks from before sequence 11; that alone was notes 2, 4 and 5. T2 profile rename and delete; T3 the plan summary by weight; T6, T7 found and fixed |
