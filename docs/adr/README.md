@@ -11,7 +11,7 @@ decision, numbered, never edited after acceptance — superseded instead.
 |---|----------|--------|
 | [0001](0001-record-architecture-decisions.md) | Record architecture decisions | Accepted |
 | [0002](0002-modular-monolith.md) | Modular monolith, not microservices | Accepted |
-| [0003](0003-the-honesty-rule.md) | Every hand-built component sits behind a boring one | Accepted |
+| [0003](0003-the-honesty-rule.md) | Every hand-built component sits behind a boring one | **Gate paragraph superseded by [0035](0035-track-b-opens-before-real-traffic-against-a-synthetic-workload.md)** |
 | [0004](0004-solver-ojalgo.md) | ojAlgo for the mixed-integer program | Accepted |
 | [0005](0005-game-agnostic-domain-model.md) | No game-specific code outside game data | Accepted |
 | [0006](0006-wilson-intervals-for-drop-rates.md) | Wilson score intervals for drop rates | Accepted |
@@ -43,3 +43,4 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0032](0032-a-step-carries-what-the-game-calls-it.md) | A step carries what the game calls it | Accepted |
 | [0033](0033-a-key-the-bundle-invents-may-be-given-a-word.md) | A key the bundle invents may be given a word | Accepted |
 | [0034](0034-pull-income-walks-conversions-into-the-pull-currency.md) | Pull income walks conversions into the pull currency | Accepted |
+| [0035](0035-track-b-opens-before-real-traffic-against-a-synthetic-workload.md) | Track B opens before real traffic, against a synthetic workload | Accepted |

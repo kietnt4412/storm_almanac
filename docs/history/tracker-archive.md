@@ -2913,6 +2913,39 @@ newest first. **Write the entry there; add its line here.**
 
 ---
 
+## D4 and D5 — the full accounts
+
+*Moved here from the tracker 2026-09-29 (fifty-first session); both finished when Phase 4 closed on 2026-09-28. Verbatim.*
+
+### D5 · The maintainer rehearses the stranger test before strangers are found (2026-09-25)
+
+**Phase 4's exit asks for five strangers, and the maintainer knows few people who play**, so asked
+whether testing it themselves would do. **It cannot meet the exit, and this does not change the
+exit:** the test is whether someone who has never seen the site plans without help, and the one
+tester who cannot stall where a stranger would is the one who built it. **What is taken instead, for
+now, is a rehearsal** — a private window, one construct planned from the home page, every hesitation
+written down, each fixed or cut on the record; friends who do not play count as rehearsal, not as
+strangers. Google's client stays in *Testing*. **A deferral, not a cut;** the Phase 4 box stays
+unticked. **Cost:** D4's, and sharper — D4 waited on the site, which work fixes; this waits on an
+audience, which no work on the site produces, so the Track B gate and Phase 6's data (N26) have no
+date. **Bought:** the stalls a builder can find are gone before a stranger's first impression.
+**Reversal trigger:** the rehearsal's stall list is empty — then strangers are found where players
+already are, the game's subreddit and Discord servers, rather than among people the maintainer knows. **Fired 2026-09-26** (forty-seventh), when S6 closed; **five strangers ran it and Phase 4 closed 2026-09-28.**
+
+### D4 · Public launch deferred until the site is more finished (2026-09-24)
+
+**The plan says launch publicly even if ugly; the maintainer chose not to yet**, the same day
+everything a launch needs went live — deployed, signed into, shipped by CI. The switch held
+back is Google's consent screen, left in *Testing*, so only listed accounts can sign in and so
+plan. **The URL is public and the catalog reads without an account**; that is not hidden.
+**This is a deferral, not a cut** — the cut list's "never cut the Phase 4 public launch"
+stands. **Cost:** the reason to launch ugly — strangers' feedback before effort goes into
+guessing — waits, and so does everything that needs users: Phase 4's exit, the Track B gate,
+and Phase 6's community data, which is the bootstrap problem (N26) itself. **Bought:** a first
+impression made on more than one construct. **Reversal trigger:** [Q6](docs/history/tracker-archive.md#q6--what-makes-the-site-finished-enough-to-let-strangers-in)'s list, once written, is
+met — a list rather than a feeling, so the deferral cannot quietly become permanent. **Written
+2026-09-24 with four items; all four met the same day.** The trigger fired; the maintainer's answer is [D5](#d5--the-maintainer-rehearses-the-stranger-test-before-strangers-are-found-2026-09-25).
+
 ## D2 — the full account
 
 Compressed out of the live tracker on 2026-09-18 (twenty-third session); the
@@ -3231,7 +3264,7 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
-**2026-09-29 (fifty-first) — C1 closes on a reader's screen.**
+**2026-09-29 (fifty-first) — C1 closes on a reader's screen, and Phase 7 opens by D7.**
 
 **The remote, checked first:** PR #60 merged 2026-09-28 10:05Z; its `main` run
 `36407578470` green; `/api/health` reported `5df07e7`, #60's merge. `dev` one doc
@@ -3248,9 +3281,34 @@ named Adelyde's banner and the reader asked Selena's** — the exit says *a* liv
 banner, so it counts; Adelyde's worst case of 60 was driven only locally
 (fiftieth). Code unchanged this session.
 
-**Offered and not yet answered:** modelling the Crucible pull track — a refund
-by pull count, not by outcome, so the chain is untouched and only the ticket →
-pulls mapping changes (a banner field, a migration, likely an ADR, sequence 19).
+**Offered and held:** modelling the Crucible pull track — a refund by pull
+count, not by outcome, so the chain is untouched and only the ticket → pulls
+mapping changes (a banner field, a migration, likely an ADR, sequence 19). The
+maintainer held it, and C2 and C3 with it.
+
+**Then Track B, by the maintainer: D7 and ADR 0035.** The reason given was to
+put the project in shape before it goes on a CV. The gate was explained first:
+five testers are users, not traffic, and Phase 6 has no reports. The maintainer
+chose **Phase 7 over 8** (single-node, most likely to be finished) and **a
+synthetic workload that says so**, with a reversal trigger of re-running the
+benchmark on real reports and publishing it beside the synthetic result.
+Checking the seam found that **`DropReportStore` has no implementation at all**,
+so P7.5 writes Phase 6's Postgres side first. It also found a question the port
+cannot answer (**Q7**): does `scan(stage, item, version)` return the runs where
+the item did *not* drop? If not, every rate built on it is too high. CLAUDE.md's
+non-negotiable now says Phase 7 alone is open. D4 and D5, both finished, moved
+here verbatim to make room.
+
+**P7.1 built.** `LsmStore`, a byte-keyed store: a CRC32C-framed
+`WriteAheadLog` with a magic header, the JDK's `ConcurrentSkipListMap` as the
+memtable (a deliberate choice, argued in its javadoc), and recovery on open.
+**A torn tail is cut back before anything is appended**, which a test proves by
+cutting a five-record log at every byte offset, replaying it, appending and
+replaying again. **A foreign file is refused, not truncated.** One owner per
+directory; a failed write poisons the store until it is reopened. A jqwik
+property test drives 200 random put / delete / reopen sequences against a
+`TreeMap` (200 of 200 checks). 10 tests, and the architecture tests are still
+green.
 
 **2026-09-28 (fiftieth) — C1 opens: the readings, ADR 0034, sequence 17, and a pull planner driven end to end.**
 

@@ -34,8 +34,10 @@ comment.
   selectable by `storm-almanac.substrate.*` in `application.yml`. Publish the
   benchmark either way — concluding that Postgres won is an allowed and
   respectable outcome.
-- **Track B is gated.** Do not write code in `substrate/` until the product is
-  publicly deployed with real traffic (end of Phase 4, realistically Phase 6).
+- **Track B is gated, and Phase 7 alone is open** since 2026-09-29, on a
+  synthetic workload ([ADR 0035](docs/adr/0035-track-b-opens-before-real-traffic-against-a-synthetic-workload.md)):
+  every number it produces names its workload as generated. Do not write code in
+  `substrate/almanac-raft` or `almanac-chaos` until the product has real traffic.
   Check the gate status in TRACKER.md.
 - **No game assets, no client automation.** Numbers and text only, attributed.
 
