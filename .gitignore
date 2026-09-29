@@ -44,3 +44,6 @@ upstream-snapshots/
 # TypeScript incremental build cache: derived, machine-specific, and it changes
 # on every build. It was tracked by accident.
 tsconfig.tsbuildinfo
+
+# jqwik keeps failing seeds between runs; local state, not source.
+.jqwik-database

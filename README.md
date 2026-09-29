@@ -15,33 +15,27 @@ fractional ones, the reason each stage is on the list, drop rates discounted by
 how thin their sample is, and where every number was read. Arknights' ArkPlanner
 has a real solver too, but it keeps its reasoning to itself and covers one game.
 
-It runs on a storage engine and a consensus layer written from scratch — one
-product to be used, one substrate to be understood.
-
 - **Launch title:** Punishing: Gray Raven · **Second title:** Reverse: 1999
   (swapped 2026-09-13; everything built so far was built against Reverse: 1999)
 - **Stack:** Java 21 · Spring Boot 3 · React 19 · Postgres · Redis
-- **Plan:** [plan.html](plan.html) — 13 phases, two tracks
+- **Plan:** [plan.html](plan.html) — 13 phases, two tracks; the second is parked
 - **Progress:** [TRACKER.md](TRACKER.md) — current phase, what is done, what is next
 
-## The two tracks
+## The product, and a parked second track
 
-**Track A — product.** The optimizer, the gacha engine, the drop-statistics
-platform, two games, a public deployment with real users. Postgres and Redis
-underneath, chosen because they work.
+**The product.** The optimizer, the gacha engine and pull planner, the
+drop-statistics platform, two games, a public deployment with real users.
+Postgres and Redis underneath, chosen because they work.
 
-**Track B — substrate.** An LSM-tree storage engine for the drop-report log, a
-Raft implementation coordinating the solver fleet, and a fault-injection harness
-that tries to break both.
-
-Track A ships first and completely. Track B starts only once the product is
-publicly deployed with real traffic, because infrastructure written for a system
-with no users is infrastructure written against imaginary requirements.
-
-Every hand-built component sits behind an interface that already has a boring
-implementation. Both stay in the codebase, selectable by config, and the
-benchmark gets published — including if the boring one wins. See
-[ADR 0003](docs/adr/0003-the-honesty-rule.md).
+**The substrate, parked.** The plan's second track was hand-built infrastructure:
+an LSM-tree storage engine for the drop-report log, Raft coordinating the solver
+fleet, and a fault-injection harness to break both. It was cut from scope on
+2026-09-29 ([ADR 0036](docs/adr/0036-track-b-is-cut-and-parked.md)). Only the
+storage engine's first slice exists — a write-ahead log, a memtable and crash
+recovery — kept in the tree and tested. If the track returns, every hand-built
+component sits behind an interface that already has a boring implementation, and
+the benchmark gets published even if the boring one wins
+([ADR 0003](docs/adr/0003-the-honesty-rule.md)).
 
 ## Running it
 
@@ -98,9 +92,9 @@ backend/
   modules/api         REST + WebSocket edge
   app                 the single deployable
   adapters/reverse-1999     one title's upstream, converted — the whole cost of a game
-  substrate/almanac-store   Track B · LSM storage engine        (phase 7)
-  substrate/almanac-raft    Track B · consensus                 (phase 8)
-  substrate/almanac-chaos   Track B · fault injection           (phase 10)
+  substrate/almanac-store   parked · LSM storage engine, first slice only
+  substrate/almanac-raft    parked · empty
+  substrate/almanac-chaos   parked · empty
 frontend/             React 19 + TypeScript + Vite, PWA with offline editing
 docs/adr/             every decision names the trigger that would reverse it
 ```

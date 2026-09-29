@@ -13,7 +13,7 @@ being finished with is.
 - The plan is [plan.html](plan.html) (13 phases, two tracks, plus Track C by [D6](#d6--a-third-track-for-the-product-after-launch-2026-09-26)); [README.md](README.md)
   is the public face and [CLAUDE.md](CLAUDE.md) the working agreement.
 - **Cut back whenever it passes 550 lines** ([the ledger](docs/history/tracker-archive.md#the-line-count-ledger)); anything it no longer carries is in the archive verbatim — decide whether it is still operative rather than assuming it was lost.
-- Last updated: **2026-09-28** (fiftieth session)
+- Last updated: **2026-09-29** (fifty-first session)
 
 ---
 
@@ -61,7 +61,7 @@ being finished with is.
   and prices only the first, so **15 of 779 drop facts are declared and 764 sampled**, ~2% free. Two consolations:
   **gacha rates *are* disclosed**, and the grade is itself a free first-hand fact for all 595 pairs, with nowhere to
   live until Phase 6 ([the note](docs/game-facts/reverse-1999-drop-disclosure.md)).
-- **Phases 0–5 are closed; Track C and Phase 6 are open; Track B is gated.** **Phase 4 closed 2026-09-28**: five strangers completed a plan without help (the maintainer's report) and left five notes, all closed ([archive](docs/history/tracker-archive.md#completed-next-actions)). Phase 5 closed **out of order on purpose** ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)) and **nothing calls either gacha engine**. [The board](#track-a--product).
+- **Phases 0–5 and C1 are closed; C2, C3 and Phase 6 are open; Track B is cut and parked** ([D8](#d8--track-b-cut-and-parked-2026-09-29)). **Phase 4 closed 2026-09-28**: five strangers completed a plan without help (the maintainer's report) and left five notes, all closed ([archive](docs/history/tracker-archive.md#completed-next-actions)). Phase 5 closed **out of order on purpose** ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)) and **nothing calls either gacha engine**. [The board](#track-a--product).
 - **Deployed and signed into since 2026-09-24** ([D1 reversed](#d1--deployment-deferred-2026-09-02)) —
   `https://storm-almanac.vercel.app` rewrites to Render, which serves PGR sequence 8 from Neon; the first real OAuth
   exchange and the first production write ran the same day. Free tier, still no money. **CI deploys it:** a push to
@@ -69,13 +69,14 @@ being finished with is.
   **`backend/Dockerfile`'s COPY list is B5's path and drifts in silence** — it omitted `adapters/` from Phase 1
   until 2026-09-09, every image build failing in six seconds while this file called it verified, so **anything added
   beside `modules`, `adapters`, `substrate`, `app` needs a line there**.
-- **The remote, last checked 2026-09-28 (fiftieth) — re-check it, do not trust it, and check three things:**
+- **The remote, last checked 2026-09-29 (fifty-first) — re-check it, do not trust it, and check three things:**
   which PRs merged, **the last `main` run**, and **the SHA `/api/health` reports** — a red `main` run once kept
   #46 off production with nothing showing it (archive, forty-second).
-  [PR #59](https://github.com/kietnt4412/storm_almanac/pull/59) (T8, T9) merged 2026-09-28 03:36Z; its
-  `main` run `36376650286` green; **production reports `59c6d1f`**, #59's merge. C1 is committed on `dev`, not pushed.
+  [PR #60](https://github.com/kietnt4412/storm_almanac/pull/60) (C1, sequences 17–18) merged 2026-09-28 10:05Z; its
+  `main` run `36407578470` green; **production reports `5df07e7`**, #60's merge — `/banners`, `/measures` flags and
+  `/pulls` checked live the same hour, and on 2026-09-29 it answered a signed-in reader (C1's exit). No PR open.
   **Both databases hold sequence 18** since 2026-09-28 (Neon 10:01:03Z, local 10:02:13Z), each read back as *no changes*;
-  **Neon skipped 17** (16 → 18, twelve changes). Production on `59c6d1f` serves 18 and was healthy right after.
+  **Neon skipped 17** (16 → 18, twelve changes).
   Stale on eight of nine checks, so re-check it rather than read it. B6 means a commit on `dev` with no PR open is still built.
   **What the trigger does not do is watch the merge** — PR #25 merged *before its own run finished*
   and was green by luck (archive, twenty-sixth) — so **wait for the run before merging** still
@@ -205,8 +206,8 @@ works". It does not mean that:
 - **No two real devices have ever synced.** One browser's stale edit has lost to a newer value and said so; two
   requests interleaving on the same key at the same instant is argued rather than measured. And **a merge publishes
   nothing**, so a cached plan survives the inventory under it moving — harmless until Phase 6.
-- **The gacha engines have answered a player only locally.** Since 2026-09-28 (fiftieth) `/pulls` asks the chain
-  from a stored counter (`V18`) and the declared income, driven against sequence 17 — **not yet on production**. Two
+- **The gacha engines have answered one reader on production** (2026-09-29, Selena's banner, C1's exit): `/pulls`
+  asks the chain from a stored counter (`V18`) and the declared income. Two
   things make its answers dearer than the truth, never cheaper: **the Crucible pull-count track is not modelled**
   (twelve pulls back in sixty), and **multi-copy answers ignore copy exchanges** (**N38**). **Four banners are
   first-hand and five are not (Q4).** Selena's close is written in sequence 18 (10/01 06:59 UTC).
@@ -231,7 +232,7 @@ works". It does not mean that:
 **Phase 4 closed 2026-09-28**, after D5's rehearsal closed all ten stalls (S1–S10, archive) — every Phase 4 item
 [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-> **Resume here (2026-09-28, fiftieth):** **C1 is built and driven locally, and its exit is not met yet.** Commits on `dev` (ADR 0034, sequences 17 and 18, the pull planner), not pushed. In order: (1) ~~sequence 18 on Neon~~ **done**; (2) a PR from `dev`, merged after its run is green; (3) a signed-in reader asks `/pulls` on production for Adelyde's banner — that is the exit. **N39 closed by the readings.** Worth doing in C1 if the maintainer agrees: model the Crucible pull track. N38, N18, N19, N43 held.
+> **Resume here (2026-09-29, fifty-first):** **C1 closed. Track B opened (D7) and was cut the same day (D8)** — parked in the archive with a resume guide, and P7.1's code left in the tree. **Nothing is chosen next**: the Crucible pull track, C2, C3 and Phase 6 are the maintainer's pick, and C2's and C3's exits are still unagreed. **Selena's pool closes 2026-10-01 06:59 UTC.**
 
 **The strangers' notes, T1–T9, are all closed** and [in the archive](docs/history/tracker-archive.md#completed-next-actions)
 — five strangers, nobody stalled, so the notes were Track C's input.
@@ -310,10 +311,10 @@ previous one's criterion is met. The "Landed" record for closed phases is
 
 ### Track C — the product after launch ([D6](#d6--a-third-track-for-the-product-after-launch-2026-09-26))
 
-**Open since 2026-09-28, when Phase 4's box was ticked; runs beside Phase 6; closes before Track B starts.** Not in
+**Open since 2026-09-28, when Phase 4's box was ticked; runs beside Phase 6.** Not in
 [plan.html](plan.html). The invariants hold here too — a pull planner is `gacha`, so no `if (game == …)`. **C1 was
 chosen first and its exit agreed as written** (maintainer, 2026-09-28); C2's and C3's are proposed, not agreed — C2's
-tester was settled 2026-09-26. **C1's readings are taken; sequence 17 is published locally, not on Neon** (2026-09-28): the Black Card and Direct Exchange 1:1 (ADR 0034), the daily bar (5/10/15 at 60/80/100), the twelve
+tester was settled 2026-09-26. **C1 closed 2026-09-29** ([its record](docs/history/tracker-archive.md#closed-phases-in-full)). Its readings (sequence 17, in both databases via 18): the Black Card and Direct Exchange 1:1 (ADR 0034), the daily bar (5/10/15 at 60/80/100), the twelve
 weeklies (1 000), the Cage's Black Cards (10 + 15), and the live banner — Adelyde: Anabasis, Crucible Event Construct,
 0.50%, wall 60, **100% featured**, closing 2026-11-04 23:00 UTC
 ([the note](docs/game-facts/punishing-gray-raven-research-disclosure.md#2026-09-28--the-live-banner-and-what-the-dailies-pay)).
@@ -322,49 +323,35 @@ pool; twelve pulls back in sixty.
 
 | | Phase | Shape | **Exit** |
 |---|---|---|---|
-| [ ] | **C1 · Pull planner** | **Built and driven locally 2026-09-28 (fiftieth); not deployed.** `GET /banners`, `V18` pity per scope key, `GET/PUT /pity`, `POST /pulls` answered by the exact chain alone (maintainer), `/pulls`. **N39 closed** by the readings (sequence 17); Black Cards count through Direct Exchange (ADR 0034). Not modelled: the Crucible pull track, paid income, copy exchanges (N38, Phase 11) | A signed-in reader's stored pity and declared income answer "how likely by when" for a live banner, on their own account |
+| [x] | **C1 · Pull planner** | **Closed 2026-09-29** on the maintainer's production screen ([record](docs/history/tracker-archive.md#closed-phases-in-full)); deployed in #60. Not modelled: the Crucible pull track, paid income, copy exchanges (N38, Phase 11) | A signed-in reader's stored pity and declared income answer "how likely by when" for a live banner, on their own account |
 | [ ] | **C2 · UI polish** | A visual pass over every screen, mobile first; the rehearsal's smaller hesitations. **Tested by the maintainer and Claude, not strangers** (maintainer, 2026-09-26) — a rehearsal like D5's | Every screen driven at 375 and 1280 px, and a self-run rehearsal over every screen leaves no stall unfixed or uncut |
 | [ ] | **C3 · Account features** | What a returning player wants: saved plans, progress over time, more than one goal set, what a new patch changed for *their* goals | A reader returning after a new sequence sees what it changed for their goals and plan, without asking |
 
-### The gate
+### Track B — cut, and parked in the archive
 
-> **Track B starts only when the product is publicly deployed with real users and
-> real traffic.** If Phase 4 has not landed, go back and land it. Infrastructure
-> built against imagined requirements is a toy; infrastructure built against six
-> weeks of your own production traffic is engineering.
+**Cut 2026-09-29 by the maintainer** ([D8](#d8--track-b-cut-and-parked-2026-09-29), ADR 0036): Phases 7–10 (the LSM
+store, Raft, the solver cluster, the chaos harness) are out of scope. **Everything is kept** — the gate, the table,
+the Phase 7 slices and a resume guide are [in the archive](docs/history/tracker-archive.md#track-b--parked-2026-09-29),
+and P7.1's code still builds in `backend/substrate/almanac-store`. **Do not write code in `substrate/`** unless the
+maintainer reopens it with an ADR superseding 0036.
 
-**Gate status: CLOSED** — Phase 4 launched 2026-09-28, but five testers are real users and
-not real traffic; the gate opens on traffic worth engineering against. Do not open `almanac-store`. When Phase 7 comes
-round, re-read D1 and decide deliberately whether Track B on synthetic workloads
-is still worth building.
-
-### Track B — substrate, and Track A's close
-
-Scope is in [plan.html](plan.html). **None of 7–10 may start before the gate opens.**
+### Track A's close
 
 | | Phase | Shape | **Exit** |
 |---|---|---|---|
-| [ ] | **7 · almanac-store** (LSM), 3w | Behind `DropReportStore`, alongside the Postgres one | Crash-consistency fuzzing survives 10k randomized kills; benchmark vs Postgres published — **including if Postgres wins** |
-| [ ] | **8 · almanac-raft**, 3w | Exposed first as a replicated KV, so it is testable before anything depends on it | 5-node cluster survives repeated leader kills and partitions with no divergent log |
-| [ ] | **9 · Solver cluster**, 2w | Replicated job log, leased work, idempotent completion, results over WebSocket | Kill any node mid-solve — no lost solves, no duplicated solves, throughput recorded |
-| [ ] | **10 · Chaos harness**, 1.5w | Partitions, pauses, kills, disk corruption; linearizability checking; failing seeds kept as regression tests | Nightly suite green for 7 consecutive nights, **and one real bug found and written up** |
 | [ ] | **11 · Reverse: 1999 as the second title**, 2w — *was PGR until [D3](#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13)* | R1999 keeps the adapter as a cross-check, two imported patches, the benchmark and one first-hand banner; what it still costs is **first-hand sourcing of the catalog** and its own day boundary | R1999 live with **zero game-specific code** added to `planner`, `gacha` or `stats` after PGR launched — and the diff to prove it |
-| [ ] | **12 · Hardening and the writeups**, 1w | Tracing, alerting, a backup actually restored from, a load test with published numbers, pre-rendered catalog pages | Restore drill completed from a real backup; catalog pages indexed; three writeups published — the storage benchmark, the consensus verification, the multi-game diff |
+| [ ] | **12 · Hardening and the writeups**, 1w | Tracing, alerting, a backup actually restored from, a load test with published numbers, pre-rendered catalog pages | Restore drill completed from a real backup; catalog pages indexed; **the multi-game diff written up** — the storage and consensus writeups went with Track B (D8) |
 
 ---
 
 ## Cut list, and the seams
 
 Consult this before descoping anything, and record it in the session log if a cut
-is taken. **Never cut** the Phase 4 public launch, the Phase 2 optimizer, or
-completing at least one of Phase 7 or 8 properly — half an LSM tree and half a
-Raft are worth nothing, one finished engine a great deal.
+is taken. **Never cut** the Phase 4 public launch or the Phase 2 optimizer. The
+rule that one of Phase 7 or 8 must be finished went with Track B (D8); its cut
+order is [in the archive](docs/history/tracker-archive.md#track-b--parked-2026-09-29).
 
-1. **Cut first:** Phase 10 as a separate phase — fold minimal fault injection into
-   8 and 9. This loses the strongest evidence, so cut only under real pressure.
-2. **Cut second:** Phase 9. Keep `almanac-raft` as a verified standalone
-   replicated KV and leave the solver single-node.
-3. **Cut third:** Phase 11's real second game — but still prove the abstraction
+1. **Cut first:** Phase 11's real second game — but still prove the abstraction
    against a synthetic test game. That proof is the product thesis.
 
 **The invariants live in [CLAUDE.md](CLAUDE.md#non-negotiables)**; two of the six
@@ -373,9 +360,9 @@ is most likely to trip.
 
 | Port | Defined in | Boring impl | Hand-built impl |
 |------|-----------|-------------|-----------------|
-| `DropReportStore` | `modules/stats` | Postgres — phase 6 | `almanac-store` — phase 7 |
-| `SolveCoordinator` | `modules/planner` | single-node — phase 2 | `almanac-raft` — phase 9 |
-| solve cache | `modules/planner` | Redis — phase 2 | replicated KV — phase 8 |
+| `DropReportStore` | `modules/stats` | Postgres — phase 6 | `almanac-store` — parked (D8) |
+| `SolveCoordinator` | `modules/planner` | single-node — phase 2 | `almanac-raft` — parked (D8) |
+| solve cache | `modules/planner` | Redis — phase 2 | replicated KV — parked (D8) |
 
 **Keep these interfaces narrow: a port shaped to flatter the hand-built side proves nothing.**
 
@@ -385,6 +372,19 @@ is most likely to trip.
 
 Decision, cost, and what would reverse it. **The full accounts are
 [in the archive](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression).**
+
+### D8 · Track B cut, and parked (2026-09-29)
+
+**The maintainer cut Phases 7–10 the same day D7 opened Phase 7** ([ADR 0036](docs/adr/0036-track-b-is-cut-and-parked.md)),
+judging them senior-level work, with the risk being a CV line they could not defend under questioning. **Kept, not
+deleted:** the whole of Track B is [in the archive](docs/history/tracker-archive.md#track-b--parked-2026-09-29) with a
+resume guide, and P7.1's code stays in the tree. **Cost:** the project's Track B story — a hand-built engine
+benchmarked against Postgres — and two of Phase 12's three writeups. **Bought:** the time goes to the product,
+which already has users. **Reversal trigger:** the maintainer chooses to return; an ADR superseding 0036 reopens it.
+
+### D7 · Track B opens before real traffic, on a synthetic workload (2026-09-29)
+
+**Superseded the same day by D8.** [As it stood](docs/history/tracker-archive.md#track-b--parked-2026-09-29).
 
 ### D6 · A third track for the product after launch (2026-09-26)
 
@@ -396,32 +396,11 @@ item taken before Phase 4's box is ticked — that is a deferral of the launch a
 
 ### D5 · The maintainer rehearses the stranger test before strangers are found (2026-09-25)
 
-**Phase 4's exit asks for five strangers, and the maintainer knows few people who play**, so asked
-whether testing it themselves would do. **It cannot meet the exit, and this does not change the
-exit:** the test is whether someone who has never seen the site plans without help, and the one
-tester who cannot stall where a stranger would is the one who built it. **What is taken instead, for
-now, is a rehearsal** — a private window, one construct planned from the home page, every hesitation
-written down, each fixed or cut on the record; friends who do not play count as rehearsal, not as
-strangers. Google's client stays in *Testing*. **A deferral, not a cut;** the Phase 4 box stays
-unticked. **Cost:** D4's, and sharper — D4 waited on the site, which work fixes; this waits on an
-audience, which no work on the site produces, so the Track B gate and Phase 6's data (N26) have no
-date. **Bought:** the stalls a builder can find are gone before a stranger's first impression.
-**Reversal trigger:** the rehearsal's stall list is empty — then strangers are found where players
-already are, the game's subreddit and Discord servers, rather than among people the maintainer knows. **Fired 2026-09-26** (forty-seventh), when S6 closed; **five strangers ran it and Phase 4 closed 2026-09-28.**
+**Finished 2026-09-28** — the rehearsal's stall list emptied (S1–S10), five strangers ran it, Phase 4 closed. [In full](docs/history/tracker-archive.md#d4-and-d5--the-full-accounts).
 
 ### D4 · Public launch deferred until the site is more finished (2026-09-24)
 
-**The plan says launch publicly even if ugly; the maintainer chose not to yet**, the same day
-everything a launch needs went live — deployed, signed into, shipped by CI. The switch held
-back is Google's consent screen, left in *Testing*, so only listed accounts can sign in and so
-plan. **The URL is public and the catalog reads without an account**; that is not hidden.
-**This is a deferral, not a cut** — the cut list's "never cut the Phase 4 public launch"
-stands. **Cost:** the reason to launch ugly — strangers' feedback before effort goes into
-guessing — waits, and so does everything that needs users: Phase 4's exit, the Track B gate,
-and Phase 6's community data, which is the bootstrap problem (N26) itself. **Bought:** a first
-impression made on more than one construct. **Reversal trigger:** [Q6](docs/history/tracker-archive.md#q6--what-makes-the-site-finished-enough-to-let-strangers-in)'s list, once written, is
-met — a list rather than a feeling, so the deferral cannot quietly become permanent. **Written
-2026-09-24 with four items; all four met the same day.** The trigger fired; the maintainer's answer is [D5](#d5--the-maintainer-rehearses-the-stranger-test-before-strangers-are-found-2026-09-25).
+**Finished 2026-09-24** — Q6's four items met the same day; its answer was D5. [In full](docs/history/tracker-archive.md#d4-and-d5--the-full-accounts).
 
 ### D3 · Launch title swapped to Punishing: Gray Raven (2026-09-13)
 
@@ -486,6 +465,11 @@ Start-Process 'C:\Program Files\Docker\Docker\Docker Desktop.exe'
 
 Carry forward until answered, then move the entry [to the archive](docs/history/tracker-archive.md#answered-questions).
 
+- **Q7 — What does `DropReportStore.scan(stage, item, version)` return?** *Open since 2026-09-29; Phase 6's to answer,
+  before its Postgres store is written (and before parked P7.5, if Track B returns).* A report is one stage's runs with the drops it saw, so a run where the item did **not** drop is
+  still a trial for it. If `scan` returns only reports that saw the item, every rate built on it is too high. If it
+  returns every report for `(stage, version)`, then `item` does nothing and the port should say so. **Answer it on the
+  Postgres side, not the LSM side** (ADR 0035, decision 4).
 - **Q5 — Is our "3.5" the same 3.5 anyone else means?** *Open for the existing
   data; **dissolved for everything after ADR 0015**.* `fetch-upstream.sh` pins a
   commit dated **2026-03-17** while Global 3.5 ran **2026-05-28 to 2026-07-02**,
@@ -516,6 +500,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
+| 2026-09-29 | fifty-first | **C1 closed**: signed in on production, Selena's banner, 75.0% / 76 pulls / certain in 120, re-derived by hand. **Then D7 opened Phase 7** and P7.1 was built (WAL, memtable, recovery). **Then D8 cut Track B**, parked in the archive with a resume guide |
 | 2026-09-28 | fiftieth | **C1 chosen, exit agreed, built.** Readings: Adelyde's Crucible banner (0.50%, wall 60, **100%**), the missions' and Cage's Black Cards, Direct Exchange 1:1. **ADR 0034**: income walks conversions. **Sequence 17** local; Neon refused, handed over. `/pulls` driven: 112 pulls, certain in 15. Not deployed |
 | 2026-09-28 | forty-ninth | Production on `07ff98a` (#58). **T8**: a PGR level step is priced only in EXP, and the upgrades route served item costs only, so the character page's Level rows read bare; now `progress` on the wire, EXP first on the row. **T9**: a step with no price says "Free". **N42 closed by screens**: Ultima Awaken is free, unlocked by the third Awaken — the maintainer's own report overruled; sequence 16, the Awaken track held as N43 |
 | 2026-09-28 | forty-eighth | Production on `2e147d0` (#57). **Phase 4 closed**: five strangers completed a plan without help. **T1 was a bug** — the worker served "the latest" game data from cache, so a returning browser saw tracks from before sequence 11; that alone was notes 2, 4 and 5. T2 profile rename and delete; T3 the plan summary by weight; T6, T7 found and fixed |

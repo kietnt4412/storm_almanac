@@ -1688,6 +1688,24 @@ was written when each closed.
       data out of the service worker (T1, fixed the same day), so which version of
       the roster and goal screens each stranger saw is not known.
 
+- [x] **C1 · Pull planner** (Track C, D6) — **closed 2026-09-29**, opened 2026-09-28
+      `GET /banners`, `V18` pity per scope key, `GET/PUT /pity`, `POST /pulls`
+      answered by the exact chain alone, the `/pulls` screen; Black Cards count as
+      tickets through Direct Exchange (ADR 0034); sequences 17–18; deployed in #60.
+      **Exit:** a signed-in reader's stored pity and declared income answer "how
+      likely by when" for a live banner, on their own account.
+      **How the exit was met:** the maintainer, signed in on production (`5df07e7`,
+      sequence 18), asked `/pulls` for **Selena: Pianissimo's** Arrival banner — not
+      Adelyde's, which the resume line had named; the exit asks for *a* live banner.
+      Counter 0, last S featured, 19 000 Black Cards saved, the Cage's top, every
+      daily and weekly mission, 2 days: **75.0%, 76 pulls** (19 000 held + 60 to
+      come, 250 each), **certain in 120, first copy ~68 on average**. Checked by
+      hand the same day: 0.7 + 0.3 × P(a second S in what is left of 76) = 0.7497;
+      E[pulls to an S] = (1 − 0.995⁶⁰) / 0.005 = 51.9, × 1.3 = 67.5. **What
+      travels with it:** the Crucible pull-count track, paid income and copy
+      exchanges (N38) are not modelled, so answers are dearer than the truth and
+      never cheaper; whether 0 was the maintainer's real counter was not asked.
+
 ### Qualifications moved out of the live tracker, 2026-09-11 (seventeenth session)
 
 Verbatim, and still true. They left *What is still unverified* because they
@@ -2895,6 +2913,127 @@ newest first. **Write the entry there; add its line here.**
 
 ---
 
+## Track B — parked 2026-09-29
+
+*Moved here from the tracker on 2026-09-29 (fifty-first session), when the maintainer cut Track B
+([D8](#d8--track-b-cut-and-parked-2026-09-29), [ADR 0036](../adr/0036-track-b-is-cut-and-parked.md)). Everything below the resume guide is
+the tracker's text as it stood that day, verbatim — nothing was deleted, and it links to the tracker's own anchors.*
+
+### How to come back to it
+
+1. **Write an ADR superseding 0036** that says why now, and add a deviation to the tracker. ADR 0003's honesty
+   rule (a boring implementation behind every hand-built one, a published benchmark either way) still applies, and
+   ADR 0035's rule that a figure from a generated workload says so still applies if there is no real traffic yet.
+2. **Move this section back** into the tracker: the gate, the Track B table, the Phase 7 slices, the cut-list
+   entries, and the `almanac-store` row of *Current state*.
+3. **The code is still in the tree.** `backend/substrate/almanac-store` holds P7.1 (commit `8d0d891`) — WAL,
+   memtable, recovery, 10 tests — and still builds and runs in every `./gradlew build`. `almanac-raft` and
+   `almanac-chaos` are empty modules. **Resume at P7.2.** Read `LsmStore`'s and `WriteAheadLog`'s javadoc first.
+4. **Q7 in the tracker blocks P7.5**: what `DropReportStore.scan(stage, item, version)` returns.
+5. **Phase 7 before 8 is still the advice**: single-node, in-process, the one most likely to be finished. The cut
+   list's rule was that half an LSM tree and half a Raft are worth nothing.
+
+### The Phase 7 slices, as they stood
+
+Each slice is done when its tests are committed; **the phase closes on its exit, not on the sixth box.** Every figure names its workload as generated (ADR 0035).
+
+- [x] **P7.1 · WAL, memtable, recovery** (2026-09-29). CRC32C-framed log; a torn tail is cut back to the last whole record before anything is appended — **proven at every byte offset**; a mid-log bit flip loses the tail too, on the record. The JDK's skip list, deliberately. One owner per directory; a failed write refuses all later ones. Property test against a `TreeMap`, 200 random sequences with reopens.
+- [ ] **P7.2 · SSTables and the flush** — blocks, sparse index, bloom filter, footer checksum; freeze, flush, rotate the WAL; a manifest that makes the switch atomic; the merged read path, newest first.
+- [ ] **P7.3 · Levelled compaction** — background, tombstones reclaimed only at the bottom level, the amplification knob.
+- [ ] **P7.4 · Crash-consistency fuzzing** — 10 000 randomized kills during writes, flushes and compactions; every acknowledged write present, no unacknowledged one. Real kills or an injected filesystem: decide and write down why.
+- [ ] **P7.5 · Both `DropReportStore`s** — the Postgres one first (Phase 6's boring half), then the LSM adapter, selectable by `storm-almanac.substrate.drop-report-store`. **Needs Q7 answered.**
+- [ ] **P7.6 · The benchmark, published** — write throughput, p99 scan, space amplification, recovery time, on a committed generator. Postgres winning is allowed.
+
+### The `almanac-store` row of *Current state*
+
+| Area | State | The one thing to know |
+|------|-------|-----------------------|
+| `almanac-store` | **P7.1 of six, 10 tests** | A plain library: bytes in, bytes out, no Spring. Only `Durability.SYNC_EACH_WRITE` promises an acknowledged write survives a crash. `Fsync.directory` is a no-op on Windows, so **the crash fuzzing (P7.4) is meant for the Linux runner** |
+
+### The gate and the Track B table, as they stood
+
+> **Track B starts only when the product is publicly deployed with real users and
+> real traffic.** If Phase 4 has not landed, go back and land it. Infrastructure
+> built against imagined requirements is a toy; infrastructure built against six
+> weeks of your own production traffic is engineering.
+
+**Gate status: OPEN FOR PHASE 7 ONLY, since 2026-09-29** ([D7](#d7--track-b-opens-before-real-traffic-on-a-synthetic-workload-2026-09-29),
+ADR 0035) — five testers are real users and not real traffic, so the workload is synthetic and every number says so.
+**Closed for 8–10:** do not write code in `almanac-raft` or `almanac-chaos`.
+
+**Track B — substrate, and Track A's close**
+
+Scope is in [plan.html](plan.html). **Phase 7 is open (D7); none of 8–10 may start before the gate opens.**
+
+| | Phase | Shape | **Exit** |
+|---|---|---|---|
+| [ ] | **7 · almanac-store** (LSM), 3w — **open since 2026-09-29 (D7); slice 1 of 6 built** | Behind `DropReportStore`, alongside the Postgres one. [Its slices](#phase-7--almanac-store-open-by-d7) | Crash-consistency fuzzing survives 10k randomized kills; benchmark vs Postgres published — **including if Postgres wins** |
+| [ ] | **8 · almanac-raft**, 3w | Exposed first as a replicated KV, so it is testable before anything depends on it | 5-node cluster survives repeated leader kills and partitions with no divergent log |
+| [ ] | **9 · Solver cluster**, 2w | Replicated job log, leased work, idempotent completion, results over WebSocket | Kill any node mid-solve — no lost solves, no duplicated solves, throughput recorded |
+| [ ] | **10 · Chaos harness**, 1.5w | Partitions, pauses, kills, disk corruption; linearizability checking; failing seeds kept as regression tests | Nightly suite green for 7 consecutive nights, **and one real bug found and written up** |
+
+### The cut list's Track B entries, as they stood
+
+Consult this before descoping anything, and record it in the session log if a cut
+is taken. **Never cut** the Phase 4 public launch, the Phase 2 optimizer, or
+completing at least one of Phase 7 or 8 properly — half an LSM tree and half a
+Raft are worth nothing, one finished engine a great deal.
+
+1. **Cut first:** Phase 10 as a separate phase — fold minimal fault injection into
+   8 and 9. This loses the strongest evidence, so cut only under real pressure.
+2. **Cut second:** Phase 9. Keep `almanac-raft` as a verified standalone
+   replicated KV and leave the solver single-node.
+
+| Port | Defined in | Boring impl | Hand-built impl |
+|------|-----------|-------------|-----------------|
+| `DropReportStore` | `modules/stats` | Postgres — phase 6 | `almanac-store` — phase 7 |
+| `SolveCoordinator` | `modules/planner` | single-node — phase 2 | `almanac-raft` — phase 9 |
+| solve cache | `modules/planner` | Redis — phase 2 | replicated KV — phase 8 |
+
+### D7, as it stood
+
+**D7 · Track B opens before real traffic, on a synthetic workload (2026-09-29)**
+
+**The gate says real traffic first; the maintainer opened Phase 7 anyway**, to give the project its Track B shape
+now ([ADR 0035](docs/adr/0035-track-b-opens-before-real-traffic-against-a-synthetic-workload.md)). Phase 7 and not 8,
+because a single-node engine is the one most likely to be *finished*. **Phases 8–10 stay gated. Cost:** the engine is
+tuned against a generator, and every figure it produces must say so; Postgres winning is likely and allowed; C2 and C3
+wait. **Reversal trigger:** real drop reports arrive — the benchmark is re-run on them and published *beside* the
+synthetic one.
+
+## D4 and D5 — the full accounts
+
+*Moved here from the tracker 2026-09-29 (fifty-first session); both finished when Phase 4 closed on 2026-09-28. Verbatim.*
+
+### D5 · The maintainer rehearses the stranger test before strangers are found (2026-09-25)
+
+**Phase 4's exit asks for five strangers, and the maintainer knows few people who play**, so asked
+whether testing it themselves would do. **It cannot meet the exit, and this does not change the
+exit:** the test is whether someone who has never seen the site plans without help, and the one
+tester who cannot stall where a stranger would is the one who built it. **What is taken instead, for
+now, is a rehearsal** — a private window, one construct planned from the home page, every hesitation
+written down, each fixed or cut on the record; friends who do not play count as rehearsal, not as
+strangers. Google's client stays in *Testing*. **A deferral, not a cut;** the Phase 4 box stays
+unticked. **Cost:** D4's, and sharper — D4 waited on the site, which work fixes; this waits on an
+audience, which no work on the site produces, so the Track B gate and Phase 6's data (N26) have no
+date. **Bought:** the stalls a builder can find are gone before a stranger's first impression.
+**Reversal trigger:** the rehearsal's stall list is empty — then strangers are found where players
+already are, the game's subreddit and Discord servers, rather than among people the maintainer knows. **Fired 2026-09-26** (forty-seventh), when S6 closed; **five strangers ran it and Phase 4 closed 2026-09-28.**
+
+### D4 · Public launch deferred until the site is more finished (2026-09-24)
+
+**The plan says launch publicly even if ugly; the maintainer chose not to yet**, the same day
+everything a launch needs went live — deployed, signed into, shipped by CI. The switch held
+back is Google's consent screen, left in *Testing*, so only listed accounts can sign in and so
+plan. **The URL is public and the catalog reads without an account**; that is not hidden.
+**This is a deferral, not a cut** — the cut list's "never cut the Phase 4 public launch"
+stands. **Cost:** the reason to launch ugly — strangers' feedback before effort goes into
+guessing — waits, and so does everything that needs users: Phase 4's exit, the Track B gate,
+and Phase 6's community data, which is the bootstrap problem (N26) itself. **Bought:** a first
+impression made on more than one construct. **Reversal trigger:** [Q6](docs/history/tracker-archive.md#q6--what-makes-the-site-finished-enough-to-let-strangers-in)'s list, once written, is
+met — a list rather than a feeling, so the deferral cannot quietly become permanent. **Written
+2026-09-24 with four items; all four met the same day.** The trigger fired; the maintainer's answer is [D5](#d5--the-maintainer-rehearses-the-stranger-test-before-strangers-are-found-2026-09-25).
+
 ## D2 — the full account
 
 Compressed out of the live tracker on 2026-09-18 (twenty-third session); the
@@ -3212,6 +3351,66 @@ An entry is worth writing when it records something a future session would
 otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
+
+**2026-09-29 (fifty-first) — C1 closes on a reader's screen; Track B opens by D7 and is parked by D8.**
+
+**The remote, checked first:** PR #60 merged 2026-09-28 10:05Z; its `main` run
+`36407578470` green; `/api/health` reported `5df07e7`, #60's merge. `dev` one doc
+commit ahead. No PR open. Production's `/banners` served both pools at sequence
+18, Adelyde's open to 11/04 23:00 UTC and Selena's to 10/01 06:59 UTC.
+
+**C1's exit met.** The maintainer sent a screenshot of `/pulls` on production,
+signed in: Selena's banner (the 120-pull certainty identifies it), counter 0,
+19 000 Black Cards, 2 days → **75.0%, 76 pulls, certain in 120, ~68 on
+average**. All three figures re-derived by hand and agree (the arithmetic is in
+[C1's closed record](#closed-phases-in-full)). Asking past the close cannot
+overstate it: `PullController` caps the horizon at `closesAt`. **The resume line
+named Adelyde's banner and the reader asked Selena's** — the exit says *a* live
+banner, so it counts; Adelyde's worst case of 60 was driven only locally
+(fiftieth). Code unchanged this session.
+
+**Offered and held:** modelling the Crucible pull track — a refund by pull
+count, not by outcome, so the chain is untouched and only the ticket → pulls
+mapping changes (a banner field, a migration, likely an ADR, sequence 19). The
+maintainer held it, and C2 and C3 with it.
+
+**Then Track B, by the maintainer: D7 and ADR 0035.** The reason given was to
+put the project in shape before it goes on a CV. The gate was explained first:
+five testers are users, not traffic, and Phase 6 has no reports. The maintainer
+chose **Phase 7 over 8** (single-node, most likely to be finished) and **a
+synthetic workload that says so**, with a reversal trigger of re-running the
+benchmark on real reports and publishing it beside the synthetic result.
+Checking the seam found that **`DropReportStore` has no implementation at all**,
+so P7.5 writes Phase 6's Postgres side first. It also found a question the port
+cannot answer (**Q7**): does `scan(stage, item, version)` return the runs where
+the item did *not* drop? If not, every rate built on it is too high. CLAUDE.md's
+non-negotiable now says Phase 7 alone is open. D4 and D5, both finished, moved
+here verbatim to make room.
+
+**P7.1 built.** `LsmStore`, a byte-keyed store: a CRC32C-framed
+`WriteAheadLog` with a magic header, the JDK's `ConcurrentSkipListMap` as the
+memtable (a deliberate choice, argued in its javadoc), and recovery on open.
+**A torn tail is cut back before anything is appended**, which a test proves by
+cutting a five-record log at every byte offset, replaying it, appending and
+replaying again. **A foreign file is refused, not truncated.** One owner per
+directory; a failed write poisons the store until it is reopened. A jqwik
+property test drives 200 random put / delete / reopen sequences against a
+`TreeMap` (200 of 200 checks). 10 tests, and the architecture tests are still
+green.
+
+**Then D8 and ADR 0036: Track B cut, the same session.** After each phase was
+summarised, the maintainer asked whether cutting the infrastructure was fine,
+since it felt like senior-level work. The advice given: yes. The product already
+tells the story a new graduate needs, and the real risk of Track B is a CV line
+they cannot defend when an interviewer digs into it. Three options were offered:
+cut it, finish a scaled-down Phase 7 only, or keep the plan. **The maintainer cut
+it and asked to keep it in the archive.** So [*Track B — parked
+2026-09-29*](#track-b--parked-2026-09-29) holds the tracker's text verbatim with a
+resume guide, P7.1's code stays in the tree and keeps building, and Phase 12
+loses the storage and consensus writeups. **The README had claimed "it runs on a
+storage engine and a consensus layer written from scratch"** since the scaffold,
+which was never true; it now says the track is parked and what exists of it.
+Next is unchosen: the Crucible track, C2, C3 or Phase 6.
 
 **2026-09-28 (fiftieth) — C1 opens: the readings, ADR 0034, sequence 17, and a pull planner driven end to end.**
 
