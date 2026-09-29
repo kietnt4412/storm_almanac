@@ -13,7 +13,7 @@ being finished with is.
 - The plan is [plan.html](plan.html) (13 phases, two tracks, plus Track C by [D6](#d6--a-third-track-for-the-product-after-launch-2026-09-26)); [README.md](README.md)
   is the public face and [CLAUDE.md](CLAUDE.md) the working agreement.
 - **Cut back whenever it passes 550 lines** ([the ledger](docs/history/tracker-archive.md#the-line-count-ledger)); anything it no longer carries is in the archive verbatim — decide whether it is still operative rather than assuming it was lost.
-- Last updated: **2026-09-29** (fifty-fourth session)
+- Last updated: **2026-09-30** (fifty-fifth session)
 
 ---
 
@@ -70,13 +70,12 @@ being finished with is.
   **`backend/Dockerfile`'s COPY list is B5's path and drifts in silence** — it omitted `adapters/` from Phase 1
   until 2026-09-09, every image build failing in six seconds while this file called it verified, so **anything added
   beside `modules`, `adapters`, `substrate`, `app` needs a line there**.
-- **The remote, last checked 2026-09-29 (fifty-fourth) — re-check it, do not trust it, and check three things:**
+- **The remote, last checked 2026-09-30 (fifty-fifth) — re-check it, do not trust it, and check three things:**
   which PRs merged, **the last `main` run**, and **the SHA `/api/health` reports** — a red `main` run once kept
   #46 off production with nothing showing it (archive, forty-second).
-  [PR #62](https://github.com/kietnt4412/storm_almanac/pull/62) (C3.1) merged 2026-09-29 02:37Z; its
-  **[PR #63](https://github.com/kietnt4412/storm_almanac/pull/63) (C3.2) merged 10:19:40Z, eleven seconds after it
-  opened and before its PR run could finish.** Its `main` run `36554872165` came back green, and **production reports
-  `5c965f9`**, #63's merge, so `/since` is live. **C3.3 is in its own PR, opened this session, and not deployed.**
+  **[PR #64](https://github.com/kietnt4412/storm_almanac/pull/64) (C3.3) merged 2026-09-29 10:50:52Z**; its `main`
+  run `36558089363` is green and **production reports `5ca20f5`**, #64's merge — so C3.1, C3.2 and C3.3 are all live,
+  and **C3 waits only on a sequence 19**.
   **Both databases hold sequence 18** since 2026-09-28 (Neon 10:01:03Z, local 10:02:13Z), each read back as *no changes*;
   **Neon skipped 17** (16 → 18, twelve changes).
   Stale on eight of nine checks, so re-check it rather than read it. B6 means a commit on `dev` with no PR open is still built.
@@ -234,7 +233,7 @@ works". It does not mean that:
 **Phase 4 closed 2026-09-28**, after D5's rehearsal closed all ten stalls (S1–S10, archive) — every Phase 4 item
 [in the archive](docs/history/tracker-archive.md#completed-next-actions).
 
-> **Resume here (2026-09-29, fifty-fourth):** **C3.3 built**, on the plan the maintainer agreed ([docs/plans/c3.3-the-notice.md](docs/plans/c3.3-the-notice.md), all four answers the recommendation; *As built* says where the build differs). Home says "New since your plan: … · 32 changes in it touch your plan · See what changed →". The plan screen puts a panel above the saved plan, with the cost on both sides, the changes grouped by track ("Lucia: Inverse Crown · Red Orb — 14 steps: 13 new, 1 changed"), every line behind a toggle, and one button, *Re-plan*, the only thing that clears it. Driven locally at 375 and 1280 px. **C3's exit is not met until production shows it**, and on production every saved plan is already on 18. The exit's own words need **a reader returning after a new sequence**, so the proof comes with the next publish (sequence 19), after C3.3 deploys (C3.2 did, in #63). Pinning a plan with `?version=` would show the screen, but it would not be the exit. **Selena's pool closes 2026-10-01 06:59 UTC.**
+> **Resume here (2026-09-29, fifty-fourth):** **C3.3 built**, on the plan the maintainer agreed ([docs/plans/c3.3-the-notice.md](docs/plans/c3.3-the-notice.md), all four answers the recommendation; *As built* says where the build differs). Home says "New since your plan: … · 32 changes in it touch your plan · See what changed →". The plan screen puts a panel above the saved plan, with the cost on both sides, the changes grouped by track ("Lucia: Inverse Crown · Red Orb — 14 steps: 13 new, 1 changed"), every line behind a toggle, and one button, *Re-plan*, the only thing that clears it. Driven locally at 375 and 1280 px. **C3's exit is not met until production shows it**, and on production every saved plan is already on 18. The exit's own words need **a reader returning after a new sequence**, so the proof comes with the next publish (sequence 19). **C3.3 deployed in #64 (checked 2026-09-30, production `5ca20f5`)** — nothing stands between C3 and its exit but a first-hand reading worth publishing. **Agreed 2026-09-30: sequence 19 is the banner that replaces Selena's**, read by the maintainer once it opens after 10-01 06:59 UTC. Pinning a plan with `?version=` would show the screen, but it would not be the exit. **Selena's pool closes 2026-10-01 06:59 UTC.**
 
 **The strangers' notes, T1–T9, are all closed** and [in the archive](docs/history/tracker-archive.md#completed-next-actions)
 — five strangers, nobody stalled, so the notes were Track C's input.
@@ -327,7 +326,7 @@ pool; twelve pulls back in sixty.
 |---|---|---|---|
 | [x] | **C1 · Pull planner** | **Closed 2026-09-29** on the maintainer's production screen ([record](docs/history/tracker-archive.md#closed-phases-in-full)); deployed in #60. Not modelled: the Crucible pull track, paid income, copy exchanges (N38, Phase 11) | A signed-in reader's stored pity and declared income answer "how likely by when" for a live banner, on their own account |
 | [ ] | **C2 · UI polish** | A visual pass over every screen, mobile first; the rehearsal's smaller hesitations. **Tested by the maintainer and Claude, not strangers** (maintainer, 2026-09-26) — a rehearsal like D5's | Every screen driven at 375 and 1280 px, and a self-run rehearsal over every screen leaves no stall unfixed or uncut |
-| [ ] | **C3 · Account features** | **Agreed 2026-09-29: three slices to the exit** ([ADR 0037](docs/adr/0037-a-saved-plan-is-a-snapshot-and-a-change-report-re-solves.md)). **[x] C3.1 saved plan** — `V19`, one per profile, the last plan answered, kept as shown with its request (`reach` included), on `GET /plan`; form refilled from it. Deployed in #62. **[x] C3.2 `/since`** — the progression changes either plan uses (a stage, a step, its costs, the game), and both plans' energy and days, solved on the saved sequence and the latest against today's state; nothing saved. Deployed in #63. **[x] C3.3 built** — Home and the plan screen say it unasked; only a re-plan clears it ([the plan, agreed](docs/plans/c3.3-the-notice.md)). Driven locally, not deployed; **the exit waits on production and a sequence 19**. **Cut to later:** more than one goal set, progress over time | A reader returning after a new sequence sees what it changed for their goals and plan, without asking |
+| [ ] | **C3 · Account features** | **Agreed 2026-09-29: three slices to the exit** ([ADR 0037](docs/adr/0037-a-saved-plan-is-a-snapshot-and-a-change-report-re-solves.md)). **[x] C3.1 saved plan** — `V19`, one per profile, the last plan answered, kept as shown with its request (`reach` included), on `GET /plan`; form refilled from it. Deployed in #62. **[x] C3.2 `/since`** — the progression changes either plan uses (a stage, a step, its costs, the game), and both plans' energy and days, solved on the saved sequence and the latest against today's state; nothing saved. Deployed in #63. **[x] C3.3 built** — Home and the plan screen say it unasked; only a re-plan clears it ([the plan, agreed](docs/plans/c3.3-the-notice.md)). Deployed in #64; **the exit waits on a sequence 19**. **Cut to later:** more than one goal set, progress over time | A reader returning after a new sequence sees what it changed for their goals and plan, without asking |
 
 ### Track B — cut, and parked in the archive
 
