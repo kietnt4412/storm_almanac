@@ -3391,6 +3391,8 @@ back, and passes once the import is removed again.
 on forced `:app:test --rerun` runs, each confirmed as executed by its
 `DevSignInTest` result timestamp.
 
+**Then the C3.3 plan was drafted**, in [docs/plans/c3.3-the-notice.md](../plans/c3.3-the-notice.md), and left for the maintainer. It proposes a line on Home's profile row and a panel above the saved plan, with upgrade changes grouped by entity and track and the raw lines behind a toggle, re-planning as the only way to clear it, and a new optional `entity`/`toState` on an upgrade change. It asks four questions. **Not agreed and not built.**
+
 **2026-09-29 (fifty-third) — C3.2 built: `/since`, what a new sequence changed for one reader.**
 
 **The remote, checked first:** PR #62 (C3.1) merged 02:37Z; its `main` run
