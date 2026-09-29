@@ -3352,6 +3352,52 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-29 (fifty-second) — C3 chosen, its exit agreed, and C3.1 built: a saved plan.**
+
+**The remote, checked first:** PR #61 (P7.1, D7, D8) merged 02:04Z; its `main`
+run `36511073154` was in progress at 02:10Z and finished green; `/api/health`
+then reported `4b0ff78`, #61's merge. No PR open.
+
+**The pick.** The maintainer asked for the next step. The Crucible track, C2,
+C3 and Phase 6 were laid out, and Phase 6 was recommended. **They chose C3**,
+agreed its exit as written, and took the proposed cut. C3 reaches its exit in
+three slices: C3.1, a saved plan; C3.2, `/since`, what a new sequence changed
+for the reader's goals and plan; C3.3, the notice on Home. **More than one goal
+set and progress over time are postponed.** The exit does not need them, and
+goal sets would touch the goals route, the plan route and the client store.
+They settled two more questions: `reach` is saved with the plan, and the plan is
+saved automatically, one per profile, rather than by a button.
+
+**What was found before building.** Comparing two sequences already existed:
+`VersionDiff` and `GET /api/games/{g}/diff?from&to` compare any two published
+versions, and nothing narrows the result to one reader. The gap was that
+**a plan was never kept**. `POST /plan` answered, the page held the answer in a
+mutation, and the server had no record of which sequence a reader last planned
+on. So "since you were last here" had nothing to be measured from.
+
+**C3.1.** `V19` adds `player.saved_plan`: one row per profile, the sequence as a
+column, and the request and the plan as JSONB that the player module never
+reads, the same reason `player.pity`'s scope key is opaque. `POST /plan` saves
+every answer it gives; a refusal saves nothing. The new `GET /plan` returns the
+saved plan byte for byte, or 204. **The plan is kept as shown and not
+recomputed**, because a re-solve is today's plan, and because the solver can land
+on a different plan of equal cost (3 880 against 3 877). **C3.2 will not compare
+against the snapshot.** It will solve the saved sequence and the latest against
+today's state, so the difference it reports is the patch's alone (ADR 0037).
+ADR 0037 also records that 0022's "nothing stores the answer" is no longer true,
+and why that is not 0022's reversal. The page opens on the saved plan, labelled
+with when and on which patch, and fills its form from the saved request once.
+It seeds `reach` only when the browser has no answer of its own for the profile.
+
+**Measured.** 527 backend tests green in full, 4 of them new. 93 frontend tests
+(+3) and `tsc -b` clean. **Driven** against the local database as
+`rehearsal-s6`: `V19` applied on boot; with no saved plan the screen showed
+nothing from before. At 160 Serum/day, 30 days and a Cage score of 120 000 the
+plan came to **1 230 Serum over 28.0 days**. Then the browser's local store was
+cleared to stand in for a second device. On reload the form read 160 / 30 /
+120 000, `reach` was back in the store, and the saved plan showed with its
+label. At 375 px there was no horizontal scroll. Committed on `dev` and pushed; not deployed.
+
 **2026-09-29 (fifty-first) — C1 closes on a reader's screen; Track B opens by D7 and is parked by D8.**
 
 **The remote, checked first:** PR #60 merged 2026-09-28 10:05Z; its `main` run

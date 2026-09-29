@@ -205,5 +205,15 @@ final class RealUpstream {
         public void savePity(io.stormalmanac.player.CarriedPity pity) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public java.util.Optional<io.stormalmanac.player.SavedPlan> savedPlanOf(ProfileId profile) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void savePlan(io.stormalmanac.player.SavedPlan plan) {
+            throw new UnsupportedOperationException();
+        }
     }
 }

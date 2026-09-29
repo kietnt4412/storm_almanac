@@ -15,6 +15,7 @@ import io.stormalmanac.player.PlayerProfile;
 import io.stormalmanac.player.PlayerStateRepository;
 import io.stormalmanac.player.Roster;
 import io.stormalmanac.player.RosterEdit;
+import io.stormalmanac.player.SavedPlan;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -336,6 +337,48 @@ public class JdbcPlayerStateRepository implements PlayerStateRepository {
                 pity.scopeKey(),
                 pity.pullsSinceHit(),
                 pity.consecutiveLosses());
+    }
+
+    // ── Saved plan ──────────────────────────────────────────────────────────
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<SavedPlan> savedPlanOf(ProfileId profile) {
+        return jdbc.query(
+                        """
+                        SELECT game_version, request::text AS request, plan::text AS plan, saved_at
+                          FROM player.saved_plan
+                         WHERE profile_id = ?
+                        """,
+                        (rs, row) -> new SavedPlan(
+                                profile,
+                                rs.getLong("game_version"),
+                                rs.getString("request"),
+                                rs.getString("plan"),
+                                rs.getObject("saved_at", OffsetDateTime.class).toInstant()),
+                        profile.value())
+                .stream()
+                .findFirst();
+    }
+
+    @Override
+    @Transactional
+    public void savePlan(SavedPlan plan) {
+        jdbc.update(
+                """
+                INSERT INTO player.saved_plan (profile_id, game_version, request, plan, saved_at)
+                VALUES (?, ?, ?::jsonb, ?::jsonb, ?)
+                ON CONFLICT (profile_id)
+                DO UPDATE SET game_version = EXCLUDED.game_version,
+                              request = EXCLUDED.request,
+                              plan = EXCLUDED.plan,
+                              saved_at = EXCLUDED.saved_at
+                """,
+                plan.profile().value(),
+                plan.gameVersion(),
+                plan.request(),
+                plan.plan(),
+                OffsetDateTime.ofInstant(plan.savedAt(), ZoneOffset.UTC));
     }
 
     // ── Offline sync ────────────────────────────────────────────────────────

@@ -241,7 +241,22 @@ public final class PlayerView {
         public Map<String, Integer> resolvedReach() {
             return reach == null ? Map.of() : reach;
         }
+
+        /** The request with every default filled in, which is what a saved plan keeps. */
+        public PlanRequest resolved() {
+            return new PlanRequest(resolvedObjective().name(), energyPerDay, resolvedHorizonDays(), resolvedReach());
+        }
     }
+
+    /**
+     * The last plan this profile was shown, and what was asked to get it (ADR 0037).
+     *
+     * <p>{@code plan} is exactly what {@code POST /plan} answered at the time, and
+     * is not recomputed: the inventory has moved since, and the solver may land on
+     * a different answer of equal cost. {@code request} is resolved — every
+     * default filled in — so that a screen showing it shows what was solved.
+     */
+    public record SavedPlanResponse(PlanRequest request, PlanResponse plan, Instant savedAt) {}
 
     /**
      * @param computedAgainst the game-data version this plan was solved against,

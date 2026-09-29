@@ -668,6 +668,28 @@ export const solve = (
     body: JSON.stringify(body),
   });
 
+/** What a plan was asked with, every default filled in by the server. */
+export interface PlanRequest {
+  objective: string;
+  energyPerDay: number;
+  horizonDays: number;
+  reach: Record<string, number>;
+}
+
+/**
+ * The last plan this profile was shown, as it was shown — not recomputed — and
+ * what was asked to get it. The server saves every plan it answers (ADR 0037).
+ */
+export interface SavedPlan {
+  request: PlanRequest;
+  plan: Plan;
+  savedAt: string;
+}
+
+/** Undefined when the profile has never run a plan: the server answers 204. */
+export const getSavedPlan = (profile: string) =>
+  request<SavedPlan | undefined>(`/api/me/profiles/${profile}/plan`);
+
 /**
  * What this reader is still short of for one entity at one target state.
  *
