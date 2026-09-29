@@ -62,7 +62,7 @@ being finished with is.
   and prices only the first, so **15 of 779 drop facts are declared and 764 sampled**, ~2% free. Two consolations:
   **gacha rates *are* disclosed**, and the grade is itself a free first-hand fact for all 595 pairs, with nowhere to
   live until Phase 6 ([the note](docs/game-facts/reverse-1999-drop-disclosure.md)).
-- **Phases 0–5 and C1 are closed; C2, C3 and Phase 6 are open; Track B is cut and parked** ([D8](#d8--track-b-cut-and-parked-2026-09-29)). **Phase 4 closed 2026-09-28**: five strangers completed a plan without help (the maintainer's report) and left five notes, all closed ([archive](docs/history/tracker-archive.md#completed-next-actions)). Phase 5 closed **out of order on purpose** ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)) and **nothing calls either gacha engine**. [The board](#track-a--product).
+- **Phases 0–5 and C1 are closed; C2 and C3 are open; Phase 6 moved into Phase 11** ([D9](#d9--phase-6-moves-into-phase-11-2026-09-30)); **Track B is cut and parked** ([D8](#d8--track-b-cut-and-parked-2026-09-29)). **Phase 4 closed 2026-09-28**: five strangers completed a plan without help (the maintainer's report) and left five notes, all closed ([archive](docs/history/tracker-archive.md#completed-next-actions)). Phase 5 closed **out of order on purpose** ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)) and **nothing calls either gacha engine**. [The board](#track-a--product).
 - **Deployed and signed into since 2026-09-24** ([D1 reversed](#d1--deployment-deferred-2026-09-02)) —
   `https://storm-almanac.vercel.app` rewrites to Render, which serves PGR sequence 8 from Neon; the first real OAuth
   exchange and the first production write ran the same day. Free tier, still no money. **CI deploys it:** a push to
@@ -235,7 +235,7 @@ works". It does not mean that:
 
 > **Resume here (2026-09-29, fifty-fourth):** **C3.3 built**, on the plan the maintainer agreed ([docs/plans/c3.3-the-notice.md](docs/plans/c3.3-the-notice.md), all four answers the recommendation; *As built* says where the build differs). Home says "New since your plan: … · 32 changes in it touch your plan · See what changed →". The plan screen puts a panel above the saved plan, with the cost on both sides, the changes grouped by track ("Lucia: Inverse Crown · Red Orb — 14 steps: 13 new, 1 changed"), every line behind a toggle, and one button, *Re-plan*, the only thing that clears it. Driven locally at 375 and 1280 px. **C3's exit is not met until production shows it**, and on production every saved plan is already on 18. The exit's own words need **a reader returning after a new sequence**, so the proof comes with the next publish (sequence 19). **C3.3 deployed in #64 (checked 2026-09-30, production `5ca20f5`)** — nothing stands between C3 and its exit but a first-hand reading worth publishing. **Agreed 2026-09-30: sequence 19 is the banner that replaces Selena's**, read by the maintainer once it opens after 10-01 06:59 UTC. Pinning a plan with `?version=` would show the screen, but it would not be the exit. **Selena's pool closes 2026-10-01 06:59 UTC.**
 
-> **Phase 6 taken 2026-09-30 (fifty-fifth), plan drafted and not agreed:** [docs/plans/phase-6-drop-statistics.md](docs/plans/phase-6-drop-statistics.md) — four slices (report intake, estimates into the solver, the screens, the exit on production) and six questions. **Production has nothing to supersede:** PGR's only stage pays a *declared* 82 Simulation Score and the Kornblume seeds never ship (ADR 0015), so **the exit needs a first-hand run count on a PGR stage with a random drop** — question 1, the maintainer's reading. **No code until the plan is agreed.**
+> **C2 taken 2026-09-30 (fifty-fifth), as a visual pass** — the maintainer's meaning: colour, theme, the look and the visuals, not only stalls. Plan first, agreed before code. **Phase 6 was taken and put down the same session** (D9): its plan is drafted and waits for Phase 11.
 
 **The strangers' notes, T1–T9, are all closed** and [in the archive](docs/history/tracker-archive.md#completed-next-actions)
 — five strangers, nobody stalled, so the notes were Track C's input.
@@ -303,10 +303,12 @@ previous one's criterion is met. The "Landed" record for closed phases is
 - [x] **Phase 5 · Gacha engine** — closed 2026-09-12 out of order
       ([D2](#d2--phase-5-entered-before-phase-4-closed-2026-09-12)); **one banner first-hand (Q4)**;
       income model landed 2026-09-22 (ADR 0029), shop exchange is **N38**.
-- [ ] **Phase 6 · Drop statistics on Postgres** — 1.5 weeks. Report submission,
+- [ ] **Phase 6 · Drop statistics on Postgres** — **moved into Phase 11 on 2026-09-30**
+      ([D9](#d9--phase-6-moves-into-phase-11-2026-09-30), ADR 0038): PGR's farming is all fixed payouts
+      (maintainer), so the live title has nothing to estimate. **Its plan is drafted and waits there**:
+      [docs/plans/phase-6-drop-statistics.md](docs/plans/phase-6-drop-statistics.md). 1.5 weeks. Report submission,
       Wilson intervals, provenance, abuse controls, estimates feeding the
-      optimizer — on the boring implementation first, because this is the interface
-      Track B later swaps. **Read before tightening any rule over data already
+      optimizer — on the boring implementation first. **Read before tightening any rule over data already
       published:** a version is immutable and the rules for reading one are not, so
       a published snapshot can stop being loadable without anything touching it —
       [it has happened here](docs/history/tracker-archive.md#a-published-version-that-stopped-being-readable).
@@ -314,7 +316,7 @@ previous one's criterion is met. The "Landed" record for closed phases is
 
 ### Track C — the product after launch ([D6](#d6--a-third-track-for-the-product-after-launch-2026-09-26))
 
-**Open since 2026-09-28, when Phase 4's box was ticked; runs beside Phase 6.** Not in
+**Open since 2026-09-28, when Phase 4's box was ticked.** Not in
 [plan.html](plan.html). The invariants hold here too — a pull planner is `gacha`, so no `if (game == …)`. **C1 was
 chosen first and its exit agreed as written** (maintainer, 2026-09-28); **C3's exit was agreed as written on
 2026-09-29**, with its scope cut to reach it; C2's is proposed, not agreed — C2's tester was settled 2026-09-26. **C1 closed 2026-09-29** ([its record](docs/history/tracker-archive.md#closed-phases-in-full)). Its readings (sequence 17, in both databases via 18): the Black Card and Direct Exchange 1:1 (ADR 0034), the daily bar (5/10/15 at 60/80/100), the twelve
@@ -327,7 +329,7 @@ pool; twelve pulls back in sixty.
 | | Phase | Shape | **Exit** |
 |---|---|---|---|
 | [x] | **C1 · Pull planner** | **Closed 2026-09-29** on the maintainer's production screen ([record](docs/history/tracker-archive.md#closed-phases-in-full)); deployed in #60. Not modelled: the Crucible pull track, paid income, copy exchanges (N38, Phase 11) | A signed-in reader's stored pity and declared income answer "how likely by when" for a live banner, on their own account |
-| [ ] | **C2 · UI polish** | A visual pass over every screen, mobile first; the rehearsal's smaller hesitations. **Tested by the maintainer and Claude, not strangers** (maintainer, 2026-09-26) — a rehearsal like D5's | Every screen driven at 375 and 1280 px, and a self-run rehearsal over every screen leaves no stall unfixed or uncut |
+| [ ] | **C2 · UI polish** | **Taken 2026-09-30.** A visual pass over every screen, mobile first — **the maintainer means colour, theme and visuals**, a better-looking product, not only the rehearsal's smaller hesitations. **Tested by the maintainer and Claude, not strangers** (maintainer, 2026-09-26) — a rehearsal like D5's | Every screen driven at 375 and 1280 px, and a self-run rehearsal over every screen leaves no stall unfixed or uncut |
 | [ ] | **C3 · Account features** | **Agreed 2026-09-29: three slices to the exit** ([ADR 0037](docs/adr/0037-a-saved-plan-is-a-snapshot-and-a-change-report-re-solves.md)). **[x] C3.1 saved plan** — `V19`, one per profile, the last plan answered, kept as shown with its request (`reach` included), on `GET /plan`; form refilled from it. Deployed in #62. **[x] C3.2 `/since`** — the progression changes either plan uses (a stage, a step, its costs, the game), and both plans' energy and days, solved on the saved sequence and the latest against today's state; nothing saved. Deployed in #63. **[x] C3.3 built** — Home and the plan screen say it unasked; only a re-plan clears it ([the plan, agreed](docs/plans/c3.3-the-notice.md)). Deployed in #64; **the exit waits on a sequence 19**. **Cut to later:** more than one goal set, progress over time | A reader returning after a new sequence sees what it changed for their goals and plan, without asking |
 
 ### Track B — cut, and parked in the archive
@@ -342,7 +344,7 @@ maintainer reopens it with an ADR superseding 0036.
 
 | | Phase | Shape | **Exit** |
 |---|---|---|---|
-| [ ] | **11 · Reverse: 1999 as the second title**, 2w — *was PGR until [D3](#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13)* | R1999 keeps the adapter as a cross-check, two imported patches, the benchmark and one first-hand banner; what it still costs is **first-hand sourcing of the catalog** and its own day boundary | R1999 live with **zero game-specific code** added to `planner`, `gacha` or `stats` after PGR launched — and the diff to prove it |
+| [ ] | **11 · Reverse: 1999 as the second title**, 2w — *was PGR until [D3](#d3--launch-title-swapped-to-punishing-gray-raven-2026-09-13)* | R1999 keeps the adapter as a cross-check, two imported patches, the benchmark and one first-hand banner; what it still costs is **first-hand sourcing of the catalog**, its own day boundary, and **Phase 6's drop statistics** (D9, [the plan](docs/plans/phase-6-drop-statistics.md)), which R1999's undisclosed rates need | R1999 live with **zero game-specific code** added to `planner`, `gacha` or `stats` after PGR launched — and the diff to prove it |
 | [ ] | **12 · Hardening and the writeups**, 1w | Tracing, alerting, a backup actually restored from, a load test with published numbers, pre-rendered catalog pages | Restore drill completed from a real backup; catalog pages indexed; **the multi-game diff written up** — the storage and consensus writeups went with Track B (D8) |
 
 ---
@@ -375,6 +377,15 @@ is most likely to trip.
 
 Decision, cost, and what would reverse it. **The full accounts are
 [in the archive](docs/history/tracker-archive.md#the-tracker-as-it-stood-before-the-2026-09-18-compression).**
+
+### D9 · Phase 6 moves into Phase 11 (2026-09-30)
+
+**Drafting Phase 6's plan found the live title cannot meet its exit** ([ADR 0038](docs/adr/0038-drop-statistics-move-into-the-second-title.md)):
+PGR's one stage pays a declared 82 Simulation Score, the maintainer reports all its farming is fixed payouts, and
+the Kornblume seeds never ship. R1999 is the opposite — 764 of 779 drop facts sampled, rates undisclosed (N26) — so
+Phase 6 is built with it. **Cost:** Phase 11 grows by 1.5 weeks and the data-platform story waits. **Bought:** no
+statistics layer built for a game with nothing to estimate. **Reversal trigger:** a PGR stage the planner can use
+turns out to drop at random.
 
 ### D8 · Track B cut, and parked (2026-09-29)
 
@@ -470,7 +481,7 @@ Carry forward until answered, then move the entry [to the archive](docs/history/
 
 - **Q7 — What does `DropReportStore.scan(stage, item, version)` return?** *Open since 2026-09-29; **answer proposed
   2026-09-30 in [the Phase 6 plan](docs/plans/phase-6-drop-statistics.md#q7-answered)** — every report for the stage,
-  so `item` goes; closes when the plan is agreed.* A report is one stage's runs with the drops it saw, so a run where the item did **not** drop is
+  so `item` goes; moved with Phase 6 into Phase 11 (D9), and closes when that plan is agreed.* A report is one stage's runs with the drops it saw, so a run where the item did **not** drop is
   still a trial for it. If `scan` returns only reports that saw the item, every rate built on it is too high. If it
   returns every report for `(stage, version)`, then `item` does nothing and the port should say so. **Answer it on the
   Postgres side, not the LSM side** (ADR 0035, decision 4).
@@ -504,7 +515,7 @@ newest first. **Write the entry there; add one short line here.**
 
 | Date | Session | What it was |
 |---|---|---|
-| 2026-09-30 | fifty-fifth | C3.3 found live (#64, `5ca20f5`); C3 waits on sequence 19, the banner after Selena's. **Phase 6 taken, plan drafted, not agreed**: Q7 answered in it; production has nothing to supersede, so the exit needs a first-hand run count on a random-drop PGR stage |
+| 2026-09-30 | fifty-fifth | C3.3 found live (#64, `5ca20f5`); C3 waits on sequence 19, the banner after Selena's. **Phase 6 planned, then moved into Phase 11** (D9, ADR 0038): PGR's farming is all fixed payouts. **C2 taken as a visual pass** |
 | 2026-09-29 | fifty-fourth | **C3.3 agreed (all four recommendations) and built**: Home's line and the plan screen's panel, grouped by track, cleared only by a re-plan. Driven locally at 375/1280 on the real 14 → 18 report. The exit waits on production and sequence 19 |
 | 2026-09-29 | fifty-third | **C3.2 built**: `/since` re-solves the saved request on the saved sequence and the latest, and keeps the changes either plan uses. `Change` carries kind and slug. Real data: 14 → 18 is 405 changes, 32 for the rehearsal account, 1 230 both sides. Then the `DevSignInTest` "flake": MockMvc's `csrf()` rewired the live server's CSRF repository; replaced by `BrowserCsrf`, guarded |
 | 2026-09-29 | fifty-second | **C3 chosen and its exit agreed**, scope cut to saved plan + change report. **C3.1 built**: `V19` keeps each profile's last plan as shown with its request; the plan screen opens on it. ADR 0037. Driven in a browser with the local store cleared, as a second device would be |

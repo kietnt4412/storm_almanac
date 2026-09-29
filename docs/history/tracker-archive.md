@@ -3375,6 +3375,16 @@ asked for a mean per run, so the plan proposes ADR 0038. And
 `storm-almanac.substrate.drop-report-store` has been in `application.yml`
 since the scaffold, waiting for the implementation.
 
+**Then Phase 6 moved into Phase 11 (D9, ADR 0038).** Asked about question 1,
+the maintainer reported that PGR's farming is all fixed payouts, so no stage
+has anything to estimate, and suggested dropping the phase. It moved rather
+than being cut, because R1999's undisclosed, sampled drops are exactly what it
+is for (N26). The plan is kept as drafted with its questions unanswered. The
+proposed "estimate is a mean per run" ADR lost the number 0038 to the move
+itself, and takes the next free number when picked up. **C2 taken instead**,
+and the maintainer defined it: a visual pass (colour, theme, the look), not
+only the rehearsal's leftover hesitations.
+
 **2026-09-29 (fifty-fourth) — C3.3 agreed and built: the notice on Home and the plan screen.**
 
 **The remote, checked first:** [PR #63](https://github.com/kietnt4412/storm_almanac/pull/63)

@@ -1,8 +1,11 @@
 # Phase 6 — drop statistics on Postgres
 
-**Status:** drafted 2026-09-30 (fifty-fifth session). **Not agreed.** Nothing in
-it is built. The maintainer answers the questions at the end, and then the
-slices are built in order.
+**Status:** drafted 2026-09-30 (fifty-fifth session). **Moved into Phase 11 the
+same day** ([ADR 0038](../adr/0038-drop-statistics-move-into-the-second-title.md)):
+the maintainer reports PGR's farming is all fixed payouts, so there is nothing to
+estimate on the live title. Kept as drafted, questions unanswered, for R1999.
+The proposed ADR 0038 below (an estimate is a mean per run) is now unnumbered;
+it takes the next free number when this plan is picked up.
 
 Phase 6's exit, from [plan.html](../../plan.html): *a community-derived estimate
 supersedes a seeded one in a live plan.*
