@@ -3357,7 +3357,11 @@ what `git log` is for.
 **The remote, checked first:** [PR #63](https://github.com/kietnt4412/storm_almanac/pull/63)
 (`dev` → `main`, C3.2) was opened by the maintainer at 10:19Z. The last `main`
 run was still `36513494458`, green, and production reported `6f532c6`. The two
-latest `dev` pushes were green.
+latest `dev` pushes were green. **#63 then merged at 10:19:40Z, eleven seconds
+after it opened**, which is the merge-before-the-run case the tracker warns
+about. Its `main` run `36554872165` came back green, and production reported
+`5c965f9`, so C3.2 went live while C3.3 was being built. C3.3 goes in a PR of
+its own.
 
 **The plan agreed.** The maintainer answered the four questions in
 [the C3.3 plan](../plans/c3.3-the-notice.md), and every answer was the
