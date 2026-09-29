@@ -3352,6 +3352,65 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-29 (fifty-fourth) — C3.3 agreed and built: the notice on Home and the plan screen.**
+
+**The remote, checked first:** [PR #63](https://github.com/kietnt4412/storm_almanac/pull/63)
+(`dev` → `main`, C3.2) was opened by the maintainer at 10:19Z. The last `main`
+run was still `36513494458`, green, and production reported `6f532c6`. The two
+latest `dev` pushes were green. **#63 then merged at 10:19:40Z, eleven seconds
+after it opened**, which is the merge-before-the-run case the tracker warns
+about. Its `main` run `36554872165` came back green, and production reported
+`5c965f9`, so C3.2 went live while C3.3 was being built. C3.3 goes in a PR of
+its own.
+
+**The plan agreed.** The maintainer answered the four questions in
+[the C3.3 plan](../plans/c3.3-the-notice.md), and every answer was the
+recommendation:
+- Home shows the count.
+- Nothing dismisses the notice except a re-plan.
+- "Nothing in it touches your plan" gets a line.
+- The saved plan stays as it was shown.
+
+**Built.** `/since` now gives an upgrade change the same four fields
+`payingFor` has: `entity`, `entityName`, `fromState` and `toState`. The page
+fetches each touched entity's tracks at the latest sequence, and
+`groupChanges` says a track's steps in one line. The plan asked the server
+for a `track`. The server cannot name one without guessing from ids, because
+Level, Promote and Evolve share "Growth" and have no tag, so that half stayed
+on the page. The Home line counts raw changes, the same number as the panel's
+"Every line (32)". Its "nothing touches" form links "Re-plan →", since only a
+re-plan clears it. *As built* in the plan has every difference.
+
+**Driven, and two things real data found that the plan had not.** On the
+local database as `rehearsal-s6`, with a plan pinned on 14, the report came
+back 32 of 405, 1,230 Serum over 28 days on both sides, as the fifty-third
+session measured. The panel said it in two lines. Real data found two things:
+- **Sequences 14 and 18 are both patch 4.8.0.** The planned heading repeated
+  "Anchored in Faith (Global 4.8.0)" on both sides of its arrow, so a label
+  both sides share is now said once.
+- **An `edge` change's values carry their own arrows.** The raw line read as
+  a chain of four states, so a value holding an arrow is now bracketed.
+
+At 1280 px the Home line pushed Delete onto a second line inside the name
+column, so it moved to a full-width row of its own. A re-plan on 18 cleared
+the panel and the Home line and left the account as it was.
+
+**Vite served a stale module.** After three quick edits to one file, the dev
+server kept serving the copy from between the second and the third, and a
+reload did not help. Fetching `/src/…` from the page showed the old text, and
+touching the file fixed it. On this machine, K: is not the system drive and
+the watcher can miss a save. **If the browser disagrees with the file, fetch
+the module before debugging the code.**
+
+**The exit is not met.** C3's exit is a reader returning *after a new
+sequence*, and on production every saved plan is on 18, which is the latest.
+The proof is the maintainer's screen after sequence 19 is published on top of
+a deploy carrying C3.2 and C3.3. A plan pinned with `?version=` would show
+the screen, but it is not the exit.
+
+**Measured.** Backend: **534 tests**, the full build green in 4 min 19 s with none skipped (533 plus one in `ChangesSinceTest`). Frontend: 105 tests (93 before; 4 for
+`groupChanges`, 8 for the notice on both screens). Typecheck and build clean.
+
 **2026-09-29 (fifty-third, continued) — the `DevSignInTest` flake was not a flake: MockMvc's `csrf()` rewired the live server.**
 
 **What the entry below got wrong.** It called the failure "timing" and gave

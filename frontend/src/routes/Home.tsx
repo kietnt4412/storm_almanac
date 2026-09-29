@@ -5,6 +5,7 @@ import { ApiError, getGames, getMe, signInUrl, type Profile } from '../api/clien
 import { useCreateProfile, useDeleteProfile, useRenameProfile } from '../profile';
 import { STEPS } from '../steps/Steps';
 import { usePlannerStore } from '../store/plannerStore';
+import { useSince } from './SinceNotice';
 
 /**
  * Where a reader lands: what this is, which profile they are planning for, and
@@ -312,7 +313,45 @@ function ProfileRow({
       >
         Delete
       </button>
+      {/* Its own row across the card, so the buttons stay beside the name. */}
+      <SinceLine profile={profile} onOpen={onSelect} />
     </li>
+  );
+}
+
+/**
+ * One line under a profile when a sequence has come out since its last plan
+ * (C3.3), so a returning reader hears about it without asking.
+ *
+ * <p><b>It counts what touches their plan</b>, which costs two solves per
+ * out-of-date profile once per patch; the row never waits for it. It says so
+ * when nothing does, because no line at all reads the same as up to date. It
+ * goes away when the reader re-plans, and not before (maintainer, 2026-09-29).
+ */
+function SinceLine({ profile, onOpen }: { profile: Profile; onOpen: () => void }) {
+  const since = useSince(profile.id);
+  const report = since.data;
+  if (!report || report.savedVersion >= report.latestVersion) return null;
+  const touching = report.changes.length;
+  return (
+    <p className="w-full text-sm">
+      <span className="font-medium">New since your plan:</span> {report.latestVersionLabel} (v{report.latestVersion}) ·{' '}
+      {touching === 0 ? (
+        <>
+          nothing in it touches your plan ·{' '}
+          <Link to="/plan" onClick={onOpen}>
+            Re-plan →
+          </Link>
+        </>
+      ) : (
+        <>
+          {touching} change{touching === 1 ? '' : 's'} in it touch{touching === 1 ? 'es' : ''} your plan ·{' '}
+          <Link to="/plan" onClick={onOpen}>
+            See what changed →
+          </Link>
+        </>
+      )}
+    </p>
   );
 }
 
