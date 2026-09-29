@@ -259,6 +259,60 @@ public final class PlayerView {
     public record SavedPlanResponse(PlanRequest request, PlanResponse plan, Instant savedAt) {}
 
     /**
+     * What the published sequences since a reader's saved plan changed for them
+     * (C3.2, ADR 0037).
+     *
+     * <p><b>Up to date is an answer, not an absence.</b> When the saved plan was
+     * solved against the latest sequence, {@code changes} is empty and both sides
+     * are null, and nothing was solved to say so: this is read on every visit to
+     * Home, and the common case must cost one query.
+     *
+     * @param changes    the changes that touch something one of the reader's two
+     *                   plans uses, in report order
+     * @param allChanges how many changes the patch made in all, so "3 of 41" can
+     *                   be said and the rest of the report is not mistaken for
+     *                   nothing
+     * @param onSaved    the saved request solved on the saved sequence against
+     *                   <em>today's</em> inventory, roster and goals — not the
+     *                   saved plan, which counted what the reader owned then
+     * @param onLatest   the same request on the latest sequence. With everything
+     *                   but the patch held still, the move from one to the other
+     *                   is the patch's
+     */
+    public record SinceResponse(
+            String profile,
+            String game,
+            long savedVersion,
+            String savedVersionLabel,
+            long latestVersion,
+            String latestVersionLabel,
+            Instant savedAt,
+            List<ChangeForYouView> changes,
+            int allChanges,
+            PlanSideView onSaved,
+            PlanSideView onLatest) {}
+
+    /**
+     * One change, with a name a reader knows it by beside the slug a report
+     * prints: "The Sigil Vault" beside {@code stage 'pg-2-3'}.
+     *
+     * @param about what sort of thing it is — {@code stage}, {@code upgrade},
+     *              {@code item} — so a page can group or link by it
+     */
+    public record ChangeForYouView(
+            String kind, String about, String slug, String name, String detail, String before, String after) {}
+
+    /**
+     * A plan's size on one sequence, or why there is none.
+     *
+     * @param refused the solver's refusal, said as it said it — a patch that
+     *                removed the only source of something is the case this
+     *                report most needs to tell — and null when there is a plan
+     */
+    public record PlanSideView(
+            long version, String versionLabel, Integer totalEnergy, Double etaDays, String refused) {}
+
+    /**
      * @param computedAgainst the game-data version this plan was solved against,
      *                        carried out to the caller rather than left in the
      *                        server's logs. A plan that cannot say which patch it

@@ -50,12 +50,17 @@ final class Facts {
 
     private Facts() {}
 
-    /** A thing a patch note would name: {@code stage 'pg-1-1'}. */
-    record Subject(Axis axis, String label) implements Comparable<Subject> {
+    /** A thing a patch note would name: {@code stage 'pg-1-1'}, kept as its kind and slug. */
+    record Subject(Axis axis, String about, String slug) implements Comparable<Subject> {
+
+        String label() {
+            return Change.label(about, slug);
+        }
+
         @Override
         public int compareTo(Subject other) {
             int byAxis = axis.compareTo(other.axis);
-            return byAxis != 0 ? byAxis : label.compareTo(other.label);
+            return byAxis != 0 ? byAxis : label().compareTo(other.label());
         }
     }
 
@@ -237,7 +242,7 @@ final class Facts {
             Map<Subject, Map<String, String>> facts, Axis axis, String kind, String slug) {
         // TreeMap: a rendered report lists a subject's changed fields in the same
         // order every time, whatever order the model happened to yield them in.
-        return facts.computeIfAbsent(new Subject(axis, kind + " '" + slug + "'"), key -> new TreeMap<>());
+        return facts.computeIfAbsent(new Subject(axis, kind, slug), key -> new TreeMap<>());
     }
 
     private static void stacks(Map<String, String> about, String prefix, List<ItemStack> stacks) {
