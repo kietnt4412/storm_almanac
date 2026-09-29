@@ -43,4 +43,5 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0032](0032-a-step-carries-what-the-game-calls-it.md) | A step carries what the game calls it | Accepted |
 | [0033](0033-a-key-the-bundle-invents-may-be-given-a-word.md) | A key the bundle invents may be given a word | Accepted |
 | [0034](0034-pull-income-walks-conversions-into-the-pull-currency.md) | Pull income walks conversions into the pull currency | Accepted |
-| [0035](0035-track-b-opens-before-real-traffic-against-a-synthetic-workload.md) | Track B opens before real traffic, against a synthetic workload | Accepted |
+| [0035](0035-track-b-opens-before-real-traffic-against-a-synthetic-workload.md) | Track B opens before real traffic, against a synthetic workload | **Superseded by [0036](0036-track-b-is-cut-and-parked.md)** |
+| [0036](0036-track-b-is-cut-and-parked.md) | Track B is cut, and parked | Accepted |

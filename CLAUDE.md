@@ -34,11 +34,11 @@ comment.
   selectable by `storm-almanac.substrate.*` in `application.yml`. Publish the
   benchmark either way — concluding that Postgres won is an allowed and
   respectable outcome.
-- **Track B is gated, and Phase 7 alone is open** since 2026-09-29, on a
-  synthetic workload ([ADR 0035](docs/adr/0035-track-b-opens-before-real-traffic-against-a-synthetic-workload.md)):
-  every number it produces names its workload as generated. Do not write code in
-  `substrate/almanac-raft` or `almanac-chaos` until the product has real traffic.
-  Check the gate status in TRACKER.md.
+- **Track B is cut and parked** since 2026-09-29
+  ([ADR 0036](docs/adr/0036-track-b-is-cut-and-parked.md)). Do not write code in
+  `substrate/` unless the maintainer reopens it with an ADR superseding 0036; the
+  resume guide is in the archive under *Track B — parked 2026-09-29*.
+  `almanac-store` holds its first slice and must keep building.
 - **No game assets, no client automation.** Numbers and text only, attributed.
 
 ## Conventions

@@ -2913,6 +2913,94 @@ newest first. **Write the entry there; add its line here.**
 
 ---
 
+## Track B — parked 2026-09-29
+
+*Moved here from the tracker on 2026-09-29 (fifty-first session), when the maintainer cut Track B
+([D8](#d8--track-b-cut-and-parked-2026-09-29), [ADR 0036](../adr/0036-track-b-is-cut-and-parked.md)). Everything below the resume guide is
+the tracker's text as it stood that day, verbatim — nothing was deleted, and it links to the tracker's own anchors.*
+
+### How to come back to it
+
+1. **Write an ADR superseding 0036** that says why now, and add a deviation to the tracker. ADR 0003's honesty
+   rule (a boring implementation behind every hand-built one, a published benchmark either way) still applies, and
+   ADR 0035's rule that a figure from a generated workload says so still applies if there is no real traffic yet.
+2. **Move this section back** into the tracker: the gate, the Track B table, the Phase 7 slices, the cut-list
+   entries, and the `almanac-store` row of *Current state*.
+3. **The code is still in the tree.** `backend/substrate/almanac-store` holds P7.1 (commit `8d0d891`) — WAL,
+   memtable, recovery, 10 tests — and still builds and runs in every `./gradlew build`. `almanac-raft` and
+   `almanac-chaos` are empty modules. **Resume at P7.2.** Read `LsmStore`'s and `WriteAheadLog`'s javadoc first.
+4. **Q7 in the tracker blocks P7.5**: what `DropReportStore.scan(stage, item, version)` returns.
+5. **Phase 7 before 8 is still the advice**: single-node, in-process, the one most likely to be finished. The cut
+   list's rule was that half an LSM tree and half a Raft are worth nothing.
+
+### The Phase 7 slices, as they stood
+
+Each slice is done when its tests are committed; **the phase closes on its exit, not on the sixth box.** Every figure names its workload as generated (ADR 0035).
+
+- [x] **P7.1 · WAL, memtable, recovery** (2026-09-29). CRC32C-framed log; a torn tail is cut back to the last whole record before anything is appended — **proven at every byte offset**; a mid-log bit flip loses the tail too, on the record. The JDK's skip list, deliberately. One owner per directory; a failed write refuses all later ones. Property test against a `TreeMap`, 200 random sequences with reopens.
+- [ ] **P7.2 · SSTables and the flush** — blocks, sparse index, bloom filter, footer checksum; freeze, flush, rotate the WAL; a manifest that makes the switch atomic; the merged read path, newest first.
+- [ ] **P7.3 · Levelled compaction** — background, tombstones reclaimed only at the bottom level, the amplification knob.
+- [ ] **P7.4 · Crash-consistency fuzzing** — 10 000 randomized kills during writes, flushes and compactions; every acknowledged write present, no unacknowledged one. Real kills or an injected filesystem: decide and write down why.
+- [ ] **P7.5 · Both `DropReportStore`s** — the Postgres one first (Phase 6's boring half), then the LSM adapter, selectable by `storm-almanac.substrate.drop-report-store`. **Needs Q7 answered.**
+- [ ] **P7.6 · The benchmark, published** — write throughput, p99 scan, space amplification, recovery time, on a committed generator. Postgres winning is allowed.
+
+### The `almanac-store` row of *Current state*
+
+| Area | State | The one thing to know |
+|------|-------|-----------------------|
+| `almanac-store` | **P7.1 of six, 10 tests** | A plain library: bytes in, bytes out, no Spring. Only `Durability.SYNC_EACH_WRITE` promises an acknowledged write survives a crash. `Fsync.directory` is a no-op on Windows, so **the crash fuzzing (P7.4) is meant for the Linux runner** |
+
+### The gate and the Track B table, as they stood
+
+> **Track B starts only when the product is publicly deployed with real users and
+> real traffic.** If Phase 4 has not landed, go back and land it. Infrastructure
+> built against imagined requirements is a toy; infrastructure built against six
+> weeks of your own production traffic is engineering.
+
+**Gate status: OPEN FOR PHASE 7 ONLY, since 2026-09-29** ([D7](#d7--track-b-opens-before-real-traffic-on-a-synthetic-workload-2026-09-29),
+ADR 0035) — five testers are real users and not real traffic, so the workload is synthetic and every number says so.
+**Closed for 8–10:** do not write code in `almanac-raft` or `almanac-chaos`.
+
+**Track B — substrate, and Track A's close**
+
+Scope is in [plan.html](plan.html). **Phase 7 is open (D7); none of 8–10 may start before the gate opens.**
+
+| | Phase | Shape | **Exit** |
+|---|---|---|---|
+| [ ] | **7 · almanac-store** (LSM), 3w — **open since 2026-09-29 (D7); slice 1 of 6 built** | Behind `DropReportStore`, alongside the Postgres one. [Its slices](#phase-7--almanac-store-open-by-d7) | Crash-consistency fuzzing survives 10k randomized kills; benchmark vs Postgres published — **including if Postgres wins** |
+| [ ] | **8 · almanac-raft**, 3w | Exposed first as a replicated KV, so it is testable before anything depends on it | 5-node cluster survives repeated leader kills and partitions with no divergent log |
+| [ ] | **9 · Solver cluster**, 2w | Replicated job log, leased work, idempotent completion, results over WebSocket | Kill any node mid-solve — no lost solves, no duplicated solves, throughput recorded |
+| [ ] | **10 · Chaos harness**, 1.5w | Partitions, pauses, kills, disk corruption; linearizability checking; failing seeds kept as regression tests | Nightly suite green for 7 consecutive nights, **and one real bug found and written up** |
+
+### The cut list's Track B entries, as they stood
+
+Consult this before descoping anything, and record it in the session log if a cut
+is taken. **Never cut** the Phase 4 public launch, the Phase 2 optimizer, or
+completing at least one of Phase 7 or 8 properly — half an LSM tree and half a
+Raft are worth nothing, one finished engine a great deal.
+
+1. **Cut first:** Phase 10 as a separate phase — fold minimal fault injection into
+   8 and 9. This loses the strongest evidence, so cut only under real pressure.
+2. **Cut second:** Phase 9. Keep `almanac-raft` as a verified standalone
+   replicated KV and leave the solver single-node.
+
+| Port | Defined in | Boring impl | Hand-built impl |
+|------|-----------|-------------|-----------------|
+| `DropReportStore` | `modules/stats` | Postgres — phase 6 | `almanac-store` — phase 7 |
+| `SolveCoordinator` | `modules/planner` | single-node — phase 2 | `almanac-raft` — phase 9 |
+| solve cache | `modules/planner` | Redis — phase 2 | replicated KV — phase 8 |
+
+### D7, as it stood
+
+**D7 · Track B opens before real traffic, on a synthetic workload (2026-09-29)**
+
+**The gate says real traffic first; the maintainer opened Phase 7 anyway**, to give the project its Track B shape
+now ([ADR 0035](docs/adr/0035-track-b-opens-before-real-traffic-against-a-synthetic-workload.md)). Phase 7 and not 8,
+because a single-node engine is the one most likely to be *finished*. **Phases 8–10 stay gated. Cost:** the engine is
+tuned against a generator, and every figure it produces must say so; Postgres winning is likely and allowed; C2 and C3
+wait. **Reversal trigger:** real drop reports arrive — the benchmark is re-run on them and published *beside* the
+synthetic one.
+
 ## D4 and D5 — the full accounts
 
 *Moved here from the tracker 2026-09-29 (fifty-first session); both finished when Phase 4 closed on 2026-09-28. Verbatim.*
@@ -3264,7 +3352,7 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
-**2026-09-29 (fifty-first) — C1 closes on a reader's screen, and Phase 7 opens by D7.**
+**2026-09-29 (fifty-first) — C1 closes on a reader's screen; Track B opens by D7 and is parked by D8.**
 
 **The remote, checked first:** PR #60 merged 2026-09-28 10:05Z; its `main` run
 `36407578470` green; `/api/health` reported `5df07e7`, #60's merge. `dev` one doc
@@ -3309,6 +3397,20 @@ directory; a failed write poisons the store until it is reopened. A jqwik
 property test drives 200 random put / delete / reopen sequences against a
 `TreeMap` (200 of 200 checks). 10 tests, and the architecture tests are still
 green.
+
+**Then D8 and ADR 0036: Track B cut, the same session.** After each phase was
+summarised, the maintainer asked whether cutting the infrastructure was fine,
+since it felt like senior-level work. The advice given: yes. The product already
+tells the story a new graduate needs, and the real risk of Track B is a CV line
+they cannot defend when an interviewer digs into it. Three options were offered:
+cut it, finish a scaled-down Phase 7 only, or keep the plan. **The maintainer cut
+it and asked to keep it in the archive.** So [*Track B — parked
+2026-09-29*](#track-b--parked-2026-09-29) holds the tracker's text verbatim with a
+resume guide, P7.1's code stays in the tree and keeps building, and Phase 12
+loses the storage and consensus writeups. **The README had claimed "it runs on a
+storage engine and a consensus layer written from scratch"** since the scaffold,
+which was never true; it now says the track is parked and what exists of it.
+Next is unchosen: the Crucible track, C2, C3 or Phase 6.
 
 **2026-09-28 (fiftieth) — C1 opens: the readings, ADR 0034, sequence 17, and a pull planner driven end to end.**
 

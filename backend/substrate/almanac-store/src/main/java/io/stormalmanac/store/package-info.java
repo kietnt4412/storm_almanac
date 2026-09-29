@@ -1,6 +1,10 @@
 /**
  * <b>almanac-store</b> — an embedded log-structured merge tree. Track B, phase 7.
  *
+ * <p><b>Parked since 2026-09-29</b> (ADR 0036): Track B was cut the day it opened,
+ * and this first slice is kept, building and tested, for a return. The resume
+ * guide is in the tracker archive under <i>Track B — parked 2026-09-29</i>.
+ *
  * <p>Opened 2026-09-29 before the product had real traffic, on a synthetic
  * workload (ADR 0035): every figure measured against it names its workload as
  * generated until real drop reports exist.
