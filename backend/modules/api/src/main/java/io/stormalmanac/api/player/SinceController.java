@@ -11,11 +11,13 @@ import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.gamedata.Goal;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.GameDefinitionRepository;
+import io.stormalmanac.gamedata.Upgrade;
 import io.stormalmanac.gamedata.diff.Change;
 import io.stormalmanac.gamedata.diff.VersionDiff;
 import io.stormalmanac.planner.Optimizer;
 import io.stormalmanac.planner.Plan;
 import io.stormalmanac.planner.SolveRequest;
+import io.stormalmanac.planner.StepNames;
 import io.stormalmanac.player.PlayerProfile;
 import io.stormalmanac.player.PlayerStateRepository;
 import io.stormalmanac.player.SavedPlan;
@@ -148,6 +150,8 @@ public class SinceController {
     }
 
     private static ChangeForYouView view(Change change, GameDefinition namedBy) {
+        StepNames names = StepNames.of(namedBy);
+        Optional<Upgrade> step = change.about().equals("upgrade") ? names.upgradeOf(change.slug()) : Optional.empty();
         return new ChangeForYouView(
                 change.kind().name(),
                 change.about(),
@@ -155,7 +159,11 @@ public class SinceController {
                 PlanConcerns.name(change, namedBy),
                 change.detail(),
                 change.before(),
-                change.after());
+                change.after(),
+                step.map(upgrade -> upgrade.entity().value()).orElse(null),
+                step.map(upgrade -> names.entity(upgrade.entity())).orElse(null),
+                step.map(Upgrade::fromState).orElse(null),
+                step.map(Upgrade::toState).orElse(null));
     }
 
     private PlanRequest read(String document) {

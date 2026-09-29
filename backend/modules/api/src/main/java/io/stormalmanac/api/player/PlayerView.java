@@ -296,11 +296,28 @@ public final class PlayerView {
      * One change, with a name a reader knows it by beside the slug a report
      * prints: "The Sigil Vault" beside {@code stage 'pg-2-3'}.
      *
+     * <p><b>An upgrade step says whose it is and where it goes</b> (C3.3). A
+     * patch that re-reads one skill curve is fourteen steps of one track, and
+     * a reader wants that said once, "Lucia: Inverse Crown · Red Orb", which
+     * only a page holding the entity's tracks can say; these are the same four
+     * fields {@link PayingForView} carries for the same reason. Null for
+     * anything that is not an upgrade.
+     *
      * @param about what sort of thing it is — {@code stage}, {@code upgrade},
      *              {@code item} — so a page can group or link by it
      */
     public record ChangeForYouView(
-            String kind, String about, String slug, String name, String detail, String before, String after) {}
+            String kind,
+            String about,
+            String slug,
+            String name,
+            String detail,
+            String before,
+            String after,
+            String entity,
+            String entityName,
+            String fromState,
+            String toState) {}
 
     /**
      * A plan's size on one sequence, or why there is none.

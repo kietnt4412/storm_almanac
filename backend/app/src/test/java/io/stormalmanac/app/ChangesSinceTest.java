@@ -63,7 +63,7 @@ class ChangesSinceTest extends SharedDatabaseTest {
     void noPlanNoReport() throws Exception {
         publish("proving-ground-1.0.json");
         RequestPostProcessor player = signedIn("sub-vertin");
-        String profile = profileWantingInsightOne(player);
+        String profile = profileWanting(player, "insight-1");
 
         mvc.perform(get("/api/me/profiles/" + profile + "/since").with(player))
                 .andExpect(status -> assertThat(status.getResponse().getStatus()).isEqualTo(204));
@@ -74,7 +74,7 @@ class ChangesSinceTest extends SharedDatabaseTest {
     void upToDate() throws Exception {
         publish("proving-ground-1.0.json");
         RequestPostProcessor player = signedIn("sub-vertin");
-        String profile = profileWantingInsightOne(player);
+        String profile = profileWanting(player, "insight-1");
         plan(player, profile);
 
         JsonNode since = body(mvc.perform(get("/api/me/profiles/" + profile + "/since").with(player)));
@@ -91,7 +91,7 @@ class ChangesSinceTest extends SharedDatabaseTest {
     void theChangesThatConcernThePlan() throws Exception {
         publish("proving-ground-1.0.json");
         RequestPostProcessor player = signedIn("sub-vertin");
-        String profile = profileWantingInsightOne(player);
+        String profile = profileWanting(player, "insight-1");
         JsonNode shown = plan(player, profile);
 
         // The precondition the assertions below stand on: with nothing owned,
@@ -146,7 +146,7 @@ class ChangesSinceTest extends SharedDatabaseTest {
     void aRefusedSideSaysWhy() throws Exception {
         publish("proving-ground-1.0.json");
         RequestPostProcessor player = signedIn("sub-vertin");
-        String profile = profileWantingInsightOne(player);
+        String profile = profileWanting(player, "insight-1");
         plan(player, profile);
         publish("proving-ground-1.1.json");
 
@@ -164,11 +164,39 @@ class ChangesSinceTest extends SharedDatabaseTest {
     }
 
     @Test
+    @DisplayName("an upgrade step that changed says whose it is and which states it joins, so a page can group it by track")
+    void anUpgradeSaysWhoseItIs() throws Exception {
+        publish("proving-ground-1.0.json");
+        RequestPostProcessor player = signedIn("sub-vertin");
+        String profile = profileWanting(player, "insight-2");
+        plan(player, profile, 60);
+        publish("proving-ground-1.1.json");
+
+        JsonNode since = body(mvc.perform(get("/api/me/profiles/" + profile + "/since").with(player)));
+        List<JsonNode> changes = new ArrayList<>();
+        since.get("changes").forEach(changes::add);
+
+        // 1.1 cut Insight 2's gold, and this reader's plan pays for Insight 2.
+        assertThat(changes).anySatisfy(change -> {
+            assertThat(change.get("about").asText()).isEqualTo("upgrade");
+            assertThat(change.get("slug").asText()).isEqualTo("warden-insight-2");
+            assertThat(change.get("entity").asText()).isEqualTo("warden");
+            assertThat(change.get("entityName").asText()).isEqualTo("The Warden");
+            assertThat(change.get("fromState").asText()).isEqualTo("insight-1");
+            assertThat(change.get("toState").asText()).isEqualTo("insight-2");
+        });
+        // Anything else carries none of them.
+        assertThat(changes).filteredOn(change -> !change.get("about").asText().equals("upgrade"))
+                .isNotEmpty()
+                .allSatisfy(change -> assertThat(change.get("entity").isNull()).isTrue());
+    }
+
+    @Test
     @DisplayName("another account's report is not found")
     void theReportIsTheProfilesAlone() throws Exception {
         publish("proving-ground-1.0.json");
         RequestPostProcessor mine = signedIn("sub-vertin");
-        String profile = profileWantingInsightOne(mine);
+        String profile = profileWanting(mine, "insight-1");
         plan(mine, profile);
 
         mvc.perform(get("/api/me/profiles/" + profile + "/since").with(signedIn("sub-someone-else")))
@@ -185,8 +213,8 @@ class ChangesSinceTest extends SharedDatabaseTest {
                 account));
     }
 
-    /** Nothing owned, Warden at Insight 0, wanting Insight 1. */
-    private String profileWantingInsightOne(RequestPostProcessor player) throws Exception {
+    /** Nothing owned, Warden at Insight 0, wanting {@code target}. */
+    private String profileWanting(RequestPostProcessor player, String target) throws Exception {
         String profile = body(mvc.perform(post("/api/me/profiles")
                         .with(player)
                         .with(csrf())
@@ -207,17 +235,21 @@ class ChangesSinceTest extends SharedDatabaseTest {
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json.writeValueAsString(
-                        Map.of("goals", List.of(Map.of("entity", "warden", "targetState", "insight-1"))))));
+                        Map.of("goals", List.of(Map.of("entity", "warden", "targetState", target))))));
 
         return profile;
     }
 
     private JsonNode plan(RequestPostProcessor player, String profile) throws Exception {
+        return plan(player, profile, 7);
+    }
+
+    private JsonNode plan(RequestPostProcessor player, String profile, int horizonDays) throws Exception {
         return body(mvc.perform(post("/api/me/profiles/" + profile + "/plan")
                 .with(player)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json.writeValueAsString(Map.of("energyPerDay", 240, "horizonDays", 7)))));
+                .content(json.writeValueAsString(Map.of("energyPerDay", 240, "horizonDays", horizonDays)))));
     }
 
     private JsonNode body(ResultActions actions) throws Exception {

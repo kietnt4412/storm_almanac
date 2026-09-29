@@ -691,6 +691,64 @@ export const getSavedPlan = (profile: string) =>
   request<SavedPlan | undefined>(`/api/me/profiles/${profile}/plan`);
 
 /**
+ * One change a new sequence made to something the reader's plans use, named in
+ * the words of the version it still exists in.
+ */
+export interface ChangeForYou {
+  kind: 'ADDED' | 'REMOVED' | 'CHANGED';
+  /** What sort of thing: `stage`, `upgrade`, `item`, `shop`, `game`, … */
+  about: string;
+  slug: string;
+  name: string;
+  /** Which part of it, for a CHANGED: `drop ore-rough`, `cost cogs`. */
+  detail: string | null;
+  before: string | null;
+  after: string | null;
+  /*
+    An upgrade step's entity and states, so the page can say a re-read skill
+    curve once per track. Null for anything else; absent from a server older
+    than this page (C3.3).
+  */
+  entity?: string | null;
+  entityName?: string | null;
+  fromState?: string | null;
+  toState?: string | null;
+}
+
+/** One side of the report: the saved request solved on one sequence against today's state. */
+export interface PlanSide {
+  version: number;
+  versionLabel: string;
+  totalEnergy: number | null;
+  etaDays: number | null;
+  /** The solver's refusal, as it said it; null when there is a plan. */
+  refused: string | null;
+}
+
+/**
+ * What the sequences published since the reader's last plan changed for them
+ * (C3.2, ADR 0037). Up to date when `savedVersion` is `latestVersion`, and then
+ * nothing was solved and both sides are null.
+ */
+export interface Since {
+  profile: string;
+  game: string;
+  savedVersion: number;
+  savedVersionLabel: string;
+  latestVersion: number;
+  latestVersionLabel: string;
+  savedAt: string;
+  changes: ChangeForYou[];
+  /** Every change between the two sequences, the reader's or not. */
+  allChanges: number;
+  onSaved: PlanSide | null;
+  onLatest: PlanSide | null;
+}
+
+/** Undefined when the profile has never run a plan: the server answers 204. */
+export const getSince = (profile: string) => request<Since | undefined>(`/api/me/profiles/${profile}/since`);
+
+/**
  * What this reader is still short of for one entity at one target state.
  *
  * `game` is the game the page is showing. An entity id means something only

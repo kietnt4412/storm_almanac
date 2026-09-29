@@ -18,6 +18,7 @@ import {
 import { ProfileGate } from '../profile';
 import { sectionsOf, trackOf, tracksOfGraph, type Track } from '../roster/tracks';
 import { NextStep } from '../steps/Steps';
+import { SinceNotice } from './SinceNotice';
 import { reachOf, usePlannerStore } from '../store/plannerStore';
 
 /**
@@ -101,7 +102,12 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
 
   const run = useMutation<Plan, Error>({
     mutationFn: () => solve(profileId, { energyPerDay, horizonDays, objective, reach }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['savedPlan', profileId] }),
+    // A new plan is saved on the latest sequence, so the report of what changed
+    // since the last one is out of date too, here and on Home.
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['savedPlan', profileId] });
+      queryClient.invalidateQueries({ queryKey: ['since', profileId] });
+    },
   });
 
   // What is on screen: the plan just worked out, or else the last one saved.
@@ -244,6 +250,15 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
       </form>
 
       {run.isError && <Refusal error={run.error} />}
+      {!run.data && (
+        <SinceNotice
+          profileId={profileId}
+          game={game}
+          energyUnit={energyUnit}
+          replanning={run.isPending}
+          onReplan={() => run.mutate()}
+        />
+      )}
       {fromBefore && (
         <p className="muted text-sm">
           Your last plan, worked out {new Date(fromBefore.savedAt).toLocaleString()} on patch{' '}
