@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 
 import io.stormalmanac.api.gamedata.GameDataReadModel;
+import io.stormalmanac.api.player.PlayerView;
 import io.stormalmanac.api.player.PlayerView.ConversionView;
 import io.stormalmanac.api.player.PlayerView.PlanResponse;
 import io.stormalmanac.api.player.PlayerView.RewardClaimView;
@@ -430,12 +431,17 @@ class AuthoredBundlePlanTest {
         assertThat(enhancers.total()).isEqualTo("Buy %s Memory Enhancer IV for %s Simulation Score"
                 .formatted(StepNames.quantity(10L * buys), StepNames.quantity(87L * buys)));
         assertThat(enhancers.repeat()).isEqualTo(buys + " × 10 for 87");
+        // The same spend as numbers, for the page's chart of where a currency
+        // goes (C2) — equal to the words, because both come off one shop row.
+        assertThat(enhancers.spends()).isEqualTo(new PlayerView.SpendView(
+                "simulation-score", "Simulation Score", 87L * buys, "Memory Enhancer IV"));
 
         ConversionView fed = overclock.conversions().stream()
                 .filter(line -> line.step().equals("memory-exp-4-star"))
                 .findFirst().orElseThrow();
         assertThat(fed.total()).isEqualTo("Feed " + StepNames.quantity(fed.times()) + " Memory Enhancer IV into Memory EXP");
         assertThat(fed.repeat()).as("a feed's count is in its total").isNull();
+        assertThat(fed.spends()).as("a feed spends no currency").isNull();
 
         PlanResponse resonance = PlanResponse.of(solve(Goal.deterministic(SAMANTHA, "upper-resonance-1")), definition);
         assertThat(resonance.conversions()).extracting(ConversionView::total, ConversionView::repeat)

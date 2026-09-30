@@ -389,7 +389,10 @@ public final class PlayerView {
                             .map(c -> new ConversionView(
                                     c.sourceOrSinkId(), names.step(c.sourceOrSinkId()), c.times(),
                                     names.step(c.sourceOrSinkId(), c.times()),
-                                    names.repeat(c.sourceOrSinkId(), c.times()).orElse(null)))
+                                    names.repeat(c.sourceOrSinkId(), c.times()).orElse(null),
+                                    names.spent(c.sourceOrSinkId(), c.times())
+                                            .map(SpendView::of)
+                                            .orElse(null)))
                             .toList(),
                     plan.rewardClaims().stream()
                             .sorted(Comparator.comparing(c -> c.reward(), names.rewardOrder()))
@@ -498,7 +501,20 @@ public final class PlayerView {
      * "× 429", wrong by a factor of 429, where this way it prints what it
      * always did.
      */
-    public record ConversionView(String step, String displayName, int times, String total, String repeat) {}
+    public record ConversionView(
+            String step, String displayName, int times, String total, String repeat, SpendView spends) {}
+
+    /**
+     * What a purchase spends, as numbers (C2): the plan page draws where each
+     * currency goes from these rather than parsing {@code total}. Null for
+     * anything that is not a priced shop row, and absent from a plan saved
+     * before it, which the page reads as "nothing to draw".
+     */
+    public record SpendView(String item, String displayName, long quantity, String buys) {
+        static SpendView of(StepNames.Spent spent) {
+            return new SpendView(spent.currency().value(), spent.currencyName(), spent.quantity(), spent.buys());
+        }
+    }
 
     public record RewardClaimView(String reward, String displayName, int times) {}
 }

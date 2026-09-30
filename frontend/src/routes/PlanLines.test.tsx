@@ -139,4 +139,43 @@ describe('the lines of a plan', () => {
     expect(screen.getByText('simulated-battlefield')).toBeInTheDocument();
     expect(screen.getByText(/simulation-shop-cogs/)).toBeInTheDocument();
   });
+  it('draws where each currency goes from the purchases, largest share first, and draws nothing without numbers', () => {
+    const spend = (step: string, buys: string, quantity: number) => ({
+      step,
+      times: 1,
+      spends: { item: 'simulation-score', displayName: 'Simulation Score', quantity, buys },
+    });
+    const { unmount } = render(
+      <Answer
+        plan={plan({
+          stages: [],
+          conversions: [
+            spend('cogs', 'Cogs', 545),
+            spend('exp', 'EXP Pod (L)', 2_472),
+            spend('sp', 'Skill Point', 345),
+            // A feed spends no currency, and a plan saved before the numbers has none.
+            { step: 'feed', times: 120, spends: null },
+            { step: 'old', times: 1 },
+          ],
+          rewards: [],
+          bindingStages: [],
+        })}
+        energyUnit="Serum"
+      />,
+    );
+
+    expect(screen.getByText('Where your Simulation Score goes')).toBeInTheDocument();
+    expect(screen.getByText('3,362 in all')).toBeInTheDocument();
+    const legend = screen.getAllByRole('listitem').map((item) => item.textContent);
+    expect(legend.slice(0, 3)).toEqual(['EXP Pod (L)2,472 · 74%', 'Cogs545 · 16%', 'Skill Point345 · 10%']);
+    unmount();
+
+    render(
+      <Answer
+        plan={plan({ stages: [], conversions: [{ step: 'old', times: 1 }], rewards: [], bindingStages: [] })}
+        energyUnit="Serum"
+      />,
+    );
+    expect(screen.queryByText(/Where your/)).not.toBeInTheDocument();
+  });
 });

@@ -15,38 +15,75 @@
  * behind the page — follow along; without it a dark palette gets a white
  * scrollbar and white autofill.
  *
- * The palette is the one the PWA manifest already committed to in
- * vite.config.ts, so the splash screen and the first paint agree.
+ * The palette is "Storm" (C2, agreed 2026-09-30): deep navy, an electric cyan
+ * for what the reader acts on, violet for the second thing on a chart. The PWA
+ * manifest in vite.config.ts carries the dark ground, so the splash screen and
+ * the first paint agree.
+ *
+ * Three ways in, one set of values each: the light scheme is the default, the
+ * dark one applies when the system asks for it *and the reader has not chosen
+ * light*, and a reader who chose dark gets it whatever the system says. The
+ * choice is `data-theme` on the root, set by `ui/preferences.ts`; "system" is
+ * no attribute at all. The dark values are written twice because a media query
+ * and an attribute selector cannot share one block.
  */
 :root {
-  color-scheme: light dark;
-  --ground: #f7faf9;
+  color-scheme: light;
+  --ground: #f3f6fb;
   --surface: #ffffff;
-  --ink: #10201f;
-  --muted: #5b6f6d;
-  --line: #d9e3e1;
-  --brand: #0d6f68;
-  --signal: #9c6414;
-  --short: #a33a2a;
+  --raised: #ffffff;
+  --ink: #0b1628;
+  --muted: #52627d;
+  --line: #dce3ee;
+  --brand: #0369a1;
+  --on-brand: #ffffff;
+  --violet: #6d28d9;
+  --signal: #9a5b00;
+  --short: #b42318;
+  --shadow: 0 1px 2px rgb(11 22 40 / 6%), 0 4px 16px rgb(11 22 40 / 6%);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --ground: #0e1a19;
-    --surface: #142523;
-    --ink: #e6f0ef;
-    --muted: #9ab3b0;
-    --line: #24403d;
-    --brand: #4fd1c5;
-    --signal: #e0a95c;
-    --short: #f08a72;
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --ground: #0b1220;
+    --surface: #121b2e;
+    --raised: #172238;
+    --ink: #e6edf7;
+    --muted: #8a9bb8;
+    --line: #22304d;
+    --brand: #38bdf8;
+    --on-brand: #06121f;
+    --violet: #a78bfa;
+    --signal: #f5b454;
+    --short: #f87171;
+    --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 25%);
   }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --ground: #0b1220;
+  --surface: #121b2e;
+  --raised: #172238;
+  --ink: #e6edf7;
+  --muted: #8a9bb8;
+  --line: #22304d;
+  --brand: #38bdf8;
+  --on-brand: #06121f;
+  --violet: #a78bfa;
+  --signal: #f5b454;
+  --short: #f87171;
+  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 25%);
 }
 
 body {
   background: var(--ground);
   color: var(--ink);
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
@@ -61,15 +98,30 @@ a {
  */
 @layer components {
   .card {
-    @apply rounded-lg border p-4;
+    @apply rounded-xl border p-4;
     background: var(--surface);
     border-color: var(--line);
   }
 
+  /*
+   * An answer, as opposed to a question. The plan's result and the pull odds sit
+   * on this, so what the reader came for does not look like the form above it.
+   */
+  .card-raised {
+    @apply rounded-xl border p-5;
+    background: var(--raised);
+    border-color: color-mix(in srgb, var(--brand) 30%, var(--line));
+    box-shadow: var(--shadow);
+  }
+
   .btn {
-    @apply rounded-md px-3 py-1.5 text-sm font-medium transition-opacity;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition;
     background: var(--brand);
-    color: var(--ground);
+    color: var(--on-brand);
+  }
+
+  .btn:hover:not(:disabled) {
+    filter: brightness(1.08);
   }
 
   .btn:disabled {
@@ -77,10 +129,68 @@ a {
   }
 
   .btn-quiet {
-    @apply rounded-md border px-3 py-1.5 text-sm font-medium;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition;
     border-color: var(--line);
     color: var(--ink);
     background: transparent;
+  }
+
+  .btn-quiet:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+  }
+
+  /*
+   * A number the reader acts on — serum, days, a chance. Big, tabular, and in
+   * the brand colour only when it is *the* number; the rest stay ink.
+   */
+  .stat-label {
+    @apply block text-xs font-medium;
+    color: var(--muted);
+  }
+
+  .stat-value {
+    @apply block text-2xl font-semibold leading-tight;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-tile {
+    @apply rounded-lg px-3 py-2.5;
+    background: color-mix(in srgb, var(--ink) 4%, transparent);
+  }
+
+  /* The side panel's rows: an icon, a word, and a tint for where you are. */
+  .nav-item {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium no-underline transition;
+    color: var(--muted);
+  }
+
+  .nav-item:hover {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+  }
+
+  .nav-item-here {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--brand) 16%, transparent);
+  }
+
+  .nav-item-here > svg {
+    color: var(--brand);
+  }
+
+  .icon-btn {
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-lg transition;
+    color: var(--muted);
+  }
+
+  .icon-btn:hover {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+  }
+
+  .icon-btn[aria-pressed='true'] {
+    color: var(--brand);
+    background: color-mix(in srgb, var(--brand) 16%, transparent);
   }
 
   /*
@@ -88,28 +198,35 @@ a {
    * on is filled, the way a recorded value was when these were chips: where you
    * are is the content, and the others are ways to go.
    */
+  /*
+   * The four steps as one progress bar (C2): a segment each, filled up to and
+   * including the step the reader is on, with the step's name under it. The
+   * segment says how far through you are; the name says where a tap goes.
+   */
   .step {
-    @apply inline-flex items-center gap-2 rounded-full border px-3 py-1 no-underline;
-    border-color: var(--line);
+    @apply block no-underline;
     color: var(--muted);
   }
 
+  .step-seg {
+    @apply mb-1.5 block h-1.5 rounded-full transition-colors;
+    background: var(--line);
+  }
+
+  .step-done > .step-seg {
+    background: color-mix(in srgb, var(--brand) 55%, var(--line));
+  }
+
   .step-here {
-    @apply font-medium;
-    background: color-mix(in srgb, var(--brand) 18%, transparent);
-    border-color: color-mix(in srgb, var(--brand) 45%, transparent);
     color: var(--ink);
+  }
+
+  .step-here > .step-seg {
+    background: var(--brand);
   }
 
   .step-n {
-    @apply inline-flex h-5 w-5 items-center justify-center rounded-full text-xs;
-    background: var(--line);
-    color: var(--ink);
-  }
-
-  .step-here > .step-n {
-    background: var(--brand);
-    color: var(--ground);
+    @apply block text-[11px] font-medium uppercase tracking-wide;
   }
 
   .input {

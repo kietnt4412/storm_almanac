@@ -1,5 +1,5 @@
 import { useState, type ReactElement } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 
 /**
  * The four steps from nothing to a plan, in the one order every screen shows.
@@ -41,19 +41,29 @@ export function isStep(pathname: string): boolean {
   return STEPS.some((step) => step.to === pathname);
 }
 
-/** Every step, which one this is, and a way to any of them. */
+/**
+ * Every step, which one this is, and a way to any of them — drawn as one
+ * progress bar since C2, so the bar says how far through the reader is before
+ * any word does. Steps before this one are filled paler than this one: done is
+ * not the same as here.
+ */
 export function StepBar(): ReactElement {
+  const { pathname } = useLocation();
+  const here = STEPS.findIndex((step) => step.to === pathname);
   return (
     <nav aria-label="Steps" className="mb-6">
-      <ol className="flex flex-wrap gap-2 text-sm">
+      <ol className="grid grid-cols-4 gap-2 text-sm">
         {STEPS.map((step, index) => (
-          <li key={step.to}>
+          <li key={step.to} className="min-w-0">
             <NavLink
               to={step.to}
-              className={({ isActive }) => `step ${isActive ? 'step-here' : ''}`}
+              className={({ isActive }) =>
+                `step ${isActive ? 'step-here' : index < here ? 'step-done' : ''}`
+              }
             >
-              <span className="step-n">{index + 1}</span>
-              {step.title}
+              <span className="step-seg" aria-hidden="true" />
+              <span className="step-n">Step {index + 1}</span>
+              <span className="block truncate font-medium">{step.title}</span>
             </NavLink>
           </li>
         ))}

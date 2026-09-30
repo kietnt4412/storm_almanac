@@ -52,7 +52,9 @@ describe('the pull planner', () => {
     await userEvent.selectOptions(screen.getByLabelText('How far you get in Daily missions'), '100');
     await userEvent.click(screen.getByRole('button', { name: 'Work it out' }));
 
-    expect(await screen.findByText('100%')).toBeInTheDocument();
+    // The headline, and the curve it is one point on, marked where the pulls run out.
+    expect(await screen.findByText('100%', { selector: 'p' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /your 15 pulls reach 100%/ })).toBeInTheDocument();
 
     const put = sent.find((request) => request.method === 'PUT');
     expect(put?.body).toEqual({ pullsSinceHit: 45, consecutiveLosses: 0 });
@@ -189,6 +191,8 @@ describe('the pull planner', () => {
             chance: 1,
             expectedPulls: 15,
             worstCasePulls: 15,
+            // From 45 on a wall of 60: rising to certainty at the fifteenth pull.
+            curve: Array.from({ length: 16 }, (_, pulls) => (pulls === 15 ? 1 : Math.round((pulls / 15) ** 2 * 10_000) / 10_000)),
             method: 'exact Markov chain',
           });
         }

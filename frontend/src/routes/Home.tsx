@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { ApiError, getGames, getMe, signInUrl, type Profile } from '../api/client';
+import { ApiError, getGames, getMe, getSavedPlan, signInUrl, type Profile } from '../api/client';
 import { useCreateProfile, useDeleteProfile, useRenameProfile } from '../profile';
 import { STEPS } from '../steps/Steps';
 import { usePlannerStore } from '../store/plannerStore';
 import { useSince } from './SinceNotice';
+import { Explain } from '../ui/Explain';
 
 /**
  * Where a reader lands: what this is, which profile they are planning for, and
@@ -47,17 +48,17 @@ export function Home() {
   // so the form says so rather than letting the server refuse it.
   const taken = me.data?.profiles.find((profile) => profile.game === chosen && profile.region === region);
   const gameName = (id: string) => published.find((candidate) => candidate.id === id)?.displayName ?? id;
+  const energyUnit = (id: string) => published.find((candidate) => candidate.id === id)?.energyUnit ?? 'energy';
   const chosenName = gameName(chosen);
 
   return (
     <div className="space-y-6">
       <section>
         <h1 className="text-2xl font-semibold">Work out the cheapest way to get there</h1>
-        <p className="muted mt-1 max-w-2xl">
-          Tell it what you own and what you want. It reads the published patch data, works out what
-          your goals actually cost, and says which stages to run — and how much of the answer it could
-          prove inside its own time budget.
-        </p>
+        <Explain className="muted mt-1 max-w-2xl" lead="Tell it what you own and what you want.">
+          It reads the published patch data, works out what your goals actually cost, and says which stages
+          to run — and how much of the answer it could prove inside its own time budget.
+        </Explain>
       </section>
 
       {signedOut && (
@@ -86,6 +87,7 @@ export function Home() {
                   key={profile.id}
                   profile={profile}
                   gameName={gameName(profile.game)}
+                  energyUnit={energyUnit(profile.game)}
                   active={profile.id === profileId}
                   onSelect={() => selectProfile(profile.id)}
                 />
@@ -196,11 +198,13 @@ export function Home() {
 function ProfileRow({
   profile,
   gameName,
+  energyUnit,
   active,
   onSelect,
 }: {
   profile: Profile;
   gameName: string;
+  energyUnit: string;
   active: boolean;
   onSelect: () => void;
 }) {
@@ -313,6 +317,7 @@ function ProfileRow({
       >
         Delete
       </button>
+      <PlanLine profile={profile} energyUnit={energyUnit} onOpen={onSelect} />
       {/* Its own row across the card, so the buttons stay beside the name. */}
       <SinceLine profile={profile} onOpen={onSelect} />
     </li>
@@ -328,6 +333,39 @@ function ProfileRow({
  * when nothing does, because no line at all reads the same as up to date. It
  * goes away when the reader re-plans, and not before (maintainer, 2026-09-29).
  */
+/**
+ * The profile's saved plan in one line (C2.3): what it costs and how long, so
+ * Home says where a reader stands before they open anything. It reads the same
+ * query the plan screen does, so the two never show different plans, and says
+ * nothing for a profile that has never been planned.
+ */
+function PlanLine({ profile, energyUnit, onOpen }: { profile: Profile; energyUnit: string; onOpen: () => void }) {
+  const saved = useQuery({
+    queryKey: ['savedPlan', profile.id],
+    queryFn: async () => (await getSavedPlan(profile.id)) ?? null,
+  });
+  const plan = saved.data?.plan;
+  if (!plan) return null;
+  return (
+    <div className="flex w-full flex-wrap items-center gap-2 text-sm">
+      <span className="stat-tile inline-flex items-baseline gap-1.5 py-1">
+        <span className="count font-semibold" style={{ color: 'var(--brand)' }}>
+          {plan.totalEnergy.toLocaleString()}
+        </span>
+        <span className="muted">{energyUnit}</span>
+      </span>
+      <span className="stat-tile inline-flex items-baseline gap-1.5 py-1">
+        <span className="count font-semibold">{plan.etaDays.toFixed(1)}</span>
+        <span className="muted">days</span>
+      </span>
+      <span className="muted">your plan, on v{plan.version}</span>
+      <Link to="/plan" onClick={onOpen} className="ml-auto">
+        Open plan →
+      </Link>
+    </div>
+  );
+}
+
 function SinceLine({ profile, onOpen }: { profile: Profile; onOpen: () => void }) {
   const since = useSince(profile.id);
   const report = since.data;

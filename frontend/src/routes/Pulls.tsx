@@ -15,6 +15,8 @@ import {
 import { ProfileGate } from '../profile';
 import { reachOf, usePlannerStore } from '../store/plannerStore';
 import { Ladder } from './PlanView';
+import { ChanceCurve } from '../ui/ChanceCurve';
+import { Explain } from '../ui/Explain';
 
 /**
  * "Will I get her, and by when?" — C1's screen.
@@ -155,10 +157,9 @@ function Asker({
       <section className="card space-y-3">
         <div>
           <h2 className="font-medium">Your pity</h2>
-          <p className="muted text-sm">
-            As your pool screen shows it. It is saved, and every pool that carries the same counter reads it
-            back.
-          </p>
+          <Explain lead="As your pool screen shows it.">
+            It is saved, and every pool that carries the same counter reads it back.
+          </Explain>
         </div>
         <div className="flex flex-wrap items-end gap-4">
           <div>
@@ -209,10 +210,9 @@ function Asker({
         <section className="card space-y-3">
           <div>
             <h2 className="font-medium">How far do you get?</h2>
-            <p className="muted text-sm">
-              What the game pays towards pulls depends on what you finish. Leave one alone and none of it is
-              counted, so the answer is never better than the truth.
-            </p>
+            <Explain lead="What the game pays towards pulls depends on what you finish.">
+              Leave one alone and none of it is counted, so the answer is never better than the truth.
+            </Explain>
           </div>
           {ladders.map((ladder) => (
             <Ladder
@@ -279,13 +279,25 @@ function Answer({ odds }: { odds: Odds }) {
   const wanted = odds.copies === 1 ? 'the featured unit' : `${odds.copies} copies of the featured unit`;
 
   return (
-    <section className="card space-y-3" aria-live="polite">
-      <div>
-        <p className="text-3xl font-semibold">{percent(odds.chance)}</p>
-        <p>
-          chance of {wanted} within {plural(odds.days, 'day')}.
-        </p>
+    <section className="card-raised space-y-4" aria-live="polite">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="text-4xl font-bold leading-none" style={{ color: 'var(--brand)' }}>
+            {percent(odds.chance)}
+          </p>
+          <p className="mt-1">
+            chance of {wanted} within {plural(odds.days, 'day')}.
+          </p>
+        </div>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <Stat label="You can afford" value={count(budget.pulls)} />
+          <Stat label="Average to first" value={count(Math.round(odds.expectedPulls))} />
+          <Stat label="Certain by" value={count(odds.worstCasePulls)} />
+        </div>
       </div>
+
+      {/* Absent from a server a deploy behind the page; the answer stands without it. */}
+      {odds.curve && odds.curve.length > 1 && <ChanceCurve curve={odds.curve} afforded={budget.pulls} />}
 
       <ul className="space-y-1 text-sm">
         <li>
@@ -323,6 +335,15 @@ function Answer({ odds }: { odds: Odds }) {
         balance is your saved <Link to="/inventory">inventory</Link>.
       </p>
     </section>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="stat-tile">
+      <span className="stat-label">{label}</span>
+      <span className="stat-value text-xl">{value}</span>
+    </div>
   );
 }
 

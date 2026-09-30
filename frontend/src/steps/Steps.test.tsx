@@ -19,12 +19,15 @@ describe('the way through the four steps', () => {
 
     const steps = screen.getAllByRole('link');
     expect(steps.map((step) => step.textContent)).toEqual([
-      '1What you own',
-      '2Where they stand',
-      '3What you want',
-      '4The plan',
+      'Step 1What you own',
+      'Step 2Where they stand',
+      'Step 3What you want',
+      'Step 4The plan',
     ]);
     expect(screen.getByRole('link', { current: 'page' })).toHaveTextContent('Where they stand');
+    // The bar fills up to the step the reader is on, and a step behind it is
+    // drawn as done rather than as here.
+    expect(steps.map((step) => step.className.trim())).toEqual(['step step-done', 'step step-here', 'step', 'step']);
   });
 
   it('leads from each step to the next, and back to the one before', () => {

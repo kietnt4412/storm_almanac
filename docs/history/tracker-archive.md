@@ -3352,6 +3352,74 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-09-30 (fifty-fifth) — C3.3 found live; Phase 6 taken and its plan drafted.**
+
+**The remote, checked first:** [PR #64](https://github.com/kietnt4412/storm_almanac/pull/64)
+(C3.3) merged 2026-09-29 10:50:52Z, its `main` run `36558089363` green, and
+production reports `5ca20f5`. The page's served JavaScript carries "New since
+your plan:", so the frontend half is live too, not only the merge. The
+maintainer thought only C3.2 had shipped. **C3 now waits on nothing but a
+sequence 19**, agreed to be the banner that replaces Selena's once it opens
+after 10-01 06:59 UTC.
+
+**Phase 6 chosen over C2.** [The plan](../plans/phase-6-drop-statistics.md) is
+drafted and not agreed. It answers Q7: `scan` returns every report for the
+stage, because a report without the item is still trials of it, so the `item`
+parameter goes. **The finding that shapes it: production has nothing to
+supersede.** PGR's one stage pays a declared 82 Simulation Score, and
+plan.html's seeds were Kornblume's, which ADR 0015 keeps out. So the exit needs
+a first-hand run count on a PGR stage with a random drop the planner can use.
+That is question 1, left without a recommendation because it is a game fact.
+Also found: `DropEstimate` still carries a Wilson proportion where ADR 0011
+asked for a mean per run, so the plan proposes ADR 0038. And
+`storm-almanac.substrate.drop-report-store` has been in `application.yml`
+since the scaffold, waiting for the implementation.
+
+**Then Phase 6 moved into Phase 11 (D9, ADR 0038).** Asked about question 1,
+the maintainer reported that PGR's farming is all fixed payouts, so no stage
+has anything to estimate, and suggested dropping the phase. It moved rather
+than being cut, because R1999's undisclosed, sampled drops are exactly what it
+is for (N26). The plan is kept as drafted with its questions unanswered. The
+proposed "estimate is a mean per run" ADR lost the number 0038 to the move
+itself, and takes the next free number when picked up. **C2 taken instead**,
+and the maintainer defined it: a visual pass (colour, theme, the look), not
+only the rehearsal's leftover hesitations.
+
+**C2 agreed and mostly built.** Three directions were shown as mockups. The
+maintainer took A · Storm, all four visuals and the "Why?" toggles, and
+answered navigation their own way: a side panel with a hide button, not the
+recommended bottom tab bar. [The plan's *As built*](../plans/c2-the-visual-pass.md#as-built-2026-09-30-fifty-fifth)
+has the detail. Two things real data decided:
+- **No stat curve chart.** No PGR entity carries a stat curve.
+- **The currency bar needed numbers on the wire.** A purchase's spend was
+  only a sentence, so `spends` joined `ConversionView`. The pull curve likewise
+  became `curve` on `/pulls`, and `probabilityOfFeatured` is now defined as
+  the curve's last point.
+
+Backend 536 tests (two new) and frontend 112, all green. Nothing is deployed
+and the rehearsal (C2.4) has not run.
+
+**Mid-session, the maintainer offered [grayravens.com](https://grayravens.com/wiki/GRAY_RAVENS)**
+as a data source. It is a fansite supported by Kuro, and its footer says CC
+BY-SA 4.0. That solves licensing, the reason Kornblume went, but not
+accuracy: reading the client has overruled guides four times. ADR 0015 stands
+until an ADR supersedes it. The maintainer was offered either that ADR (wiki
+data under its own provenance label) or a cross-check of the bundle against
+the wiki. **Answered the same session:** "let it there as a second source". The
+wiki is for cross-checking and for knowing what to read. Nothing from it is
+published, and no ADR was written, because ADR 0015 already permits a local
+cross-check. The licence was noted: attribution plus share-alike, per the
+footer only (the site's copyright page was not read).
+
+**A running `bootRun` and a `./gradlew build` do not share a tree.** The build
+rewrote `modules/api`'s jar under the live server, and the plan route answered
+500 with `ClassNotFoundException: PlayerView$SavedPlanResponse`. It was not a
+code bug, and a restart fixed it. **Stop the `api` preview before a full
+build, or restart it after.** Also, the pane stops painting while the app
+window is minimised: screenshots time out, and CSS transitions freeze
+mid-way. At 375 px the side panel looked open for that reason alone, which
+reading the transform with transitions off proved.
+
 **2026-09-29 (fifty-fourth) — C3.3 agreed and built: the notice on Home and the plan screen.**
 
 **The remote, checked first:** [PR #63](https://github.com/kietnt4412/storm_almanac/pull/63)
