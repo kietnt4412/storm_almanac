@@ -6,6 +6,7 @@ import { useCreateProfile, useDeleteProfile, useRenameProfile } from '../profile
 import { STEPS } from '../steps/Steps';
 import { usePlannerStore } from '../store/plannerStore';
 import { useSince } from './SinceNotice';
+import { Explain } from '../ui/Explain';
 
 /**
  * Where a reader lands: what this is, which profile they are planning for, and
@@ -54,11 +55,10 @@ export function Home() {
     <div className="space-y-6">
       <section>
         <h1 className="text-2xl font-semibold">Work out the cheapest way to get there</h1>
-        <p className="muted mt-1 max-w-2xl">
-          Tell it what you own and what you want. It reads the published patch data, works out what
-          your goals actually cost, and says which stages to run — and how much of the answer it could
-          prove inside its own time budget.
-        </p>
+        <Explain className="muted mt-1 max-w-2xl" lead="Tell it what you own and what you want.">
+          It reads the published patch data, works out what your goals actually cost, and says which stages
+          to run — and how much of the answer it could prove inside its own time budget.
+        </Explain>
       </section>
 
       {signedOut && (

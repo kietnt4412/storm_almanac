@@ -16,6 +16,7 @@ import { ProfileGate } from '../profile';
 import { reachOf, usePlannerStore } from '../store/plannerStore';
 import { Ladder } from './PlanView';
 import { ChanceCurve } from '../ui/ChanceCurve';
+import { Explain } from '../ui/Explain';
 
 /**
  * "Will I get her, and by when?" — C1's screen.
@@ -156,10 +157,9 @@ function Asker({
       <section className="card space-y-3">
         <div>
           <h2 className="font-medium">Your pity</h2>
-          <p className="muted text-sm">
-            As your pool screen shows it. It is saved, and every pool that carries the same counter reads it
-            back.
-          </p>
+          <Explain lead="As your pool screen shows it.">
+            It is saved, and every pool that carries the same counter reads it back.
+          </Explain>
         </div>
         <div className="flex flex-wrap items-end gap-4">
           <div>
@@ -210,10 +210,9 @@ function Asker({
         <section className="card space-y-3">
           <div>
             <h2 className="font-medium">How far do you get?</h2>
-            <p className="muted text-sm">
-              What the game pays towards pulls depends on what you finish. Leave one alone and none of it is
-              counted, so the answer is never better than the truth.
-            </p>
+            <Explain lead="What the game pays towards pulls depends on what you finish.">
+              Leave one alone and none of it is counted, so the answer is never better than the truth.
+            </Explain>
           </div>
           {ladders.map((ladder) => (
             <Ladder

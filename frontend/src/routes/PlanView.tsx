@@ -21,6 +21,7 @@ import { NextStep } from '../steps/Steps';
 import { SinceNotice } from './SinceNotice';
 import { reachOf, usePlannerStore } from '../store/plannerStore';
 import { SpendBars } from '../ui/SpendBar';
+import { Explain } from '../ui/Explain';
 
 /**
  * The answer, and what it is worth.
@@ -155,10 +156,9 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
     <div className="space-y-4">
       <header>
         <h1 className="text-xl font-semibold">Plan</h1>
-        <p className="muted text-sm">
-          Computed from what you own and what you want — not from anything typed below. What is asked
-          for here is what nothing else can tell us: how much you play, and how far you get.
-        </p>
+        <Explain lead="Computed from what you own and what you want — not from anything typed below.">
+          What is asked for here is what nothing else can tell us: how much you play, and how far you get.
+        </Explain>
       </header>
 
       {!hasGoals && !goals.isPending && (
@@ -228,11 +228,11 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
           <section className="card space-y-3">
             <div>
               <h2 className="font-medium">How far do you get?</h2>
-              <p className="muted text-sm">
-                Some of this game's income is paid by how well you did, and nothing anyone can read
-                says how well that is. Leave one alone and the plan counts none of it — which makes
-                the plan dearer than the truth rather than cheaper, and it will say so.
-              </p>
+              <Explain lead="Some of this game's income is paid by how well you did.">
+                Nothing anyone can read says how well that is. Leave one alone and the plan counts none
+                of it — which makes the plan dearer than the truth rather than cheaper, and it will say
+                so.
+              </Explain>
             </div>
             {planLadders.map((ladder) => (
               <Ladder
