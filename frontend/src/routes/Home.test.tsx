@@ -65,7 +65,7 @@ describe('the add-a-profile form', () => {
   });
 });
 
-function serve(profiles: Profile[]): () => number {
+function serve(profiles: Profile[], saved?: unknown): () => number {
   let posts = 0;
   vi.stubGlobal(
     'fetch',
@@ -78,6 +78,7 @@ function serve(profiles: Profile[]): () => number {
         posts += 1;
         return ok(THEL);
       }
+      if (saved && url === `/api/me/profiles/${THEL.id}/plan`) return ok(saved);
       if (url === '/api/games') {
         return ok({
           games: [
@@ -223,3 +224,51 @@ function account(initial: Profile[]): { writes: Write[] } {
   );
   return { writes };
 }
+
+/**
+ * C2: Home says where a profile's saved plan stands — what it costs and how
+ * long — before the reader opens anything, and nothing for a profile never
+ * planned.
+ */
+describe('the saved plan on Home', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("shows the plan's cost in the game's energy, its days, and a way to it", async () => {
+    serve([THEL], {
+      request: { energyPerDay: 160, horizonDays: 30, objective: 'LEAST_ENERGY', reach: {} },
+      savedAt: '2026-09-29T10:00:00Z',
+      plan: {
+        id: 'p1',
+        profile: 'thel',
+        game: PGR,
+        version: 18,
+        versionLabel: 'Anchored in Faith',
+        attribution: '',
+        objective: 'LEAST_ENERGY',
+        stages: [],
+        conversions: [],
+        rewards: [],
+        totalEnergy: 1230,
+        etaDays: 28,
+        shadowPrice: [],
+        bindingStages: [],
+        notes: [],
+        computedAt: '2026-09-29T10:00:00Z',
+      },
+    });
+    renderHome();
+
+    expect(await screen.findByText('1,230')).toBeInTheDocument();
+    expect(screen.getByText('Serum')).toBeInTheDocument();
+    expect(screen.getByText('28.0')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open plan →' })).toHaveAttribute('href', '/plan');
+  });
+
+  it('says nothing for a profile that has never been planned', async () => {
+    serve([THEL]);
+    renderHome();
+
+    expect(await screen.findByText('Thel')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Open plan →' })).not.toBeInTheDocument();
+  });
+});

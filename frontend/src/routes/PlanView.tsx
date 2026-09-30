@@ -20,6 +20,7 @@ import { sectionsOf, trackOf, tracksOfGraph, type Track } from '../roster/tracks
 import { NextStep } from '../steps/Steps';
 import { SinceNotice } from './SinceNotice';
 import { reachOf, usePlannerStore } from '../store/plannerStore';
+import { SpendBars } from '../ui/SpendBar';
 
 /**
  * The answer, and what it is worth.
@@ -377,29 +378,38 @@ export function Answer({
   tracks?: Map<string, Track[]>;
 }) {
   const paying = plan.payingFor ?? [];
+  const spends = plan.conversions.flatMap((conversion) => (conversion.spends ? [conversion.spends] : []));
   return (
     <div className="space-y-4">
-      <section className="card">
-        <div className="flex flex-wrap items-baseline gap-x-8 gap-y-2">
-          <div>
-            <div className="label">Total {energyUnit.toLowerCase()}</div>
-            <div className="count text-2xl font-semibold">{plan.totalEnergy.toLocaleString()}</div>
+      <section className="card-raised space-y-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="grid flex-1 grid-cols-3 gap-2 sm:max-w-md">
+            <div className="stat-tile">
+              <div className="stat-label">Total {energyUnit.toLowerCase()}</div>
+              <div className="stat-value text-3xl" style={{ color: 'var(--brand)' }}>
+                {plan.totalEnergy.toLocaleString()}
+              </div>
+            </div>
+            <div className="stat-tile">
+              <div className="stat-label">Days</div>
+              <div className="stat-value text-3xl">{plan.etaDays.toFixed(1)}</div>
+            </div>
+            <div className="stat-tile">
+              <div className="stat-label">Objective</div>
+              <div className="mt-1 font-medium">
+                {plan.objective === 'FEWEST_DAYS' ? 'Fewest days' : `Least ${energyUnit.toLowerCase()}`}
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="label">Days</div>
-            <div className="count text-2xl font-semibold">{plan.etaDays.toFixed(1)}</div>
-          </div>
-          <div>
-            <div className="label">Objective</div>
-            <div>{plan.objective === 'FEWEST_DAYS' ? 'Fewest days' : `Least ${energyUnit.toLowerCase()}`}</div>
-          </div>
-          <div className="ml-auto text-right text-xs muted">
+          <div className="text-right text-xs muted">
             <div>
               patch {plan.versionLabel} (v{plan.version})
             </div>
             <div>{new Date(plan.computedAt).toLocaleString()}</div>
           </div>
         </div>
+
+        <SpendBars spends={spends} />
 
         {paying.length > 0 && <PaysFor steps={paying.length} groups={payingForGroups(paying, tracks)} />}
         <Remarks plan={plan} />

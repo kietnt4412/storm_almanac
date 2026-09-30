@@ -389,7 +389,15 @@ export interface Plan {
     total is a new field rather than a new meaning for the name, so a page and a
     server a deploy apart never print a total beside "× 429".
   */
-  conversions: { step: string; displayName?: string; times: number; total?: string; repeat?: string | null }[];
+  conversions: {
+    step: string;
+    displayName?: string;
+    times: number;
+    total?: string;
+    repeat?: string | null;
+    /** What a priced purchase spends, as numbers (C2); null otherwise, absent from an older plan. */
+    spends?: { item: string; displayName: string; quantity: number; buys: string } | null;
+  }[];
   rewards: { reward: string; displayName?: string; times: number }[];
   totalEnergy: number;
   etaDays: number;

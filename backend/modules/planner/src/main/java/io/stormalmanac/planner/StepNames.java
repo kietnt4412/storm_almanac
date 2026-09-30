@@ -113,6 +113,36 @@ public final class StepNames {
     }
 
     /**
+     * What a purchase done {@code times} over spends, and on what — the numbers
+     * behind {@link #step(String, int)}'s words, for a page that draws where a
+     * currency goes (C2) rather than parsing a sentence for it. Empty for
+     * anything but a shop row with a price: a craft consumes items, a feed and a
+     * price are the demand itself, and a free row spends nothing.
+     */
+    public Optional<Spent> spent(String id, int times) {
+        return definition.shops().stream()
+                .filter(shop -> shop.id().equals(id) && shop.price() > 0)
+                .findFirst()
+                .map(shop -> new Spent(
+                        shop.currency(),
+                        name(shop.currency()),
+                        (long) shop.price() * times,
+                        name(shop.offer().item())));
+    }
+
+    /**
+     * @param currency what is paid
+     * @param quantity how much of it, all {@code times} together
+     * @param buys     the name of what it buys
+     */
+    public record Spent(ItemId currency, String currencyName, long quantity, String buys) {}
+
+    private String name(ItemId item) {
+        Item found = items.get(item);
+        return found == null ? item.value() : found.displayName();
+    }
+
+    /**
      * The order a reader works through {@link #step}s in: buy, then open what
      * was bought, then feed it, then pay. Id order was the order before names,
      * and read as no order at all once the names showed.
