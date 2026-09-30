@@ -256,6 +256,11 @@ export interface Odds {
   chance: number;
   expectedPulls: number;
   worstCasePulls: number;
+  /**
+   * The chance at every pull count from none to the worst case (C2); `chance`
+   * is its point at the pulls afforded. Absent from a server older than the page.
+   */
+  curve?: number[];
   method: string;
 }
 

@@ -68,6 +68,26 @@ class MarkovBannerEngineTest {
         }
 
         @Test
+        @DisplayName("the curve is the single answer at every pull count, so the chart and the number cannot disagree")
+        void curveIsTheAnswerAtEveryCount() {
+            for (BannerModel banner : Banners.all()) {
+                PityState fresh = Banners.freshFor(banner);
+                int worst = (int) PullModel.of(banner).worstCasePulls();
+                for (int copies = 1; copies <= 2; copies++) {
+                    double[] curve = exact.curveOfFeatured(banner, fresh, worst * copies, copies);
+                    assertThat(curve).hasSize(worst * copies + 1);
+                    assertThat(curve[0]).isZero();
+                    for (int pulls = 0; pulls < curve.length; pulls += 7) {
+                        assertThat(curve[pulls])
+                                .as("%s, %d copies, %d pulls", banner.id(), copies, pulls)
+                                .isEqualTo(exact.probabilityOfFeatured(banner, fresh, pulls, copies));
+                    }
+                    assertThat(curve[curve.length - 1]).as("%s at the wall", banner.id()).isEqualTo(1.0);
+                }
+            }
+        }
+
+        @Test
         @DisplayName("a second copy is never easier than a first")
         void moreCopiesAreNeverEasier() {
             for (BannerModel banner : Banners.all()) {

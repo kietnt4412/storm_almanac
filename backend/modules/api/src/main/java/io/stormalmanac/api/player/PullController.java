@@ -3,7 +3,6 @@ package io.stormalmanac.api.player;
 import io.stormalmanac.api.ResourceNotFoundException;
 import io.stormalmanac.api.UnanswerableException;
 import io.stormalmanac.common.id.ItemId;
-import io.stormalmanac.gacha.BannerEngine;
 import io.stormalmanac.gacha.DeclaredIncomeModel;
 import io.stormalmanac.gacha.IncomeModel;
 import io.stormalmanac.gacha.IncomeModel.PullBudget;
@@ -19,6 +18,7 @@ import io.stormalmanac.player.PlayerProfile;
 import io.stormalmanac.player.PlayerStateRepository;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -64,7 +64,8 @@ public class PullController {
     private final GameDefinitionRepository definitions;
     private final OwnedProfiles owned;
     private final IncomeModel income = new DeclaredIncomeModel();
-    private final BannerEngine engine = new MarkovBannerEngine();
+    // The exact chain by its own type, because only it draws the curve.
+    private final MarkovBannerEngine engine = new MarkovBannerEngine();
 
     public PullController(PlayerStateRepository players, GameDefinitionRepository definitions, OwnedProfiles owned) {
         this.players = players;
@@ -147,9 +148,13 @@ public class PullController {
         long worstCase = model.worstCasePullsFrom(from, copies);
 
         // Past the worst case the answer is certainty, and the chain need not
-        // walk every pull of a very large balance to say so.
+        // walk every pull of a very large balance to say so. The curve runs to
+        // the worst case whatever the budget, so the chart shows the whole shape
+        // and marks where this reader's pulls run out on it; the chance is read
+        // off the same curve, so the number and the chart are one answer.
         int asked = (int) Math.min(budget.pulls(), worstCase);
-        double chance = engine.probabilityOfFeatured(banner, from, asked, copies);
+        double[] curve = engine.curveOfFeatured(banner, from, (int) worstCase, copies);
+        double chance = curve[asked];
 
         return new OddsResponse(
                 banner.id().value(),
@@ -166,6 +171,7 @@ public class PullController {
                 chance,
                 engine.expectedPullsToFeatured(banner, from),
                 worstCase,
+                CurveView.of(curve),
                 engine.method());
     }
 
@@ -261,6 +267,9 @@ public class PullController {
      *                       copies within the pulls the budget affords
      * @param expectedPulls  expected pulls to the first featured copy from here
      * @param worstCasePulls the most pulls {@code copies} copies can take from here
+     * @param curve          the chance at every pull count from none to the worst
+     *                       case; {@code chance} is its point at the pulls the
+     *                       budget affords
      */
     public record OddsResponse(
             String banner,
@@ -277,5 +286,22 @@ public class PullController {
             double chance,
             double expectedPulls,
             long worstCasePulls,
+            List<Double> curve,
             String method) {}
+
+    /**
+     * The curve as the wire carries it: rounded to four decimals, because a
+     * chart is drawn in pixels and nobody reads a chance past 0.01%. Unrounded,
+     * six copies' 720 points were 13 KB of digits nobody looks at.
+     */
+    static final class CurveView {
+        private CurveView() {}
+
+        static List<Double> of(double[] curve) {
+            return Arrays.stream(curve)
+                    .map(chance -> Math.round(chance * 10_000) / 10_000.0)
+                    .boxed()
+                    .toList();
+        }
+    }
 }

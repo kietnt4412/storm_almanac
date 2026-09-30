@@ -207,6 +207,23 @@ class PullPlannerTest extends SharedDatabaseTest {
     }
 
     @Test
+    @DisplayName("the curve runs from no pulls to the worst case, and the chance is its point at the pulls afforded")
+    void theCurveAndTheChanceAreOneAnswer() throws Exception {
+        // One pull afforded, on a wall of 60 from a fresh counter.
+        JsonNode odds = odds(Map.of(
+                "banner", "tide-certain", "days", 7, "reach", Map.of("daily-bar", 100, "arena", 10)));
+
+        JsonNode curve = odds.get("curve");
+        assertThat(curve).hasSize(61);
+        assertThat(curve.get(0).asDouble()).isZero();
+        assertThat(curve.get(1).asDouble()).isEqualTo(Math.round(odds.get("chance").asDouble() * 10_000) / 10_000.0);
+        assertThat(curve.get(60).asDouble()).isEqualTo(1.0);
+        for (int pull = 1; pull < curve.size(); pull++) {
+            assertThat(curve.get(pull).asDouble()).isGreaterThanOrEqualTo(curve.get(pull - 1).asDouble());
+        }
+    }
+
+    @Test
     @DisplayName("a closed banner and an unpriced one are refused by name, and no horizon is not a question")
     void unanswerableQuestionsAreRefused() throws Exception {
         MvcResult closed = oddsResult(Map.of("banner", "tide-gone", "days", 7));

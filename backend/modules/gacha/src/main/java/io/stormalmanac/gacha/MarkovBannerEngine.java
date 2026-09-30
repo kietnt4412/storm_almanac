@@ -49,6 +49,23 @@ public final class MarkovBannerEngine implements BannerEngine {
 
     @Override
     public double probabilityOfFeatured(BannerModel banner, PityState from, int pulls, int copies) {
+        double[] curve = curveOfFeatured(banner, from, pulls, copies);
+        return curve[pulls];
+    }
+
+    /**
+     * The same answer at every pull count from zero to {@code pulls}: element
+     * {@code n} is the probability of at least {@code copies} featured copies
+     * within {@code n} pulls.
+     *
+     * <p>Free, because the chain already walks one pull at a time and the answer
+     * after each is the mass it has left behind. The pull planner draws it (C2), so
+     * a reader sees the whole shape — how flat the start is, where pity bends it,
+     * where the wall makes it certain — and not one number on it. {@link
+     * #probabilityOfFeatured} is this curve's last point by construction, so the
+     * two can never disagree.
+     */
+    public double[] curveOfFeatured(BannerModel banner, PityState from, int pulls, int copies) {
         if (pulls < 0) throw new IllegalArgumentException("pulls must be >= 0, was " + pulls);
         if (copies < 1) throw new IllegalArgumentException("copies must be >= 1, was " + copies);
 
@@ -70,6 +87,8 @@ public final class MarkovBannerEngine implements BannerEngine {
         current[Math.min(from.pullsSinceHit(), walls - 1)]
                [Math.min(from.consecutiveLosses(), depth - 1)]
                [0] = 1.0;
+        double[] curve = new double[pulls + 1];
+        curve[0] = chanceLeftBehind(current);
 
         for (int pull = 0; pull < pulls; pull++) {
             for (double[][] plane : next) {
@@ -107,19 +126,24 @@ public final class MarkovBannerEngine implements BannerEngine {
             double[][][] swap = current;
             current = next;
             next = swap;
+            curve[pull + 1] = chanceLeftBehind(current);
         }
+        return curve;
+    }
 
-        // The answer is one minus the mass that never got there, rather than the
-        // mass that did, and the difference is not a stylistic one. Accumulating
-        // arrivals over seventy steps leaves a rounding residual of about 1e-13,
-        // so a wall the game guarantees came back as 0.9999999999999895 and a
-        // probability once came back above 1.0 — which is not a number to put in
-        // front of a player, and not a wall a player can check against the client.
-        // Every path out of the chain at certainty leaves the remaining mass
-        // exactly zero, so read it there: certainty is exactly 1.0 and
-        // impossibility is exactly 0.0, and the residual lands on the answers in
-        // between, where it is 1e-16 against a value nobody reads past four
-        // decimals.
+    /**
+     * The answer is one minus the mass that never got there, rather than the
+     * mass that did, and the difference is not a stylistic one. Accumulating
+     * arrivals over seventy steps leaves a rounding residual of about 1e-13, so a
+     * wall the game guarantees came back as 0.9999999999999895 and a probability
+     * once came back above 1.0 — which is not a number to put in front of a
+     * player, and not a wall a player can check against the client. Every path
+     * out of the chain at certainty leaves the remaining mass exactly zero, so
+     * read it there: certainty is exactly 1.0 and impossibility is exactly 0.0,
+     * and the residual lands on the answers in between, where it is 1e-16 against
+     * a value nobody reads past four decimals.
+     */
+    private static double chanceLeftBehind(double[][][] current) {
         double remaining = 0.0;
         for (double[][] plane : current) {
             for (double[] row : plane) {
