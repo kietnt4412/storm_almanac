@@ -1,0 +1,106 @@
+import type { ReactElement } from 'react';
+
+/**
+ * A small set of line icons, drawn here rather than taken from a package.
+ *
+ * <p>Hand-drawn for two reasons. Nothing in the product may carry game art
+ * (CLAUDE.md), so whatever marks a screen has to be generic; and adding a
+ * dependency on this machine means fighting E1 for a download, for fourteen
+ * shapes a 24-unit grid draws in a line or two each. They take the colour of the
+ * text around them, so a theme recolours them with everything else.
+ */
+const PATHS = {
+  bolt: <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z" />,
+  home: (
+    <>
+      <path d="M3 11 12 4l9 7" />
+      <path d="M5 10v10h14V10" />
+    </>
+  ),
+  box: (
+    <>
+      <path d="m3 7 9-4 9 4-9 4-9-4z" />
+      <path d="M3 7v10l9 4 9-4V7" />
+      <path d="M12 11v10" />
+    </>
+  ),
+  users: (
+    <>
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6" />
+      <path d="M16 4.5a3.5 3.5 0 0 1 0 7" />
+      <path d="M18 14.2c2.1.7 3.5 2.8 3.5 5.8" />
+    </>
+  ),
+  target: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="12" cy="12" r="1" />
+    </>
+  ),
+  route: (
+    <>
+      <circle cx="5" cy="6" r="2" />
+      <circle cx="19" cy="18" r="2" />
+      <path d="M7 6h7.5a3 3 0 0 1 0 6h-5a3 3 0 0 0 0 6H17" />
+    </>
+  ),
+  sparkle: <path d="M12 3 13.8 10.2 21 12l-7.2 1.8L12 21l-1.8-7.2L3 12l7.2-1.8z" />,
+  book: (
+    <>
+      <path d="M4 19V5a2 2 0 0 1 2-2h13v14H6a2 2 0 0 0-2 2z" />
+      <path d="M4 19a2 2 0 0 0 2 2h13v-4" />
+    </>
+  ),
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </>
+  ),
+  moon: <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />,
+  monitor: (
+    <>
+      <rect x="3" y="4" width="18" height="12" rx="2" />
+      <path d="M8 20h8M12 16v4" />
+    </>
+  ),
+  panel: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M9 4v16" />
+    </>
+  ),
+  menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+  close: <path d="M6 6l12 12M18 6 6 18" />,
+  signOut: (
+    <>
+      <path d="M15 4h4v16h-4" />
+      <path d="M10 8l-4 4 4 4" />
+      <path d="M6 12h10" />
+    </>
+  ),
+} as const;
+
+export type IconName = keyof typeof PATHS;
+
+export function Icon({ name, size = 20 }: { name: IconName; size?: number }): ReactElement {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+      className="shrink-0"
+    >
+      {PATHS[name]}
+    </svg>
+  );
+}

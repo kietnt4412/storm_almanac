@@ -19,8 +19,8 @@ export default defineConfig({
         short_name: 'Almanac',
         start_url: '/',
         display: 'standalone',
-        background_color: '#0E1A19',
-        theme_color: '#0D6F68',
+        background_color: '#0B1220',
+        theme_color: '#0B1220',
       },
       workbox: {
         // A navigation to a path the server answers must reach the server.

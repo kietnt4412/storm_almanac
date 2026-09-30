@@ -1,7 +1,11 @@
 # C2 — the visual pass
 
-**Status:** drafted 2026-09-30 (fifty-fifth session). **Not agreed.** Nothing in
-it is built.
+**Status:** drafted 2026-09-30 (fifty-fifth session). **Agreed the same day**:
+direction **A · Storm**, all four visuals, explanations cut to one sentence
+plus "Why?". **Navigation is the maintainer's own answer, not the
+recommendation:** *a side panel with a hide button*, in place of both the top
+links and the proposed bottom tab bar. The exit wording (question 5) is still
+proposed.
 
 **What C2 means, in the maintainer's words (2026-09-30):** make the product look
 better: colour, theme, visuals. The rehearsal's leftover hesitations are
@@ -47,9 +51,11 @@ Seen 2026-09-30, locally, on the rehearsal account:
 
 ### C2.2 · The shell
 
-- **The header**: brand mark, navigation, and the account menu. **On a phone,
-  a bottom tab bar** (Home, Plan, Pulls, Catalog, More), because the header
-  wraps into two lines today.
+- **A side panel** holding the brand mark, the navigation and the account,
+  with a button that hides it (**agreed 2026-09-30, the maintainer's answer**).
+  On a wide screen it sits beside the page and collapses to a slim rail. On a
+  phone it's hidden by default and slides over the page from a menu button.
+  Whether it's hidden is remembered in the browser.
 - **The four steps** become a progress bar that says how far through the
   reader is.
 
