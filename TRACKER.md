@@ -51,6 +51,12 @@ being finished with is.
   authored** — its wall is drawn 80–100 and ADR 0023 made that writable on 2026-09-20, but nobody has written it;
   **`Availability.opensAt` is read by nobody**, deliberately; and **`GameAgnosticismTest` is blind
   to a constant right for no game** — `UTC` is not a game name, and a javadoc caught 0025's bug where no test did.
+- **A second source, never a shipped one: [the GRAY RAVENS wiki](https://grayravens.com/wiki/GRAY_RAVENS)**
+  (maintainer, 2026-09-30). A Kuro-supported fansite whose footer says CC BY-SA 4.0, so ADR 0015's reversal trigger
+  would allow it. **The maintainer chose not to:** it is for cross-checking the bundle and for knowing what to read
+  next (a banner before it is read), on the terms Kornblume keeps. Nothing from it enters a published bundle, and a
+  reading still comes from the client. Shipping it would need a provenance kind `publish` accepts, an ADR and
+  attribution with share-alike.
 - **Going first-hand on game data**, 2026-09-09
   ([ADR 0015](docs/adr/0015-game-data-is-sourced-first-hand-not-adapted.md)), superseding 0009 and closing Q2, Q3,
   F1 and F2. Kornblume is unlicensed. **Nothing is deleted yet and the order matters:** the adapter stays as a
@@ -235,7 +241,7 @@ works". It does not mean that:
 
 > **Resume here (2026-09-29, fifty-fourth):** **C3.3 built**, on the plan the maintainer agreed ([docs/plans/c3.3-the-notice.md](docs/plans/c3.3-the-notice.md), all four answers the recommendation; *As built* says where the build differs). Home says "New since your plan: … · 32 changes in it touch your plan · See what changed →". The plan screen puts a panel above the saved plan, with the cost on both sides, the changes grouped by track ("Lucia: Inverse Crown · Red Orb — 14 steps: 13 new, 1 changed"), every line behind a toggle, and one button, *Re-plan*, the only thing that clears it. Driven locally at 375 and 1280 px. **C3's exit is not met until production shows it**, and on production every saved plan is already on 18. The exit's own words need **a reader returning after a new sequence**, so the proof comes with the next publish (sequence 19). **C3.3 deployed in #64 (checked 2026-09-30, production `5ca20f5`)** — nothing stands between C3 and its exit but a first-hand reading worth publishing. **Agreed 2026-09-30: sequence 19 is the banner that replaces Selena's**, read by the maintainer once it opens after 10-01 06:59 UTC. Pinning a plan with `?version=` would show the screen, but it would not be the exit. **Selena's pool closes 2026-10-01 06:59 UTC.**
 
-> **C2 (2026-09-30, fifty-fifth): agreed and mostly built on `dev`, not deployed** — [the plan](docs/plans/c2-the-visual-pass.md): direction **A · Storm**, the side panel with a hide button (the maintainer's own answer), all visuals, "Why?" toggles. Two backend fields came with it, both optional on the wire: `curve` on `/pulls` and `spends` on a plan's purchases. **Next:** the maintainer looks at it (the window was minimised for most of the drive, so few screenshots exist), then C2.4's self-run rehearsal at 375 and 1280 in both themes, then a PR. **Exit wording (question 5) not yet agreed.** **The wiki** ([grayravens.com](https://grayravens.com/wiki/GRAY_RAVENS), CC BY-SA 4.0, Kuro-supported) was offered as a source; ADR 0015 forbids it until an ADR supersedes it, and the maintainer has not said whether to write one. **Phase 6 was taken and put down the same session** (D9).
+> **C2 (2026-09-30, fifty-fifth): agreed and mostly built on `dev`, not deployed** — [the plan](docs/plans/c2-the-visual-pass.md): direction **A · Storm**, the side panel with a hide button (the maintainer's own answer), all visuals, "Why?" toggles. Two backend fields came with it, both optional on the wire: `curve` on `/pulls` and `spends` on a plan's purchases. **Next:** the maintainer looks at it (the window was minimised for most of the drive, so few screenshots exist), then C2.4's self-run rehearsal at 375 and 1280 in both themes, then a PR. **Exit wording (question 5) not yet agreed.** **Phase 6 was taken and put down the same session** (D9).
 
 **The strangers' notes, T1–T9, are all closed** and [in the archive](docs/history/tracker-archive.md#completed-next-actions)
 — five strangers, nobody stalled, so the notes were Track C's input.

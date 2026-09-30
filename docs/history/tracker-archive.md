@@ -3405,7 +3405,11 @@ BY-SA 4.0. That solves licensing, the reason Kornblume went, but not
 accuracy: reading the client has overruled guides four times. ADR 0015 stands
 until an ADR supersedes it. The maintainer was offered either that ADR (wiki
 data under its own provenance label) or a cross-check of the bundle against
-the wiki, and has not answered yet.
+the wiki. **Answered the same session:** "let it there as a second source". The
+wiki is for cross-checking and for knowing what to read. Nothing from it is
+published, and no ADR was written, because ADR 0015 already permits a local
+cross-check. The licence was noted: attribution plus share-alike, per the
+footer only (the site's copyright page was not read).
 
 **A running `bootRun` and a `./gradlew build` do not share a tree.** The build
 rewrote `modules/api`'s jar under the live server, and the plan route answered
