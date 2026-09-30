@@ -98,3 +98,35 @@ exit.
    screen and move the rest behind a "Why?" toggle. The wording itself stays.
    It is what made the strangers trust the numbers.
 5. **Agree the exit** as proposed, plus "in both themes".
+
+## As built (2026-09-30, fifty-fifth)
+
+C2.1, C2.2 and three of C2.3's four visuals are built, with the
+explanations cut to one sentence plus "Why?". All of it is on `dev`, not
+deployed. What differs from the plan:
+
+- **The stat curve chart is not built.** No PGR entity in the bundle carries
+  a stat curve (none has been read from the client), so the chart would draw
+  nothing on the live game. It waits for a reading, or for Phase 11's R1999.
+- **The pull curve** is `curve` on `/pulls`: the chance at every pull count
+  to the worst case, rounded to four decimals. `MarkovBannerEngine.curveOfFeatured`
+  walks the chain once, and `probabilityOfFeatured` is now that curve's last
+  point, so the number and the chart are one answer by construction.
+- **Where a currency goes** needed numbers too: a priced shop row's
+  `ConversionView` carries `spends` (currency, quantity, what it buys) beside
+  its sentence. On the rehearsal account the plan's 3,362 Simulation Score
+  (41 runs × 82) split 74% EXP Pod (L), 16% Cogs, 10% Skill Point.
+- **Goal-track progress bars** were not built. `payingFor` gives from → to
+  per track, but drawing it as progress needs each track's full ladder, and
+  that is a larger change than the rest of C2.3.
+- **Icons are hand-drawn** (`ui/Icon.tsx`, fifteen shapes): no game art, and
+  no new dependency to fetch through E1.
+- **Theme and panel** are two plain `localStorage` keys, not the planner
+  store, so its persisted version and outbox migration are untouched.
+
+**Driven** locally as `rehearsal-s6`: the plan and the pull planner at 1280 px
+in dark, Home and the rail in light; at 375 px, every screen has no
+horizontal overflow, the panel starts hidden, the menu opens it and a
+navigation closes it. Screenshots were unreliable (the app window was
+minimised for much of it), so most checks were read from the page's layout
+rather than looked at. **The self-run rehearsal (C2.4) has not happened.**

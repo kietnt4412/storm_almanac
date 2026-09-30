@@ -3385,6 +3385,37 @@ itself, and takes the next free number when picked up. **C2 taken instead**,
 and the maintainer defined it: a visual pass (colour, theme, the look), not
 only the rehearsal's leftover hesitations.
 
+**C2 agreed and mostly built.** Three directions were shown as mockups. The
+maintainer took A · Storm, all four visuals and the "Why?" toggles, and
+answered navigation their own way: a side panel with a hide button, not the
+recommended bottom tab bar. [The plan's *As built*](../plans/c2-the-visual-pass.md#as-built-2026-09-30-fifty-fifth)
+has the detail. Two things real data decided:
+- **No stat curve chart.** No PGR entity carries a stat curve.
+- **The currency bar needed numbers on the wire.** A purchase's spend was
+  only a sentence, so `spends` joined `ConversionView`. The pull curve likewise
+  became `curve` on `/pulls`, and `probabilityOfFeatured` is now defined as
+  the curve's last point.
+
+Backend 536 tests (two new) and frontend 112, all green. Nothing is deployed
+and the rehearsal (C2.4) has not run.
+
+**Mid-session, the maintainer offered [grayravens.com](https://grayravens.com/wiki/GRAY_RAVENS)**
+as a data source. It is a fansite supported by Kuro, and its footer says CC
+BY-SA 4.0. That solves licensing, the reason Kornblume went, but not
+accuracy: reading the client has overruled guides four times. ADR 0015 stands
+until an ADR supersedes it. The maintainer was offered either that ADR (wiki
+data under its own provenance label) or a cross-check of the bundle against
+the wiki, and has not answered yet.
+
+**A running `bootRun` and a `./gradlew build` do not share a tree.** The build
+rewrote `modules/api`'s jar under the live server, and the plan route answered
+500 with `ClassNotFoundException: PlayerView$SavedPlanResponse`. It was not a
+code bug, and a restart fixed it. **Stop the `api` preview before a full
+build, or restart it after.** Also, the pane stops painting while the app
+window is minimised: screenshots time out, and CSS transitions freeze
+mid-way. At 375 px the side panel looked open for that reason alone, which
+reading the transform with transitions off proved.
+
 **2026-09-29 (fifty-fourth) — C3.3 agreed and built: the notice on Home and the plan screen.**
 
 **The remote, checked first:** [PR #63](https://github.com/kietnt4412/storm_almanac/pull/63)
