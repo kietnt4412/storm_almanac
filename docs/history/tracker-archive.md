@@ -3352,6 +3352,44 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-10-01 (fifty-eighth) — C2.6: motion from a recording, and a top bar in place of the side panel.**
+
+**The maintainer shared a 25-second screen recording** of Gcore's product site
+and asked for "the opening, animation". No ffmpeg or Python on this machine, so
+the frames came out through the dev server: the file was copied under
+`frontend/public` for the length of the look, drawn to a canvas at chosen
+times, then deleted. It shows a logo reveal, a curtain wiping up, a word-by-word
+headline with a light streak, circuit traces with pulses, scroll reveals and a
+dotted globe. Claude proposed A–D, and E (the globe) skipped. The maintainer
+took A–D, chose once per session, and asked for the recording's nav bar.
+Asked two questions, they chose grouped menus and the full-width → pill
+scroll. **This replaces the side panel the maintainer chose in C2**, at
+their own request.
+
+**Built on `dev`** ([as built](../plans/c2-the-visual-pass.md#c26--motion-and-the-top-bar-2026-10-01-fifty-eighth)):
+the opening, `Words`, `Reveal`, the plan circuit, the top bar with its phone
+sheet, and a footer carrying the backend line. No new dependency: CSS
+keyframes, one `IntersectionObserver` and one `ResizeObserver`. 135
+frontend tests (127 → 135). The panel test became two, for the Planner menu and
+the pill, plus five for the opening and the words and two for the circuit.
+
+**What was worth learning:**
+- **The circuit must not draw a claim the plan does not make.** A trace from a
+  stage to a goal would say that stage pays for that goal. The solver prices
+  them together, so every trace goes through the cost chip.
+- **Hover-to-open plus click-to-toggle never stays open for a mouse.** The
+  shell test caught it, and so did the leave event firing as the pointer moved
+  onto an item. Fixed with a hover-aware click and a 150 ms close delay.
+- **Grouping by named tracks failed before the names loaded.** The circuit
+  first used `payingForGroups`, which falls back to one row per step while
+  tracks load, so it showed 43 nodes for one character. It groups by
+  `payingFor.entity` now.
+- **Tailwind 3 rejects `@layer` in a CSS file without `@tailwind`**, so
+  `motion.css` is unlayered and its classes beat utilities on the same element.
+- **The Browser pane only advances animations while painting**, which made a
+  finished hero look empty in the first screenshot. Seek animations to check a
+  frame; do not time screenshots.
+
 **2026-10-01 (fifty-seventh) — C2.5: five screen changes from mockups, and a game switch.**
 
 **The remote, checked first:** [PR #66](https://github.com/kietnt4412/storm_almanac/pull/66)

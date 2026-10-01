@@ -189,3 +189,79 @@ scrolls sideways, and the switch sits in the drawer. **Not yet driven:** the
 R1999 screens with an R1999 profile. The local R1999 banner route fails
 on its own data ("craft 'craft-spell-of-banishing' consumes nothing"). That is
 a version published before a rule tightened, not this change.
+
+## C2.6 · Motion, and the top bar (2026-10-01, fifty-eighth)
+
+**Agreed 2026-10-01.** The maintainer shared a screen recording of a product
+site (Gcore's) and asked for its opening and animation. Claude pulled frames
+from it and proposed five adaptations. The maintainer took four: **A** an
+opening, **B** a hero entrance, **C** scroll reveals, **D** the plan as a
+circuit. They agreed to skip **E**, the dotted 3D globe: it needs a library,
+and there is nothing global to show. They answered: the opening plays **once
+per browser session**. They then asked for **the recording's nav bar** in place
+of C2's side panel, and chose **grouped menus** (Home · Planner ▾ · Pulls ·
+Catalog) and **the same scroll behaviour** (full width at the top, a floating
+pill once scrolled).
+
+### As built
+
+1. **The opening** (`ui/Intro.tsx`). The game's mark turns in, "Storm
+   Almanac" slides out from behind it, then the curtain is clipped away from
+   its bottom edge, so the page rises over it. About 2.2 s; any key or click
+   skips to the wipe. It is kept once per session by `sessionStorage`. It is
+   never shown under `prefers-reduced-motion`, or where `matchMedia` is
+   missing (jsdom), so no other test sees it. While it plays, `data-intro` on
+   the root holds every entrance paused, so the hero's words rise as the
+   curtain lifts.
+2. **Hero entrance** (`ui/motion.tsx`). `Words` splits a heading into words
+   that rise one after another. The sentence stays whole in an `sr-only` copy,
+   so a screen reader and `getByRole('heading', { name })` hear it once. Home's
+   hero gets a pale streak of the brand colour in its corner, which sweeps in
+   and then breathes. The facts, plan card and banner rise in a stagger, and
+   each page rises in when opened, keyed on the first part of its path.
+3. **Scroll reveals.** `Reveal` slides a block up the first time it enters the
+   view, through `IntersectionObserver`. Content is hidden only where the
+   browser can bring it back, so a missing observer or reduced motion leaves
+   it visible. Used on Home's setup and profiles, and the plan's checklist and
+   prices.
+4. **The plan as a circuit** (`ui/PlanCircuit.tsx`). What the reader does is
+   on the left: the dearest stages, then one node for the purchases and one
+   for the claims. Each character the plan pays for is on the right. The cost
+   sits on a glowing chip in the middle, with traces and a travelling pulse.
+   **Every trace runs through the chip, never stage → goal**, because the plan
+   does not say which run pays for which goal. The traces are measured off the
+   laid-out nodes with a `ResizeObserver`. On a phone the columns stack and
+   draw no traces. It is `aria-hidden`, because the checklist and "What this
+   pays for" say all of it in words. The right side groups by
+   `payingFor.entity`, so it reads "Lucia: Inverse Crown · 43 upgrades" even
+   before track names load. Grouping by the named tracks first showed 43
+   separate steps.
+5. **The top bar** (`App.tsx`, `motion.css`). It replaces C2's side panel and
+   its hide button (`ui/preferences.ts` is gone). It is full width and
+   see-through at the top. After 24 px of scroll it gathers into a centred
+   pill with a blurred background, its width animated, and the name folds
+   away beside the mark. **Planner ▾** holds the four steps, each with its
+   icon and step title. The game switch and the account (profile picker,
+   backend status, sign out) are chips on the right. A signed-out reader gets
+   a "Sign in" pill. Menus open on click, or on hover with a mouse. The backend
+   status line moved to a new footer. On a phone, a menu button drops a sheet
+   with every page, the game switch and the account.
+6. **Still twins.** Every effect has a `prefers-reduced-motion` rule that
+   leaves it where it ends, in `src/motion.css`. That file sits outside
+   Tailwind's layers (`@layer` needs `@tailwind` in the same file), so its
+   classes beat a utility on the same element. That is why the phone sheet's
+   `md:hidden` sits on a wrapper.
+
+**A bug the tests found:** a mouse hover opened a menu, and the click that
+followed toggled it shut, so for a mouse it never stayed open. A click after a
+hover now keeps it open, and leaving closes it after 150 ms, so a pointer
+slipping off the edge does not lose it.
+
+**Driven locally** as `rehearsal-s6`, at 1280 and 375 px, dark and light: the
+opening's lockup and its wipe, the full-width bar and the pill (832 px, fully
+round, the name folded), the Planner menu over the hero, the circuit on the
+real plan (one stage, five buys, three claims → Lucia), the stacked circuit
+on a phone with no sideways scroll, and the phone sheet. No console errors.
+**The Browser pane advances CSS animations only while it is painting**, so
+the opening was checked by seeking its animations rather than timing
+screenshots. Its timing needs a person to watch it once in a real browser.
