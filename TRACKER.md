@@ -81,7 +81,7 @@ being finished with is.
   #46 off production with nothing showing it (archive, forty-second).
   **[PR #67](https://github.com/kietnt4412/storm_almanac/pull/67) (C2.5, `V20`) and [#68](https://github.com/kietnt4412/storm_almanac/pull/68) (rarity colours) merged 2026-10-01**; #68's `main`
   run `36818177626` is green and **production reports `dc28905`** — so C2 through C2.5 and C3.1–C3.3 are live,
-  and **C3 waits only on a sequence 19**. **[PR #69](https://github.com/kietnt4412/storm_almanac/pull/69) (C2.6) merged 05:40Z; its `main` run `36820898102` is green and production reports `3297b16`** (checked 07:39Z, fifty-ninth). **C2.7 is on `dev`, its PR open.**
+  and **C3 waits only on a sequence 19**. **[PR #69](https://github.com/kietnt4412/storm_almanac/pull/69) (C2.6) merged 05:40Z; its `main` run `36820898102` is green and production reports `3297b16`** (checked 07:39Z, fifty-ninth). **[PR #70](https://github.com/kietnt4412/storm_almanac/pull/70) (C2.7, `V21`) merged 07:41Z, `main` green at `2e48a91`, which production showed the maintainer; its follow-up (the morph, the status line, the footer) is [PR #71](https://github.com/kietnt4412/storm_almanac/pull/71), open.**
   **Both databases hold sequence 18** since 2026-09-28 (Neon 10:01:03Z, local 10:02:13Z), each read back as *no changes*;
   **Neon skipped 17** (16 → 18, twelve changes).
   Stale on eight of nine checks, so re-check it rather than read it. B6 means a commit on `dev` with no PR open is still built.
