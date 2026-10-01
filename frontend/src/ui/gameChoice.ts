@@ -6,12 +6,15 @@ import { create } from 'zustand';
  * light / dark switch, re-dressing the whole site for the game chosen).
  *
  * <p><b>The look is presentation data, and this is the only place the client
- * names a game</b> ([ADR 0039](../../../docs/adr/0039-a-games-look-is-presentation-data-in-the-client.md)).
- * Nothing here branches: a game's id picks a palette in `index.css` by the
- * `data-game` attribute, and a two-to-four letter mark drawn as text. A game
- * with no entry gets the Storm palette and the bolt, which is what the
- * synthetic Proving Ground and any future title get until somebody writes it
- * one. No game art (CLAUDE.md): the marks are lettering, not the games' icons.
+ * names a game</b> ([ADR 0039](../../../docs/adr/0039-a-games-look-is-presentation-data-in-the-client.md),
+ * [ADR 0040](../../../docs/adr/0040-a-games-look-is-a-drawing-a-wordmark-and-a-dress.md)).
+ * Nothing here branches: a game's id picks a palette in `index.css` and a
+ * dress in `looks.css` by the `data-game` attribute; its wordmark and its
+ * emblem kind are data the components draw. A game with no entry gets the
+ * Storm palette and the bolt, which is what the synthetic Proving Ground and
+ * any future title get until somebody writes it one. No game art (CLAUDE.md):
+ * the marks and wordmarks are our own drawing and type, not the games' icons
+ * or logos.
  *
  * <p><b>"Coming soon" is the one thing the server cannot say.</b> A game is
  * offered once the server publishes it; a look marked `upcoming` is listed,
@@ -31,11 +34,33 @@ export interface GameLook {
   name: string;
   /** Listed as coming soon while the server does not publish it. */
   upcoming?: boolean;
+  /**
+   * The game's name set as a wordmark (2026-10-01, the maintainer's ask): a
+   * large word and a small line under it, each letter animated in. Set in our
+   * own type, in our own way, by `looks.css` under the game's `data-game` —
+   * not the game's logo, which is game art (CLAUDE.md).
+   */
+  wordmark: { word: string; line: string };
+  /** Which drawing `GameMark` makes in small places: a cut-corner plate, or a double-ruled seal. */
+  emblem: 'plate' | 'seal';
 }
 
 export const LOOKS: GameLook[] = [
-  { id: 'punishing-gray-raven', mark: 'PGR', name: 'Punishing: Gray Raven' },
-  { id: 'reverse-1999', mark: '1999', name: 'Reverse: 1999', upcoming: true },
+  {
+    id: 'punishing-gray-raven',
+    mark: 'PGR',
+    name: 'Punishing: Gray Raven',
+    wordmark: { word: 'PUNISHING', line: 'GRAY RAVEN' },
+    emblem: 'plate',
+  },
+  {
+    id: 'reverse-1999',
+    mark: '1999',
+    name: 'Reverse: 1999',
+    upcoming: true,
+    wordmark: { word: 'REVERSE', line: '1999' },
+    emblem: 'seal',
+  },
 ];
 
 export function lookOf(game: string | null | undefined): GameLook | undefined {

@@ -1,0 +1,521 @@
+/*
+ * Each game's feel (2026-10-01, the maintainer's ask: "too simple" — a palette
+ * swap and three letters in a square). Its own file so the palette in
+ * index.css and the motion in motion.css stay readable on their own; imported
+ * after both, outside Tailwind's layers, so a rule here beats a component class
+ * or a utility on the same element.
+ *
+ * Two kinds of rule:
+ *   1. The wordmark (`ui/Wordmark.tsx`), wherever it is drawn: on the element's
+ *      own `data-game`, so the switch and the opening can show a game that is
+ *      not the page's.
+ *   2. The page's dress: on `:root[data-game=…]` only, so a switch row that
+ *      wears another game's colours does not also take its card shapes.
+ *
+ * Our own type and our own drawing, not the games' logos or art (CLAUDE.md):
+ * system faces, skewed, cut and spaced. Every animation has its still twin at
+ * the bottom.
+ */
+
+/* ── The wordmark, shared ────────────────────────────────────────────────── */
+
+.wordmark {
+  --wm-size: 1.75rem;
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  line-height: 1;
+  color: var(--ink);
+  white-space: nowrap;
+  isolation: isolate;
+}
+
+.wordmark[data-size='sm'] {
+  --wm-size: 1.35rem;
+}
+
+.wordmark[data-size='lg'] {
+  --wm-size: clamp(2.5rem, 10vw, 5.25rem);
+}
+
+.wm-word {
+  display: inline-flex;
+  font-size: var(--wm-size);
+}
+
+.wm-l,
+.wm-c {
+  display: inline-block;
+}
+
+.wm-rule {
+  display: block;
+  position: relative;
+}
+
+.wm-line {
+  display: flex;
+  justify-content: space-between;
+  /* Never below a size the eye can still make out as letters. */
+  font-size: max(0.45rem, calc(var(--wm-size) * 0.3));
+}
+
+/* ── Punishing: Gray Raven — heavy, slanted, cut through, and restless ──── */
+
+.wordmark[data-game='punishing-gray-raven'] .wm-word {
+  font-family: 'Arial Black', 'Segoe UI Black', Impact, system-ui, sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  transform: skewX(-8deg);
+  /* Two speed cuts straight through every letter. */
+  -webkit-mask-image: linear-gradient(180deg, #000 0 36%, transparent 36% 41%, #000 41% 63%, transparent 63% 67%, #000 67%);
+  mask-image: linear-gradient(180deg, #000 0 36%, transparent 36% 41%, #000 41% 63%, transparent 63% 67%, #000 67%);
+  text-shadow: 0.045em 0 0 color-mix(in srgb, var(--brand) 85%, transparent);
+  animation: wm-pgr-glitch 7s steps(1, end) calc(var(--wm-delay, 0ms) + 1.8s) infinite;
+}
+
+.wordmark[data-game='punishing-gray-raven'] .wm-l {
+  animation: wm-pgr-in 0.5s cubic-bezier(0.2, 0.9, 0.25, 1.1) calc(var(--wm-delay, 0ms) + var(--i) * 45ms) both;
+}
+
+/* Speed streaks trailing off the left of the word, drawn in after it lands. */
+.wordmark[data-game='punishing-gray-raven']::before,
+.wordmark[data-game='punishing-gray-raven']::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  right: 62%;
+  height: max(2px, calc(var(--wm-size) * 0.06));
+  background: linear-gradient(90deg, transparent, var(--brand));
+  transform-origin: right;
+  animation: wm-streak 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--wm-delay, 0ms) + 0.35s) both;
+}
+
+.wordmark[data-game='punishing-gray-raven']::before {
+  top: calc(var(--wm-size) * 0.38);
+  width: 55%;
+}
+
+.wordmark[data-game='punishing-gray-raven']::after {
+  top: calc(var(--wm-size) * 0.64);
+  width: 38%;
+  animation-delay: calc(var(--wm-delay, 0ms) + 0.45s);
+}
+
+.wordmark[data-game='punishing-gray-raven'] .wm-rule {
+  height: max(2px, calc(var(--wm-size) * 0.07));
+  margin: calc(var(--wm-size) * 0.12) 0 calc(var(--wm-size) * 0.1);
+  background: repeating-linear-gradient(-60deg, var(--brand) 0 0.5em, transparent 0.5em 0.65em);
+  transform: skewX(-30deg);
+  transform-origin: left;
+  animation: wm-rule-left 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--wm-delay, 0ms) + 0.35s) both;
+}
+
+.wordmark[data-game='punishing-gray-raven'] .wm-line {
+  font-family: ui-monospace, Consolas, 'Cascadia Mono', monospace;
+  font-weight: 700;
+  color: var(--muted);
+  padding-right: 0.4em;
+}
+
+.wordmark[data-game='punishing-gray-raven'] .wm-c {
+  animation: wm-pgr-type 0.35s steps(2, end) calc(var(--wm-delay, 0ms) + 0.55s + var(--i) * 45ms) both;
+}
+
+@keyframes wm-pgr-in {
+  0% {
+    opacity: 0;
+    transform: translateX(1.2em) skewX(-35deg);
+    filter: blur(3px);
+  }
+  55% {
+    opacity: 1;
+    transform: translateX(-0.06em) skewX(-4deg);
+    filter: none;
+  }
+}
+
+@keyframes wm-pgr-type {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+    color: var(--brand);
+  }
+}
+
+/* Every few seconds the word slips: a jolt, a split in two colours, back. */
+@keyframes wm-pgr-glitch {
+  0%,
+  6%,
+  100% {
+    transform: skewX(-8deg);
+    text-shadow: 0.045em 0 0 color-mix(in srgb, var(--brand) 85%, transparent);
+  }
+  2% {
+    transform: skewX(-8deg) translateX(-0.05em);
+    text-shadow:
+      -0.07em 0 0 var(--brand),
+      0.07em 0 0 color-mix(in srgb, var(--violet) 80%, transparent);
+  }
+  3% {
+    transform: skewX(-14deg) translateX(0.04em);
+  }
+  4.5% {
+    transform: skewX(-8deg) translateX(-0.02em);
+    text-shadow: 0.1em 0 0 var(--brand);
+  }
+}
+
+@keyframes wm-streak {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+}
+
+@keyframes wm-rule-left {
+  from {
+    transform: skewX(-30deg) scaleX(0);
+  }
+}
+
+/* ── Reverse: 1999 — engraved, spaced, rising into place ─────────────────── */
+
+.wordmark[data-game='reverse-1999'] .wm-word {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  margin-right: -0.12em;
+}
+
+.wordmark[data-game='reverse-1999'] .wm-l {
+  animation:
+    wm-ink 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--wm-delay, 0ms) + var(--i) * 80ms) both,
+    wm-glint 9s ease-in-out calc(var(--wm-delay, 0ms) + 2.4s + var(--i) * 90ms) infinite;
+}
+
+/* A hairline with a diamond at its middle, drawn out from the centre. */
+.wordmark[data-game='reverse-1999'] .wm-rule {
+  height: 1px;
+  margin: calc(var(--wm-size) * 0.16) 8% calc(var(--wm-size) * 0.14);
+  background: linear-gradient(90deg, transparent, var(--brand) 18%, var(--brand) 82%, transparent);
+  animation: wm-rule-centre 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--wm-delay, 0ms) + 0.5s) both;
+}
+
+.wordmark[data-game='reverse-1999'] .wm-rule::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(4px, calc(var(--wm-size) * 0.13));
+  height: max(4px, calc(var(--wm-size) * 0.13));
+  background: var(--ground);
+  border: 1px solid var(--brand);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.wordmark[data-game='reverse-1999'] .wm-line {
+  justify-content: center;
+  gap: 0.55em;
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-size: calc(var(--wm-size) * 0.34);
+  color: var(--brand);
+  perspective: 20em;
+}
+
+/* The year turns over like a clock's leaves, one digit after another. */
+.wordmark[data-game='reverse-1999'] .wm-c {
+  transform-origin: 50% 0;
+  animation: wm-flip 0.6s cubic-bezier(0.3, 1.4, 0.4, 1) calc(var(--wm-delay, 0ms) + 0.8s + var(--i) * 140ms) both;
+}
+
+@keyframes wm-ink {
+  from {
+    opacity: 0;
+    transform: translateY(0.4em);
+    filter: blur(6px);
+  }
+}
+
+/* Every few seconds a light passes along the word, letter by letter. */
+@keyframes wm-glint {
+  0%,
+  8%,
+  100% {
+    color: inherit;
+    text-shadow: none;
+  }
+  4% {
+    color: var(--brand);
+    text-shadow: 0 0 0.3em color-mix(in srgb, var(--brand) 60%, transparent);
+  }
+}
+
+@keyframes wm-rule-centre {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+}
+
+@keyframes wm-flip {
+  from {
+    opacity: 0;
+    transform: rotateX(-95deg);
+  }
+}
+
+/* ── Where the wordmark sits: the top bar, the opening ───────────────────── */
+
+.brand-lockup {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  max-width: 14rem;
+}
+
+.brand-site {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.intro-wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.9rem;
+}
+
+.intro-site {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--muted);
+  animation: fade-in 0.6s ease-out 1.3s both;
+}
+
+@media (max-width: 639px) {
+  .intro-lockup:has(.intro-wordmark) {
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .intro-wordmark {
+    align-items: center;
+  }
+}
+
+.avatar {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand) 45%, transparent);
+}
+
+/* ── The page dressed as Punishing: Gray Raven ───────────────────────────── */
+
+/* A blueprint grid under the top of the page, fading into the ground. */
+:root[data-game='punishing-gray-raven'] body {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--ground) 35%, transparent), var(--ground) 560px),
+    linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 32px 32px,
+    var(--ground);
+}
+
+:root[data-game='punishing-gray-raven'] :is(.card, .card-raised) {
+  border-radius: 2px;
+  background:
+    linear-gradient(225deg, var(--brand) 0 7px, transparent 7.5px) top right / 14px 14px no-repeat,
+    var(--surface);
+}
+
+:root[data-game='punishing-gray-raven'] .card-raised {
+  background:
+    linear-gradient(225deg, var(--brand) 0 9px, transparent 9.5px) top right / 18px 18px no-repeat,
+    var(--raised);
+  border-left: 3px solid var(--brand);
+}
+
+:root[data-game='punishing-gray-raven'] .hero {
+  border-radius: 0;
+  border-left: 3px solid var(--brand);
+  clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 26px 100%, 0 calc(100% - 26px));
+  background:
+    repeating-linear-gradient(-45deg, var(--brand) 0 9px, transparent 9px 18px) bottom / 100% 6px no-repeat,
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--ink) 4%, transparent) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--brand) 14%, transparent), transparent 60%),
+    var(--raised);
+  padding-bottom: 2.25rem;
+}
+
+:root[data-game='punishing-gray-raven'] :is(.hero h1, main > div > h1, main h1) {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  font-style: italic;
+}
+
+:root[data-game='punishing-gray-raven'] .btn {
+  border-radius: 0;
+  padding-inline: 1.25rem;
+  clip-path: polygon(9px 0, 100% 0, calc(100% - 9px) 100%, 0 100%);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+}
+
+:root[data-game='punishing-gray-raven'] :is(.btn-quiet, .input, .chip, .stat-tile, .nav-item, .menu-row) {
+  border-radius: 2px;
+}
+
+:root[data-game='punishing-gray-raven'] :is(.label, .stat-label, .step-n, .chip) {
+  font-family: ui-monospace, Consolas, 'Cascadia Mono', monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+:root[data-game='punishing-gray-raven'] .stat-value {
+  font-family: ui-monospace, Consolas, 'Cascadia Mono', monospace;
+  font-weight: 700;
+}
+
+:root[data-game='punishing-gray-raven'] .step-seg {
+  border-radius: 0;
+  transform: skewX(-30deg);
+}
+
+:root[data-game='punishing-gray-raven'] .top-link-here {
+  background: transparent;
+  box-shadow: inset 0 -2px 0 var(--brand);
+  border-radius: 0;
+}
+
+/* ── The page dressed as Reverse: 1999 ───────────────────────────────────── */
+
+/* Paper: a fine grain over the ground, in both schemes. */
+:root[data-game='reverse-1999'] body {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .4 0 0 0 0 .3 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    var(--ground);
+}
+
+:root[data-game='reverse-1999'] :is(h1, h2, h3, .stat-value) {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-weight: 500;
+}
+
+:root[data-game='reverse-1999'] .stat-value {
+  font-variant-numeric: oldstyle-nums tabular-nums;
+}
+
+/* A second rule inside every card, like a printed frame. */
+:root[data-game='reverse-1999'] :is(.card, .card-raised) {
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 0 3px var(--surface),
+    inset 0 0 0 4px color-mix(in srgb, var(--line) 80%, transparent);
+}
+
+:root[data-game='reverse-1999'] .card-raised {
+  box-shadow:
+    inset 0 0 0 3px var(--raised),
+    inset 0 0 0 4px color-mix(in srgb, var(--brand) 30%, var(--line)),
+    var(--shadow);
+}
+
+:root[data-game='reverse-1999'] .hero {
+  border-radius: 4px;
+  outline: 1px solid color-mix(in srgb, var(--brand) 25%, var(--line));
+  outline-offset: 5px;
+  background:
+    radial-gradient(90% 120% at 100% 0%, color-mix(in srgb, var(--brand) 12%, transparent), transparent 65%),
+    var(--raised);
+}
+
+:root[data-game='reverse-1999'] .hero h1 {
+  font-size: clamp(1.6rem, 4vw, 2.25rem);
+}
+
+/* Rain that falls upward, in place of the streak of light. */
+:root[data-game='reverse-1999'] .hero-streak::before {
+  inset: 0;
+  top: 0;
+  right: 0;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  filter: none;
+  transform: none;
+  opacity: 0.55;
+  --drop: color-mix(in srgb, var(--brand) 70%, transparent);
+  background:
+    linear-gradient(0deg, transparent 0 82%, var(--drop)) 8% 0 / 1px 150px repeat-y,
+    linear-gradient(0deg, transparent 0 86%, var(--drop)) 23% 40px / 1px 210px repeat-y,
+    linear-gradient(0deg, transparent 0 80%, var(--drop)) 41% 90px / 1px 120px repeat-y,
+    linear-gradient(0deg, transparent 0 85%, var(--drop)) 58% 20px / 1px 180px repeat-y,
+    linear-gradient(0deg, transparent 0 82%, var(--drop)) 74% 70px / 1px 150px repeat-y,
+    linear-gradient(0deg, transparent 0 88%, var(--drop)) 89% 10px / 1px 240px repeat-y,
+    linear-gradient(0deg, transparent 0 80%, var(--drop)) 96% 120px / 1px 130px repeat-y;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 45%);
+  mask-image: linear-gradient(90deg, transparent, #000 45%);
+  animation: rain-rise 6s linear infinite;
+}
+
+@keyframes rain-rise {
+  to {
+    background-position-y: -150px, -170px, -30px, -160px, -80px, -230px, -10px;
+  }
+}
+
+:root[data-game='reverse-1999'] .btn {
+  border-radius: 9999px;
+  padding-inline: 1.15rem;
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+:root[data-game='reverse-1999'] .btn-quiet {
+  border-radius: 9999px;
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+}
+
+:root[data-game='reverse-1999'] :is(.label, .stat-label, .step-n) {
+  letter-spacing: 0.2em;
+}
+
+:root[data-game='reverse-1999'] .chip {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  font-style: italic;
+}
+
+:root[data-game='reverse-1999'] .step-seg {
+  height: 3px;
+}
+
+:root[data-game='reverse-1999'] .top-link-here {
+  background: transparent;
+  text-decoration: underline;
+  text-decoration-color: var(--brand);
+  text-underline-offset: 6px;
+}
+
+/* ── Asked for less motion: every letter where it lands, nothing restless ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmark *,
+  .wordmark::before,
+  .wordmark::after,
+  .intro-site,
+  :root[data-game='reverse-1999'] .hero-streak::before {
+    animation: none !important;
+  }
+}

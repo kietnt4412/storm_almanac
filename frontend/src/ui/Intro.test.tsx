@@ -41,6 +41,17 @@ describe('the opening', () => {
     expect(screen.queryByTestId('intro')).not.toBeInTheDocument();
   });
 
+  it("holds longer for a game's wordmark, so its letters land before the lift", () => {
+    motion('no-preference');
+    render(<Intro game="punishing-gray-raven" />);
+
+    expect(screen.getByRole('img', { name: 'Punishing: Gray Raven', hidden: true })).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(1500));
+    expect(screen.getByTestId('intro')).not.toHaveClass('intro-wipe');
+    act(() => vi.advanceTimersByTime(600));
+    expect(screen.getByTestId('intro')).toHaveClass('intro-wipe');
+  });
+
   it('skips straight to the lift on any key', () => {
     motion('no-preference');
     render(<Intro game={null} />);

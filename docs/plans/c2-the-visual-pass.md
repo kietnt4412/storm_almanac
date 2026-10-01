@@ -265,3 +265,62 @@ on a phone with no sideways scroll, and the phone sheet. No console errors.
 **The Browser pane advances CSS animations only while it is painting**, so
 the opening was checked by seeking its animations rather than timing
 screenshots. Its timing needs a person to watch it once in a real browser.
+
+## C2.7 · A feel per game, wordmarks, and the reader's picture (2026-10-01, fifty-ninth)
+
+**Agreed 2026-10-01.** The maintainer found PGR and Reverse: 1999 "too simple":
+a palette swap and three letters in a square. Asked whether they meant the
+look, the switch or the data, they chose the look. Claude mocked up both games
+in both schemes. The maintainer agreed to everything except R1999's mark, and
+sent the game's logo as the idea for it. Then they sent PGR's for the same
+treatment, "but creative in our own", and asked for the words to animate.
+They also asked to show their Google picture, stored as Claude proposed.
+[ADR 0040](../adr/0040-a-games-look-is-a-drawing-a-wordmark-and-a-dress.md)
+supersedes 0039's decisions 1 and 2.
+
+### As built
+
+1. **Wordmarks** (`ui/Wordmark.tsx`, `looks.css`). PGR: heavy italic
+   PUNISHING, skewed, cut through by two speed bands, with streaks trailing
+   off its left. Its letters slam in from the right, a hatched rule draws
+   out, and GRAY RAVEN types in, spread across the width. Every 7 s it
+   glitches for a moment. R1999: REVERSE in spaced serif capitals, rising in
+   letter by letter from a blur. A hairline with a diamond draws out from the
+   centre, and 1999 flips in digit by digit like a clock's leaves. Every 9 s
+   a light passes along the word. **Our own type:** system faces, nothing
+   traced from the logos.
+2. **Where they sit.** In the top bar, beside the mark, with "Storm Almanac"
+   small under it, folding into the pill on scroll. Keyed by game, so a switch
+   plays it again. In the opening, large, which now holds 2.1 s rather than
+   1.5 s for a game with a look, so the letters land first.
+3. **Marks** (`ui/GameMark.tsx`). PGR keeps the agreed plate: cut corners,
+   a crimson slash, "PGR" stencilled. R1999 gets a seal: a double rule, a
+   serif R, a rule, and 1999 spaced under. Both are drawn in the game's tokens,
+   so they follow the scheme.
+4. **The page's dress** (`looks.css`, on `:root[data-game]` only). PGR: a
+   blueprint grid fading out under the top of the page; cards with a crimson
+   corner tab; a hero with cut corners, scanlines and a hazard stripe; slanted
+   uppercase buttons; italic uppercase headings; monospace labels, chips and
+   figures; skewed step segments. R1999: paper grain; serif headings and
+   old-style figures; a second rule inside every card; a hero with an outer
+   rule and **rain that rises** in place of C2.6's streak; pill buttons in
+   serif; italic chips.
+5. **The reader's picture.** `V21` adds `identity.account.picture_url`,
+   https only (a CHECK, and `SignIn` drops anything else). It is refreshed on
+   every sign-in like the name, and a sign-in that sends none clears it.
+   Google's `picture` claim fills it; Discord's `avatar` is a hash, so
+   Discord shows initials. `/api/me` carries `pictureUrl`, optional on the
+   wire. The account chip shows it with `referrerpolicy="no-referrer"`, and
+   falls back to the initial if it fails to load. The worker caches game data
+   only, so the photo is never cached.
+
+**Tests:** 542 backend (+3: https only, Discord has none, refreshed and
+cleared), 137 frontend (+2: the opening holds for a wordmark, the picture
+and its fallback).
+
+**Driven locally** with the API on sequence 18, at 375 and 1280 px, dark and
+light, both games: the openings mid-animation, Home, the game menu, the pill,
+and a dev account given a picture link by hand, loaded in the chip. As in
+C2.6, the Browser pane advances animations only while it paints, so a first
+screenshot of a page can catch it mid-entrance. **The animations need a
+person to watch them in a real browser.**

@@ -66,6 +66,18 @@ class PlayerStateDatabaseTest extends SharedDatabaseTest {
     }
 
     @Test
+    @DisplayName("the provider's picture is refreshed on every sign-in, and one that sends none clears it")
+    void providerOwnsThePicture() {
+        Account first = accounts.upsertFromOidc("google", "sub-1", "Vertin", "v@example.com", "https://example.invalid/a.png");
+        Account changed = accounts.upsertFromOidc("google", "sub-1", "Vertin", "v@example.com", "https://example.invalid/b.png");
+        Account cleared = accounts.upsertFromOidc("google", "sub-1", "Vertin", "v@example.com", null);
+
+        assertThat(first.pictureUrl()).isEqualTo("https://example.invalid/a.png");
+        assertThat(changed.pictureUrl()).isEqualTo("https://example.invalid/b.png");
+        assertThat(cleared.pictureUrl()).isNull();
+    }
+
+    @Test
     @DisplayName("two providers claiming the same email are two accounts, not one")
     void identityIsProviderAndSubjectNeverEmail() {
         Account google = accounts.upsertFromOidc("google", "sub-1", "Vertin", "same@example.com");

@@ -16,6 +16,11 @@ export interface Me {
   accountId: string;
   displayName: string;
   email: string;
+  /*
+    The provider's picture, an https link it hosts, or null for initials.
+    Optional because the page and the API deploy at different instants.
+  */
+  pictureUrl?: string | null;
   profiles: Profile[];
 }
 

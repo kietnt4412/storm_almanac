@@ -35,6 +35,25 @@ class SignInTest {
         assertThat(signIn.subject()).isEqualTo("104829375618293746501");
         assertThat(signIn.displayName()).isEqualTo("Nguyen Tuan Kiet");
         assertThat(signIn.email()).isEqualTo("someone@gmail.com");
+        assertThat(signIn.pictureUrl()).isEqualTo("https://example.invalid/avatar.png");
+    }
+
+    @Test
+    @DisplayName("a picture that is not an https link is dropped, because a page puts it straight into an image")
+    void onlyHttpsPictures() {
+        for (String picture : new String[] {"http://example.invalid/a.png", "javascript:alert(1)", "data:image/png;base64,AA"}) {
+            SignIn signIn = SignIn.from("google", Map.of("sub", "1", "picture", picture));
+
+            assertThat(signIn.pictureUrl()).as(picture).isNull();
+        }
+    }
+
+    @Test
+    @DisplayName("Discord's avatar is a hash, not a link, so a Discord account has no picture")
+    void discordAvatarIsNotAPicture() {
+        SignIn signIn = SignIn.from("discord", Map.of("id", "80351110224678912", "avatar", "a_1269e74af4df7417b13759eae50c83dc"));
+
+        assertThat(signIn.pictureUrl()).isNull();
     }
 
     @Test

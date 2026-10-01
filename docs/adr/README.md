@@ -47,4 +47,5 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0036](0036-track-b-is-cut-and-parked.md) | Track B is cut, and parked | Accepted |
 | [0037](0037-a-saved-plan-is-a-snapshot-and-a-change-report-re-solves.md) | A saved plan is a snapshot, and a change report re-solves | Accepted |
 | [0038](0038-drop-statistics-move-into-the-second-title.md) | Drop statistics move into the second title | Accepted |
-| [0039](0039-a-games-look-is-presentation-data-in-the-client.md) | A game's look is presentation data in the client | Accepted |
+| [0039](0039-a-games-look-is-presentation-data-in-the-client.md) | A game's look is presentation data in the client | **Decisions 1 and 2 superseded by [0040](0040-a-games-look-is-a-drawing-a-wordmark-and-a-dress.md)** |
+| [0040](0040-a-games-look-is-a-drawing-a-wordmark-and-a-dress.md) | A game's look is a drawing, a wordmark and a dress | Accepted |

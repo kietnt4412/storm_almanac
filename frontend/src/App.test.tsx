@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -99,6 +99,32 @@ describe('the shell', () => {
     await vi.waitFor(() => expect(bar).toHaveAttribute('data-scrolled', 'true'));
     scrollTo(0);
     await vi.waitFor(() => expect(bar).toHaveAttribute('data-scrolled', 'false'));
+  });
+
+  it("shows the reader's Google picture, and their initial when it will not load", async () => {
+    const signedOut = vi.mocked(fetch).getMockImplementation()!;
+    vi.mocked(fetch).mockImplementation(async (url) =>
+      url === '/api/me'
+        ? ok({
+            accountId: 'a1',
+            displayName: 'Vertin',
+            email: 'v@example.com',
+            pictureUrl: 'https://example.invalid/vertin.png',
+            profiles: [],
+          })
+        : signedOut(url),
+    );
+    renderShell();
+
+    const account = await screen.findByRole('button', { name: 'Account' });
+    const picture = account.querySelector('img');
+    expect(picture).toHaveAttribute('src', 'https://example.invalid/vertin.png');
+    // Google's photo host refuses some requests that say which site asked.
+    expect(picture).toHaveAttribute('referrerpolicy', 'no-referrer');
+
+    fireEvent.error(picture!);
+    expect(account.querySelector('img')).toBeNull();
+    expect(within(account).getByText('V')).toBeInTheDocument();
   });
 });
 

@@ -10,6 +10,7 @@ import { Icon, type IconName } from './ui/Icon';
 import { Intro } from './ui/Intro';
 import { applyGame, lookOf, LOOKS, useGameChoice } from './ui/gameChoice';
 import { GameMark } from './ui/GameMark';
+import { Wordmark } from './ui/Wordmark';
 
 /**
  * The shell every screen hangs off: who is reading, which profile they are
@@ -167,7 +168,7 @@ export function App() {
                   align="right"
                   trigger={
                     <>
-                      <Initial name={me.data.displayName} />
+                      <Avatar name={me.data.displayName} picture={me.data.pictureUrl} />
                       <span className="hidden max-w-[8rem] truncate lg:inline">{me.data.displayName}</span>
                       <Icon name="chevronDown" size={14} />
                     </>
@@ -225,7 +226,7 @@ export function App() {
               {profilePicker}
               {me.data ? (
                 <div className="flex items-center gap-2 text-sm">
-                  <Initial name={me.data.displayName} />
+                  <Avatar name={me.data.displayName} picture={me.data.pictureUrl} />
                   <span className="min-w-0 flex-1 truncate">{me.data.displayName}</span>
                   <button type="button" className="btn-quiet" onClick={leave} disabled={signingOut}>
                     <Icon name="signOut" size={16} /> Sign out
@@ -396,15 +397,29 @@ function Dropdown({
   );
 }
 
+/**
+ * The way home: the game's mark, then its wordmark with the site's name under
+ * it — or, for a game with no look, just the name. Keyed by game, so switching
+ * game plays the wordmark's letters in again. Both fold into the pill on scroll.
+ */
 function Brand({ game }: { game: string | null }) {
+  const look = lookOf(game);
   return (
     <NavLink
       to="/"
       className="flex shrink-0 items-center gap-2 text-base font-semibold no-underline"
       style={{ color: 'var(--ink)' }}
+      aria-label={look ? `Storm Almanac · ${look.name}` : undefined}
     >
       <GameMark game={game} size={32} />
-      <span className="brand-word">Storm Almanac</span>
+      {look ? (
+        <span className="brand-word brand-lockup" aria-hidden="true">
+          <Wordmark key={look.id} game={look.id} size="sm" />
+          <span className="brand-site">Storm Almanac</span>
+        </span>
+      ) : (
+        <span className="brand-word">Storm Almanac</span>
+      )}
     </NavLink>
   );
 }
@@ -426,7 +441,27 @@ function SheetLink({ to, icon, end, children }: { to: string; icon: IconName; en
   );
 }
 
-function Initial({ name }: { name: string }) {
+/**
+ * The reader's picture from their provider — Google's photo — or their initial
+ * where there is none: a Discord account, the development sign-in, or a photo
+ * that will not load. `no-referrer` because Google's photo host refuses some
+ * requests that say which site asked. Decoration: the name beside it says who.
+ */
+function Avatar({ name, picture }: { name: string; picture?: string | null }) {
+  const [failed, setFailed] = useState(false);
+  if (picture && !failed) {
+    return (
+      <img
+        src={picture}
+        alt=""
+        width={28}
+        height={28}
+        referrerPolicy="no-referrer"
+        className="avatar h-7 w-7 shrink-0 rounded-full object-cover"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
   return (
     <span
       className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
