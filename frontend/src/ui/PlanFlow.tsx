@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import type { Plan } from '../api/client';
 
 /**
@@ -129,8 +129,9 @@ function FlowChart({ flow }: { flow: Flow }): ReactElement {
           phone it keeps a readable size and scrolls sideways inside the card. */}
       <div className="overflow-x-auto">
       <svg viewBox={`0 0 ${W} ${height}`} className="w-full min-w-[520px] max-w-2xl" aria-hidden="true">
+        {/* It flows as it arrives: what pays, then the pool, then what it buys (C2.17). */}
         {left.map(({ part, y, h, at }, index) => (
-          <g key={part.key}>
+          <g key={part.key} className="wipe" style={flowDelay(index * 80)}>
             <path d={band(LEFT + NODE, y, MIDDLE, at, h)} fill="var(--brand)" opacity={0.25} />
             <rect x={LEFT} y={y} width={NODE} height={Math.max(h, 1)} rx={3} fill={part.key === 'bag' ? 'var(--muted)' : 'var(--brand)'} />
             <text x={LEFT - 6} y={leftLabels[index]} textAnchor="end" className="flow-text">
@@ -141,12 +142,14 @@ function FlowChart({ flow }: { flow: Flow }): ReactElement {
             </text>
           </g>
         ))}
-        <rect x={MIDDLE} y={16} width={NODE} height={H} rx={3} fill="var(--violet)" />
-        <text x={MIDDLE + NODE / 2} y={10} textAnchor="middle" className="flow-text">
-          {fmt(flow.total)} {flow.name}
-        </text>
+        <g className="wipe" style={flowDelay(left.length * 80 + 150)}>
+          <rect x={MIDDLE} y={16} width={NODE} height={H} rx={3} fill="var(--violet)" />
+          <text x={MIDDLE + NODE / 2} y={10} textAnchor="middle" className="flow-text">
+            {fmt(flow.total)} {flow.name}
+          </text>
+        </g>
         {right.map(({ part, y, h, at, colour }, index) => (
-          <g key={part.key}>
+          <g key={part.key} className="wipe" style={flowDelay(left.length * 80 + 300 + index * 80)}>
             <path d={band(MIDDLE + NODE, at, RIGHT, y, h)} fill={colour} opacity={0.3} />
             <rect x={RIGHT} y={y} width={NODE} height={Math.max(h, 1)} rx={3} fill={colour} />
             <text x={RIGHT + NODE + 6} y={rightLabels[index]} className="flow-text">
@@ -180,3 +183,5 @@ function band(x1: number, y1: number, x2: number, y2: number, h: number): string
 function fmt(quantity: number): string {
   return Math.round(quantity).toLocaleString();
 }
+
+const flowDelay = (ms: number) => ({ '--delay': `${Math.min(ms, 1400)}ms` }) as CSSProperties;

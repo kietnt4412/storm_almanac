@@ -1,5 +1,6 @@
 import { useState, type CSSProperties, type ReactElement } from 'react';
 import type { Odds } from '../api/client';
+import { Count } from './motion';
 
 /**
  * Pulls you can feel (C2.14, agreed 2026-10-01): every pull from the reader's
@@ -37,12 +38,14 @@ export function PullStrip({ odds }: { odds: Odds }): ReactElement | null {
         <div>
           <span className="label">{day ? (day.day === 0 ? 'Today' : `In ${day.day} day${day.day === 1 ? '' : 's'}`) : 'With what you hold'}</span>
           <p className="text-sm">
-            <b className="count">{afforded.toLocaleString()}</b> pull{afforded === 1 ? '' : 's'}
+            <b className="count">
+              <Count value={afforded} duration={400} />
+            </b> pull{afforded === 1 ? '' : 's'}
             {date && <span className="muted"> · {date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>}
           </p>
         </div>
         <div className="pull-strip-chance count" aria-live="polite">
-          {(chance * 100).toFixed(chance > 0 && chance < 0.01 ? 2 : 0)}%
+          <Count value={chance} format={(value) => `${(value * 100).toFixed(chance > 0 && chance < 0.01 ? 2 : 0)}%`} duration={500} />
         </div>
       </div>
 
@@ -61,19 +64,20 @@ export function PullStrip({ odds }: { odds: Odds }): ReactElement | null {
       )}
 
       <div className="pull-cells" role="img" aria-label={`${counted} pulls already counted, ${afforded} of the next ${future} afforded`}>
+        {/* The cells drop in one after another as the answer lands, capped so a long wall is not a wait. */}
         {Array.from({ length: counted }, (_, at) => (
-          <span key={`c${at}`} className="pull-cell" data-state="counted" />
+          <span key={`c${at}`} className="pull-cell stagger-in" data-state="counted" style={cellDelay(at)} />
         ))}
         {landing.map((chanceHere, at) => {
           const pull = at + 1;
           return (
             <span
               key={pull}
-              className="pull-cell"
+              className="pull-cell stagger-in"
               data-state={pull <= afforded ? 'afforded' : 'ahead'}
               data-average={pull === average || undefined}
               title={`Pull ${counted + pull}: ${(chanceHere * 100).toFixed(2)}% to land here`}
-              style={{ '--heat': (chanceHere / peak).toFixed(3) } as CSSProperties}
+              style={{ '--heat': (chanceHere / peak).toFixed(3), ...cellDelay(counted + at) } as CSSProperties}
             />
           );
         })}
@@ -98,3 +102,5 @@ export function PullStrip({ odds }: { odds: Odds }): ReactElement | null {
     </section>
   );
 }
+
+const cellDelay = (at: number) => ({ '--delay': `${Math.min(at, 90) * 9}ms` }) as CSSProperties;

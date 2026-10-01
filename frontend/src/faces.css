@@ -933,8 +933,272 @@
   }
 }
 
+/*
+ * An answer landing (C2.17), in each game's terms; `.land` is on the card an
+ * answer sits on and `.land-figure` on its headline number, and both play on
+ * mount (motion.css says when that is).
+ *
+ * Punishing: Gray Raven — a target acquired: the card flashes like a hit, its
+ * brackets snap in from outside, a scan line sweeps it once and the number
+ * splits into its colour channels before it settles. Nothing shakes.
+ */
+:root[data-game='punishing-gray-raven'] .land {
+  animation:
+    rise 0.45s var(--ease-out) both,
+    pgr-hit 0.5s ease-out 0.1s;
+}
+
+:root[data-game='punishing-gray-raven'] .land::after {
+  animation: pgr-brackets 0.6s steps(1, end) 0.05s both;
+}
+
+:root[data-game='punishing-gray-raven'] .land::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+  background: var(--brand);
+  box-shadow:
+    0 0 12px 2px color-mix(in srgb, var(--brand) 70%, transparent),
+    0 -18px 24px -6px color-mix(in srgb, var(--brand) 25%, transparent);
+  opacity: 0;
+  animation: pgr-scan 0.7s cubic-bezier(0.5, 0, 0.5, 1) 0.15s;
+}
+
+:root[data-game='punishing-gray-raven'] .land-figure {
+  animation: pgr-split 0.6s steps(1, end) 0.2s both;
+}
+
+@keyframes pgr-hit {
+  0% {
+    filter: brightness(1.9) saturate(1.4);
+  }
+  18% {
+    filter: brightness(1.15);
+  }
+  100% {
+    filter: none;
+  }
+}
+
+@keyframes pgr-brackets {
+  0% {
+    inset: -18px;
+    opacity: 0;
+  }
+  15% {
+    inset: -12px;
+    opacity: 1;
+  }
+  30% {
+    inset: -6px;
+  }
+  45% {
+    inset: -1px;
+    opacity: 0.3;
+  }
+  60% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.5;
+  }
+  90%,
+  100% {
+    inset: -1px;
+    opacity: 0.8;
+  }
+}
+
+@keyframes pgr-scan {
+  from {
+    top: 0;
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  to {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes pgr-split {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+    text-shadow:
+      -5px 0 #22d3ee,
+      5px 0 var(--brand);
+    transform: translateX(3px) skewX(-8deg);
+  }
+  25% {
+    text-shadow:
+      4px 0 #22d3ee,
+      -4px 0 var(--brand);
+    transform: translateX(-2px);
+  }
+  40% {
+    text-shadow:
+      -2px 0 #22d3ee,
+      2px 0 var(--brand);
+    transform: none;
+  }
+  55% {
+    text-shadow: 1px 0 #22d3ee;
+  }
+  70%,
+  100% {
+    text-shadow: none;
+    transform: none;
+  }
+}
+
+/*
+ * Reverse: 1999 — pressed into the page: the card's ink comes up out of the
+ * sepia, the number bleeds in from a blot, and the stamp in its corner comes
+ * down hard and lands crooked, where it stays.
+ */
+:root[data-game='reverse-1999'] .land {
+  animation:
+    rise 0.7s var(--ease-out) both,
+    r1999-develop 1.1s ease-out;
+}
+
+:root[data-game='reverse-1999'] .land::after {
+  animation: r1999-stamp 0.55s cubic-bezier(0.5, 0, 0.3, 1.4) 0.55s both;
+}
+
+:root[data-game='reverse-1999'] .land-figure {
+  display: inline-block;
+  animation: r1999-ink 0.9s ease-out 0.1s both;
+}
+
+@keyframes r1999-develop {
+  from {
+    filter: sepia(0.7) contrast(0.85);
+  }
+}
+
+@keyframes r1999-stamp {
+  0% {
+    opacity: 0;
+    transform: rotate(-40deg) scale(2.2);
+  }
+  60% {
+    opacity: 0.55;
+    transform: rotate(-12deg) scale(0.9);
+  }
+  100% {
+    opacity: 0.28;
+    transform: rotate(-14deg) scale(1);
+  }
+}
+
+@keyframes r1999-ink {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    letter-spacing: 0.25em;
+  }
+  50% {
+    opacity: 1;
+    filter: blur(1px);
+  }
+}
+
+/*
+ * Feedback in each game's terms (C2.18). Punishing: Gray Raven: a card under
+ * the pointer is locked on — its brackets spring outward and glow, and a red
+ * edge comes up on its left — and a button at work runs hazard stripes, like
+ * the game's loading bars. Reverse: 1999: a card lifts off the page with a gold
+ * rule inside it, and a button at work has a wash of ink moving across it, back
+ * and forth like a pen.
+ */
+:root[data-game='punishing-gray-raven'] :is(a, button).card::after {
+  transition:
+    inset 0.18s steps(3, end),
+    opacity 0.18s,
+    filter 0.18s;
+}
+
+:root[data-game='punishing-gray-raven'] :is(a, button).card:is(:hover, :focus-visible)::after {
+  inset: -5px;
+  opacity: 1;
+  filter: drop-shadow(0 0 4px var(--brand));
+}
+
+:root[data-game='punishing-gray-raven'] :is(a, button).card:is(:hover, :focus-visible) {
+  box-shadow:
+    inset 3px 0 0 var(--brand),
+    0 8px 24px -12px color-mix(in srgb, var(--brand) 60%, transparent);
+}
+
+:root[data-game='punishing-gray-raven'] .btn:active:not(:disabled) {
+  filter: brightness(1.35);
+  transform: translateX(2px) scale(0.97);
+}
+
+:root[data-game='punishing-gray-raven'] .btn[data-working]::after {
+  background: linear-gradient(
+      -45deg,
+      rgb(0 0 0 / 28%) 25%,
+      transparent 25% 50%,
+      rgb(0 0 0 / 28%) 50% 75%,
+      transparent 75%
+    )
+    0 0 / 20px 20px;
+  animation: pgr-hazard 0.45s linear infinite;
+}
+
+@keyframes pgr-hazard {
+  to {
+    background-position: 20px 0;
+  }
+}
+
+:root[data-game='reverse-1999'] :is(a, button).card:is(:hover, :focus-visible) {
+  transform: translateY(-3px) rotate(-0.35deg);
+  box-shadow:
+    inset 0 0 0 3px var(--surface),
+    inset 0 0 0 4px color-mix(in srgb, var(--brand) 70%, var(--line)),
+    0 14px 26px -14px rgb(0 0 0 / 55%);
+}
+
+:root[data-game='reverse-1999'] .btn[data-working]::after {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--on-brand) 40%, transparent), transparent) 0 50% /
+    45% 180% no-repeat;
+  animation: r1999-pen 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes r1999-pen {
+  to {
+    background-position: 100% 50%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  :root[data-game] .page {
+  :root[data-game] .btn[data-working]::after {
+    animation: none !important;
+  }
+
+  :root[data-game] :is(a, button).card:is(:hover, :focus-visible) {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-game] .page,
+  :root[data-game] .land,
+  :root[data-game] .land::before,
+  :root[data-game] .land::after,
+  :root[data-game] .land-figure {
     animation: none !important;
   }
 }

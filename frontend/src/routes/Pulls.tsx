@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
@@ -21,6 +21,7 @@ import { formatUntil, useNow } from '../ui/time';
 import { Explain } from '../ui/Explain';
 import { Emblem } from '../ui/Emblem';
 import { PullStrip } from '../ui/PullStrip';
+import { Count } from '../ui/motion';
 
 /**
  * "Will I get her, and by when?" — C1's screen.
@@ -296,7 +297,7 @@ function Asker({
             ))}
           </select>
         </div>
-        <button type="submit" className="btn" disabled={run.isPending || pity.isPending}>
+        <button type="submit" className="btn" data-working={run.isPending || undefined} disabled={run.isPending || pity.isPending}>
           {run.isPending ? 'Working it out…' : 'Work it out'}
         </button>
       </div>
@@ -312,7 +313,8 @@ function Asker({
           </div>
         )}
         {run.data ? (
-          <Answer odds={run.data} />
+          // Keyed by when it was asked, so every answer lands rather than repaints.
+          <Answer key={run.submittedAt} odds={run.data} />
         ) : (
           !run.isError && (
             <p className="card muted hidden text-sm lg:block">
@@ -330,20 +332,20 @@ function Answer({ odds }: { odds: Odds }) {
   const wanted = odds.copies === 1 ? 'the featured unit' : `${odds.copies} copies of the featured unit`;
 
   return (
-    <section className="card-raised space-y-4" aria-live="polite">
+    <section className="card-raised land space-y-4" aria-live="polite">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-4xl font-bold leading-none" style={{ color: 'var(--brand)' }}>
-            {percent(odds.chance)}
+          <p className="land-figure text-4xl font-bold leading-none" style={{ color: 'var(--brand)' }}>
+            <Count value={odds.chance} format={percent} />
           </p>
           <p className="mt-1">
             chance of {wanted} within {plural(odds.days, 'day')}.
           </p>
         </div>
         <div className="grid grid-cols-3 gap-2 text-center">
-          <Stat label="You can afford" value={count(budget.pulls)} />
-          <Stat label="Average to first" value={count(Math.round(odds.expectedPulls))} />
-          <Stat label="Certain by" value={count(odds.worstCasePulls)} />
+          <Stat label="You can afford" value={budget.pulls} at={0} />
+          <Stat label="Average to first" value={Math.round(odds.expectedPulls)} at={1} />
+          <Stat label="Certain by" value={odds.worstCasePulls} at={2} />
         </div>
       </div>
 
@@ -398,11 +400,13 @@ function Answer({ odds }: { odds: Odds }) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, at }: { label: string; value: number; at: number }) {
   return (
-    <div className="stat-tile">
+    <div className="stat-tile rise" style={{ '--delay': `${150 + at * 90}ms` } as CSSProperties}>
       <span className="stat-label">{label}</span>
-      <span className="stat-value text-xl">{value}</span>
+      <span className="stat-value text-xl">
+        <Count value={value} />
+      </span>
     </div>
   );
 }

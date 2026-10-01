@@ -19,6 +19,7 @@ import { sectionsOf, statesOfGraph, tracksOfGraph, type Track } from '../roster/
 import { NextStep } from '../steps/Steps';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 import { Emblem } from '../ui/Emblem';
+import { Icon } from '../ui/Icon';
 import { ranksByKind } from '../ui/rarity';
 
 /**
@@ -190,7 +191,19 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
               Discard
             </button>
           )}
-          <button type="button" className="btn" onClick={() => save.mutate()} disabled={!dirty || save.isPending}>
+          <button
+            type="button"
+            className="btn"
+            onClick={() => save.mutate()}
+            disabled={!dirty || save.isPending}
+            data-working={save.isPending || undefined}
+          >
+            {/* A save that just went through says so with a tick that lands (C2.18). */}
+            {!dirty && !save.isPending && save.isSuccess && (
+              <span key={save.submittedAt} className="tick-in" aria-hidden="true">
+                <Icon name="check" size={15} />
+              </span>
+            )}
             {save.isPending ? 'Saving…' : dirty ? 'Save goals' : 'Saved'}
           </button>
         </div>

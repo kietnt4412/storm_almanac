@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
@@ -26,7 +26,7 @@ import { reachOf, usePlannerStore } from '../store/plannerStore';
 import { SpendBars } from '../ui/SpendBar';
 import { Explain } from '../ui/Explain';
 import { Icon, type IconName } from '../ui/Icon';
-import { Reveal } from '../ui/motion';
+import { Count, Reveal } from '../ui/motion';
 import { PlanCircuit, type Faces } from '../ui/PlanCircuit';
 import { ShareDialog } from '../ui/ShareDialog';
 import { daysOf } from '../ui/time';
@@ -332,7 +332,7 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
           </section>
         )}
 
-        <button type="submit" className="btn" disabled={run.isPending || !hasGoals}>
+        <button type="submit" className="btn" data-working={run.isPending || undefined} disabled={run.isPending || !hasGoals}>
           {run.isPending ? 'Solving…' : 'Work it out'}
         </button>
       </form>
@@ -362,6 +362,8 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
       )}
       {shown && !run.isError && (
         <Answer
+          // A new answer lands (C2.17); ticking a line is the same answer and does not.
+          key={shown.computedAt}
           plan={shown}
           energyUnit={energyUnit}
           tracks={tracks}
@@ -499,22 +501,26 @@ export function Answer({
   const [sharing, setSharing] = useState(false);
   return (
     <div className="space-y-4">
-      <section className="card-raised rise space-y-4">
+      <section className="card-raised land space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="grid flex-1 grid-cols-3 gap-2 sm:max-w-md">
-            <div className="stat-tile">
+            <div className="stat-tile rise" style={tileDelay(0)}>
               <div className="stat-label">Total {energyUnit.toLowerCase()}</div>
-              <div className="stat-value text-3xl" style={{ color: 'var(--brand)' }}>
-                {plan.totalEnergy.toLocaleString()}
+              <div className="stat-value land-figure text-3xl" style={{ color: 'var(--brand)' }}>
+                <Count value={plan.totalEnergy} />
               </div>
             </div>
-            <div className="stat-tile">
+            <div className="stat-tile rise" style={tileDelay(1)}>
               <div className="stat-label">Days</div>
-              <div className="stat-value text-3xl">{daysOf(plan.etaDays)}</div>
+              <div className="stat-value text-3xl">
+                <Count value={plan.etaDays} format={daysOf} />
+              </div>
             </div>
-            <div className="stat-tile">
+            <div className="stat-tile rise" style={tileDelay(2)}>
               <div className="stat-label">Runs</div>
-              <div className="stat-value text-3xl">{runs.toLocaleString()}</div>
+              <div className="stat-value text-3xl">
+                <Count value={runs} />
+              </div>
             </div>
           </div>
           <div className="flex flex-col items-end gap-2 text-right text-xs muted">
@@ -581,6 +587,9 @@ export { daysOf };
  * line does and to what. A stage's id, a step's id and a reward's id are each
  * unique within their own kind, and the kind keeps them apart.
  */
+/** The three tiles follow the card in, one after another. */
+const tileDelay = (at: number) => ({ '--delay': `${120 + at * 90}ms` }) as CSSProperties;
+
 export function lineKey(kind: 'run' | 'step' | 'claim', id: string): string {
   return `${kind}:${id}`;
 }
@@ -750,14 +759,18 @@ function Prices({ prices, energyUnit }: { prices: ShadowPrice[]; energyUnit: str
           </p>
           {/* As bars against the dearest (C2.8), so what is precious shows at a glance; the number stays. */}
           <ul className="grid grid-cols-[minmax(6rem,12rem)_1fr_auto] items-center gap-x-3 gap-y-1.5 text-sm">
-            {priced.map((price) => (
+            {priced.map((price, index) => (
               <li key={price.item} className="contents">
                 <span className="truncate">{price.displayName}</span>
                 <span className="h-2.5 rounded-full" style={{ background: 'var(--line)' }} aria-hidden="true">
                   <span
-                    className="block h-full rounded-full"
+                    className="wipe block h-full rounded-full"
                     data-testid="price-bar"
-                    style={{ width: `${(price.price / priced[0]!.price) * 100}%`, background: 'var(--violet)' }}
+                    style={{
+                      width: `${(price.price / priced[0]!.price) * 100}%`,
+                      background: 'var(--violet)',
+                      '--delay': `${Math.min(index, 12) * 60}ms`,
+                    } as CSSProperties}
                   />
                 </span>
                 <span className="count muted text-right">{price.price.toFixed(2)}</span>
