@@ -77,3 +77,26 @@ export function useNow(everyMs = 30_000): Date {
   }, [everyMs]);
   return now;
 }
+
+/**
+ * Whether something has been waited on for longer than `afterMs`. A wait that
+ * ends sooner is never mentioned, so a warm server says nothing at all.
+ */
+export function useTakingLong(waiting: boolean, afterMs = 3_000): boolean {
+  const [long, setLong] = useState(false);
+  useEffect(() => {
+    if (!waiting) {
+      setLong(false);
+      return;
+    }
+    const timer = setTimeout(() => setLong(true), afterMs);
+    return () => clearTimeout(timer);
+  }, [waiting, afterMs]);
+  return waiting && long;
+}
+
+/** Days as a reader says them: "28", and "13.5" only when the half matters. */
+export function daysOf(days: number): string {
+  const tenths = Math.round(days * 10) / 10;
+  return Number.isInteger(tenths) ? String(tenths) : tenths.toFixed(1);
+}

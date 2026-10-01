@@ -19,6 +19,8 @@ import { ChanceCurve } from '../ui/ChanceCurve';
 import { ChanceByDate, CopiesBar, PityDial } from '../ui/PullPictures';
 import { formatUntil, useNow } from '../ui/time';
 import { Explain } from '../ui/Explain';
+import { Emblem } from '../ui/Emblem';
+import { PullStrip } from '../ui/PullStrip';
 
 /**
  * "Will I get her, and by when?" — C1's screen.
@@ -95,9 +97,18 @@ function PullPlanner({ profileId, game }: { profileId: string; game: string }) {
                     className={`card text-left transition ${here ? 'card-next' : ''}`}
                     style={here ? { borderWidth: 2 } : undefined}
                   >
-                    <span className="block font-medium">{candidate.displayName}</span>
-                    <span className="block text-sm" style={{ color: soon ? 'var(--signal)' : 'var(--muted)' }}>
-                      {left === null ? 'No close date' : `Closes in ${formatUntil(left)}`}
+                    <span className="flex items-center gap-3">
+                      <Emblem
+                        subject={{ id: candidate.id, displayName: candidate.displayName, kind: candidate.bannerType, rarity: candidate.headline }}
+                        game={game}
+                        size={40}
+                      />
+                      <span className="min-w-0">
+                        <span className="block font-medium">{candidate.displayName}</span>
+                        <span className="block text-sm" style={{ color: soon ? 'var(--signal)' : 'var(--muted)' }}>
+                          {left === null ? 'No close date' : `Closes in ${formatUntil(left)}`}
+                        </span>
+                      </span>
                     </span>
                   </button>
                 );
@@ -335,6 +346,8 @@ function Answer({ odds }: { odds: Odds }) {
           <Stat label="Certain by" value={count(odds.worstCasePulls)} />
         </div>
       </div>
+
+      <PullStrip odds={odds} />
 
       {/* Absent from a server a deploy behind the page; the answer stands without it. */}
       {/* By date where the server says it (C2.8), the question the page exists

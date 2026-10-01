@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import {
   ApiError,
+  getEntities,
   getEntity,
   getGames,
   getGoals,
@@ -17,6 +18,8 @@ import { Sourcing, merge } from '../catalog/Sourcing';
 import { sectionsOf, tracksOfGraph } from '../roster/tracks';
 import { useCreateProfile, useProfileFor } from '../profile';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
+import { Dossier } from '../catalog/Dossier';
+import { ranksByKind } from '../ui/rarity';
 
 /**
  * One character page — and the argument for having a catalog at all.
@@ -45,6 +48,19 @@ export function EntityPage() {
     queryFn: () => getUpgrades(game, entity),
     staleTime: Infinity,
   });
+  // The whole catalog, only for the emblem's colour: a rarity's place among its kind's.
+  const entities = useQuery({ queryKey: ['entities', game], queryFn: () => getEntities(game) });
+  const ranks = useMemo(() => ranksByKind(entities.data?.entities ?? [], (one) => one.kind), [entities.data]);
+  // Where the reader has them, for the dossier's ring and staircase. The same
+  // queries the overlay below asks, so they are asked once.
+  const { profile } = useProfileFor(game);
+  const storedRoster = useQuery({
+    queryKey: ['roster', profile?.id],
+    queryFn: () => getRoster(profile!.id),
+    enabled: Boolean(profile),
+  });
+  const outbox = usePlannerStore((state) => outboxOf(state, profile?.id ?? null));
+  const mine = profile ? effectiveRoster(storedRoster.data?.entities ?? {}, outbox.roster)[entity] : undefined;
 
   if (detail.isPending) return <p className="muted">Loading…</p>;
   if (detail.isError) {
@@ -67,11 +83,16 @@ export function EntityPage() {
         <Link to={`/catalog/${game}`} className="text-sm">
           ← Catalog
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold">{page.displayName}</h1>
-        <p className="muted text-sm">
-          {[page.rarity.label, page.kindName ?? page.kind, page.element, ...page.tags].filter(Boolean).join(' · ')}
-        </p>
       </header>
+
+      <Dossier
+        entity={page}
+        ranks={ranks.get(page.kind)}
+        game={game}
+        steps={steps}
+        order={upgrades.data?.sections}
+        states={mine}
+      />
 
       <Overlay game={game} entity={entity} states={statesOf(steps)} />
 

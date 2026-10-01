@@ -413,3 +413,53 @@ function savedPlan() {
     },
   };
 }
+
+/**
+ * The free host sleeps, and a reader who wakes it waits up to a minute for every
+ * answer. A headline over nothing read as a broken page (2026-10-01).
+ */
+describe('Home before the server answers', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('shows the shape of what is coming, and the real cards once it answers', async () => {
+    let answer: () => void = () => {};
+    const answered = new Promise<void>((resolve) => (answer = resolve));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        await answered;
+        if (url === '/api/me') {
+          return new Response(JSON.stringify({ status: 401 }), {
+            status: 401,
+            headers: { 'Content-Type': 'application/problem+json' },
+          });
+        }
+        if (url === '/api/games') {
+          return ok({
+            games: [
+              {
+                id: PGR,
+                displayName: 'Punishing: Gray Raven',
+                energyUnit: 'Serum',
+                latest: { game: PGR, sequence: 10, label: 'Anchored in Faith', attribution: 'read from the client' },
+              },
+            ],
+          });
+        }
+        return ok({ banners: [] });
+      }),
+    );
+    renderHome();
+
+    expect(screen.getByTestId('home-waiting')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Sign in' })).not.toBeInTheDocument();
+
+    answer();
+
+    expect(await screen.findByRole('link', { name: 'Sign in' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'How it works' })).toBeInTheDocument();
+    expect(screen.queryByTestId('home-waiting')).not.toBeInTheDocument();
+  });
+});

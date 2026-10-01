@@ -3,6 +3,7 @@ import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/rea
 import { Link } from 'react-router-dom';
 import {
   ApiError,
+  getEntities,
   getGames,
   getGoals,
   getMeasures,
@@ -26,7 +27,9 @@ import { SpendBars } from '../ui/SpendBar';
 import { Explain } from '../ui/Explain';
 import { Icon, type IconName } from '../ui/Icon';
 import { Reveal } from '../ui/motion';
-import { PlanCircuit } from '../ui/PlanCircuit';
+import { PlanCircuit, type Faces } from '../ui/PlanCircuit';
+import { ShareDialog } from '../ui/ShareDialog';
+import { daysOf } from '../ui/time';
 import { flowsOf, PlanFlow } from '../ui/PlanFlow';
 import { WhyDays } from '../ui/WhyDays';
 
@@ -190,6 +193,10 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
     });
     return byEntity;
   }, [graphs]);
+
+  // For the faces the circuit draws on what the plan pays for: the catalog's,
+  // so an emblem here is the one the reader saw on every other screen.
+  const entities = useQuery({ queryKey: ['entities', game], queryFn: () => getEntities(game) });
 
   const energyUnit = games.data?.games.find((published) => published.id === game)?.energyUnit ?? 'energy';
   const hasGoals = (goals.data?.goals.length ?? 0) > 0;
@@ -358,6 +365,7 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
           plan={shown}
           energyUnit={energyUnit}
           tracks={tracks}
+          faces={entities.data ? { game, entities: entities.data.entities } : undefined}
           done={done}
           onToggle={toggle}
           energyPerDay={run.data ? askedRate ?? undefined : saved.data?.request.energyPerDay}
@@ -469,9 +477,12 @@ export function Answer({
   done = [],
   onToggle,
   energyPerDay,
+  faces,
 }: {
   plan: Plan;
   energyUnit: string;
+  /** The catalog, for an emblem on each thing the plan pays for; without it, an icon. */
+  faces?: Faces;
   /** The rate the plan was asked with, for "Why N days?"; without it, no bar. */
   energyPerDay?: number;
   /** Each paid-for entity's tracks, by id; a step whose entity is missing keeps the server's name. */
@@ -485,6 +496,7 @@ export function Answer({
   const groups = payingForGroups(paying, tracks);
   const spends = plan.conversions.flatMap((conversion) => (conversion.spends ? [conversion.spends] : []));
   const runs = plan.stages.reduce((sum, stage) => sum + stage.runs, 0);
+  const [sharing, setSharing] = useState(false);
   return (
     <div className="space-y-4">
       <section className="card-raised rise space-y-4">
@@ -505,15 +517,26 @@ export function Answer({
               <div className="stat-value text-3xl">{runs.toLocaleString()}</div>
             </div>
           </div>
-          <div className="text-right text-xs muted">
+          <div className="flex flex-col items-end gap-2 text-right text-xs muted">
             <div>
-              patch {plan.versionLabel} (v{plan.version})
+              <div>
+                patch {plan.versionLabel} (v{plan.version})
+              </div>
+              <div>{new Date(plan.computedAt).toLocaleString()}</div>
             </div>
-            <div>{new Date(plan.computedAt).toLocaleString()}</div>
+            {/* Only where the catalog is to hand, for the card's emblem (C2.13). */}
+            {faces && (
+              <button type="button" className="btn-quiet" onClick={() => setSharing(true)}>
+                <Icon name="share" size={15} /> Share
+              </button>
+            )}
           </div>
         </div>
+        {sharing && faces && (
+          <ShareDialog plan={plan} energyUnit={energyUnit} entities={faces.entities} onClose={() => setSharing(false)} />
+        )}
 
-        <PlanCircuit plan={plan} energyUnit={energyUnit} />
+        <PlanCircuit plan={plan} energyUnit={energyUnit} faces={faces} />
 
         {energyPerDay !== undefined && <WhyDays plan={plan} energyPerDay={energyPerDay} energyUnit={energyUnit} />}
 
@@ -550,11 +573,8 @@ export function Answer({
   );
 }
 
-/** Days as a reader says them: "28", and "13.5" only when the half matters. */
-export function daysOf(days: number): string {
-  const tenths = Math.round(days * 10) / 10;
-  return Number.isInteger(tenths) ? String(tenths) : tenths.toFixed(1);
-}
+/** Moved to `ui/time.ts` (C2.13), so the share card prints days the way this screen does. */
+export { daysOf };
 
 /**
  * What names one line of a plan in the list of what is done (V20): what the

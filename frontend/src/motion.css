@@ -311,6 +311,57 @@
 }
 
 /*
+ * Waiting on a server that is starting: blocks the shape of what is coming,
+ * with light passing over them, and a line under the bar saying why.
+ */
+.skeleton {
+  display: block;
+  border-radius: 0.75rem;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(
+        100deg,
+        transparent 30%,
+        color-mix(in srgb, var(--ink) 7%, transparent) 50%,
+        transparent 70%
+      )
+      0 0 / 250% 100% no-repeat,
+    var(--surface);
+  animation: skeleton-sweep 1.6s ease-in-out var(--delay, 0ms) infinite;
+}
+
+@keyframes skeleton-sweep {
+  from {
+    background-position: 150% 0, 0 0;
+  }
+  to {
+    background-position: -100% 0, 0 0;
+  }
+}
+
+.waking-bar {
+  border-top: 1px solid var(--line);
+  padding: 0.5rem 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.waking-dot {
+  flex: none;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: var(--brand);
+  animation: waking-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes waking-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/*
  * The light streak across Home's hero: a soft bar of the brand colour that
  * sweeps in from the top-right corner, then breathes. It is the one flourish on
  * the page with nothing to say, so it is pale and sits behind the words.
@@ -402,7 +453,9 @@
     filter: none;
   }
 
-  .hero-streak::before {
+  .hero-streak::before,
+  .skeleton,
+  .waking-dot {
     animation: none;
   }
 

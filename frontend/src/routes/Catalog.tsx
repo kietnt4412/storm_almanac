@@ -4,6 +4,8 @@ import { Link, useParams } from 'react-router-dom';
 import { getEntities, getGames } from '../api/client';
 import { Sourcing } from '../catalog/Sourcing';
 import { useActiveGame } from '../profile';
+import { Emblem } from '../ui/Emblem';
+import { ranksByKind, tierColour } from '../ui/rarity';
 
 /**
  * Browse and search, and the one part of the product a stranger can read.
@@ -58,6 +60,19 @@ function Browser({ game }: { game: string }) {
     );
   }, [entities.data, query]);
 
+  // The kinds the patch has, each once in the order it first appears, by the
+  // bundle's word for it: a filter over what is there, not a list of a game's.
+  const [kind, setKind] = useState('');
+  const kinds = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const entity of entities.data?.entities ?? []) {
+      if (!seen.has(entity.kind)) seen.set(entity.kind, entity.kindName ?? entity.kind);
+    }
+    return [...seen.entries()];
+  }, [entities.data]);
+  const shown = kind ? rows.filter((entity) => entity.kind === kind) : rows;
+  const ranks = useMemo(() => ranksByKind(entities.data?.entities ?? [], (entity) => entity.kind), [entities.data]);
+
   if (entities.isPending) return <p className="muted">Loading the catalog…</p>;
   if (entities.isError) {
     return <p className="card">Could not read the catalog: {(entities.error as Error).message}</p>;
@@ -86,23 +101,45 @@ function Browser({ game }: { game: string }) {
         autoFocus
       />
 
-      {rows.length === 0 ? (
+      {kinds.length > 1 && (
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Kind">
+          {[['', 'Everything'] as const, ...kinds].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className="chip"
+              aria-pressed={kind === value}
+              style={kind === value ? { borderColor: 'var(--brand)', background: 'color-mix(in srgb, var(--brand) 14%, var(--surface))' } : undefined}
+              onClick={() => setKind(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {shown.length === 0 ? (
         <p className="muted">Nobody matches that in this patch.</p>
       ) : (
-        <ul className="grid gap-2 sm:grid-cols-2">
-          {rows.map((entity) => (
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {shown.map((entity) => (
             <li key={entity.id}>
               <Link
                 to={`/catalog/${game}/${entity.id}`}
-                className="card block no-underline"
+                className="card has-emblem flex h-full items-center gap-3 no-underline"
                 style={{ color: 'var(--ink)' }}
               >
-                <div className="flex items-baseline gap-2">
-                  <span className="font-medium">{entity.displayName}</span>
-                  <span className="muted text-xs">{entity.rarity.label}</span>
-                </div>
-                <div className="muted mt-1 text-sm">
-                  {[entity.kindName ?? entity.kind, entity.element, ...entity.tags].filter(Boolean).join(' · ')}
+                <Emblem subject={entity} ranks={ranks.get(entity.kind)} game={game} size={56} />
+                <div className="min-w-0">
+                  <div className="font-medium leading-snug">{entity.displayName}</div>
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+                    <span className="font-semibold" style={{ color: tierColour(entity.rarity.rank, ranks.get(entity.kind) ?? []) }}>
+                      {entity.rarity.label}
+                    </span>
+                    <span className="muted">
+                      {[entity.kindName ?? entity.kind, entity.element, ...entity.tags].filter(Boolean).join(' · ')}
+                    </span>
+                  </div>
                 </div>
               </Link>
             </li>

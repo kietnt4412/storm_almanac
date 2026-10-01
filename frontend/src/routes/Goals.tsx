@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   getEntities,
   getGoals,
@@ -12,11 +12,14 @@ import {
 } from '../api/client';
 import { ProfileGate } from '../profile';
 import { moveRow, removeRow, rowsOf, setTarget, type GoalRow } from '../roster/goalRows';
+import { SkillTree } from '../roster/SkillTree';
 import { TargetPicker } from '../roster/TargetPicker';
 import { TrackPicker } from '../roster/TrackPicker';
 import { sectionsOf, statesOfGraph, tracksOfGraph, type Track } from '../roster/tracks';
 import { NextStep } from '../steps/Steps';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
+import { Emblem } from '../ui/Emblem';
+import { ranksByKind } from '../ui/rarity';
 
 /**
  * What the player wants, in order.
@@ -111,22 +114,42 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
   // Rows the reader has opened and set nothing on yet. They cannot live in the
   // list, because a goal needs a target; the roster screen keeps its opened
   // entities the same way. Nothing is saved for them.
-  const [opened, setOpened] = useState<string[]>([]);
+  // `?add=<entity>` opens one, from a character page's "Plan this" (C2.12): the
+  // reader arrives with the row they came for already there.
+  const [params] = useSearchParams();
+  const [opened, setOpened] = useState<string[]>(() => {
+    const asked = params.get('add');
+    return asked ? [asked] : [];
+  });
   // The entity whose "where they stand" is open, one at a time.
   const [standing, setStanding] = useState<string | null>(null);
   // The row being dragged by its grip (C2.8). A drop sends the whole list, as
   // ↑ and ↓ do, which stay for the keyboard and for touch, where HTML drag
   // and drop does not fire.
   const [dragging, setDragging] = useState<number | null>(null);
+  // The tree (C2.15) on a wide screen, the ladders everywhere: the ladders are
+  // the keyboard's and the phone's way in. The choice is this browser's.
+  const wide = useWide();
+  const [view, setView] = useState<'tree' | 'ladders'>(() => readView());
+  const chooseView = (next: 'tree' | 'ladders') => {
+    setView(next);
+    try {
+      window.localStorage.setItem(VIEW_KEY, next);
+    } catch {
+      // A preference; the choice still applies to this page.
+    }
+  };
 
   if (entities.isPending || saved.isPending) return <p className="muted">Loading…</p>;
 
   const catalog = entities.data?.entities ?? [];
+  const ranks = ranksByKind(catalog, (entity) => entity.kind);
   const savedRows = rowsOf(goals);
   const rows: GoalRow[] = [
     ...savedRows,
     ...opened
-      .filter((entity) => !savedRows.some((row) => row.entity === entity))
+      // A link may name someone this patch does not have; that opens nothing.
+      .filter((entity) => !savedRows.some((row) => row.entity === entity) && catalog.some((one) => one.id === entity))
       .map((entity) => ({ entity, goals: [] })),
   ];
   const addable = catalog.filter(
@@ -146,6 +169,22 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {wide && (
+            <div className="flex gap-1" role="group" aria-label="How to set targets">
+              {(['tree', 'ladders'] as const).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  className="chip"
+                  aria-pressed={view === value}
+                  style={view === value ? { borderColor: 'var(--brand)', background: 'color-mix(in srgb, var(--brand) 14%, var(--surface))' } : undefined}
+                  onClick={() => chooseView(value)}
+                >
+                  {value === 'tree' ? 'Tree' : 'Ladders'}
+                </button>
+              ))}
+            </div>
+          )}
           {dirty && (
             <button type="button" className="btn-quiet" onClick={() => setDraft(null)}>
               Discard
@@ -208,6 +247,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                   >
                     {index + 1}
                   </span>
+                  {entity && <Emblem subject={entity} ranks={ranks.get(entity.kind)} game={game} size={36} />}
                   <Link to={`/catalog/${game}/${row.entity}`} className="font-medium">
                     {name}
                   </Link>
@@ -280,6 +320,20 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                         />
                       </div>
                     )}
+                    {wide && view === 'tree' && entity ? (
+                    <SkillTree
+                      entity={entity}
+                      game={game}
+                      ranks={ranks.get(entity.kind)}
+                      tracks={graph.tracks}
+                      order={graph.order}
+                      targets={graph.targets}
+                      roster={roster[row.entity] ?? []}
+                      row={row}
+                      steps={graph.steps}
+                      onChange={(track, state) => setDraft(setTarget(goals, row.entity, graph.tracks, track, state))}
+                    />
+                    ) : (
                     <TargetPicker
                       subject={name}
                       tracks={graph.tracks}
@@ -298,6 +352,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                         )
                       }
                     />
+                    )}
                   </>
                 )}
               </li>
@@ -361,3 +416,27 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
   );
 }
 
+
+const VIEW_KEY = 'storm-almanac:goal-view';
+
+function readView(): 'tree' | 'ladders' {
+  try {
+    return window.localStorage.getItem(VIEW_KEY) === 'ladders' ? 'ladders' : 'tree';
+  } catch {
+    return 'tree';
+  }
+}
+
+/** Whether the screen is wide enough for the tree; never, where there is no matchMedia. */
+function useWide(): boolean {
+  const query = '(min-width: 1024px)';
+  const [wide, setWide] = useState(() => typeof window.matchMedia === 'function' && window.matchMedia(query).matches);
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+    const list = window.matchMedia(query);
+    const change = () => setWide(list.matches);
+    list.addEventListener('change', change);
+    return () => list.removeEventListener('change', change);
+  }, []);
+  return wide;
+}

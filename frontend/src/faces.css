@@ -1,0 +1,940 @@
+/*
+ * Faces (C2.10–C2.16): the emblems, and everything later slices build on them.
+ * Colours are tokens, so every emblem follows the game's palette and both
+ * schemes; `--tone` is the rarity's colour, set on each emblem.
+ */
+
+/* ── The emblem ─────────────────────────────────────────────────────────── */
+
+.emblem {
+  display: block;
+  overflow: visible;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.emblem-ground > * {
+  fill: var(--raised);
+}
+
+.emblem-motif {
+  fill: var(--tone);
+  stroke: none;
+  opacity: 0.36;
+}
+
+.emblem-motif .emblem-line {
+  fill: none;
+  stroke: var(--tone);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.emblem-frame > * {
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.emblem[data-emblem='seal'] .emblem-frame > * {
+  stroke-width: 2.5;
+}
+
+.emblem-slash {
+  fill: var(--tone);
+  opacity: 0.2;
+}
+
+.emblem-tab,
+.emblem-pips {
+  fill: var(--tone);
+}
+
+.emblem-inner {
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.emblem-tick {
+  stroke: var(--tone);
+  stroke-width: 1.3;
+  opacity: 0.7;
+}
+
+.emblem-edge {
+  stroke: var(--tone);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+/* The initials, in the type the game's mark uses, kept legible over the motif. */
+.emblem-initials {
+  fill: var(--ink);
+  stroke: var(--raised);
+  stroke-width: 4;
+  stroke-linejoin: round;
+  paint-order: stroke;
+  font-family: system-ui, 'Segoe UI', sans-serif;
+  font-weight: 800;
+  font-size: 21px;
+  letter-spacing: 0.5px;
+}
+
+.emblem-initials[data-emblem='plate'] {
+  font-family: 'Arial Black', 'Segoe UI Black', Impact, system-ui, sans-serif;
+  font-weight: 900;
+  font-style: italic;
+}
+
+.emblem-initials[data-emblem='seal'] {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  font-weight: 400;
+  font-size: 23px;
+  letter-spacing: 1px;
+}
+
+/* A card that holds an emblem turns it a little under the pointer. */
+.has-emblem:hover .emblem,
+.has-emblem:focus-visible .emblem {
+  transform: rotate(-4deg) scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emblem {
+    transition: none;
+  }
+
+  .has-emblem:hover .emblem,
+  .has-emblem:focus-visible .emblem {
+    transform: none;
+  }
+}
+
+.emblem-accent {
+  opacity: 0.45;
+}
+
+/* The serial: small, in the frame's colour, mono on a plate and serif on a seal. */
+.emblem-serial {
+  fill: var(--tone);
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.emblem-serial[data-emblem='seal'] {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  font-size: 7px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+/* ── The hangar (C2.11): a unit card that turns over ────────────────────── */
+
+.unit-card {
+  perspective: 1400px;
+  height: 100%;
+}
+
+.unit-inner {
+  display: grid;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.unit-card[data-turned='true'] .unit-inner {
+  transform: rotateY(180deg);
+}
+
+.unit-face {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.875rem;
+  background:
+    radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--tone) 16%, transparent), transparent 70%),
+    var(--surface);
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--tone) 70%, transparent);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.unit-back {
+  transform: rotateY(180deg);
+}
+
+.unit-portrait {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto;
+}
+
+.unit-portrait > .emblem {
+  position: relative;
+}
+
+.unit-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.unit-ring-track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 5;
+}
+
+.unit-ring-fill {
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: 5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--tone) 60%, transparent));
+}
+
+.unit-ring-head {
+  fill: var(--ink);
+  stroke: var(--tone);
+  stroke-width: 2.5;
+}
+
+.unit-ring-tick {
+  stroke: var(--muted);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.unit-name {
+  display: block;
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.unit-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.375rem;
+  margin-top: auto;
+}
+
+.unit-stats > div {
+  min-width: 0;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--raised);
+}
+
+.unit-stats dt {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.unit-stats dd {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.unit-actions > * {
+  flex: 1;
+  justify-content: center;
+}
+
+.unit-scroll {
+  flex: 1;
+  min-height: 0;
+  max-height: 15rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.unit-left {
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--tone) 10%, var(--raised));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .unit-inner {
+    transition: none;
+  }
+}
+
+.unit-next {
+  padding: 0.5rem 0.625rem;
+  border-left: 3px solid var(--tone);
+  border-radius: 0.375rem;
+  background: var(--raised);
+}
+
+/* ── The dossier (C2.12) ─────────────────────────────────────────────────── */
+
+.dossier-hero {
+  display: grid;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background:
+    radial-gradient(70% 120% at 0% 50%, color-mix(in srgb, var(--tone) 22%, transparent), transparent 70%),
+    repeating-linear-gradient(135deg, transparent 0 14px, color-mix(in srgb, var(--ink) 3%, transparent) 14px 15px),
+    var(--surface);
+  box-shadow: inset 0 2px 0 color-mix(in srgb, var(--tone) 70%, transparent);
+}
+
+@media (min-width: 640px) {
+  .dossier-hero {
+    grid-template-columns: auto 1fr;
+    gap: 2rem;
+    padding: 1.5rem 2rem;
+  }
+}
+
+.dossier-portrait {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 188px;
+  height: 188px;
+  margin: 0 auto;
+}
+
+.dossier-portrait > .emblem {
+  position: relative;
+  filter: drop-shadow(0 10px 24px color-mix(in srgb, var(--tone) 35%, transparent));
+}
+
+.dossier-name {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: 1.05;
+}
+
+.dossier-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dossier-stats > div {
+  min-width: 5.5rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--raised);
+}
+
+.dossier-stats dt {
+  color: var(--muted);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.dossier-stats dd {
+  color: var(--ink);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.staircase {
+  display: block;
+  width: 100%;
+  height: 8.5rem;
+}
+
+.stair {
+  fill: var(--line);
+  transition: fill 0.3s;
+}
+
+.stair-reached {
+  fill: var(--brand);
+}
+
+.staircase-families {
+  display: flex;
+  gap: 2px;
+  color: var(--muted);
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.staircase-families > span {
+  flex-basis: 0;
+  min-width: 0;
+  overflow: hidden;
+  padding-top: 0.25rem;
+  border-top: 2px solid var(--line);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cost-split {
+  display: flex;
+  gap: 2px;
+  height: 0.875rem;
+  overflow: hidden;
+  border-radius: 9999px;
+}
+
+.cost-split > span {
+  flex-basis: 0;
+  min-width: 3px;
+}
+
+/* ── The share card (C2.13). Also written into the PNG, so plain values only. ── */
+
+.share-card {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: system-ui, 'Segoe UI', sans-serif;
+}
+
+.share-ground {
+  fill: var(--ground);
+}
+
+.share-stripe {
+  fill: var(--ink);
+  opacity: 0.035;
+}
+
+.share-ring {
+  fill: var(--surface);
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.share-tile {
+  fill: var(--raised);
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.share-label {
+  fill: var(--muted);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.share-title,
+.share-big {
+  fill: var(--ink);
+  font-weight: 800;
+}
+
+.share-number {
+  fill: var(--ink);
+  font-size: 50px;
+  font-weight: 800;
+}
+
+.share-muted {
+  fill: var(--muted);
+}
+
+.share-foot {
+  fill: var(--muted);
+  font-size: 20px;
+  letter-spacing: 2px;
+}
+
+.share-card[data-style='plate'] :is(.share-title, .share-big, .share-number) {
+  font-family: 'Arial Black', 'Segoe UI Black', Impact, system-ui, sans-serif;
+  font-style: italic;
+}
+
+.share-card[data-style='seal'] :is(.share-title, .share-big, .share-number, .share-label, .share-foot) {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  font-weight: 500;
+}
+
+.share-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.share-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 55%);
+}
+
+.share-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  width: min(100%, 46rem);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--raised);
+  box-shadow: var(--shadow);
+}
+
+.share-preview {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+}
+
+/* ── Pulls you can feel (C2.14) ──────────────────────────────────────────── */
+
+.pull-strip {
+  padding: 0.875rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.pull-strip-chance {
+  color: var(--brand);
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pull-cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.pull-cell {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 11px;
+  height: 20px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--muted) calc(10% + var(--heat, 0) * 45%), var(--raised));
+  transition: background 0.25s, transform 0.25s;
+}
+
+.pull-cell[data-state='counted'] {
+  background: var(--muted);
+  opacity: 0.55;
+}
+
+.pull-cell[data-state='afforded'] {
+  background: color-mix(in srgb, var(--brand) calc(45% + var(--heat, 0) * 55%), var(--raised));
+  box-shadow: 0 0 calc(var(--heat, 0) * 10px) color-mix(in srgb, var(--brand) 60%, transparent);
+}
+
+/* Average: a tick above the cell. */
+.pull-cell[data-average]::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: var(--ink);
+  transform: translateX(-50%);
+}
+
+.pull-slider {
+  width: 100%;
+  height: 6px;
+  appearance: none;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--brand) var(--fill, 0%), var(--line) var(--fill, 0%));
+  cursor: pointer;
+}
+
+.pull-slider::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  appearance: none;
+  border: 3px solid var(--brand);
+  border-radius: 9999px;
+  background: var(--raised);
+}
+
+.pull-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--brand);
+  border-radius: 9999px;
+  background: var(--raised);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pull-cell {
+    transition: none;
+  }
+}
+
+/* ── The skill tree (C2.15) ──────────────────────────────────────────────── */
+
+.skill-tree {
+  display: block;
+  width: 100%;
+  max-width: 680px;
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.tree-halo {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+}
+
+.tree-core {
+  fill: color-mix(in srgb, var(--brand) 8%, var(--raised));
+  stroke: var(--line);
+}
+
+.tree-section {
+  fill: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.tree-label {
+  fill: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  transition: fill 0.2s;
+}
+
+.tree-spoke[data-active] .tree-label {
+  fill: var(--ink);
+}
+
+.tree-rail {
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.tree-have {
+  stroke: var(--brand);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.tree-want {
+  stroke: var(--signal);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 1 6;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--signal) 70%, transparent));
+  animation: tree-flow 1.2s linear infinite;
+}
+
+@keyframes tree-flow {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+
+.tree-node {
+  cursor: pointer;
+}
+
+.tree-node[data-state='closed'] {
+  cursor: default;
+}
+
+.tree-hit {
+  fill: transparent;
+}
+
+.tree-dot {
+  fill: var(--raised);
+  stroke: var(--muted);
+  stroke-width: 1.2;
+  transition: r 0.15s, fill 0.15s;
+}
+
+.tree-node[data-state='have'] .tree-dot {
+  fill: var(--brand);
+  stroke: var(--brand);
+}
+
+.tree-node[data-state='want'] .tree-dot {
+  fill: var(--signal);
+  stroke: var(--signal);
+}
+
+.tree-node[data-state='closed'] .tree-dot {
+  opacity: 0.35;
+}
+
+.tree-node[data-target] .tree-dot {
+  fill: var(--raised);
+  stroke: var(--signal);
+  stroke-width: 3;
+}
+
+.tree-node:not([data-state='closed']):hover .tree-dot {
+  r: 6;
+  stroke: var(--ink);
+}
+
+.tree-panel {
+  align-self: start;
+  padding: 0.875rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.tree-total {
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.5rem;
+  background: var(--raised);
+}
+
+.tree-key {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--muted);
+}
+
+.tree-key[data-state='have'] {
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.tree-key[data-state='want'] {
+  background: var(--signal);
+  border-color: var(--signal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree-want {
+    animation: none;
+  }
+
+  .tree-dot,
+  .tree-label {
+    transition: none;
+  }
+}
+
+/* ── A dress with a structure (C2.16) ─────────────────────────────────────
+ * The same components in a different frame: Punishing: Gray Raven as a combat
+ * screen, Reverse: 1999 as a printed almanac. Only `data-game` selects them,
+ * so a game with no look keeps the Storm page (ADR 0039, 0040).
+ */
+
+/* Punishing: Gray Raven — scanlines over everything, never in the way of a click. */
+:root[data-game='punishing-gray-raven'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--ink) 3.5%, transparent) 0 1px, transparent 1px 3px),
+    radial-gradient(130% 100% at 50% 40%, transparent 60%, color-mix(in srgb, #000 28%, transparent));
+}
+
+/* Brackets at two corners of every card, the third already carries the tick. */
+:root[data-game='punishing-gray-raven'] :is(.card, .card-raised) {
+  position: relative;
+}
+
+:root[data-game='punishing-gray-raven'] :is(.card, .card-raised)::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--brand), var(--brand)) top left / 12px 2px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) top left / 2px 12px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) bottom right / 12px 2px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) bottom right / 2px 12px no-repeat;
+  opacity: 0.8;
+}
+
+/* Readouts: every number in the HUD's mono. */
+:root[data-game='punishing-gray-raven'] :is(.count, .unit-stats dd, .dossier-stats dd, .pull-strip-chance) {
+  font-family: ui-monospace, Consolas, 'Cascadia Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A section heading opens with a bar, like a panel's title on the game's menus. */
+:root[data-game='punishing-gray-raven'] main :is(.card, .card-raised, section) > h2::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 0.85em;
+  margin-right: 0.5rem;
+  vertical-align: -0.05em;
+  background: var(--brand);
+  transform: skewX(-18deg);
+}
+
+/* A page arrives as a signal locking on: sliced, shaken, then still. */
+:root[data-game='punishing-gray-raven'] .page {
+  animation: pgr-lock-on 0.55s steps(1, end) both;
+}
+
+@keyframes pgr-lock-on {
+  0% {
+    opacity: 0;
+    clip-path: inset(0 0 92% 0);
+    transform: translateX(-12px);
+  }
+  14% {
+    opacity: 1;
+    clip-path: inset(38% 0 40% 0);
+    transform: translateX(10px);
+    filter: hue-rotate(40deg) saturate(1.6);
+  }
+  28% {
+    clip-path: inset(10% 0 62% 0);
+    transform: translateX(-6px);
+  }
+  42% {
+    clip-path: inset(0 0 30% 0);
+    transform: translateX(4px);
+    filter: none;
+  }
+  58% {
+    clip-path: inset(0 0 8% 0);
+    transform: translateX(-2px);
+  }
+  72%,
+  100% {
+    clip-path: none;
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* Reverse: 1999 — ruled paper, with a red margin down the page. */
+:root[data-game='reverse-1999'] main {
+  position: relative;
+  background: repeating-linear-gradient(180deg, transparent 0 31px, color-mix(in srgb, var(--brand) 9%, transparent) 31px 32px);
+}
+
+:root[data-game='reverse-1999'] main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.375rem;
+  width: 1px;
+  background: color-mix(in srgb, var(--short) 55%, transparent);
+  box-shadow: 4px 0 0 color-mix(in srgb, var(--short) 30%, transparent);
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  :root[data-game='reverse-1999'] main::before {
+    left: 1rem;
+  }
+}
+
+/* Notes in the margin's hand: the quiet lines under the numbers. */
+:root[data-game='reverse-1999'] main :is(p, span).muted:is(.text-xs, .text-sm) {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  font-style: italic;
+}
+
+/* A section mark before a card's heading. */
+:root[data-game='reverse-1999'] main :is(.card, .card-raised, section) > h2::before {
+  content: '§';
+  margin-right: 0.4rem;
+  color: var(--brand);
+  font-weight: 400;
+}
+
+/* An answer is stamped: a double ring pressed into its lower corner. */
+:root[data-game='reverse-1999'] .card-raised {
+  position: relative;
+}
+
+:root[data-game='reverse-1999'] .card-raised::after {
+  content: '✶';
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 2px solid var(--brand);
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 3px var(--raised), inset 0 0 0 4px var(--brand);
+  color: var(--brand);
+  font-size: 18px;
+  opacity: 0.28;
+  transform: rotate(-14deg);
+  pointer-events: none;
+}
+
+/* A page arrives turned over from the left, like a leaf. */
+:root[data-game='reverse-1999'] .page {
+  transform-origin: left center;
+  animation: r1999-leaf 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes r1999-leaf {
+  from {
+    opacity: 0;
+    transform: perspective(1400px) rotateY(-16deg) translateX(-8px);
+    filter: sepia(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-game] .page {
+    animation: none !important;
+  }
+}

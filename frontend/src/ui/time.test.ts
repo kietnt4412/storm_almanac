@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { formatUntil, nextReset, offsetMinutes } from './time';
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { formatUntil, nextReset, offsetMinutes, useTakingLong } from './time';
 
 describe('the next daily reset', () => {
   it('is today at the hour when the hour is still ahead, on a game whose clock is UTC', () => {
@@ -37,5 +38,39 @@ describe('a countdown', () => {
     expect(formatUntil(3 * hour + 12 * 60_000)).toBe('3 h 12 min');
     expect(formatUntil(8 * 60_000)).toBe('8 min');
     expect(formatUntil(-1)).toBe('now');
+  });
+});
+
+describe('a wait worth mentioning', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('is said only once it has run past its threshold, and unsaid the moment it ends', () => {
+    vi.useFakeTimers();
+    const { result, rerender } = renderHook(({ waiting }) => useTakingLong(waiting, 3_000), {
+      initialProps: { waiting: true },
+    });
+
+    expect(result.current).toBe(false);
+    act(() => vi.advanceTimersByTime(2_999));
+    expect(result.current).toBe(false);
+    act(() => vi.advanceTimersByTime(1));
+    expect(result.current).toBe(true);
+
+    rerender({ waiting: false });
+    expect(result.current).toBe(false);
+  });
+
+  it('never says a wait that ended in time', () => {
+    vi.useFakeTimers();
+    const { result, rerender } = renderHook(({ waiting }) => useTakingLong(waiting, 3_000), {
+      initialProps: { waiting: true },
+    });
+
+    act(() => vi.advanceTimersByTime(1_000));
+    rerender({ waiting: false });
+    act(() => vi.advanceTimersByTime(5_000));
+    expect(result.current).toBe(false);
   });
 });
