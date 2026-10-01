@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { Goal } from '../api/client';
@@ -78,28 +78,31 @@ describe('goal rows', () => {
 describe('the target picker', () => {
   it('leaves every track as it is until one is set, and says where each stands', async () => {
     const onChange = vi.fn();
-    render(
+    const picker = (goals: Goal[]) => (
       <TargetPicker
         subject="Lucia"
         tracks={TRACKS}
         order={['Growth', 'Basic Skill']}
         targets={TARGETS}
         roster={['level-65', 'lament-18']}
-        row={{ entity: 'lucia', goals: [] }}
+        row={{ entity: 'lucia', goals }}
         onChange={onChange}
-      />,
+      />
     );
+    const { rerender } = render(picker([]));
 
     const promote = screen.getByLabelText('Target for Promote of Lucia');
-    expect(promote).toHaveValue('');
-    expect(screen.getByLabelText('Target for Level of Lucia')).toHaveValue('');
+    expect(promote).toHaveAttribute('aria-valuetext', 'leave as is, now 8');
+    expect(screen.getByLabelText('Target for Level of Lucia')).toHaveAttribute('aria-valuetext', 'leave as is, now 65');
     expect(screen.getByText('now 65 →')).toBeInTheDocument();
-    // Red Orb is at its end: nothing to aim at, and no dropdown to ask with.
+    // Red Orb is at its end: nothing to aim at, and no ladder to ask with.
     expect(screen.queryByLabelText(/Target for Red Orb/)).not.toBeInTheDocument();
 
-    await userEvent.selectOptions(promote, 'Ace ★2');
+    fireEvent.change(promote, { target: { value: '2' } });
     expect(onChange).toHaveBeenCalledWith(PROMOTE, 'promote-10');
-    await userEvent.selectOptions(promote, 'leave as is');
+    // Dragged back to where they stand: the track is left as it is.
+    rerender(picker([goal('lucia', 'promote-10')]));
+    fireEvent.change(promote, { target: { value: '0' } });
     expect(onChange).toHaveBeenLastCalledWith(PROMOTE, null);
   });
 
@@ -114,8 +117,10 @@ describe('the target picker', () => {
         onChange={() => {}}
       />,
     );
-    expect(screen.getByLabelText('Target for Level of Lucia')).toHaveValue('level-65');
     expect(screen.getByText('65 (reached)')).toBeInTheDocument();
+    // Its end is behind them, so there is no ladder; Clear is the way to drop it.
+    expect(screen.queryByLabelText('Target for Level of Lucia')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Clear the reached target on Level of Lucia' })).toBeInTheDocument();
   });
 });
 
@@ -146,12 +151,12 @@ describe('a goal row once something is set (C2.5)', () => {
       />,
     );
 
-    expect(screen.getByLabelText('Target for Level of Lucia')).toHaveValue('level-70');
+    expect(screen.getByLabelText('Target for Level of Lucia')).toHaveAttribute('aria-valuetext', '70');
     expect(screen.queryByLabelText('Target for Promote of Lucia')).not.toBeInTheDocument();
     const more = screen.getByRole('button', { name: /more tracks, left as they are/ });
 
     await userEvent.click(more);
-    expect(screen.getByLabelText('Target for Promote of Lucia')).toHaveValue('');
+    expect(screen.getByLabelText('Target for Promote of Lucia').getAttribute('aria-valuetext')).toMatch(/^leave as is/);
     expect(screen.getByRole('button', { name: 'Show only the tracks being moved' })).toBeInTheDocument();
   });
 

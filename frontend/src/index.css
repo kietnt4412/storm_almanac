@@ -365,4 +365,67 @@ a {
   .count {
     font-variant-numeric: tabular-nums;
   }
+
+  /*
+   * A goal's ladder (C2.8): a native range input, invisible, over a drawn rail.
+   * Grey to where the reader stands, the brand colour on to the target, a pip
+   * per state. The input takes the pointer and the keyboard; the focus ring
+   * goes on the drawn thumb, where the eye is.
+   */
+  /* Inset by half the thumb, so a target at either end is not cut by the card. */
+  .ladder {
+    @apply relative mx-3 h-8;
+  }
+
+  .ladder > input {
+    @apply absolute inset-0 m-0 h-full w-full cursor-pointer opacity-0;
+  }
+
+  .ladder-rail,
+  .ladder-have,
+  .ladder-want {
+    @apply absolute top-3 h-2 rounded-full;
+  }
+
+  .ladder-rail {
+    @apply inset-x-0;
+    background: var(--line);
+  }
+
+  .ladder-have {
+    @apply left-0;
+    background: color-mix(in srgb, var(--ink) 35%, var(--line));
+  }
+
+  .ladder-want {
+    background: var(--brand);
+  }
+
+  .ladder-pip {
+    @apply absolute top-2 -ml-0.5 h-4 w-1 rounded-sm;
+    background: var(--surface);
+    opacity: 0.85;
+  }
+
+  .ladder-thumb {
+    @apply pointer-events-none absolute top-1 -ml-3 h-6 w-6 rounded-full border-[3px];
+    background: var(--raised);
+    border-color: var(--brand);
+    box-shadow: var(--shadow);
+  }
+
+  .ladder:focus-within .ladder-thumb {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+
+  .ladder-families {
+    @apply flex text-[10px];
+    color: var(--muted);
+  }
+
+  .ladder-families > span {
+    @apply overflow-hidden text-ellipsis whitespace-nowrap border-l pt-0.5 text-center;
+    border-color: var(--line);
+  }
 }
