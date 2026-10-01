@@ -517,3 +517,91 @@
   border: 1px solid var(--line);
   border-radius: 0.5rem;
 }
+
+/* ── Pulls you can feel (C2.14) ──────────────────────────────────────────── */
+
+.pull-strip {
+  padding: 0.875rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.pull-strip-chance {
+  color: var(--brand);
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pull-cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.pull-cell {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 11px;
+  height: 20px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--muted) calc(10% + var(--heat, 0) * 45%), var(--raised));
+  transition: background 0.25s, transform 0.25s;
+}
+
+.pull-cell[data-state='counted'] {
+  background: var(--muted);
+  opacity: 0.55;
+}
+
+.pull-cell[data-state='afforded'] {
+  background: color-mix(in srgb, var(--brand) calc(45% + var(--heat, 0) * 55%), var(--raised));
+  box-shadow: 0 0 calc(var(--heat, 0) * 10px) color-mix(in srgb, var(--brand) 60%, transparent);
+}
+
+/* Average: a tick above the cell. */
+.pull-cell[data-average]::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: var(--ink);
+  transform: translateX(-50%);
+}
+
+.pull-slider {
+  width: 100%;
+  height: 6px;
+  appearance: none;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--brand) var(--fill, 0%), var(--line) var(--fill, 0%));
+  cursor: pointer;
+}
+
+.pull-slider::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  appearance: none;
+  border: 3px solid var(--brand);
+  border-radius: 9999px;
+  background: var(--raised);
+}
+
+.pull-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--brand);
+  border-radius: 9999px;
+  background: var(--raised);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pull-cell {
+    transition: none;
+  }
+}

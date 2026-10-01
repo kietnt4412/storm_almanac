@@ -20,6 +20,7 @@ import { ChanceByDate, CopiesBar, PityDial } from '../ui/PullPictures';
 import { formatUntil, useNow } from '../ui/time';
 import { Explain } from '../ui/Explain';
 import { Emblem } from '../ui/Emblem';
+import { PullStrip } from '../ui/PullStrip';
 
 /**
  * "Will I get her, and by when?" — C1's screen.
@@ -345,6 +346,8 @@ function Answer({ odds }: { odds: Odds }) {
           <Stat label="Certain by" value={count(odds.worstCasePulls)} />
         </div>
       </div>
+
+      <PullStrip odds={odds} />
 
       {/* Absent from a server a deploy behind the page; the answer stands without it. */}
       {/* By date where the server says it (C2.8), the question the page exists
