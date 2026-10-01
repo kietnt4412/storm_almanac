@@ -272,6 +272,17 @@ export interface Odds {
    * is its point at the pulls afforded. Absent from a server older than the page.
    */
   curve?: number[];
+  /**
+   * Each day from today to the close (or the horizon asked, with no close):
+   * the pulls that day's income affords and the chance they give (C2.8). Its
+   * point at `days` is `chance`. Absent from a server older than the page.
+   */
+  byDay?: { day: number; pulls: number; chance: number }[];
+  /**
+   * With the pulls afforded, the chance of exactly k copies at index k, and of
+   * the last index or more at the last (C2.8). Absent from an older server.
+   */
+  byCopies?: number[];
   method: string;
 }
 

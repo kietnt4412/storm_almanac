@@ -11,6 +11,7 @@ import io.stormalmanac.gamedata.banner.BannerModel;
 import io.stormalmanac.gamedata.banner.FeaturedRule;
 import io.stormalmanac.gamedata.banner.PityRule;
 import io.stormalmanac.gamedata.banner.PityScope;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +84,26 @@ class MarkovBannerEngineTest {
                                 .isEqualTo(exact.probabilityOfFeatured(banner, fresh, pulls, copies));
                     }
                     assertThat(curve[curve.length - 1]).as("%s at the wall", banner.id()).isEqualTo(1.0);
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("how many copies a number of pulls ends with sums to one, and agrees with 'at least k' for every k")
+        void copiesWithinAgreesWithAtLeast() {
+            for (BannerModel banner : Banners.all()) {
+                PityState fresh = Banners.freshFor(banner);
+                int worst = (int) PullModel.of(banner).worstCasePulls();
+                for (int pulls : new int[] {0, worst / 2, worst, worst * 2}) {
+                    double[] exactly = exact.copiesWithin(banner, fresh, pulls, 3);
+                    assertThat(exactly).hasSize(4);
+                    assertThat(Arrays.stream(exactly).sum()).as("%s at %d pulls", banner.id(), pulls)
+                            .isCloseTo(1.0, within(1e-12));
+                    for (int k = 1; k <= 3; k++) {
+                        double atLeast = Arrays.stream(exactly, k, exactly.length).sum();
+                        assertThat(atLeast).as("%s, at least %d in %d pulls", banner.id(), k, pulls)
+                                .isCloseTo(exact.probabilityOfFeatured(banner, fresh, pulls, k), within(1e-12));
+                    }
                 }
             }
         }

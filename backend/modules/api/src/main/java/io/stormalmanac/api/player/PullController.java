@@ -14,10 +14,12 @@ import io.stormalmanac.gamedata.GameDefinitionRepository;
 import io.stormalmanac.gamedata.Item;
 import io.stormalmanac.gamedata.banner.BannerModel;
 import io.stormalmanac.player.CarriedPity;
+import io.stormalmanac.player.Inventory;
 import io.stormalmanac.player.PlayerProfile;
 import io.stormalmanac.player.PlayerStateRepository;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -138,8 +140,8 @@ public class PullController {
         }
 
         Map<String, Integer> reach = request.reach() == null ? Map.of() : request.reach();
-        PullBudget budget = income.affordableWithin(
-                definition, banner, players.inventoryOf(owner.id()), days, reach);
+        Inventory inventory = players.inventoryOf(owner.id());
+        PullBudget budget = income.affordableWithin(definition, banner, inventory, days, reach);
 
         CarriedPity carried = players.pityOf(owner.id(), PityState.scopeKeyOf(banner));
         PityState from = new PityState(
@@ -155,6 +157,28 @@ public class PullController {
         int asked = (int) Math.min(budget.pulls(), worstCase);
         double[] curve = engine.curveOfFeatured(banner, from, (int) worstCase, copies);
         double chance = curve[asked];
+
+        // The same answer by date (C2.8): the pulls each day's income affords,
+        // read off the same curve, from today to the banner's close, or to the
+        // horizon asked when it has none. One call, so the page never asks once
+        // a day; the point at the counted horizon is `chance` by construction.
+        int chartDays = closes == null
+                ? request.days()
+                : (int) Math.min(MAX_CHART_DAYS, Duration.between(now, closes).toSeconds() / SECONDS_PER_DAY);
+        List<DayView> byDay = new ArrayList<>();
+        for (int day = 0; day <= chartDays; day++) {
+            long pulls = day == days
+                    ? budget.pulls()
+                    : income.affordableWithin(definition, banner, inventory, day, reach).pulls();
+            byDay.add(new DayView(day, pulls, Math.round(curve[(int) Math.min(pulls, worstCase)] * 10_000) / 10_000.0));
+        }
+
+        // How many copies the afforded pulls end with, "exactly k" up to "this
+        // many or more": the chain walked once to one past what was asked, at
+        // least three, so a reader asking for one still sees what a second costs.
+        int upTo = Math.max(3, copies + 1);
+        int copyPulls = (int) Math.min(budget.pulls(), model.worstCasePullsFrom(from, upTo));
+        List<Double> byCopies = CurveView.of(engine.copiesWithin(banner, from, copyPulls, upTo));
 
         return new OddsResponse(
                 banner.id().value(),
@@ -172,8 +196,13 @@ public class PullController {
                 engine.expectedPullsToFeatured(banner, from),
                 worstCase,
                 CurveView.of(curve),
+                byDay,
+                byCopies,
                 engine.method());
     }
+
+    /** A year of days is as far as the chart by date is drawn, whatever a banner's close says. */
+    private static final int MAX_CHART_DAYS = 366;
 
     private GameDefinition latest(PlayerProfile owner) {
         return definitions.findLatest(owner.game())
@@ -270,6 +299,15 @@ public class PullController {
      * @param curve          the chance at every pull count from none to the worst
      *                       case; {@code chance} is its point at the pulls the
      *                       budget affords
+     * @param byDay          the pulls afforded and the chance on each day from
+     *                       today to the close, or to the horizon asked when the
+     *                       banner has none (C2.8); its point at {@code days} is
+     *                       {@code chance}
+     * @param byCopies       with the pulls afforded, the chance of exactly
+     *                       {@code k} copies at element {@code k}, and of the last
+     *                       index or more at the last element (C2.8). Copy
+     *                       exchanges are not modelled (N38), so more copies are
+     *                       likelier than this says
      */
     public record OddsResponse(
             String banner,
@@ -287,7 +325,12 @@ public class PullController {
             double expectedPulls,
             long worstCasePulls,
             List<Double> curve,
+            List<DayView> byDay,
+            List<Double> byCopies,
             String method) {}
+
+    /** One day of the chart by date: the pulls that day's income affords, and the chance they give. */
+    public record DayView(int day, long pulls, double chance) {}
 
     /**
      * The curve as the wire carries it: rounded to four decimals, because a

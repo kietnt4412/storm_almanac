@@ -224,6 +224,44 @@ class PullPlannerTest extends SharedDatabaseTest {
     }
 
     @Test
+    @DisplayName("the chance by date runs to the close and agrees with the chance at the horizon asked (C2.8)")
+    void theChanceByDateAgreesWithTheChance() throws Exception {
+        JsonNode odds = odds(Map.of(
+                "banner", "tide-certain", "days", 7, "reach", Map.of("daily-bar", 100, "arena", 10)));
+
+        JsonNode byDay = odds.get("byDay");
+        // The banner closes in 2099, so the chart stops at a year.
+        assertThat(byDay).hasSize(367);
+        assertThat(byDay.get(0).get("day").asInt()).isZero();
+        JsonNode asked = byDay.get(7);
+        assertThat(asked.get("pulls").asLong()).isEqualTo(odds.at("/budget/pulls").asLong());
+        assertThat(asked.get("chance").asDouble())
+                .isEqualTo(Math.round(odds.get("chance").asDouble() * 10_000) / 10_000.0);
+        for (int day = 1; day < byDay.size(); day++) {
+            assertThat(byDay.get(day).get("pulls").asLong()).isGreaterThanOrEqualTo(byDay.get(day - 1).get("pulls").asLong());
+            assertThat(byDay.get(day).get("chance").asDouble())
+                    .isGreaterThanOrEqualTo(byDay.get(day - 1).get("chance").asDouble());
+        }
+    }
+
+    @Test
+    @DisplayName("the copies a reader ends with sum to one, from none to three or more (C2.8)")
+    void theCopiesSumToOne() throws Exception {
+        holding(Map.of("tide-card", 3_750));
+        savePity("tide-certain", 45, 0);
+
+        JsonNode byCopies = odds(Map.of("banner", "tide-certain", "days", 0)).get("byCopies");
+
+        // Fifteen pulls from 45 on a wall of 60 is one copy for certain, and
+        // fifteen more cannot reach a second wall.
+        assertThat(byCopies).hasSize(4);
+        double sum = 0;
+        for (JsonNode chance : byCopies) sum += chance.asDouble();
+        assertThat(sum).isCloseTo(1.0, within(0.001));
+        assertThat(byCopies.get(0).asDouble()).isZero();
+    }
+
+    @Test
     @DisplayName("a closed banner and an unpriced one are refused by name, and no horizon is not a question")
     void unanswerableQuestionsAreRefused() throws Exception {
         MvcResult closed = oddsResult(Map.of("banner", "tide-gone", "days", 7));
