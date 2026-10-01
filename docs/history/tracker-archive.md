@@ -3380,6 +3380,31 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-10-02 (sixty-fourth) — C2.19: the emblem flies, the step bar slides.**
+
+**The ask:** "make the website more lively rather than the static page and dry word numbers". No screenshot
+came through, so a tour of production found the dry spots and six ideas were offered (item faces, a slider on
+the dossier, numbers in days, the sourcing as a timeline, ticking countdowns, a self-playing demo on Home).
+**The maintainer chose the agreed C2.19 first; the six wait for their pick** — each wants a plan and a mockup
+before code.
+
+**Remote, checked 2026-10-02 ~00:00Z:** **[PR #75](https://github.com/kietnt4412/storm_almanac/pull/75)
+(C2.17, C2.18, the tree fix) merged 2026-10-01 13:23Z; its `main` run `36868402724` is green and production
+reports `b7f8bce`.** This session first told the maintainer the motion work was not live, from the tracker's
+"in a PR" — wrong, and caught only by checking. The tracker's remote line is the thing to re-check, again.
+
+**Built:** C2.19 (`0306b92`) as the plan said, plus two things it did not: a 300 ms loader on the character
+route, and `ScrollRestoration` (a page now opens at its top — a behaviour change, on purpose). The page takes
+no part in the transition; only named pieces travel ([as built](../plans/c2.17-motion.md#c219-as-built-2026-10-02-sixty-fourth)).
+209 → 213 frontend tests.
+
+**What turned out false.** **Naming every emblem on a page is not naming one:** a view transition flies the
+pair it can match and fades every one-sided name on its own, so the five tiles not clicked hung over the new
+page for 270 ms — fixed with `::view-transition-old(*):only-child`. **A hidden Browser pane aborts every view
+transition**, an empty one included, with `InvalidStateError`; so after the first drive nothing more could be
+seen drawn, and the flight with the fix, the per-game timings and the step slide are **unseen**. The abort
+did prove the fallback: every aborted click still navigated.
+
 **2026-10-01 (sixty-third) — Motion where the answer is: C2.17 and C2.18.**
 
 **The ask:** improve the site "in the animation and effect side". A tour found the motion all spent on
