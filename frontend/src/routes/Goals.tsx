@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   getEntities,
   getGoals,
@@ -113,7 +113,13 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
   // Rows the reader has opened and set nothing on yet. They cannot live in the
   // list, because a goal needs a target; the roster screen keeps its opened
   // entities the same way. Nothing is saved for them.
-  const [opened, setOpened] = useState<string[]>([]);
+  // `?add=<entity>` opens one, from a character page's "Plan this" (C2.12): the
+  // reader arrives with the row they came for already there.
+  const [params] = useSearchParams();
+  const [opened, setOpened] = useState<string[]>(() => {
+    const asked = params.get('add');
+    return asked ? [asked] : [];
+  });
   // The entity whose "where they stand" is open, one at a time.
   const [standing, setStanding] = useState<string | null>(null);
   // The row being dragged by its grip (C2.8). A drop sends the whole list, as
@@ -129,7 +135,8 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
   const rows: GoalRow[] = [
     ...savedRows,
     ...opened
-      .filter((entity) => !savedRows.some((row) => row.entity === entity))
+      // A link may name someone this patch does not have; that opens nothing.
+      .filter((entity) => !savedRows.some((row) => row.entity === entity) && catalog.some((one) => one.id === entity))
       .map((entity) => ({ entity, goals: [] })),
   ];
   const addable = catalog.filter(

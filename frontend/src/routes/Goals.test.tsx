@@ -53,11 +53,36 @@ describe('reordering goals by dragging', () => {
     ]);
   });
 
+  it("opens a row for whoever a character page's \"Plan this\" names, and none for an id the patch lacks", async () => {
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <MemoryRouter initialEntries={['/goals?add=karenina']}>
+          <Goals />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByRole('link', { name: 'Karenina' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Priority 3').closest('li')).toHaveTextContent('Karenina');
+  });
+
+  it('opens nothing for an id the patch does not have', async () => {
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <MemoryRouter initialEntries={['/goals?add=nobody']}>
+          <Goals />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    await screen.findByRole('link', { name: 'Lucia' });
+    expect(screen.queryByLabelText('Priority 3')).not.toBeInTheDocument();
+  });
+
   function serve() {
     const version = { game: PGR, sequence: 18, label: 'Anchored in Faith', attribution: 'read from the client' };
     const entities = [
       { id: 'lucia', displayName: 'Lucia', kind: 'character' },
       { id: 'selena', displayName: 'Selena', kind: 'character' },
+      { id: 'karenina', displayName: 'Karenina', kind: 'character' },
     ];
     let goals = [
       { entity: 'lucia', targetState: 'level-10', priority: 0 },
