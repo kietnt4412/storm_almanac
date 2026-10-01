@@ -19,6 +19,20 @@
       "runtimeExecutable": "backend\\gradlew.bat",
       "runtimeArgs": ["-p", "backend", ":app:bootRun", "--console=plain"],
       "port": 8080
+    },
+    {
+      "comment": "The same frontend on 5174, proxied to api-alt on 8081: for when another session already holds 5173 and 8080 (frontend/vite.alt.config.ts).",
+      "name": "web-alt",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "frontend", "--", "--config", "vite.alt.config.ts"],
+      "port": 5174
+    },
+    {
+      "comment": "The backend from source on 8081, for web-alt.",
+      "name": "api-alt",
+      "runtimeExecutable": "backend\\gradlew.bat",
+      "runtimeArgs": ["-p", "backend", ":app:bootRun", "--console=plain", "--args=--server.port=8081"],
+      "port": 8081
     }
   ]
 }

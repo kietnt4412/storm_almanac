@@ -429,3 +429,13 @@ a {
     border-color: var(--line);
   }
 }
+
+/* The words in a hand-drawn chart (C2.8's flow): ink, and muted for the numbers under a name. */
+.flow-text {
+  fill: var(--ink);
+  font-size: 11px;
+}
+
+.flow-muted {
+  fill: var(--muted);
+}

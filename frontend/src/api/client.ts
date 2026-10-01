@@ -392,7 +392,15 @@ export interface Plan {
     instants, and a page that meets an older server shows the id rather than a
     blank row.
   */
-  stages: { stage: string; displayName?: string; runs: number; energyCost: number; totalEnergy: number }[];
+  stages: {
+    stage: string;
+    displayName?: string;
+    runs: number;
+    energyCost: number;
+    totalEnergy: number;
+    /** What the runs pay, as the solve counted it (C2.8); absent from a plan saved before it. */
+    pays?: { item: string; displayName: string; perRun: number; total: number }[];
+  }[];
   /*
     `displayName` names one purchase and `total` all `times` of them, "Buy
     514,800 Cogs for 429 Simulation Score"; `repeat` is how a purchase is made
@@ -417,7 +425,8 @@ export interface Plan {
       boughtQuantity?: number;
     } | null;
   }[];
-  rewards: { reward: string; displayName?: string; times: number }[];
+  /** `cadence` is the reward's, `WEEKLY` and so on (C2.8); absent from a plan saved before it. */
+  rewards: { reward: string; displayName?: string; times: number; cadence?: string | null }[];
   totalEnergy: number;
   etaDays: number;
   shadowPrice: ShadowPrice[];
@@ -434,6 +443,12 @@ export interface Plan {
     Absent from a server older than this page, which sends `notes` alone.
   */
   remarks?: Remark[];
+  /*
+    What the goals need of each item before the bag is taken off: the solver's
+    demand, gates added, crossed states left out (C2.8). An item may be a
+    `progress:` or `choice:` key no bag holds. Absent from a plan saved before it.
+  */
+  needs?: { item: string; displayName: string; quantity: number }[];
   computedAt: string;
 }
 

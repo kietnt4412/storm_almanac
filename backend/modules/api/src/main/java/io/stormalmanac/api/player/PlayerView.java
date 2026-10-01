@@ -368,6 +368,7 @@ public final class PlayerView {
             List<String> notes,
             List<RemarkView> remarks,
             List<PayingForView> payingFor,
+            List<NeedView> needs,
             Instant computedAt) {
 
         public static PlanResponse of(Plan plan, GameDefinition definition) {
@@ -391,7 +392,8 @@ public final class PlayerView {
                     plan.stageRuns().stream()
                             .map(run -> new StageRunView(
                                     run.stage().value(), names.stage(run.stage()),
-                                    run.runs(), run.energyCost(), run.totalEnergy()))
+                                    run.runs(), run.energyCost(), run.totalEnergy(),
+                                    YieldView.of(plan.explanation().yields().get(run.stage()), run.runs(), names)))
                             .toList(),
                     // Read order, not id order: buy, open, feed, pay; a ladder's
                     // tiers bottom rung up. Still one order per plan, so two
@@ -408,7 +410,8 @@ public final class PlayerView {
                             .toList(),
                     plan.rewardClaims().stream()
                             .sorted(Comparator.comparing(c -> c.reward(), names.rewardOrder()))
-                            .map(c -> new RewardClaimView(c.reward(), names.reward(c.reward()), c.times()))
+                            .map(c -> new RewardClaimView(
+                                    c.reward(), names.reward(c.reward()), c.times(), cadenceOf(definition, c.reward())))
                             .toList(),
                     plan.totalEnergy(),
                     plan.etaDays(),
@@ -423,7 +426,50 @@ public final class PlayerView {
                     plan.explanation().payingFor().stream()
                             .map(entry -> PayingForView.of(entry, names))
                             .toList(),
+                    plan.explanation().demand().entrySet().stream()
+                            .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemId::value)))
+                            .map(need -> new NeedView(
+                                    need.getKey().value(), names.demand(need.getKey()), need.getValue()))
+                            .toList(),
                     plan.computedAt());
+        }
+
+        /** The reward's cadence by name, {@code WEEKLY}; null for one this version does not declare. */
+        private static String cadenceOf(GameDefinition definition, String reward) {
+            return definition.rewards().stream()
+                    .filter(candidate -> candidate.id().equals(reward))
+                    .findFirst()
+                    .map(candidate -> candidate.cadence().name())
+                    .orElse(null);
+        }
+    }
+
+    /**
+     * What the goals need of one item before the inventory is taken off (C2.8):
+     * the demand the solver resolved, gates added and crossed states left out.
+     * The inventory screen sets the bag against this rather than working out a
+     * second idea of need. An {@code item} may be a progress kind or a choice
+     * ({@code progress:…}, {@code choice:…}), which no bag holds.
+     */
+    public record NeedView(String item, String displayName, int quantity) {}
+
+    /**
+     * What a stage's runs pay of one item (C2.8): {@code perRun} as the solve
+     * counted it, and {@code total} over the plan's runs. The plan page draws
+     * where the energy goes from these, so it never guesses a split between two
+     * stages, and a sampled rate arrives already discounted (ADR 0011).
+     */
+    public record YieldView(String item, String displayName, double perRun, double total) {
+
+        static List<YieldView> of(Map<ItemId, Double> perRun, int runs, StepNames names) {
+            if (perRun == null) return List.of();
+            return perRun.entrySet().stream()
+                    .filter(paid -> paid.getValue() > 0)
+                    .sorted(Map.Entry.comparingByKey(Comparator.comparing(ItemId::value)))
+                    .map(paid -> new YieldView(
+                            paid.getKey().value(), names.demand(paid.getKey()), paid.getValue(),
+                            paid.getValue() * runs))
+                    .toList();
         }
     }
 
@@ -496,7 +542,8 @@ public final class PlayerView {
      * {@code simulation-shop-weapon-enhancer-iv}. The words are
      * {@link StepNames}'s, built only from facts already published.
      */
-    public record StageRunView(String stage, String displayName, int runs, int energyCost, int totalEnergy) {}
+    public record StageRunView(
+            String stage, String displayName, int runs, int energyCost, int totalEnergy, List<YieldView> pays) {}
 
     /**
      * A thing to craft, buy, feed or pay, {@code times} over.
@@ -538,5 +585,11 @@ public final class PlayerView {
         }
     }
 
-    public record RewardClaimView(String reward, String displayName, int times) {}
+    /**
+     * A free grant the plan counts, {@code times} over. {@code cadence} is the
+     * reward's, {@code DAILY} or {@code WEEKLY} and so on (C2.8), so the plan page
+     * can mark each claim on the horizon; the model counts the k-th weekly claim
+     * at day 7k, never on a weekday.
+     */
+    public record RewardClaimView(String reward, String displayName, int times, String cadence) {}
 }
