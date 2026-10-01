@@ -3380,6 +3380,35 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-10-01 (sixty-first) — C2.9, a first screen that asks which game; the footer writes an email.**
+
+**The remote, checked first:** [PR #72](https://github.com/kietnt4412/storm_almanac/pull/72) (C2.8)
+merged 09:17Z; its `main` run `36841797842` is green and production reports `c8f38f9`
+(checked 10:59Z). So the five core screens are live.
+
+**The flash, diagnosed from the code.** The maintainer saw the Storm palette for about a second
+before PGR on every start. `main.tsx` paints the *stored* game before React renders, but the key is
+written only by `choose()`, and a reader who reached PGR as the default (first published game, or
+their profile's) never chose. So every load painted Storm, waited for `/api/games` and `/api/me`,
+and turned. A second key for the game last *shown* was proposed first; the maintainer's answer was
+better: **ask on the first visit**, so every browser leaves a choice behind. Built as C2.9: offered
+from the client's looks without waiting for the server, the upcoming one greyed, never in front of a
+`/catalog/<game>` link, and the chosen game's opening plays after the pick (the maintainer: the
+opening *is* the entry to the game). **Driving it found a second bug:** with no backend running, the
+choice was dropped once `/api/games` failed, because `useActiveGame` trusted it only while the request
+was *pending*. It now trusts it whenever there is no list to check it against.
+
+**The footer.** The Discord handle and its copy button went, and so did the red swash under the
+signature. The signature is a `mailto:` to the contact address the maintainer named (not the
+account address). The maintainer asked for a hint that it can be pressed, then for the hint to be
+less obvious: a faint pencil note, *write to me* with an arrow, that inks in under the pointer.
+Against harvesters the address is held in two halves and the link gets its `mailto:` on pointer,
+touch or focus; a production build was grepped and does not contain it whole.
+
+**Asked and not done: R1999 on production for the maintainer's account** (Q8). No admin role
+exists, and R1999's only data is the Kornblume cross-check that ADR 0015 keeps off production.
+Recommended locally instead; the maintainer has not answered.
+
 **2026-10-01 (sixtieth) — C2.8: the five core screens, agreed from mockups and built a page at a time.**
 
 **The remote, checked first:** [PR #71](https://github.com/kietnt4412/storm_almanac/pull/71)
