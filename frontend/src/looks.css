@@ -578,43 +578,95 @@
   background: currentColor;
 }
 
-.footer-contact {
+/* The signature is a link that writes an email: it lifts and glows a little under the pointer. */
+.signature-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.3rem 0.35rem 0.3rem 0.7rem;
-  border: 1px solid var(--line);
-  border-radius: 9999px;
-  background: var(--surface);
-  font-size: 0.8125rem;
-  color: var(--ink);
+  gap: 0.125rem;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem 0.25rem 0.375rem;
+  text-decoration: none;
+  transition: transform 0.2s, background-color 0.2s;
 }
 
-.footer-contact > svg {
-  color: var(--brand);
+.signature-link:hover,
+.signature-link:focus-visible {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
 }
 
-.footer-copy {
+.signature-link:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/*
+ * "write to me", a note in the margin: an arrow curled back to the name, drawn
+ * once by the pen as the name finishes its first writing, and a line in a hand.
+ * Faint, in pencil grey, so it reads as a margin note a reader happens on rather
+ * than a sign (the maintainer: "too obvious"); under the pointer it inks in, in
+ * the brand colour, and the arrow nudges toward the name.
+ */
+.sig-hint {
   display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.15rem 0.55rem;
-  border-radius: 9999px;
-  font-size: 0.6875rem;
-  font-weight: 600;
+  align-items: flex-end;
+  gap: 0.125rem;
+  margin-top: 0.75rem;
   color: var(--muted);
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
-  transition: color 0.2s, background-color 0.2s;
+  opacity: 0.45;
+  transition: color 0.25s, opacity 0.25s;
 }
 
-.footer-copy:hover {
-  color: var(--ink);
-  background: color-mix(in srgb, var(--brand) 16%, transparent);
+.signature-link:hover .sig-hint,
+.signature-link:focus-visible .sig-hint {
+  color: var(--brand);
+  opacity: 1;
+}
+
+.sig-arrow {
+  overflow: visible;
+  transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.25, 1.2);
+}
+
+.sig-arrow-stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: sig-arrow 0.6s ease-out 4.2s forwards;
+}
+
+.sig-arrow-head {
+  animation-delay: 4.75s;
+  animation-duration: 0.25s;
+}
+
+.sig-hint-text {
+  font-family: 'Segoe Script', 'Bradley Hand', 'Snell Roundhand', 'Comic Sans MS', cursive;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  transform: rotate(-5deg);
+  transform-origin: left bottom;
+  animation: fade-in 0.5s ease-out 4.6s both;
+}
+
+.signature-link:hover .sig-arrow,
+.signature-link:focus-visible .sig-arrow {
+  transform: translate(-3px, -2px) rotate(-6deg);
+}
+
+@keyframes sig-arrow {
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 /*
  * The signature: each pen stroke drawn in turn (the crossbar, the stem, then
- * "hel" in one go, then the swash under it), held, faded, and written again.
+ * "hel" in one go), held, faded, and written again.
  * Every stroke has `pathLength` 1, so a dash of 1 is the whole stroke and an
  * offset of 1 is none of it. A stroke waits hidden for its turn, because a
  * dash of no length still draws its round cap as a dot. Still, it is simply
@@ -637,11 +689,6 @@
   animation: 9s infinite;
 }
 
-.sig-4 {
-  stroke: var(--brand);
-  stroke-width: 4.5;
-}
-
 .sig-1 {
   animation-name: sig-1;
 }
@@ -650,9 +697,6 @@
 }
 .sig-3 {
   animation-name: sig-3;
-}
-.sig-4 {
-  animation-name: sig-4;
 }
 
 @keyframes sig-1 {
@@ -723,29 +767,6 @@
   }
 }
 
-@keyframes sig-4 {
-  0%,
-  47% {
-    stroke-dashoffset: 1;
-    opacity: 0;
-  }
-  47.1% {
-    stroke-dashoffset: 1;
-    opacity: 1;
-    animation-timing-function: ease-out;
-  }
-  55%,
-  80% {
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
-  88%,
-  100% {
-    stroke-dashoffset: 0;
-    opacity: 0;
-  }
-}
-
 /* ── Asked for less motion: every letter where it lands, nothing restless ── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -760,7 +781,16 @@
   }
 
   .brand-emblem,
-  .brand-lockup {
+  .brand-lockup,
+  .signature-link,
+  .sig-arrow,
+  .sig-hint {
     transition: none !important;
+  }
+
+  .sig-arrow-stroke,
+  .sig-hint-text {
+    animation: none !important;
+    stroke-dashoffset: 0;
   }
 }

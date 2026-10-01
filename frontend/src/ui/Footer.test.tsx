@@ -1,7 +1,6 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
-import { DISCORD_HANDLE, Footer } from './Footer';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+import { contactEmail, Footer } from './Footer';
 
 /**
  * The foot of every page (2026-10-01): the maintainer's credit and contact,
@@ -9,28 +8,35 @@ import { DISCORD_HANDLE, Footer } from './Footer';
  * front of readers was the bug that asked for this.
  */
 describe('the footer', () => {
-  it('credits Thel, with a Discord handle to reach them, and says nothing about a server that answers', () => {
+  it('credits Thel with a signature that writes them an email, and says nothing about a server that answers', () => {
     render(<Footer unreachable={false} />);
 
-    expect(screen.getByRole('img', { name: 'Thel' })).toBeInTheDocument();
-    expect(screen.getByText(`@${DISCORD_HANDLE}`)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Email Thel' })).toBeInTheDocument();
+    expect(screen.queryByText(/discord/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/backend|server/i)).not.toBeInTheDocument();
+  });
+
+  it('keeps the address out of the page until someone reaches for the link, so a harvester finds none', () => {
+    const { container } = render(<Footer unreachable={false} />);
+    const link = screen.getByRole('link', { name: 'Email Thel' });
+
+    expect(container.innerHTML).not.toContain('@');
+
+    fireEvent.pointerEnter(link);
+    expect(link).toHaveAttribute('href', `mailto:${contactEmail()}`);
+  });
+
+  it('arms the link for a keyboard too', () => {
+    render(<Footer unreachable={false} />);
+    const link = screen.getByRole('link', { name: 'Email Thel' });
+
+    act(() => link.focus());
+    expect(link).toHaveAttribute('href', `mailto:${contactEmail()}`);
   });
 
   it('says so when the server cannot be reached, because the screens are then what this device remembers', () => {
     render(<Footer unreachable />);
 
     expect(screen.getByRole('status')).toHaveTextContent("Can't reach the server");
-  });
-
-  it('copies the handle, and says it did', async () => {
-    const user = userEvent.setup();
-    const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
-    render(<Footer unreachable={false} />);
-
-    await user.click(screen.getByRole('button', { name: `Copy ${DISCORD_HANDLE}` }));
-
-    expect(writeText).toHaveBeenCalledWith(DISCORD_HANDLE);
-    expect(await screen.findByText('Copied')).toBeInTheDocument();
   });
 });
