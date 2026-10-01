@@ -114,6 +114,13 @@ const PATHS = {
   chevron: <path d="m9 6 6 6-6 6" />,
   chevronDown: <path d="m6 9 6 6 6-6" />,
   check: <path d="m5 12 4.5 4.5L19 7" />,
+  chat: <path d="M4 5h16v11H9l-5 4V5z" />,
+  copy: (
+    <>
+      <rect x="8" y="8" width="12" height="12" rx="2" />
+      <path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" />
+    </>
+  ),
   signOut: (
     <>
       <path d="M15 4h4v16h-4" />

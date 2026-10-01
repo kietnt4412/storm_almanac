@@ -11,6 +11,7 @@ import { Intro } from './ui/Intro';
 import { applyGame, lookOf, LOOKS, useGameChoice } from './ui/gameChoice';
 import { GameMark } from './ui/GameMark';
 import { Wordmark } from './ui/Wordmark';
+import { Footer } from './ui/Footer';
 
 /**
  * The shell every screen hangs off: who is reading, which profile they are
@@ -84,11 +85,9 @@ export function App() {
   useEscape(open, () => setOpen(false));
   const scrolled = useScrolled(24);
 
-  const healthLine = health.isError
-    ? 'Backend unreachable — anything below is what this device remembers.'
-    : health.data
-      ? `Backend ${health.data.status} · ${health.data.version}`
-      : 'Backend: checking…';
+  // The server's state is said only when a reader needs it: when it cannot be
+  // reached. Its version is a developer's concern and stays on /api/health.
+  const unreachable = health.isError;
 
   const gameSwitch = (
     <GameSwitch active={active.id} games={active.games} profiles={profiles} signedIn={Boolean(me.data)} />
@@ -177,7 +176,6 @@ export function App() {
                   <div className="w-64 space-y-3 p-1 text-sm">
                     <div className="font-medium">{me.data.displayName}</div>
                     {profilePicker}
-                    <p className="muted text-xs">{healthLine}</p>
                     <button type="button" className="btn-quiet w-full" onClick={leave} disabled={signingOut}>
                       <Icon name="signOut" size={16} /> Sign out
                     </button>
@@ -253,12 +251,7 @@ export function App() {
         </main>
       </div>
 
-      <footer className="border-t px-4 py-5 text-xs muted" style={{ borderColor: 'var(--line)' }}>
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 md:px-4">
-          <span>Storm Almanac — numbers and text only, each with where it was read.</span>
-          <span>{healthLine}</span>
-        </div>
-      </footer>
+      <Footer unreachable={unreachable} />
     </div>
   );
 }
@@ -398,28 +391,41 @@ function Dropdown({
 }
 
 /**
- * The way home: the game's mark, then its wordmark with the site's name under
- * it — or, for a game with no look, just the name. Keyed by game, so switching
- * game plays the wordmark's letters in again. Both fold into the pill on scroll.
+ * The way home. For a game with a look: its wordmark with the site's name
+ * under it, and no mark (the maintainer, 2026-10-01). Once the bar gathers
+ * into a pill, the wordmark squeezes away and the mark turns in where it
+ * stood, and back again at the top; `looks.css` does it off the bar's
+ * `data-scrolled`. Keyed by game, so switching game plays the letters in
+ * again. A game with no look keeps the bolt beside the site's name.
  */
 function Brand({ game }: { game: string | null }) {
   const look = lookOf(game);
+  if (!look) {
+    return (
+      <NavLink
+        to="/"
+        className="flex shrink-0 items-center gap-2 text-base font-semibold no-underline"
+        style={{ color: 'var(--ink)' }}
+      >
+        <GameMark game={game} size={32} />
+        <span className="brand-word">Storm Almanac</span>
+      </NavLink>
+    );
+  }
   return (
     <NavLink
       to="/"
-      className="flex shrink-0 items-center gap-2 text-base font-semibold no-underline"
+      className="brand-morph flex shrink-0 items-center no-underline"
       style={{ color: 'var(--ink)' }}
-      aria-label={look ? `Storm Almanac · ${look.name}` : undefined}
+      aria-label={`Storm Almanac · ${look.name}`}
     >
-      <GameMark game={game} size={32} />
-      {look ? (
-        <span className="brand-word brand-lockup" aria-hidden="true">
-          <Wordmark key={look.id} game={look.id} size="sm" />
-          <span className="brand-site">Storm Almanac</span>
-        </span>
-      ) : (
-        <span className="brand-word">Storm Almanac</span>
-      )}
+      <span className="brand-emblem" aria-hidden="true">
+        <GameMark game={look.id} size={32} />
+      </span>
+      <span className="brand-word brand-lockup" aria-hidden="true">
+        <Wordmark key={look.id} game={look.id} size="sm" />
+        <span className="brand-site">Storm Almanac</span>
+      </span>
     </NavLink>
   );
 }
