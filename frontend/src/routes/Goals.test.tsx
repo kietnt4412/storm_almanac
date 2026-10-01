@@ -51,6 +51,10 @@ describe('reordering goals by dragging', () => {
       { entity: 'selena', targetState: 'level-10', priority: 0 },
       { entity: 'lucia', targetState: 'level-10', priority: 1 },
     ]);
+
+    // C2.18: a save that went through says so with a tick, which a screen reader is not read.
+    const done = await screen.findByRole('button', { name: 'Saved' });
+    expect(done.querySelector('.tick-in')).not.toBeNull();
   });
 
   it("opens a row for whoever a character page's \"Plan this\" names, and none for an id the patch lacks", async () => {

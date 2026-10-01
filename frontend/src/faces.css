@@ -1113,6 +1113,86 @@
   }
 }
 
+/*
+ * Feedback in each game's terms (C2.18). Punishing: Gray Raven: a card under
+ * the pointer is locked on — its brackets spring outward and glow, and a red
+ * edge comes up on its left — and a button at work runs hazard stripes, like
+ * the game's loading bars. Reverse: 1999: a card lifts off the page with a gold
+ * rule inside it, and a button at work has a wash of ink moving across it, back
+ * and forth like a pen.
+ */
+:root[data-game='punishing-gray-raven'] :is(a, button).card::after {
+  transition:
+    inset 0.18s steps(3, end),
+    opacity 0.18s,
+    filter 0.18s;
+}
+
+:root[data-game='punishing-gray-raven'] :is(a, button).card:is(:hover, :focus-visible)::after {
+  inset: -5px;
+  opacity: 1;
+  filter: drop-shadow(0 0 4px var(--brand));
+}
+
+:root[data-game='punishing-gray-raven'] :is(a, button).card:is(:hover, :focus-visible) {
+  box-shadow:
+    inset 3px 0 0 var(--brand),
+    0 8px 24px -12px color-mix(in srgb, var(--brand) 60%, transparent);
+}
+
+:root[data-game='punishing-gray-raven'] .btn:active:not(:disabled) {
+  filter: brightness(1.35);
+  transform: translateX(2px) scale(0.97);
+}
+
+:root[data-game='punishing-gray-raven'] .btn[data-working]::after {
+  background: linear-gradient(
+      -45deg,
+      rgb(0 0 0 / 28%) 25%,
+      transparent 25% 50%,
+      rgb(0 0 0 / 28%) 50% 75%,
+      transparent 75%
+    )
+    0 0 / 20px 20px;
+  animation: pgr-hazard 0.45s linear infinite;
+}
+
+@keyframes pgr-hazard {
+  to {
+    background-position: 20px 0;
+  }
+}
+
+:root[data-game='reverse-1999'] :is(a, button).card:is(:hover, :focus-visible) {
+  transform: translateY(-3px) rotate(-0.35deg);
+  box-shadow:
+    inset 0 0 0 3px var(--surface),
+    inset 0 0 0 4px color-mix(in srgb, var(--brand) 70%, var(--line)),
+    0 14px 26px -14px rgb(0 0 0 / 55%);
+}
+
+:root[data-game='reverse-1999'] .btn[data-working]::after {
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--on-brand) 40%, transparent), transparent) 0 50% /
+    45% 180% no-repeat;
+  animation: r1999-pen 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes r1999-pen {
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-game] .btn[data-working]::after {
+    animation: none !important;
+  }
+
+  :root[data-game] :is(a, button).card:is(:hover, :focus-visible) {
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root[data-game] .page,
   :root[data-game] .land,

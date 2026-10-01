@@ -612,7 +612,7 @@ function Profiles({
               onChange={(event) => setDisplayName(event.target.value)}
             />
           </div>
-          <button type="submit" className="btn" disabled={add.isPending || published.length === 0 || Boolean(taken)}>
+          <button type="submit" className="btn" data-working={add.isPending || undefined} disabled={add.isPending || published.length === 0 || Boolean(taken)}>
             {add.isPending ? 'Creating…' : 'Add a profile'}
           </button>
           {!forced && (
@@ -694,7 +694,7 @@ function ProfileRow({
               autoFocus
             />
           </div>
-          <button type="submit" className="btn" disabled={rename.isPending || name.trim() === ''}>
+          <button type="submit" className="btn" data-working={rename.isPending || undefined} disabled={rename.isPending || name.trim() === ''}>
             {rename.isPending ? 'Saving…' : 'Save'}
           </button>
           <button
@@ -722,7 +722,7 @@ function ProfileRow({
           with it, on every device, and cannot be brought back.
         </p>
         <div className="flex flex-wrap gap-3">
-          <button type="button" className="btn" disabled={remove.isPending} onClick={() => remove.mutate(profile.id)}>
+          <button type="button" className="btn" data-working={remove.isPending || undefined} disabled={remove.isPending} onClick={() => remove.mutate(profile.id)}>
             {remove.isPending ? 'Deleting…' : 'Delete it'}
           </button>
           <button

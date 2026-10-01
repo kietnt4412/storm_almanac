@@ -297,7 +297,7 @@ function Asker({
             ))}
           </select>
         </div>
-        <button type="submit" className="btn" disabled={run.isPending || pity.isPending}>
+        <button type="submit" className="btn" data-working={run.isPending || undefined} disabled={run.isPending || pity.isPending}>
           {run.isPending ? 'Working it out…' : 'Work it out'}
         </button>
       </div>

@@ -332,7 +332,7 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
           </section>
         )}
 
-        <button type="submit" className="btn" disabled={run.isPending || !hasGoals}>
+        <button type="submit" className="btn" data-working={run.isPending || undefined} disabled={run.isPending || !hasGoals}>
           {run.isPending ? 'Solving…' : 'Work it out'}
         </button>
       </form>

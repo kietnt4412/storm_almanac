@@ -367,7 +367,7 @@ function NoProfileFor({ game }: { game: string }) {
         You have no {name} profile, so there is no roster or inventory to measure this against.
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-3">
-        <button type="button" className="btn" onClick={() => add.mutate({ game, region: 'global', displayName: 'Main' })} disabled={add.isPending}>
+        <button type="button" className="btn" onClick={() => add.mutate({ game, region: 'global', displayName: 'Main' })} disabled={add.isPending} data-working={add.isPending || undefined}>
           {add.isPending ? 'Creating…' : `Make a ${name} profile`}
         </button>
         {add.isError && (
