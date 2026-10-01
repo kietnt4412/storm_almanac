@@ -47,7 +47,7 @@ public class JdbcAccountRepository implements AccountRepository {
     public Optional<Account> find(AccountId id) {
         return one(jdbc.query(
                 """
-                SELECT id, display_name, email, created_at
+                SELECT id, display_name, email, picture_url, created_at
                   FROM identity.account
                  WHERE id = ?
                 """,
@@ -58,8 +58,9 @@ public class JdbcAccountRepository implements AccountRepository {
     /**
      * Find the account this provider subject already belongs to, or create one.
      *
-     * <p>The display name and email are refreshed on every sign-in, because the
-     * provider is the authority on both and a stale name is a support ticket.
+     * <p>The display name, email and picture are refreshed on every sign-in,
+     * because the provider is the authority on all three and a stale name is a
+     * support ticket.
      * Nothing else about the account is touched: {@code created_at} is when this
      * person first arrived, not when they last did.
      *
@@ -71,7 +72,8 @@ public class JdbcAccountRepository implements AccountRepository {
      */
     @Override
     @Transactional
-    public Account upsertFromOidc(String provider, String subject, String displayName, String email) {
+    public Account upsertFromOidc(
+            String provider, String subject, String displayName, String email, String pictureUrl) {
         require(provider, "provider");
         require(subject, "subject");
 
@@ -81,12 +83,13 @@ public class JdbcAccountRepository implements AccountRepository {
         if (existing.isEmpty()) {
             jdbc.update(
                     """
-                    INSERT INTO identity.account (id, display_name, email)
-                    VALUES (?, ?, ?)
+                    INSERT INTO identity.account (id, display_name, email, picture_url)
+                    VALUES (?, ?, ?, ?)
                     """,
                     id.value(),
                     displayName == null ? "" : displayName,
-                    email == null ? "" : email);
+                    email == null ? "" : email,
+                    pictureUrl);
             jdbc.update(
                     """
                     INSERT INTO identity.account_identity (provider, subject, account_id)
@@ -99,10 +102,11 @@ public class JdbcAccountRepository implements AccountRepository {
         } else {
             jdbc.update(
                     """
-                    UPDATE identity.account SET display_name = ?, email = ? WHERE id = ?
+                    UPDATE identity.account SET display_name = ?, email = ?, picture_url = ? WHERE id = ?
                     """,
                     displayName == null ? "" : displayName,
                     email == null ? "" : email,
+                    pictureUrl,
                     id.value());
         }
 
@@ -131,6 +135,7 @@ public class JdbcAccountRepository implements AccountRepository {
                 AccountId.of(rs.getString("id")),
                 rs.getString("display_name"),
                 rs.getString("email"),
+                rs.getString("picture_url"),
                 createdAt == null ? null : createdAt.toInstant());
     }
 

@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { GameMark } from './GameMark';
+import { lookOf } from './gameChoice';
 import { prefersMotion } from './motion';
+import { Wordmark } from './Wordmark';
 
 /**
  * The opening (C2.6, agreed 2026-10-01: once per browser session): the mark
  * turns in, the name slides out from behind it, then the page rises over both
- * from the bottom edge.
+ * from the bottom edge. For a game with a look, the name is the game's
+ * wordmark, letter by letter, with the site's name under it — so the opening
+ * holds a little longer, for the letters to land.
  *
  * <p><b>Once per session, not once per visit to Home.</b> This is a tool people
  * return to through the day; an opening on every navigation would stand between
@@ -25,6 +29,7 @@ import { prefersMotion } from './motion';
 const KEY = 'storm-almanac:intro-seen';
 /** When the curtain starts to lift, and how long it takes. */
 const HOLD_MS = 1500;
+const HOLD_WORDMARK_MS = 2100;
 const WIPE_MS = 650;
 
 export function shouldPlayIntro(): boolean {
@@ -46,6 +51,7 @@ function remember(): void {
 
 export function Intro({ game }: { game: string | null }) {
   const [phase, setPhase] = useState<'off' | 'show' | 'wipe'>(() => (shouldPlayIntro() ? 'show' : 'off'));
+  const hold = lookOf(game) ? HOLD_WORDMARK_MS : HOLD_MS;
 
   useEffect(() => {
     if (phase === 'off') return;
@@ -54,7 +60,7 @@ export function Intro({ game }: { game: string | null }) {
       root.setAttribute('data-intro', 'on');
       remember();
       const skip = () => setPhase('wipe');
-      const timer = window.setTimeout(skip, HOLD_MS);
+      const timer = window.setTimeout(skip, hold);
       window.addEventListener('keydown', skip);
       window.addEventListener('pointerdown', skip);
       return () => {
@@ -67,7 +73,7 @@ export function Intro({ game }: { game: string | null }) {
     root.removeAttribute('data-intro');
     const timer = window.setTimeout(() => setPhase('off'), WIPE_MS);
     return () => window.clearTimeout(timer);
-  }, [phase]);
+  }, [phase, hold]);
 
   // Never leave the page's entrances paused behind an opening that is gone.
   useEffect(() => () => document.documentElement.removeAttribute('data-intro'), []);
@@ -79,9 +85,16 @@ export function Intro({ game }: { game: string | null }) {
         <span className="intro-mark">
           <GameMark game={game} size={64} />
         </span>
-        <span className="intro-name">
-          <span>Storm Almanac</span>
-        </span>
+        {lookOf(game) ? (
+          <span className="intro-wordmark">
+            <Wordmark game={game} size="lg" delay={350} />
+            <span className="intro-site">Storm Almanac</span>
+          </span>
+        ) : (
+          <span className="intro-name">
+            <span>Storm Almanac</span>
+          </span>
+        )}
       </div>
       <span className="intro-skip">Press any key to skip</span>
     </div>

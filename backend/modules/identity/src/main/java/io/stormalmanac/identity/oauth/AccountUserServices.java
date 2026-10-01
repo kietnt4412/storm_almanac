@@ -75,7 +75,7 @@ public class AccountUserServices {
     private AccountId register(String provider, Map<String, Object> attributes) {
         SignIn signIn = SignIn.from(provider, attributes);
         Account account = accounts.upsertFromOidc(
-                signIn.provider(), signIn.subject(), signIn.displayName(), signIn.email());
+                signIn.provider(), signIn.subject(), signIn.displayName(), signIn.email(), signIn.pictureUrl());
         return account.id();
     }
 

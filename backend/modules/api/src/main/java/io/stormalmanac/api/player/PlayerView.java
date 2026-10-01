@@ -40,13 +40,16 @@ public final class PlayerView {
 
     // ── Account and profiles ────────────────────────────────────────────────
 
-    public record MeResponse(String accountId, String displayName, String email, List<ProfileResponse> profiles) {
+    /** @param pictureUrl the provider's picture, an {@code https} link, or null for initials */
+    public record MeResponse(
+            String accountId, String displayName, String email, String pictureUrl, List<ProfileResponse> profiles) {
 
         public static MeResponse of(Account account, List<PlayerProfile> profiles) {
             return new MeResponse(
                     account.id().value(),
                     account.displayName(),
                     account.email(),
+                    account.pictureUrl(),
                     profiles.stream().map(ProfileResponse::of).toList());
         }
     }

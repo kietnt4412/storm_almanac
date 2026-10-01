@@ -3,7 +3,7 @@ package io.stormalmanac.identity;
 import java.util.Map;
 
 /**
- * What a provider tells us about the person signing in, reduced to the three
+ * What a provider tells us about the person signing in, reduced to the four
  * things this service stores.
  *
  * <p>Every provider is a different shape of JSON and exactly one of the
@@ -14,12 +14,17 @@ import java.util.Map;
  * let someone in because their provider stopped sending a display name would be
  * an outage caused by decoration.
  *
+ * <p>The picture is decoration too, and stricter: it is kept only as an
+ * {@code https} link, because a page puts it straight into an image. Google
+ * sends one as {@code picture}; Discord sends a hash under {@code avatar} that
+ * is not a link, so a Discord account shows initials.
+ *
  * <p>Kept as a small pure function so the provider-specific half is testable
  * without a provider. The alternative — reading these keys inside a Spring
  * {@code OAuth2UserService} — is only testable by standing up an authorization
  * server, which tests Spring's protocol implementation rather than ours.
  */
-public record SignIn(String provider, String subject, String displayName, String email) {
+public record SignIn(String provider, String subject, String displayName, String email, String pictureUrl) {
 
     public SignIn {
         if (provider == null || provider.isBlank()) {
@@ -34,6 +39,7 @@ public record SignIn(String provider, String subject, String displayName, String
         }
         displayName = displayName == null ? "" : displayName;
         email = email == null ? "" : email;
+        pictureUrl = pictureUrl != null && pictureUrl.startsWith("https://") ? pictureUrl : null;
     }
 
     /**
@@ -52,7 +58,8 @@ public record SignIn(String provider, String subject, String displayName, String
                 // constant.
                 string(attributes, "sub", "id"),
                 string(attributes, "global_name", "name", "username"),
-                string(attributes, "email"));
+                string(attributes, "email"),
+                string(attributes, "picture"));
     }
 
     private static String string(Map<String, Object> attributes, String... keys) {
