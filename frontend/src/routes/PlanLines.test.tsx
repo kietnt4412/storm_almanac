@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import type { Plan } from '../api/client';
 import { Answer } from './PlanView';
@@ -63,7 +63,8 @@ describe('the lines of a plan', () => {
       />,
     );
 
-    expect(screen.getByText('Simulated Battlefield')).toBeInTheDocument();
+    // The checklist's row; the circuit above it draws the same name for the eye.
+    expect(within(checklist()).getByText('Simulated Battlefield')).toBeInTheDocument();
     expect(screen.getByText('binding')).toBeInTheDocument();
     expect(screen.getByText(/Buy 10 Memory Enhancer IV for 87 Simulation Score/)).toBeInTheDocument();
     expect(screen.getByText(/Weekly, score 90,000\+: 5 Phantom Pain Scar/)).toBeInTheDocument();
@@ -136,7 +137,7 @@ describe('the lines of a plan', () => {
       />,
     );
 
-    expect(screen.getByText('simulated-battlefield')).toBeInTheDocument();
+    expect(within(checklist()).getByText('simulated-battlefield')).toBeInTheDocument();
     expect(screen.getByText(/simulation-shop-cogs/)).toBeInTheDocument();
   });
   it('draws where each currency goes from the purchases, largest share first, and draws nothing without numbers', () => {
@@ -179,3 +180,8 @@ describe('the lines of a plan', () => {
     expect(screen.queryByText(/Where your/)).not.toBeInTheDocument();
   });
 });
+
+/** The plan's checklist, "Do this". */
+function checklist(): HTMLElement {
+  return screen.getByRole('heading', { name: 'Do this' }).closest('section')!;
+}

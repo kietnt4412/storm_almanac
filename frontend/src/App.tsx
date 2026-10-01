@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ApiError, getHealth, getMe, signInUrl, signOut, type GameSummary, type Profile } from './api/client';
 import { profileForGame, useActiveGame } from './profile';
-import { isStep, StepBar } from './steps/Steps';
+import { isStep, StepBar, STEPS } from './steps/Steps';
 import { usePlannerStore } from './store/plannerStore';
 import { useOutboxFlush } from './sync/useOutboxFlush';
 import { Icon, type IconName } from './ui/Icon';
+import { Intro } from './ui/Intro';
 import { applyGame, lookOf, LOOKS, useGameChoice } from './ui/gameChoice';
 import { GameMark } from './ui/GameMark';
-import { usePanelHidden } from './ui/preferences';
 
 /**
  * The shell every screen hangs off: who is reading, which profile they are
@@ -42,7 +42,6 @@ export function App() {
   const location = useLocation();
 
   const profiles = me.data?.profiles ?? [];
-  const selected = profiles.find((profile) => profile.id === profileId) ?? null;
 
   // A profile id persisted from a previous session can outlive the profile —
   // another device deleted it, or this is a different account on the same
@@ -72,201 +71,395 @@ export function App() {
     }
   };
 
-  // The side panel (C2, the maintainer's call): beside the page on a wide
-  // screen, where hiding it leaves a rail of icons; over the page on a phone,
-  // where it starts closed and a menu button opens it. `hidden` is the wide
-  // screen's remembered choice, `open` the phone's drawer, which a navigation
-  // or Escape closes — a drawer left open over the page you just asked for is
-  // the page not arriving.
-  const [hidden, setHidden] = usePanelHidden();
-
   // The game the whole site is dressed for (C2.5): its palette on the document,
   // and its mark beside the name.
   const active = useActiveGame();
-  const choose = useGameChoice((state) => state.choose);
   useEffect(() => applyGame(active.id), [active.id]);
+
+  // The phone's menu, which a navigation or Escape closes — a menu left open
+  // over the page you just asked for is the page not arriving.
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [location.pathname]);
-  useEffect(() => {
-    if (!open) return;
-    const close = (event: KeyboardEvent) => event.key === 'Escape' && setOpen(false);
-    window.addEventListener('keydown', close);
-    return () => window.removeEventListener('keydown', close);
-  }, [open]);
+  useEscape(open, () => setOpen(false));
+  const scrolled = useScrolled(24);
 
-  // Words that the rail hides from sight and keeps for a screen reader, so a
-  // link is still named "Plan" when all that shows is its icon.
-  const word = hidden ? 'md:sr-only' : '';
+  const healthLine = health.isError
+    ? 'Backend unreachable — anything below is what this device remembers.'
+    : health.data
+      ? `Backend ${health.data.status} · ${health.data.version}`
+      : 'Backend: checking…';
+
+  const gameSwitch = (
+    <GameSwitch active={active.id} games={active.games} profiles={profiles} signedIn={Boolean(me.data)} />
+  );
+  const profilePicker = profiles.length > 1 && <ProfilePicker profiles={profiles} />;
 
   return (
-    <div className="min-h-screen md:flex">
-      <div
-        className="sticky top-0 z-30 flex items-center gap-2 border-b px-3 py-2 md:hidden"
-        style={{ borderColor: 'var(--line)', background: 'var(--surface)' }}
-      >
-        <button type="button" className="icon-btn" onClick={() => setOpen(true)} aria-label="Open menu">
-          <Icon name="menu" />
-        </button>
-        <Brand game={active.id} />
-      </div>
+    <div className="flex min-h-screen flex-col">
+      <Intro game={active.id} />
 
-      {open && (
-        <div
-          className="fixed inset-0 z-40 md:hidden"
-          style={{ background: 'rgb(0 0 0 / 50%)' }}
-          onClick={() => setOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      {/*
+        The top bar (C2.6, the maintainer's ask, 2026-10-01, replacing C2's side
+        panel): full width at the top of the page, and a floating pill once the
+        page scrolls under it. The four planner steps share one menu, because
+        the step bar on each of them already says the way through.
+      */}
+      <header className="site-nav" data-scrolled={scrolled}>
+        <div className="site-nav-inner">
+          <Brand game={active.id} />
 
-      <aside
-        aria-label="Menu"
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col gap-4 border-r p-3 transition-transform md:sticky md:top-0 md:h-screen md:translate-x-0 ${
-          open ? 'translate-x-0' : '-translate-x-full'
-        } ${hidden ? 'md:w-[4.25rem]' : 'md:w-60'}`}
-        style={{ borderColor: 'var(--line)', background: 'var(--surface)' }}
-      >
-        <div className={`flex items-center gap-2 ${hidden ? 'md:flex-col' : ''}`}>
-          <Brand game={active.id} wordClass={word} />
-          <button
-            type="button"
-            className="icon-btn ml-auto hidden md:inline-flex"
-            onClick={() => setHidden(!hidden)}
-            aria-label={hidden ? 'Show menu' : 'Hide menu'}
-            title={hidden ? 'Show menu' : 'Hide menu'}
-          >
-            <Icon name="panel" />
-          </button>
-          <button
-            type="button"
-            className="icon-btn ml-auto md:hidden"
-            onClick={() => setOpen(false)}
-            aria-label="Close menu"
-          >
-            <Icon name="close" />
-          </button>
-        </div>
-
-        <nav className="flex flex-col gap-1">
-          {/* In the order of the steps, so the menu reads as the way through. */}
-          <Tab to="/" icon="home" word={word} end>Home</Tab>
-          <Tab to="/inventory" icon="box" word={word}>Inventory</Tab>
-          <Tab to="/roster" icon="users" word={word}>Roster</Tab>
-          <Tab to="/goals" icon="target" word={word}>Goals</Tab>
-          <Tab to="/plan" icon="route" word={word}>Plan</Tab>
-          <Tab to="/pulls" icon="sparkle" word={word}>Pulls</Tab>
-          <Tab to="/catalog" icon="book" word={word}>Catalog</Tab>
-        </nav>
-
-        <div className="mt-auto flex flex-col gap-3 text-sm">
-          {profiles.length > 1 && (
-            <select
-              className={`input w-full ${hidden ? 'md:hidden' : ''}`}
-              value={selected?.id ?? ''}
-              onChange={(event) => {
-                selectProfile(event.target.value);
-                // A profile is one game, so picking one picks its game too.
-                const picked = profiles.find((profile) => profile.id === event.target.value);
-                if (picked) choose(picked.game);
-              }}
-              aria-label="Profile"
+          <nav aria-label="Menu" className="hidden flex-1 items-center justify-center gap-1 md:flex">
+            <TopLink to="/" end>
+              Home
+            </TopLink>
+            <Dropdown
+              label="Planner"
+              here={isStep(location.pathname)}
+              trigger={
+                <>
+                  Planner <Icon name="chevronDown" size={14} />
+                </>
+              }
             >
-              {profiles.map((profile) => (
-                <option key={profile.id} value={profile.id}>
-                  {profile.displayName} — {profile.game} ({profile.region})
-                </option>
-              ))}
-            </select>
-          )}
+              <ul className="w-72 space-y-0.5">
+                {STEPS.map((step) => (
+                  <li key={step.to}>
+                    <NavLink
+                      to={step.to}
+                      className={({ isActive }) => `menu-row ${isActive ? 'menu-row-here' : ''}`}
+                    >
+                      <span className="menu-row-icon">
+                        <Icon name={STEP_ICONS[step.to]} size={18} />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block font-medium">{STEP_WORDS[step.to]}</span>
+                        <span className="muted block text-xs leading-snug">{step.title}</span>
+                      </span>
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </Dropdown>
+            <TopLink to="/pulls">Pulls</TopLink>
+            <TopLink to="/catalog">Catalog</TopLink>
+          </nav>
 
-          <GameSwitch
-            active={active.id}
-            games={active.games}
-            profiles={profiles}
-            signedIn={Boolean(me.data)}
-            stacked={hidden}
-            word={word}
-          />
-
-          {me.data ? (
-            <div className={`flex items-center gap-2 ${hidden ? 'md:flex-col' : ''}`}>
-              <span className={`muted min-w-0 flex-1 truncate ${word}`}>{me.data.displayName}</span>
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={leave}
-                disabled={signingOut}
-                aria-label="Sign out"
-                title="Sign out"
+          <div className="ml-auto flex items-center gap-1.5 md:ml-0">
+            <div className="hidden md:block">
+              <Dropdown
+                label="Game"
+                align="right"
+                trigger={
+                  <>
+                    <GameMark game={active.id} size={22} />
+                    <Icon name="chevronDown" size={14} />
+                  </>
+                }
               >
-                <Icon name="signOut" />
-              </button>
+                <div className="w-64">{gameSwitch}</div>
+              </Dropdown>
             </div>
-          ) : signedOut ? (
-            <a className="btn no-underline" href={signInUrl(location.pathname)}>
-              Sign in
-            </a>
-          ) : (
-            <span className="muted">{me.isPending ? 'checking…' : ''}</span>
-          )}
 
-          <p className={`text-xs muted ${word}`}>
-            {health.isError
-              ? 'Backend unreachable — anything below is what this device remembers.'
-              : health.data
-                ? `Backend ${health.data.status} · ${health.data.version}`
-                : 'Backend: checking…'}
-          </p>
+            {me.data ? (
+              <div className="hidden md:block">
+                <Dropdown
+                  label="Account"
+                  align="right"
+                  trigger={
+                    <>
+                      <Initial name={me.data.displayName} />
+                      <span className="hidden max-w-[8rem] truncate lg:inline">{me.data.displayName}</span>
+                      <Icon name="chevronDown" size={14} />
+                    </>
+                  }
+                >
+                  <div className="w-64 space-y-3 p-1 text-sm">
+                    <div className="font-medium">{me.data.displayName}</div>
+                    {profilePicker}
+                    <p className="muted text-xs">{healthLine}</p>
+                    <button type="button" className="btn-quiet w-full" onClick={leave} disabled={signingOut}>
+                      <Icon name="signOut" size={16} /> Sign out
+                    </button>
+                  </div>
+                </Dropdown>
+              </div>
+            ) : signedOut ? (
+              <a className="btn btn-pill no-underline" href={signInUrl(location.pathname)}>
+                Sign in
+              </a>
+            ) : null}
+
+            <button
+              type="button"
+              className="icon-btn md:hidden"
+              onClick={() => setOpen(!open)}
+              aria-label={open ? 'Close menu' : 'Open menu'}
+              aria-expanded={open}
+            >
+              <Icon name={open ? 'close' : 'menu'} />
+            </button>
+          </div>
         </div>
-      </aside>
+
+        {open && (
+          <div className="md:hidden">
+            <div className="sheet-scrim" onClick={() => setOpen(false)} aria-hidden="true" />
+            <div className="sheet" role="dialog" aria-label="Menu">
+              <nav className="grid grid-cols-2 gap-1" aria-label="Pages">
+                <SheetLink to="/" icon="home" end>
+                  Home
+                </SheetLink>
+                {STEPS.map((step) => (
+                  <SheetLink key={step.to} to={step.to} icon={STEP_ICONS[step.to]}>
+                    {STEP_WORDS[step.to]}
+                  </SheetLink>
+                ))}
+                <SheetLink to="/pulls" icon="sparkle">
+                  Pulls
+                </SheetLink>
+                <SheetLink to="/catalog" icon="book">
+                  Catalog
+                </SheetLink>
+              </nav>
+              {gameSwitch}
+              {profilePicker}
+              {me.data ? (
+                <div className="flex items-center gap-2 text-sm">
+                  <Initial name={me.data.displayName} />
+                  <span className="min-w-0 flex-1 truncate">{me.data.displayName}</span>
+                  <button type="button" className="btn-quiet" onClick={leave} disabled={signingOut}>
+                    <Icon name="signOut" size={16} /> Sign out
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
+      </header>
 
       <div className="min-w-0 flex-1">
         <SyncBar sync={sync} />
         <main className="mx-auto max-w-5xl px-4 py-6 md:px-8 md:py-8">
           {isStep(location.pathname) && <StepBar />}
-          <Outlet />
+          {/*
+            Each page rises in as it is opened (C2.6). Keyed by the first part
+            of the path, so moving between two catalog pages is not a new page
+            and keeps what it had.
+          */}
+          <div key={location.pathname.split('/')[1]} className="rise">
+            <Outlet />
+          </div>
         </main>
       </div>
+
+      <footer className="border-t px-4 py-5 text-xs muted" style={{ borderColor: 'var(--line)' }}>
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 md:px-4">
+          <span>Storm Almanac — numbers and text only, each with where it was read.</span>
+          <span>{healthLine}</span>
+        </div>
+      </footer>
     </div>
   );
 }
 
-function Brand({ game, wordClass = '' }: { game: string | null; wordClass?: string }) {
+type StepPath = (typeof STEPS)[number]['to'];
+
+const STEP_ICONS: Record<StepPath, IconName> = {
+  '/inventory': 'box',
+  '/roster': 'users',
+  '/goals': 'target',
+  '/plan': 'route',
+};
+
+/** What the menu calls each step: the page's name, with the step's own title under it. */
+const STEP_WORDS: Record<StepPath, string> = {
+  '/inventory': 'Inventory',
+  '/roster': 'Roster',
+  '/goals': 'Goals',
+  '/plan': 'Plan',
+};
+
+/** Whether the page has scrolled past `threshold` pixels, read once a frame at most. */
+function useScrolled(threshold: number): boolean {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    let frame = 0;
+    const read = () => {
+      frame = 0;
+      setScrolled(window.scrollY > threshold);
+    };
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(read);
+    };
+    read();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [threshold]);
+  return scrolled;
+}
+
+function useEscape(active: boolean, close: () => void) {
+  useEffect(() => {
+    if (!active) return;
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && close();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [active, close]);
+}
+
+/**
+ * A menu under a button in the bar. It opens on a click, and on hover where
+ * there is a pointer that hovers, the way the bar it copies does; a click
+ * outside, Escape or a navigation closes it.
+ */
+function Dropdown({
+  label,
+  trigger,
+  here = false,
+  align = 'center',
+  children,
+}: {
+  label: string;
+  trigger: ReactNode;
+  here?: boolean;
+  align?: 'center' | 'right';
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  useEffect(() => setOpen(false), [location.pathname]);
+  useEscape(open, () => setOpen(false));
+  useEffect(() => {
+    if (!open) return;
+    const outside = (event: PointerEvent) => {
+      if (box.current && !box.current.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', outside);
+    return () => document.removeEventListener('pointerdown', outside);
+  }, [open]);
+
+  // Hover opens only for a mouse: a tap fires pointerenter too. And the click
+  // that follows a hover keeps the menu open rather than toggling it shut —
+  // the pointer that opened it is usually on its way to clicking it.
+  //
+  // Leaving closes after a moment, not at once, so a pointer that slips off the
+  // edge on its way down to an item finds the menu still there.
+  const hovered = useRef(false);
+  const closing = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(closing.current), []);
+  const hover = (next: boolean) => (event: React.PointerEvent) => {
+    if (event.pointerType !== 'mouse') return;
+    window.clearTimeout(closing.current);
+    if (next) {
+      hovered.current = true;
+      setOpen(true);
+    } else {
+      closing.current = window.setTimeout(() => {
+        hovered.current = false;
+        setOpen(false);
+      }, 150);
+    }
+  };
+  const click = () => {
+    if (hovered.current) {
+      hovered.current = false;
+      setOpen(true);
+    } else {
+      setOpen(!open);
+    }
+  };
+
+  return (
+    <div ref={box} className="relative" onPointerEnter={hover(true)} onPointerLeave={hover(false)}>
+      <button
+        type="button"
+        className={`top-link ${here ? 'top-link-here' : ''}`}
+        aria-expanded={open}
+        aria-haspopup="true"
+        aria-label={typeof trigger === 'string' ? undefined : label}
+        onClick={click}
+      >
+        {trigger}
+      </button>
+      {open && (
+        // The gap between button and menu is padding on this wrapper, not a
+        // margin, so the pointer crossing it never leaves the dropdown.
+        <div className={`absolute top-full z-50 pt-2 ${align === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}>
+          <div className="menu-panel">{children}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Brand({ game }: { game: string | null }) {
   return (
     <NavLink
       to="/"
-      className="flex items-center gap-2 px-1 text-base font-semibold no-underline"
+      className="flex shrink-0 items-center gap-2 text-base font-semibold no-underline"
       style={{ color: 'var(--ink)' }}
     >
       <GameMark game={game} size={32} />
-      <span className={wordClass}>Storm Almanac</span>
+      <span className="brand-word">Storm Almanac</span>
     </NavLink>
   );
 }
 
-function Tab({
-  to,
-  icon,
-  word,
-  end,
-  children,
-}: {
-  to: string;
-  icon: IconName;
-  word: string;
-  end?: boolean;
-  children: React.ReactNode;
-}) {
+function TopLink({ to, end, children }: { to: string; end?: boolean; children: ReactNode }) {
   return (
-    <NavLink
-      to={to}
-      end={end}
-      title={typeof children === 'string' ? children : undefined}
-      className={({ isActive }) => `nav-item ${isActive ? 'nav-item-here' : ''}`}
-    >
-      <Icon name={icon} />
-      <span className={word}>{children}</span>
+    <NavLink to={to} end={end} className={({ isActive }) => `top-link ${isActive ? 'top-link-here' : ''}`}>
+      {children}
     </NavLink>
+  );
+}
+
+function SheetLink({ to, icon, end, children }: { to: string; icon: IconName; end?: boolean; children: ReactNode }) {
+  return (
+    <NavLink to={to} end={end} className={({ isActive }) => `nav-item ${isActive ? 'nav-item-here' : ''}`}>
+      <Icon name={icon} />
+      <span>{children}</span>
+    </NavLink>
+  );
+}
+
+function Initial({ name }: { name: string }) {
+  return (
+    <span
+      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+      style={{ background: 'color-mix(in srgb, var(--brand) 18%, transparent)', color: 'var(--brand)' }}
+      aria-hidden="true"
+    >
+      {name.trim().charAt(0).toUpperCase() || '?'}
+    </span>
+  );
+}
+
+function ProfilePicker({ profiles }: { profiles: Profile[] }) {
+  const profileId = usePlannerStore((state) => state.profileId);
+  const selectProfile = usePlannerStore((state) => state.selectProfile);
+  const choose = useGameChoice((state) => state.choose);
+  return (
+    <select
+      className="input w-full"
+      value={profiles.some((profile) => profile.id === profileId) ? (profileId ?? '') : ''}
+      onChange={(event) => {
+        selectProfile(event.target.value);
+        // A profile is one game, so picking one picks its game too.
+        const picked = profiles.find((profile) => profile.id === event.target.value);
+        if (picked) choose(picked.game);
+      }}
+      aria-label="Profile"
+    >
+      {profiles.map((profile) => (
+        <option key={profile.id} value={profile.id}>
+          {profile.displayName} — {profile.game} ({profile.region})
+        </option>
+      ))}
+    </select>
   );
 }
 
@@ -286,15 +479,11 @@ function GameSwitch({
   games,
   profiles,
   signedIn,
-  stacked,
-  word,
 }: {
   active: string | null;
   games: GameSummary[];
   profiles: Profile[];
   signedIn: boolean;
-  stacked: boolean;
-  word: string;
 }) {
   const choose = useGameChoice((state) => state.choose);
   const profileId = usePlannerStore((state) => state.profileId);
@@ -312,8 +501,8 @@ function GameSwitch({
   };
 
   return (
-    <div role="group" aria-label="Game" className={`flex flex-col gap-1 ${stacked ? 'md:items-center' : ''}`}>
-      <span className={`label px-1 ${word}`}>Game</span>
+    <div role="group" aria-label="Game" className="flex flex-col gap-1">
+      <span className="label px-1">Game</span>
       {games.map((game) => (
         <button
           key={game.id}
@@ -325,7 +514,7 @@ function GameSwitch({
           onClick={() => pick(game.id)}
         >
           <GameMark game={game.id} size={22} />
-          <span className={`min-w-0 truncate text-left ${word}`}>{game.displayName}</span>
+          <span className="min-w-0 truncate text-left">{game.displayName}</span>
         </button>
       ))}
       {soon.map((look) => (
@@ -337,8 +526,8 @@ function GameSwitch({
           title={`${look.name} — coming soon`}
         >
           <GameMark game={look.id} size={22} />
-          <span className={`min-w-0 flex-1 truncate ${word}`}>{look.name}</span>
-          <span className={`text-[11px] font-medium uppercase tracking-wide ${word}`}>Soon</span>
+          <span className="min-w-0 flex-1 truncate">{look.name}</span>
+          <span className="text-[11px] font-medium uppercase tracking-wide">Soon</span>
         </span>
       ))}
     </div>

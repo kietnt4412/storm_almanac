@@ -1,0 +1,414 @@
+/*
+ * The motion pass and the top bar (C2.6, 2026-10-01, the maintainer's ask after
+ * a recording of a site whose page arrives rather than appears). Its own file
+ * so the palette in index.css stays readable on its own; imported after it, so
+ * it may use every token and component class there.
+ *
+ * Every rule here has a still twin at the bottom, for a reader whose system
+ * asks for reduced motion. Not in a Tailwind layer, so these classes beat a
+ * utility on the same element: keep display utilities off what they style.
+ */
+
+/*
+ * The top bar: full width and see-through at the top of the page, a floating
+ * pill with the page blurred behind it once the page scrolls. The inner box
+ * animates its width rather than swapping layouts, so the bar visibly gathers
+ * itself in instead of jumping.
+ */
+.site-nav {
+  @apply sticky top-0 z-40;
+  transition: padding-top 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.site-nav-inner {
+  @apply relative mx-auto flex items-center gap-3 border;
+  width: min(100% - 2rem, 72rem);
+  padding: 0.75rem 0.25rem;
+  border-color: transparent;
+  border-radius: 1rem;
+  transition:
+    width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    padding 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-radius 0.45s,
+    background-color 0.3s,
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.site-nav[data-scrolled='true'] {
+  padding-top: 0.625rem;
+}
+
+.site-nav[data-scrolled='true'] .site-nav-inner {
+  width: min(100% - 1.25rem, 52rem);
+  padding: 0.375rem 0.375rem 0.375rem 0.5rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  border-color: color-mix(in srgb, var(--ink) 10%, transparent);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+}
+
+/* The name folds away into the pill on a wide screen; the mark stays the way home. */
+.brand-word {
+  @apply overflow-hidden whitespace-nowrap;
+  max-width: 12rem;
+  transition:
+    max-width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.3s;
+}
+
+@media (min-width: 768px) {
+  .site-nav[data-scrolled='true'] .brand-word {
+    max-width: 0;
+    opacity: 0;
+  }
+}
+
+.top-link {
+  @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium no-underline transition;
+  color: var(--muted);
+}
+
+.top-link:hover,
+.top-link[aria-expanded='true'] {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.top-link-here {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--brand) 15%, transparent);
+}
+
+.top-link > svg:last-child {
+  transition: transform 0.2s;
+}
+
+.top-link[aria-expanded='true'] > svg:last-child {
+  transform: rotate(180deg);
+}
+
+.btn-pill {
+  @apply rounded-full px-4 py-1.5;
+}
+
+.menu-panel {
+  @apply rounded-2xl border p-2;
+  background: var(--raised);
+  border-color: var(--line);
+  box-shadow: var(--shadow);
+  animation: menu-in 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.menu-row {
+  @apply flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm no-underline transition;
+  color: var(--ink);
+}
+
+.menu-row:hover {
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.menu-row-here {
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
+}
+
+.menu-row-icon {
+  @apply inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg;
+  color: var(--brand);
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
+}
+
+/* The menu on a phone: drops from under the bar, over a dimmed page. */
+.sheet-scrim {
+  @apply fixed inset-0 -z-10;
+  background: rgb(0 0 0 / 45%);
+  animation: fade-in 0.2s ease-out;
+}
+
+.sheet {
+  @apply mx-auto mt-2 flex flex-col gap-4 rounded-2xl border p-3;
+  width: min(100% - 1.25rem, 32rem);
+  background: var(--raised);
+  border-color: var(--line);
+  box-shadow: var(--shadow);
+  animation: menu-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.circuit-node {
+  @apply flex min-w-0 items-center gap-2 rounded-xl border px-2.5 py-2 text-sm;
+  background: var(--surface);
+  border-color: var(--line);
+}
+
+.circuit-hub {
+  @apply relative flex flex-col items-center justify-center rounded-2xl border px-4 py-3 text-center;
+  background: color-mix(in srgb, var(--brand) 10%, var(--raised));
+  border-color: color-mix(in srgb, var(--brand) 45%, var(--line));
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--brand) 8%, transparent),
+    0 0 32px color-mix(in srgb, var(--brand) 25%, transparent);
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/*
+ * The opening (`ui/Intro.tsx`): the mark turns in, the name slides out from
+ * behind it, and the page rises over both. The curtain is clipped away from
+ * its bottom edge upward, so what shows through is the page coming up.
+ */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(60% 50% at 50% 50%, color-mix(in srgb, var(--brand) 12%, transparent), transparent 70%),
+    var(--ground);
+  clip-path: inset(0 0 0 0);
+  cursor: pointer;
+}
+
+.intro-wipe {
+  animation: intro-wipe 0.65s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+}
+
+.intro-wipe .intro-lockup {
+  animation: intro-lift 0.65s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+}
+
+.intro-lockup {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.intro-mark {
+  display: inline-flex;
+  animation: intro-mark 0.7s cubic-bezier(0.2, 0.9, 0.25, 1.2) both;
+}
+
+.intro-name {
+  overflow: hidden;
+  font-size: clamp(1.75rem, 5vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  animation: intro-name 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.45s both;
+}
+
+.intro-name > span {
+  display: inline-block;
+  animation: intro-name-slide 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.45s both;
+}
+
+.intro-skip {
+  position: absolute;
+  bottom: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  animation: fade-in 0.4s ease-out 0.8s both;
+}
+
+@keyframes intro-mark {
+  from {
+    opacity: 0;
+    transform: scale(0.4) rotate(-120deg);
+  }
+}
+
+@keyframes intro-name {
+  from {
+    max-width: 0;
+  }
+  to {
+    max-width: 22ch;
+  }
+}
+
+@keyframes intro-name-slide {
+  from {
+    opacity: 0;
+    transform: translateX(-40%);
+  }
+}
+
+@keyframes intro-wipe {
+  to {
+    clip-path: inset(0 0 100% 0);
+  }
+}
+
+@keyframes intro-lift {
+  to {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+}
+
+/*
+ * Entrances: a word that rises (`Words`), a block that rises on mount (`.rise`)
+ * and one that rises when scrolled to (`Reveal`). Each takes `--delay` for its
+ * place in a stagger. While the opening plays they wait, paused at their first
+ * frame, so they run as it lifts rather than unseen behind it.
+ */
+.word-in {
+  display: inline-block;
+  white-space: pre;
+  animation: word-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) var(--delay, 0ms) both;
+}
+
+.rise {
+  animation: rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) var(--delay, 0ms) both;
+}
+
+:root[data-intro] .word-in,
+:root[data-intro] .rise,
+:root[data-intro] .hero-streak::before {
+  animation-play-state: paused;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+}
+
+.reveal-in {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) var(--delay, 0ms),
+    transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) var(--delay, 0ms);
+}
+
+@keyframes word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em);
+    filter: blur(6px);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+/*
+ * The light streak across Home's hero: a soft bar of the brand colour that
+ * sweeps in from the top-right corner, then breathes. It is the one flourish on
+ * the page with nothing to say, so it is pale and sits behind the words.
+ */
+.hero-streak {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero-streak::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -10%;
+  right: -12%;
+  width: 60%;
+  height: 56px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--brand) 75%, transparent), transparent);
+  filter: blur(20px);
+  transform: rotate(-28deg);
+  animation:
+    streak-in 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both,
+    streak-breathe 6s ease-in-out 1.6s infinite;
+  pointer-events: none;
+}
+
+@keyframes streak-in {
+  from {
+    opacity: 0;
+    transform: rotate(-28deg) translateX(60%);
+  }
+}
+
+@keyframes streak-breathe {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/*
+ * The plan's circuit (`ui/PlanCircuit.tsx`): traces between what you do and
+ * what it pays for, with a pulse of light running along each. `pathLength` is
+ * 100 on every trace, so one dash pattern fits a trace of any length.
+ */
+.circuit-trace {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ink) 18%, transparent);
+  stroke-width: 1.5;
+}
+
+.circuit-pulse {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 10 90;
+  filter: drop-shadow(0 0 4px var(--brand));
+  animation: circuit-pulse 2.6s linear var(--delay, 0ms) infinite;
+}
+
+@keyframes circuit-pulse {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Asked for less motion: everything is where it ends up, and nothing moves. */
+@media (prefers-reduced-motion: reduce) {
+  .intro,
+  .circuit-pulse {
+    display: none;
+  }
+
+  .word-in,
+  .rise,
+  .reveal,
+  .menu-panel,
+  .sheet,
+  .sheet-scrim {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  .hero-streak::before {
+    animation: none;
+  }
+
+  .site-nav,
+  .site-nav-inner,
+  .brand-word {
+    transition: none;
+  }
+}

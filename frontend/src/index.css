@@ -232,7 +232,7 @@ a {
     background: color-mix(in srgb, var(--ink) 4%, transparent);
   }
 
-  /* The side panel's rows: an icon, a word, and a tint for where you are. */
+  /* A row in the phone's menu and the game menu: an icon, a word, and a tint for where you are. */
   .nav-item {
     @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium no-underline transition;
     color: var(--muted);
