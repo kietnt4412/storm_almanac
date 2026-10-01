@@ -3352,6 +3352,39 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-10-01 (fifty-sixth) — C2 found live; Home becomes a dashboard.**
+
+**The remote, checked first:** [PR #65](https://github.com/kietnt4412/storm_almanac/pull/65)
+(C2) merged 2026-09-30 00:42:54Z, its `main` run `36652084401` green, and
+production reports `93503e8`, #65's merge. So the tracker's "C2 mostly built on
+`dev`, not deployed" was already stale when this session started. Selena's
+pool was still open (it closes 10-01 06:59 UTC), so sequence 19 waits.
+
+**The maintainer asked for a richer Home** ("too simple"). Per the standing
+rule, a plan first: five parts, all agreed as proposed, plus a daily reset
+countdown, the add-profile form closed behind a button, and **the plan card
+first, with the setup card taking the top only until a first plan exists**.
+Built on `dev`: a tinted hero band with the patch and reset chips, a signed-out
+Sign in and Browse the catalog pair, a plan card (energy, days, runs, the spend
+bar, the "New since your plan" line moved into it), a live banner card (close
+countdown, stored pity as a bar), a setup card counting what each step holds
+with the first undone step marked "Do this next", and compact profiles with an
+initial badge. The per-row plan and since lines are gone; the card shows the
+active profile's.
+
+**One backend field:** `dayBoundary` on `/api/games` (`{zone, hour}`), null when
+the bundle never said. The planner's midnight-UTC fallback is not sent, because
+a countdown to a placeholder would name the wrong hour (ADR 0025). The page
+computes the next reset itself from the zone, so a games list the worker cached
+still counts down correctly; `ui/time.ts` reads IANA zones through `Intl` and
+Java's fixed-offset spellings ("Z", "UTC+07:00") by hand.
+
+**Driven locally** as `rehearsal-s6` (a saved plan) and a fresh
+`home-dashboard-check` account, at 375 px light and desktop dark, then signed
+out; no horizontal scroll at 375. Two fixes came from looking: the setup
+steps went two across on a phone, and four columns beside the banner wrapped
+every title, so that slot uses two. Frontend 112 → 121 tests.
+
 **2026-09-30 (fifty-fifth) — C3.3 found live; Phase 6 taken and its plan drafted.**
 
 **The remote, checked first:** [PR #64](https://github.com/kietnt4412/storm_almanac/pull/64)
