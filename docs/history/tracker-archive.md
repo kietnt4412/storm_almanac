@@ -3378,6 +3378,13 @@ R1999, each game's dress in a new `looks.css`, and `V21` for the picture.
   finding its wordmark by role needs `hidden: true`.
 - **No Python here either**: multi-line edits went through small Node scripts.
 
+**Then C2.8 was planned, not built.** Claude walked the five core screens as
+`rehearsal-s6` and recommended a drawing for each, built only from numbers the
+page already has. The maintainer took all five, in the recommended order:
+[the plan](../plans/c2.8-the-core-screens.md). Two rules bound it: no game art,
+and no picture of a claim the solver does not make (no per-day schedule, no
+stage → goal line). Only `/pulls` needs new fields. Mockups come first.
+
 **2026-10-01 (fifty-eighth) — C2.6: motion from a recording, and a top bar in place of the side panel.**
 
 **The maintainer shared a 25-second screen recording** of Gcore's product site
@@ -9041,3 +9048,9 @@ and **`web-built`**, the built bundle on 4173 that the offline test needs) proxi
 `/api` **and `/dev`** to `localhost:8080`, so local is same-origin. The sign-in URL
 is chosen behind `import.meta.env.DEV`, so the development one is not in a
 production bundle.
+
+### Tracker lines retired on 2026-10-01 (fifty-ninth session)
+
+The C2 note from *Next actions*, replaced by C2.8's resume note to keep the tracker at 550 lines. What it asked for is done (C2 deployed in #65) or carried in the C2 row of the board (the rehearsal, the exit wording):
+
+> **C2 (2026-09-30, fifty-fifth): agreed and mostly built, deployed in #65** — [the plan](docs/plans/c2-the-visual-pass.md): direction **A · Storm**, the side panel with a hide button (the maintainer's own answer), all visuals, "Why?" toggles. Two backend fields came with it, both optional on the wire: `curve` on `/pulls` and `spends` on a plan's purchases. **Next:** the maintainer looks at it (the window was minimised for most of the drive, so few screenshots exist), then C2.4's self-run rehearsal at 375 and 1280 in both themes, then a PR. **Exit wording (question 5) not yet agreed.** **Phase 6 was taken and put down the same session** (D9).
