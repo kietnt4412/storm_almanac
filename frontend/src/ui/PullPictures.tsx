@@ -1,4 +1,5 @@
-import type { ReactElement } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
+import { useTween } from './motion';
 
 /**
  * The pull planner's three pictures (C2.8, agreed 2026-10-01): where the
@@ -33,7 +34,9 @@ export function PityDial({
     const [x2, y2] = point(to);
     return `M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
   };
-  const share = Math.min(pulls, hardAt) / hardAt;
+  // The needle follows the counter as it is typed, and sweeps up to it on arrival.
+  const shown = useTween(Math.min(pulls, hardAt), { duration: 700 });
+  const share = shown / hardAt;
   const left = Math.max(0, hardAt - pulls);
   return (
     <div className="flex flex-col items-center">
@@ -46,7 +49,7 @@ export function PityDial({
           <path d={arc(0, share)} fill="none" stroke="var(--brand)" strokeWidth="16" strokeLinecap="round" />
         )}
         <text x={cx} y={cy - 12} textAnchor="middle" fontSize="30" fontWeight="700" fill="var(--ink)">
-          {pulls}
+          {Math.round(shown) === Math.min(pulls, hardAt) ? pulls : Math.round(shown)}
         </text>
         <text x={cx} y={cy + 8} textAnchor="middle" fontSize="11" fill="var(--muted)">
           of {drawnFrom !== null ? `${drawnFrom}–${hardAt}` : hardAt}
@@ -136,13 +139,22 @@ export function ChanceByDate({
           </text>
         ))}
         <path
+          className="bloom"
           d={`${line.join(' ')} L${x(last)},${y(0)} L${x(0)},${y(0)} Z`}
           fill="var(--brand)"
           fillOpacity="0.12"
         />
-        <path d={line.join(' ')} fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinejoin="round" />
+        <path
+          className="draw"
+          pathLength={1}
+          d={line.join(' ')}
+          fill="none"
+          stroke="var(--brand)"
+          strokeWidth="2.5"
+          strokeLinejoin="round"
+        />
         {certain && certain.day > 0 && (
-          <g>
+          <g className="bloom" style={{ '--delay': '300ms' } as CSSProperties}>
             <line x1={x(certain.day)} x2={x(certain.day)} y1={PAD.top} y2={y(0)} stroke="var(--violet)" strokeDasharray="3 3" />
             <text x={x(certain.day) + 4} y={PAD.top + 10} fontSize="11" fill="var(--violet)">
               certain · {date(certain.day)}
@@ -154,7 +166,7 @@ export function ChanceByDate({
             closes
           </text>
         )}
-        <circle cx={x(at.day)} cy={y(at.chance)} r="5" fill="var(--brand)" stroke="var(--raised)" strokeWidth="2" />
+        <circle className="pop" cx={x(at.day)} cy={y(at.chance)} r="5" fill="var(--brand)" stroke="var(--raised)" strokeWidth="2" />
       </svg>
       <figcaption className="text-sm">
         By <b>{date(at.day)}</b> ({at.pulls.toLocaleString()} pulls): <b>{chanceWords(at.chance)}</b>.{' '}
@@ -192,7 +204,7 @@ export function CopiesBar({ byCopies }: { byCopies: number[] }): ReactElement | 
         <h3 className="font-medium">How many copies</h3>
         <span className="muted text-xs">with the pulls you can afford</span>
       </div>
-      <div className="flex h-7 overflow-hidden rounded-lg" aria-hidden="true">
+      <div className="wipe flex h-7 overflow-hidden rounded-lg" aria-hidden="true" style={{ '--delay': '250ms' } as CSSProperties}>
         {byCopies.map((chance, k) =>
           chance > 0 ? (
             <span

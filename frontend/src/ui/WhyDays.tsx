@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import type { Plan } from '../api/client';
 
 /** Days as the plan screen says them, "28" and "7.7" (PlanView's daysOf, kept here to avoid a cycle). */
@@ -88,15 +88,20 @@ export function WhyDays({
       <div className="relative h-12" aria-hidden="true">
         <span className="absolute inset-x-0 top-4 h-4 overflow-hidden rounded-md" style={{ background: 'var(--line)' }}>
           <span
-            className="absolute inset-y-0 left-0"
-            style={{ width: at(binding.energyDays), background: 'color-mix(in srgb, var(--brand) 70%, transparent)' }}
+            className="wipe absolute inset-y-0 left-0"
+            style={{
+              width: at(binding.energyDays),
+              background: 'color-mix(in srgb, var(--brand) 70%, transparent)',
+              '--delay': '200ms',
+            } as CSSProperties}
           />
         </span>
-        {binding.marks.map((day) => (
+        {/* Each claim drops onto the bar after the energy has run along it. */}
+        {binding.marks.map((day, index) => (
           <span
             key={day}
-            className="absolute top-2 h-8 w-0.5"
-            style={{ left: `calc(${at(day)} - 1px)`, background: 'var(--violet)' }}
+            className="stagger-in absolute top-2 h-8 w-0.5"
+            style={{ left: `calc(${at(day)} - 1px)`, background: 'var(--violet)', '--delay': `${700 + Math.min(index, 10) * 70}ms` } as CSSProperties}
           />
         ))}
         <span className="muted absolute top-9 text-[10px]" style={{ left: 0 }}>

@@ -75,11 +75,19 @@ export function ChanceCurve({
         pulls
       </text>
 
-      <path d={area} fill="var(--brand)" fillOpacity="0.12" />
-      <path d={line.join(' ')} fill="none" stroke="var(--brand)" strokeWidth="2.5" strokeLinejoin="round" />
+      <path className="bloom" d={area} fill="var(--brand)" fillOpacity="0.12" />
+      <path
+        className="draw"
+        pathLength={1}
+        d={line.join(' ')}
+        fill="none"
+        stroke="var(--brand)"
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+      />
 
       <line x1={x(at)} x2={x(at)} y1={PAD.top} y2={y(0)} stroke="var(--violet)" strokeWidth="1.5" strokeDasharray="4 4" />
-      <circle cx={x(at)} cy={y(chanceAt)} r="5" fill="var(--violet)" stroke="var(--raised)" strokeWidth="2" />
+      <circle className="pop" cx={x(at)} cy={y(chanceAt)} r="5" fill="var(--violet)" stroke="var(--raised)" strokeWidth="2" />
       <text
         x={x(at) + (markerRight ? -10 : 10)}
         y={Math.max(PAD.top + 12, y(chanceAt) - 10)}

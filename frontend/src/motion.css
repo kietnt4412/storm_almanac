@@ -278,6 +278,7 @@
 
 :root[data-intro] .word-in,
 :root[data-intro] .rise,
+:root[data-intro] .land,
 :root[data-intro] .hero-streak::before {
   animation-play-state: paused;
 }
@@ -433,11 +434,122 @@
   }
 }
 
+/*
+ * Answers arrive (C2.17): the vocabulary every picture of an answer is drawn
+ * in, so a new chart gets motion by naming a class, not by writing keyframes.
+ * Numbers are the one thing JavaScript moves (`useTween`, `Count`); the rest is
+ * here. Each takes `--delay` for its place in a stagger, and all of them play
+ * on mount, so an answer keyed by when it was asked plays them again.
+ *
+ *   .draw   an SVG stroke with pathLength="1" drawn from its start
+ *   .bloom  a fill that fades in once the line over it is drawn
+ *   .pop    a marker that lands at the end of the line
+ *   .wipe   a bar uncovered from its left edge, its corners left alone
+ *   .stagger-in  a small part (a cell, a tile) that drops into place
+ *   .land   the card an answer sits on, dressed per game in faces.css
+ */
+:root {
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-snap: cubic-bezier(0.2, 0.9, 0.25, 1.25);
+  --dur-draw: 0.9s;
+}
+
+.draw {
+  stroke-dasharray: 1;
+  animation: draw var(--dur-draw) var(--ease-out) var(--delay, 0ms) backwards;
+}
+
+.bloom {
+  animation: fade-in 0.6s ease-out calc(var(--delay, 0ms) + var(--dur-draw) * 0.5) backwards;
+}
+
+.pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop 0.45s var(--ease-snap) calc(var(--delay, 0ms) + var(--dur-draw) * 0.8) backwards;
+}
+
+.wipe {
+  animation: wipe 0.8s var(--ease-out) var(--delay, 0ms) backwards;
+}
+
+/* Inside a block still waiting to scroll in, the drawing waits with it. */
+.reveal:not(.reveal-in) :is(.draw, .bloom, .pop, .wipe, .stagger-in) {
+  animation-play-state: paused;
+}
+
+.stagger-in {
+  animation: stagger-in 0.35s var(--ease-out) var(--delay, 0ms) backwards;
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+
+@keyframes wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scaleY(0.4);
+  }
+}
+
+/*
+ * The Storm landing: a ring of the brand colour spreads off the card once. No
+ * fill mode, so the card's own shadow (a game's printed frame) is back after.
+ * Every landing rises as well, so a card that lands needs no `.rise`.
+ */
+.land {
+  animation:
+    rise 0.7s var(--ease-out) both,
+    land-ring 0.9s var(--ease-out) 0.25s;
+}
+
+@keyframes land-ring {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 45%, transparent), var(--shadow);
+  }
+  to {
+    box-shadow: 0 0 0 18px color-mix(in srgb, var(--brand) 0%, transparent), var(--shadow);
+  }
+}
+
 /* Asked for less motion: everything is where it ends up, and nothing moves. */
 @media (prefers-reduced-motion: reduce) {
   .intro,
   .circuit-pulse {
     display: none;
+  }
+
+  .draw,
+  .bloom,
+  .pop,
+  .wipe,
+  .stagger-in,
+  .land,
+  .land::before,
+  .land-figure {
+    animation: none !important;
   }
 
   .word-in,

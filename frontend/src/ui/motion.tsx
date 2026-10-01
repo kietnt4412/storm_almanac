@@ -70,6 +70,80 @@ function canReveal(): boolean {
 }
 
 /**
+ * A number that moves to its value instead of jumping there (C2.17): from
+ * `from` on mount, which counts an answer up as it lands, and from wherever it
+ * stood when the value changes, so a dial follows the reader's typing.
+ *
+ * <p>The one JavaScript animation primitive; everything that is not a number is
+ * drawn by the classes in `motion.css`. Still where motion is reduced, where
+ * nothing can draw frames (jsdom, a hidden tab), and on the first frame of a
+ * reader who never sees it — the value is the truth and the motion is a guest.
+ */
+export function useTween(target: number, { from = 0, duration = 900 }: { from?: number; duration?: number } = {}): number {
+  const [still] = useState(() => !prefersMotion() || typeof requestAnimationFrame !== 'function');
+  const [shown, setShown] = useState(() => (still || hidden() ? target : from));
+  const current = useRef(shown);
+  current.current = shown;
+
+  useEffect(() => {
+    if (still) return;
+    const start = current.current;
+    if (start === target) return;
+    if (hidden()) {
+      setShown(target);
+      return;
+    }
+    const began = performance.now();
+    let frame = requestAnimationFrame(function step(now) {
+      const t = Math.min(1, (now - began) / duration);
+      setShown(t >= 1 ? target : start + (target - start) * easeOut(t));
+      if (t < 1) frame = requestAnimationFrame(step);
+    });
+    // A window that says it is visible and draws no frames (behind another,
+    // or a preview pane) would hold the number on a wrong frame; a timer runs
+    // there, so the count ends on the value whether or not anybody saw it move.
+    const settle = setTimeout(() => setShown(target), duration + 250);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(settle);
+    };
+  }, [target, duration, still]);
+
+  return still ? target : shown;
+}
+
+/** Fast out of the gate, settling into place: the curve every entrance here uses. */
+const easeOut = (t: number) => 1 - Math.pow(1 - t, 4);
+
+const hidden = () => typeof document !== 'undefined' && document.visibilityState === 'hidden';
+
+/**
+ * A number in the page that counts to its value. A screen reader is told the
+ * value once, never the frames on the way; a whole number counts in whole steps.
+ */
+export function Count({
+  value,
+  format = (n) => n.toLocaleString(),
+  from,
+  duration,
+}: {
+  value: number;
+  format?: (value: number) => string;
+  from?: number;
+  duration?: number;
+}) {
+  const shown = useTween(value, { from, duration });
+  if (shown === value) return <>{format(value)}</>;
+  const step = Number.isInteger(value) ? Math.round(shown) : shown;
+  return (
+    <>
+      <span aria-hidden="true">{format(step)}</span>
+      <span className="sr-only">{format(value)}</span>
+    </>
+  );
+}
+
+/**
  * A block that slides up into place when it scrolls into view. `delay` staggers
  * siblings that arrive together, the way the cards under a heading follow it.
  */

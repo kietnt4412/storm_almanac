@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 
 export interface Spend {
   item: string;
@@ -57,8 +57,9 @@ export function SpendBars({ spends }: { spends: Spend[] }): ReactElement | null 
                     width: `${(quantity / total) * 100}%`,
                     background: COLOURS[index % COLOURS.length],
                     borderColor: 'var(--raised)',
-                  }}
-                  className="h-full border-r-2 last:border-r-0"
+                    '--delay': `${200 + index * 120}ms`,
+                  } as CSSProperties}
+                  className="wipe h-full border-r-2 last:border-r-0"
                   title={`${buys}: ${quantity.toLocaleString()}`}
                 />
               ))}
