@@ -3380,6 +3380,50 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-10-01 (sixty-second) — Faces and a dress: C2.10 to C2.16, and a server that says it is waking.**
+
+**The remote:** [PR #73](https://github.com/kietnt4412/storm_almanac/pull/73) (C2.9 and the footer)
+merged during the session; production reports `fd419c1` (checked 11:12Z). Nothing from this session
+is pushed: eight commits on `dev`, `ab8c3d4` to `ccd225f`.
+
+**Three "bugs" off screenshots, two of them false.** Asked for visual ideas, the agent toured
+production and reported the home page empty until scrolled, the phone's top bar overlapping the page,
+and a blank page on a cold start. **The Browser pane was hidden**, and a hidden page draws no frames
+between screenshots, so delayed `.rise` entrances and the bar's blur were caught half-drawn. Measured
+with `getBoundingClientRect`, computed styles and `getAnimations()`, the first two were not there.
+**The third was real**: Render's free tier sleeps, and for up to a minute a reader saw a headline and
+no sign-in. Fixed (`ab8c3d4`): a line under the top bar once `/api/health` has waited 3 s, and
+placeholder cards on Home while `/api/me` or `/api/games` is pending. Checked against a stub on 8081
+that holds every request 12 s and then forwards it to production.
+
+**"Not good enough; I want real big enhancement."** Seven were offered and the maintainer took all
+seven in the recommended order ([the plan](../plans/c2.10-faces-and-dress.md), *As built* per slice):
+**C2.10** a generated emblem per entity, item and banner (seeded by id, family by kind, frame in the
+game's emblem style, rarity colour compared *within a kind*); **C2.11** the roster as unit cards that
+turn over; **C2.12** the character page as a dossier, with `/goals?add=` behind "Plan this";
+**C2.13** the plan as a 1200 × 630 image made on the device; **C2.14** a cell per pull and a day
+slider; **C2.15** goals picked on a radial tree, wide screens only; **C2.16** PGR as a combat screen,
+R1999 as an almanac. 175 → 205 frontend tests; backend untouched.
+
+**What turned out false along the way.** One motif family per kind made five constructs one face
+five times over: a second, id-picked motif and a serial were added. A weapon's 6★ made every S-rank
+construct look lower until ranks were compared within a kind. Two older fixtures carry entities with
+no rarity, and the emblem took their pages down: a missing rarity now draws a plain frame.
+**`fill="var(--x)"` does nothing** in an SVG attribute; colours from tokens go through `style`. **A
+`position: fixed` dialog inside the page was fixed to the page**, because the route's entrance
+animation leaves a transform: the share dialog renders through a portal. **The pulls strip needed no
+new field**: the chance of landing on exactly pull *k* is the step in `curve` onto it.
+
+**Two things the plan promised and the data cannot back.** Gates drawn as locks on the tree: the
+upgrades route does not say which steps have one, so none are drawn. The share card's Discord unfurl:
+it needs a public, read-only snapshot of a private plan, which is the maintainer's decision and an ADR;
+the image is built, the link is not.
+
+**Environment.** Another session held 5173 and 8080, and its watcher missed this session's writes on K:
+(the tracker's warning, again), so `web-alt` 5174 and `api-alt` 8081 were used. The local R1999 catalog
+does not load (`craft-spell-of-banishing consumes nothing`); the seal style was checked on a static
+gallery instead. Local test data written: account `c214-pulls` with a PGR profile and 7 000 Black Cards.
+
 **2026-10-01 (sixty-first) — C2.9, a first screen that asks which game; the footer writes an email.**
 
 **The remote, checked first:** [PR #72](https://github.com/kietnt4412/storm_almanac/pull/72) (C2.8)
