@@ -61,6 +61,16 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
     queryFn: async () => (await getSavedPlan(profileId)) ?? null,
   });
   const planUse = useMemo(() => usesOf(saved.data?.plan), [saved.data]);
+  // Against what the plan needs (C2.8): a ring per tile, a line of counts, and
+  // the chips. Live as the reader types, since the need is the plan's and the
+  // count is theirs.
+  const coverage = useMemo(
+    () => coverageOf(saved.data?.plan, held, new Set((items.data?.items ?? []).map((item) => item.id))),
+    [saved.data, held, items.data],
+  );
+  const [showing, setShowing] = useState<Showing>('all');
+  const needed = [...coverage.values()].filter((entry) => entry.state === 'covered' || entry.state === 'short');
+  const short = needed.filter((entry) => entry.state === 'short').length;
 
   // Every rank in the bag, highest first: a tile's stripe is its place in that
   // order, so the colours come from the data rather than from a game's scale.
@@ -73,6 +83,7 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
     const needle = filter.trim().toLowerCase();
     return (items.data?.items ?? []).filter((item) => {
       if (onlyHeld && !((held[item.id] ?? 0) > 0)) return false;
+      if (!shows(showing, coverage.get(item.id))) return false;
       if (!needle) return true;
       // The slug is matched as well as the name because the slug is what a
       // shortfall line, a plan and a bug report all name.
@@ -83,7 +94,7 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
         (item.categoryName ?? '').toLowerCase().includes(needle)
       );
     });
-  }, [filter, held, items.data, onlyHeld]);
+  }, [coverage, filter, held, items.data, onlyHeld, showing]);
 
   if (items.isPending || stored.isPending) return <p className="muted">Loading the bag…</p>;
   if (items.isError) {
@@ -131,6 +142,46 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
         </label>
       </div>
 
+      {coverage.size > 0 && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          {needed.length > 0 ? (
+            <span className="count">
+              <b>
+                Covers {needed.length - short} of {needed.length}
+              </b>
+              {short > 0 && (
+                <>
+                  <span className="muted"> · </span>
+                  <span style={{ color: 'var(--brand)' }}>{short} the plan has to get</span>
+                </>
+              )}
+            </span>
+          ) : (
+            <span className="muted">Work the plan out again to see what it needs from the bag.</span>
+          )}
+          <span className="grow" />
+          {(
+            [
+              ['all', 'Everything'],
+              ['short', 'Short for the plan'],
+              ['used', 'Used by the plan'],
+              ['unused', 'Not used'],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className="chip"
+              aria-pressed={showing === value}
+              style={showing === value ? { borderColor: 'var(--brand)', background: 'color-mix(in srgb, var(--brand) 14%, var(--surface))' } : undefined}
+              onClick={() => setShowing(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {rows.length === 0 ? (
         <p className="muted">Nothing matches that.</p>
       ) : (
@@ -145,6 +196,8 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
 
                   const spends = planUse.spends.get(item.id);
                   const buys = planUse.buys.get(item.id);
+                  const covers = coverage.get(item.id);
+                  const count = held[item.id] ?? 0;
 
                   return (
                     <li
@@ -156,15 +209,39 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
                         borderLeftColor: tierColour(item.rarity.rank, ranks),
                       }}
                     >
+                      <span className="flex items-start justify-between gap-2">
                       <span className="min-w-0">
-                        <span className="muted block text-xs">{item.rarity.label}</span>
+                        <span className="muted flex items-center gap-1.5 text-xs">
+                          {item.rarity.label}
+                          {/* Saved, or still in this device's outbox: the same state as "not sent yet". */}
+                          <span
+                            className="inline-block h-1.5 w-1.5 rounded-full"
+                            data-testid="sync-dot"
+                            data-pending={pending ? 'true' : 'false'}
+                            title={pending ? 'waiting to send' : 'saved'}
+                            style={{ background: pending ? 'var(--signal)' : 'var(--ok)' }}
+                          />
+                        </span>
                         <span className="block leading-snug">{item.displayName}</span>
+                        {covers?.state === 'covered' && (
+                          <span className="block text-xs" style={{ color: 'var(--ok)' }}>
+                            covers the {covers.need.toLocaleString()} needed
+                          </span>
+                        )}
+                        {covers?.state === 'short' && (
+                          <span className="block text-xs" style={{ color: 'var(--brand)' }}>
+                            {(covers.need - count).toLocaleString()} more — the plan gets them
+                          </span>
+                        )}
                         {pending && (
                           <span className="block text-xs" style={{ color: 'var(--signal)' }}>
                             not sent yet
                             {serverHas !== pending.value && ` · server has ${serverHas}`}
                           </span>
                         )}
+                      </span>
+                      {/* Beside the name, so the row with the count keeps its room on a phone. */}
+                      {covers?.need !== undefined && <CoverageRing held={count} need={covers.need} />}
                       </span>
                       <span className="flex items-end justify-between gap-2">
                         <span className="muted min-w-0 text-xs">
@@ -250,6 +327,87 @@ export function usesOf(plan: Plan | undefined): { spends: Map<string, number>; b
     }
   }
   return { spends, buys };
+}
+
+export type Coverage =
+  | { state: 'covered' | 'short'; need: number }
+  | { state: 'used' | 'unused'; need?: undefined };
+
+/**
+ * What the bag holds against what the saved plan needs (C2.8, agreed
+ * 2026-10-01), item by item.
+ *
+ * <p><b>Need is the plan's own</b>: `needs`, the demand the solver resolved
+ * before taking the bag off, gates added and crossed states left out. Not what
+ * the purchases spend, which is what this screen showed until now: set against
+ * the bag, that called Simulation Score 3,362 short when the plan farms every
+ * point of it. A currency the plan only spends is "used", with no ring.
+ *
+ * <p>Short means the plan has to get the rest, by a run, a purchase or a claim;
+ * a plan that answered at all gets all of it. A plan saved before `needs` marks
+ * only what it spends and buys.
+ *
+ * <p>Only what a bag can hold is counted: a need for EXP (`progress:…`) or for
+ * one step at several prices (`choice:…`) is no tile, and counting it read
+ * "covers 1 of 3" on a screen showing two.
+ *
+ * @param known the catalog's item ids, the tiles there are
+ */
+export function coverageOf(
+  plan: Plan | undefined,
+  held: Record<string, number>,
+  known: Set<string>,
+): Map<string, Coverage> {
+  const coverage = new Map<string, Coverage>();
+  const { spends, buys } = usesOf(plan);
+  for (const need of plan?.needs ?? []) {
+    if (need.quantity <= 0 || !known.has(need.item)) continue;
+    coverage.set(need.item, {
+      state: (held[need.item] ?? 0) >= need.quantity ? 'covered' : 'short',
+      need: need.quantity,
+    });
+  }
+  for (const item of [...spends.keys(), ...buys.keys()]) {
+    if (!coverage.has(item)) coverage.set(item, { state: 'used' });
+  }
+  return coverage;
+}
+
+/** Which tiles the chips leave on screen. */
+export type Showing = 'all' | 'short' | 'used' | 'unused';
+
+export function shows(showing: Showing, coverage: Coverage | undefined): boolean {
+  const state = coverage?.state ?? 'unused';
+  if (showing === 'short') return state === 'short';
+  if (showing === 'used') return state !== 'unused';
+  if (showing === 'unused') return state === 'unused';
+  return true;
+}
+
+/** A tile's ring: held against need, green once covered, the plan's colour while it still has to get some. */
+function CoverageRing({ held, need }: { held: number; need: number }) {
+  const share = Math.min(1, held / need);
+  const r = 15;
+  const around = 2 * Math.PI * r;
+  return (
+    <svg width="36" height="36" viewBox="0 0 38 38" aria-hidden="true">
+      <circle cx="19" cy="19" r={r} fill="none" stroke="var(--line)" strokeWidth="4" />
+      {share > 0 && (
+        <circle
+          className="coverage-arc"
+          cx="19"
+          cy="19"
+          r={r}
+          fill="none"
+          stroke={share >= 1 ? 'var(--ok)' : 'var(--brand)'}
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeDasharray={`${around * share} ${around}`}
+          transform="rotate(-90 19 19)"
+        />
+      )}
+    </svg>
+  );
 }
 
 /**

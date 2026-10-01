@@ -230,7 +230,9 @@ public final class MipOptimizer implements Optimizer {
                         cached.explanation().shadowPrice(),
                         cached.explanation().bindingStages(),
                         notes,
-                        cached.explanation().payingFor()),
+                        cached.explanation().payingFor(),
+                        cached.explanation().demand(),
+                        cached.explanation().yields()),
                 cached.computedAt());
     }
 
@@ -441,7 +443,10 @@ public final class MipOptimizer implements Optimizer {
                 : measured + " drop coefficient(s) came from player reports; the rest are declared."));
 
         List<StageId> binding = outcome.stageRuns().stream().map(StageRun::stage).toList();
-        return new Explanation(shadowPrices, binding, List.copyOf(notes), demand.steps());
+        Map<StageId, Map<ItemId, Double>> paid = new LinkedHashMap<>();
+        for (StageRun run : outcome.stageRuns()) paid.put(run.stage(), yields.yieldsOf(run.stage()));
+        return new Explanation(
+                shadowPrices, binding, List.copyOf(notes), demand.steps(), demand.quantities(), paid);
     }
 
     /**

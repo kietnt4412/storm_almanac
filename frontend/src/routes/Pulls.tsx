@@ -16,6 +16,7 @@ import { ProfileGate } from '../profile';
 import { reachOf, usePlannerStore } from '../store/plannerStore';
 import { Ladder } from './PlanView';
 import { ChanceCurve } from '../ui/ChanceCurve';
+import { ChanceByDate, CopiesBar, PityDial } from '../ui/PullPictures';
 import { formatUntil, useNow } from '../ui/time';
 import { Explain } from '../ui/Explain';
 
@@ -187,6 +188,7 @@ function Asker({
           </Explain>
         </div>
         <div className="flex flex-wrap items-end gap-4">
+          <PityDial pulls={pulls} hardAt={banner.hardAt} drawnFrom={banner.drawnFrom} />
           <div>
             <label className="label" htmlFor="since">
               Pulls since your last {banner.headline.label}
@@ -335,7 +337,14 @@ function Answer({ odds }: { odds: Odds }) {
       </div>
 
       {/* Absent from a server a deploy behind the page; the answer stands without it. */}
-      {odds.curve && odds.curve.length > 1 && <ChanceCurve curve={odds.curve} afforded={budget.pulls} />}
+      {/* By date where the server says it (C2.8), the question the page exists
+          for; by pull count from a server a deploy behind. The answer stands without either. */}
+      {odds.byDay && odds.byDay.length > 1 ? (
+        <ChanceByDate byDay={odds.byDay} asked={odds.days} closesAt={odds.closesAt} />
+      ) : (
+        odds.curve && odds.curve.length > 1 && <ChanceCurve curve={odds.curve} afforded={budget.pulls} />
+      )}
+      {odds.byCopies && <CopiesBar byCopies={odds.byCopies} />}
 
       <ul className="space-y-1 text-sm">
         <li>

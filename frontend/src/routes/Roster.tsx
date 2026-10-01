@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { getEntities, getRoster, getUpgrades } from '../api/client';
+import { getEntities, getRoster, getUpgrades, type UpgradeStep } from '../api/client';
 import { ProfileGate } from '../profile';
+import { CompletionRing, completionOf, TrackLadders } from '../roster/RosterCard';
 import { TrackPicker } from '../roster/TrackPicker';
-import { TrackBar } from '../roster/TrackBar';
-import { sectionsOf, standingOn, tracksOfGraph, type Track } from '../roster/tracks';
+import { tracksOfGraph, type Track } from '../roster/tracks';
 import { NextStep } from '../steps/Steps';
 import { Icon } from '../ui/Icon';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
@@ -78,12 +78,13 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
   });
 
   const tracksOf = useMemo(() => {
-    const byEntity = new Map<string, { tracks: Track[]; order: string[] }>();
+    const byEntity = new Map<string, { tracks: Track[]; order: string[]; steps: UpgradeStep[] }>();
     graphs.forEach((graph) => {
       if (!graph.data) return;
       byEntity.set(graph.data.entity.id, {
         tracks: tracksOfGraph(graph.data.steps),
         order: graph.data.sections ?? [],
+        steps: graph.data.steps,
       });
     });
     return byEntity;
@@ -116,15 +117,17 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
           from wherever you say you are.
         </p>
       ) : (
-        <ul className="space-y-2">
+        // A card each (C2.8), several to a row; an open one takes the whole row,
+        // since its fourteen dropdowns do not fit in a third of it.
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {shown.map((slug) => {
             const states = roster[slug] ?? [];
             const graph = tracksOf.get(slug);
             const tracks = graph?.tracks;
             const isOpen = open.includes(slug);
             return (
-              <li key={slug} className="card space-y-3">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <li key={slug} className={`card space-y-3 ${isOpen ? 'sm:col-span-2 lg:col-span-3' : ''}`}>
+                <div className="flex items-center gap-x-2">
                   <button
                     type="button"
                     className="icon-btn -ml-2 h-7 w-7"
@@ -136,20 +139,15 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
                       <Icon name="chevron" size={16} />
                     </span>
                   </button>
-                  <Link to={`/catalog/${game}/${slug}`} className="font-medium">
+                  <Link to={`/catalog/${game}/${slug}`} className="min-w-0 flex-1 truncate font-medium">
                     {nameOf(slug)}
                   </Link>
-                  {tracks !== undefined && tracks.length > 0 && <Standing tracks={tracks} order={graph?.order} states={states} />}
-
-                  {/* Null is the one answer that means "not owned" on the wire (V13). */}
-                  <button
-                    type="button"
-                    className="btn-quiet ml-auto text-sm"
-                    onClick={() => editRosterState(profileId, slug, null)}
-                  >
-                    Remove {nameOf(slug)} from the roster
-                  </button>
+                  {tracks !== undefined && tracks.length > 0 && <CompletionRing {...completionOf(tracks, states)} />}
                 </div>
+
+                {tracks !== undefined && tracks.length > 0 && (
+                  <TrackLadders tracks={tracks} order={graph?.order} states={states} steps={graph?.steps} />
+                )}
 
                 {!isOpen ? null : tracks === undefined ? (
                   <p className="muted text-sm">reading their tracks…</p>
@@ -166,6 +164,15 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
                     onChange={(next) => editRosterState(profileId, slug, next)}
                   />
                 )}
+
+                {/* Null is the one answer that means "not owned" on the wire (V13). */}
+                <button
+                  type="button"
+                  className="muted text-xs"
+                  onClick={() => editRosterState(profileId, slug, null)}
+                >
+                  Remove {nameOf(slug)} from the roster
+                </button>
               </li>
             );
           })}
@@ -222,47 +229,4 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
  */
 export function basesOf(tracks: Track[]): string[] {
   return tracks.map((track) => track.states[0]!.state);
-}
-
-/**
- * Where someone stands, in one line: every track they have moved, in the game's
- * order and words — "Promote Elite ★3 · Level 60 · Red Orb 4" — then how many
- * are untouched, with a bar for how far up all their tracks they are together.
- */
-export function Standing({ tracks, order, states }: { tracks: Track[]; order?: string[]; states: string[] }) {
-  const positions = sectionsOf(tracks, order)
-    .flatMap((section) => section.tracks)
-    .map((track) => {
-      const at = standingOn(track, states);
-      const index = at === undefined ? 0 : track.states.findIndex((candidate) => candidate.state === at);
-      return { track, index: Math.max(0, index) };
-    });
-  const moved = positions.filter((position) => position.index > 0);
-  const untouched = positions.length - moved.length;
-  const climbed = positions.reduce((sum, position) => sum + position.index, 0);
-  const height = positions.reduce((sum, position) => sum + Math.max(0, position.track.states.length - 1), 0);
-  // Every track laid end to end, as one track the bar can draw.
-  const whole: Track = {
-    name: 'every track',
-    states: Array.from({ length: height + 1 }, (_, index) => ({ state: String(index), label: String(index) })),
-  };
-
-  return (
-    <span className="flex min-w-0 flex-1 basis-60 items-center gap-3">
-      <span className="muted min-w-0 truncate text-sm">
-        {moved.length === 0
-          ? 'untouched'
-          : [
-              ...moved.map(({ track, index }) => `${track.tag ?? track.name} ${track.states[index]!.label}`),
-              ...(untouched > 0 ? [`${untouched} untouched`] : []),
-            ].join(' · ')}
-      </span>
-      <span
-        className="hidden w-16 shrink-0 sm:block"
-        title={`${Math.round((climbed / Math.max(1, height)) * 100)}% of the way up every track`}
-      >
-        <TrackBar track={whole} at={climbed} />
-      </span>
-    </span>
-  );
 }

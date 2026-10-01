@@ -55,7 +55,8 @@ describe('the saved plan', () => {
     renderPlan();
 
     expect(await screen.findByText(/Your last plan, worked out/)).toBeInTheDocument();
-    expect(screen.getByText('1,470')).toBeInTheDocument();
+    // The total tile; "Why N days?" says the same number in its sentence (C2.8).
+    expect(screen.getAllByText('1,470')[0]).toHaveClass('stat-value');
     expect(screen.getByText(/Anchored in Faith \(v18\)\. It counts what you owned then/)).toBeInTheDocument();
 
     expect(screen.getByLabelText(/a day/)).toHaveValue(180);

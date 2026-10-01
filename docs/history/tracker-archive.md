@@ -3232,6 +3232,15 @@ the tracker now says only that):
 > this box is ticked, with the cut recorded in the session log. **All four are
 > done** (B5 with one cut, ADR 0030).
 
+**550 on 2026-10-01 (sixtieth), before its own row, and 537 after carrying less.**
+The session index's rows for the thirty-sixth to forty-ninth sessions moved
+verbatim to *Session index rows collapsed on 2026-09-24*, and two finished
+notes under *Next actions* became one line. As they stood:
+
+> > **C2.5 (2026-10-01, fifty-seventh): agreed, built, live since #67** — five screen changes from Claude's mockups (plan checklist with ticks kept by `V20`, pulls beside its answer, goal-track bars, roster lines, inventory tiles tied to the plan) and the maintainer's **game switch** in place of light / dark ([ADR 0039](docs/adr/0039-a-games-look-is-presentation-data-in-the-client.md), lettering not game icons, R1999 "Soon" on production). [As built](docs/plans/c2-the-visual-pass.md#c25--the-second-pass-and-the-game-switch-2026-10-01-fifty-seventh). **C2.6 (fifty-eighth), live since #69:** motion from the maintainer's screen recording (opening, hero, reveals, plan circuit) and **a top bar in place of the side panel**, at their ask ([as built](docs/plans/c2-the-visual-pass.md#c26--motion-and-the-top-bar-2026-10-01-fifty-eighth)). **C2.7 (fifty-ninth), on `dev` too:** a feel per game, animated wordmarks in our own type (the maintainer sent the games' logos as the idea; no glyph traced, ADR 0040) and the reader's Google picture (`V21`) — [as built](docs/plans/c2-the-visual-pass.md#c27--a-feel-per-game-wordmarks-and-the-readers-picture-2026-10-01-fifty-ninth). **Next:** the maintainer watches the openings and wordmarks in a real browser, a PR, then C2.4's rehearsal. **`V21` migrates Neon when that deploy starts** — additive and nullable, so the older build keeps starting.
+>
+> > **Resume here (2026-10-01, fifty-ninth): C2.8, the five core screens.** The maintainer took all five, in order: **goals** (ladder sliders and a live cost of the range), **plan** ("why 28 days?", a resource flow, what's precious), **pulls** (a pity dial, chance by date, copies), **roster** (a card per construct), **inventory** (coverage rings, short-for-plan filters). [The plan](docs/plans/c2.8-the-core-screens.md) says what data each draws and what it must not claim. **First:** re-check the remote and #71, answer its three data questions from the code, **mock up all five and get the maintainer's agreement before building.** Only `/pulls` needs the server (`byDay`, `byCopies`).
+
 ---
 
 ## The PGR status bullet until 2026-09-25
@@ -3308,6 +3317,25 @@ than a wiki.
 
 *The thirty-fifth row joined them in the forty-first session, for the same reason and at the same count, 551.*
 
+*The thirty-sixth to forty-ninth rows joined them in the sixtieth session (2026-10-01), when the tracker stood at 550 before that session's own row. They are below, newest first, as they stood:*
+
+| Date | Session | What it was |
+|---|---|---|
+| 2026-09-28 | forty-ninth | Production on `07ff98a` (#58). **T8**: a PGR level step is priced only in EXP, and the upgrades route served item costs only, so the character page's Level rows read bare; now `progress` on the wire, EXP first on the row. **T9**: a step with no price says "Free". **N42 closed by screens**: Ultima Awaken is free, unlocked by the third Awaken — the maintainer's own report overruled; sequence 16, the Awaken track held as N43 |
+| 2026-09-28 | forty-eighth | Production on `2e147d0` (#57). **Phase 4 closed**: five strangers completed a plan without help. **T1 was a bug** — the worker served "the latest" game data from cache, so a returning browser saw tracks from before sequence 11; that alone was notes 2, 4 and 5. T2 profile rename and delete; T3 the plan summary by weight; T6, T7 found and fixed |
+| 2026-09-26 | forty-seventh | Production on `03199cb` (#56). **S6 closed by a reading**: the maintainer read the upgrade prompt on Seeker System from Lv 1 to each target 5–17; fourteen rows replace the derived 4 → 18 and sum to its 41 SP and 197 000 Cogs exactly. **Sequence 15** in both databases — the classifier refused the agent, so the maintainer published to Neon by hand. A plan from Lv 10 is 120 Serum, not 150. **D5's stall list is empty**; #57 open |
+| 2026-09-26 | forty-sixth | Production on `3bfa8a9` (#55). **S9**: a purchase says its totals, "Buy 514,800 Cogs for 429 Simulation Score · 429 × 1,200 for 1", in a new wire field so a page and server a deploy apart cannot disagree. **S10**: zero shadow prices become one sentence saying why. Then the smaller three: notes in plain words and last, Pods XL, L, M by what they feed, and **sequence 14** (`*` → ★, on Neon). #56 open; only S6 left |
+| 2026-09-26 | forty-fifth | Production on `8470ddf` (#53). **S8**: the plan's steps travel as data and read "Level · 65, Red Orb · 18"; **sequence 13** gives the bundle's keys words (ADR 0033, `V17`) — "Phantom Pain Cage", one "Character EXP" heading. **S7**: one goal row per construct. Four smaller hesitations fixed. #54 deployed, sequence 13 on Neon. **Third run completes**; S9, S10 found |
+| 2026-09-26 | forty-fourth | Production on `32cd5b0` (#52). **The rehearsal's second run completes and stalls three ways**: S6 skills 5–17 unread, S7 one target per goal row, S8 raw ids left. **Track C (D6)**: pull planner, UI polish, account features, after launch and before Track B; C2 tested by ourselves |
+| 2026-09-26 | forty-third | Remote checked: #51 merged, production on `1ee33fa`. **S5**: the plan page's rows and four notes named from published facts — "Buy 10 Memory Enhancer IV for 87 Simulation Score" — in reading order; no new reading. `StepNames` absorbed `DemandNames` |
+| 2026-09-25 | forty-second | **PR #46 never deployed**: its `main` run went red on a `findBy` that took 1 320 ms where the same commit had taken 486. Production stayed on #45, and nothing showed it until somebody looked. `asyncUtilTimeout` is now 5 s for every test. The remote check now includes the last `main` run and the health SHA. **D5**: the maintainer rehearses the stranger test first, and strangers wait until the stall list is empty. **S1**, found in minutes: a second profile on one server was a bare 500 — now a 409 by name, and the form says so first. **S2** and **S3** the same day: a dropdown per track instead of ~70 raw ids, and four steps with a way on from each. **S4**: the game's rank names and skill sections, carried by the step (ADR 0032, sequence 11) |
+| 2026-09-24 | forty-first | Q6 written: the maintainer agreed the three "seen, not agreed" items. **Sign-in now returns the reader to their page** — `?then=` held in the session across Google, one open-redirect check shared with the dev sign-in; untried against Google until deployed. **A choice line is named by its prices**, which are facts already. **A shadow price rendered at last** — 90.00, driven, no reading needed. All four met. Then the character page asks with **its own game's profile**, and the route refuses a mismatch by name. 466 backend tests, 39 frontend |
+| 2026-09-24 | fortieth | **N41 closed**, with Lucia: Inverse Crown in Karenina's place (not owned). Sequence 9 put her and Selena on the ladder, +129 facts. Then the maintainer named the patch: today's readings were **4.8.0 "Anchored in Faith"**, live since that morning's maintenance, where sequences 8 and 9 said 4.7.0 — sequence 10 relabels, no fact changes. A test went red with sequence 9 unnoticed; run the full build. Both in both databases. 452 tests |
+| 2026-09-24 | thirty-ninth | N41's question answered first-hand: every S-rank construct shares Lacrimosa's EXP, Promote and skill costs. So the bundle writes that path **once** (`ladders`, ADR 0031) and expands it per construct in the parser; Lacrimosa's 57 rows became 30 entries and diff against sequence 7 as *no changes*, same provenance per fact. Then her four skill pages showed **eight** levelled skills where the bundle had seven, one of them a name on no page. Sequence 8 published locally and to Neon, −4/+8, each read back as *no changes*. 452 backend tests |
+| 2026-09-24 | thirty-eighth | B5 started, and **the backend went live** on Render and Neon with PGR sequence 7 published. The maintainer settled both decisions — one origin, and their own keep-alive bot for the sleeping free tier. **The image built and ran end to end for the first time**: 15 migrations on an empty Postgres, and PGR sequence 7 published into it from the same image's CLI. The "slow download" was a 500 MB build context with no `.dockerignore`. Running it as Render will found two bugs, each pinned by a test that failed first: `/actuator/health` 503 on an unused Redis, and an OAuth redirect URI of `http://<render-host>` behind the proxy. Then a third, in the page: the PWA worker answered sign-in navigations from its cache. Then **the first real OAuth exchange**, a sign-out production never had, and a `deploy` job whose first run on `main` went green — **B5 closed, Phase 0 ticked**. The dev sign-in kept (ADR 0030). 441 backend tests, 33 frontend |
+| 2026-09-22 | thirty-seventh | N37 and N28 closed as one sequence 7, published and read back as *no changes*. **The EXP pool names are the bundle's own word, not the game's** — PGR calls all three pools "EXP" (ADR 0028) — and the pull price is 250 tickets, writable at last because the maintainer opened the ticket's tile and it grades 5★, so the format change the research note argued for was never needed (ADR 0029). `IncomeModel` written, and nothing calls it. **Three stale claims fell out of doing the work**, including "no bundle declares a banner at all", which had been false since sequence 0. Whole-graph equality caught an ordering bug the field-by-field assertions missed. 435 tests, 16 gated ones run; p95 1 812 ms and the plan 3 877 Activity, both recorded rather than smoothed |
+| 2026-09-21 | thirty-sixth | N35's two load-bearing halves closed, leaving N37. The plan form asks **how far do you get** and sends `reach`, off a new `/measures` route that collects the ladders ADR 0022 said were declared nowhere; answering nothing is refused *by name*, answering 1 100 000 plans **Evolve to SS in 63 days and 0 Serum** — the first plan a web client has ever asked for that counts a scored grant. The ladder summary computes **56 Scars a week**, agreeing with the figure ADR 0022 states in prose. A roster screen, sharing one state-editing component with Goals. 420 backend tests, frontend 16 → 28. ADR 0022 stands: the maintainer kept `reach` on the request, so its trigger is now a *second device*. **Do not run prettier here** — no config, and it reformatted 456 lines of a 269-line change |
+
 The tracker reached **561 lines** in the thirty-eighth session, eleven over its
 limit, before that session's own row was added. Its rule says rewrite a section
 rather than shave one, so the session index was rewritten a second time: every
@@ -3352,6 +3380,66 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-10-01 (sixtieth) — C2.8: the five core screens, agreed from mockups and built a page at a time.**
+
+**The remote, checked first:** [PR #71](https://github.com/kietnt4412/storm_almanac/pull/71)
+merged 08:10Z; its `main` run `36834701760` is green and production reports
+`cf01f64`. So C2.5 to C2.7 are live.
+
+**The three data questions, answered from the code before drawing** ([the
+plan](../plans/c2.8-the-core-screens.md#the-data-questions-answered-from-the-code-sixtieth)).
+A reward's cadence was on no route the plan page reads (only `/measures`, and
+only for a reward behind a measure). The score per stage was not on the wire.
+And **Inventory's "plan uses" was purchases only**: set against the bag, it
+would have called Simulation Score 3,362 short when the plan farms every point.
+The model counts the k-th weekly claim at day 7k (`Cadence.occurrencesIn`),
+which is what lets the plan page mark claims honestly.
+
+**Mockups, then agreement.** One static page through the dev server, all five
+screens, a PGR / R1999 switch, driven at 1280 and 375. The first screenshots
+caught covered and short both red under PGR's crimson, so covered became a
+fixed green (`--ok`). The maintainer agreed all five as shown, with the
+recommended answer to each question: need from the plan's own demand, two
+optional wire fields for the plan, the fixed green. The mockup was deleted.
+
+**Built, one commit a page, each driven before the next:**
+- **Goals** (`b75f1bb`): a range-input ladder per track, the range's own
+  prices (`rangeCost`: a choice named and never added, crossed states free,
+  gates said to be left out), the row's sum, drag to reorder. Red Orb 4 → 18
+  read 41 Skill Point · 197,000 Cogs on the rehearsal account.
+- **Plan** (`5447f49`): `Explanation` carries `demand` and `yields`, and the
+  plan response `stages[].pays`, `rewards[].cadence` and `needs`.
+  "Why 28 days?" said the serum is spent by day 8 and four weekly claims set
+  the length; the flow drew 3,362 Score as 2,472 / 545 / 345.
+- **Pulls** (`747fbeb`): `byDay` (each day's affordable pulls read off the one
+  curve) and `byCopies` (`MarkovBannerEngine.copiesWithin`, one walk to "k or
+  more", tested against `probabilityOfFeatured` for every k). With dailies and
+  weeklies counted: 20 pulls, 9.5% by the close, the copies 90.5 / 9.1 / 0.4%.
+- **Roster** (`4d53d17`): a card per construct, squares filled to where the
+  reader stands, a ring, a price on every unreached rung. `Standing` and
+  `TrackBar` went.
+- **Inventory** (`4690596`): coverage of `needs`, chips, a sync dot. **The
+  screen test caught a real bug**: "Covers 1 of 3" on two tiles, because
+  `progress:character-exp` was counted; only catalog items count now.
+
+**Three things worth knowing.** Another session held 5173 and 8080 running
+older code, so `web-alt` (5174) and `api-alt` (8081) were added to
+`.claude/launch.json`, with `frontend/vite.alt.config.ts` re-pointing the
+proxy. **The dev server's file watcher on K: missed a write twice** (Goals,
+then Inventory): the page served the old module until the file was touched,
+which looked like a bug in the new code both times. And **shell-quoted
+`node -e` scripts lost every backtick** (template literals and Markdown code
+spans) three times; scripts went into files after that.
+
+**Not built, and said:** numbers counting up on the inventory (the ring moves
+instead, because the number is a field being typed into); copies in the shop
+(N38, said under the chart). Every shadow price on the rehearsal plan is zero,
+so the price bars were proven by the unit test only.
+
+Backend 546 tests, frontend 170 (from 140), production build green.
+**Five commits on `dev`, not pushed** — pushing and the PR are the
+maintainer's call.
+
 **2026-10-01 (fifty-ninth) — C2.7: a feel per game, wordmarks that move, and the reader's Google picture.**
 
 **The maintainer said PGR and R1999 were "too simple".** That is three
@@ -3377,6 +3465,13 @@ R1999, each game's dress in a new `looks.css`, and `V21` for the picture.
 - **`aria-hidden` hides from `getByRole`.** The opening is aria-hidden, so
   finding its wordmark by role needs `hidden: true`.
 - **No Python here either**: multi-line edits went through small Node scripts.
+
+**Then C2.8 was planned, not built.** Claude walked the five core screens as
+`rehearsal-s6` and recommended a drawing for each, built only from numbers the
+page already has. The maintainer took all five, in the recommended order:
+[the plan](../plans/c2.8-the-core-screens.md). Two rules bound it: no game art,
+and no picture of a claim the solver does not make (no per-day schedule, no
+stage → goal line). Only `/pulls` needs new fields. Mockups come first.
 
 **2026-10-01 (fifty-eighth) — C2.6: motion from a recording, and a top bar in place of the side panel.**
 
@@ -9041,3 +9136,9 @@ and **`web-built`**, the built bundle on 4173 that the offline test needs) proxi
 `/api` **and `/dev`** to `localhost:8080`, so local is same-origin. The sign-in URL
 is chosen behind `import.meta.env.DEV`, so the development one is not in a
 production bundle.
+
+### Tracker lines retired on 2026-10-01 (fifty-ninth session)
+
+The C2 note from *Next actions*, replaced by C2.8's resume note to keep the tracker at 550 lines. What it asked for is done (C2 deployed in #65) or carried in the C2 row of the board (the rehearsal, the exit wording):
+
+> **C2 (2026-09-30, fifty-fifth): agreed and mostly built, deployed in #65** — [the plan](docs/plans/c2-the-visual-pass.md): direction **A · Storm**, the side panel with a hide button (the maintainer's own answer), all visuals, "Why?" toggles. Two backend fields came with it, both optional on the wire: `curve` on `/pulls` and `spends` on a plan's purchases. **Next:** the maintainer looks at it (the window was minimised for most of the drive, so few screenshots exist), then C2.4's self-run rehearsal at 375 and 1280 in both themes, then a PR. **Exit wording (question 5) not yet agreed.** **Phase 6 was taken and put down the same session** (D9).

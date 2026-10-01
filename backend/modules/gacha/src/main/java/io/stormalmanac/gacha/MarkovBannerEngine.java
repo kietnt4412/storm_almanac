@@ -132,6 +132,68 @@ public final class MarkovBannerEngine implements BannerEngine {
     }
 
     /**
+     * How many featured copies {@code pulls} pulls end with: element {@code k} is
+     * the chance of exactly {@code k} for every {@code k} below {@code upTo}, and
+     * the last element the chance of {@code upTo} or more (C2.8's copies chart).
+     *
+     * <p>One walk of the same chain as {@link #curveOfFeatured}, aimed at
+     * {@code upTo} copies: the mass still in the chain sits at the copies it has,
+     * which is "exactly k", and what left it reached {@code upTo}. So element
+     * {@code upTo} is {@code curveOfFeatured(…, upTo)[pulls]}, and the sum of
+     * elements from {@code k} on is the chance of at least {@code k}, by
+     * construction. The elements sum to one.
+     */
+    public double[] copiesWithin(BannerModel banner, PityState from, int pulls, int upTo) {
+        if (upTo < 1) throw new IllegalArgumentException("upTo must be >= 1, was " + upTo);
+        PullModel model = PullModel.of(banner);
+        int walls = model.hardAt();
+        int depth = model.featured().guaranteeAfterLoss() + 1;
+        // Walked again rather than shared with curveOfFeatured, which keeps no
+        // state by copies: the two answers are tested to agree instead.
+        double[][][] current = new double[walls][depth][upTo];
+        double[][][] next = new double[walls][depth][upTo];
+        current[Math.min(from.pullsSinceHit(), walls - 1)]
+               [Math.min(from.consecutiveLosses(), depth - 1)]
+               [0] = 1.0;
+        for (int pull = 0; pull < pulls; pull++) {
+            for (double[][] plane : next) {
+                for (double[] row : plane) {
+                    Arrays.fill(row, 0.0);
+                }
+            }
+            for (int since = 0; since < walls; since++) {
+                double hit = model.hitRateAt(since);
+                for (int losses = 0; losses < depth; losses++) {
+                    double toFeatured = hit * model.featuredChanceAfter(losses);
+                    double toOffFeatured = hit - toFeatured;
+                    for (int held = 0; held < upTo; held++) {
+                        double mass = current[since][losses][held];
+                        if (mass == 0.0) continue;
+                        next[Math.min(since + 1, walls - 1)][losses][held] += mass * (1.0 - hit);
+                        if (held + 1 < upTo) next[0][0][held + 1] += mass * toFeatured;
+                        next[0][Math.min(losses + 1, depth - 1)][held] += mass * toOffFeatured;
+                    }
+                }
+            }
+            double[][][] swap = current;
+            current = next;
+            next = swap;
+        }
+        double[] exactly = new double[upTo + 1];
+        double remaining = 0.0;
+        for (double[][] plane : current) {
+            for (double[] row : plane) {
+                for (int held = 0; held < upTo; held++) {
+                    exactly[held] += row[held];
+                    remaining += row[held];
+                }
+            }
+        }
+        exactly[upTo] = Math.clamp(1.0 - remaining, 0.0, 1.0);
+        return exactly;
+    }
+
+    /**
      * The answer is one minus the mass that never got there, rather than the
      * mass that did, and the difference is not a stylistic one. Accumulating
      * arrivals over seventy steps leaves a rounding residual of about 1e-13, so a

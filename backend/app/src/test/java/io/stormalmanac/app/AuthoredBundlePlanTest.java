@@ -415,6 +415,29 @@ class AuthoredBundlePlanTest {
     }
 
     @Test
+    @DisplayName("a plan says what its stage's runs pay, each claim's cadence, and what the goals need (C2.8)")
+    void planCarriesYieldsCadencesAndNeeds() {
+        // The seeker-system plan above: 5 runs at 82 Simulation Score a run is
+        // 410 Score, against the 379 its purchases spend. The page draws where
+        // the energy goes from this, so it must be the solve's yield, not a
+        // re-read of the bundle; here the two agree because the yield is declared.
+        PlanResponse skill = PlanResponse.of(solve(Goal.deterministic(HELENTINE, "seeker-system-18")), definition);
+        assertThat(skill.stages()).singleElement().satisfies(stage -> assertThat(stage.pays())
+                .containsExactly(new PlayerView.YieldView("simulation-score", "Simulation Score", 82.0, 410.0)));
+        // What the goal needs, before the bag: the prompt's own 1 -> 18 total.
+        assertThat(skill.needs()).contains(
+                new PlayerView.NeedView("cogs", "Cogs", 206_000),
+                new PlayerView.NeedView("skill-point", "Skill Point", 44));
+
+        // Every tier of the Cage is weekly, and the line says so, so the page
+        // can mark the k-th claim at day 7k without hard-coding "weekly".
+        PlanResponse cage = PlanResponse.of(solve(Goal.deterministic(HELENTINE, "evolve-ss"), Inventory.empty(PROFILE),
+                63, Map.of("phantom-pain-cage-score", 1_100_000)), definition);
+        assertThat(cage.rewards()).isNotEmpty().allSatisfy(claim -> assertThat(claim.cadence()).isEqualTo("WEEKLY"));
+        assertThat(cage.stages()).as("nothing farmed, so nothing paid").isEmpty();
+    }
+
+    @Test
     @DisplayName("a line done many times says its totals, and a purchase says how it is made up")
     void planLinesSayTheirTotals() {
         // S9 of D5's third run: "Buy 1,200 Cogs for 1 Simulation Score × 429"

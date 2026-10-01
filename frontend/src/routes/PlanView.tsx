@@ -27,6 +27,8 @@ import { Explain } from '../ui/Explain';
 import { Icon, type IconName } from '../ui/Icon';
 import { Reveal } from '../ui/motion';
 import { PlanCircuit } from '../ui/PlanCircuit';
+import { flowsOf, PlanFlow } from '../ui/PlanFlow';
+import { WhyDays } from '../ui/WhyDays';
 
 /**
  * The answer, and what it is worth.
@@ -111,8 +113,12 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
   // open while there is no answer to show, folded to one line once there is.
   const [editing, setEditing] = useState<boolean | null>(null);
 
+  // The rate the last run was asked with, kept apart from the form so editing
+  // the form after a plan does not redraw that plan's "Why N days?".
+  const [askedRate, setAskedRate] = useState<number | null>(null);
   const run = useMutation<Plan, Error>({
     mutationFn: () => solve(profileId, { energyPerDay, horizonDays, objective, reach }),
+    onMutate: () => setAskedRate(energyPerDay),
     // A new plan is saved on the latest sequence, so the report of what changed
     // since the last one is out of date too, here and on Home.
     onSuccess: () => {
@@ -348,7 +354,14 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
         </p>
       )}
       {shown && !run.isError && (
-        <Answer plan={shown} energyUnit={energyUnit} tracks={tracks} done={done} onToggle={toggle} />
+        <Answer
+          plan={shown}
+          energyUnit={energyUnit}
+          tracks={tracks}
+          done={done}
+          onToggle={toggle}
+          energyPerDay={run.data ? askedRate ?? undefined : saved.data?.request.energyPerDay}
+        />
       )}
 
       <NextStep from="/plan" />
@@ -455,9 +468,12 @@ export function Answer({
   tracks = new Map(),
   done = [],
   onToggle,
+  energyPerDay,
 }: {
   plan: Plan;
   energyUnit: string;
+  /** The rate the plan was asked with, for "Why N days?"; without it, no bar. */
+  energyPerDay?: number;
   /** Each paid-for entity's tracks, by id; a step whose entity is missing keeps the server's name. */
   tracks?: Map<string, Track[]>;
   /** The lines ticked off, by {@link lineKey}. */
@@ -499,7 +515,15 @@ export function Answer({
 
         <PlanCircuit plan={plan} energyUnit={energyUnit} />
 
-        <SpendBars spends={spends} />
+        {energyPerDay !== undefined && <WhyDays plan={plan} energyPerDay={energyPerDay} energyUnit={energyUnit} />}
+
+        {/* Where the energy goes, from what each stage pays (C2.8); a plan saved
+            before stages carried that keeps the bars of where a currency goes. */}
+        {flowsOf(plan, energyUnit).length > 0 ? (
+          <PlanFlow plan={plan} energyUnit={energyUnit} />
+        ) : (
+          <SpendBars spends={spends} />
+        )}
 
         {paying.length > 0 && <PaysFor steps={paying.length} groups={groups} />}
         <Remarks plan={plan} />
@@ -704,11 +728,19 @@ function Prices({ prices, energyUnit }: { prices: ShadowPrice[]; energyUnit: str
             {energyUnit} per extra unit, at this answer. It is what the plan would pay to get one more
             — so it is also what a material is worth when a banner or an event hands you some.
           </p>
-          <ul className="grid gap-1 text-sm sm:grid-cols-2">
+          {/* As bars against the dearest (C2.8), so what is precious shows at a glance; the number stays. */}
+          <ul className="grid grid-cols-[minmax(6rem,12rem)_1fr_auto] items-center gap-x-3 gap-y-1.5 text-sm">
             {priced.map((price) => (
-              <li key={price.item} className="flex justify-between gap-4">
-                <span>{price.displayName}</span>
-                <span className="count muted">{price.price.toFixed(2)}</span>
+              <li key={price.item} className="contents">
+                <span className="truncate">{price.displayName}</span>
+                <span className="h-2.5 rounded-full" style={{ background: 'var(--line)' }} aria-hidden="true">
+                  <span
+                    className="block h-full rounded-full"
+                    data-testid="price-bar"
+                    style={{ width: `${(price.price / priced[0]!.price) * 100}%`, background: 'var(--violet)' }}
+                  />
+                </span>
+                <span className="count muted text-right">{price.price.toFixed(2)}</span>
               </li>
             ))}
           </ul>

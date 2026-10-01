@@ -8,6 +8,7 @@ import {
   getUpgrades,
   saveGoals,
   type Goal,
+  type UpgradeStep,
 } from '../api/client';
 import { ProfileGate } from '../profile';
 import { moveRow, removeRow, rowsOf, setTarget, type GoalRow } from '../roster/goalRows';
@@ -69,7 +70,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
   // conflating them was a real bug — see statesOfGraph, which is where the
   // distinction now lives, shared with the roster screen.
   const statesOf = useMemo(() => {
-    const byEntity = new Map<string, { targets: string[]; tracks: Track[]; order: string[] }>();
+    const byEntity = new Map<string, { targets: string[]; tracks: Track[]; order: string[]; steps: UpgradeStep[] }>();
     graphs.forEach((graph) => {
       const data = graph.data;
       if (!data) return;
@@ -79,6 +80,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
         targets: statesOfGraph(data.steps).targets,
         tracks: sectionsOf(tracksOfGraph(data.steps), data.sections).flatMap((section) => section.tracks),
         order: data.sections ?? [],
+        steps: data.steps,
       });
     });
     return byEntity;
@@ -112,6 +114,10 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
   const [opened, setOpened] = useState<string[]>([]);
   // The entity whose "where they stand" is open, one at a time.
   const [standing, setStanding] = useState<string | null>(null);
+  // The row being dragged by its grip (C2.8). A drop sends the whole list, as
+  // ↑ and ↓ do, which stay for the keyboard and for touch, where HTML drag
+  // and drop does not fire.
+  const [dragging, setDragging] = useState<number | null>(null);
 
   if (entities.isPending || saved.isPending) return <p className="muted">Loading…</p>;
 
@@ -166,9 +172,42 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
             const name = entity?.displayName ?? row.entity;
             const isSaved = index < savedRows.length;
             return (
-              <li key={row.entity} className="card space-y-3">
+              <li
+                key={row.entity}
+                className="card space-y-3"
+                style={dragging !== null && dragging !== index && isSaved ? { borderColor: 'var(--brand)' } : undefined}
+                onDragOver={(event) => {
+                  if (dragging !== null && isSaved) event.preventDefault();
+                }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  if (dragging !== null && isSaved && dragging !== index) setDraft(moveRow(goals, dragging, index));
+                  setDragging(null);
+                }}
+              >
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="count muted w-6 text-right">{index + 1}</span>
+                  {isSaved && (
+                    <span
+                      draggable
+                      className="muted cursor-grab select-none tracking-[-2px]"
+                      title="Drag to reorder"
+                      aria-hidden="true"
+                      onDragStart={(event) => {
+                        event.dataTransfer?.setData('text/plain', row.entity);
+                        setDragging(index);
+                      }}
+                      onDragEnd={() => setDragging(null)}
+                    >
+                      ⋮⋮
+                    </span>
+                  )}
+                  <span
+                    className="count inline-grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-bold"
+                    style={{ background: 'var(--brand)', color: 'var(--on-brand)' }}
+                    aria-label={`Priority ${index + 1}`}
+                  >
+                    {index + 1}
+                  </span>
                   <Link to={`/catalog/${game}/${row.entity}`} className="font-medium">
                     {name}
                   </Link>
@@ -248,6 +287,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                       targets={graph.targets}
                       roster={roster[row.entity] ?? []}
                       row={row}
+                      steps={graph.steps}
                       onChange={(track, state) => setDraft(setTarget(goals, row.entity, graph.tracks, track, state))}
                       onChangeMany={(changes) =>
                         setDraft(
