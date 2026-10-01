@@ -54,10 +54,12 @@ describe('the inventory and the plan', () => {
   });
 
   it('colours a rarity by its place among the ranks present, highest first', () => {
-    const ranks = [6, 5, 4, 3];
-    expect(tierColour(6, ranks)).toBe('var(--signal)');
-    expect(tierColour(5, ranks)).toBe('var(--violet)');
-    expect(tierColour(4, ranks)).toBe('var(--brand)');
-    expect(tierColour(3, ranks)).toBe('var(--line)');
+    // Red, orange, purple, yellow, then quiet (the maintainer, 2026-10-01).
+    const ranks = [6, 5, 4, 3, 2];
+    expect(tierColour(6, ranks)).toBe('var(--rarity-1)');
+    expect(tierColour(5, ranks)).toBe('var(--rarity-2)');
+    expect(tierColour(4, ranks)).toBe('var(--rarity-3)');
+    expect(tierColour(3, ranks)).toBe('var(--rarity-4)');
+    expect(tierColour(2, ranks)).toBe('var(--line)');
   });
 });
