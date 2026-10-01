@@ -3408,7 +3408,13 @@ the answer by `submittedAt` fixed it in passing.
 **C2.19 not built, handed to the maintainer:** view transitions need React Router's data router (the
 app uses `BrowserRouter`), and the dossier's data is rarely cached when its link is clicked. **Also
 asked:** C2.16's PGR page entrance jitters the page sideways ±12 px — close to the shake the
-maintainer said they dislike.
+maintainer said they dislike. **Answered:** build C2.19, next session; the jitter stays.
+
+**A bug off production (`a230377`):** the maintainer's screenshot of `/goals` showed "SS Rank Passive
+Skill" running out of the card. The tree was a fixed 680 square with `overflow: visible`, and a name
+starts at radius 280 and runs outward. The viewBox now grows to each name's far end, measured with
+`getComputedTextLength` before paint (an estimate in jsdom): 742 wide on Lacrimosa, every label at
+least 10 px inside.
 
 **2026-10-01 (sixty-second) — Faces and a dress: C2.10 to C2.16, and a server that says it is waking.**
 
