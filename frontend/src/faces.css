@@ -605,3 +605,157 @@
     transition: none;
   }
 }
+
+/* ── The skill tree (C2.15) ──────────────────────────────────────────────── */
+
+.skill-tree {
+  display: block;
+  width: 100%;
+  max-width: 680px;
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.tree-halo {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+}
+
+.tree-core {
+  fill: color-mix(in srgb, var(--brand) 8%, var(--raised));
+  stroke: var(--line);
+}
+
+.tree-section {
+  fill: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.tree-label {
+  fill: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  transition: fill 0.2s;
+}
+
+.tree-spoke[data-active] .tree-label {
+  fill: var(--ink);
+}
+
+.tree-rail {
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.tree-have {
+  stroke: var(--brand);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.tree-want {
+  stroke: var(--signal);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 1 6;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--signal) 70%, transparent));
+  animation: tree-flow 1.2s linear infinite;
+}
+
+@keyframes tree-flow {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+
+.tree-node {
+  cursor: pointer;
+}
+
+.tree-node[data-state='closed'] {
+  cursor: default;
+}
+
+.tree-hit {
+  fill: transparent;
+}
+
+.tree-dot {
+  fill: var(--raised);
+  stroke: var(--muted);
+  stroke-width: 1.2;
+  transition: r 0.15s, fill 0.15s;
+}
+
+.tree-node[data-state='have'] .tree-dot {
+  fill: var(--brand);
+  stroke: var(--brand);
+}
+
+.tree-node[data-state='want'] .tree-dot {
+  fill: var(--signal);
+  stroke: var(--signal);
+}
+
+.tree-node[data-state='closed'] .tree-dot {
+  opacity: 0.35;
+}
+
+.tree-node[data-target] .tree-dot {
+  fill: var(--raised);
+  stroke: var(--signal);
+  stroke-width: 3;
+}
+
+.tree-node:not([data-state='closed']):hover .tree-dot {
+  r: 6;
+  stroke: var(--ink);
+}
+
+.tree-panel {
+  align-self: start;
+  padding: 0.875rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+
+.tree-total {
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.5rem;
+  background: var(--raised);
+}
+
+.tree-key {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--muted);
+}
+
+.tree-key[data-state='have'] {
+  background: var(--brand);
+  border-color: var(--brand);
+}
+
+.tree-key[data-state='want'] {
+  background: var(--signal);
+  border-color: var(--signal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree-want {
+    animation: none;
+  }
+
+  .tree-dot,
+  .tree-label {
+    transition: none;
+  }
+}
