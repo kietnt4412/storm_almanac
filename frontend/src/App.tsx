@@ -259,7 +259,7 @@ export function App() {
             of the path, so moving between two catalog pages is not a new page
             and keeps what it had.
           */}
-          <div key={location.pathname.split('/')[1]} className="rise">
+          <div key={location.pathname.split('/')[1]} className="rise page">
             <Outlet />
           </div>
         </main>

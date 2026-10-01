@@ -759,3 +759,182 @@
     transition: none;
   }
 }
+
+/* ── A dress with a structure (C2.16) ─────────────────────────────────────
+ * The same components in a different frame: Punishing: Gray Raven as a combat
+ * screen, Reverse: 1999 as a printed almanac. Only `data-game` selects them,
+ * so a game with no look keeps the Storm page (ADR 0039, 0040).
+ */
+
+/* Punishing: Gray Raven — scanlines over everything, never in the way of a click. */
+:root[data-game='punishing-gray-raven'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--ink) 3.5%, transparent) 0 1px, transparent 1px 3px),
+    radial-gradient(130% 100% at 50% 40%, transparent 60%, color-mix(in srgb, #000 28%, transparent));
+}
+
+/* Brackets at two corners of every card, the third already carries the tick. */
+:root[data-game='punishing-gray-raven'] :is(.card, .card-raised) {
+  position: relative;
+}
+
+:root[data-game='punishing-gray-raven'] :is(.card, .card-raised)::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--brand), var(--brand)) top left / 12px 2px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) top left / 2px 12px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) bottom right / 12px 2px no-repeat,
+    linear-gradient(var(--brand), var(--brand)) bottom right / 2px 12px no-repeat;
+  opacity: 0.8;
+}
+
+/* Readouts: every number in the HUD's mono. */
+:root[data-game='punishing-gray-raven'] :is(.count, .unit-stats dd, .dossier-stats dd, .pull-strip-chance) {
+  font-family: ui-monospace, Consolas, 'Cascadia Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A section heading opens with a bar, like a panel's title on the game's menus. */
+:root[data-game='punishing-gray-raven'] main :is(.card, .card-raised, section) > h2::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 0.85em;
+  margin-right: 0.5rem;
+  vertical-align: -0.05em;
+  background: var(--brand);
+  transform: skewX(-18deg);
+}
+
+/* A page arrives as a signal locking on: sliced, shaken, then still. */
+:root[data-game='punishing-gray-raven'] .page {
+  animation: pgr-lock-on 0.55s steps(1, end) both;
+}
+
+@keyframes pgr-lock-on {
+  0% {
+    opacity: 0;
+    clip-path: inset(0 0 92% 0);
+    transform: translateX(-12px);
+  }
+  14% {
+    opacity: 1;
+    clip-path: inset(38% 0 40% 0);
+    transform: translateX(10px);
+    filter: hue-rotate(40deg) saturate(1.6);
+  }
+  28% {
+    clip-path: inset(10% 0 62% 0);
+    transform: translateX(-6px);
+  }
+  42% {
+    clip-path: inset(0 0 30% 0);
+    transform: translateX(4px);
+    filter: none;
+  }
+  58% {
+    clip-path: inset(0 0 8% 0);
+    transform: translateX(-2px);
+  }
+  72%,
+  100% {
+    clip-path: none;
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* Reverse: 1999 — ruled paper, with a red margin down the page. */
+:root[data-game='reverse-1999'] main {
+  position: relative;
+  background: repeating-linear-gradient(180deg, transparent 0 31px, color-mix(in srgb, var(--brand) 9%, transparent) 31px 32px);
+}
+
+:root[data-game='reverse-1999'] main::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.375rem;
+  width: 1px;
+  background: color-mix(in srgb, var(--short) 55%, transparent);
+  box-shadow: 4px 0 0 color-mix(in srgb, var(--short) 30%, transparent);
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  :root[data-game='reverse-1999'] main::before {
+    left: 1rem;
+  }
+}
+
+/* Notes in the margin's hand: the quiet lines under the numbers. */
+:root[data-game='reverse-1999'] main :is(p, span).muted:is(.text-xs, .text-sm) {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  font-style: italic;
+}
+
+/* A section mark before a card's heading. */
+:root[data-game='reverse-1999'] main :is(.card, .card-raised, section) > h2::before {
+  content: '§';
+  margin-right: 0.4rem;
+  color: var(--brand);
+  font-weight: 400;
+}
+
+/* An answer is stamped: a double ring pressed into its lower corner. */
+:root[data-game='reverse-1999'] .card-raised {
+  position: relative;
+}
+
+:root[data-game='reverse-1999'] .card-raised::after {
+  content: '✶';
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border: 2px solid var(--brand);
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 3px var(--raised), inset 0 0 0 4px var(--brand);
+  color: var(--brand);
+  font-size: 18px;
+  opacity: 0.28;
+  transform: rotate(-14deg);
+  pointer-events: none;
+}
+
+/* A page arrives turned over from the left, like a leaf. */
+:root[data-game='reverse-1999'] .page {
+  transform-origin: left center;
+  animation: r1999-leaf 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes r1999-leaf {
+  from {
+    opacity: 0;
+    transform: perspective(1400px) rotateY(-16deg) translateX(-8px);
+    filter: sepia(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-game] .page {
+    animation: none !important;
+  }
+}
