@@ -253,15 +253,13 @@ export function usesOf(plan: Plan | undefined): { spends: Map<string, number>; b
 }
 
 /**
- * A rarity's stripe: the highest rank in the bag in the signal colour, the next
- * in violet, the next in the brand colour, and the rest quiet. By position in
- * the ranks present, so "6★" and "SSR" are coloured the same way without this
- * file knowing either.
+ * A rarity's stripe, by its place among the ranks in the bag: the highest red,
+ * then orange, purple and yellow (the maintainer, 2026-10-01), and anything
+ * lower quiet. By position, not by label, so "6★" and "SSR" are coloured the
+ * same way without this file knowing either. The four colours are their own
+ * tokens in `index.css`, which no game palette redefines.
  */
 export function tierColour(rank: number, ranks: number[]): string {
   const tier = ranks.indexOf(rank);
-  if (tier === 0) return 'var(--signal)';
-  if (tier === 1) return 'var(--violet)';
-  if (tier === 2) return 'var(--brand)';
-  return 'var(--line)';
+  return tier >= 0 && tier < 4 ? `var(--rarity-${tier + 1})` : 'var(--line)';
 }

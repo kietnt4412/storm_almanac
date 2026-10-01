@@ -51,6 +51,15 @@
   --signal: #9a5b00;
   --short: #b42318;
   --shadow: 0 1px 2px rgb(11 22 40 / 6%), 0 4px 16px rgb(11 22 40 / 6%);
+  /*
+   * Rarity, highest first: red, orange, purple, yellow (the maintainer, 2026-10-01).
+   * Its own four tokens, which no game palette redefines, so a 6★ stripe is the
+   * same red under PGR's crimson as under R1999's amber.
+   */
+  --rarity-1: #d92d20;
+  --rarity-2: #e8590c;
+  --rarity-3: #7c3aed;
+  --rarity-4: #eab308;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -69,6 +78,10 @@
     --signal: #f5b454;
     --short: #f87171;
     --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 25%);
+    --rarity-1: #f04438;
+    --rarity-2: #fb923c;
+    --rarity-3: #a78bfa;
+    --rarity-4: #facc15;
   }
 }
 
