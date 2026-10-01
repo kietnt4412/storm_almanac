@@ -289,8 +289,11 @@ supersedes 0039's decisions 1 and 2.
    centre, and 1999 flips in digit by digit like a clock's leaves. Every 9 s
    a light passes along the word. **Our own type:** system faces, nothing
    traced from the logos.
-2. **Where they sit.** In the top bar, beside the mark, with "Storm Almanac"
-   small under it, folding into the pill on scroll. Keyed by game, so a switch
+2. **Where they sit.** In the top bar, with "Storm Almanac" small under it
+   and **no mark beside it** (the maintainer, after seeing it). As the bar
+   gathers into the pill, the word squeezes towards its left edge and fades
+   while the mark turns in where it stood, with a flash as it lands; at the
+   top again, the reverse. 768 px up only, since a phone's pill keeps the word. Keyed by game, so a switch
    plays it again. In the opening, large, which now holds 2.1 s rather than
    1.5 s for a game with a look, so the letters land first.
 3. **Marks** (`ui/GameMark.tsx`). PGR keeps the agreed plate: cut corners,
@@ -314,9 +317,21 @@ supersedes 0039's decisions 1 and 2.
    falls back to the initial if it fails to load. The worker caches game data
    only, so the photo is never cached.
 
+6. **No server status for readers** (the maintainer, from production: a
+   commit hash in the account menu and footer). Both lines are gone. Only
+   "Can't reach the server — showing what this device remembers" is said, and
+   only then. The version stays on `/api/health` for us.
+7. **A footer with a credit** (`ui/Footer.tsx`): what this is, "a fan-made
+   planner, not affiliated with any game's publisher", and **Thel** written by
+   a pen. Four hand-drawn strokes (crossbar, stem, "hel", swash), each drawn in
+   turn over 5 s, held, faded, and written again every 9 s. Under it is the
+   maintainer's Discord handle with a copy button, Discord being the contact
+   they chose. The handle is one constant, `DISCORD_HANDLE`.
+
 **Tests:** 542 backend (+3: https only, Discord has none, refreshed and
-cleared), 137 frontend (+2: the opening holds for a wordmark, the picture
-and its fallback).
+cleared), 140 frontend (+5: the opening holds for a wordmark, the picture
+and its fallback, and the footer three times: the credit with no status, the
+offline notice, the copy).
 
 **Driven locally** with the API on sequence 18, at 375 and 1280 px, dark and
 light, both games: the openings mid-animation, Home, the game menu, the pill,
