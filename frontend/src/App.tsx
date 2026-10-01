@@ -13,6 +13,7 @@ import { applyGame, lookOf, LOOKS, useGameChoice } from './ui/gameChoice';
 import { GameMark } from './ui/GameMark';
 import { Wordmark } from './ui/Wordmark';
 import { Footer } from './ui/Footer';
+import { useTakingLong } from './ui/time';
 
 /**
  * The shell every screen hangs off: who is reading, which profile they are
@@ -96,6 +97,10 @@ export function App() {
   // The server's state is said only when a reader needs it: when it cannot be
   // reached. Its version is a developer's concern and stays on /api/health.
   const unreachable = health.isError;
+  // The free host sleeps when nobody has used it for a while, and every request
+  // then waits up to a minute while it starts. Said only once the wait is long
+  // enough to look like a broken page.
+  const waking = useTakingLong(health.isPending);
 
   const gameSwitch = <GameSwitch active={active.id} games={active.games} pick={pick} />;
   const profilePicker = profiles.length > 1 && <ProfilePicker profiles={profiles} />;
@@ -246,6 +251,7 @@ export function App() {
 
       <div className="min-w-0 flex-1">
         <SyncBar sync={sync} />
+        {waking && <WakingBar />}
         <main className="mx-auto max-w-5xl px-4 py-6 md:px-8 md:py-8">
           {isStep(location.pathname) && <StepBar />}
           {/*
@@ -592,6 +598,21 @@ function GameSwitch({
  * offline editor's normal state is "some edits are not sent yet", and a
  * notification for a normal state is noise that teaches people to ignore it.
  */
+/** Said while a sleeping server starts, so a page still filling in does not look broken. */
+function WakingBar() {
+  return (
+    <div className="waking-bar" role="status">
+      <div className="mx-auto flex max-w-5xl items-center gap-2 px-4 md:px-8">
+        <span className="waking-dot" aria-hidden="true" />
+        <span>
+          Waking the server — it sleeps when nobody has used it for a while, and takes up to a minute to start.
+          The page fills in on its own.
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function SyncBar({ sync }: { sync: ReturnType<typeof useOutboxFlush> }) {
   const nothingToSay = sync.pending === 0 && sync.rejected.length === 0 && !sync.error && sync.online;
   if (nothingToSay) return null;

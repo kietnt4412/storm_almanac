@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import {
   ApiError,
   getBanners,
+  getGames,
   getGoals,
   getInventory,
   getMe,
@@ -55,6 +56,8 @@ export function Home() {
   // switched to a game they have not made one for (C2.5).
   const { game, games: published } = useActiveGame();
   const { profile: active } = useSelectedProfile();
+  // Read for whether it has answered yet; useActiveGame holds the same query.
+  const games = useQuery({ queryKey: ['games'], queryFn: getGames });
 
   return (
     <div className="space-y-6">
@@ -72,7 +75,7 @@ export function Home() {
             to run — and how much of the answer it could prove inside its own time budget.
           </Explain>
         </div>
-        {game && <GameFacts game={game} />}
+        {game ? <GameFacts game={game} /> : games.isPending && <ChipsWaiting />}
         {signedOut && (
           <div className="rise space-y-2" style={{ '--delay': '650ms' } as CSSProperties}>
             <div className="flex flex-wrap gap-3">
@@ -91,7 +94,9 @@ export function Home() {
         )}
       </section>
 
-      {me.isPending ? null : active && game ? (
+      {me.isPending || games.isPending ? (
+        <CardsWaiting />
+      ) : active && game ? (
         <Dashboard profile={active} game={game} />
       ) : (
         game && (
@@ -125,6 +130,34 @@ export function Home() {
           <Profiles profiles={profiles} activeId={active?.id ?? null} published={published} />
         </Reveal>
       )}
+    </div>
+  );
+}
+
+/**
+ * The shape of what is coming, while the server has not answered: on a host
+ * that has been asleep that is up to a minute, and a headline over nothing
+ * reads as a page that broke. Hidden from a screen reader, which hears the
+ * waking notice instead.
+ */
+function ChipsWaiting() {
+  return (
+    <div className="flex flex-wrap gap-2" aria-hidden="true">
+      <span className="skeleton h-7 w-72 max-w-full" />
+      <span className="skeleton h-7 w-48" />
+    </div>
+  );
+}
+
+function CardsWaiting() {
+  return (
+    <div className="grid gap-4 lg:grid-cols-3" aria-hidden="true" data-testid="home-waiting">
+      <div className="grid gap-3 sm:grid-cols-2 lg:col-span-2">
+        {[0, 1, 2, 3].map((index) => (
+          <div key={index} className="skeleton h-28" style={{ '--delay': `${index * 120}ms` } as CSSProperties} />
+        ))}
+      </div>
+      <div className="skeleton h-40 lg:h-full" style={{ '--delay': '480ms' } as CSSProperties} />
     </div>
   );
 }
