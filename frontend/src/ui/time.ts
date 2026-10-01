@@ -94,3 +94,9 @@ export function useTakingLong(waiting: boolean, afterMs = 3_000): boolean {
   }, [waiting, afterMs]);
   return waiting && long;
 }
+
+/** Days as a reader says them: "28", and "13.5" only when the half matters. */
+export function daysOf(days: number): string {
+  const tenths = Math.round(days * 10) / 10;
+  return Number.isInteger(tenths) ? String(tenths) : tenths.toFixed(1);
+}

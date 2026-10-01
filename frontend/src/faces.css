@@ -412,3 +412,108 @@
   flex-basis: 0;
   min-width: 3px;
 }
+
+/* ── The share card (C2.13). Also written into the PNG, so plain values only. ── */
+
+.share-card {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: system-ui, 'Segoe UI', sans-serif;
+}
+
+.share-ground {
+  fill: var(--ground);
+}
+
+.share-stripe {
+  fill: var(--ink);
+  opacity: 0.035;
+}
+
+.share-ring {
+  fill: var(--surface);
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.share-tile {
+  fill: var(--raised);
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.share-label {
+  fill: var(--muted);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+.share-title,
+.share-big {
+  fill: var(--ink);
+  font-weight: 800;
+}
+
+.share-number {
+  fill: var(--ink);
+  font-size: 50px;
+  font-weight: 800;
+}
+
+.share-muted {
+  fill: var(--muted);
+}
+
+.share-foot {
+  fill: var(--muted);
+  font-size: 20px;
+  letter-spacing: 2px;
+}
+
+.share-card[data-style='plate'] :is(.share-title, .share-big, .share-number) {
+  font-family: 'Arial Black', 'Segoe UI Black', Impact, system-ui, sans-serif;
+  font-style: italic;
+}
+
+.share-card[data-style='seal'] :is(.share-title, .share-big, .share-number, .share-label, .share-foot) {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  font-weight: 500;
+}
+
+.share-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.share-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 55%);
+}
+
+.share-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  width: min(100%, 46rem);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--raised);
+  box-shadow: var(--shadow);
+}
+
+.share-preview {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+}

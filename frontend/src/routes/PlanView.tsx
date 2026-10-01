@@ -28,6 +28,8 @@ import { Explain } from '../ui/Explain';
 import { Icon, type IconName } from '../ui/Icon';
 import { Reveal } from '../ui/motion';
 import { PlanCircuit, type Faces } from '../ui/PlanCircuit';
+import { ShareDialog } from '../ui/ShareDialog';
+import { daysOf } from '../ui/time';
 import { flowsOf, PlanFlow } from '../ui/PlanFlow';
 import { WhyDays } from '../ui/WhyDays';
 
@@ -494,6 +496,7 @@ export function Answer({
   const groups = payingForGroups(paying, tracks);
   const spends = plan.conversions.flatMap((conversion) => (conversion.spends ? [conversion.spends] : []));
   const runs = plan.stages.reduce((sum, stage) => sum + stage.runs, 0);
+  const [sharing, setSharing] = useState(false);
   return (
     <div className="space-y-4">
       <section className="card-raised rise space-y-4">
@@ -514,13 +517,24 @@ export function Answer({
               <div className="stat-value text-3xl">{runs.toLocaleString()}</div>
             </div>
           </div>
-          <div className="text-right text-xs muted">
+          <div className="flex flex-col items-end gap-2 text-right text-xs muted">
             <div>
-              patch {plan.versionLabel} (v{plan.version})
+              <div>
+                patch {plan.versionLabel} (v{plan.version})
+              </div>
+              <div>{new Date(plan.computedAt).toLocaleString()}</div>
             </div>
-            <div>{new Date(plan.computedAt).toLocaleString()}</div>
+            {/* Only where the catalog is to hand, for the card's emblem (C2.13). */}
+            {faces && (
+              <button type="button" className="btn-quiet" onClick={() => setSharing(true)}>
+                <Icon name="share" size={15} /> Share
+              </button>
+            )}
           </div>
         </div>
+        {sharing && faces && (
+          <ShareDialog plan={plan} energyUnit={energyUnit} entities={faces.entities} onClose={() => setSharing(false)} />
+        )}
 
         <PlanCircuit plan={plan} energyUnit={energyUnit} faces={faces} />
 
@@ -559,11 +573,8 @@ export function Answer({
   );
 }
 
-/** Days as a reader says them: "28", and "13.5" only when the half matters. */
-export function daysOf(days: number): string {
-  const tenths = Math.round(days * 10) / 10;
-  return Number.isInteger(tenths) ? String(tenths) : tenths.toFixed(1);
-}
+/** Moved to `ui/time.ts` (C2.13), so the share card prints days the way this screen does. */
+export { daysOf };
 
 /**
  * What names one line of a plan in the list of what is done (V20): what the
