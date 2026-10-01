@@ -346,7 +346,8 @@ public class JdbcPlayerStateRepository implements PlayerStateRepository {
     public Optional<SavedPlan> savedPlanOf(ProfileId profile) {
         return jdbc.query(
                         """
-                        SELECT game_version, request::text AS request, plan::text AS plan, saved_at
+                        SELECT game_version, request::text AS request, plan::text AS plan, saved_at,
+                               ARRAY(SELECT jsonb_array_elements_text(done)) AS done
                           FROM player.saved_plan
                          WHERE profile_id = ?
                         """,
@@ -355,7 +356,8 @@ public class JdbcPlayerStateRepository implements PlayerStateRepository {
                                 rs.getLong("game_version"),
                                 rs.getString("request"),
                                 rs.getString("plan"),
-                                rs.getObject("saved_at", OffsetDateTime.class).toInstant()),
+                                rs.getObject("saved_at", OffsetDateTime.class).toInstant(),
+                                List.of((String[]) rs.getArray("done").getArray())),
                         profile.value())
                 .stream()
                 .findFirst();
@@ -364,21 +366,43 @@ public class JdbcPlayerStateRepository implements PlayerStateRepository {
     @Override
     @Transactional
     public void savePlan(SavedPlan plan) {
+        // A new plan starts with nothing ticked off: its lines are not the last
+        // plan's lines, even where they read the same (V20).
         jdbc.update(
                 """
-                INSERT INTO player.saved_plan (profile_id, game_version, request, plan, saved_at)
-                VALUES (?, ?, ?::jsonb, ?::jsonb, ?)
+                INSERT INTO player.saved_plan (profile_id, game_version, request, plan, saved_at, done)
+                VALUES (?, ?, ?::jsonb, ?::jsonb, ?, '[]'::jsonb)
                 ON CONFLICT (profile_id)
                 DO UPDATE SET game_version = EXCLUDED.game_version,
                               request = EXCLUDED.request,
                               plan = EXCLUDED.plan,
-                              saved_at = EXCLUDED.saved_at
+                              saved_at = EXCLUDED.saved_at,
+                              done = EXCLUDED.done
                 """,
                 plan.profile().value(),
                 plan.gameVersion(),
                 plan.request(),
                 plan.plan(),
                 OffsetDateTime.ofInstant(plan.savedAt(), ZoneOffset.UTC));
+    }
+
+    @Override
+    @Transactional
+    public boolean markDone(ProfileId profile, Instant savedAt, List<String> done) {
+        // Conditional on the plan's own timestamp, so a tick sent from a device
+        // that has not seen the latest re-run lands on nothing rather than on a
+        // plan whose lines it never saw.
+        return jdbc.update(
+                        """
+                        UPDATE player.saved_plan
+                           SET done = to_jsonb(?::text[])
+                         WHERE profile_id = ?
+                           AND saved_at = ?
+                        """,
+                        done.toArray(String[]::new),
+                        profile.value(),
+                        OffsetDateTime.ofInstant(savedAt, ZoneOffset.UTC))
+                == 1;
     }
 
     // ── Offline sync ────────────────────────────────────────────────────────

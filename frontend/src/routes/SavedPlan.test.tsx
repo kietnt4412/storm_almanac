@@ -91,6 +91,35 @@ describe('the saved plan', () => {
     );
   });
 
+  it('folds the inputs to one line once there is a plan, and ticks lines off on the saved plan', async () => {
+    const withLines: SavedPlan = {
+      ...SAVED,
+      plan: {
+        ...plan(1_470),
+        stages: [{ stage: 'simulated-battlefield', displayName: 'Simulated Battlefield', runs: 49, energyCost: 30, totalEnergy: 1_470 }],
+        rewards: [{ reward: 'cage-30000', displayName: 'Weekly, score 30,000+', times: 4 }],
+      },
+      done: ['claim:cage-30000'],
+    };
+    serve(withLines);
+    renderPlan();
+
+    expect(await screen.findByText('Planned with')).toBeInTheDocument();
+    expect(screen.getByText(/^180 [a-z]+ a day · 30 days · fewest days/)).toBeInTheDocument();
+    expect(screen.getByText('1 of 2 done')).toBeInTheDocument();
+    expect(screen.getByLabelText('Done: Weekly, score 30,000+')).toBeChecked();
+
+    await userEvent.click(screen.getByLabelText('Done: Simulated Battlefield'));
+    expect(screen.getByText('2 of 2 done')).toBeInTheDocument();
+    await vi.waitFor(() =>
+      expect(sent.find((r) => r.method === 'PUT')).toEqual({
+        method: 'PUT',
+        url: `/api/me/profiles/${PROFILE.id}/plan/done`,
+        body: { savedAt: SAVED.savedAt, done: ['claim:cage-30000', 'run:simulated-battlefield'] },
+      }),
+    );
+  });
+
   function renderPlan() {
     render(
       <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
@@ -114,6 +143,7 @@ describe('the saved plan', () => {
         if (url === `/api/me/profiles/${PROFILE.id}/goals`) {
           return ok({ profile: PROFILE.id, goals: [{ entity: 'lacrimosa', targetState: 'rank-2' }] });
         }
+        if (url === `/api/me/profiles/${PROFILE.id}/plan/done`) return new Response(null, { status: 204 });
         if (url === `/api/me/profiles/${PROFILE.id}/plan`) {
           if (method === 'POST') return ok(plan(90));
           return saved ? ok(saved) : new Response(null, { status: 204 });

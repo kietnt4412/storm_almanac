@@ -255,8 +255,17 @@ public final class PlayerView {
      * is not recomputed: the inventory has moved since, and the solver may land on
      * a different answer of equal cost. {@code request} is resolved — every
      * default filled in — so that a screen showing it shows what was solved.
+     * {@code done} is the plan's lines the reader has ticked off, by the page's
+     * own keys (V20); {@code savedAt} is what a tick names to say which plan it is
+     * for.
      */
-    public record SavedPlanResponse(PlanRequest request, PlanResponse plan, Instant savedAt) {}
+    public record SavedPlanResponse(PlanRequest request, PlanResponse plan, Instant savedAt, List<String> done) {}
+
+    /**
+     * What the reader has ticked off on the plan saved at {@code savedAt}: the
+     * whole list, replacing the last one.
+     */
+    public record DoneRequest(Instant savedAt, List<String> done) {}
 
     /**
      * What the published sequences since a reader's saved plan changed for them
@@ -508,11 +517,21 @@ public final class PlayerView {
      * What a purchase spends, as numbers (C2): the plan page draws where each
      * currency goes from these rather than parsing {@code total}. Null for
      * anything that is not a priced shop row, and absent from a plan saved
-     * before it, which the page reads as "nothing to draw".
+     * before it, which the page reads as "nothing to draw". {@code boughtItem}
+     * and {@code boughtQuantity} are what it buys, by id and all together — the
+     * inventory screen marks the item with them (C2.5); a plan saved before them
+     * reads them as null and 0, and marks nothing.
      */
-    public record SpendView(String item, String displayName, long quantity, String buys) {
+    public record SpendView(
+            String item, String displayName, long quantity, String buys, String boughtItem, long boughtQuantity) {
         static SpendView of(StepNames.Spent spent) {
-            return new SpendView(spent.currency().value(), spent.currencyName(), spent.quantity(), spent.buys());
+            return new SpendView(
+                    spent.currency().value(),
+                    spent.currencyName(),
+                    spent.quantity(),
+                    spent.buys(),
+                    spent.bought().value(),
+                    spent.boughtQuantity());
         }
     }
 

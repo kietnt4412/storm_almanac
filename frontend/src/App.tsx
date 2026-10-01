@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { ApiError, getHealth, getMe, signInUrl, signOut } from './api/client';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { ApiError, getHealth, getMe, signInUrl, signOut, type GameSummary, type Profile } from './api/client';
+import { profileForGame, useActiveGame } from './profile';
 import { isStep, StepBar } from './steps/Steps';
 import { usePlannerStore } from './store/plannerStore';
 import { useOutboxFlush } from './sync/useOutboxFlush';
 import { Icon, type IconName } from './ui/Icon';
-import { type ThemeChoice, usePanelHidden, useTheme } from './ui/preferences';
+import { applyGame, lookOf, LOOKS, useGameChoice } from './ui/gameChoice';
+import { GameMark } from './ui/GameMark';
+import { usePanelHidden } from './ui/preferences';
 
 /**
  * The shell every screen hangs off: who is reading, which profile they are
@@ -75,8 +78,13 @@ export function App() {
   // screen's remembered choice, `open` the phone's drawer, which a navigation
   // or Escape closes — a drawer left open over the page you just asked for is
   // the page not arriving.
-  const [theme, setTheme] = useTheme();
   const [hidden, setHidden] = usePanelHidden();
+
+  // The game the whole site is dressed for (C2.5): its palette on the document,
+  // and its mark beside the name.
+  const active = useActiveGame();
+  const choose = useGameChoice((state) => state.choose);
+  useEffect(() => applyGame(active.id), [active.id]);
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [location.pathname]);
   useEffect(() => {
@@ -99,7 +107,7 @@ export function App() {
         <button type="button" className="icon-btn" onClick={() => setOpen(true)} aria-label="Open menu">
           <Icon name="menu" />
         </button>
-        <Brand />
+        <Brand game={active.id} />
       </div>
 
       {open && (
@@ -119,7 +127,7 @@ export function App() {
         style={{ borderColor: 'var(--line)', background: 'var(--surface)' }}
       >
         <div className={`flex items-center gap-2 ${hidden ? 'md:flex-col' : ''}`}>
-          <Brand wordClass={word} />
+          <Brand game={active.id} wordClass={word} />
           <button
             type="button"
             className="icon-btn ml-auto hidden md:inline-flex"
@@ -155,7 +163,12 @@ export function App() {
             <select
               className={`input w-full ${hidden ? 'md:hidden' : ''}`}
               value={selected?.id ?? ''}
-              onChange={(event) => selectProfile(event.target.value)}
+              onChange={(event) => {
+                selectProfile(event.target.value);
+                // A profile is one game, so picking one picks its game too.
+                const picked = profiles.find((profile) => profile.id === event.target.value);
+                if (picked) choose(picked.game);
+              }}
               aria-label="Profile"
             >
               {profiles.map((profile) => (
@@ -166,7 +179,14 @@ export function App() {
             </select>
           )}
 
-          <ThemeSwitch theme={theme} onChange={setTheme} stacked={hidden} />
+          <GameSwitch
+            active={active.id}
+            games={active.games}
+            profiles={profiles}
+            signedIn={Boolean(me.data)}
+            stacked={hidden}
+            word={word}
+          />
 
           {me.data ? (
             <div className={`flex items-center gap-2 ${hidden ? 'md:flex-col' : ''}`}>
@@ -211,19 +231,14 @@ export function App() {
   );
 }
 
-function Brand({ wordClass = '' }: { wordClass?: string }) {
+function Brand({ game, wordClass = '' }: { game: string | null; wordClass?: string }) {
   return (
     <NavLink
       to="/"
       className="flex items-center gap-2 px-1 text-base font-semibold no-underline"
       style={{ color: 'var(--ink)' }}
     >
-      <span
-        className="inline-flex h-8 w-8 items-center justify-center rounded-lg"
-        style={{ background: 'color-mix(in srgb, var(--brand) 18%, transparent)', color: 'var(--brand)' }}
-      >
-        <Icon name="bolt" size={18} />
-      </span>
+      <GameMark game={game} size={32} />
       <span className={wordClass}>Storm Almanac</span>
     </NavLink>
   );
@@ -255,41 +270,76 @@ function Tab({
   );
 }
 
-const THEMES: { choice: ThemeChoice; icon: IconName; label: string }[] = [
-  { choice: 'light', icon: 'sun', label: 'Light theme' },
-  { choice: 'system', icon: 'monitor', label: 'Theme follows the system' },
-  { choice: 'dark', icon: 'moon', label: 'Dark theme' },
-];
-
-/** Light, dark, or whatever the device says — remembered by this browser. */
-function ThemeSwitch({
-  theme,
-  onChange,
+/**
+ * Which game the site is about (C2.5, the maintainer's idea, in place of the
+ * light / dark switch). Every game the server publishes is offered, each in
+ * its own colours; a look marked upcoming that the server does not publish is
+ * listed as coming soon and cannot be picked.
+ *
+ * <p>Switching picks the reader's profile for that game. With none, a signed-in
+ * reader is taken Home with the form to make one open on that game — the
+ * screens would otherwise be about a profile of another game under this one's
+ * colours. A signed-out reader just gets the game: its catalog and its look.
+ */
+function GameSwitch({
+  active,
+  games,
+  profiles,
+  signedIn,
   stacked,
+  word,
 }: {
-  theme: ThemeChoice;
-  onChange: (choice: ThemeChoice) => void;
+  active: string | null;
+  games: GameSummary[];
+  profiles: Profile[];
+  signedIn: boolean;
   stacked: boolean;
+  word: string;
 }) {
+  const choose = useGameChoice((state) => state.choose);
+  const profileId = usePlannerStore((state) => state.profileId);
+  const selectProfile = usePlannerStore((state) => state.selectProfile);
+  const navigate = useNavigate();
+
+  const soon = LOOKS.filter((look) => look.upcoming && !games.some((game) => game.id === look.id));
+  if (games.length + soon.length < 2) return null;
+
+  const pick = (game: string) => {
+    choose(game);
+    const profile = profileForGame(profiles, profileId, game);
+    if (profile) selectProfile(profile.id);
+    else if (signedIn) navigate(`/?new=${encodeURIComponent(game)}`);
+  };
+
   return (
-    <div
-      role="group"
-      aria-label="Theme"
-      className={`flex gap-1 rounded-lg p-1 ${stacked ? 'md:flex-col' : ''}`}
-      style={{ background: 'color-mix(in srgb, var(--ink) 5%, transparent)' }}
-    >
-      {THEMES.map(({ choice, icon, label }) => (
+    <div role="group" aria-label="Game" className={`flex flex-col gap-1 ${stacked ? 'md:items-center' : ''}`}>
+      <span className={`label px-1 ${word}`}>Game</span>
+      {games.map((game) => (
         <button
-          key={choice}
+          key={game.id}
           type="button"
-          className="icon-btn flex-1"
-          aria-pressed={theme === choice}
-          aria-label={label}
-          title={label}
-          onClick={() => onChange(choice)}
+          data-game={lookOf(game.id) ? game.id : 'storm'}
+          className={`nav-item ${game.id === active ? 'nav-item-here' : ''}`}
+          aria-pressed={game.id === active}
+          title={game.displayName}
+          onClick={() => pick(game.id)}
         >
-          <Icon name={icon} size={18} />
+          <GameMark game={game.id} size={22} />
+          <span className={`min-w-0 truncate text-left ${word}`}>{game.displayName}</span>
         </button>
+      ))}
+      {soon.map((look) => (
+        <span
+          key={look.id}
+          data-game={look.id}
+          className="nav-item cursor-default opacity-60"
+          aria-disabled="true"
+          title={`${look.name} — coming soon`}
+        >
+          <GameMark game={look.id} size={22} />
+          <span className={`min-w-0 flex-1 truncate ${word}`}>{look.name}</span>
+          <span className={`text-[11px] font-medium uppercase tracking-wide ${word}`}>Soon</span>
+        </span>
       ))}
     </div>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import {
@@ -8,11 +8,13 @@ import {
   getMeasures,
   getSavedPlan,
   getUpgrades,
+  savePlanDone,
   solve,
   type Measure,
   type PayingFor,
   type Plan,
   type Remark,
+  type SavedPlan,
   type ShadowPrice,
 } from '../api/client';
 import { ProfileGate } from '../profile';
@@ -22,6 +24,7 @@ import { SinceNotice } from './SinceNotice';
 import { reachOf, usePlannerStore } from '../store/plannerStore';
 import { SpendBars } from '../ui/SpendBar';
 import { Explain } from '../ui/Explain';
+import { Icon, type IconName } from '../ui/Icon';
 
 /**
  * The answer, and what it is worth.
@@ -102,11 +105,16 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
     }
   }, [saved.data, profileId, setReach]);
 
+  // Whether the inputs are unfolded. Null is "as the screen would have it":
+  // open while there is no answer to show, folded to one line once there is.
+  const [editing, setEditing] = useState<boolean | null>(null);
+
   const run = useMutation<Plan, Error>({
     mutationFn: () => solve(profileId, { energyPerDay, horizonDays, objective, reach }),
     // A new plan is saved on the latest sequence, so the report of what changed
     // since the last one is out of date too, here and on Home.
     onSuccess: () => {
+      setEditing(null);
       queryClient.invalidateQueries({ queryKey: ['savedPlan', profileId] });
       queryClient.invalidateQueries({ queryKey: ['since', profileId] });
     },
@@ -115,6 +123,36 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
   // What is on screen: the plan just worked out, or else the last one saved.
   const shown = run.data ?? saved.data?.plan;
   const fromBefore = !run.data && !run.isError && saved.data ? saved.data : null;
+
+  // What is ticked off, kept with the saved plan (V20). Only the saved plan can
+  // be ticked: a plan just answered is the saved one once it has been read back,
+  // and until then there is nothing on the server to keep a tick against.
+  const ticking = shown && saved.data && shown.id === saved.data.plan.id ? saved.data : null;
+  const [done, setDone] = useState<string[]>([]);
+  useEffect(() => setDone(ticking?.done ?? []), [ticking?.savedAt, ticking?.done]);
+  const [tickFailed, setTickFailed] = useState(false);
+  const tick = useMutation<void, Error, { savedAt: string; done: string[] }>({
+    mutationFn: ({ savedAt, done: next }) => savePlanDone(profileId, savedAt, next),
+    onMutate: () => setTickFailed(false),
+    onSuccess: (_, { savedAt, done: next }) =>
+      queryClient.setQueryData<SavedPlan | null>(['savedPlan', profileId], (current) =>
+        current && current.savedAt === savedAt ? { ...current, done: next } : current,
+      ),
+    // A 409 is a plan worked out again elsewhere: read the new one. Anything
+    // else puts the server's list back and says the tick did not keep.
+    onError: (error) => {
+      if (!(error instanceof ApiError && error.status === 409)) setTickFailed(true);
+      queryClient.invalidateQueries({ queryKey: ['savedPlan', profileId] });
+      setDone(ticking?.done ?? []);
+    },
+  });
+  const toggle = ticking
+    ? (key: string) => {
+        const next = done.includes(key) ? done.filter((line) => line !== key) : [...done, key];
+        setDone(next);
+        tick.mutate({ savedAt: ticking.savedAt, done: next });
+      }
+    : undefined;
 
   // The tracks of whoever the plan pays for, so each step reads as the goal
   // screen named it — at the plan's own version. Asked for as "the latest",
@@ -169,14 +207,48 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
         </p>
       )}
 
+      {/*
+        The inputs, folded to one line once there is an answer to look at: a
+        returning reader came for the plan, not for the form that asked for it.
+        Folded, not removed — the fields stay in the page, filled from the saved
+        request, and "Change" opens them.
+      */}
+      <details
+        className="card"
+        open={editing ?? !shown}
+        // The browser fires a toggle for every change of `open`, React's own
+        // included — so one that matches what the screen would show anyway is
+        // React's, and only a change against it is the reader's. Taking every
+        // toggle kept the inputs open after the saved plan arrived.
+        onToggle={(event) => {
+          if (event.currentTarget.open !== (editing ?? !shown)) setEditing(event.currentTarget.open);
+        }}
+      >
+        <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+          <span className="font-medium">{shown ? 'Planned with' : 'What to plan with'}</span>
+          <span className="muted count">
+            {[
+              `${energyPerDay.toLocaleString()} ${energyUnit.toLowerCase()} a day`,
+              `${horizonDays} days`,
+              objective === 'FEWEST_DAYS' ? 'fewest days' : `least ${energyUnit.toLowerCase()}`,
+              ...planLadders
+                .filter((ladder) => (reach[ladder.measure] ?? 0) > 0)
+                .map((ladder) => `${ladder.displayName ?? ladder.measure} ${reach[ladder.measure]!.toLocaleString()}+`),
+            ].join(' · ')}
+          </span>
+          <span className="ml-auto font-medium" style={{ color: 'var(--brand)' }}>
+            {(editing ?? !shown) ? 'Hide' : 'Change'}
+          </span>
+        </summary>
+
       <form
-        className="space-y-4"
+        className="mt-4 space-y-4"
         onSubmit={(event) => {
           event.preventDefault();
           run.mutate();
         }}
       >
-        <div className="card flex flex-wrap items-end gap-4">
+        <div className="flex flex-wrap items-end gap-4">
           <div>
             <label className="label" htmlFor="energy">
               {energyUnit} a day
@@ -225,7 +297,7 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
           under it reads as something broken.
         */}
         {planLadders.length > 0 && (
-          <section className="card space-y-3">
+          <section className="space-y-3 border-t pt-4" style={{ borderColor: 'var(--line)' }}>
             <div>
               <h2 className="font-medium">How far do you get?</h2>
               <Explain lead="Some of this game's income is paid by how well you did.">
@@ -249,6 +321,7 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
           {run.isPending ? 'Solving…' : 'Work it out'}
         </button>
       </form>
+      </details>
 
       {run.isError && <Refusal error={run.error} />}
       {!run.data && (
@@ -267,7 +340,14 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
           work it out again to plan from what you own now.
         </p>
       )}
-      {shown && !run.isError && <Answer plan={shown} energyUnit={energyUnit} tracks={tracks} />}
+      {tickFailed && (
+        <p className="text-sm" style={{ color: 'var(--signal)' }}>
+          That tick did not save — check your connection and tick it again.
+        </p>
+      )}
+      {shown && !run.isError && (
+        <Answer plan={shown} energyUnit={energyUnit} tracks={tracks} done={done} onToggle={toggle} />
+      )}
 
       <NextStep from="/plan" />
     </div>
@@ -371,14 +451,21 @@ export function Answer({
   plan,
   energyUnit,
   tracks = new Map(),
+  done = [],
+  onToggle,
 }: {
   plan: Plan;
   energyUnit: string;
   /** Each paid-for entity's tracks, by id; a step whose entity is missing keeps the server's name. */
   tracks?: Map<string, Track[]>;
+  /** The lines ticked off, by {@link lineKey}. */
+  done?: string[];
+  /** Ticks a line on or off; absent when this plan cannot be ticked, and then there are no boxes. */
+  onToggle?: (key: string) => void;
 }) {
   const paying = plan.payingFor ?? [];
   const spends = plan.conversions.flatMap((conversion) => (conversion.spends ? [conversion.spends] : []));
+  const runs = plan.stages.reduce((sum, stage) => sum + stage.runs, 0);
   return (
     <div className="space-y-4">
       <section className="card-raised space-y-4">
@@ -392,13 +479,11 @@ export function Answer({
             </div>
             <div className="stat-tile">
               <div className="stat-label">Days</div>
-              <div className="stat-value text-3xl">{plan.etaDays.toFixed(1)}</div>
+              <div className="stat-value text-3xl">{daysOf(plan.etaDays)}</div>
             </div>
             <div className="stat-tile">
-              <div className="stat-label">Objective</div>
-              <div className="mt-1 font-medium">
-                {plan.objective === 'FEWEST_DAYS' ? 'Fewest days' : `Least ${energyUnit.toLowerCase()}`}
-              </div>
+              <div className="stat-label">Runs</div>
+              <div className="stat-value text-3xl">{runs.toLocaleString()}</div>
             </div>
           </div>
           <div className="text-right text-xs muted">
@@ -415,102 +500,170 @@ export function Answer({
         <Remarks plan={plan} />
       </section>
 
-      {plan.stages.length === 0 ? (
+      {plan.stages.length === 0 && (
         <p className="card">
           Nothing to farm: what you already hold covers every goal on the list.
         </p>
-      ) : (
-        <section className="card">
-          <h2 className="mb-2 font-medium">What to run</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left">
-                  <th className="label py-1">Stage</th>
-                  <th className="label py-1 text-right">Runs</th>
-                  <th className="label py-1 text-right">Each</th>
-                  <th className="label py-1 text-right">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {plan.stages.map((run) => (
-                  <tr key={run.stage} className="border-t" style={{ borderColor: 'var(--line)' }}>
-                    <td className="py-1" title={run.stage}>
-                      {run.displayName ?? run.stage}
-                      {plan.bindingStages.includes(run.stage) && (
-                        <span className="ml-2 text-xs" style={{ color: 'var(--signal)' }}>
-                          binding
-                        </span>
-                      )}
-                    </td>
-                    <td className="count py-1 text-right">{run.runs}</td>
-                    <td className="count py-1 text-right">{run.energyCost}</td>
-                    <td className="count py-1 text-right">{run.totalEnergy.toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {plan.bindingStages.length > 0 && (
-            <p className="muted mt-2 text-xs">
-              A binding stage is one the answer is pressed up against: running it more would change the
-              plan, and running anything else more would not.
-            </p>
-          )}
-        </section>
       )}
 
-      {plan.conversions.length > 0 && (
-        <section className="card">
-          <h2 className="mb-2 font-medium">What to craft and buy</h2>
-          <ul className="space-y-1 text-sm">
-            {/*
-              The totals first, since they are what the reader spends and gets;
-              "× 429" beside one purchase read as one cheap buy (S9). A server
-              from before the totals sends none, and gets the line it always did.
-            */}
-            {plan.conversions.map((conversion) => (
-              <li key={conversion.step} title={conversion.step}>
-                {conversion.total ? (
-                  <>
-                    {conversion.total}
-                    {/* One unit when it wraps: "429 ×" alone at a line's end reads as a stray number. */}
-                    {conversion.repeat && (
-                      <>
-                        {' '}
-                        <span className="count muted whitespace-nowrap">· {conversion.repeat}</span>
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    {conversion.displayName ?? conversion.step}{' '}
-                    <span className="count muted">× {conversion.times}</span>
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {plan.rewards.length > 0 && (
-        <section className="card">
-          <h2 className="mb-2 font-medium">What to claim</h2>
-          <ul className="space-y-1 text-sm">
-            {plan.rewards.map((claim) => (
-              <li key={claim.reward} title={claim.reward}>
-                {claim.displayName ?? claim.reward} <span className="count muted">× {claim.times}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <Checklist plan={plan} energyUnit={energyUnit} done={done} onToggle={onToggle} />
 
       {plan.shadowPrice.length > 0 && <Prices prices={plan.shadowPrice} energyUnit={energyUnit} />}
 
       <p className="text-xs muted">{plan.attribution}</p>
     </div>
+  );
+}
+
+/** Days as a reader says them: "28", and "13.5" only when the half matters. */
+export function daysOf(days: number): string {
+  const tenths = Math.round(days * 10) / 10;
+  return Number.isInteger(tenths) ? String(tenths) : tenths.toFixed(1);
+}
+
+/**
+ * What names one line of a plan in the list of what is done (V20): what the
+ * line does and to what. A stage's id, a step's id and a reward's id are each
+ * unique within their own kind, and the kind keeps them apart.
+ */
+export function lineKey(kind: 'run' | 'step' | 'claim', id: string): string {
+  return `${kind}:${id}`;
+}
+
+/**
+ * Everything the plan asks the reader to do, as one list to work down: the
+ * runs, then what to buy, craft and feed, then what to claim (C2.5, agreed
+ * 2026-10-01).
+ *
+ * <p><b>One list, because it is one job.</b> Until then these were three cards —
+ * a table of stages and two lists — and a reader at the game with the plan open
+ * beside it had to keep their place in three. Each line keeps the words it had:
+ * a purchase still says its totals and how they are made up (S9).
+ *
+ * <p><b>A tick is the reader's, kept with the saved plan</b> (the maintainer's
+ * answer, 2026-10-01), so it follows them to another device and is gone when a
+ * new plan replaces this one. A plan that cannot be ticked — one not yet read
+ * back as saved — shows the same list without boxes.
+ */
+function Checklist({
+  plan,
+  energyUnit,
+  done,
+  onToggle,
+}: {
+  plan: Plan;
+  energyUnit: string;
+  done: string[];
+  onToggle?: (key: string) => void;
+}) {
+  const lines: { key: string; icon: IconName; title: string; label: string; body: ReactNode }[] = [
+    ...plan.stages.map((run) => ({
+      key: lineKey('run', run.stage),
+      icon: 'run' as const,
+      title: run.stage,
+      label: run.displayName ?? run.stage,
+      body: (
+        <>
+          <span>{run.displayName ?? run.stage}</span>
+          {plan.bindingStages.includes(run.stage) && (
+            <span className="ml-2 text-xs" style={{ color: 'var(--signal)' }}>
+              binding
+            </span>
+          )}{' '}
+          <span className="count muted whitespace-nowrap">
+            · {run.runs.toLocaleString()} runs × {run.energyCost} = {run.totalEnergy.toLocaleString()}{' '}
+            {energyUnit.toLowerCase()}
+          </span>
+        </>
+      ),
+    })),
+    ...plan.conversions.map((conversion) => ({
+      key: lineKey('step', conversion.step),
+      icon: (conversion.spends ? 'shop' : 'feed') as IconName,
+      title: conversion.step,
+      label: conversion.total ?? conversion.displayName ?? conversion.step,
+      // The totals first, since they are what the reader spends and gets;
+      // "× 429" beside one purchase read as one cheap buy (S9). A server from
+      // before the totals sends none, and gets the line it always did.
+      body: conversion.total ? (
+        <>
+          {conversion.total}
+          {/* One unit when it wraps: "429 ×" alone at a line's end reads as a stray number. */}
+          {conversion.repeat && (
+            <>
+              {' '}
+              <span className="count muted whitespace-nowrap">· {conversion.repeat}</span>
+            </>
+          )}
+        </>
+      ) : (
+        <>
+          {conversion.displayName ?? conversion.step}{' '}
+          <span className="count muted">× {conversion.times}</span>
+        </>
+      ),
+    })),
+    ...plan.rewards.map((claim) => ({
+      key: lineKey('claim', claim.reward),
+      icon: 'gift' as const,
+      title: claim.reward,
+      label: claim.displayName ?? claim.reward,
+      body: (
+        <>
+          {claim.displayName ?? claim.reward} <span className="count muted">× {claim.times}</span>
+        </>
+      ),
+    })),
+  ];
+  if (lines.length === 0) return null;
+
+  const ticked = lines.filter((line) => done.includes(line.key)).length;
+
+  return (
+    <section className="card">
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <h2 className="font-medium">Do this</h2>
+        {onToggle && (
+          <span className="muted count text-sm">
+            {ticked} of {lines.length} done
+          </span>
+        )}
+      </div>
+      <ul className="text-sm">
+        {lines.map((line) => {
+          const isDone = done.includes(line.key);
+          return (
+            <li
+              key={line.key}
+              title={line.title}
+              className="flex items-start gap-3 border-t py-2 first:border-t-0"
+              style={{ borderColor: 'var(--line)', opacity: isDone ? 0.55 : undefined }}
+            >
+              {onToggle && (
+                <input
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 shrink-0"
+                  style={{ accentColor: 'var(--brand)' }}
+                  checked={isDone}
+                  aria-label={`Done: ${line.label}`}
+                  onChange={() => onToggle(line.key)}
+                />
+              )}
+              <span className="muted mt-px">
+                <Icon name={line.icon} size={16} />
+              </span>
+              <span className={isDone ? 'line-through' : undefined}>{line.body}</span>
+            </li>
+          );
+        })}
+      </ul>
+      {plan.bindingStages.length > 0 && (
+        <p className="muted mt-2 text-xs">
+          A binding stage is one the answer is pressed up against: running it more would change the
+          plan, and running anything else more would not.
+        </p>
+      )}
+    </section>
   );
 }
 

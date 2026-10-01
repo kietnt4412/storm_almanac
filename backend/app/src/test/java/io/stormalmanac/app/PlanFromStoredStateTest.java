@@ -250,6 +250,75 @@ class PlanFromStoredStateTest extends SharedDatabaseTest {
     }
 
     @Test
+    @DisplayName("what a reader ticks off is kept with the saved plan, and the next plan starts with none")
+    void ticksBelongToOnePlan() throws Exception {
+        publish("proving-ground-1.0.json");
+        RequestPostProcessor player = signedIn("google", "sub-vertin", "Vertin");
+        String profile = profileWithGoal(player, Map.of());
+        planWith(player, profile, Map.of("energyPerDay", 240));
+
+        JsonNode saved = body(mvc.perform(get("/api/me/profiles/" + profile + "/plan").with(player)));
+        assertThat(saved.get("done")).isEmpty();
+        String savedAt = saved.get("savedAt").asText();
+
+        // A duplicate is one tick, and the order sent is the order kept.
+        tick(player, profile, savedAt, List.of("run:dawn-trial", "claim:weekly", "run:dawn-trial"), 204);
+        JsonNode ticked = body(mvc.perform(get("/api/me/profiles/" + profile + "/plan").with(player)));
+        assertThat(ticked.get("done")).extracting(JsonNode::asText).containsExactly("run:dawn-trial", "claim:weekly");
+        assertThat(ticked.get("plan")).isEqualTo(saved.get("plan"));
+
+        // The list is replaced whole: unticking is sending it without the line.
+        tick(player, profile, savedAt, List.of("claim:weekly"), 204);
+        assertThat(body(mvc.perform(get("/api/me/profiles/" + profile + "/plan").with(player))).get("done"))
+                .extracting(JsonNode::asText)
+                .containsExactly("claim:weekly");
+
+        // Re-running replaces the plan, and nothing on the new one is done yet.
+        planWith(player, profile, Map.of("energyPerDay", 90));
+        JsonNode replanned = body(mvc.perform(get("/api/me/profiles/" + profile + "/plan").with(player)));
+        assertThat(replanned.get("done")).isEmpty();
+
+        // A tick from a device that has not seen the re-run lands on nothing.
+        tick(player, profile, savedAt, List.of("run:dawn-trial"), 409);
+        assertThat(body(mvc.perform(get("/api/me/profiles/" + profile + "/plan").with(player))).get("done"))
+                .isEmpty();
+    }
+
+    @Test
+    @DisplayName("ticking off is refused without a saved plan, without saying which plan, and on someone else's")
+    void ticksAreRefusedWithoutTheirPlan() throws Exception {
+        publish("proving-ground-1.0.json");
+        RequestPostProcessor mine = signedIn("google", "sub-vertin", "Vertin");
+        String profile = profileWithGoal(mine, Map.of());
+
+        tick(mine, profile, Instant.now().toString(), List.of("run:dawn-trial"), 404);
+
+        planWith(mine, profile, Map.of("energyPerDay", 240));
+        mvc.perform(put("/api/me/profiles/" + profile + "/plan/done")
+                        .with(mine)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of("done", List.of("run:dawn-trial")))))
+                .andExpect(status -> assertThat(status.getResponse().getStatus()).isEqualTo(400));
+
+        String savedAt = body(mvc.perform(get("/api/me/profiles/" + profile + "/plan").with(mine)))
+                .get("savedAt")
+                .asText();
+        RequestPostProcessor theirs = signedIn("google", "sub-someone-else", "Someone Else");
+        tick(theirs, profile, savedAt, List.of("run:dawn-trial"), 404);
+    }
+
+    private void tick(RequestPostProcessor who, String profile, String savedAt, List<String> done, int expected)
+            throws Exception {
+        mvc.perform(put("/api/me/profiles/" + profile + "/plan/done")
+                        .with(who)
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json.writeValueAsString(Map.of("savedAt", savedAt, "done", done))))
+                .andExpect(status -> assertThat(status.getResponse().getStatus()).isEqualTo(expected));
+    }
+
+    @Test
     @DisplayName("another account's saved plan is not found, and deleting the profile deletes it")
     void aSavedPlanIsTheProfilesAlone() throws Exception {
         publish("proving-ground-1.0.json");

@@ -402,7 +402,15 @@ export interface Plan {
     total?: string;
     repeat?: string | null;
     /** What a priced purchase spends, as numbers (C2); null otherwise, absent from an older plan. */
-    spends?: { item: string; displayName: string; quantity: number; buys: string } | null;
+    spends?: {
+      item: string;
+      displayName: string;
+      quantity: number;
+      buys: string;
+      /** What it buys, by id and all together (C2.5); absent from a plan saved before them. */
+      boughtItem?: string | null;
+      boughtQuantity?: number;
+    } | null;
   }[];
   rewards: { reward: string; displayName?: string; times: number }[];
   totalEnergy: number;
@@ -703,11 +711,23 @@ export interface SavedPlan {
   request: PlanRequest;
   plan: Plan;
   savedAt: string;
+  /** The plan's lines ticked off, by `ui`'s keys (V20). Absent from a server older than the checklist. */
+  done?: string[];
 }
 
 /** Undefined when the profile has never run a plan: the server answers 204. */
 export const getSavedPlan = (profile: string) =>
   request<SavedPlan | undefined>(`/api/me/profiles/${profile}/plan`);
+
+/**
+ * Replace what is ticked off on the plan saved at `savedAt`. A 409 means the plan
+ * was worked out again somewhere since, and the ticks were for the old one.
+ */
+export const savePlanDone = (profile: string, savedAt: string, done: string[]) =>
+  request<void>(`/api/me/profiles/${profile}/plan/done`, {
+    method: 'PUT',
+    body: JSON.stringify({ savedAt, done }),
+  });
 
 /**
  * One change a new sequence made to something the reader's plans use, named in

@@ -4,7 +4,6 @@ import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-do
 import {
   ApiError,
   getBanners,
-  getGames,
   getGoals,
   getInventory,
   getMe,
@@ -16,14 +15,16 @@ import {
   type Plan,
   type Profile,
 } from '../api/client';
-import { useCreateProfile, useDeleteProfile, useRenameProfile } from '../profile';
+import { useActiveGame, useCreateProfile, useDeleteProfile, useRenameProfile, useSelectedProfile } from '../profile';
 import { STEPS } from '../steps/Steps';
 import { usePlannerStore } from '../store/plannerStore';
+import { daysOf } from './PlanView';
 import { useSince } from './SinceNotice';
 import { Explain } from '../ui/Explain';
 import { Icon, type IconName } from '../ui/Icon';
 import { SpendBars } from '../ui/SpendBar';
 import { formatUntil, nextReset, useNow } from '../ui/time';
+import { useGameChoice } from '../ui/gameChoice';
 
 /**
  * Where a reader lands, as a dashboard (2026-10-01): what this is and which
@@ -46,14 +47,13 @@ export function Home() {
     queryFn: getMe,
     retry: (_failures, error) => !(error instanceof ApiError && error.isSignedOut),
   });
-  const games = useQuery({ queryKey: ['games'], queryFn: getGames });
-  const profileId = usePlannerStore((state) => state.profileId);
 
   const signedOut = me.error instanceof ApiError && me.error.isSignedOut;
-  const published = games.data?.games ?? [];
   const profiles = me.data?.profiles ?? [];
-  const active = profiles.find((profile) => profile.id === profileId) ?? profiles[0] ?? null;
-  const game = published.find((candidate) => candidate.id === active?.game) ?? published[0] ?? null;
+  // The game the switch is on, and the reader's profile for it — none, if they
+  // switched to a game they have not made one for (C2.5).
+  const { game, games: published } = useActiveGame();
+  const { profile: active } = useSelectedProfile();
 
   return (
     <div className="space-y-6">
@@ -200,7 +200,7 @@ function PlanCard({ profile, plan, energyUnit }: { profile: Profile; plan: Plan;
         </div>
         <div className="stat-tile">
           <span className="stat-label">Days</span>
-          <span className="stat-value count">{plan.etaDays.toFixed(1)}</span>
+          <span className="stat-value count">{daysOf(plan.etaDays)}</span>
         </div>
         <div className="stat-tile">
           <span className="stat-label">Runs</span>
@@ -279,6 +279,30 @@ function SetupCard({ profile, plan, wide }: { profile: Profile; plan: Plan | nul
   const doneCount = rows.filter((row) => row.done).length;
   const next = rows.findIndex((row) => !row.done);
 
+  // Finished, it is one line (C2.5): four full cards saying "done" held the
+  // middle of Home for a reader who had nothing left to set up, below the plan
+  // they came for. The steps stay one tap away, as links.
+  if (next === -1) {
+    return (
+      <section className="card flex flex-wrap items-center gap-x-4 gap-y-2" aria-labelledby="setup-heading">
+        <h2 id="setup-heading" className="font-semibold">
+          Your setup
+        </h2>
+        <span className="text-sm font-medium" style={{ color: 'var(--brand)' }}>
+          ✓ {doneCount} of {STEPS.length} done
+        </span>
+        <nav className="flex flex-wrap gap-x-3 gap-y-1 text-sm" aria-label="Setup steps">
+          {rows.map(({ step, count, say }) => (
+            <Link key={step.to} to={step.to} className="no-underline" title={count !== null ? say(count) : undefined}>
+              {step.title}
+            </Link>
+          ))}
+        </nav>
+        <span className="muted text-sm sm:ml-auto">Re-plan whenever your inventory moves.</span>
+      </section>
+    );
+  }
+
   return (
     <section className="card h-full space-y-4" aria-labelledby="setup-heading">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -325,9 +349,6 @@ function SetupCard({ profile, plan, wide }: { profile: Profile; plan: Plan | nul
           );
         })}
       </ol>
-      {next === -1 && (
-        <p className="muted text-sm">All four done. Re-plan whenever your inventory moves.</p>
-      )}
     </section>
   );
 }
@@ -420,17 +441,21 @@ function Profiles({
   // goes back there rather than stranding them here. A path on this site only.
   const [search] = useSearchParams();
   const then = localPath(search.get('then'));
+  // A game the switch sent the reader here to make a profile for (C2.5).
+  const asked = search.get('new');
+  const wanted = published.some((candidate) => candidate.id === asked) ? asked : null;
   const selectProfile = usePlannerStore((state) => state.selectProfile);
+  const choose = useGameChoice((state) => state.choose);
 
   const [adding, setAdding] = useState(false);
-  const [game, setGame] = useState('');
+  const [game, setGame] = useState(wanted ?? '');
   const [region, setRegion] = useState('global');
   const [displayName, setDisplayName] = useState('Main');
   const add = useCreateProfile();
 
-  const forced = profiles.length === 0 || then !== null;
+  const forced = profiles.length === 0 || then !== null || wanted !== null;
   const showForm = forced || adding;
-  const chosen = game || published[0]?.id || '';
+  const chosen = game || wanted || published[0]?.id || '';
   // One profile per game per server is the server's rule. The defaults are the
   // first game on "global", which is the profile a reader with one already has,
   // so the form says so rather than letting the server refuse it.
@@ -462,7 +487,10 @@ function Profiles({
               profile={profile}
               gameName={gameName(profile.game)}
               active={profile.id === activeId}
-              onSelect={() => selectProfile(profile.id)}
+              onSelect={() => {
+                selectProfile(profile.id);
+                choose(profile.game);
+              }}
             />
           ))}
         </ul>

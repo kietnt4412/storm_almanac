@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { getEntities, getGames } from '../api/client';
 import { Sourcing } from '../catalog/Sourcing';
-import { useSelectedProfile } from '../profile';
+import { useActiveGame } from '../profile';
 
 /**
  * Browse and search, and the one part of the product a stranger can read.
@@ -22,12 +22,11 @@ import { useSelectedProfile } from '../profile';
 export function Catalog() {
   const { game } = useParams();
   const games = useQuery({ queryKey: ['games'], queryFn: getGames });
-  const { profile } = useSelectedProfile();
+  const active = useActiveGame();
 
-  // No game in the path: send the reader to their own if they have one, and
-  // otherwise to the only one published. Both are better than a chooser for a
-  // list with one entry on it.
-  const resolved = game ?? profile?.game ?? games.data?.games[0]?.id;
+  // No game in the path: the one the switch is on, which is the reader's own
+  // profile's when they have not switched, and otherwise the first published.
+  const resolved = game ?? active.id ?? games.data?.games[0]?.id;
 
   if (!resolved) {
     return games.isPending ? (

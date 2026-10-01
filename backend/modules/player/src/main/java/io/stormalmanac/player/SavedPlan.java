@@ -2,6 +2,7 @@ package io.stormalmanac.player;
 
 import io.stormalmanac.common.id.ProfileId;
 import java.time.Instant;
+import java.util.List;
 
 /**
  * The last plan a profile was shown, and what was asked to get it.
@@ -18,8 +19,12 @@ import java.time.Instant;
  * @param request     what the reader asked with — energy a day, horizon,
  *                    objective and reach — as JSON
  * @param plan        the plan as the reader was shown it, as JSON
+ * @param done        the plan's lines the reader has ticked off, by the page's
+ *                    own keys, which this module does not read (V20). A new
+ *                    plan starts with none
  */
-public record SavedPlan(ProfileId profile, long gameVersion, String request, String plan, Instant savedAt) {
+public record SavedPlan(
+        ProfileId profile, long gameVersion, String request, String plan, Instant savedAt, List<String> done) {
 
     public SavedPlan {
         if (gameVersion < 0) {
@@ -31,5 +36,11 @@ public record SavedPlan(ProfileId profile, long gameVersion, String request, Str
         if (plan == null || plan.isBlank()) {
             throw new IllegalArgumentException("a saved plan keeps the plan");
         }
+        done = done == null ? List.of() : List.copyOf(done);
+    }
+
+    /** A plan as it is saved: just answered, so nothing on it is done yet. */
+    public SavedPlan(ProfileId profile, long gameVersion, String request, String plan, Instant savedAt) {
+        this(profile, gameVersion, request, plan, savedAt, List.of());
     }
 }
