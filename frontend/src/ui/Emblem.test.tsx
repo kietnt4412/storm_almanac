@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { Emblem, initials, serial } from './Emblem';
+import { Emblem, flightName, initials, serial } from './Emblem';
 
 const LUCIA = { id: 'lucia-inverse-crown', displayName: 'Lucia: Inverse Crown', kind: 'character', rarity: { label: 'S', rank: 5 } };
 const SELENA = { id: 'selena-pianissimo', displayName: 'Selena: Pianissimo', kind: 'character', rarity: { label: 'S', rank: 5 } };
@@ -40,6 +40,13 @@ describe('an emblem', () => {
     expect(serial('lucia-inverse-crown', 'plate')).toMatch(/^[0-9A-Z]{2}-[0-9A-Z]{2}$/);
     expect(serial('lucia-inverse-crown', 'seal')).toMatch(/^Nº \d{3}$/);
     expect(serial('lucia-inverse-crown', 'plate')).not.toBe(serial('selena-pianissimo', 'plate'));
+  });
+
+  it('flies under one name per character, which a CSS name can always hold', () => {
+    expect(flightName('lucia-inverse-crown')).toBe('emblem-lucia-inverse-crown');
+    expect(flightName('lucia-inverse-crown')).not.toBe(flightName('selena-pianissimo'));
+    // An id may begin with a digit or carry a dot; the name never does either.
+    expect(flightName('1999.sonetto')).toBe('emblem-1999_sonetto');
   });
 
   it('is hidden from a screen reader, which reads the name beside it', () => {

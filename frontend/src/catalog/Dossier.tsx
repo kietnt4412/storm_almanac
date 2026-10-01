@@ -50,7 +50,7 @@ export function Dossier({
       <section className="dossier-hero" style={{ '--tone': tone } as CSSProperties} aria-label={entity.displayName}>
         <div className="dossier-portrait">
           <PortraitRing share={share} />
-          <Emblem subject={entity} ranks={ranks} game={game} size={128} />
+          <Emblem subject={entity} ranks={ranks} game={game} size={128} flies />
         </div>
         <div className="min-w-0 space-y-3">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">

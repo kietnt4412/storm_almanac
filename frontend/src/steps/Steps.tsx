@@ -46,6 +46,10 @@ export function isStep(pathname: string): boolean {
  * progress bar since C2, so the bar says how far through the reader is before
  * any word does. Steps before this one are filled paler than this one: done is
  * not the same as here.
+ *
+ * <p>Since C2.19 the links between steps are view transitions, and the segment
+ * that says "here" carries a name (`step-here`, in `motion.css`), so it slides
+ * from the step left to the step opened.
  */
 export function StepBar(): ReactElement {
   const { pathname } = useLocation();
@@ -57,6 +61,7 @@ export function StepBar(): ReactElement {
           <li key={step.to} className="min-w-0">
             <NavLink
               to={step.to}
+              viewTransition
               className={({ isActive }) =>
                 `step ${isActive ? 'step-here' : index < here ? 'step-done' : ''}`
               }
@@ -98,7 +103,7 @@ export function NextStep({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4" style={{ borderColor: 'var(--line)' }}>
       {previous ? (
-        <Link to={previous.to} className="text-sm">
+        <Link to={previous.to} viewTransition className="text-sm">
           ← {previous.title}
         </Link>
       ) : (
@@ -114,7 +119,7 @@ export function NextStep({
               setGoing(true);
               try {
                 await before();
-                navigate(next.to);
+                navigate(next.to, { viewTransition: true });
               } catch {
                 // The screen owns the error; the reader stays to read it.
               } finally {
@@ -125,7 +130,7 @@ export function NextStep({
             {going ? 'Saving…' : (label ?? `Next: ${next.title} →`)}
           </button>
         ) : (
-          <Link to={next.to} className="btn no-underline">
+          <Link to={next.to} viewTransition className="btn no-underline">
             Next: {next.title} →
           </Link>
         ))}

@@ -32,6 +32,7 @@ export function Emblem({
   game,
   size = 40,
   className = '',
+  flies = false,
 }: {
   subject: EmblemSubject;
   /** Every rank among the things it is shown with, highest first, for the frame's colour. */
@@ -39,6 +40,12 @@ export function Emblem({
   game: string | null;
   size?: number;
   className?: string;
+  /**
+   * Whether this is the emblem that flies between pages when a link to its
+   * character is followed (C2.19). One per character on a page: two under the
+   * same name and the browser skips the transition altogether.
+   */
+  flies?: boolean;
 }): ReactElement {
   const clip = useId();
   const style = lookOf(game)?.emblem ?? 'hex';
@@ -63,7 +70,7 @@ export function Emblem({
       viewBox="0 0 64 64"
       aria-hidden="true"
       focusable="false"
-      style={{ '--tone': tone } as React.CSSProperties}
+      style={{ '--tone': tone, viewTransitionName: flies ? flightName(subject.id) : undefined } as React.CSSProperties}
     >
       <defs>
         <clipPath id={clip}>{shape.outline}</clipPath>
@@ -84,6 +91,15 @@ export function Emblem({
       </text>
     </svg>
   );
+}
+
+/**
+ * The name an emblem flies under (C2.19): the same on the link and on the page
+ * it opens, so the browser knows the two are one. An id may hold characters a
+ * CSS name may not, and those become underscores.
+ */
+export function flightName(id: string): string {
+  return `emblem-${id.replace(/[^A-Za-z0-9_-]/g, '_')}`;
 }
 
 /**

@@ -814,6 +814,12 @@
   transform: skewX(-18deg);
 }
 
+/* What crosses between pages (C2.19) moves fast and overshoots its seat, like a target snapped to. */
+:root[data-game='punishing-gray-raven'] {
+  --dur-morph: 0.38s;
+  --ease-morph: var(--ease-snap);
+}
+
 /* A page arrives as a signal locking on: sliced, shaken, then still. */
 :root[data-game='punishing-gray-raven'] .page {
   animation: pgr-lock-on 0.55s steps(1, end) both;
@@ -912,6 +918,11 @@
   opacity: 0.28;
   transform: rotate(-14deg);
   pointer-events: none;
+}
+
+/* What crosses between pages (C2.19) drifts across, unhurried, like a card slid over a desk. */
+:root[data-game='reverse-1999'] {
+  --dur-morph: 0.6s;
 }
 
 /* A page arrives turned over from the left, like a leaf. */

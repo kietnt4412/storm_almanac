@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { getEntities, getRoster, getUpgrades, type UpgradeStep } from '../api/client';
+import { prefetchHandlers } from '../catalog/prefetch';
 import { ProfileGate } from '../profile';
 import { UnitCard } from '../roster/UnitCard';
 import { TrackPicker } from '../roster/TrackPicker';
@@ -44,6 +45,7 @@ export function Roster() {
 function Editor({ profileId, game }: { profileId: string; game: string }) {
   const entities = useQuery({ queryKey: ['entities', game], queryFn: () => getEntities(game) });
   const stored = useQuery({ queryKey: ['roster', profileId], queryFn: () => getRoster(profileId) });
+  const client = useQueryClient();
 
   const outbox = usePlannerStore((state) => outboxOf(state, profileId));
   const editRosterState = usePlannerStore((state) => state.editRosterState);
@@ -150,8 +152,13 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
                   </div>
                 ) : (
                   <div className="card has-emblem flex items-center gap-x-2">
-                    {entity && <Emblem subject={entity} ranks={ranks.get(entity.kind)} game={game} size={36} />}
-                    <Link to={`/catalog/${game}/${slug}`} className="min-w-0 flex-1 truncate font-medium">
+                    {entity && <Emblem subject={entity} ranks={ranks.get(entity.kind)} game={game} size={36} flies />}
+                    <Link
+                      to={`/catalog/${game}/${slug}`}
+                      viewTransition
+                      {...prefetchHandlers(client, game, slug)}
+                      className="min-w-0 flex-1 truncate font-medium"
+                    >
                       {nameOf(slug)}
                     </Link>
                     <button type="button" className="btn-quiet" aria-expanded={isOpen} onClick={toggle}>
