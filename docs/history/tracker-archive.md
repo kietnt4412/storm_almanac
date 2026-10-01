@@ -3352,6 +3352,32 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-10-01 (fifty-ninth) — C2.7: a feel per game, wordmarks that move, and the reader's Google picture.**
+
+**The maintainer said PGR and R1999 were "too simple".** That is three
+different jobs (the look, the switch, the data), so Claude asked which. The
+answer was the look. Following the standing rule to confirm UX first, Claude
+mocked it up through the dev server (the file under `frontend/public` for the
+look, then deleted, as in the fifty-eighth). The maintainer agreed to all of
+it except R1999's mark, and sent the game's logo as the idea. A minute later
+they sent PGR's, "but creative in our own", then asked for the words to
+animate, and also asked for their Google picture.
+
+**Built on `dev`** ([as built](../plans/c2-the-visual-pass.md#c27--a-feel-per-game-wordmarks-and-the-readers-picture-2026-10-01-fifty-ninth)):
+wordmarks with per-letter entrances and an ambient loop each, a seal for
+R1999, each game's dress in a new `looks.css`, and `V21` for the picture.
+**ADR 0040** supersedes 0039's decisions 1 and 2. 542 backend, 137 frontend.
+
+**What was worth learning:**
+- **A logo the maintainer sends is still game art.** CLAUDE.md's "no game
+  assets" covers the shape of a wordmark as much as an image file. The answer
+  was the same idea in our own type, said up front rather than argued later.
+- **Google's `picture` claim was already arriving and being dropped.**
+  `SignInTest` had fed it in since Phase 3 and asserted nothing about it.
+- **`aria-hidden` hides from `getByRole`.** The opening is aria-hidden, so
+  finding its wordmark by role needs `hidden: true`.
+- **No Python here either**: multi-line edits went through small Node scripts.
+
 **2026-10-01 (fifty-eighth) — C2.6: motion from a recording, and a top bar in place of the side panel.**
 
 **The maintainer shared a 25-second screen recording** of Gcore's product site
