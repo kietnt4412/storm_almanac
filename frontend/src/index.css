@@ -229,6 +229,33 @@ a {
     @apply block text-[11px] font-medium uppercase tracking-wide;
   }
 
+  /*
+   * Home's top band: the one surface on the site with a wash of colour, so the
+   * landing page reads as a front door rather than another form.
+   */
+  .hero {
+    @apply rounded-2xl border p-5 sm:p-7;
+    border-color: color-mix(in srgb, var(--brand) 25%, var(--line));
+    background:
+      radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--violet) 16%, transparent), transparent 60%),
+      linear-gradient(135deg, color-mix(in srgb, var(--brand) 14%, var(--raised)), var(--raised));
+    box-shadow: var(--shadow);
+  }
+
+  /* A fact about the game, as a small rounded label: the patch, the reset. */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium;
+    border-color: var(--line);
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  /* The setup step to do next: tinted, so the eye lands on it first. */
+  .card-next {
+    border-color: var(--brand);
+    background: color-mix(in srgb, var(--brand) 8%, var(--surface));
+  }
+
   .input {
     @apply rounded-md border px-2 py-1 text-sm;
     background: var(--surface);

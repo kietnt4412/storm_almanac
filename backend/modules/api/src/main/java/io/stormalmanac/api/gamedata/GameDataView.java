@@ -198,7 +198,18 @@ public final class GameDataView {
      * much energy a day?" in a game's own noun is the difference between a tool
      * that knows the game and a form.
      */
-    public record GameSummaryView(String id, String displayName, String energyUnit, VersionView latest) {}
+    public record GameSummaryView(
+            String id, String displayName, String energyUnit, VersionView latest, DayBoundaryView dayBoundary) {}
+
+    /**
+     * When the game's day rolls over, so a page can count down to the reset.
+     *
+     * <p>Null on the summary when the bundle never said: the planner falls back
+     * to midnight UTC for an unstated boundary (ADR 0025), but a countdown to a
+     * placeholder would tell a player the wrong hour, so the wire keeps the two
+     * apart. The zone is its {@code ZoneId} id — "UTC", "America/New_York".
+     */
+    public record DayBoundaryView(String zone, int hour) {}
 
     public record GamesResponse(List<GameSummaryView> games) {}
 

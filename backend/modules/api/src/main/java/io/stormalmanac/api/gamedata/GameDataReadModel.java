@@ -4,6 +4,7 @@ import io.stormalmanac.api.ResourceNotFoundException;
 import io.stormalmanac.api.gamedata.GameDataView.BreakpointView;
 import io.stormalmanac.api.gamedata.GameDataView.ChangeView;
 import io.stormalmanac.api.gamedata.GameDataView.CostView;
+import io.stormalmanac.api.gamedata.GameDataView.DayBoundaryView;
 import io.stormalmanac.api.gamedata.GameDataView.DiffResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntitiesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntityResponse;
@@ -38,6 +39,7 @@ import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gacha.DeclaredIncomeModel;
 import io.stormalmanac.gacha.PullModel;
 import io.stormalmanac.gamedata.Availability;
+import io.stormalmanac.gamedata.DayBoundary;
 import io.stormalmanac.gamedata.FactRef;
 import io.stormalmanac.gamedata.Fodder;
 import io.stormalmanac.gamedata.GameDefinition;
@@ -117,8 +119,13 @@ public class GameDataReadModel {
                         published.game().id().value(),
                         published.game().displayName(),
                         published.game().energyUnit(),
-                        version(published.version())))
+                        version(published.version()),
+                        dayBoundary(published.game().dayBoundary())))
                 .toList());
+    }
+
+    private static DayBoundaryView dayBoundary(DayBoundary boundary) {
+        return boundary == null ? null : new DayBoundaryView(boundary.zone().getId(), boundary.hour());
     }
 
     /**
