@@ -42,6 +42,12 @@ export interface GameSummary {
   /** The game's own word for energy — Activity, Serum, Vigour. */
   energyUnit: string;
   latest: Version;
+  /*
+    When the game's day rolls over, for Home's reset countdown. Null when the
+    bundle never said, and optional because the page and the API deploy at
+    different instants.
+  */
+  dayBoundary?: { zone: string; hour: number } | null;
 }
 
 export interface GamesResponse {

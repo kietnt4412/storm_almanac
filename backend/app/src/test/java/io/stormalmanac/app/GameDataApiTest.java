@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
 import io.stormalmanac.api.gamedata.GameDataView.CostView;
+import io.stormalmanac.api.gamedata.GameDataView.DayBoundaryView;
 import io.stormalmanac.api.gamedata.GameDataView.DiffResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntitiesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.EntityResponse;
@@ -16,6 +17,8 @@ import io.stormalmanac.api.gamedata.GameDataView.UpgradeStepView;
 import io.stormalmanac.api.gamedata.GameDataView.UpgradesResponse;
 import io.stormalmanac.api.gamedata.GameDataView.VersionsResponse;
 import io.stormalmanac.common.id.GameId;
+import io.stormalmanac.gamedata.DayBoundary;
+import io.stormalmanac.gamedata.Game;
 import io.stormalmanac.gamedata.Provenance;
 import io.stormalmanac.gamedata.ingest.CanonicalBundleParser;
 import io.stormalmanac.gamedata.ingest.GameDataBundle;
@@ -25,6 +28,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -178,7 +182,29 @@ class GameDataApiTest extends SharedDatabaseTest {
             // first, and it is attributed like every other answer.
             assertThat(game.latest().label()).isEqualTo("1.1");
             assertThat(game.latest().attribution()).isNotBlank();
+            // The fixture never says when its day rolls over, and the planner's
+            // midnight-UTC fallback is not a reading, so nothing is sent.
+            assertThat(game.dayBoundary()).isNull();
         });
+    }
+
+    @Test
+    @DisplayName("a game that declares when its day rolls over says so on the index, so a page can count down to it")
+    void theIndexCarriesTheDayBoundary() {
+        GameDataBundle fixture = bundle("proving-ground-1.0.json");
+        Game game = fixture.game();
+        ingest.ingestDraft(new GameDataBundle(
+                new Game(game.id(), game.displayName(), game.energyUnit(), new DayBoundary(ZoneId.of("UTC"), 5)),
+                fixture.sequence(), fixture.label(), fixture.attribution(), fixture.provenance(),
+                fixture.sourcedBy(), fixture.factProvenance(), fixture.items(), fixture.sources(),
+                fixture.sinks(), fixture.banners(), fixture.entities(), fixture.progressKinds(),
+                fixture.sections(), fixture.words()));
+        ingest.publish(PROVING_GROUND, fixture.sequence());
+
+        GamesResponse games = ok(http.getForEntity("/api/games", GamesResponse.class));
+
+        assertThat(games.games()).singleElement()
+                .satisfies(summary -> assertThat(summary.dayBoundary()).isEqualTo(new DayBoundaryView("UTC", 5)));
     }
 
     @Test
