@@ -289,7 +289,7 @@ function Asker({
       </div>
       </div>
 
-      <div className="space-y-4 lg:sticky lg:top-4">
+      <div className="space-y-4 lg:sticky lg:top-24">
         {run.isError && (
           <div className="card">
             <p className="font-medium">

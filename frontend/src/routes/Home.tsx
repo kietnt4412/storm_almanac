@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -25,6 +25,7 @@ import { Icon, type IconName } from '../ui/Icon';
 import { SpendBars } from '../ui/SpendBar';
 import { formatUntil, nextReset, useNow } from '../ui/time';
 import { useGameChoice } from '../ui/gameChoice';
+import { Reveal, Words } from '../ui/motion';
 
 /**
  * Where a reader lands, as a dashboard (2026-10-01): what this is and which
@@ -57,17 +58,23 @@ export function Home() {
 
   return (
     <div className="space-y-6">
-      <section className="hero space-y-4">
+      {/*
+        The hero arrives (C2.6): the headline word by word, then the line under
+        it and the facts, with a streak of light in the corner.
+      */}
+      <section className="hero hero-streak space-y-4">
         <div>
-          <h1 className="text-2xl font-semibold sm:text-3xl">Work out the cheapest way to get there</h1>
-          <Explain className="muted mt-1 max-w-2xl" lead="Tell it what you own and what you want.">
+          <h1 className="text-2xl font-semibold sm:text-3xl">
+            <Words text="Work out the cheapest way to get there" delay={80} />
+          </h1>
+          <Explain className="rise muted mt-1 max-w-2xl [--delay:420ms]" lead="Tell it what you own and what you want.">
             It reads the published patch data, works out what your goals actually cost, and says which stages
             to run — and how much of the answer it could prove inside its own time budget.
           </Explain>
         </div>
         {game && <GameFacts game={game} />}
         {signedOut && (
-          <div className="space-y-2">
+          <div className="rise space-y-2" style={{ '--delay': '650ms' } as CSSProperties}>
             <div className="flex flex-wrap gap-3">
               <a className="btn no-underline" href={signInUrl(location.pathname)}>
                 Sign in
@@ -91,7 +98,12 @@ export function Home() {
           <div className="grid gap-4 lg:grid-cols-3">
             <section className="grid gap-3 sm:grid-cols-2 lg:col-span-2" aria-label="How it works">
               {STEPS.map((step, index) => (
-                <Link key={step.to} to={step.to} className="card block no-underline" style={{ color: 'var(--ink)' }}>
+                <Link
+                  key={step.to}
+                  to={step.to}
+                  className="card rise block no-underline"
+                  style={{ color: 'var(--ink)', '--delay': `${700 + index * 90}ms` } as CSSProperties}
+                >
                   <div className="flex items-center gap-2" style={{ color: 'var(--brand)' }}>
                     <Icon name={STEP_ICONS[step.to]} size={18} />
                     <span className="label">Step {index + 1}</span>
@@ -101,12 +113,18 @@ export function Home() {
                 </Link>
               ))}
             </section>
-            <BannerCard game={game.id} profileId={null} />
+            <div className="rise" style={{ '--delay': '1060ms' } as CSSProperties}>
+              <BannerCard game={game.id} profileId={null} />
+            </div>
           </div>
         )
       )}
 
-      {me.data && <Profiles profiles={profiles} activeId={active?.id ?? null} published={published} />}
+      {me.data && (
+        <Reveal>
+          <Profiles profiles={profiles} activeId={active?.id ?? null} published={published} />
+        </Reveal>
+      )}
     </div>
   );
 }
@@ -129,7 +147,7 @@ function GameFacts({ game }: { game: GameSummary }) {
   const boundary = game.dayBoundary;
   const reset = boundary ? nextReset(boundary.zone, boundary.hour, now) : null;
   return (
-    <ul className="flex flex-wrap gap-2" aria-label="The game">
+    <ul className="rise flex flex-wrap gap-2" aria-label="The game" style={{ '--delay': '560ms' } as CSSProperties}>
       <li className="chip">
         <Icon name="book" size={14} />
         {game.displayName} · v{game.latest.sequence} · {game.latest.label}
@@ -154,16 +172,22 @@ function Dashboard({ profile, game }: { profile: Profile; game: GameSummary }) {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <div className="rise lg:col-span-2" style={{ '--delay': '700ms' } as CSSProperties}>
           {plan ? (
             <PlanCard profile={profile} plan={plan} energyUnit={game.energyUnit} />
           ) : (
             <SetupCard profile={profile} plan={null} wide={false} />
           )}
         </div>
-        <BannerCard game={game.id} profileId={profile.id} />
+        <div className="rise" style={{ '--delay': '820ms' } as CSSProperties}>
+          <BannerCard game={game.id} profileId={profile.id} />
+        </div>
       </div>
-      {plan && <SetupCard profile={profile} plan={plan} wide />}
+      {plan && (
+        <Reveal>
+          <SetupCard profile={profile} plan={plan} wide />
+        </Reveal>
+      )}
     </div>
   );
 }

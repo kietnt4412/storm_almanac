@@ -12,6 +12,7 @@ import { Pulls } from './routes/Pulls';
 import { Catalog } from './routes/Catalog';
 import { EntityPage } from './routes/EntityPage';
 import './index.css';
+import './motion.css';
 import { applyGame, storedGame } from './ui/gameChoice';
 
 // Before the first render, so a reader who chose a game never sees another

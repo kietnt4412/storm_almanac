@@ -25,6 +25,8 @@ import { reachOf, usePlannerStore } from '../store/plannerStore';
 import { SpendBars } from '../ui/SpendBar';
 import { Explain } from '../ui/Explain';
 import { Icon, type IconName } from '../ui/Icon';
+import { Reveal } from '../ui/motion';
+import { PlanCircuit } from '../ui/PlanCircuit';
 
 /**
  * The answer, and what it is worth.
@@ -464,11 +466,12 @@ export function Answer({
   onToggle?: (key: string) => void;
 }) {
   const paying = plan.payingFor ?? [];
+  const groups = payingForGroups(paying, tracks);
   const spends = plan.conversions.flatMap((conversion) => (conversion.spends ? [conversion.spends] : []));
   const runs = plan.stages.reduce((sum, stage) => sum + stage.runs, 0);
   return (
     <div className="space-y-4">
-      <section className="card-raised space-y-4">
+      <section className="card-raised rise space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="grid flex-1 grid-cols-3 gap-2 sm:max-w-md">
             <div className="stat-tile">
@@ -494,9 +497,11 @@ export function Answer({
           </div>
         </div>
 
+        <PlanCircuit plan={plan} energyUnit={energyUnit} />
+
         <SpendBars spends={spends} />
 
-        {paying.length > 0 && <PaysFor steps={paying.length} groups={payingForGroups(paying, tracks)} />}
+        {paying.length > 0 && <PaysFor steps={paying.length} groups={groups} />}
         <Remarks plan={plan} />
       </section>
 
@@ -506,9 +511,15 @@ export function Answer({
         </p>
       )}
 
-      <Checklist plan={plan} energyUnit={energyUnit} done={done} onToggle={onToggle} />
+      <Reveal>
+        <Checklist plan={plan} energyUnit={energyUnit} done={done} onToggle={onToggle} />
+      </Reveal>
 
-      {plan.shadowPrice.length > 0 && <Prices prices={plan.shadowPrice} energyUnit={energyUnit} />}
+      {plan.shadowPrice.length > 0 && (
+        <Reveal>
+          <Prices prices={plan.shadowPrice} energyUnit={energyUnit} />
+        </Reveal>
+      )}
 
       <p className="text-xs muted">{plan.attribution}</p>
     </div>

@@ -112,6 +112,7 @@ const PATHS = {
     </>
   ),
   chevron: <path d="m9 6 6 6-6 6" />,
+  chevronDown: <path d="m6 9 6 6 6-6" />,
   check: <path d="m5 12 4.5 4.5L19 7" />,
   signOut: (
     <>

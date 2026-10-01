@@ -7,10 +7,10 @@ import { App } from './App';
 import { useGameChoice } from './ui/gameChoice';
 
 /**
- * The side panel (C2, agreed 2026-09-30) and the game switch (C2.5, 2026-10-01).
- * Both are choices this browser remembers, and neither may be lost to a reload:
- * a reader who picked a game and got another back on the next visit would stop
- * picking.
+ * The top bar (C2.6, 2026-10-01, in place of C2's side panel) and the game
+ * switch in it (C2.5). The game is a choice this browser remembers, and it may
+ * not be lost to a reload: a reader who picked a game and got another back on
+ * the next visit would stop picking.
  */
 describe('the shell', () => {
   beforeEach(() => {
@@ -41,7 +41,7 @@ describe('the shell', () => {
     renderShell();
     const user = userEvent.setup();
 
-    const group = await screen.findByRole('group', { name: 'Game' });
+    const group = await openGameMenu(user);
     const pgr = within(group).getByRole('button', { name: /Punishing: Gray Raven/ });
     const proving = within(group).getByRole('button', { name: /The Proving Ground/ });
     // Published nowhere this server knows, so listed and not offered.
@@ -64,21 +64,53 @@ describe('the shell', () => {
     useGameChoice.setState({ chosen: 'proving-ground' });
     renderShell();
 
-    const group = await screen.findByRole('group', { name: 'Game' });
+    const group = await openGameMenu(userEvent.setup());
     expect(within(group).getByRole('button', { name: /The Proving Ground/ })).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('hides the panel to a rail and remembers it, keeping every link named', async () => {
+  it('puts the four planner steps under one menu, which Escape closes', async () => {
     renderShell();
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole('button', { name: 'Hide menu' }));
-    expect(window.localStorage.getItem('storm-almanac:panel-hidden')).toBe('true');
-    expect(screen.getByRole('button', { name: 'Show menu' })).toBeInTheDocument();
-    // The rail shows icons; the words stay for a screen reader.
-    expect(screen.getByRole('link', { name: 'Plan' })).toHaveAttribute('href', '/plan');
+    const menu = screen.getByRole('navigation', { name: 'Menu' });
+    expect(within(menu).getByRole('link', { name: 'Pulls' })).toHaveAttribute('href', '/pulls');
+    expect(within(menu).queryByRole('link', { name: /Plan/ })).not.toBeInTheDocument();
+
+    await user.click(within(menu).getByRole('button', { name: 'Planner' }));
+    for (const [name, href] of [
+      ['Inventory', '/inventory'],
+      ['Roster', '/roster'],
+      ['Goals', '/goals'],
+      ['Plan', '/plan'],
+    ]) {
+      expect(within(menu).getByRole('link', { name: new RegExp(`^${name}`) })).toHaveAttribute('href', href);
+    }
+
+    await user.keyboard('{Escape}');
+    expect(within(menu).queryByRole('link', { name: /^Inventory/ })).not.toBeInTheDocument();
+  });
+
+  it('gathers the bar into a pill once the page scrolls, and spreads it out again at the top', async () => {
+    renderShell();
+    const bar = screen.getByRole('banner');
+    expect(bar).toHaveAttribute('data-scrolled', 'false');
+
+    scrollTo(200);
+    await vi.waitFor(() => expect(bar).toHaveAttribute('data-scrolled', 'true'));
+    scrollTo(0);
+    await vi.waitFor(() => expect(bar).toHaveAttribute('data-scrolled', 'false'));
   });
 });
+
+async function openGameMenu(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(await screen.findByRole('button', { name: 'Game' }));
+  return screen.findByRole('group', { name: 'Game' });
+}
+
+function scrollTo(y: number) {
+  Object.defineProperty(window, 'scrollY', { value: y, configurable: true });
+  window.dispatchEvent(new Event('scroll'));
+}
 
 function renderShell() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
