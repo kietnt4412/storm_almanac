@@ -434,7 +434,13 @@ class AuthoredBundlePlanTest {
         // The same spend as numbers, for the page's chart of where a currency
         // goes (C2) — equal to the words, because both come off one shop row.
         assertThat(enhancers.spends()).isEqualTo(new PlayerView.SpendView(
-                "simulation-score", "Simulation Score", 87L * buys, "Memory Enhancer IV"));
+                "simulation-score",
+                "Simulation Score",
+                87L * buys,
+                "Memory Enhancer IV",
+                // What it buys, by id and all together, for the inventory screen (C2.5).
+                "memory-enhancer-iv",
+                10L * buys));
 
         ConversionView fed = overclock.conversions().stream()
                 .filter(line -> line.step().equals("memory-exp-4-star"))

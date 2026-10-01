@@ -20,14 +20,24 @@
  * manifest in vite.config.ts carries the dark ground, so the splash screen and
  * the first paint agree.
  *
- * Three ways in, one set of values each: the light scheme is the default, the
- * dark one applies when the system asks for it *and the reader has not chosen
- * light*, and a reader who chose dark gets it whatever the system says. The
- * choice is `data-theme` on the root, set by `ui/preferences.ts`; "system" is
- * no attribute at all. The dark values are written twice because a media query
- * and an attribute selector cannot share one block.
+ * Two schemes, and the device picks: the light one is the default and the dark
+ * one applies when the system asks for it. Until 2026-10-01 a reader could
+ * override that with a light / dark / system switch; the maintainer replaced
+ * it with a switch between the games (C2.5), so the scheme follows the device
+ * and the switch changes the *palette*.
+ *
+ * Each game with a look (`ui/gameChoice.ts`, ADR 0039) redefines the same
+ * tokens under `[data-game='…']`, once per scheme. The attribute is on the root
+ * for the page, and on any element that must wear another game's colours —
+ * the switch draws each game's mark in its own. A game with no look keeps
+ * Storm. The blocks are in cascade order on purpose: Storm light, Storm dark,
+ * then each game's light and dark, so a game's dark beats everything above it.
+ *
+ * Punishing: Gray Raven is near-black and crimson; Reverse: 1999 is aged paper
+ * and amber. No game art — colour is all either borrows (CLAUDE.md).
  */
-:root {
+:root,
+[data-game='storm'] {
   color-scheme: light;
   --ground: #f3f6fb;
   --surface: #ffffff;
@@ -44,7 +54,8 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
+  :root,
+  [data-game='storm'] {
     color-scheme: dark;
     --ground: #0b1220;
     --surface: #121b2e;
@@ -61,20 +72,70 @@
   }
 }
 
-:root[data-theme='dark'] {
-  color-scheme: dark;
-  --ground: #0b1220;
-  --surface: #121b2e;
-  --raised: #172238;
-  --ink: #e6edf7;
-  --muted: #8a9bb8;
-  --line: #22304d;
-  --brand: #38bdf8;
-  --on-brand: #06121f;
-  --violet: #a78bfa;
-  --signal: #f5b454;
-  --short: #f87171;
-  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 25%);
+:root[data-game='punishing-gray-raven'],
+[data-game='punishing-gray-raven'] {
+  --ground: #f5f3f4;
+  --surface: #ffffff;
+  --raised: #ffffff;
+  --ink: #17131a;
+  --muted: #5e5662;
+  --line: #e3dde1;
+  --brand: #c4161c;
+  --on-brand: #ffffff;
+  --violet: #3f5b78;
+  --signal: #8a6100;
+  --short: #b54708;
+  --shadow: 0 1px 2px rgb(23 19 26 / 6%), 0 4px 16px rgb(23 19 26 / 7%);
+}
+
+:root[data-game='reverse-1999'],
+[data-game='reverse-1999'] {
+  --ground: #f4eee2;
+  --surface: #fffaf0;
+  --raised: #fffdf7;
+  --ink: #2b2118;
+  --muted: #73604b;
+  --line: #e4d6bf;
+  --brand: #a4561a;
+  --on-brand: #ffffff;
+  --violet: #6b4c8a;
+  --signal: #a1340f;
+  --short: #b42318;
+  --shadow: 0 1px 2px rgb(43 33 24 / 7%), 0 4px 16px rgb(43 33 24 / 8%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-game='punishing-gray-raven'],
+  [data-game='punishing-gray-raven'] {
+    --ground: #0c0b0e;
+    --surface: #151418;
+    --raised: #1c1a20;
+    --ink: #f1edf0;
+    --muted: #9b939d;
+    --line: #2b2830;
+    --brand: #f2555a;
+    --on-brand: #1a0506;
+    --violet: #9fb4cc;
+    --signal: #f5d454;
+    --short: #fdb022;
+    --shadow: 0 1px 2px rgb(0 0 0 / 35%), 0 8px 24px rgb(0 0 0 / 30%);
+  }
+
+  :root[data-game='reverse-1999'],
+  [data-game='reverse-1999'] {
+    --ground: #15100a;
+    --surface: #201911;
+    --raised: #2a2117;
+    --ink: #f3e9d8;
+    --muted: #b09a7e;
+    --line: #3a2e20;
+    --brand: #f0a24a;
+    --on-brand: #1d1206;
+    --violet: #c4a7e7;
+    --signal: #ff9b73;
+    --short: #f87171;
+    --shadow: 0 1px 2px rgb(0 0 0 / 35%), 0 8px 24px rgb(0 0 0 / 30%);
+  }
 }
 
 body {

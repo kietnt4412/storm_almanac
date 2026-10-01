@@ -249,6 +249,14 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                       roster={roster[row.entity] ?? []}
                       row={row}
                       onChange={(track, state) => setDraft(setTarget(goals, row.entity, graph.tracks, track, state))}
+                      onChangeMany={(changes) =>
+                        setDraft(
+                          changes.reduce(
+                            (next, { track, state }) => setTarget(next, row.entity, graph.tracks, track, state),
+                            goals,
+                          ),
+                        )
+                      }
                     />
                   </>
                 )}

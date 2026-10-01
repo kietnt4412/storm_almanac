@@ -4,13 +4,16 @@ import {
   ApiError,
   createProfile,
   deleteProfile,
+  getGames,
   getMe,
   renameProfile,
   signInUrl,
+  type GameSummary,
   type Me,
   type Profile,
 } from './api/client';
 import { usePlannerStore } from './store/plannerStore';
+import { useGameChoice } from './ui/gameChoice';
 
 /**
  * The profile every authenticated screen is about.
@@ -24,11 +27,39 @@ export function useSelectedProfile(): {
   pending: boolean;
 } {
   const { profiles, profileId, signedOut, pending } = useAccount();
+  const { chosen } = useActiveGame();
+  const selected = profiles.find((profile) => profile.id === profileId) ?? profiles[0] ?? null;
   return {
-    profile: profiles.find((profile) => profile.id === profileId) ?? profiles[0] ?? null,
+    // The game switch decides which game every screen is about (C2.5): the
+    // reader's profile for it, or none — which the gate turns into an offer to
+    // make one, rather than showing another game's data under this game's look.
+    profile: chosen ? profileForGame(profiles, profileId, chosen) : selected,
     signedOut,
     pending,
   };
+}
+
+/**
+ * The game the site is about right now: the one the reader switched to, if the
+ * server publishes it; otherwise their selected profile's; otherwise the first
+ * the server publishes. `chosen` is set only for a switch the server can serve.
+ */
+export function useActiveGame(): {
+  id: string | null;
+  game: GameSummary | null;
+  games: GameSummary[];
+  chosen: string | null;
+} {
+  const games = useQuery({ queryKey: ['games'], queryFn: getGames });
+  const { profiles, profileId } = useAccount();
+  const choice = useGameChoice((state) => state.chosen);
+  const served = games.data?.games ?? [];
+  // While the list is loading, the choice is trusted: what this browser chose
+  // last is far likelier right than wrong, and a flash of another game is worse.
+  const chosen = choice && (games.isPending || served.some((game) => game.id === choice)) ? choice : null;
+  const selected = profiles.find((profile) => profile.id === profileId) ?? profiles[0] ?? null;
+  const id = chosen ?? selected?.game ?? served[0]?.id ?? null;
+  return { id, game: served.find((game) => game.id === id) ?? null, games: served, chosen };
 }
 
 /**
@@ -76,6 +107,8 @@ export function useCreateProfile() {
     onSuccess: (profile) => {
       queries.setQueryData<Me>(['me'], (me) => (me ? { ...me, profiles: [...me.profiles, profile] } : me));
       selectProfile(profile.id);
+      // A new profile is for the game the reader means to look at.
+      useGameChoice.getState().choose(profile.game);
       queries.invalidateQueries({ queryKey: ['me'] });
     },
   });
@@ -151,10 +184,27 @@ export function ProfileGate({
   children: (profile: Profile) => React.ReactNode;
 }): React.ReactElement {
   const { profile, signedOut, pending } = useSelectedProfile();
+  const { chosen, game } = useActiveGame();
+  const { profiles } = useAccount();
   const location = useLocation();
 
   if (profile) return <>{children(profile)}</>;
   if (pending) return <p className="muted">Reading your account…</p>;
+
+  // Switched to a game they have no profile for: say which, and offer it.
+  if (!signedOut && chosen && profiles.length > 0) {
+    return (
+      <div className="card">
+        <p>
+          You have no {game?.displayName ?? chosen} profile yet.{' '}
+          <Link to={`/?new=${encodeURIComponent(chosen)}&then=${encodeURIComponent(location.pathname)}`}>
+            Make one
+          </Link>{' '}
+          and you come back here with it — or switch game in the menu.
+        </p>
+      </div>
+    );
+  }
 
   if (signedOut) {
     return (

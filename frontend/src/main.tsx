@@ -12,11 +12,11 @@ import { Pulls } from './routes/Pulls';
 import { Catalog } from './routes/Catalog';
 import { EntityPage } from './routes/EntityPage';
 import './index.css';
-import { applyTheme, storedTheme } from './ui/preferences';
+import { applyGame, storedGame } from './ui/gameChoice';
 
-// Before the first render, so a reader who chose light on a dark phone never
-// sees the dark page flash first.
-applyTheme(storedTheme());
+// Before the first render, so a reader who chose a game never sees another
+// game's colours flash first. The shell keeps it in step from then on.
+applyGame(storedGame());
 
 // Server state goes in TanStack Query; planner-local state (a half-edited
 // inventory, an unsaved goal set) goes in Zustand. Keeping the two apart is

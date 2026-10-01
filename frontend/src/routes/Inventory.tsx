@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getInventory, getItems, type Item } from '../api/client';
+import { getInventory, getItems, getSavedPlan, type Item, type Plan } from '../api/client';
 import { ProfileGate } from '../profile';
 import { NextStep } from '../steps/Steps';
 import { effectiveInventory, outboxOf, usePlannerStore } from '../store/plannerStore';
@@ -51,6 +51,22 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
   const held = useMemo(
     () => effectiveInventory(stored.data?.items ?? {}, outbox.inventory),
     [outbox.inventory, stored.data],
+  );
+
+  // What the saved plan does with each item, so a tile says it while the reader
+  // is counting (C2.5, the maintainer's answer: tie the bag to the plan). The
+  // same query the plan screen reads, so it is one request between them.
+  const saved = useQuery({
+    queryKey: ['savedPlan', profileId],
+    queryFn: async () => (await getSavedPlan(profileId)) ?? null,
+  });
+  const planUse = useMemo(() => usesOf(saved.data?.plan), [saved.data]);
+
+  // Every rank in the bag, highest first: a tile's stripe is its place in that
+  // order, so the colours come from the data rather than from a game's scale.
+  const ranks = useMemo(
+    () => [...new Set((items.data?.items ?? []).map((item) => item.rarity.rank))].sort((a, b) => b - a),
+    [items.data],
   );
 
   const rows = useMemo(() => {
@@ -122,27 +138,39 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
           {groups.map(([category, inCategory]) => (
             <section key={category}>
               <h2 className="label mb-2">{category}</h2>
-              <ul className="space-y-1">
+              <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
                 {inCategory.map((item) => {
                   const serverHas = stored.data?.items[item.id] ?? 0;
                   const pending = outbox.inventory[item.id];
 
+                  const spends = planUse.spends.get(item.id);
+                  const buys = planUse.buys.get(item.id);
+
                   return (
                     <li
                       key={item.id}
-                      className="flex items-center gap-3 rounded-md px-2 py-1"
-                      style={{ background: 'var(--surface)' }}
+                      className="flex flex-col justify-between gap-2 rounded-lg border border-l-4 p-3"
+                      style={{
+                        background: 'var(--surface)',
+                        borderColor: 'var(--line)',
+                        borderLeftColor: tierColour(item.rarity.rank, ranks),
+                      }}
                     >
-                      <span className="w-10 text-xs muted">{item.rarity.label}</span>
-                      <span className="grow">
-                        {item.displayName}
+                      <span className="min-w-0">
+                        <span className="muted block text-xs">{item.rarity.label}</span>
+                        <span className="block leading-snug">{item.displayName}</span>
                         {pending && (
-                          <span className="ml-2 text-xs" style={{ color: 'var(--signal)' }}>
+                          <span className="block text-xs" style={{ color: 'var(--signal)' }}>
                             not sent yet
                             {serverHas !== pending.value && ` · server has ${serverHas}`}
                           </span>
                         )}
                       </span>
+                      <span className="flex items-end justify-between gap-2">
+                        <span className="muted min-w-0 text-xs">
+                          {spends !== undefined && <span className="block">plan spends {spends.toLocaleString()}</span>}
+                          {buys !== undefined && <span className="block">plan buys {buys.toLocaleString()}</span>}
+                        </span>
                       <input
                         ref={(element) => {
                           fields.current[item.id] = element;
@@ -168,6 +196,7 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
                           if (next) fields.current[next]?.focus();
                         }}
                       />
+                      </span>
                     </li>
                   );
                 })}
@@ -202,4 +231,37 @@ export function groupByCategory(items: Item[]): [string, Item[]][] {
     else groups.set(key, [item]);
   }
   return [...groups.entries()];
+}
+
+/**
+ * What a plan spends of each currency and buys of each item, all its purchases
+ * together. Off the numbers a purchase carries (`spends`), never its sentence;
+ * a plan saved before those numbers marks nothing rather than guessing.
+ */
+export function usesOf(plan: Plan | undefined): { spends: Map<string, number>; buys: Map<string, number> } {
+  const spends = new Map<string, number>();
+  const buys = new Map<string, number>();
+  for (const conversion of plan?.conversions ?? []) {
+    const spent = conversion.spends;
+    if (!spent) continue;
+    spends.set(spent.item, (spends.get(spent.item) ?? 0) + spent.quantity);
+    if (spent.boughtItem && spent.boughtQuantity) {
+      buys.set(spent.boughtItem, (buys.get(spent.boughtItem) ?? 0) + spent.boughtQuantity);
+    }
+  }
+  return { spends, buys };
+}
+
+/**
+ * A rarity's stripe: the highest rank in the bag in the signal colour, the next
+ * in violet, the next in the brand colour, and the rest quiet. By position in
+ * the ranks present, so "6★" and "SSR" are coloured the same way without this
+ * file knowing either.
+ */
+export function tierColour(rank: number, ranks: number[]): string {
+  const tier = ranks.indexOf(rank);
+  if (tier === 0) return 'var(--signal)';
+  if (tier === 1) return 'var(--violet)';
+  if (tier === 2) return 'var(--brand)';
+  return 'var(--line)';
 }

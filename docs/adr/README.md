@@ -45,3 +45,6 @@ decision, numbered, never edited after acceptance — superseded instead.
 | [0034](0034-pull-income-walks-conversions-into-the-pull-currency.md) | Pull income walks conversions into the pull currency | Accepted |
 | [0035](0035-track-b-opens-before-real-traffic-against-a-synthetic-workload.md) | Track B opens before real traffic, against a synthetic workload | **Superseded by [0036](0036-track-b-is-cut-and-parked.md)** |
 | [0036](0036-track-b-is-cut-and-parked.md) | Track B is cut, and parked | Accepted |
+| [0037](0037-a-saved-plan-is-a-snapshot-and-a-change-report-re-solves.md) | A saved plan is a snapshot, and a change report re-solves | Accepted |
+| [0038](0038-drop-statistics-move-into-the-second-title.md) | Drop statistics move into the second title | Accepted |
+| [0039](0039-a-games-look-is-presentation-data-in-the-client.md) | A game's look is presentation data in the client | Accepted |

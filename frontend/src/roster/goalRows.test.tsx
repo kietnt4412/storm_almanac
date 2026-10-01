@@ -118,3 +118,63 @@ describe('the target picker', () => {
     expect(screen.getByText('65 (reached)')).toBeInTheDocument();
   });
 });
+
+describe('a goal row once something is set (C2.5)', () => {
+  const SKILLS = tracksOfGraph([
+    ...STEPS,
+    { fromState: 'severance-1', toState: 'severance-2', section: 'Basic Skill', tag: 'Yellow Orb' },
+    { fromState: 'severance-2', toState: 'severance-18', section: 'Basic Skill', tag: 'Yellow Orb' },
+    { fromState: 'thorns-1', toState: 'thorns-18', section: 'Basic Skill', tag: 'Blue Orb' },
+  ]);
+  const SKILL_TARGETS = statesOfGraph([
+    ...STEPS,
+    { fromState: 'severance-1', toState: 'severance-2' },
+    { fromState: 'severance-2', toState: 'severance-18' },
+    { fromState: 'thorns-1', toState: 'thorns-18' },
+  ]).targets;
+
+  it('shows only the tracks being moved, each with a bar, and folds the rest behind one line', async () => {
+    render(
+      <TargetPicker
+        subject="Lucia"
+        tracks={SKILLS}
+        order={['Growth', 'Basic Skill']}
+        targets={SKILL_TARGETS}
+        roster={['level-60']}
+        row={{ entity: 'lucia', goals: [goal('lucia', 'level-70')] }}
+        onChange={() => {}}
+      />,
+    );
+
+    expect(screen.getByLabelText('Target for Level of Lucia')).toHaveValue('level-70');
+    expect(screen.queryByLabelText('Target for Promote of Lucia')).not.toBeInTheDocument();
+    const more = screen.getByRole('button', { name: /more tracks, left as they are/ });
+
+    await userEvent.click(more);
+    expect(screen.getByLabelText('Target for Promote of Lucia')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Show only the tracks being moved' })).toBeInTheDocument();
+  });
+
+  it('sends every track in a section to its end at once, skipping one already there', async () => {
+    const onChangeMany = vi.fn();
+    render(
+      <TargetPicker
+        subject="Lucia"
+        tracks={SKILLS}
+        order={['Growth', 'Basic Skill']}
+        targets={SKILL_TARGETS}
+        roster={['lament-18']}
+        row={{ entity: 'lucia', goals: [] }}
+        onChange={() => {}}
+        onChangeMany={onChangeMany}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Set every Basic Skill track of Lucia to its end' }));
+    // Red Orb is already at 18: nothing to send for it.
+    expect(onChangeMany).toHaveBeenCalledWith([
+      { track: expect.objectContaining({ tag: 'Yellow Orb' }), state: 'severance-18' },
+      { track: expect.objectContaining({ tag: 'Blue Orb' }), state: 'thorns-18' },
+    ]);
+  });
+});

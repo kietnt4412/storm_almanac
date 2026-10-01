@@ -130,3 +130,62 @@ horizontal overflow, the panel starts hidden, the menu opens it and a
 navigation closes it. Screenshots were unreliable (the app window was
 minimised for much of it), so most checks were read from the page's layout
 rather than looked at. **The self-run rehearsal (C2.4) has not happened.**
+
+## C2.5 · The second pass, and the game switch (2026-10-01, fifty-seventh)
+
+**Agreed 2026-10-01.** Claude drove every screen and proposed five changes as
+mockups. The maintainer took all five and answered the three questions: ticks
+are **saved with the saved plan**, the bag is **tied to the plan**, and all of
+it lands **before the C2.4 rehearsal**. They then added the game switch, and
+answered three questions on it: **hand-drawn lettering, not the games' icons**
+(icons are game art), **the switch replaces the light / dark button** (the
+scheme follows the device), and **Reverse: 1999 is listed as coming soon on
+production**.
+
+### As built
+
+1. **Plan: answer first, one checklist.** Once there is a plan, the inputs fold
+   to one line: "Planned with 160 serum a day · 30 days · least serum · Phantom
+   Pain Cage 120,000+ · Change". Runs, purchases, feeds and claims are one
+   *Do this* list. The tiles are serum, days ("28", not "28.0") and runs.
+   **Ticks are kept with the saved plan** (`V20`, `player.saved_plan.done`;
+   `PUT /api/me/profiles/{p}/plan/done` names the plan by `savedAt`). A tick
+   against a plan that has since been re-run is a 409, and a new plan starts
+   unticked.
+2. **Pulls: the answer beside the form** from a laptop's width, held in view.
+   Open pools are cards with their time left, ordered so **the one open longest
+   comes first**. Until now the page opened on a pool closing in hours and
+   answered "0% within 0 days". Zero days now says "what you hold now".
+3. **Goals: a from → to bar on every track being moved**, with the S2
+   dropdowns kept. A saved row shows only the tracks with a target, and folds
+   the rest behind "+ 10 more tracks, left as they are". A row being set up
+   stays whole while the reader works on it. **"Max"** sets every track in a
+   section to its end. This is the goal-track bar C2.3 left unbuilt.
+4. **Roster: one line per construct**: "Promote Elite ★3 · Level 60 · Red Orb
+   4 · Core Passive 4 · 10 untouched", with a bar for how far up every track
+   together. A chevron opens it to edit. Someone just added opens on their own.
+5. **Inventory: tiles**, two to four across. A stripe colours rarity by its
+   place among the ranks present, not by any game's scale. Each tile says what
+   the saved plan spends or buys of it ("plan buys 654,000"). That needed
+   `boughtItem` and `boughtQuantity` on a purchase's `spends`. A plan saved
+   before them marks only what it spends.
+6. **Smaller:** Home's setup is one line once all four steps are done. The
+   catalog's account of each reading folds behind "How it was read", while
+   what was read, when, and every warning stay in the open.
+7. **The game switch** ([ADR 0039](../adr/0039-a-games-look-is-presentation-data-in-the-client.md)).
+   It sits in the side panel where the theme switch was. Every published game
+   is offered in its own colours, and an upcoming one is greyed as "Soon".
+   Picking a game re-dresses the site: PGR is near-black and crimson, R1999
+   aged paper and amber, each in light and dark. Every screen becomes about the
+   reader's profile for that game. With none, a signed-in reader is taken Home
+   with the add-profile form open on it. The brand mark is the game's lettering.
+
+**Driven locally** on `rehearsal-s6`: the plan's ticks survive a reload and
+a re-plan clears them. Pulls opens on Adelyde (34 days). The goal row folds 10
+tracks. The roster line reads as above. Inventory shows plan spends and buys
+after a re-plan. The switch goes PGR → R1999 (with no R1999 profile, it opens
+Home's form on Reverse: 1999) → PGR, in light and dark. At 375 px no screen
+scrolls sideways, and the switch sits in the drawer. **Not yet driven:** the
+R1999 screens with an R1999 profile. The local R1999 banner route fails
+on its own data ("craft 'craft-spell-of-banishing' consumes nothing"). That is
+a version published before a rule tightened, not this change.

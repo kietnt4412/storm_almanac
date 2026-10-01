@@ -81,6 +81,38 @@ const PATHS = {
       <path d="M12 7v5l3 2" />
     </>
   ),
+  // A run of a stage: two crossed blades.
+  run: (
+    <>
+      <path d="M4 4l10 10M4 4v4M4 4h4" />
+      <path d="M20 4 10 14M20 4v4M20 4h-4" />
+      <path d="M8 16l-3 3M16 16l3 3" />
+    </>
+  ),
+  // A purchase: a bag.
+  shop: (
+    <>
+      <path d="M5 8h14l-1 12H6L5 8z" />
+      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+    </>
+  ),
+  // Feeding or crafting one thing into another: up into a bar.
+  feed: (
+    <>
+      <path d="M12 19V9M8 13l4-4 4 4" />
+      <path d="M5 5h14" />
+    </>
+  ),
+  // A claim: a gift.
+  gift: (
+    <>
+      <rect x="4" y="9" width="16" height="11" rx="1" />
+      <path d="M4 13h16M12 9v11" />
+      <path d="M12 9c-1.5-3-5-3-5-1s3 1 5 1c2 0 5 1 5-1s-3.5-2-5 1z" />
+    </>
+  ),
+  chevron: <path d="m9 6 6 6-6 6" />,
+  check: <path d="m5 12 4.5 4.5L19 7" />,
   signOut: (
     <>
       <path d="M15 4h4v16h-4" />

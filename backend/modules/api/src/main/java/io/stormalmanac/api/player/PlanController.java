@@ -2,6 +2,8 @@ package io.stormalmanac.api.player;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.stormalmanac.api.ConflictException;
+import io.stormalmanac.api.player.PlayerView.DoneRequest;
 import io.stormalmanac.api.player.PlayerView.PlanRequest;
 import io.stormalmanac.api.player.PlayerView.PlanResponse;
 import io.stormalmanac.api.player.PlayerView.SavedPlanResponse;
@@ -17,10 +19,14 @@ import io.stormalmanac.player.PlayerProfile;
 import io.stormalmanac.player.PlayerStateRepository;
 import io.stormalmanac.player.SavedPlan;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.LinkedHashSet;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <pre>
  * POST /api/me/profiles/{profile}/plan  [?version=N]
  * GET  /api/me/profiles/{profile}/plan
+ * PUT  /api/me/profiles/{profile}/plan/done
  * </pre>
  *
  * <p><b>The goals come from the database, not from the body.</b> That is the
@@ -120,8 +127,11 @@ public class PlanController {
                 body.resolvedReach());
 
         PlanResponse answer = PlanResponse.of(optimizer.solve(solve), definition);
+        // To the microsecond, which is what Postgres keeps: the timestamp is what a
+        // tick names its plan by, and it has to read back equal to itself.
+        Instant savedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
         players.savePlan(new SavedPlan(
-                owner.id(), gameVersion.sequence(), write(body.resolved()), write(answer), Instant.now()));
+                owner.id(), gameVersion.sequence(), write(body.resolved()), write(answer), savedAt));
         return answer;
     }
 
@@ -136,9 +146,48 @@ public class PlanController {
                 .map(saved -> ResponseEntity.ok(new SavedPlanResponse(
                         read(saved.request(), PlanRequest.class),
                         read(saved.plan(), PlanResponse.class),
-                        saved.savedAt())))
+                        saved.savedAt(),
+                        saved.done())))
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
+
+    /**
+     * What the reader has ticked off on their saved plan, replaced whole (V20).
+     *
+     * <p><b>Named by the plan it is for.</b> A tick sent from a device that has
+     * not seen the latest re-run is a 409 rather than a write: the new plan's
+     * lines are not the old one's, and carrying "done" across would mark work
+     * done that the reader never did.
+     */
+    @PutMapping("/api/me/profiles/{profile}/plan/done")
+    public ResponseEntity<Void> done(@PathVariable String profile, @RequestBody DoneRequest request) {
+        PlayerProfile owner = owned.require(profile);
+        if (request == null || request.savedAt() == null) {
+            throw new IllegalArgumentException("savedAt is required: it says which plan the ticks are for");
+        }
+        List<String> done = request.done() == null ? List.of() : request.done();
+        if (done.size() > MAX_DONE) {
+            throw new IllegalArgumentException("at most " + MAX_DONE + " lines can be ticked off, got " + done.size());
+        }
+        for (String key : done) {
+            if (key == null || key.isBlank() || key.length() > MAX_KEY_LENGTH) {
+                throw new IllegalArgumentException(
+                        "a ticked line is named by a non-blank key of at most " + MAX_KEY_LENGTH + " characters");
+            }
+        }
+        if (players.savedPlanOf(owner.id()).isEmpty()) {
+            throw new ResourceNotFoundException("profile " + profile + " has no saved plan to tick off");
+        }
+        if (!players.markDone(owner.id(), request.savedAt(), List.copyOf(new LinkedHashSet<>(done)))) {
+            throw new ConflictException("the plan has been worked out again since; tick off the new one");
+        }
+        return ResponseEntity.noContent().build();
+    }
+
+    /** A plan is tens of lines; this only stops a body from being a dump. */
+    private static final int MAX_DONE = 500;
+
+    private static final int MAX_KEY_LENGTH = 300;
 
     private GameDefinition definitionFor(PlayerProfile profile, Long version) {
         return (version == null

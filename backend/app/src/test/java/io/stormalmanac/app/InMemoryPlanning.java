@@ -144,5 +144,10 @@ final class InMemoryPlanning {
         public void savePlan(io.stormalmanac.player.SavedPlan plan) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public boolean markDone(ProfileId profile, java.time.Instant savedAt, java.util.List<String> done) {
+            throw new UnsupportedOperationException();
+        }
     }
 }

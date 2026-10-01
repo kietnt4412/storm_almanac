@@ -16,6 +16,7 @@ import { ProfileGate } from '../profile';
 import { reachOf, usePlannerStore } from '../store/plannerStore';
 import { Ladder } from './PlanView';
 import { ChanceCurve } from '../ui/ChanceCurve';
+import { formatUntil, useNow } from '../ui/time';
 import { Explain } from '../ui/Explain';
 
 /**
@@ -43,10 +44,16 @@ function PullPlanner({ profileId, game }: { profileId: string; game: string }) {
 
   // Only a banner that is open and priced can be asked about; the rest are
   // refused by the server, and offering them would be offering a refusal.
+  // The one open longest first: a pool closing in hours is still offered, but
+  // opening on it answered "0% within 0 days" for a reader who had asked nothing.
   const askable = useMemo(
-    () => (banners.data?.banners ?? []).filter((banner) => banner.open && banner.pullPrice !== null),
+    () =>
+      (banners.data?.banners ?? [])
+        .filter((banner) => banner.open && banner.pullPrice !== null)
+        .sort((a, b) => (closing(a) === closing(b) ? 0 : closing(b) > closing(a) ? 1 : -1)),
     [banners.data],
   );
+  const now = useNow();
   const [bannerId, setBannerId] = useState<string | null>(null);
   const banner = askable.find((candidate) => candidate.id === bannerId) ?? askable[0] ?? null;
 
@@ -67,27 +74,38 @@ function PullPlanner({ profileId, game }: { profileId: string; game: string }) {
         <p className="card">No banner is open and priced right now, so there is nothing to work out.</p>
       ) : (
         <>
+          {/*
+            The open pools side by side, each with how long it has left, so the
+            choice is made on what tells them apart — a pool closing in hours
+            reads as one — rather than inside a dropdown that hides it.
+          */}
           {askable.length > 1 && (
-            <div className="card">
-              <label className="label" htmlFor="banner">
-                Banner
-              </label>
-              <select
-                id="banner"
-                className="input w-full"
-                value={banner.id}
-                onChange={(event) => setBannerId(event.target.value)}
-              >
-                {askable.map((candidate) => (
-                  <option key={candidate.id} value={candidate.id}>
-                    {candidate.displayName}
-                  </option>
-                ))}
-              </select>
+            <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Banner">
+              {askable.map((candidate) => {
+                const left = candidate.closesAt ? new Date(candidate.closesAt).getTime() - now.getTime() : null;
+                const soon = left !== null && left < 86_400_000;
+                const here = candidate.id === banner.id;
+                return (
+                  <button
+                    key={candidate.id}
+                    type="button"
+                    aria-pressed={here}
+                    onClick={() => setBannerId(candidate.id)}
+                    className={`card text-left transition ${here ? 'card-next' : ''}`}
+                    style={here ? { borderWidth: 2 } : undefined}
+                  >
+                    <span className="block font-medium">{candidate.displayName}</span>
+                    <span className="block text-sm" style={{ color: soon ? 'var(--signal)' : 'var(--muted)' }}>
+                      {left === null ? 'No close date' : `Closes in ${formatUntil(left)}`}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
           <Asker
             key={banner.id}
+            named={askable.length <= 1}
             profileId={profileId}
             banner={banner}
             ladders={(measures.data?.measures ?? []).filter((ladder) => ladder.paysForPulls !== false)}
@@ -99,10 +117,13 @@ function PullPlanner({ profileId, game }: { profileId: string; game: string }) {
 }
 
 function Asker({
+  named,
   profileId,
   banner,
   ladders,
 }: {
+  /** Whether to say the banner's name; not when a card above already does. */
+  named: boolean;
   profileId: string;
   banner: Banner;
   ladders: Measure[];
@@ -142,15 +163,19 @@ function Asker({
   const splits = banner.featuredChance < 1;
 
   return (
+    // Two columns from a laptop's width: the questions on the left and the
+    // answer beside them, held in view, so changing a question and reading what
+    // it did are one glance rather than a scroll. One column on a phone.
     <form
-      className="space-y-4"
+      className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start"
       onSubmit={(event) => {
         event.preventDefault();
         run.mutate();
       }}
     >
+      <div className="space-y-4">
       <section className="card space-y-1">
-        <h2 className="font-medium">{banner.displayName}</h2>
+        {named && <h2 className="font-medium">{banner.displayName}</h2>}
         <p className="muted text-sm">{describe(banner)}</p>
       </section>
 
@@ -238,6 +263,8 @@ function Asker({
             value={days}
             onChange={(event) => setDays(Math.max(0, Number(event.target.value)))}
           />
+          {/* Zero is a real question — what you hold now — and on a pool closing today it is the only one. */}
+          {days === 0 && <span className="muted ml-2 text-sm">what you hold now</span>}
         </div>
         <div>
           <label className="label" htmlFor="copies">
@@ -260,16 +287,27 @@ function Asker({
           {run.isPending ? 'Working it out…' : 'Work it out'}
         </button>
       </div>
+      </div>
 
-      {run.isError && (
-        <div className="card">
-          <p className="font-medium">
-            {run.error instanceof ApiError && run.error.isUnanswerable ? 'There is no answer for this' : 'That did not work'}
-          </p>
-          <p className="muted mt-1 text-sm">{run.error.message}</p>
-        </div>
-      )}
-      {run.data && <Answer odds={run.data} />}
+      <div className="space-y-4 lg:sticky lg:top-4">
+        {run.isError && (
+          <div className="card">
+            <p className="font-medium">
+              {run.error instanceof ApiError && run.error.isUnanswerable ? 'There is no answer for this' : 'That did not work'}
+            </p>
+            <p className="muted mt-1 text-sm">{run.error.message}</p>
+          </div>
+        )}
+        {run.data ? (
+          <Answer odds={run.data} />
+        ) : (
+          !run.isError && (
+            <p className="card muted hidden text-sm lg:block">
+              Your chance shows here — set your pity and how far you get, then work it out.
+            </p>
+          )
+        )}
+      </div>
     </form>
   );
 }
@@ -391,4 +429,9 @@ function when(instant: string): string {
 function daysUntil(instant: string | null): number | null {
   if (!instant) return null;
   return Math.max(0, Math.floor((new Date(instant).getTime() - Date.now()) / 86_400_000));
+}
+
+/** When a pool closes, for ordering: one with no close date is open the longest. */
+function closing(banner: Banner): number {
+  return banner.closesAt ? new Date(banner.closesAt).getTime() : Number.POSITIVE_INFINITY;
 }

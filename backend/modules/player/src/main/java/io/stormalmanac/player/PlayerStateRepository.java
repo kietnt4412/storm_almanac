@@ -4,6 +4,7 @@ import io.stormalmanac.common.id.AccountId;
 import io.stormalmanac.common.id.EntityId;
 import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.ProfileId;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -125,4 +126,15 @@ public interface PlayerStateRepository {
      * it is re-run, and the one run last anywhere is the one the reader last saw.
      */
     void savePlan(SavedPlan plan);
+
+    /**
+     * Replace what the reader has ticked off on their saved plan — but only on
+     * the plan saved at {@code savedAt}. A tick sent against a plan that has
+     * since been re-run is refused rather than carried onto the new one, whose
+     * lines are not the same lines (V20).
+     *
+     * @return false when there is no saved plan, or it is not the one saved at
+     *         {@code savedAt}
+     */
+    boolean markDone(ProfileId profile, Instant savedAt, List<String> done);
 }

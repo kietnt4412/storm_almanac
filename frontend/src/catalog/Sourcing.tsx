@@ -63,7 +63,15 @@ export function Sourcing({
                 {describe(source.origin)}
               </span>
               <span className="muted"> · read {source.observedOn}</span>
-              <p className="muted mt-0.5">{source.detail}</p>
+              {/*
+                The account of each reading folds (C2.5): a paragraph per sitting
+                outweighed the catalog it sits under. What was read and when stay
+                in the open, and so does every warning below.
+              */}
+              <details className="mt-0.5">
+                <summary className="muted cursor-pointer text-xs">How it was read</summary>
+                <p className="muted mt-1">{source.detail}</p>
+              </details>
             </li>
           ))}
         </ul>

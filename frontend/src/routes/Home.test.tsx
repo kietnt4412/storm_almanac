@@ -265,7 +265,7 @@ describe('the saved plan on Home', () => {
 
     expect(await screen.findByText('1,230')).toBeInTheDocument();
     expect(screen.getByText('Serum')).toBeInTheDocument();
-    expect(screen.getByText('28.0')).toBeInTheDocument();
+    expect(screen.getByText('28')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open plan →' })).toHaveAttribute('href', '/plan');
   });
 

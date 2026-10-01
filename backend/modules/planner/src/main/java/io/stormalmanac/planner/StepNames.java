@@ -127,15 +127,20 @@ public final class StepNames {
                         shop.currency(),
                         name(shop.currency()),
                         (long) shop.price() * times,
-                        name(shop.offer().item())));
+                        name(shop.offer().item()),
+                        shop.offer().item(),
+                        (long) shop.offer().quantity() * times));
     }
 
     /**
      * @param currency what is paid
      * @param quantity how much of it, all {@code times} together
      * @param buys     the name of what it buys
+     * @param bought   what it buys, by id — what the inventory screen marks (C2.5)
+     * @param boughtQuantity how many of it, all {@code times} together
      */
-    public record Spent(ItemId currency, String currencyName, long quantity, String buys) {}
+    public record Spent(
+            ItemId currency, String currencyName, long quantity, String buys, ItemId bought, long boughtQuantity) {}
 
     private String name(ItemId item) {
         Item found = items.get(item);

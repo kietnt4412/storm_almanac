@@ -4,8 +4,10 @@ import { Link } from 'react-router-dom';
 import { getEntities, getRoster, getUpgrades } from '../api/client';
 import { ProfileGate } from '../profile';
 import { TrackPicker } from '../roster/TrackPicker';
-import { tracksOfGraph, type Track } from '../roster/tracks';
+import { TrackBar } from '../roster/TrackBar';
+import { sectionsOf, standingOn, tracksOfGraph, type Track } from '../roster/tracks';
 import { NextStep } from '../steps/Steps';
+import { Icon } from '../ui/Icon';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 
 /**
@@ -53,6 +55,10 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
   // and the dropdowns already showed the base, so a reader who owns her
   // untouched had nothing to change, and lost her on reload.
   const [adding, setAdding] = useState('');
+  // Whose tracks are open for editing (C2.5). Closed, an entry is one line
+  // saying where they stand; fourteen dropdowns per construct made the screen
+  // a wall once there were three of them.
+  const [open, setOpen] = useState<string[]>([]);
 
   const shown = useMemo(() => Object.keys(roster), [roster]);
 
@@ -115,12 +121,25 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
             const states = roster[slug] ?? [];
             const graph = tracksOf.get(slug);
             const tracks = graph?.tracks;
+            const isOpen = open.includes(slug);
             return (
               <li key={slug} className="card space-y-3">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <button
+                    type="button"
+                    className="icon-btn -ml-2 h-7 w-7"
+                    aria-expanded={isOpen}
+                    aria-label={`${isOpen ? 'Close' : 'Edit'} where ${nameOf(slug)} stands`}
+                    onClick={() => setOpen(isOpen ? open.filter((other) => other !== slug) : [...open, slug])}
+                  >
+                    <span style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'inline-flex' }}>
+                      <Icon name="chevron" size={16} />
+                    </span>
+                  </button>
                   <Link to={`/catalog/${game}/${slug}`} className="font-medium">
                     {nameOf(slug)}
                   </Link>
+                  {tracks !== undefined && tracks.length > 0 && <Standing tracks={tracks} order={graph?.order} states={states} />}
 
                   {/* Null is the one answer that means "not owned" on the wire (V13). */}
                   <button
@@ -132,7 +151,7 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
                   </button>
                 </div>
 
-                {tracks === undefined ? (
+                {!isOpen ? null : tracks === undefined ? (
                   <p className="muted text-sm">reading their tracks…</p>
                 ) : tracks.length === 0 ? (
                   <p className="muted text-sm">
@@ -180,6 +199,8 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
             // Only someone with tracks is offered, so there is always a base to stand on.
             const tracks = tracksOf.get(adding)?.tracks ?? [];
             editRosterState(profileId, adding, basesOf(tracks));
+            // Opened, since the next thing anyone adding someone does is say where they stand.
+            setOpen([...open, adding]);
             setAdding('');
           }}
         >
@@ -201,4 +222,47 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
  */
 export function basesOf(tracks: Track[]): string[] {
   return tracks.map((track) => track.states[0]!.state);
+}
+
+/**
+ * Where someone stands, in one line: every track they have moved, in the game's
+ * order and words — "Promote Elite ★3 · Level 60 · Red Orb 4" — then how many
+ * are untouched, with a bar for how far up all their tracks they are together.
+ */
+export function Standing({ tracks, order, states }: { tracks: Track[]; order?: string[]; states: string[] }) {
+  const positions = sectionsOf(tracks, order)
+    .flatMap((section) => section.tracks)
+    .map((track) => {
+      const at = standingOn(track, states);
+      const index = at === undefined ? 0 : track.states.findIndex((candidate) => candidate.state === at);
+      return { track, index: Math.max(0, index) };
+    });
+  const moved = positions.filter((position) => position.index > 0);
+  const untouched = positions.length - moved.length;
+  const climbed = positions.reduce((sum, position) => sum + position.index, 0);
+  const height = positions.reduce((sum, position) => sum + Math.max(0, position.track.states.length - 1), 0);
+  // Every track laid end to end, as one track the bar can draw.
+  const whole: Track = {
+    name: 'every track',
+    states: Array.from({ length: height + 1 }, (_, index) => ({ state: String(index), label: String(index) })),
+  };
+
+  return (
+    <span className="flex min-w-0 flex-1 basis-60 items-center gap-3">
+      <span className="muted min-w-0 truncate text-sm">
+        {moved.length === 0
+          ? 'untouched'
+          : [
+              ...moved.map(({ track, index }) => `${track.tag ?? track.name} ${track.states[index]!.label}`),
+              ...(untouched > 0 ? [`${untouched} untouched`] : []),
+            ].join(' · ')}
+      </span>
+      <span
+        className="hidden w-16 shrink-0 sm:block"
+        title={`${Math.round((climbed / Math.max(1, height)) * 100)}% of the way up every track`}
+      >
+        <TrackBar track={whole} at={climbed} />
+      </span>
+    </span>
+  );
 }
