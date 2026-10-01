@@ -3366,7 +3366,7 @@ animate, and also asked for their Google picture.
 **Built on `dev`** ([as built](../plans/c2-the-visual-pass.md#c27--a-feel-per-game-wordmarks-and-the-readers-picture-2026-10-01-fifty-ninth)):
 wordmarks with per-letter entrances and an ambient loop each, a seal for
 R1999, each game's dress in a new `looks.css`, and `V21` for the picture.
-**ADR 0040** supersedes 0039's decisions 1 and 2. 542 backend, 137 frontend.
+**ADR 0040** supersedes 0039's decisions 1 and 2. Then, at the maintainer's ask: the mark leaves the full-width bar and the wordmark turns into it as the pill gathers; **`Backend ok · <sha>` comes off the page** (seen on production, in the account menu and the footer), leaving only an offline notice; and a footer crediting Thel, written by a pen in four strokes, with a Discord handle. 542 backend, 140 frontend.
 
 **What was worth learning:**
 - **A logo the maintainer sends is still game art.** CLAUDE.md's "no game

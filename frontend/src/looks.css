@@ -287,6 +287,53 @@
   color: var(--muted);
 }
 
+/*
+ * The wordmark becomes the mark (the maintainer, 2026-10-01). At the top the
+ * bar shows the wordmark alone. As it gathers into a pill, the word squeezes
+ * towards its left edge and fades while the mark turns in where it stood,
+ * with a flash as it lands; at the top again, the reverse. Only where the pill
+ * folds the name (768 px up): on a phone the wordmark stays.
+ */
+.brand-emblem {
+  display: inline-flex;
+  width: 0;
+  opacity: 0;
+  transform: scale(0.3) rotate(-120deg);
+  transition:
+    width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.2s,
+    transform 0.45s cubic-bezier(0.2, 0.9, 0.25, 1.25);
+}
+
+.brand-lockup {
+  transform-origin: left center;
+  transition:
+    max-width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s,
+    opacity 0.3s 0.08s,
+    transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s;
+}
+
+@media (min-width: 768px) {
+  .site-nav[data-scrolled='true'] .brand-emblem {
+    width: 32px;
+    opacity: 1;
+    transform: none;
+    transition-delay: 0s, 0.14s, 0.14s;
+    animation: emblem-land 0.6s ease-out 0.3s;
+  }
+
+  .site-nav[data-scrolled='true'] .brand-lockup {
+    transform: scale(0.15, 0.6);
+    transition-delay: 0s;
+  }
+}
+
+@keyframes emblem-land {
+  40% {
+    filter: drop-shadow(0 0 6px var(--brand)) brightness(1.25);
+  }
+}
+
 .intro-wordmark {
   display: inline-flex;
   flex-direction: column;
@@ -508,6 +555,197 @@
   text-underline-offset: 6px;
 }
 
+/* ── The footer, and the maintainer's name written by a pen ──────────────── */
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--brand) 5%, transparent));
+}
+
+.footer-offline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--signal);
+  font-weight: 500;
+}
+
+.footer-offline::before {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: currentColor;
+}
+
+.footer-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.35rem 0.3rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 9999px;
+  background: var(--surface);
+  font-size: 0.8125rem;
+  color: var(--ink);
+}
+
+.footer-contact > svg {
+  color: var(--brand);
+}
+
+.footer-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.footer-copy:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--brand) 16%, transparent);
+}
+
+/*
+ * The signature: each pen stroke drawn in turn (the crossbar, the stem, then
+ * "hel" in one go, then the swash under it), held, faded, and written again.
+ * Every stroke has `pathLength` 1, so a dash of 1 is the whole stroke and an
+ * offset of 1 is none of it. A stroke waits hidden for its turn, because a
+ * dash of no length still draws its round cap as a dot. Still, it is simply
+ * written.
+ */
+.signature {
+  overflow: visible;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--brand) 35%, transparent));
+}
+
+.sig-stroke {
+  fill: none;
+  stroke: var(--ink);
+  /* Thick in the drawing's own units: it is drawn at under a third of its size. */
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: 9s infinite;
+}
+
+.sig-4 {
+  stroke: var(--brand);
+  stroke-width: 4.5;
+}
+
+.sig-1 {
+  animation-name: sig-1;
+}
+.sig-2 {
+  animation-name: sig-2;
+}
+.sig-3 {
+  animation-name: sig-3;
+}
+.sig-4 {
+  animation-name: sig-4;
+}
+
+@keyframes sig-1 {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  0.1% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+    animation-timing-function: ease-in-out;
+  }
+  7%,
+  80% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  88%,
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes sig-2 {
+  0%,
+  7% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  7.1% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+    animation-timing-function: ease-in;
+  }
+  14%,
+  80% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  88%,
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes sig-3 {
+  0%,
+  15% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  15.1% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  }
+  46%,
+  80% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  88%,
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes sig-4 {
+  0%,
+  47% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  47.1% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+    animation-timing-function: ease-out;
+  }
+  55%,
+  80% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  88%,
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
 /* ── Asked for less motion: every letter where it lands, nothing restless ── */
 
 @media (prefers-reduced-motion: reduce) {
@@ -515,7 +753,14 @@
   .wordmark::before,
   .wordmark::after,
   .intro-site,
-  :root[data-game='reverse-1999'] .hero-streak::before {
+  :root[data-game='reverse-1999'] .hero-streak::before,
+  .brand-emblem,
+  .sig-stroke {
     animation: none !important;
+  }
+
+  .brand-emblem,
+  .brand-lockup {
+    transition: none !important;
   }
 }
