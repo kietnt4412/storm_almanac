@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import {
   ApiError,
+  getEntities,
   getEntity,
   getGames,
   getGoals,
@@ -17,6 +18,8 @@ import { Sourcing, merge } from '../catalog/Sourcing';
 import { sectionsOf, tracksOfGraph } from '../roster/tracks';
 import { useCreateProfile, useProfileFor } from '../profile';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
+import { Emblem } from '../ui/Emblem';
+import { ranksByKind } from '../ui/rarity';
 
 /**
  * One character page — and the argument for having a catalog at all.
@@ -45,6 +48,9 @@ export function EntityPage() {
     queryFn: () => getUpgrades(game, entity),
     staleTime: Infinity,
   });
+  // The whole catalog, only for the emblem's colour: a rarity's place among its kind's.
+  const entities = useQuery({ queryKey: ['entities', game], queryFn: () => getEntities(game) });
+  const ranks = useMemo(() => ranksByKind(entities.data?.entities ?? [], (one) => one.kind), [entities.data]);
 
   if (detail.isPending) return <p className="muted">Loading…</p>;
   if (detail.isError) {
@@ -67,10 +73,15 @@ export function EntityPage() {
         <Link to={`/catalog/${game}`} className="text-sm">
           ← Catalog
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold">{page.displayName}</h1>
-        <p className="muted text-sm">
-          {[page.rarity.label, page.kindName ?? page.kind, page.element, ...page.tags].filter(Boolean).join(' · ')}
-        </p>
+        <div className="mt-2 flex items-center gap-4">
+          <Emblem subject={page} ranks={ranks.get(page.kind)} game={game} size={72} />
+          <div className="min-w-0">
+            <h1 className="text-2xl font-semibold">{page.displayName}</h1>
+            <p className="muted text-sm">
+              {[page.rarity.label, page.kindName ?? page.kind, page.element, ...page.tags].filter(Boolean).join(' · ')}
+            </p>
+          </div>
+        </div>
       </header>
 
       <Overlay game={game} entity={entity} states={statesOf(steps)} />

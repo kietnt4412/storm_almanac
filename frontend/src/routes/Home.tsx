@@ -27,6 +27,7 @@ import { SpendBars } from '../ui/SpendBar';
 import { formatUntil, nextReset, useNow } from '../ui/time';
 import { useGameChoice } from '../ui/gameChoice';
 import { Reveal, Words } from '../ui/motion';
+import { Emblem } from '../ui/Emblem';
 
 /**
  * Where a reader lands, as a dashboard (2026-10-01): what this is and which
@@ -442,13 +443,20 @@ function BannerCard({ game, profileId }: { game: string; profileId: string | nul
         <p className="muted text-sm">No banner is open right now.</p>
       ) : (
         <>
-          <div>
+          <div className="flex items-center gap-3">
+            <Emblem
+              subject={{ id: banner.id, displayName: banner.displayName, kind: banner.bannerType, rarity: banner.headline }}
+              game={game}
+              size={44}
+            />
+            <div className="min-w-0">
             <div className="text-lg font-semibold leading-snug">{banner.displayName}</div>
             <div className="muted text-sm">
               {banner.closesAt
                 ? `Closes in ${formatUntil(new Date(banner.closesAt).getTime() - now.getTime())}`
                 : 'No close date read'}
               {open.length > 1 && ` · ${open.length - 1} more open`}
+            </div>
             </div>
           </div>
           {pity.data && (

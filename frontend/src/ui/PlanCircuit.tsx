@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
-import type { Plan } from '../api/client';
+import type { EntitySummary, Plan } from '../api/client';
+import { Emblem } from './Emblem';
 import { Icon, type IconName } from './Icon';
+import { ranksByKind } from './rarity';
 
 /**
  * The plan as a circuit (C2.6, agreed 2026-10-01): what the reader does on the
@@ -26,13 +28,22 @@ interface Node {
   icon: IconName;
   label: string;
   detail: string;
+  /** The catalog's entry for a character the plan pays for, which draws its emblem in place of the icon. */
+  face?: EntitySummary;
+}
+
+/** The catalog, for a face on each character; the game picks the emblem's style. */
+export interface Faces {
+  game: string;
+  entities: EntitySummary[];
 }
 
 const MAX = 4;
 
-export function PlanCircuit({ plan, energyUnit }: { plan: Plan; energyUnit: string }) {
+export function PlanCircuit({ plan, energyUnit, faces }: { plan: Plan; energyUnit: string; faces?: Faces }) {
   const sources = sourcesOf(plan);
-  const targets = targetsOf(plan);
+  const targets = targetsOf(plan, faces);
+  const ranks = faces ? ranksByKind(faces.entities, (entity) => entity.kind) : undefined;
 
   const box = useRef<HTMLDivElement>(null);
   const hub = useRef<HTMLDivElement>(null);
@@ -80,7 +91,7 @@ export function PlanCircuit({ plan, energyUnit }: { plan: Plan; energyUnit: stri
       {targets.length > 0 ? (
         <div className="flex flex-col gap-2">
           {targets.map((node) => (
-            <CircuitNode key={node.key} node={node} side="target" />
+            <CircuitNode key={node.key} node={node} side="target" faces={faces} ranks={ranks} />
           ))}
         </div>
       ) : (
@@ -90,12 +101,26 @@ export function PlanCircuit({ plan, energyUnit }: { plan: Plan; energyUnit: stri
   );
 }
 
-function CircuitNode({ node, side }: { node: Node; side: 'source' | 'target' }) {
+function CircuitNode({
+  node,
+  side,
+  faces,
+  ranks,
+}: {
+  node: Node;
+  side: 'source' | 'target';
+  faces?: Faces;
+  ranks?: Map<string, number[]>;
+}) {
   return (
     <div className="circuit-node" data-side={side} title={node.label}>
-      <span className="shrink-0" style={{ color: side === 'source' ? 'var(--brand)' : 'var(--violet)' }}>
-        <Icon name={node.icon} size={16} />
-      </span>
+      {node.face && faces ? (
+        <Emblem subject={node.face} ranks={ranks?.get(node.face.kind)} game={faces.game} size={30} />
+      ) : (
+        <span className="shrink-0" style={{ color: side === 'source' ? 'var(--brand)' : 'var(--violet)' }}>
+          <Icon name={node.icon} size={16} />
+        </span>
+      )}
       <span className="min-w-0">
         <span className="block truncate font-medium">{node.label}</span>
         <span className="muted block truncate text-xs">{node.detail}</span>
@@ -139,7 +164,7 @@ function sourcesOf(plan: Plan): Node[] {
 }
 
 /** What the plan pays for, one node per character, the most steps first. */
-function targetsOf(plan: Plan): Node[] {
+function targetsOf(plan: Plan, faces?: Faces): Node[] {
   const byEntity = new Map<string, { label: string; steps: number }>();
   for (const step of plan.payingFor ?? []) {
     const key = step.entity ?? step.step;
@@ -154,6 +179,7 @@ function targetsOf(plan: Plan): Node[] {
       icon: 'target' as const,
       label: entry.label,
       detail: `${entry.steps} upgrade${entry.steps === 1 ? '' : 's'}`,
+      face: faces?.entities.find((entity) => entity.id === key),
     }));
   return cap(nodes, (rest) => ({ key: 'more-goals', icon: 'target', label: `${rest} more`, detail: 'also paid for' }));
 }

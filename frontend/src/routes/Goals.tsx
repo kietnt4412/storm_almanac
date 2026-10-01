@@ -17,6 +17,8 @@ import { TrackPicker } from '../roster/TrackPicker';
 import { sectionsOf, statesOfGraph, tracksOfGraph, type Track } from '../roster/tracks';
 import { NextStep } from '../steps/Steps';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
+import { Emblem } from '../ui/Emblem';
+import { ranksByKind } from '../ui/rarity';
 
 /**
  * What the player wants, in order.
@@ -122,6 +124,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
   if (entities.isPending || saved.isPending) return <p className="muted">Loading…</p>;
 
   const catalog = entities.data?.entities ?? [];
+  const ranks = ranksByKind(catalog, (entity) => entity.kind);
   const savedRows = rowsOf(goals);
   const rows: GoalRow[] = [
     ...savedRows,
@@ -208,6 +211,7 @@ function Picker({ profileId, game }: { profileId: string; game: string }) {
                   >
                     {index + 1}
                   </span>
+                  {entity && <Emblem subject={entity} ranks={ranks.get(entity.kind)} game={game} size={36} />}
                   <Link to={`/catalog/${game}/${row.entity}`} className="font-medium">
                     {name}
                   </Link>

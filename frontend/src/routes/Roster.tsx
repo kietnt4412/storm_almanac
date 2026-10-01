@@ -7,7 +7,9 @@ import { CompletionRing, completionOf, TrackLadders } from '../roster/RosterCard
 import { TrackPicker } from '../roster/TrackPicker';
 import { tracksOfGraph, type Track } from '../roster/tracks';
 import { NextStep } from '../steps/Steps';
+import { Emblem } from '../ui/Emblem';
 import { Icon } from '../ui/Icon';
+import { ranksByKind } from '../ui/rarity';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 
 /**
@@ -95,6 +97,7 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
   const catalog = entities.data?.entities ?? [];
   const nameOf = (slug: string) =>
     catalog.find((candidate) => candidate.id === slug)?.displayName ?? slug;
+  const ranks = ranksByKind(catalog, (entity) => entity.kind);
   const addable = catalog.filter(
     (entity) => !shown.includes(entity.id) && (tracksOf.get(entity.id)?.tracks.length ?? 0) > 0,
   );
@@ -125,8 +128,9 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
             const graph = tracksOf.get(slug);
             const tracks = graph?.tracks;
             const isOpen = open.includes(slug);
+            const entity = catalog.find((candidate) => candidate.id === slug);
             return (
-              <li key={slug} className={`card space-y-3 ${isOpen ? 'sm:col-span-2 lg:col-span-3' : ''}`}>
+              <li key={slug} className={`card has-emblem space-y-3 ${isOpen ? 'sm:col-span-2 lg:col-span-3' : ''}`}>
                 <div className="flex items-center gap-x-2">
                   <button
                     type="button"
@@ -139,6 +143,7 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
                       <Icon name="chevron" size={16} />
                     </span>
                   </button>
+                  {entity && <Emblem subject={entity} ranks={ranks.get(entity.kind)} game={game} size={36} />}
                   <Link to={`/catalog/${game}/${slug}`} className="min-w-0 flex-1 truncate font-medium">
                     {nameOf(slug)}
                   </Link>

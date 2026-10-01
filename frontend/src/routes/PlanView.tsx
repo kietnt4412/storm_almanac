@@ -3,6 +3,7 @@ import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/rea
 import { Link } from 'react-router-dom';
 import {
   ApiError,
+  getEntities,
   getGames,
   getGoals,
   getMeasures,
@@ -26,7 +27,7 @@ import { SpendBars } from '../ui/SpendBar';
 import { Explain } from '../ui/Explain';
 import { Icon, type IconName } from '../ui/Icon';
 import { Reveal } from '../ui/motion';
-import { PlanCircuit } from '../ui/PlanCircuit';
+import { PlanCircuit, type Faces } from '../ui/PlanCircuit';
 import { flowsOf, PlanFlow } from '../ui/PlanFlow';
 import { WhyDays } from '../ui/WhyDays';
 
@@ -190,6 +191,10 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
     });
     return byEntity;
   }, [graphs]);
+
+  // For the faces the circuit draws on what the plan pays for: the catalog's,
+  // so an emblem here is the one the reader saw on every other screen.
+  const entities = useQuery({ queryKey: ['entities', game], queryFn: () => getEntities(game) });
 
   const energyUnit = games.data?.games.find((published) => published.id === game)?.energyUnit ?? 'energy';
   const hasGoals = (goals.data?.goals.length ?? 0) > 0;
@@ -358,6 +363,7 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
           plan={shown}
           energyUnit={energyUnit}
           tracks={tracks}
+          faces={entities.data ? { game, entities: entities.data.entities } : undefined}
           done={done}
           onToggle={toggle}
           energyPerDay={run.data ? askedRate ?? undefined : saved.data?.request.energyPerDay}
@@ -469,9 +475,12 @@ export function Answer({
   done = [],
   onToggle,
   energyPerDay,
+  faces,
 }: {
   plan: Plan;
   energyUnit: string;
+  /** The catalog, for an emblem on each thing the plan pays for; without it, an icon. */
+  faces?: Faces;
   /** The rate the plan was asked with, for "Why N days?"; without it, no bar. */
   energyPerDay?: number;
   /** Each paid-for entity's tracks, by id; a step whose entity is missing keeps the server's name. */
@@ -513,7 +522,7 @@ export function Answer({
           </div>
         </div>
 
-        <PlanCircuit plan={plan} energyUnit={energyUnit} />
+        <PlanCircuit plan={plan} energyUnit={energyUnit} faces={faces} />
 
         {energyPerDay !== undefined && <WhyDays plan={plan} energyPerDay={energyPerDay} energyUnit={energyUnit} />}
 

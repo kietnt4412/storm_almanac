@@ -4,6 +4,8 @@ import { getInventory, getItems, getSavedPlan, type Item, type Plan } from '../a
 import { ProfileGate } from '../profile';
 import { NextStep } from '../steps/Steps';
 import { effectiveInventory, outboxOf, usePlannerStore } from '../store/plannerStore';
+import { Emblem } from '../ui/Emblem';
+import { tierColour } from '../ui/rarity';
 
 /**
  * Bulk entry, which is where a companion tool lives or dies.
@@ -210,7 +212,15 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
                       }}
                     >
                       <span className="flex items-start justify-between gap-2">
-                      <span className="min-w-0">
+                      {/* A face beside the name where a tile has the room; on a phone the stripe says the rarity. */}
+                      <Emblem
+                        subject={{ ...item, kind: item.category }}
+                        ranks={ranks}
+                        game={game}
+                        size={32}
+                        className="hidden sm:block"
+                      />
+                      <span className="min-w-0 flex-1">
                         <span className="muted flex items-center gap-1.5 text-xs">
                           {item.rarity.label}
                           {/* Saved, or still in this device's outbox: the same state as "not sent yet". */}
@@ -410,14 +420,5 @@ function CoverageRing({ held, need }: { held: number; need: number }) {
   );
 }
 
-/**
- * A rarity's stripe, by its place among the ranks in the bag: the highest red,
- * then orange, purple and yellow (the maintainer, 2026-10-01), and anything
- * lower quiet. By position, not by label, so "6★" and "SSR" are coloured the
- * same way without this file knowing either. The four colours are their own
- * tokens in `index.css`, which no game palette redefines.
- */
-export function tierColour(rank: number, ranks: number[]): string {
-  const tier = ranks.indexOf(rank);
-  return tier >= 0 && tier < 4 ? `var(--rarity-${tier + 1})` : 'var(--line)';
-}
+/** A tile's stripe is its rarity's place among the ranks in the bag; moved to `ui/rarity.ts` for the emblems (C2.10). */
+export { tierColour };

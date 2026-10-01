@@ -1,0 +1,133 @@
+/*
+ * Faces (C2.10–C2.16): the emblems, and everything later slices build on them.
+ * Colours are tokens, so every emblem follows the game's palette and both
+ * schemes; `--tone` is the rarity's colour, set on each emblem.
+ */
+
+/* ── The emblem ─────────────────────────────────────────────────────────── */
+
+.emblem {
+  display: block;
+  overflow: visible;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.emblem-ground > * {
+  fill: var(--raised);
+}
+
+.emblem-motif {
+  fill: var(--tone);
+  stroke: none;
+  opacity: 0.36;
+}
+
+.emblem-motif .emblem-line {
+  fill: none;
+  stroke: var(--tone);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.emblem-frame > * {
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.emblem[data-emblem='seal'] .emblem-frame > * {
+  stroke-width: 2.5;
+}
+
+.emblem-slash {
+  fill: var(--tone);
+  opacity: 0.2;
+}
+
+.emblem-tab,
+.emblem-pips {
+  fill: var(--tone);
+}
+
+.emblem-inner {
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.emblem-tick {
+  stroke: var(--tone);
+  stroke-width: 1.3;
+  opacity: 0.7;
+}
+
+.emblem-edge {
+  stroke: var(--tone);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+/* The initials, in the type the game's mark uses, kept legible over the motif. */
+.emblem-initials {
+  fill: var(--ink);
+  stroke: var(--raised);
+  stroke-width: 4;
+  stroke-linejoin: round;
+  paint-order: stroke;
+  font-family: system-ui, 'Segoe UI', sans-serif;
+  font-weight: 800;
+  font-size: 21px;
+  letter-spacing: 0.5px;
+}
+
+.emblem-initials[data-emblem='plate'] {
+  font-family: 'Arial Black', 'Segoe UI Black', Impact, system-ui, sans-serif;
+  font-weight: 900;
+  font-style: italic;
+}
+
+.emblem-initials[data-emblem='seal'] {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  font-weight: 400;
+  font-size: 23px;
+  letter-spacing: 1px;
+}
+
+/* A card that holds an emblem turns it a little under the pointer. */
+.has-emblem:hover .emblem,
+.has-emblem:focus-visible .emblem {
+  transform: rotate(-4deg) scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emblem {
+    transition: none;
+  }
+
+  .has-emblem:hover .emblem,
+  .has-emblem:focus-visible .emblem {
+    transform: none;
+  }
+}
+
+.emblem-accent {
+  opacity: 0.45;
+}
+
+/* The serial: small, in the frame's colour, mono on a plate and serif on a seal. */
+.emblem-serial {
+  fill: var(--tone);
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.emblem-serial[data-emblem='seal'] {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  font-size: 7px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
