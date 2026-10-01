@@ -3,12 +3,11 @@ import { useQueries, useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { getEntities, getRoster, getUpgrades, type UpgradeStep } from '../api/client';
 import { ProfileGate } from '../profile';
-import { CompletionRing, completionOf, TrackLadders } from '../roster/RosterCard';
+import { UnitCard } from '../roster/UnitCard';
 import { TrackPicker } from '../roster/TrackPicker';
 import { tracksOfGraph, type Track } from '../roster/tracks';
 import { NextStep } from '../steps/Steps';
 import { Emblem } from '../ui/Emblem';
-import { Icon } from '../ui/Icon';
 import { ranksByKind } from '../ui/rarity';
 import { effectiveRoster, outboxOf, usePlannerStore } from '../store/plannerStore';
 
@@ -120,41 +119,50 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
           from wherever you say you are.
         </p>
       ) : (
-        // A card each (C2.8), several to a row; an open one takes the whole row,
-        // since its fourteen dropdowns do not fit in a third of it.
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        // The hangar (C2.11): a tall card each, several to a row. Editing one
+        // takes the whole row, the card beside its fourteen dropdowns.
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {shown.map((slug) => {
             const states = roster[slug] ?? [];
             const graph = tracksOf.get(slug);
             const tracks = graph?.tracks;
             const isOpen = open.includes(slug);
             const entity = catalog.find((candidate) => candidate.id === slug);
+            const toggle = () => setOpen(isOpen ? open.filter((other) => other !== slug) : [...open, slug]);
             return (
-              <li key={slug} className={`card has-emblem space-y-3 ${isOpen ? 'sm:col-span-2 lg:col-span-3' : ''}`}>
-                <div className="flex items-center gap-x-2">
-                  <button
-                    type="button"
-                    className="icon-btn -ml-2 h-7 w-7"
-                    aria-expanded={isOpen}
-                    aria-label={`${isOpen ? 'Close' : 'Edit'} where ${nameOf(slug)} stands`}
-                    onClick={() => setOpen(isOpen ? open.filter((other) => other !== slug) : [...open, slug])}
-                  >
-                    <span style={{ transform: isOpen ? 'rotate(90deg)' : undefined, display: 'inline-flex' }}>
-                      <Icon name="chevron" size={16} />
-                    </span>
-                  </button>
-                  {entity && <Emblem subject={entity} ranks={ranks.get(entity.kind)} game={game} size={36} />}
-                  <Link to={`/catalog/${game}/${slug}`} className="min-w-0 flex-1 truncate font-medium">
-                    {nameOf(slug)}
-                  </Link>
-                  {tracks !== undefined && tracks.length > 0 && <CompletionRing {...completionOf(tracks, states)} />}
-                </div>
-
-                {tracks !== undefined && tracks.length > 0 && (
-                  <TrackLadders tracks={tracks} order={graph?.order} states={states} steps={graph?.steps} />
+              <li
+                key={slug}
+                className={isOpen ? 'grid gap-4 sm:col-span-2 lg:col-span-3 lg:grid-cols-[minmax(0,20rem)_1fr]' : ''}
+              >
+                {entity && tracks !== undefined && tracks.length > 0 ? (
+                  <div className={isOpen ? 'lg:self-start' : 'h-full'}>
+                    <UnitCard
+                      entity={entity}
+                      ranks={ranks.get(entity.kind)}
+                      game={game}
+                      tracks={tracks}
+                      order={graph?.order}
+                      steps={graph?.steps}
+                      states={states}
+                      editing={isOpen}
+                      onEdit={toggle}
+                    />
+                  </div>
+                ) : (
+                  <div className="card has-emblem flex items-center gap-x-2">
+                    {entity && <Emblem subject={entity} ranks={ranks.get(entity.kind)} game={game} size={36} />}
+                    <Link to={`/catalog/${game}/${slug}`} className="min-w-0 flex-1 truncate font-medium">
+                      {nameOf(slug)}
+                    </Link>
+                    <button type="button" className="btn-quiet" aria-expanded={isOpen} onClick={toggle}>
+                      {isOpen ? 'Done' : 'Edit'}
+                    </button>
+                  </div>
                 )}
 
-                {!isOpen ? null : tracks === undefined ? (
+                {isOpen && (
+                <div className="card space-y-3" aria-label={`Where ${nameOf(slug)} stands`}>
+                {tracks === undefined ? (
                   <p className="muted text-sm">reading their tracks…</p>
                 ) : tracks.length === 0 ? (
                   <p className="muted text-sm">
@@ -178,6 +186,8 @@ function Editor({ profileId, game }: { profileId: string; game: string }) {
                 >
                   Remove {nameOf(slug)} from the roster
                 </button>
+                </div>
+                )}
               </li>
             );
           })}

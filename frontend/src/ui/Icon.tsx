@@ -128,6 +128,21 @@ const PATHS = {
       <path d="M6 12h10" />
     </>
   ),
+  /** Turning a card over. */
+  refresh: (
+    <>
+      <path d="M20 11a8 8 0 0 0-14.5-4.5L4 8" />
+      <path d="M4 4v4h4" />
+      <path d="M4 13a8 8 0 0 0 14.5 4.5L20 16" />
+      <path d="M20 20v-4h-4" />
+    </>
+  ),
+  edit: (
+    <>
+      <path d="M4 20h4L19 9l-4-4L4 16v4z" />
+      <path d="m13 7 4 4" />
+    </>
+  ),
 } as const;
 
 export type IconName = keyof typeof PATHS;
