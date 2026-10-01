@@ -3352,6 +3352,59 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-10-01 (fifty-seventh) — C2.5: five screen changes from mockups, and a game switch.**
+
+**The remote, checked first:** [PR #66](https://github.com/kietnt4412/storm_almanac/pull/66)
+(the Home dashboard) merged 2026-10-01 00:49:32Z. Its `main` run `36798098070`
+is green and production reports `f1e1056`, so the tracker's "on `dev`, not
+deployed" was stale again.
+
+**The maintainer asked for "an updated visualisation of the UI, and some
+recommendations".** Claude drove all seven screens locally as `rehearsal-s6`
+and showed five mockups with three questions. The maintainer took all five and
+answered: ticks saved **with the saved plan**, the bag **tied to the plan**,
+done **before the C2.4 rehearsal**. They then asked for a switch between PGR
+and R1999 in place of light / dark, with each game's app icon beside the
+title. **The icons were refused**: they are game art, which CLAUDE.md forbids
+and every page's attribution line repeats. Claude offered hand-drawn lettering
+instead, and the maintainer chose it. They also chose: the switch replaces the
+theme button, and R1999 shows as "Soon" on production, where it is not
+published.
+
+**Built on `dev`** ([as built](../plans/c2-the-visual-pass.md#c25--the-second-pass-and-the-game-switch-2026-10-01-fifty-seventh)):
+- **Plan.** The answer comes first and the inputs fold to one line. One
+  "Do this" checklist, with ticks kept by `V20` (`saved_plan.done`) through
+  `PUT …/plan/done`, which names the plan by `savedAt`. A tick against a
+  re-run plan is a 409. `savedAt` is truncated to microseconds when saved,
+  because that is what Postgres keeps and the tick has to compare equal to it.
+- **Pulls.** The answer sits beside the form, and the open pool closing last
+  comes first.
+- **Goals.** From → to bars, untouched tracks folded, and "Max" per section.
+- **Roster.** One line per construct.
+- **Inventory.** Tiles with "plan spends / buys". That needed `boughtItem`
+  and `boughtQuantity` on `SpendView`.
+- **Game switch.** ADR 0039: one client file names games, and palettes are
+  tokens under `[data-game]`.
+
+**Two bugs found by driving it, neither caught by a test:**
+- **The folded inputs opened themselves.** A `<details>` fires `toggle` for
+  React's own `open` changes too, so while the saved plan loaded it read as
+  the reader opening it. Only a toggle against the computed state is now
+  taken as the reader's.
+- **A game with no look wore the active game's colours inside the switch.**
+  The Proving Ground's bolt came out crimson. `[data-game='storm']` now
+  carries the Storm tokens.
+
+**Also from looking:** the checkboxes' accessible names were slugs, and are now
+the line's words. "Plan spends" was in the brand colour, which on PGR is
+crimson and read as a warning, so it is muted now.
+
+**Found, not fixed:** the local R1999 version's `/banners` fails on its own data
+("craft 'craft-spell-of-banishing' consumes nothing"). It is a published
+version older than a rule, and was not touched here. **Backend 539 tests**
+(two new on ticks), **frontend 121 → 127**. No screen scrolls sideways at
+375 px, and PGR and R1999 were checked in light and dark.
+
 **2026-10-01 (fifty-sixth) — C2 found live; Home becomes a dashboard.**
 
 **The remote, checked first:** [PR #65](https://github.com/kietnt4412/storm_almanac/pull/65)
