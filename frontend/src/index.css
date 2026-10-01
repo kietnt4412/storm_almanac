@@ -60,6 +60,11 @@
   --rarity-2: #e8590c;
   --rarity-3: #7c3aed;
   --rarity-4: #eab308;
+  /*
+   * Covered (C2.8): what the bag already holds enough of. Fixed like the rarity
+   * colours, because under PGR's crimson covered and short were both red.
+   */
+  --ok: #15803d;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -82,6 +87,7 @@
     --rarity-2: #fb923c;
     --rarity-3: #a78bfa;
     --rarity-4: #facc15;
+    --ok: #4ade80;
   }
 }
 
@@ -482,4 +488,15 @@ a {
 .roster-square:hover > .roster-tip,
 .roster-square:focus > .roster-tip {
   display: block;
+}
+
+/* An inventory tile's ring moves to a new count rather than jumping (C2.8); still where motion is reduced. */
+.coverage-arc {
+  transition: stroke-dasharray 400ms ease-out, stroke 400ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coverage-arc {
+    transition: none;
+  }
 }
