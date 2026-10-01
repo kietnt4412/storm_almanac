@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactElement } from 'react';
 import type { EntitySummary } from '../api/client';
 import { Emblem } from '../ui/Emblem';
 import { CostLine } from './CostLine';
@@ -28,6 +28,8 @@ const SIZE = 680;
 const C = SIZE / 2;
 const INNER = 92;
 const OUTER = 262;
+/** Where a track's name starts, past its last node. */
+const LABEL = OUTER + 18;
 
 export function SkillTree({
   entity,
@@ -74,12 +76,30 @@ export function SkillTree({
     const to = indexOf(track, chosen);
     return to > at ? rangeCost(steps, track, at, to) : undefined;
   };
+  // Each name's drawn length, read before the first paint in the game's own
+  // type; until then, and where nothing is laid out (jsdom), an estimate.
+  const svg = useRef<SVGSVGElement>(null);
+  const [lengths, setLengths] = useState<Record<string, number>>({});
+  useLayoutEffect(() => {
+    const read: Record<string, number> = {};
+    svg.current?.querySelectorAll<SVGTextElement>('.tree-label').forEach((label) => {
+      if (typeof label.getComputedTextLength === 'function') read[label.textContent ?? ''] = label.getComputedTextLength();
+    });
+    const changed = Object.keys(read).some((name) => Math.abs((lengths[name] ?? -1) - read[name]!) > 0.5);
+    if (changed) setLengths(read);
+  });
+  const box = boxFor(spokes.map(({ track, angle }) => ({ name: track.tag ?? track.name, angle })), lengths);
   const total = sumOf(tracks.map(rangeOf).filter((range): range is RangeCost => range !== undefined));
   const moving = tracks.filter((track) => targetOn(track, row) !== undefined).length;
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_16rem]">
-      <svg className="skill-tree" viewBox={`0 0 ${SIZE} ${SIZE}`} role="img" aria-label={`${entity.displayName}: ${moving} tracks being moved. The ladders view sets the same goals.`}>
+      <svg
+        ref={svg}
+        className="skill-tree"
+        viewBox={`${box.x} ${box.y} ${box.width} ${box.height}`}
+        style={{ maxWidth: `${box.width}px` }}
+        role="img" aria-label={`${entity.displayName}: ${moving} tracks being moved. The ladders view sets the same goals.`}>
         <circle cx={C} cy={C} r={OUTER + 14} className="tree-halo" />
         <circle cx={C} cy={C} r={INNER - 18} className="tree-core" />
 
@@ -112,7 +132,7 @@ export function SkillTree({
           const radius = (k: number) => INNER + (last === 0 ? 0 : (k / last) * (OUTER - INNER));
           const flip = Math.cos(angle) < 0;
           const name = track.tag ?? track.name;
-          const label = polar(OUTER + 18, angle);
+          const label = polar(LABEL, angle);
           const degrees = (angle * 180) / Math.PI + (flip ? 180 : 0);
           const active = focus === track;
           return (
@@ -226,6 +246,28 @@ function TrackNote({
       )}
     </div>
   );
+}
+
+/**
+ * The drawing's box, grown to hold every track's name: a name runs outward
+ * from {@link LABEL}, and one as long as "SS Rank Passive Skill" ran out of the
+ * square and over the card's edge. A length not yet measured is estimated
+ * generously (0.62 em a letter at 12px; measured names run 0.40 to 0.59).
+ */
+function boxFor(
+  labels: { name: string; angle: number }[],
+  lengths: Record<string, number>,
+): { x: number; y: number; width: number; height: number } {
+  const PAD = 12;
+  let [left, top, right, bottom] = [0, 0, SIZE, SIZE];
+  for (const { name, angle } of labels) {
+    const end = polar(LABEL + (lengths[name] ?? name.length * 12 * 0.62), angle);
+    left = Math.min(left, end.x - PAD);
+    right = Math.max(right, end.x + PAD);
+    top = Math.min(top, end.y - PAD);
+    bottom = Math.max(bottom, end.y + PAD);
+  }
+  return { x: Math.floor(left), y: Math.floor(top), width: Math.ceil(right - left), height: Math.ceil(bottom - top) };
 }
 
 /** Clockwise from the top. */
