@@ -8,6 +8,7 @@ import { usePlannerStore } from './store/plannerStore';
 import { useOutboxFlush } from './sync/useOutboxFlush';
 import { Icon, type IconName } from './ui/Icon';
 import { Intro } from './ui/Intro';
+import { GamePicker } from './ui/GamePicker';
 import { applyGame, lookOf, LOOKS, useGameChoice } from './ui/gameChoice';
 import { GameMark } from './ui/GameMark';
 import { Wordmark } from './ui/Wordmark';
@@ -77,6 +78,13 @@ export function App() {
   // and its mark beside the name.
   const active = useActiveGame();
   useEffect(() => applyGame(active.id), [active.id]);
+  const pick = usePickGame(profiles, Boolean(me.data));
+
+  // The first screen (C2.9): a browser that has never chosen a game is asked,
+  // and the opening then plays for the game picked. A link into one game's
+  // catalog has already said which game, so it is never stood in front of.
+  const neverChosen = useGameChoice((state) => state.chosen) === null;
+  const linkedToGame = /^\/catalog\/[^/]+/.test(location.pathname);
 
   // The phone's menu, which a navigation or Escape closes — a menu left open
   // over the page you just asked for is the page not arriving.
@@ -89,10 +97,10 @@ export function App() {
   // reached. Its version is a developer's concern and stays on /api/health.
   const unreachable = health.isError;
 
-  const gameSwitch = (
-    <GameSwitch active={active.id} games={active.games} profiles={profiles} signedIn={Boolean(me.data)} />
-  );
+  const gameSwitch = <GameSwitch active={active.id} games={active.games} pick={pick} />;
   const profilePicker = profiles.length > 1 && <ProfilePicker profiles={profiles} />;
+
+  if (neverChosen && !linkedToGame) return <GamePicker onPick={pick} />;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -505,41 +513,43 @@ function ProfilePicker({ profiles }: { profiles: Profile[] }) {
 }
 
 /**
- * Which game the site is about (C2.5, the maintainer's idea, in place of the
- * light / dark switch). Every game the server publishes is offered, each in
- * its own colours; a look marked upcoming that the server does not publish is
- * listed as coming soon and cannot be picked.
- *
- * <p>Switching picks the reader's profile for that game. With none, a signed-in
- * reader is taken Home with the form to make one open on that game — the
- * screens would otherwise be about a profile of another game under this one's
- * colours. A signed-out reader just gets the game: its catalog and its look.
+ * Choosing a game, from the switch or the first screen (C2.9): it is
+ * remembered, and it picks the reader's profile for that game. With none, a
+ * signed-in reader is taken Home with the form to make one open on that game —
+ * the screens would otherwise be about a profile of another game under this
+ * one's colours. A signed-out reader just gets the game: its catalog and its look.
  */
-function GameSwitch({
-  active,
-  games,
-  profiles,
-  signedIn,
-}: {
-  active: string | null;
-  games: GameSummary[];
-  profiles: Profile[];
-  signedIn: boolean;
-}) {
+function usePickGame(profiles: Profile[], signedIn: boolean): (game: string) => void {
   const choose = useGameChoice((state) => state.choose);
   const profileId = usePlannerStore((state) => state.profileId);
   const selectProfile = usePlannerStore((state) => state.selectProfile);
   const navigate = useNavigate();
 
-  const soon = LOOKS.filter((look) => look.upcoming && !games.some((game) => game.id === look.id));
-  if (games.length + soon.length < 2) return null;
-
-  const pick = (game: string) => {
+  return (game: string) => {
     choose(game);
     const profile = profileForGame(profiles, profileId, game);
     if (profile) selectProfile(profile.id);
     else if (signedIn) navigate(`/?new=${encodeURIComponent(game)}`);
   };
+}
+
+/**
+ * Which game the site is about (C2.5, the maintainer's idea, in place of the
+ * light / dark switch). Every game the server publishes is offered, each in
+ * its own colours; a look marked upcoming that the server does not publish is
+ * listed as coming soon and cannot be picked.
+ */
+function GameSwitch({
+  active,
+  games,
+  pick,
+}: {
+  active: string | null;
+  games: GameSummary[];
+  pick: (game: string) => void;
+}) {
+  const soon = LOOKS.filter((look) => look.upcoming && !games.some((game) => game.id === look.id));
+  if (games.length + soon.length < 2) return null;
 
   return (
     <div role="group" aria-label="Game" className="flex flex-col gap-1">

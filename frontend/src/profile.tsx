@@ -54,9 +54,10 @@ export function useActiveGame(): {
   const { profiles, profileId } = useAccount();
   const choice = useGameChoice((state) => state.chosen);
   const served = games.data?.games ?? [];
-  // While the list is loading, the choice is trusted: what this browser chose
-  // last is far likelier right than wrong, and a flash of another game is worse.
-  const chosen = choice && (games.isPending || served.some((game) => game.id === choice)) ? choice : null;
+  // Until there is a list to check it against — loading, or a server that cannot
+  // be reached — the choice is trusted: what this browser chose last is far
+  // likelier right than wrong, and a flash of another game is worse.
+  const chosen = choice && (!games.data || served.some((game) => game.id === choice)) ? choice : null;
   const selected = profiles.find((profile) => profile.id === profileId) ?? profiles[0] ?? null;
   const id = chosen ?? selected?.game ?? served[0]?.id ?? null;
   return { id, game: served.find((game) => game.id === id) ?? null, games: served, chosen };

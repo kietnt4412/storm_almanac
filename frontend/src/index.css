@@ -500,3 +500,86 @@ a {
     transition: none;
   }
 }
+
+/*
+ * The first screen, which game do you play (C2.9, `ui/GamePicker.tsx`). The
+ * page around it is Storm; each option sets its own tokens by `data-game`, so
+ * its surface, ink and edge are that game's, in this scheme.
+ */
+.picker {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 2rem 1rem;
+  background:
+    radial-gradient(60% 50% at 50% 40%, color-mix(in srgb, var(--brand) 10%, transparent), transparent 70%),
+    var(--ground);
+}
+
+.picker-inner {
+  width: 100%;
+  max-width: 34rem;
+  text-align: center;
+}
+
+.picker-title {
+  margin: 0.5rem 0 0.5rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.picker-options {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.picker-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 1.25rem;
+  border: 2px solid var(--line);
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  text-align: left;
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  transition:
+    border-color 150ms ease-out,
+    transform 150ms ease-out;
+}
+
+button.picker-option:hover,
+button.picker-option:focus-visible {
+  border-color: var(--brand);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.picker-option-name {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.375rem;
+}
+
+.picker-option-soon {
+  cursor: default;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .picker-option {
+    transition: none;
+  }
+
+  button.picker-option:hover,
+  button.picker-option:focus-visible {
+    transform: none;
+  }
+}
