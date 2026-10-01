@@ -3380,6 +3380,36 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-10-01 (sixty-third) — Motion where the answer is: C2.17 and C2.18.**
+
+**The ask:** improve the site "in the animation and effect side". A tour found the motion all spent on
+arrival — on `/pulls`, once an answer came back, only the wordmark and the footer were animating.
+Three slices were offered and taken as recommended, A then B with C a stretch
+([the plan](../plans/c2.17-motion.md)); PGR "more like a game", **but no screen shake**; the toolkit
+left to the agent.
+
+**Built:** **C2.17** (`9193c0c`) answers arrive — numbers count (`useTween`, `Count`), curves draw,
+the dial sweeps and follows typing, cells drop in, bars are uncovered, and the answer's card lands per
+game (PGR a hit, brackets, a scan line and a channel split; R1999 sepia, ink and a stamp; Storm a ring).
+**C2.18** (`016fc61`) feedback — press, `data-working` on six buttons, a tick on a goals save, cards
+that lift (PGR locks on, R1999 lifts off the page). No library. 205 → 209 frontend tests. Not pushed.
+
+**What turned out false.** **The Browser pane drew no frames all session while
+`document.visibilityState` said `visible`** — `requestAnimationFrame` ran zero times in a
+second — so the tween's hidden-tab guard did not fire and a count sat on frame 0 ("032" was the frame
+and the screen-reader value side by side). The tween now lands on its value by a timer as well.
+Verification went through the Web Animations API instead: every animation paused and set to a
+`currentTime`, computed styles read, screenshots taken of the scrubbed frame. **`.rise` and `.land`
+both set `animation`**, so the second cancelled the first: each landing now includes the rise. **A
+`wipe` held with fill `both` keeps `clip-path: inset(0)` forever** and would cut off any glow: the
+primitives fill `backwards`. **The pull strip's day slider kept its place across answers**; keying
+the answer by `submittedAt` fixed it in passing.
+
+**C2.19 not built, handed to the maintainer:** view transitions need React Router's data router (the
+app uses `BrowserRouter`), and the dossier's data is rarely cached when its link is clicked. **Also
+asked:** C2.16's PGR page entrance jitters the page sideways ±12 px — close to the shake the
+maintainer said they dislike.
+
 **2026-10-01 (sixty-second) — Faces and a dress: C2.10 to C2.16, and a server that says it is waking.**
 
 **The remote:** [PR #73](https://github.com/kietnt4412/storm_almanac/pull/73) (C2.9 and the footer)
@@ -9209,6 +9239,14 @@ and **`web-built`**, the built bundle on 4173 that the offline test needs) proxi
 `/api` **and `/dev`** to `localhost:8080`, so local is same-origin. The sign-in URL
 is chosen behind `import.meta.env.DEV`, so the development one is not in a
 production bundle.
+
+### Tracker lines retired on 2026-10-01 (sixty-third session)
+
+Two resume notes from *Next actions*, replaced by the sixty-third's to keep the tracker under 550 lines. The first's open items (the unfurl, the rehearsal) are carried in the new note; the second was already marked superseded:
+
+> **Resume here (2026-10-01, sixty-second): C2.9 is live (#73, `fd419c1`); C2.10–C2.16 are eight commits on `dev`, not pushed** — the maintainer pushes and opens the PR. **One thing waits on the maintainer: the share card's Discord unfurl** (a public snapshot of a private plan, an ADR). **Locks on the skill tree were dropped**: the upgrades route does not say which steps have a gate. **Then C2.4's rehearsal**, now over the new screens too.
+
+> *Superseded, kept for its account:* **(sixty-first): C2.8 is live (#72, `c8f38f9`); C2.9 and the footer are in a PR from `dev`.** **C2.9** is a first screen, *which game do you play*, for a browser that never chose: the maintainer reported the page painting Storm for about a second and then PGR, because nothing was stored for a reader who never touched the switch. The pick is remembered and the game's opening plays. **The footer** lost the Discord handle and the swash; the signature writes an email to a contact address the maintainer gave, held in halves so no page or bundle carries it whole. **Next:** the maintainer merges, then **C2.4's rehearsal**, the last thing between C2 and its exit. **Q8 is open** (R1999 on production).
 
 ### Tracker lines retired on 2026-10-01 (fifty-ninth session)
 
