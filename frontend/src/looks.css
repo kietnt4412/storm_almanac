@@ -622,13 +622,14 @@
  */
 .signature {
   overflow: visible;
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--brand) 35%, transparent));
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--brand) 35%, transparent));
 }
 
 .sig-stroke {
   fill: none;
   stroke: var(--ink);
-  stroke-width: 3.2;
+  /* Thick in the drawing's own units: it is drawn at under a third of its size. */
+  stroke-width: 6;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-dasharray: 1;
@@ -638,7 +639,7 @@
 
 .sig-4 {
   stroke: var(--brand);
-  stroke-width: 2.4;
+  stroke-width: 4.5;
 }
 
 .sig-1 {

@@ -7,7 +7,7 @@ export const DISCORD_HANDLE = 'youngthel';
 /**
  * The foot of every page (2026-10-01, the maintainer's ask): what this is, who
  * made it, and how to reach them. The credit is the maintainer's name, Thel,
- * written out by a pen over and over: one stroke drawn after another, a swash
+ * kept icon-sized (the maintainer), written out by a pen over and over: one stroke drawn after another, a swash
  * under it, a pause, then it fades and writes itself again.
  *
  * <p><b>No server status here.</b> A reader has no use for a commit hash
@@ -38,7 +38,7 @@ export function Footer({ unreachable }: { unreachable: boolean }): ReactElement 
           )}
         </div>
 
-        <div className="flex flex-col items-start gap-2 sm:items-end">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className="label">Made by</span>
           <Signature />
           <DiscordHandle handle={DISCORD_HANDLE} />
@@ -50,7 +50,7 @@ export function Footer({ unreachable }: { unreachable: boolean }): ReactElement 
 
 function Signature() {
   return (
-    <svg className="signature" viewBox="0 0 220 92" width="176" height="74" role="img" aria-label="Thel">
+    <svg className="signature" viewBox="0 0 220 92" width="67" height="28" role="img" aria-label="Thel">
       <path
         className="sig-stroke sig-1"
         pathLength={1}

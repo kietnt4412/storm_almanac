@@ -324,7 +324,8 @@ supersedes 0039's decisions 1 and 2.
 7. **A footer with a credit** (`ui/Footer.tsx`): what this is, "a fan-made
    planner, not affiliated with any game's publisher", and **Thel** written by
    a pen. Four hand-drawn strokes (crossbar, stem, "hel", swash), each drawn in
-   turn over 5 s, held, faded, and written again every 9 s. Under it is the
+   turn over 5 s, held, faded, and written again every 9 s. It is kept
+   icon-sized at 28 px tall, at the maintainer's ask. Beside it is the
    maintainer's Discord handle with a copy button, Discord being the contact
    they chose. The handle is one constant, `DISCORD_HANDLE`.
 
