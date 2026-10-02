@@ -3401,9 +3401,15 @@ no part in the transition; only named pieces travel ([as built](../plans/c2.17-m
 **What turned out false.** **Naming every emblem on a page is not naming one:** a view transition flies the
 pair it can match and fades every one-sided name on its own, so the five tiles not clicked hung over the new
 page for 270 ms — fixed with `::view-transition-old(*):only-child`. **A hidden Browser pane aborts every view
-transition**, an empty one included, with `InvalidStateError`; so after the first drive nothing more could be
-seen drawn, and the flight with the fix, the per-game timings and the step slide are **unseen**. The abort
-did prove the fallback: every aborted click still navigated.
+transition**, an empty one included, with `InvalidStateError` — and stayed hidden after the maintainer said they
+had opened it (0 frames a second, then `visibilityState: hidden`). The abort did prove the fallback: every
+aborted click still navigated. **What worked instead: headless Chrome over the DevTools protocol**, from Node 24's
+own `WebSocket` and `fetch` with no dependency — a Chrome started by hand with `--remote-debugging-port` and an
+absolute Windows `--user-data-dir` (a relative one never opened the port), a tab per run, the transition hooked
+to pause at `ready`, and only animations started by the click scrubbed (scrubbing all of them replays the old
+page's finished entrance and looks like a bug). Every flight, both games' timings and reduced motion seen;
+numbers in [the as-built](../plans/c2.17-motion.md#c219-as-built-2026-10-02-sixty-fourth). A local PGR profile
+for `rehearsal` was made to drive the roster.
 
 **2026-10-01 (sixty-third) — Motion where the answer is: C2.17 and C2.18.**
 
