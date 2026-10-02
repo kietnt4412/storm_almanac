@@ -13,6 +13,9 @@ import io.stormalmanac.gamedata.banner.PityRule;
 import io.stormalmanac.gamedata.banner.PityScope;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SplittableRandom;
+import java.util.TreeSet;
 import java.util.random.RandomGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -259,6 +262,83 @@ class PullModelTest {
             assertThatThrownBy(() -> new PityState(PityScope.GLOBAL, "global", 0, -1))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("consecutiveLosses");
+        }
+    }
+
+    @Nested
+    @DisplayName("the rules as tables a client rolls dice against (C2.21)")
+    class Tables {
+
+        @Test
+        @DisplayName("every published banner's tables are its own hit rates and featured chances, number for number")
+        void theTablesAreTheModel() {
+            for (BannerModel banner : Banners.all()) {
+                PullModel model = PullModel.of(banner);
+                PullTables tables = model.tables(Banners.freshFor(banner));
+
+                assertThat(tables.walls()).extracting(PullTables.Wall::wall)
+                        .as(banner.id().value())
+                        .containsExactlyElementsOf(model.wallsFrom(0));
+                for (PullTables.Wall wall : tables.walls()) {
+                    assertThat(wall.hitRates()).hasSize(wall.wall());
+                    for (int misses = 0; misses < wall.wall(); misses++) {
+                        assertThat(wall.hitRates().get(misses))
+                                .as("%s, wall %d, %d misses", banner.id().value(), wall.wall(), misses)
+                                .isEqualTo(model.hitRateAt(misses, wall.wall()));
+                    }
+                    assertThat(wall.hitRates().getLast()).isEqualTo(1.0);
+                }
+                List<Double> featured = tables.featuredChance();
+                for (int losses = 0; losses < featured.size(); losses++) {
+                    assertThat(featured.get(losses)).isEqualTo(model.featuredChanceAfter(losses));
+                }
+                assertThat(featured.getLast()).isEqualTo(1.0);
+            }
+        }
+
+        @Test
+        @DisplayName("averaged over the walls still possible, a row's rate is the chain's integrated rate")
+        void theWallsAverageToTheChainsCurve() {
+            // The other road, checked on the tables themselves: given n misses the
+            // walls still possible are equally likely, so the chance of a hit is
+            // their mean — which is exactly what the chain uses without drawing.
+            for (BannerModel banner : Banners.all()) {
+                PullModel model = PullModel.of(banner);
+                PullTables tables = model.tables(Banners.freshFor(banner));
+                for (int misses = 0; misses < model.hardAt(); misses++) {
+                    double sum = 0;
+                    int alive = 0;
+                    for (PullTables.Wall wall : tables.walls()) {
+                        if (wall.wall() <= misses) continue;
+                        sum += wall.hitRates().get(misses);
+                        alive++;
+                    }
+                    assertThat(sum / alive)
+                            .as("%s at %d misses", banner.id().value(), misses)
+                            .isCloseTo(model.hitRateAt(misses), within(1e-12));
+                }
+            }
+        }
+
+        @Test
+        @DisplayName("the first cycle's walls are the ones a drawn guarantee can still be, given the misses carried")
+        void theFirstWallsAreConditioned() {
+            PullModel floating = PullModel.of(Banners.grayRavenFloating());
+            PityState carrying85 = new PityState(PityScope.BANNER_TYPE, "type:character", 85, 0);
+
+            PullTables tables = floating.tables(carrying85);
+
+            assertThat(tables.walls()).hasSize(21);
+            assertThat(tables.firstWalls()).first().isEqualTo(86);
+            assertThat(tables.firstWalls()).last().isEqualTo(100);
+            // And they are what drawWall actually draws, not a separate idea of it.
+            Set<Integer> drawn = new TreeSet<>();
+            SplittableRandom rng = new SplittableRandom(7);
+            for (int draw = 0; draw < 5_000; draw++) drawn.add(floating.drawWall(rng, 85));
+            assertThat(drawn).containsExactlyElementsOf(tables.firstWalls());
+
+            PullModel fixed = PullModel.of(Banners.grayRavenRotational());
+            assertThat(fixed.tables(Banners.freshFor(Banners.grayRavenRotational())).firstWalls()).containsExactly(60);
         }
     }
 }

@@ -238,6 +238,13 @@ a {
     background: color-mix(in srgb, var(--ink) 4%, transparent);
   }
 
+  /* A legend's key on a canvas chart, which has no element of its own to colour (C2.21). */
+  .roll-swatch {
+    @apply mr-1 inline-block rounded-sm align-middle;
+    width: 14px;
+    height: 4px;
+  }
+
   /* A row in the phone's menu and the game menu: an icon, a word, and a tint for where you are. */
   .nav-item {
     @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium no-underline transition;

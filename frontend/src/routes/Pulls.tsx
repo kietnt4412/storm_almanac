@@ -22,6 +22,7 @@ import { Explain } from '../ui/Explain';
 import { Emblem } from '../ui/Emblem';
 import { PullStrip } from '../ui/PullStrip';
 import { Count } from '../ui/motion';
+import { RollIt } from './RollIt';
 
 /**
  * "Will I get her, and by when?" — C1's screen.
@@ -176,9 +177,12 @@ function Asker({
   const splits = banner.featuredChance < 1;
 
   return (
-    // Two columns from a laptop's width: the questions on the left and the
-    // answer beside them, held in view, so changing a question and reading what
-    // it did are one glance rather than a scroll. One column on a phone.
+    <div className="space-y-4">
+    {/*
+      Two columns from a laptop's width: the questions on the left and the
+      answer beside them, held in view, so changing a question and reading what
+      it did are one glance rather than a scroll. One column on a phone.
+    */}
     <form
       className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start"
       onSubmit={(event) => {
@@ -324,6 +328,13 @@ function Asker({
         )}
       </div>
     </form>
+    {/*
+      Full width under both columns rather than in the held one, which a pile of
+      dice would push past the bottom of the screen; keyed like the answer, so
+      the dice start again on the question they are proving.
+    */}
+    {run.data && <RollIt key={run.submittedAt} odds={run.data} />}
+    </div>
   );
 }
 

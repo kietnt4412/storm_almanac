@@ -284,6 +284,21 @@ export interface Odds {
    */
   byCopies?: number[];
   method: string;
+  /**
+   * The banner's rules as tables, from the reader's counter, for the page to
+   * roll its own dice against `curve` (C2.21). Absent from an older server.
+   */
+  model?: PullTables;
+}
+
+/** A banner's rules as tables: what `PullModel` uses, so no rule is written twice. */
+export interface PullTables {
+  /** Every guarantee a fresh cycle can draw, each equally likely, with the hit rate at each miss count. */
+  walls: { wall: number; hitRates: number[] }[];
+  /** The walls the cycle in hand can have drawn, given the misses it carries. */
+  firstWalls: number[];
+  /** The chance a hit is the featured unit, by losses carried; the last holds for any more. */
+  featuredChance: number[];
 }
 
 export interface MeasuresResponse {

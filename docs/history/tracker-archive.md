@@ -3380,6 +3380,36 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-10-02 (sixty-sixth) — C2.21: roll it yourself.**
+
+**The ask:** "read the tracker then proceed the next plan" — C2.21, agreed with the mockup the session before.
+
+**Remote, checked 02:48Z:** **[PR #77](https://github.com/kietnt4412/storm_almanac/pull/77) (C2.20) merged
+01:31Z; its `main` run `36951496875` is green and production reports `208c35d`.**
+
+**Built** ([as built](../plans/c2.20-the-engines-at-work.md#c221-as-built-2026-10-02-sixty-sixth)): `PullTables`
+off `PullModel` on the odds answer as `model`; `ui/dice.ts` and a worker that rolls against it; `RollIt` full
+width under the form with F2's rain. **`drawWall` and the new `wallsFrom` now share one lower bound**, so the
+walls a client is told and the walls the simulation draws cannot drift apart; a test draws 5 000 times after 85
+misses and gets exactly 86–100. **The tables carry ADR 0023's theorem as a test**: averaged over the walls still
+possible, each row is the chain's integrated rate, to 1e-12, on every published banner.
+
+**Measured, in headless Chrome against sequence 18's live banner:** 20 000 histories in ~2.7 s with the rain, under
+300 ms with reduced motion; largest gaps 0.47, 0.31 and 0.57 points where the Kolmogorov–Smirnov bound allows
+0.96. In the unit tests 80 000 histories roll in ~50 ms, so the worker is for the frame budget on a phone, not
+because the dice are slow.
+
+**What turned out false or surprising:**
+- **"Under the chance curve" was the wrong place.** The answer's column is sticky at laptop width, and a 300 px
+  pile would have pushed it past the bottom of the screen; it went full width under the form.
+- **The local reader holds no tickets, so the panel opened on "within 0 — 0%, 0%"**, which proves nothing. It
+  now opens at the average pulls when the reader can afford none.
+- **The Browser pane's tab was hidden again** (`document.hidden`, a 0×0 viewport), and a hidden tab fires no
+  animation frames, so the roll sat at 0 for 20 s. It is correct behaviour — the rain resumes when shown — and it
+  was driven over CDP instead, as in the sixty-fourth.
+- **The live banner is mostly its wall:** 0.995⁵⁹ ≈ 74% of histories end at pull 60, so the pile is one tall bar.
+  A drawn-wall pool would show the shape the mockup did, and none is authored (the Themed Construct loose end).
+
 **2026-10-02 (sixty-fifth) — C2.20–C2.21 drafted: the engines at work.**
 
 **The ask:** "an advance function something to make people actually wow how you made this". Three ideas were
