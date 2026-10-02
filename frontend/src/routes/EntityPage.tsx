@@ -4,16 +4,15 @@ import { Link, useParams } from 'react-router-dom';
 import {
   ApiError,
   getEntities,
-  getEntity,
   getGames,
   getGoals,
   getRoster,
   getShortfall,
-  getUpgrades,
   signInUrl,
   type Shortfall,
   type UpgradeStep,
 } from '../api/client';
+import { entityQuery, upgradesQuery } from '../catalog/prefetch';
 import { Sourcing, merge } from '../catalog/Sourcing';
 import { sectionsOf, tracksOfGraph } from '../roster/tracks';
 import { useCreateProfile, useProfileFor } from '../profile';
@@ -42,12 +41,10 @@ import { ranksByKind } from '../ui/rarity';
  */
 export function EntityPage() {
   const { game = '', entity = '' } = useParams();
-  const detail = useQuery({ queryKey: ['entity', game, entity], queryFn: () => getEntity(game, entity) });
-  const upgrades = useQuery({
-    queryKey: ['upgrades', game, entity],
-    queryFn: () => getUpgrades(game, entity),
-    staleTime: Infinity,
-  });
+  // Under the keys the links into this page prefetch, so a hovered link opens
+  // on a drawn dossier (C2.19).
+  const detail = useQuery(entityQuery(game, entity));
+  const upgrades = useQuery(upgradesQuery(game, entity));
   // The whole catalog, only for the emblem's colour: a rarity's place among its kind's.
   const entities = useQuery({ queryKey: ['entities', game], queryFn: () => getEntities(game) });
   const ranks = useMemo(() => ranksByKind(entities.data?.entities ?? [], (one) => one.kind), [entities.data]);
@@ -80,7 +77,8 @@ export function EntityPage() {
   return (
     <div className="space-y-5">
       <header>
-        <Link to={`/catalog/${game}`} className="text-sm">
+        {/* Back the way the emblem came: it flies home into its tile. */}
+        <Link to={`/catalog/${game}`} viewTransition className="text-sm">
           ← Catalog
         </Link>
       </header>

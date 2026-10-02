@@ -1,5 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { UnitCard } from './UnitCard';
@@ -21,9 +22,11 @@ const LUCIA = { id: 'lucia', displayName: 'Lucia: Inverse Crown', kind: 'charact
 
 function card(states: string[], onEdit = () => {}) {
   render(
-    <MemoryRouter>
-      <UnitCard entity={LUCIA} ranks={[5]} game="punishing-gray-raven" tracks={TRACKS} steps={STEPS} states={states} editing={false} onEdit={onEdit} />
-    </MemoryRouter>,
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter>
+        <UnitCard entity={LUCIA} ranks={[5]} game="punishing-gray-raven" tracks={TRACKS} steps={STEPS} states={states} editing={false} onEdit={onEdit} />
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 }
 

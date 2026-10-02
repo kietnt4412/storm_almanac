@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { getEntities, getGames } from '../api/client';
+import { prefetchHandlers } from '../catalog/prefetch';
 import { Sourcing } from '../catalog/Sourcing';
 import { useActiveGame } from '../profile';
 import { Emblem } from '../ui/Emblem';
@@ -43,6 +44,7 @@ export function Catalog() {
 
 function Browser({ game }: { game: string }) {
   const entities = useQuery({ queryKey: ['entities', game], queryFn: () => getEntities(game) });
+  const client = useQueryClient();
   const [query, setQuery] = useState('');
 
   const rows = useMemo(() => {
@@ -126,10 +128,12 @@ function Browser({ game }: { game: string }) {
             <li key={entity.id}>
               <Link
                 to={`/catalog/${game}/${entity.id}`}
+                viewTransition
+                {...prefetchHandlers(client, game, entity.id)}
                 className="card has-emblem flex h-full items-center gap-3 no-underline"
                 style={{ color: 'var(--ink)' }}
               >
-                <Emblem subject={entity} ranks={ranks.get(entity.kind)} game={game} size={56} />
+                <Emblem subject={entity} ranks={ranks.get(entity.kind)} game={game} size={56} flies />
                 <div className="min-w-0">
                   <div className="font-medium leading-snug">{entity.displayName}</div>
                   <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">

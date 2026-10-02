@@ -601,6 +601,58 @@
   transform: translateY(-1px) scale(0.99);
 }
 
+/*
+ * Route transitions (C2.19): a link marked `viewTransition` hands what it
+ * names across to the page it opens — a character's emblem (`Emblem flies`,
+ * named per character) into the dossier, and the step bar's "here" segment to
+ * the step opened.
+ *
+ * The page itself does not take part: the old one goes at once and the new
+ * one arrives by its own entrance (`.rise`, or the game's in faces.css), so
+ * nothing arrives twice. Only the named pieces travel, over the top of it.
+ */
+:root {
+  --dur-morph: 0.45s;
+}
+
+::view-transition-old(root) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(*) {
+  animation-duration: var(--dur-morph);
+  animation-timing-function: var(--ease-morph, var(--ease-out));
+}
+
+/* The two images of a flying emblem cross over in the first part of the flight. */
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: calc(var(--dur-morph) * 0.6);
+}
+
+/*
+ * A name on one side only is not a flight: every other tile's emblem on the
+ * page left goes with its page, and one only on the page opened is simply part
+ * of it — rather than lingering or fading in apart from it.
+ */
+::view-transition-old(*):only-child {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(*):only-child {
+  animation: none;
+}
+
+.step-here > .step-seg {
+  view-transition-name: step-here;
+}
+
 /* Asked for less motion: everything is where it ends up, and nothing moves. */
 @media (prefers-reduced-motion: reduce) {
   .intro,
@@ -646,6 +698,13 @@
   .skeleton,
   .waking-dot {
     animation: none;
+  }
+
+  /* A route change is the new page at once, as it was before C2.19. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 
   .site-nav,

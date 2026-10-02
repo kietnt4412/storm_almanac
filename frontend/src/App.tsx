@@ -139,6 +139,7 @@ export function App() {
                   <li key={step.to}>
                     <NavLink
                       to={step.to}
+                      viewTransition
                       className={({ isActive }) => `menu-row ${isActive ? 'menu-row-here' : ''}`}
                     >
                       <span className="menu-row-icon">

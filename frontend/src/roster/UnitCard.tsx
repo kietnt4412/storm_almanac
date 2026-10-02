@@ -1,6 +1,8 @@
 import { useState, type ReactElement } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import type { EntitySummary } from '../api/client';
+import { prefetchHandlers } from '../catalog/prefetch';
 import { Emblem } from '../ui/Emblem';
 import { Icon } from '../ui/Icon';
 import { PortraitRing } from '../ui/PortraitRing';
@@ -45,6 +47,7 @@ export function UnitCard({
   onEdit: () => void;
 }): ReactElement {
   const [turned, setTurned] = useState(false);
+  const client = useQueryClient();
   const ordered = sectionsOf(tracks, order).flatMap((section) => section.tracks);
   const { climbed, height } = completionOf(tracks, states);
   const share = height === 0 ? 0 : climbed / height;
@@ -91,11 +94,16 @@ export function UnitCard({
 
           <div className="unit-portrait">
             <PortraitRing share={share} />
-            <Emblem subject={entity} ranks={ranks} game={game} size={92} />
+            <Emblem subject={entity} ranks={ranks} game={game} size={92} flies />
           </div>
 
           <div className="text-center">
-            <Link to={`/catalog/${game}/${entity.id}`} className="unit-name no-underline">
+            <Link
+              to={`/catalog/${game}/${entity.id}`}
+              viewTransition
+              {...prefetchHandlers(client, game, entity.id)}
+              className="unit-name no-underline"
+            >
               {entity.displayName}
             </Link>
             <p className="muted mt-0.5 text-xs">
