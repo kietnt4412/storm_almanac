@@ -9,6 +9,7 @@ import io.stormalmanac.gacha.IncomeModel.PullBudget;
 import io.stormalmanac.gacha.MarkovBannerEngine;
 import io.stormalmanac.gacha.PityState;
 import io.stormalmanac.gacha.PullModel;
+import io.stormalmanac.gacha.PullTables;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.GameDefinitionRepository;
 import io.stormalmanac.gamedata.Item;
@@ -198,7 +199,8 @@ public class PullController {
                 CurveView.of(curve),
                 byDay,
                 byCopies,
-                engine.method());
+                engine.method(),
+                model.tables(from));
     }
 
     /** A year of days is as far as the chart by date is drawn, whatever a banner's close says. */
@@ -308,6 +310,10 @@ public class PullController {
      *                       index or more at the last element (C2.8). Copy
      *                       exchanges are not modelled (N38), so more copies are
      *                       likelier than this says
+     * @param model          the banner's rules as tables, from the reader's
+     *                       counter, so the page can roll its own dice against
+     *                       {@code curve} without writing a rule twice (C2.21).
+     *                       Nothing the page calls the reader's chance comes from them
      */
     public record OddsResponse(
             String banner,
@@ -327,7 +333,8 @@ public class PullController {
             List<Double> curve,
             List<DayView> byDay,
             List<Double> byCopies,
-            String method) {}
+            String method,
+            PullTables model) {}
 
     /** One day of the chart by date: the pulls that day's income affords, and the chance they give. */
     public record DayView(int day, long pulls, double chance) {}

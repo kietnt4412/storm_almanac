@@ -207,6 +207,24 @@ class PullPlannerTest extends SharedDatabaseTest {
     }
 
     @Test
+    @DisplayName("the answer carries the banner's rules as tables, from the reader's own counter (C2.21)")
+    void theAnswerCarriesTheTablesItWasWorkedFrom() throws Exception {
+        savePity("tide-split", 45, 1);
+
+        JsonNode model = odds(Map.of("banner", "tide-split", "days", 0)).get("model");
+
+        JsonNode walls = model.get("walls");
+        assertThat(walls).hasSize(1);
+        assertThat(walls.get(0).get("wall").asInt()).isEqualTo(60);
+        JsonNode rates = walls.get(0).get("hitRates");
+        assertThat(rates).hasSize(60);
+        assertThat(rates.get(0).asDouble()).isEqualTo(0.005);
+        assertThat(rates.get(59).asDouble()).isEqualTo(1.0);
+        assertThat(model.get("firstWalls")).extracting(JsonNode::asInt).containsExactly(60);
+        assertThat(model.get("featuredChance")).extracting(JsonNode::asDouble).containsExactly(0.7, 1.0);
+    }
+
+    @Test
     @DisplayName("the curve runs from no pulls to the worst case, and the chance is its point at the pulls afforded")
     void theCurveAndTheChanceAreOneAnswer() throws Exception {
         // One pull afforded, on a wall of 60 from a fresh counter.

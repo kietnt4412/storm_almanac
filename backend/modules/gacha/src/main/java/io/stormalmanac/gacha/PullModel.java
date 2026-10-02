@@ -5,7 +5,10 @@ import io.stormalmanac.gamedata.banner.BannerModel;
 import io.stormalmanac.gamedata.banner.FeaturedRule;
 import io.stormalmanac.gamedata.banner.Floor;
 import io.stormalmanac.gamedata.banner.PityRule;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.random.RandomGenerator;
+import java.util.stream.IntStream;
 
 /**
  * The part of a {@link BannerModel} that decides whether a pull hands over the
@@ -108,11 +111,42 @@ public record PullModel(Rarity headline, double baseRate, PityRule pity, Feature
      */
     public int drawWall(RandomGenerator rng, int pullsSinceHit) {
         if (!pity.hasDrawnGuarantee()) return hardAt();
+        return rng.nextInt(lowestWall(pullsSinceHit), hardAt() + 1);
+    }
+
+    /**
+     * Every threshold {@link #drawWall} can return for a cycle carrying these
+     * misses, each as likely as the next — the one wall, when it is fixed.
+     */
+    public List<Integer> wallsFrom(int pullsSinceHit) {
+        if (!pity.hasDrawnGuarantee()) return List.of(hardAt());
+        return IntStream.rangeClosed(lowestWall(pullsSinceHit), hardAt()).boxed().toList();
+    }
+
+    private int lowestWall(int pullsSinceHit) {
         // A state carried over from a banner with a longer wall clamps to the
         // wall itself, which reads as "the next pull is the guaranteed one" —
         // the same reading hitRateAt gives it.
-        int lowest = Math.min(Math.max(pity.drawnFrom(), pullsSinceHit + 1), hardAt());
-        return rng.nextInt(lowest, hardAt() + 1);
+        return Math.min(Math.max(pity.drawnFrom(), pullsSinceHit + 1), hardAt());
+    }
+
+    /**
+     * The rules as tables a client can roll dice against (C2.21), starting from
+     * the cycle in hand. Each wall's row runs to the pull it forces, so a drawn
+     * guarantee of 80–100 is 21 rows and a fixed one is one.
+     */
+    public PullTables tables(PityState from) {
+        List<PullTables.Wall> walls = new ArrayList<>();
+        for (int wall : wallsFrom(0)) {
+            List<Double> rates = new ArrayList<>(wall);
+            for (int misses = 0; misses < wall; misses++) rates.add(hitRateAt(misses, wall));
+            walls.add(new PullTables.Wall(wall, rates));
+        }
+        List<Double> featuredChance = new ArrayList<>();
+        for (int losses = 0; losses <= featured.guaranteeAfterLoss(); losses++) {
+            featuredChance.add(featuredChanceAfter(losses));
+        }
+        return new PullTables(walls, wallsFrom(from.pullsSinceHit()), featuredChance);
     }
 
     /** Probability a hit is the featured unit, given the losses carried into it. */
