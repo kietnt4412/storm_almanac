@@ -7,12 +7,15 @@ import io.stormalmanac.api.player.PlayerView.DoneRequest;
 import io.stormalmanac.api.player.PlayerView.PlanRequest;
 import io.stormalmanac.api.player.PlayerView.PlanResponse;
 import io.stormalmanac.api.player.PlayerView.SavedPlanResponse;
+import io.stormalmanac.api.player.PlayerView.WhatIfRequest;
+import io.stormalmanac.api.player.PlayerView.WhatIfResponse;
 import io.stormalmanac.common.GameDataVersion;
-import io.stormalmanac.common.id.ProfileId;
+import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.gamedata.GameDefinition;
 import io.stormalmanac.gamedata.GameDefinitionRepository;
 import io.stormalmanac.api.ResourceNotFoundException;
 import io.stormalmanac.planner.Optimizer;
+import io.stormalmanac.planner.Plan;
 import io.stormalmanac.planner.SolveRequest;
 import io.stormalmanac.player.Goals;
 import io.stormalmanac.player.PlayerProfile;
@@ -20,8 +23,10 @@ import io.stormalmanac.player.PlayerStateRepository;
 import io.stormalmanac.player.SavedPlan;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
  * POST /api/me/profiles/{profile}/plan  [?version=N]
  * GET  /api/me/profiles/{profile}/plan
  * PUT  /api/me/profiles/{profile}/plan/done
+ * POST /api/me/profiles/{profile}/plan/what-if
  * </pre>
  *
  * <p><b>The goals come from the database, not from the body.</b> That is the
@@ -95,14 +101,7 @@ public class PlanController {
 
         PlayerProfile owner = owned.require(profile);
         PlanRequest body = request == null ? new PlanRequest(null, null, null, null) : request;
-
-        if (body.energyPerDay() == null) {
-            // Not defaulted. Every other field here has an honest default and
-            // this one does not: a player's daily energy is a fact about their
-            // account, and guessing it produces a plan that is wrong in days
-            // without being wrong in any way the reader can see.
-            throw new IllegalArgumentException("energyPerDay is required: it is a fact about the account");
-        }
+        requireEnergy(body);
 
         // The whole definition, not only its version: the plan's shadow prices
         // have to be named, and a demand line can stand for something with no
@@ -111,28 +110,106 @@ public class PlanController {
         GameDefinition definition = definitionFor(owner, version);
         GameDataVersion gameVersion = definition.version();
 
-        Goals goals = players.goalsOf(owner.id());
-        if (goals.goals().isEmpty()) {
-            throw new ResourceNotFoundException(
-                    "profile " + profile + " has no goals saved, so there is nothing to plan for");
-        }
-
-        SolveRequest solve = new SolveRequest(
-                ProfileId.of(profile),
-                gameVersion,
-                goals.goals(),
-                body.resolvedObjective(),
-                body.energyPerDay(),
-                body.resolvedHorizonDays(),
-                body.resolvedReach());
-
-        PlanResponse answer = PlanResponse.of(optimizer.solve(solve), definition);
+        PlanResponse answer = PlanResponse.of(optimizer.solve(solveRequest(owner, gameVersion, body, Map.of())), definition);
         // To the microsecond, which is what Postgres keeps: the timestamp is what a
         // tick names its plan by, and it has to read back equal to itself.
         Instant savedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
         players.savePlan(new SavedPlan(
                 owner.id(), gameVersion.sequence(), write(body.resolved()), write(answer), savedAt));
         return answer;
+    }
+
+    /**
+     * The plan route's question asked as a what-if (C2.20): <b>it saves nothing</b>.
+     *
+     * <p>A route of its own rather than a flag on {@code POST /plan}, because a
+     * flag that turns a side effect off is one a client forgets once, and the
+     * reader's saved plan — and the ticks on it — is what that once would cost.
+     * The plan screen asks this while a slider moves; "Keep this" asks the plan
+     * route with the same request.
+     *
+     * <p>{@code extra} pretends the reader holds more of a catalog item, which is
+     * how a shadow price is tested: the price says what one more unit is worth,
+     * and solving with ten more says what ten more are worth once runs come
+     * whole. Only items a reader can own are accepted.
+     *
+     * <p>Always the latest version: a what-if is about the plan a reader would
+     * follow now.
+     */
+    @PostMapping("/api/me/profiles/{profile}/plan/what-if")
+    public WhatIfResponse whatIf(@PathVariable String profile, @RequestBody(required = false) WhatIfRequest request) {
+        PlayerProfile owner = owned.require(profile);
+        WhatIfRequest asked = request == null ? new WhatIfRequest(null, null, null, null, null) : request;
+        PlanRequest body = asked.asPlanRequest();
+        requireEnergy(body);
+
+        GameDefinition definition = definitionFor(owner, null);
+        Map<ItemId, Integer> extra = extraOf(asked.resolvedExtra(), definition);
+
+        Instant asking = Instant.now();
+        long started = System.nanoTime();
+        Plan plan = optimizer.solve(solveRequest(owner, definition.version(), body, extra));
+        PlanResponse answer = PlanResponse.of(plan, definition);
+        long millis = (System.nanoTime() - started) / 1_000_000;
+        return new WhatIfResponse(answer, millis, plan.computedAt().isBefore(asking));
+    }
+
+    /** A what-if names a handful of items; this only stops a body from being a dump. */
+    private static final int MAX_EXTRA_ITEMS = 50;
+
+    /** More than any account holds of anything, and far from overflowing a sum. */
+    private static final int MAX_EXTRA_QUANTITY = 1_000_000;
+
+    private static Map<ItemId, Integer> extraOf(Map<String, Integer> extra, GameDefinition definition) {
+        if (extra.size() > MAX_EXTRA_ITEMS) {
+            throw new IllegalArgumentException(
+                    "at most " + MAX_EXTRA_ITEMS + " items can be pretended, got " + extra.size());
+        }
+        Map<ItemId, Integer> pretended = new LinkedHashMap<>();
+        for (Map.Entry<String, Integer> entry : extra.entrySet()) {
+            Integer quantity = entry.getValue();
+            if (quantity == null || quantity < 0 || quantity > MAX_EXTRA_QUANTITY) {
+                throw new IllegalArgumentException("extra \"" + entry.getKey() + "\" must be between 0 and "
+                        + MAX_EXTRA_QUANTITY + ", was " + quantity);
+            }
+            ItemId item = new ItemId(entry.getKey());
+            if (!definition.itemsById().containsKey(item)) {
+                throw new IllegalArgumentException("\"" + entry.getKey() + "\" is not an item in "
+                        + definition.game().id().value() + " " + definition.version().label()
+                        + ", so nobody can hold more of it");
+            }
+            if (quantity > 0) pretended.put(item, quantity);
+        }
+        return pretended;
+    }
+
+    private static void requireEnergy(PlanRequest body) {
+        if (body.energyPerDay() == null) {
+            // Not defaulted. Every other field here has an honest default and
+            // this one does not: a player's daily energy is a fact about their
+            // account, and guessing it produces a plan that is wrong in days
+            // without being wrong in any way the reader can see.
+            throw new IllegalArgumentException("energyPerDay is required: it is a fact about the account");
+        }
+    }
+
+    /** The goals come from the database, not from the body: that is the route. */
+    private SolveRequest solveRequest(
+            PlayerProfile owner, GameDataVersion version, PlanRequest body, Map<ItemId, Integer> extra) {
+        Goals goals = players.goalsOf(owner.id());
+        if (goals.goals().isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "profile " + owner.id().value() + " has no goals saved, so there is nothing to plan for");
+        }
+        return new SolveRequest(
+                owner.id(),
+                version,
+                goals.goals(),
+                body.resolvedObjective(),
+                body.energyPerDay(),
+                body.resolvedHorizonDays(),
+                body.resolvedReach(),
+                extra);
     }
 
     /**

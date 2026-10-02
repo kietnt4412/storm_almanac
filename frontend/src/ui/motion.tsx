@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type ElementType, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ElementType, type ReactNode, type RefObject } from 'react';
 
 /**
  * The motion pass (C2.6, the maintainer's ask of 2026-10-01, after a recording
@@ -175,4 +175,79 @@ export function Reveal({
       {children}
     </Tag>
   );
+}
+
+/**
+ * A figure whose digits roll to their value like an odometer (C2.20, F1): each
+ * digit is a strip of 0–9 slid to its place, so a what-if moving 14 to 11 is
+ * seen moving rather than swapped. A screen reader is told the text once.
+ *
+ * <p>Columns are keyed from the right, so 9 → 10 keeps the units column and
+ * adds a tens column rather than re-rolling both. Anything that is not a digit
+ * — a point, a sign — stands still. Still where motion is reduced (`motion.css`).
+ */
+export function Odometer({ text }: { text: string }) {
+  const chars = [...text];
+  return (
+    <span className="odo">
+      <span className="sr-only">{text}</span>
+      <span className="odo-digits" aria-hidden="true">
+        {chars.map((char, index) => {
+          const key = chars.length - index;
+          if (!/\d/.test(char)) {
+            return (
+              <span key={key} className="odo-char">
+                {char}
+              </span>
+            );
+          }
+          return (
+            <span key={key} className="odo-col">
+              <span className="odo-strip" style={{ transform: `translateY(-${Number(char)}em)` }}>
+                {DIGITS.map((digit) => (
+                  <span key={digit}>{digit}</span>
+                ))}
+              </span>
+            </span>
+          );
+        })}
+      </span>
+    </span>
+  );
+}
+
+const DIGITS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+/**
+ * Rows that slide to their new places instead of jumping there (C2.20, F1) —
+ * the FLIP technique: measure where each `[data-flip]` child was, let React
+ * move it, and animate it from the old place to the new one.
+ *
+ * <p>Measured by `offsetTop` against the list (which must be positioned), not
+ * by the viewport, so a page scrolled between two answers does not read as
+ * every row moving. `key` is what changes when the order may have; a render
+ * that changes neither moves nothing. Still where motion is reduced, and where
+ * there is no Web Animations API (jsdom).
+ */
+export function useFlip(list: RefObject<HTMLElement | null>, key: string) {
+  const last = useRef(new Map<string, number>());
+  useLayoutEffect(() => {
+    const box = list.current;
+    if (!box) return;
+    const next = new Map<string, number>();
+    const moving = prefersMotion();
+    box.querySelectorAll<HTMLElement>('[data-flip]').forEach((row) => {
+      const id = row.dataset.flip!;
+      const top = row.offsetTop;
+      next.set(id, top);
+      const was = last.current.get(id);
+      if (moving && was !== undefined && was !== top && typeof row.animate === 'function') {
+        row.animate([{ transform: `translateY(${was - top}px)` }, { transform: 'none' }], {
+          duration: 450,
+          easing: 'cubic-bezier(.2, .8, .2, 1)',
+        });
+      }
+    });
+    last.current = next;
+  }, [list, key]);
 }

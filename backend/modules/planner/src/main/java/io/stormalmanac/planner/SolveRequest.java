@@ -1,6 +1,7 @@
 package io.stormalmanac.planner;
 
 import io.stormalmanac.common.GameDataVersion;
+import io.stormalmanac.common.id.ItemId;
 import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.gamedata.Goal;
 import java.util.List;
@@ -30,6 +31,12 @@ import java.util.Map;
  *                     honest default: it counts none of those grants, which
  *                     makes the plan dearer than the truth rather than cheaper,
  *                     and the plan says which ones it left out
+ * @param extra        items the reader does not hold, solved as if they did: "what if
+ *                     I had ten more Serum". A what-if and never a fact — nothing
+ *                     stores it, and the plan route never sends it (C2.20). It is
+ *                     added to the inventory before the inventory is fingerprinted,
+ *                     so {@link SolveKey} needs no field for it: holding 15, and
+ *                     holding 10 while pretending 5 more, are the same question
  */
 public record SolveRequest(
         ProfileId profile,
@@ -38,7 +45,8 @@ public record SolveRequest(
         Objective objective,
         int energyPerDay,
         int horizonDays,
-        Map<String, Integer> reach
+        Map<String, Integer> reach,
+        Map<ItemId, Integer> extra
 ) {
 
     /**
@@ -55,6 +63,7 @@ public record SolveRequest(
     public SolveRequest {
         goals = List.copyOf(goals);
         reach = Map.copyOf(reach);
+        extra = Map.copyOf(extra);
         if (energyPerDay <= 0) {
             throw new IllegalArgumentException("energyPerDay must be positive, was " + energyPerDay);
         }
@@ -68,6 +77,25 @@ public record SolveRequest(
                                 + reached.getValue());
             }
         }
+        for (Map.Entry<ItemId, Integer> pretended : extra.entrySet()) {
+            if (pretended.getValue() == null || pretended.getValue() < 0) {
+                throw new IllegalArgumentException(
+                        "extra \"" + pretended.getKey().value() + "\" must not be negative, was "
+                                + pretended.getValue());
+            }
+        }
+    }
+
+    /** The same request pretending nothing: what every caller but a what-if asks. */
+    public SolveRequest(
+            ProfileId profile,
+            GameDataVersion gameVersion,
+            List<Goal> goals,
+            Objective objective,
+            int energyPerDay,
+            int horizonDays,
+            Map<String, Integer> reach) {
+        this(profile, gameVersion, goals, objective, energyPerDay, horizonDays, reach, Map.of());
     }
 
     /** The same request from a reader who has not said what they reach. */

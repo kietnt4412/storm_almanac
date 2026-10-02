@@ -8,6 +8,7 @@ import static io.stormalmanac.planner.TestGame.ORE;
 import static io.stormalmanac.planner.TestGame.ORE_STAGE;
 import static io.stormalmanac.planner.TestGame.stack;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.stormalmanac.common.id.ProfileId;
 import io.stormalmanac.gamedata.GameDefinition;
@@ -185,6 +186,66 @@ class SolveCachingTest {
         assertThat(his.computedAt()).isEqualTo(FIRST);
         assertThat(his.explanation().notes())
                 .anySatisfy(note -> assertThat(note).contains("2h ago"));
+    }
+
+    private static SolveRequest pretending(ProfileId profile, GameDefinition definition, int ingots) {
+        return new SolveRequest(
+                profile,
+                definition.version(),
+                List.of(Goal.deterministic(HERO, "insight-1")),
+                Objective.LEAST_ENERGY,
+                60,
+                SolveRequest.DEFAULT_HORIZON_DAYS,
+                Map.of(),
+                Map.of(INGOT, ingots));
+    }
+
+    @Test
+    @DisplayName("a what-if's pretended items are solved as held, and the same pretence asked again is a hit")
+    void aPretenceIsItsOwnQuestion() {
+        GameDefinition definition = workshop();
+        InProcessSolveCache cache = new InProcessSolveCache();
+        MovableClock clock = new MovableClock(FIRST);
+        MipOptimizer optimizer = optimizer(definition, justAlice(definition), cache, clock);
+
+        Plan held = optimizer.solve(requestFor(ALICE, definition));
+        Plan twoMore = optimizer.solve(pretending(ALICE, definition, 2));
+        Plan again = optimizer.solve(pretending(ALICE, definition, 2));
+
+        // Two ingots fewer to make: 12 ore and 200 gold where it was 18 and 300.
+        assertThat(held.totalEnergy()).isEqualTo(105);
+        assertThat(twoMore.totalEnergy()).isEqualTo(70);
+        assertThat(twoMore.id()).isNotEqualTo(held.id());
+        assertThat(again.id()).isEqualTo(twoMore.id());
+        assertThat(cache.missCount()).isEqualTo(2);
+        assertThat(cache.hitCount()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("holding two ingots and pretending two more ingots are the same question, so they share a solve")
+    void aPretenceIsKeyedAsTheInventoryItMakes() {
+        GameDefinition definition = workshop();
+        InProcessSolveCache cache = new InProcessSolveCache();
+        MovableClock clock = new MovableClock(FIRST);
+        TestRepositories.Players players = new TestRepositories.Players(definition.game().id())
+                .with(ALICE, Inventory.empty(ALICE), new Roster(ALICE, Map.of()))
+                .with(BOB, Inventory.empty(BOB).with(INGOT, 2), new Roster(BOB, Map.of()));
+        MipOptimizer optimizer = optimizer(definition, players, cache, clock);
+
+        Plan pretended = optimizer.solve(pretending(ALICE, definition, 2));
+        Plan held = optimizer.solve(requestFor(BOB, definition));
+
+        assertThat(held.id()).isEqualTo(pretended.id());
+        assertThat(cache.hitCount()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("a negative pretence is refused, because nobody can hold fewer than none")
+    void aNegativePretenceIsRefused() {
+        GameDefinition definition = workshop();
+        assertThatThrownBy(() -> pretending(ALICE, definition, -1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must not be negative");
     }
 
     @Test

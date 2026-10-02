@@ -653,11 +653,128 @@
   view-transition-name: step-here;
 }
 
+/*
+ * A what-if (C2.20): the plan worked out again as a slider moves. The figures
+ * roll like an odometer (F1), the rows slide to their new places by FLIP
+ * (`useFlip`) while a row that joins slides in and one that leaves folds away,
+ * and a shadow price tested sends a pulse from the item to the days (F4).
+ */
+.odo,
+.odo-digits {
+  display: inline-flex;
+  line-height: 1;
+}
+
+.odo-col {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+}
+
+.odo-strip {
+  display: block;
+  transition: transform 0.7s var(--ease-out);
+}
+
+.odo-strip > span {
+  display: block;
+  height: 1em;
+}
+
+.odo-char {
+  display: inline-block;
+  height: 1em;
+}
+
+.flip-enter {
+  animation: flip-enter 0.5s var(--ease-out) backwards;
+}
+
+@keyframes flip-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+.flip-leave {
+  animation: flip-leave 0.35s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes flip-leave {
+  to {
+    opacity: 0;
+    transform: scaleY(0.4);
+  }
+}
+
+.ripple-trace {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ink) 18%, transparent);
+  stroke-width: 1.5;
+}
+
+.ripple-pulse {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 14 86;
+  stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 4px var(--brand));
+  animation: ripple-pulse 0.9s var(--ease-out) var(--delay, 0ms) forwards;
+}
+
+@keyframes ripple-pulse {
+  80% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+.ripple-node {
+  fill: var(--raised);
+  stroke: color-mix(in srgb, var(--ink) 35%, transparent);
+  stroke-width: 1.5;
+}
+
+.ripple-node-hot {
+  animation: ripple-node 0.9s ease-out 0.55s;
+}
+
+@keyframes ripple-node {
+  40% {
+    stroke: var(--brand);
+    stroke-width: 3;
+  }
+}
+
+.ripple-label {
+  fill: var(--muted);
+  font-size: 11px;
+}
+
 /* Asked for less motion: everything is where it ends up, and nothing moves. */
 @media (prefers-reduced-motion: reduce) {
   .intro,
-  .circuit-pulse {
+  .circuit-pulse,
+  .ripple-pulse {
     display: none;
+  }
+
+  .odo-strip {
+    transition: none;
+  }
+
+  .flip-enter,
+  .flip-leave,
+  .ripple-node-hot {
+    animation: none !important;
   }
 
   .draw,
