@@ -3380,6 +3380,47 @@ otherwise have to rediscover: what was measured, what broke, what the numbers
 were, and which assumption turned out to be false. A list of files touched is
 what `git log` is for.
 
+**2026-10-02 (sixty-fifth) — C2.20–C2.21 drafted: the engines at work.**
+
+**The ask:** "an advance function something to make people actually wow how you made this". Three ideas were
+offered — a live what-if re-plan, odds that converge in the browser, an "open the hood" panel — and **the
+maintainer took the first two, in that order**, and asked for "something flashy" too, with the plan drafted first.
+**[The plan](../plans/c2.20-the-engines-at-work.md)** is written and not agreed. Found while drafting: `POST /plan`
+saves every answer, so a what-if needs its own route; `MipOptimizer` reads the inventory itself, so adding `extra`
+before `SolveKey` hashes it keeps the cache key right with `SolveKey` unchanged; `MonteCarloBannerEngine` is
+already in main, and sending `PullModel`'s tables lets the browser roll dice without a game rule written twice.
+**The open risk is the audience:** both need a profile, and a recruiter who does not sign in sees neither
+(question 3, a demo). No code; nothing measured — the production solve time is the first thing to take.
+**The four questions were answered the same session:** F1–F5 (more than the three recommended; F5's battery
+cost is on the record, paused when hidden and off under reduced motion), and the levers, the demo as C2.22 and
+the order as recommended. **A mockup** ([html](../plans/mockups/c2.20-the-engines-at-work.html)) runs on a
+pretend solver; its dice are real — 20 000 histories against the drawn-wall curve (1.5%, 80–100) landed 0.63
+points from it, the curve summing to 1 — and it waits for the maintainer's agreement.
+
+**Then agreed ("start the build") and C2.20 built** ([as built](../plans/c2.20-the-engines-at-work.md#c220-as-built-2026-10-02-sixty-fifth)).
+**Measured locally on sequence 18:**
+- A what-if is 44–49 ms on the server.
+- A cache hit is still ~35 ms, because the hit skips only the solve.
+- Production is unmeasured; `solveMillis` will report it.
+
+**What turned out false or surprising:**
+- **An odometer of "11.1" broke onto three lines.** The point was a block in an
+  inline wrapper, and only a screenshot showed it; jsdom and the text both read
+  "11.1".
+- **The live title cannot show half the feature.** Every shadow price on PGR is
+  0 except a "one of" choice, which is not an item, so "Test a price" offers
+  nothing. With one farmable stage, the rows never reorder either. The mockup's
+  pretend solver hid both.
+- **Dragging found the best demonstration:** clearing the Cage at 500 000 makes
+  the plan 120 Serum cheaper and 28 days long, because least energy waits for
+  four weekly grants.
+
+**How it was driven:** headless Chrome over CDP again, since the pane drew
+nothing. A local PGR profile `whatif` was used (Lacrimosa to every cap plus
+Samantha's Resonance). Hear the Bell's Overclock was refused with a 422 — no
+source yields `weapon-overclock-core-i` — which is also what the panel shows a
+reader.
+
 **2026-10-02 (sixty-fourth) — C2.19: the emblem flies, the step bar slides.**
 
 **The ask:** "make the website more lively rather than the static page and dry word numbers". No screenshot

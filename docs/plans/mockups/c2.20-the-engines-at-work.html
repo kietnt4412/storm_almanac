@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en" data-game="punishing-gray-raven">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Engines at work — mockup</title>
+<style>
+[data-game='punishing-gray-raven'] {
+  --ground: #f5f3f4; --surface: #ffffff; --raised: #ffffff; --ink: #17131a;
+  --muted: #5e5662; --line: #e3dde1; --brand: #c4161c; --good: #15803d;
+  --display: 'Arial Black', 'Segoe UI Black', Impact, system-ui, sans-serif;
+  --label: ui-monospace, Consolas, 'Cascadia Mono', monospace;
+}
+[data-game='reverse-1999'] {
+  --ground: #f4eee2; --surface: #fffaf0; --raised: #fffdf7; --ink: #2b2118;
+  --muted: #73604b; --line: #e4d6bf; --brand: #a4561a; --good: #4d7c0f;
+  --display: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+  --label: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+}
+@media (prefers-color-scheme: dark) {
+  [data-game='punishing-gray-raven'] {
+    --ground: #0c0b0e; --surface: #151418; --raised: #1c1a20; --ink: #f1edf0;
+    --muted: #9b939d; --line: #2b2830; --brand: #f2555a; --good: #4ade80;
+  }
+  [data-game='reverse-1999'] {
+    --ground: #15100a; --surface: #201911; --raised: #2a2117; --ink: #f3e9d8;
+    --muted: #b09a7e; --line: #3a2e20; --brand: #f0a24a; --good: #a3e635;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--ground); color: var(--ink);
+  font: 15px/1.55 system-ui, -apple-system, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+}
+#weather { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+main { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
+header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+h1 { font-family: var(--display); font-size: 26px; margin: 0; letter-spacing: .01em; }
+h2 { font-family: var(--display); font-size: 19px; margin: 0 0 4px; }
+.lede { color: var(--muted); margin: 0 0 24px; max-width: 70ch; }
+.tag { font-family: var(--label); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--brand); }
+.note { font-size: 12px; color: var(--muted); }
+.switch { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: var(--surface); }
+.switch button { border: 0; background: none; color: var(--muted); padding: 7px 14px; font: inherit; font-size: 13px; cursor: pointer; }
+.switch button[aria-pressed='true'] { background: var(--brand); color: #fff; }
+.card {
+  background: color-mix(in srgb, var(--surface) 92%, transparent); border: 1px solid var(--line);
+  border-radius: 14px; padding: 18px 20px; margin-bottom: 20px; backdrop-filter: blur(2px);
+}
+[data-game='punishing-gray-raven'] .card { border-radius: 4px; border-left: 3px solid var(--brand); }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 20px; }
+@media (max-width: 820px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.ctl { display: grid; grid-template-columns: 120px minmax(0, 1fr) 64px; gap: 10px; align-items: center; margin: 10px 0; font-size: 14px; }
+.ctl label { color: var(--muted); }
+.ctl output { font-variant-numeric: tabular-nums; text-align: right; font-weight: 600; }
+input[type=range] { width: 100%; accent-color: var(--brand); }
+.seg { display: inline-flex; gap: 4px; }
+.seg button, .btn {
+  border: 1px solid var(--line); background: var(--raised); color: var(--ink);
+  border-radius: 8px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer;
+  transition: transform .12s ease, border-color .12s ease;
+}
+.seg button[aria-pressed='true'] { border-color: var(--brand); color: var(--brand); }
+.btn:active, .seg button:active { transform: scale(.97); }
+.btn-brand { background: var(--brand); color: #fff; border-color: var(--brand); }
+.answer { display: flex; gap: 28px; align-items: flex-end; flex-wrap: wrap; }
+.figure { font-family: var(--display); font-size: 54px; line-height: 1; display: inline-flex; }
+.odo { display: inline-block; height: 1em; overflow: hidden; }
+.odo span { display: block; transition: transform .7s cubic-bezier(.2,.8,.2,1); }
+.odo span i { display: block; height: 1em; font-style: normal; }
+.delta { font-size: 13px; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--good) 15%, transparent); color: var(--good); }
+.delta.worse { background: color-mix(in srgb, var(--brand) 15%, transparent); color: var(--brand); }
+.solved { font-family: var(--label); font-size: 12px; color: var(--muted); margin-top: 6px; }
+.rows { list-style: none; margin: 14px 0 0; padding: 0; }
+.rows li {
+  display: grid; grid-template-columns: minmax(0, 1fr) 70px 90px; gap: 8px; align-items: center;
+  padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 6px; background: var(--raised);
+  font-size: 14px;
+}
+.rows li .n { text-align: right; font-variant-numeric: tabular-nums; }
+.rows li .bar { height: 6px; border-radius: 3px; background: var(--brand); opacity: .75; transition: width .6s ease; }
+.rows li.new { animation: slide-in .5s cubic-bezier(.2,.8,.2,1) backwards; }
+.rows li.gone { animation: fold .35s ease forwards; }
+@keyframes slide-in { from { opacity: 0; transform: translateX(-24px); } }
+@keyframes fold { to { opacity: 0; transform: scaleY(.2); height: 0; padding: 0; margin: 0; } }
+.price { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 10px 0; border-top: 1px dashed var(--line); font-size: 14px; }
+.price .verdict { grid-column: 1 / -1; font-size: 13px; color: var(--muted); min-height: 1.2em; }
+.price .verdict b { color: var(--ink); }
+#circuit { width: 100%; height: 120px; display: block; margin-top: 8px; }
+#circuit .wire { fill: none; stroke: var(--line); stroke-width: 2; }
+#circuit .node { fill: var(--raised); stroke: var(--muted); stroke-width: 1.5; }
+#circuit text { fill: var(--muted); font-size: 11px; font-family: system-ui, sans-serif; }
+#circuit .spark { fill: var(--brand); }
+#circuit .hot { stroke: var(--brand); }
+.rain-wrap { position: relative; }
+#rain { width: 100%; height: 300px; display: block; border-radius: 8px; background: color-mix(in srgb, var(--raised) 70%, transparent); border: 1px solid var(--line); }
+.stats { display: flex; gap: 24px; flex-wrap: wrap; margin: 12px 0; font-size: 14px; }
+.stats b { font-family: var(--display); font-size: 22px; display: block; font-variant-numeric: tabular-nums; }
+.legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); align-items: center; flex-wrap: wrap; }
+.sw { display: inline-block; width: 14px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 22px; perspective: 900px; }
+.unit {
+  position: relative; aspect-ratio: 3 / 4; border-radius: 14px; overflow: hidden; cursor: pointer;
+  background: var(--raised); border: 1px solid var(--line);
+  transform-style: preserve-3d; transition: transform .25s ease, box-shadow .25s ease;
+  box-shadow: 0 8px 22px rgb(0 0 0 / .12);
+  --mx: 50%; --my: 50%; --rx: 0deg; --ry: 0deg;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+}
+[data-game='punishing-gray-raven'] .unit { border-radius: 4px; clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%); }
+.unit.live { transition: box-shadow .25s ease; box-shadow: 0 18px 40px rgb(0 0 0 / .25); }
+.unit .art { position: absolute; inset: 0; display: grid; place-items: center; }
+.unit .emblem {
+  width: 58%; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--display); font-size: 54px; color: #fff; background: var(--brand);
+  box-shadow: inset 0 0 0 6px color-mix(in srgb, #fff 25%, transparent);
+}
+[data-game='punishing-gray-raven'] .unit .emblem { border-radius: 6px; transform: rotate(45deg); }
+[data-game='punishing-gray-raven'] .unit .emblem span { transform: rotate(-45deg); }
+.unit .meta { position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 14px; background: linear-gradient(transparent, color-mix(in srgb, var(--raised) 92%, transparent) 40%); }
+.unit .meta .rank { font-family: var(--label); font-size: 11px; color: var(--brand); letter-spacing: .08em; text-transform: uppercase; }
+.unit .meta .name { font-family: var(--display); font-size: 16px; }
+.unit .sheen { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .25s ease; mix-blend-mode: color-dodge; }
+.unit.live .sheen { opacity: 1; }
+[data-game='punishing-gray-raven'] .unit .sheen {
+  background:
+    repeating-linear-gradient(115deg, transparent 0 14px, rgb(255 40 60 / .22) 14px 16px, transparent 16px 22px, rgb(40 220 255 / .2) 22px 24px),
+    radial-gradient(circle at var(--mx) var(--my), rgb(255 255 255 / .55), transparent 45%);
+  background-position: calc(var(--mx) * .6) calc(var(--my) * .6), 0 0;
+}
+[data-game='reverse-1999'] .unit .sheen {
+  background:
+    radial-gradient(circle at var(--mx) var(--my), rgb(255 236 170 / .75), rgb(240 170 60 / .25) 30%, transparent 55%),
+    repeating-radial-gradient(circle at 50% 120%, transparent 0 7px, rgb(255 210 120 / .14) 7px 8px);
+}
+.unit .scan { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: repeating-linear-gradient(0deg, rgb(255 255 255 / .06) 0 1px, transparent 1px 3px); transition: opacity .25s; }
+[data-game='punishing-gray-raven'] .unit.live .scan { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .odo span, .rows li .bar, .unit { transition: none !important; }
+  .rows li.new, .rows li.gone { animation: none; }
+}
+</style>
+</head>
+<body>
+<canvas id="weather" aria-hidden="true"></canvas>
+<main>
+  <header>
+    <div>
+      <div class="tag">Mockup · C2.20–C2.23 · made-up numbers</div>
+      <h1>The engines at work</h1>
+    </div>
+    <div class="switch" role="group" aria-label="Game">
+      <button id="g-pgr" aria-pressed="true">Punishing: Gray Raven</button>
+      <button id="g-r99" aria-pressed="false">Reverse: 1999</button>
+    </div>
+  </header>
+  <p class="lede">Drag a slider and the plan solves again; press a shadow price and it tests itself; roll a few thousand pull histories and watch them settle onto the exact curve. Cards tilt and catch the light. The weather behind is F5. Nothing here talks to a server.</p>
+
+  <section class="card">
+    <div class="tag">C2.20 · on the plan screen, under the saved plan · F1, F4</div>
+    <h2>What if…</h2>
+    <div class="grid">
+      <div>
+        <div class="ctl"><label for="energy">Energy a day</label><input id="energy" type="range" min="120" max="400" step="20" value="240"><output id="energy-o">240</output></div>
+        <div class="ctl"><label for="horizon">Within (days)</label><input id="horizon" type="range" min="14" max="60" step="1" value="30"><output id="horizon-o">30</output></div>
+        <div class="ctl"><label>Objective</label>
+          <div class="seg"><button id="o-least" aria-pressed="true">Least energy</button><button id="o-fast" aria-pressed="false">Fewest days</button></div><span></span>
+        </div>
+        <div class="ctl"><label for="reach">Cage tier</label><input id="reach" type="range" min="0" max="9" step="1" value="5"><output id="reach-o">5</output></div>
+
+        <div style="margin-top:14px" class="tag">Shadow prices · press one to test it</div>
+        <div id="prices"></div>
+        <svg id="circuit" viewBox="0 0 420 120" aria-hidden="true">
+          <path class="wire" id="w1" d="M40 60 C110 60 110 25 180 25"/>
+          <path class="wire" id="w2" d="M40 60 C110 60 110 95 180 95"/>
+          <path class="wire" id="w3" d="M200 25 C290 25 290 60 370 60"/>
+          <path class="wire" id="w4" d="M200 95 C290 95 290 60 370 60"/>
+          <circle class="node" cx="30" cy="60" r="11"/><text x="30" y="88" text-anchor="middle" id="c-item">item</text>
+          <circle class="node" cx="190" cy="25" r="9"/><text x="190" y="9" text-anchor="middle">stage</text>
+          <circle class="node" cx="190" cy="95" r="9"/><text x="190" y="117" text-anchor="middle">shop</text>
+          <circle class="node" cx="382" cy="60" r="13"/><text x="382" y="90" text-anchor="middle">days</text>
+        </svg>
+      </div>
+      <div>
+        <div class="answer">
+          <div>
+            <div class="note">Days to every goal</div>
+            <div class="figure" id="days-fig" aria-live="polite"></div>
+          </div>
+          <div>
+            <div class="note">Energy</div>
+            <div class="figure" style="font-size:30px" id="energy-fig"></div>
+          </div>
+          <div id="vs"></div>
+        </div>
+        <div class="solved" id="solved">—</div>
+        <ul class="rows" id="rows"></ul>
+        <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap">
+          <button class="btn btn-brand" id="keep">Keep this</button>
+          <button class="btn" id="reset">Reset</button>
+          <span class="note" id="kept" style="align-self:center"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="tag">C2.21 · on /pulls, under the chance curve · F2</div>
+    <h2>Roll it yourself</h2>
+    <p class="note" style="margin:0 0 8px">A drawn wall of 80–100, 1.5% a pull. The server's exact chain draws the line; your device rolls the dice and draws the wall per cycle, the other road.</p>
+    <div class="rain-wrap"><canvas id="rain" aria-label="Histogram of pulls until the featured unit, filling as histories are rolled"></canvas></div>
+    <div class="stats">
+      <div><span class="note">Histories</span><b id="s-n">0</b></div>
+      <div><span class="note">Within <span id="s-budget-l">85</span> pulls — chain</span><b id="s-chain">—</b></div>
+      <div><span class="note">— your dice</span><b id="s-dice">—</b></div>
+      <div><span class="note">Largest gap</span><b id="s-gap">—</b></div>
+    </div>
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+      <button class="btn btn-brand" id="roll">Roll 6 000 histories</button>
+      <div class="ctl" style="grid-template-columns: 100px 180px 40px; margin:0"><label for="budget">Your pulls</label><input id="budget" type="range" min="20" max="100" value="85"><output id="budget-o">85</output></div>
+      <div class="legend"><span><span class="sw" style="background:var(--brand)"></span>your dice</span><span><span class="sw" style="background:var(--ink)"></span>the chain, exact</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="tag">C2.23 · roster, catalog and dossier · F3 (and F5 behind everything)</div>
+    <h2>Holo cards</h2>
+    <p class="note" style="margin:0 0 14px">Move the pointer over a card. PGR catches a chromatic glitch sheen and scanlines; Reverse: 1999 catches gold leaf.</p>
+    <div class="cards" id="cards"></div>
+  </section>
+  <p class="note">Every effect has a reduced-motion twin: the weather stops, cards stay flat, the rain is replaced by the finished histogram, numbers land without rolling.</p>
+</main>
+
+<script>
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = (id) => document.getElementById(id);
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+let game = 'punishing-gray-raven';
+function setGame(g) {
+  game = g;
+  document.documentElement.dataset.game = g;
+  $('g-pgr').setAttribute('aria-pressed', g === 'punishing-gray-raven');
+  $('g-r99').setAttribute('aria-pressed', g === 'reverse-1999');
+  renderCards(); drawRain(); startWeather();
+}
+$('g-pgr').onclick = () => setGame('punishing-gray-raven');
+$('g-r99').onclick = () => setGame('reverse-1999');
+
+/* ── C2.20: a pretend solver ─────────────────────────────── */
+const ITEMS = [
+  { id: 'serum', name: 'Serum', need: 150, price: 10 },
+  { id: 'cogs', name: 'Cogs (k)', need: 197, price: 2.2 },
+  { id: 'sp', name: 'Skill Point', need: 41, price: 18.2 },
+];
+let extra = {};
+const saved = { energy: 240, horizon: 30, objective: 'least', reach: 5 };
+let req = { ...saved };
+const cache = new Map();
+
+function solve(r) {
+  const need = (id) => Math.max(0, ITEMS.find((i) => i.id === id).need - (extra[id] || 0));
+  const cage = r.reach * 4;
+  const stages = [
+    { key: 'sim', name: 'Simulation run', runs: Math.ceil(need('serum') / 3), cost: 30 },
+    { key: 'cogs', name: 'Cogs run', runs: Math.ceil(Math.max(0, need('cogs') - cage * 2) / 18), cost: 40 },
+    { key: 'sp', name: 'Skill Point run', runs: Math.ceil(Math.max(0, need('sp') - cage) / 2.2), cost: 40 },
+  ];
+  if (r.objective === 'fast') stages.push({ key: 'refill', name: 'Refill with Black Cards', runs: Math.round(r.energy / 60), cost: 0 });
+  if (r.energy < 200) stages.push({ key: 'shop', name: 'Shop: Serum', runs: Math.ceil((200 - r.energy) / 20), cost: 0 });
+  if (r.reach > 0) stages.push({ key: 'cage', name: 'Phantom Pain Cage, tier ' + r.reach, runs: Math.ceil(30 / 7), cost: 0 });
+  stages.forEach((s) => (s.energy = s.runs * s.cost));
+  const energy = stages.reduce((a, s) => a + s.energy, 0);
+  const perDay = r.energy * (r.objective === 'fast' ? 1.25 : 1);
+  const days = Math.max(1, Math.min(r.horizon, Math.ceil(energy / perDay)));
+  stages.sort((a, b) => b.energy - a.energy || b.runs - a.runs);
+  return { days, energy, stages: stages.filter((s) => s.runs > 0) };
+}
+const keyOf = (r) => JSON.stringify([r, extra]);
+const base = solve(saved);
+
+function odometer(el, value) {
+  const s = String(value);
+  if (el.children.length !== s.length) {
+    el.innerHTML = '';
+    for (let i = 0; i < s.length; i++) {
+      const col = document.createElement('span'); col.className = 'odo';
+      const strip = document.createElement('span');
+      for (let d = 0; d <= 9; d++) { const n = document.createElement('i'); n.textContent = d; strip.appendChild(n); }
+      col.appendChild(strip); el.appendChild(col);
+    }
+  }
+  [...s].forEach((ch, i) => { el.children[i].firstChild.style.transform = `translateY(${-Number(ch)}em)`; });
+  el.setAttribute('aria-label', s);
+}
+
+function renderRows(plan) {
+  const ul = $('rows');
+  const before = new Map([...ul.children].map((li) => [li.dataset.key, li.getBoundingClientRect().top]));
+  const max = Math.max(1, ...plan.stages.map((s) => s.energy || s.runs * 6));
+  const keep = new Set(plan.stages.map((s) => s.key));
+  [...ul.children].forEach((li) => { if (!keep.has(li.dataset.key) && !li.classList.contains('gone')) { li.classList.add('gone'); setTimeout(() => li.remove(), reduce ? 0 : 350); } });
+  plan.stages.forEach((s) => {
+    let li = ul.querySelector(`[data-key="${s.key}"]:not(.gone)`);
+    const fresh = !li;
+    if (fresh) { li = document.createElement('li'); li.dataset.key = s.key; li.innerHTML = '<span class="nm"></span><span class="n"></span><span><div class="bar"></div></span>'; if (!reduce) li.classList.add('new'); }
+    li.querySelector('.nm').textContent = s.name;
+    li.querySelector('.n').textContent = '×' + s.runs;
+    li.querySelector('.bar').style.width = Math.round(((s.energy || s.runs * 6) / max) * 100) + '%';
+    ul.appendChild(li);
+  });
+  if (reduce) return;
+  [...ul.children].forEach((li) => {
+    const was = before.get(li.dataset.key);
+    if (was == null || li.classList.contains('gone')) return;
+    const dy = was - li.getBoundingClientRect().top;
+    if (dy) li.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.2,.8,.2,1)' });
+  });
+}
+
+function show(plan, ms, hit) {
+  odometer($('days-fig'), plan.days);
+  $('energy-fig').textContent = plan.energy.toLocaleString();
+  const dd = plan.days - base.days, de = plan.energy - base.energy;
+  $('vs').innerHTML = dd || de
+    ? (dd ? `<span class="delta ${dd > 0 ? 'worse' : ''}">${dd > 0 ? '+' : ''}${dd} days</span> ` : '')
+      + (de ? `<span class="delta ${de > 0 ? 'worse' : ''}">${de > 0 ? '+' : ''}${de.toLocaleString()} energy</span>` : '')
+      + '<div class="note" style="margin-top:4px">against your saved plan</div>'
+    : '<span class="note">same as your saved plan</span>';
+  $('solved').textContent = hit ? `served from cache · ${ms} ms` : `solved in ${ms} ms · branch and bound, 2 s budget`;
+  renderRows(plan);
+}
+
+let timer;
+function ask() {
+  clearTimeout(timer);
+  $('solved').textContent = 'solving…';
+  timer = setTimeout(() => {
+    const k = keyOf(req);
+    const hit = cache.has(k);
+    const plan = hit ? cache.get(k) : solve(req);
+    cache.set(k, plan);
+    show(plan, hit ? 1 + Math.floor(Math.random() * 3) : 18 + Math.floor(Math.random() * 40), hit);
+  }, 220);
+}
+
+for (const [id, field] of [['energy', 'energy'], ['horizon', 'horizon'], ['reach', 'reach']]) {
+  $(id).oninput = (e) => { req[field] = Number(e.target.value); $(id + '-o').textContent = e.target.value; ask(); };
+}
+function setObjective(o) { req.objective = o; $('o-least').setAttribute('aria-pressed', o === 'least'); $('o-fast').setAttribute('aria-pressed', o === 'fast'); ask(); }
+$('o-least').onclick = () => setObjective('least');
+$('o-fast').onclick = () => setObjective('fast');
+
+function renderPrices() {
+  $('prices').innerHTML = '';
+  ITEMS.forEach((it) => {
+    const step = it.id === 'cogs' ? 20 : 10;
+    const row = document.createElement('div'); row.className = 'price';
+    row.innerHTML = `<span><b>${it.name}</b> · ${it.price.toFixed(1)} energy a unit</span><button class="btn">+${step} — try it</button><span class="verdict"></span>`;
+    row.querySelector('button').onclick = () => {
+      const before = solve(req).energy;
+      extra[it.id] = (extra[it.id] || 0) + step;
+      const after = solve(req).energy;
+      const predicted = Math.round(it.price * step), actual = before - after;
+      row.querySelector('.verdict').innerHTML = predicted === actual
+        ? `Predicted <b>−${predicted}</b>, solved <b>−${actual}</b>. The price held.`
+        : `Predicted <b>−${predicted}</b>, solved <b>−${actual}</b>. Runs come whole, so the integer plan moves in steps the LP price can't see.`;
+      pulse(it.name); ask();
+    };
+    $('prices').appendChild(row);
+  });
+}
+
+function pulse(label) {
+  $('c-item').textContent = label;
+  if (reduce) return;
+  const svg = $('circuit');
+  ['w1', 'w2', 'w3', 'w4'].forEach((w) => { $(w).classList.add('hot'); setTimeout(() => $(w).classList.remove('hot'), 1100); });
+  [['w1', 'w3'], ['w2', 'w4']].forEach((route, ri) => {
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('r', 5); dot.setAttribute('class', 'spark'); svg.appendChild(dot);
+    const paths = route.map((id) => $(id)), lens = paths.map((p) => p.getTotalLength());
+    const total = lens[0] + lens[1], t0 = performance.now() + ri * 90;
+    (function step(now) {
+      const t = Math.min(1, Math.max(0, (now - t0) / 900)), d = t * total;
+      const pt = d < lens[0] ? paths[0].getPointAtLength(d) : paths[1].getPointAtLength(d - lens[0]);
+      dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y);
+      if (t < 1) requestAnimationFrame(step); else dot.remove();
+    })(performance.now());
+  });
+}
+
+$('keep').onclick = () => { $('kept').textContent = 'Saved as your plan — the real POST /plan.'; setTimeout(() => ($('kept').textContent = ''), 2500); };
+$('reset').onclick = () => {
+  req = { ...saved }; extra = {};
+  for (const f of ['energy', 'horizon', 'reach']) { $(f).value = saved[f]; $(f + '-o').textContent = saved[f]; }
+  setObjective('least'); renderPrices();
+};
+renderPrices();
+show(base, 31, false);
+
+/* ── C2.21: the dice against the chain ────────────────────── */
+const P = 0.015, LO = 80, HI = 100, BIN = 5, NB = HI / BIN, TOTAL = 6000;
+const exact = new Array(HI + 1).fill(0);
+(function () {
+  let survive = 1;
+  for (let n = 1; n <= HI; n++) {
+    const wallAbove = n < LO ? 1 : (HI - n) / (HI - LO + 1);
+    const wallHere = n >= LO ? 1 / (HI - LO + 1) : 0;
+    exact[n] = survive * (P * wallAbove + wallHere);
+    survive *= 1 - P;
+  }
+})();
+const cdf = (arr, upTo) => arr.slice(1, upTo + 1).reduce((a, b) => a + b, 0);
+function rollOne() {
+  const wall = LO + Math.floor(Math.random() * (HI - LO + 1));
+  for (let n = 1; n < wall; n++) if (Math.random() < P) return n;
+  return wall;
+}
+let counts = new Array(HI + 1).fill(0), rolled = 0, landed = 0, particles = [], rolling = false, spawned = 0;
+const rain = $('rain'), rctx = rain.getContext('2d');
+function sizeRain() { const r = rain.getBoundingClientRect(); rain.width = r.width * devicePixelRatio; rain.height = r.height * devicePixelRatio; }
+function geom() {
+  const W = rain.width, H = rain.height, pad = 28 * devicePixelRatio, bw = (W - pad * 2) / NB;
+  const peak = Math.max(...Array.from({ length: NB }, (_, b) => cdf(exact, (b + 1) * BIN) - cdf(exact, b * BIN))) * TOTAL * 1.15;
+  return { W, H, pad, bw, scale: (H - pad * 2) / peak };
+}
+function drawRain() {
+  if (!rain.width) sizeRain();
+  const { W, H, pad, bw, scale } = geom(), dpr = devicePixelRatio;
+  rctx.clearRect(0, 0, W, H);
+  const brand = css('--brand'), ink = css('--ink'), muted = css('--muted');
+  rctx.fillStyle = brand;
+  for (let b = 0; b < NB; b++) {
+    let c = 0; for (let n = b * BIN + 1; n <= (b + 1) * BIN; n++) c += counts[n];
+    const h = c * scale; rctx.globalAlpha = 0.8;
+    rctx.fillRect(pad + b * bw + 2 * dpr, H - pad - h, bw - 4 * dpr, h);
+  }
+  rctx.globalAlpha = 1;
+  const budget = Number($('budget').value), bx = pad + (budget / HI) * (W - pad * 2);
+  rctx.strokeStyle = muted; rctx.setLineDash([4 * dpr, 4 * dpr]); rctx.beginPath(); rctx.moveTo(bx, pad / 2); rctx.lineTo(bx, H - pad); rctx.stroke(); rctx.setLineDash([]);
+  rctx.strokeStyle = ink; rctx.lineWidth = 2 * dpr; rctx.beginPath();
+  for (let b = 0; b < NB; b++) {
+    const e = (cdf(exact, (b + 1) * BIN) - cdf(exact, b * BIN)) * Math.max(landed, 1);
+    const x = pad + b * bw + bw / 2, y = H - pad - e * scale;
+    b ? rctx.lineTo(x, y) : rctx.moveTo(x, y);
+  }
+  if (landed) rctx.stroke();
+  rctx.fillStyle = brand;
+  for (const p of particles) { rctx.beginPath(); rctx.arc(p.x, p.y, 2.2 * dpr, 0, 7); rctx.fill(); }
+  rctx.fillStyle = muted; rctx.font = `${11 * dpr}px system-ui`; rctx.textAlign = 'center';
+  for (let b = 0; b <= NB; b += 4) rctx.fillText(b * BIN, pad + b * bw, H - pad + 16 * dpr);
+  rctx.fillText('pulls until the featured unit', W / 2, H - 4 * dpr);
+}
+function stats() {
+  const budget = Number($('budget').value);
+  $('s-n').textContent = landed.toLocaleString();
+  $('s-chain').textContent = (cdf(exact, budget) * 100).toFixed(1) + '%';
+  if (!landed) { $('s-dice').textContent = '—'; $('s-gap').textContent = '—'; return; }
+  $('s-dice').textContent = ((cdf(counts, budget) / landed) * 100).toFixed(1) + '%';
+  let gap = 0; for (let n = 1; n <= HI; n++) gap = Math.max(gap, Math.abs(cdf(counts, n) / landed - cdf(exact, n)));
+  $('s-gap').textContent = (gap * 100).toFixed(2) + ' pts';
+}
+function land(n) { counts[n]++; landed++; }
+function frame() {
+  const { H, pad, bw } = geom(), dpr = devicePixelRatio;
+  const want = Math.min(TOTAL - spawned, 2 + Math.floor(spawned / 120));
+  for (let i = 0; i < want; i++) {
+    const n = rollOne(); spawned++;
+    const b = Math.min(NB - 1, Math.floor((n - 1) / BIN));
+    const tx = pad + b * bw + bw / 2 + (Math.random() - 0.5) * bw * 0.6;
+    particles.push({ n, x: rain.width / 2 + (Math.random() - 0.5) * 60 * dpr, y: 6 * dpr, tx, vy: 0 });
+  }
+  particles = particles.filter((p) => {
+    p.vy += 0.45 * dpr; p.y += p.vy; p.x += (p.tx - p.x) * 0.12;
+    if (p.y >= H - pad - 4 * dpr) { land(p.n); return false; }
+    return true;
+  });
+  drawRain(); stats();
+  if (spawned < TOTAL || particles.length) requestAnimationFrame(frame); else { rolling = false; $('roll').textContent = 'Roll again'; }
+}
+$('roll').onclick = () => {
+  if (rolling) return;
+  counts = new Array(HI + 1).fill(0); landed = 0; spawned = 0; particles = [];
+  if (reduce) { for (let i = 0; i < TOTAL; i++) land(rollOne()); drawRain(); stats(); $('roll').textContent = 'Roll again'; return; }
+  rolling = true; $('roll').textContent = 'Rolling…'; requestAnimationFrame(frame);
+};
+$('budget').oninput = (e) => { $('budget-o').textContent = e.target.value; $('s-budget-l').textContent = e.target.value; drawRain(); stats(); };
+addEventListener('resize', () => { sizeRain(); drawRain(); sizeWeather(); });
+
+/* ── F3: holo cards ───────────────────────────────────────── */
+const UNITS = {
+  'punishing-gray-raven': [['S', 'Lacrimosa', 'Helentine'], ['S', 'Selena', 'Pianissimo'], ['S', 'Lucia', 'Inverse Crown']],
+  'reverse-1999': [['6★', 'Sample A', 'Arcanist'], ['6★', 'Sample B', 'Arcanist'], ['5★', 'Sample C', 'Arcanist']],
+};
+function renderCards() {
+  const box = $('cards'); box.innerHTML = '';
+  UNITS[game].forEach(([rank, name, sub]) => {
+    const el = document.createElement('div'); el.className = 'unit'; el.tabIndex = 0;
+    el.innerHTML = `<div class="art"><div class="emblem"><span>${name[0]}</span></div></div><div class="scan"></div><div class="sheen"></div><div class="meta"><div class="rank">${rank} · ${sub}</div><div class="name">${name}</div></div>`;
+    if (!reduce) {
+      el.onpointermove = (e) => {
+        const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+        el.classList.add('live');
+        el.style.setProperty('--mx', x * 100 + '%'); el.style.setProperty('--my', y * 100 + '%');
+        el.style.setProperty('--ry', (x - 0.5) * 22 + 'deg'); el.style.setProperty('--rx', (0.5 - y) * 22 + 'deg');
+      };
+      el.onpointerleave = () => { el.classList.remove('live'); el.style.setProperty('--rx', '0deg'); el.style.setProperty('--ry', '0deg'); };
+    }
+    box.appendChild(el);
+  });
+}
+
+/* ── F5: weather ──────────────────────────────────────────── */
+const wx = $('weather'), wctx = wx.getContext('2d');
+let drops = [], wxRun = 0;
+function sizeWeather() { wx.width = innerWidth * devicePixelRatio; wx.height = innerHeight * devicePixelRatio; }
+function seed() {
+  const n = game === 'reverse-1999' ? 110 : 70;
+  drops = Array.from({ length: n }, () => ({ x: Math.random() * wx.width, y: Math.random() * wx.height, s: 0.4 + Math.random(), l: 8 + Math.random() * 22, w: Math.random() * 6.28 }));
+}
+function startWeather() {
+  sizeWeather(); seed(); wctx.clearRect(0, 0, wx.width, wx.height);
+  if (reduce) return;
+  const run = ++wxRun;
+  (function tick() {
+    if (run !== wxRun) return;
+    if (!document.hidden) {
+      const dpr = devicePixelRatio, brand = css('--brand');
+      wctx.clearRect(0, 0, wx.width, wx.height);
+      if (game === 'reverse-1999') {
+        wctx.strokeStyle = brand; wctx.lineWidth = 1 * dpr;
+        for (const d of drops) {
+          d.y -= (3 + d.s * 4) * dpr;
+          if (d.y < -40) { d.y = wx.height + 20; d.x = Math.random() * wx.width; }
+          wctx.globalAlpha = 0.12 + d.s * 0.18;
+          wctx.beginPath(); wctx.moveTo(d.x, d.y); wctx.lineTo(d.x, d.y + d.l * dpr); wctx.stroke();
+        }
+      } else {
+        wctx.fillStyle = brand;
+        for (const d of drops) {
+          d.w += 0.02; d.y -= (0.3 + d.s * 0.7) * dpr; d.x += Math.sin(d.w) * 0.4 * dpr;
+          if (d.y < -10) { d.y = wx.height + 10; d.x = Math.random() * wx.width; }
+          wctx.globalAlpha = 0.15 + 0.25 * Math.abs(Math.sin(d.w * 2));
+          wctx.fillRect(d.x, d.y, 2 * d.s * dpr, 2 * d.s * dpr);
+        }
+        wctx.globalAlpha = 0.035; wctx.fillStyle = css('--ink');
+        for (let y = (performance.now() / 40) % (4 * dpr); y < wx.height; y += 4 * dpr) wctx.fillRect(0, y, wx.width, 1);
+      }
+      wctx.globalAlpha = 1;
+    }
+    requestAnimationFrame(tick);
+  })();
+}
+
+sizeRain(); renderCards(); drawRain(); stats(); startWeather();
+</script>
+</body>
+</html>
