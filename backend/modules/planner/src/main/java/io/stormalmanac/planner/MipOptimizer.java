@@ -138,7 +138,7 @@ public final class MipOptimizer implements Optimizer {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "no published version " + asked.sequence() + " of " + profile.game().value()));
 
-        Inventory inventory = players.inventoryOf(profile.id());
+        Inventory inventory = pretending(players.inventoryOf(profile.id()), request.extra());
         Roster roster = players.rosterOf(profile.id());
 
         // The lookup goes here and not earlier: the key is a fingerprint of the
@@ -234,6 +234,23 @@ public final class MipOptimizer implements Optimizer {
                         cached.explanation().demand(),
                         cached.explanation().yields()),
                 cached.computedAt());
+    }
+
+    /**
+     * The inventory with a what-if's pretended items added (C2.20).
+     *
+     * <p>Added here, before {@link SolveKey} fingerprints the inventory, so the
+     * cache sees the inventory the solve is about: a pretended item is a different
+     * question, and the same pretence asked twice is a cache hit.
+     */
+    private static Inventory pretending(Inventory held, Map<ItemId, Integer> extra) {
+        Inventory inventory = held;
+        for (Map.Entry<ItemId, Integer> pretended : extra.entrySet()) {
+            inventory = inventory.with(
+                    pretended.getKey(),
+                    Math.addExact(inventory.quantityOf(pretended.getKey()), pretended.getValue()));
+        }
+        return inventory;
     }
 
     /** Coarse on purpose: nobody acts on the difference between 61 and 62 seconds. */

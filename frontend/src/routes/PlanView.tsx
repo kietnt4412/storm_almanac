@@ -32,6 +32,7 @@ import { ShareDialog } from '../ui/ShareDialog';
 import { daysOf } from '../ui/time';
 import { flowsOf, PlanFlow } from '../ui/PlanFlow';
 import { WhyDays } from '../ui/WhyDays';
+import { WhatIfPanel, type WhatIfLevers } from './WhatIf';
 
 /**
  * The answer, and what it is worth.
@@ -119,9 +120,10 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
   // The rate the last run was asked with, kept apart from the form so editing
   // the form after a plan does not redraw that plan's "Why N days?".
   const [askedRate, setAskedRate] = useState<number | null>(null);
-  const run = useMutation<Plan, Error>({
-    mutationFn: () => solve(profileId, { energyPerDay, horizonDays, objective, reach }),
-    onMutate: () => setAskedRate(energyPerDay),
+  // A what-if kept (C2.20) asks with its own levers; everything else asks with the form.
+  const run = useMutation<Plan, Error, WhatIfLevers | void>({
+    mutationFn: (levers) => solve(profileId, levers ?? { energyPerDay, horizonDays, objective, reach }),
+    onMutate: (levers) => setAskedRate(levers ? levers.energyPerDay : energyPerDay),
     // A new plan is saved on the latest sequence, so the report of what changed
     // since the last one is out of date too, here and on Home.
     onSuccess: () => {
@@ -130,6 +132,17 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
       queryClient.invalidateQueries({ queryKey: ['since', profileId] });
     },
   });
+
+  // A what-if kept is the form's answer too: the form shows the levers it was
+  // kept with, and the plan route saves it as any plan is saved.
+  const [whatIfOpen, setWhatIfOpen] = useState(false);
+  const keep = (levers: WhatIfLevers) => {
+    setEnergyPerDay(levers.energyPerDay);
+    setHorizonDays(levers.horizonDays);
+    setObjective(levers.objective);
+    Object.entries(levers.reach).forEach(([measure, score]) => setReach(profileId, measure, score));
+    run.mutate(levers);
+  };
 
   // What is on screen: the plan just worked out, or else the last one saved.
   const shown = run.data ?? saved.data?.plan;
@@ -371,6 +384,20 @@ function Solver({ profileId, game }: { profileId: string; game: string }) {
           done={done}
           onToggle={toggle}
           energyPerDay={run.data ? askedRate ?? undefined : saved.data?.request.energyPerDay}
+          after={
+            saved.data && hasGoals ? (
+              <WhatIfPanel
+                profileId={profileId}
+                saved={saved.data}
+                energyUnit={energyUnit}
+                ladders={planLadders}
+                onKeep={keep}
+                keeping={run.isPending}
+                open={whatIfOpen}
+                setOpen={setWhatIfOpen}
+              />
+            ) : undefined
+          }
         />
       )}
 
@@ -480,8 +507,11 @@ export function Answer({
   onToggle,
   energyPerDay,
   faces,
+  after,
 }: {
   plan: Plan;
+  /** What sits under the answer's card and above its checklist: the what-if panel (C2.20). */
+  after?: ReactNode;
   energyUnit: string;
   /** The catalog, for an emblem on each thing the plan pays for; without it, an icon. */
   faces?: Faces;
@@ -557,6 +587,8 @@ export function Answer({
         {paying.length > 0 && <PaysFor steps={paying.length} groups={groups} />}
         <Remarks plan={plan} />
       </section>
+
+      {after}
 
       {plan.stages.length === 0 && (
         <p className="card">

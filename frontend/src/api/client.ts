@@ -387,6 +387,8 @@ export interface ShadowPrice {
   item: string;
   displayName: string;
   price: number;
+  /** A catalog item a reader can hold, so a what-if may pretend more of it (C2.20); absent on an older plan. */
+  holdable?: boolean;
 }
 
 export interface Plan {
@@ -724,6 +726,37 @@ export const solve = (
   request<Plan>(versioned(`/api/me/profiles/${profile}/plan`, version), {
     method: 'POST',
     body: JSON.stringify(body),
+  });
+
+/**
+ * A plan's question asked as a what-if (C2.20): the plan route's four fields,
+ * plus catalog items to pretend the reader holds.
+ */
+export interface WhatIfAsk {
+  energyPerDay: number;
+  horizonDays: number;
+  objective: string;
+  reach: Record<string, number>;
+  extra: Record<string, number>;
+}
+
+/** A what-if's answer, how long the server took over it, and whether it was already worked out. */
+export interface WhatIf {
+  plan: Plan;
+  solveMillis: number;
+  fromCache: boolean;
+}
+
+/**
+ * The plan's question without the plan's side effect: the server saves nothing,
+ * so a slider can ask it as often as it moves. `signal` lets the page drop a
+ * question it has stopped caring about.
+ */
+export const whatIf = (profile: string, ask: WhatIfAsk, signal?: AbortSignal) =>
+  request<WhatIf>(`/api/me/profiles/${profile}/plan/what-if`, {
+    method: 'POST',
+    body: JSON.stringify(ask),
+    signal,
   });
 
 /** What a plan was asked with, every default filled in by the server. */

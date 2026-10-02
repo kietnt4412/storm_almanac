@@ -252,6 +252,41 @@ public final class PlayerView {
     }
 
     /**
+     * A plan request asked as a what-if (C2.20): the same four fields, plus items
+     * to pretend the reader holds.
+     *
+     * @param extra catalog item ids to how many more of each to solve as if held.
+     *              Absent means none, which makes this the plan route's question
+     *              without the plan route's side effect
+     */
+    public record WhatIfRequest(
+            String objective,
+            Integer energyPerDay,
+            Integer horizonDays,
+            Map<String, Integer> reach,
+            Map<String, Integer> extra) {
+
+        public PlanRequest asPlanRequest() {
+            return new PlanRequest(objective, energyPerDay, horizonDays, reach);
+        }
+
+        public Map<String, Integer> resolvedExtra() {
+            return extra == null ? Map.of() : extra;
+        }
+    }
+
+    /**
+     * A what-if's answer, and how it was reached.
+     *
+     * @param solveMillis how long the server spent answering, solve and naming
+     *                    included — the honest version of "this is live"
+     * @param fromCache   whether the solver served a plan it had already
+     *                    computed: a cached plan keeps the {@code computedAt} of
+     *                    its solve, so it predates the request
+     */
+    public record WhatIfResponse(PlanResponse plan, long solveMillis, boolean fromCache) {}
+
+    /**
      * The last plan this profile was shown, and what was asked to get it (ADR 0037).
      *
      * <p>{@code plan} is exactly what {@code POST /plan} answered at the time, and
@@ -378,7 +413,8 @@ public final class PlayerView {
                     .map(priced -> new ShadowPriceView(
                             priced.getKey().value(),
                             names.demand(priced.getKey()),
-                            priced.getValue()))
+                            priced.getValue(),
+                            definition.itemsById().containsKey(priced.getKey())))
                     .toList();
 
             return new PlanResponse(
@@ -531,8 +567,13 @@ public final class PlayerView {
      * <p>{@code item} is kept beside {@code displayName} rather than replaced by
      * it, because it is the key a reader would quote in a bug report and the one
      * a client can match against a shortfall line.
+     *
+     * <p>{@code holdable} says the line is a catalog item a reader can own, so a
+     * what-if may pretend to hold more of it (C2.20); EXP and a choice between
+     * prices are demand lines, not things in a bag. Null on a plan saved before
+     * it was added, which a page reads as "do not offer".
      */
-    public record ShadowPriceView(String item, String displayName, double price) {}
+    public record ShadowPriceView(String item, String displayName, double price, Boolean holdable) {}
 
     /**
      * A plan's lines carry a name beside their id, for the reason
